@@ -59,6 +59,12 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
         },
       ]
     }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
     mobileTitle={
       <h2>
         <FormattedMessage
@@ -133,6 +139,12 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
           ],
           "name": "Data",
         },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
       ]
     }
     mobileTitle={
@@ -213,6 +225,12 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
           ],
           "name": "Data",
         },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
       ]
     }
     mobileTitle={

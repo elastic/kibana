@@ -378,9 +378,16 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       size={320}
       type="overlay"
     >
-      <div
+      <nav
+        data-eui="EuiFlyout"
         data-test-subj="collapsibleNav"
+        role={null}
       >
+        <button
+          data-test-subj="euiFlyoutCloseButton"
+          onClick={[Function]}
+          type="button"
+        />
         <EuiFlexItem
           grow={false}
           style={
@@ -1973,7 +1980,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             </EuiShowFor>
           </div>
         </EuiFlexItem>
-      </div>
+      </nav>
     </EuiFlyout>
   </EuiCollapsibleNav>
 </CollapsibleNav>
@@ -2704,8 +2711,10 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       size={320}
       type="push"
     >
-      <div
+      <nav
+        data-eui="EuiFlyout"
         data-test-subj="collapsibleNav"
+        role={null}
       >
         <EuiFlexItem
           grow={false}
@@ -3085,7 +3094,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
             </EuiShowFor>
           </div>
         </EuiFlexItem>
-      </div>
+      </nav>
     </EuiFlyout>
   </EuiCollapsibleNav>
 </CollapsibleNav>

@@ -4959,197 +4959,369 @@ exports[`Header renders 1`] = `
           size={320}
           type="push"
         >
-          <EuiWindowEvent
-            event="keydown"
-            handler={[Function]}
-          />
-          <EuiFocusTrap
-            clickOutsideDisables={false}
-            disabled={true}
+          <nav
+            data-eui="EuiFlyout"
+            data-test-subj="collapsibleNav"
+            role={null}
           >
-            <div
-              data-eui="EuiFocusTrap"
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
             >
-              <EuiOutsideClickDetector
-                isDisabled={true}
-                onOutsideClick={[Function]}
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
               >
-                <nav
-                  aria-label="Primary"
-                  className="euiFlyout euiFlyout--push euiFlyout--left euiFlyout--paddingNone euiCollapsibleNav"
-                  data-test-subj="collapsibleNav"
-                  id="mockId"
-                  onMouseDown={[Function]}
-                  onMouseUp={[Function]}
-                  onTouchEnd={[Function]}
-                  onTouchStart={[Function]}
-                  role={null}
+                <EuiCollapsibleNavGroup
+                  background="light"
+                  className="eui-yScroll"
                   style={
                     Object {
-                      "width": 320,
+                      "maxHeight": "40vh",
                     }
                   }
-                  tabIndex={-1}
                 >
-                  <EuiFlexItem
-                    grow={false}
+                  <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                    id="mockId"
                     style={
                       Object {
-                        "flexShrink": 0,
+                        "maxHeight": "40vh",
                       }
                     }
                   >
                     <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                      style={
-                        Object {
-                          "flexShrink": 0,
-                        }
-                      }
+                      className="euiCollapsibleNavGroup__children"
                     >
-                      <EuiCollapsibleNavGroup
-                        background="light"
-                        className="eui-yScroll"
-                        style={
-                          Object {
-                            "maxHeight": "40vh",
-                          }
+                      <EuiListGroup
+                        color="text"
+                        gutterSize="none"
+                        listItems={
+                          Array [
+                            Object {
+                              "data-test-subj": "collapsibleNavCustomNavLink",
+                              "href": "",
+                              "icon": undefined,
+                              "iconType": undefined,
+                              "isActive": false,
+                              "isDisabled": undefined,
+                              "label": "Manage cloud deployment",
+                              "onClick": [Function],
+                            },
+                          ]
                         }
+                        maxWidth="none"
+                        size="s"
                       >
-                        <div
-                          className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                          id="mockId"
+                        <ul
+                          className="euiListGroup"
                           style={
                             Object {
-                              "maxHeight": "40vh",
+                              "maxWidth": "none",
                             }
                           }
                         >
-                          <div
-                            className="euiCollapsibleNavGroup__children"
+                          <EuiListGroupItem
+                            color="text"
+                            data-test-subj="collapsibleNavCustomNavLink"
+                            href=""
+                            isActive={false}
+                            key="title-0"
+                            label="Manage cloud deployment"
+                            onClick={[Function]}
+                            showToolTip={false}
+                            size="s"
+                            wrapText={false}
                           >
-                            <EuiListGroup
-                              color="text"
-                              gutterSize="none"
-                              listItems={
-                                Array [
-                                  Object {
-                                    "data-test-subj": "collapsibleNavCustomNavLink",
-                                    "href": "",
-                                    "icon": undefined,
-                                    "iconType": undefined,
-                                    "isActive": false,
-                                    "isDisabled": undefined,
-                                    "label": "Manage cloud deployment",
-                                    "onClick": [Function],
-                                  },
-                                ]
-                              }
-                              maxWidth="none"
-                              size="s"
+                            <li
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
                             >
-                              <ul
-                                className="euiListGroup"
-                                style={
-                                  Object {
-                                    "maxWidth": "none",
-                                  }
-                                }
+                              <button
+                                className="euiListGroupItem__button"
+                                data-test-subj="collapsibleNavCustomNavLink"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <EuiListGroupItem
-                                  color="text"
-                                  data-test-subj="collapsibleNavCustomNavLink"
-                                  href=""
-                                  isActive={false}
-                                  key="title-0"
-                                  label="Manage cloud deployment"
-                                  onClick={[Function]}
-                                  showToolTip={false}
-                                  size="s"
-                                  wrapText={false}
+                                <span
+                                  className="euiListGroupItem__label"
+                                  title="Manage cloud deployment"
                                 >
-                                  <li
-                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
-                                  >
-                                    <button
-                                      className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavCustomNavLink"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiListGroupItem__label"
-                                        title="Manage cloud deployment"
-                                      >
-                                        Manage cloud deployment
-                                      </span>
-                                    </button>
-                                  </li>
-                                </EuiListGroupItem>
-                              </ul>
-                            </EuiListGroup>
-                          </div>
-                        </div>
-                      </EuiCollapsibleNavGroup>
+                                  Manage cloud deployment
+                                </span>
+                              </button>
+                            </li>
+                          </EuiListGroupItem>
+                        </ul>
+                      </EuiListGroup>
                     </div>
-                  </EuiFlexItem>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
-                  <EuiFlexItem
-                    grow={false}
+                  </div>
+                </EuiCollapsibleNavGroup>
+              </div>
+            </EuiFlexItem>
+            <EuiHorizontalRule
+              margin="none"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full"
+              />
+            </EuiHorizontalRule>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
+              >
+                <EuiCollapsibleNavGroup
+                  background="light"
+                  className="eui-yScroll"
+                  style={
+                    Object {
+                      "maxHeight": "40vh",
+                    }
+                  }
+                >
+                  <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                    id="mockId"
                     style={
                       Object {
-                        "flexShrink": 0,
+                        "maxHeight": "40vh",
                       }
                     }
                   >
                     <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                      style={
-                        Object {
-                          "flexShrink": 0,
-                        }
-                      }
+                      className="euiCollapsibleNavGroup__children"
                     >
-                      <EuiCollapsibleNavGroup
-                        background="light"
-                        className="eui-yScroll"
-                        style={
-                          Object {
-                            "maxHeight": "40vh",
-                          }
+                      <EuiListGroup
+                        aria-label="Pinned links"
+                        color="text"
+                        gutterSize="none"
+                        listItems={
+                          Array [
+                            Object {
+                              "data-test-subj": "homeLink",
+                              "href": "/",
+                              "iconType": "home",
+                              "label": "Home",
+                              "onClick": [Function],
+                            },
+                          ]
                         }
+                        maxWidth="none"
+                        size="s"
                       >
-                        <div
-                          className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                          id="mockId"
+                        <ul
+                          aria-label="Pinned links"
+                          className="euiListGroup"
                           style={
                             Object {
-                              "maxHeight": "40vh",
+                              "maxWidth": "none",
                             }
                           }
+                        >
+                          <EuiListGroupItem
+                            color="text"
+                            data-test-subj="homeLink"
+                            href="/"
+                            iconType="home"
+                            key="title-0"
+                            label="Home"
+                            onClick={[Function]}
+                            showToolTip={false}
+                            size="s"
+                            wrapText={false}
+                          >
+                            <li
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                            >
+                              <a
+                                className="euiListGroupItem__button"
+                                data-test-subj="homeLink"
+                                href="/"
+                                onClick={[Function]}
+                                rel="noreferrer"
+                              >
+                                <EuiIcon
+                                  className="euiListGroupItem__icon"
+                                  color="inherit"
+                                  type="home"
+                                >
+                                  <span
+                                    className="euiListGroupItem__icon"
+                                    color="inherit"
+                                    data-euiicon-type="home"
+                                  />
+                                </EuiIcon>
+                                <span
+                                  className="euiListGroupItem__label"
+                                  title="Home"
+                                >
+                                  Home
+                                </span>
+                              </a>
+                            </li>
+                          </EuiListGroupItem>
+                        </ul>
+                      </EuiListGroup>
+                    </div>
+                  </div>
+                </EuiCollapsibleNavGroup>
+              </div>
+            </EuiFlexItem>
+            <EuiCollapsibleNavGroup
+              background="light"
+              data-test-subj="collapsibleNavGroup-recentlyViewed"
+              initialIsOpen={true}
+              isCollapsible={true}
+              key="recentlyViewed"
+              onToggle={[Function]}
+              title="Recently viewed"
+            >
+              <EuiAccordion
+                arrowDisplay="right"
+                buttonClassName="euiCollapsibleNavGroup__heading"
+                buttonContent={
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="m"
+                    responsive={false}
+                  >
+                    <EuiFlexItem>
+                      <EuiTitle
+                        size="xxs"
+                      >
+                        <h3
+                          className="euiCollapsibleNavGroup__title"
+                          id="mockId__title"
+                        >
+                          Recently viewed
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                data-test-subj="collapsibleNavGroup-recentlyViewed"
+                id="mockId"
+                initialIsOpen={true}
+                isLoading={false}
+                isLoadingMessage={false}
+                onToggle={[Function]}
+                paddingSize="none"
+              >
+                <div
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                  data-test-subj="collapsibleNavGroup-recentlyViewed"
+                  onToggle={[Function]}
+                >
+                  <div
+                    className="euiAccordion__triggerWrapper"
+                  >
+                    <button
+                      aria-controls="mockId"
+                      aria-expanded={true}
+                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      id="mockId"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <span
+                        className="euiAccordion__iconWrapper"
+                      >
+                        <EuiIcon
+                          className="euiAccordion__icon euiAccordion__icon-isOpen"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            className="euiAccordion__icon euiAccordion__icon-isOpen"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </span>
+                      <span
+                        className="euiIEFlexWrapFix"
+                      >
+                        <EuiFlexGroup
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                          >
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiTitle
+                                  size="xxs"
+                                >
+                                  <h3
+                                    className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                    id="mockId__title"
+                                  >
+                                    Recently viewed
+                                  </h3>
+                                </EuiTitle>
+                              </div>
+                            </EuiFlexItem>
+                          </div>
+                        </EuiFlexGroup>
+                      </span>
+                    </button>
+                  </div>
+                  <div
+                    aria-labelledby="mockId"
+                    className="euiAccordion__childWrapper"
+                    id="mockId"
+                    role="region"
+                    tabIndex={-1}
+                  >
+                    <EuiResizeObserver
+                      onResize={[Function]}
+                    >
+                      <div>
+                        <div
+                          className=""
                         >
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Pinned links"
-                              color="text"
+                              aria-label="Recently viewed links"
+                              className="kbnCollapsibleNav__recentsListGroup"
+                              color="subdued"
                               gutterSize="none"
                               listItems={
                                 Array [
                                   Object {
-                                    "data-test-subj": "homeLink",
-                                    "href": "/",
-                                    "iconType": "home",
-                                    "label": "Home",
+                                    "aria-label": "dashboard, type: kibana",
+                                    "data-test-subj": "collapsibleNavAppLink--recent",
+                                    "href": "http://localhost/",
+                                    "label": "dashboard",
                                     "onClick": [Function],
+                                    "title": "dashboard, type: kibana",
                                   },
                                 ]
                               }
@@ -5157,8 +5329,8 @@ exports[`Header renders 1`] = `
                               size="s"
                             >
                               <ul
-                                aria-label="Pinned links"
-                                className="euiListGroup"
+                                aria-label="Recently viewed links"
+                                className="euiListGroup kbnCollapsibleNav__recentsListGroup"
                                 style={
                                   Object {
                                     "maxWidth": "none",
@@ -5166,43 +5338,35 @@ exports[`Header renders 1`] = `
                                 }
                               >
                                 <EuiListGroupItem
-                                  color="text"
-                                  data-test-subj="homeLink"
-                                  href="/"
-                                  iconType="home"
+                                  aria-label="dashboard, type: kibana"
+                                  color="subdued"
+                                  data-test-subj="collapsibleNavAppLink--recent"
+                                  href="http://localhost/"
                                   key="title-0"
-                                  label="Home"
+                                  label="dashboard"
                                   onClick={[Function]}
                                   showToolTip={false}
                                   size="s"
+                                  title="dashboard, type: kibana"
                                   wrapText={false}
                                 >
                                   <li
-                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                   >
                                     <a
+                                      aria-label="dashboard, type: kibana"
                                       className="euiListGroupItem__button"
-                                      data-test-subj="homeLink"
-                                      href="/"
+                                      data-test-subj="collapsibleNavAppLink--recent"
+                                      href="http://localhost/"
                                       onClick={[Function]}
                                       rel="noreferrer"
+                                      title="dashboard, type: kibana"
                                     >
-                                      <EuiIcon
-                                        className="euiListGroupItem__icon"
-                                        color="inherit"
-                                        type="home"
-                                      >
-                                        <span
-                                          className="euiListGroupItem__icon"
-                                          color="inherit"
-                                          data-euiicon-type="home"
-                                        />
-                                      </EuiIcon>
                                       <span
                                         className="euiListGroupItem__label"
-                                        title="Home"
+                                        title="dashboard"
                                       >
-                                        Home
+                                        dashboard
                                       </span>
                                     </a>
                                   </li>
@@ -5211,363 +5375,169 @@ exports[`Header renders 1`] = `
                             </EuiListGroup>
                           </div>
                         </div>
-                      </EuiCollapsibleNavGroup>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiCollapsibleNavGroup
-                    background="light"
-                    data-test-subj="collapsibleNavGroup-recentlyViewed"
-                    initialIsOpen={true}
-                    isCollapsible={true}
-                    key="recentlyViewed"
-                    onToggle={[Function]}
-                    title="Recently viewed"
-                  >
-                    <EuiAccordion
-                      arrowDisplay="right"
-                      buttonClassName="euiCollapsibleNavGroup__heading"
-                      buttonContent={
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
-                        >
-                          <EuiFlexItem>
-                            <EuiTitle
-                              size="xxs"
-                            >
-                              <h3
-                                className="euiCollapsibleNavGroup__title"
-                                id="mockId__title"
-                              >
-                                Recently viewed
-                              </h3>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                      data-test-subj="collapsibleNavGroup-recentlyViewed"
-                      id="mockId"
-                      initialIsOpen={true}
-                      isLoading={false}
-                      isLoadingMessage={false}
-                      onToggle={[Function]}
-                      paddingSize="none"
-                    >
-                      <div
-                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                        data-test-subj="collapsibleNavGroup-recentlyViewed"
-                        onToggle={[Function]}
-                      >
-                        <div
-                          className="euiAccordion__triggerWrapper"
-                        >
-                          <button
-                            aria-controls="mockId"
-                            aria-expanded={true}
-                            className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                            id="mockId"
-                            onClick={[Function]}
-                            type="button"
-                          >
-                            <span
-                              className="euiAccordion__iconWrapper"
-                            >
-                              <EuiIcon
-                                className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                size="m"
-                                type="arrowRight"
-                              >
-                                <span
-                                  className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                  data-euiicon-type="arrowRight"
-                                  size="m"
-                                />
-                              </EuiIcon>
-                            </span>
-                            <span
-                              className="euiIEFlexWrapFix"
-                            >
-                              <EuiFlexGroup
-                                alignItems="center"
-                                gutterSize="m"
-                                responsive={false}
-                              >
-                                <div
-                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                >
-                                  <EuiFlexItem>
-                                    <div
-                                      className="euiFlexItem"
-                                    >
-                                      <EuiTitle
-                                        size="xxs"
-                                      >
-                                        <h3
-                                          className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                          id="mockId__title"
-                                        >
-                                          Recently viewed
-                                        </h3>
-                                      </EuiTitle>
-                                    </div>
-                                  </EuiFlexItem>
-                                </div>
-                              </EuiFlexGroup>
-                            </span>
-                          </button>
-                        </div>
-                        <div
-                          aria-labelledby="mockId"
-                          className="euiAccordion__childWrapper"
-                          id="mockId"
-                          role="region"
-                          tabIndex={-1}
-                        >
-                          <EuiResizeObserver
-                            onResize={[Function]}
-                          >
-                            <div>
-                              <div
-                                className=""
-                              >
-                                <div
-                                  className="euiCollapsibleNavGroup__children"
-                                >
-                                  <EuiListGroup
-                                    aria-label="Recently viewed links"
-                                    className="kbnCollapsibleNav__recentsListGroup"
-                                    color="subdued"
-                                    gutterSize="none"
-                                    listItems={
-                                      Array [
-                                        Object {
-                                          "aria-label": "dashboard, type: kibana",
-                                          "data-test-subj": "collapsibleNavAppLink--recent",
-                                          "href": "http://localhost/",
-                                          "label": "dashboard",
-                                          "onClick": [Function],
-                                          "title": "dashboard, type: kibana",
-                                        },
-                                      ]
-                                    }
-                                    maxWidth="none"
-                                    size="s"
-                                  >
-                                    <ul
-                                      aria-label="Recently viewed links"
-                                      className="euiListGroup kbnCollapsibleNav__recentsListGroup"
-                                      style={
-                                        Object {
-                                          "maxWidth": "none",
-                                        }
-                                      }
-                                    >
-                                      <EuiListGroupItem
-                                        aria-label="dashboard, type: kibana"
-                                        color="subdued"
-                                        data-test-subj="collapsibleNavAppLink--recent"
-                                        href="http://localhost/"
-                                        key="title-0"
-                                        label="dashboard"
-                                        onClick={[Function]}
-                                        showToolTip={false}
-                                        size="s"
-                                        title="dashboard, type: kibana"
-                                        wrapText={false}
-                                      >
-                                        <li
-                                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                        >
-                                          <a
-                                            aria-label="dashboard, type: kibana"
-                                            className="euiListGroupItem__button"
-                                            data-test-subj="collapsibleNavAppLink--recent"
-                                            href="http://localhost/"
-                                            onClick={[Function]}
-                                            rel="noreferrer"
-                                            title="dashboard, type: kibana"
-                                          >
-                                            <span
-                                              className="euiListGroupItem__label"
-                                              title="dashboard"
-                                            >
-                                              dashboard
-                                            </span>
-                                          </a>
-                                        </li>
-                                      </EuiListGroupItem>
-                                    </ul>
-                                  </EuiListGroup>
-                                </div>
-                              </div>
-                            </div>
-                          </EuiResizeObserver>
-                        </div>
                       </div>
-                    </EuiAccordion>
-                  </EuiCollapsibleNavGroup>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
-                  <EuiFlexItem
-                    className="eui-yScroll"
+                    </EuiResizeObserver>
+                  </div>
+                </div>
+              </EuiAccordion>
+            </EuiCollapsibleNavGroup>
+            <EuiHorizontalRule
+              margin="none"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full"
+              />
+            </EuiHorizontalRule>
+            <EuiFlexItem
+              className="eui-yScroll"
+            >
+              <div
+                className="euiFlexItem eui-yScroll"
+              >
+                <EuiCollapsibleNavGroup
+                  data-test-subj="collapsibleNavGroup-noCategory"
+                  key="0"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup"
+                    data-test-subj="collapsibleNavGroup-noCategory"
+                    id="mockId"
                   >
                     <div
-                      className="euiFlexItem eui-yScroll"
+                      className="euiCollapsibleNavGroup__children"
                     >
-                      <EuiCollapsibleNavGroup
-                        data-test-subj="collapsibleNavGroup-noCategory"
-                        key="0"
+                      <EuiListGroup
+                        flush={true}
                       >
-                        <div
-                          className="euiCollapsibleNavGroup"
-                          data-test-subj="collapsibleNavGroup-noCategory"
-                          id="mockId"
+                        <ul
+                          className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
                         >
-                          <div
-                            className="euiCollapsibleNavGroup__children"
+                          <EuiListGroupItem
+                            color="text"
+                            data-test-subj="collapsibleNavAppLink"
+                            href=""
+                            isActive={false}
+                            label="kibana"
+                            onClick={[Function]}
+                            size="s"
                           >
-                            <EuiListGroup
-                              flush={true}
+                            <li
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
                             >
-                              <ul
-                                className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+                              <button
+                                className="euiListGroupItem__button"
+                                data-test-subj="collapsibleNavAppLink"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <EuiListGroupItem
-                                  color="text"
-                                  data-test-subj="collapsibleNavAppLink"
-                                  href=""
-                                  isActive={false}
-                                  label="kibana"
-                                  onClick={[Function]}
-                                  size="s"
+                                <span
+                                  className="euiListGroupItem__label"
+                                  title="kibana"
                                 >
-                                  <li
-                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
-                                  >
-                                    <button
-                                      className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiListGroupItem__label"
-                                        title="kibana"
-                                      >
-                                        kibana
-                                      </span>
-                                    </button>
-                                  </li>
-                                </EuiListGroupItem>
-                              </ul>
-                            </EuiListGroup>
-                          </div>
-                        </div>
-                      </EuiCollapsibleNavGroup>
-                      <EuiShowFor
-                        sizes={
-                          Array [
-                            "l",
-                            "xl",
-                          ]
-                        }
-                      >
-                        <EuiCollapsibleNavGroup>
-                          <div
-                            className="euiCollapsibleNavGroup"
-                            id="mockId"
-                          >
-                            <div
-                              className="euiCollapsibleNavGroup__children"
-                            >
-                              <EuiListGroup
-                                flush={true}
-                              >
-                                <ul
-                                  className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
-                                >
-                                  <EuiListGroupItem
-                                    aria-label="Undock primary navigation"
-                                    buttonRef={
-                                      Object {
-                                        "current": <button
-                                          aria-label="Undock primary navigation"
-                                          class="euiListGroupItem__button"
-                                          data-test-subj="collapsible-nav-lock"
-                                          type="button"
-                                        >
-                                          <span
-                                            class="euiListGroupItem__icon"
-                                            color="inherit"
-                                            data-euiicon-type="lock"
-                                          />
-                                          <span
-                                            class="euiListGroupItem__label"
-                                            title="Undock navigation"
-                                          >
-                                            Undock navigation
-                                          </span>
-                                        </button>,
-                                      }
-                                    }
-                                    color="subdued"
-                                    data-test-subj="collapsible-nav-lock"
-                                    iconType="lock"
-                                    label="Undock navigation"
-                                    onClick={[Function]}
-                                    size="xs"
-                                  >
-                                    <li
-                                      className="euiListGroupItem euiListGroupItem--xSmall euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                    >
-                                      <button
-                                        aria-label="Undock primary navigation"
-                                        className="euiListGroupItem__button"
-                                        data-test-subj="collapsible-nav-lock"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        type="button"
-                                      >
-                                        <EuiIcon
-                                          className="euiListGroupItem__icon"
-                                          color="inherit"
-                                          type="lock"
-                                        >
-                                          <span
-                                            className="euiListGroupItem__icon"
-                                            color="inherit"
-                                            data-euiicon-type="lock"
-                                          />
-                                        </EuiIcon>
-                                        <span
-                                          className="euiListGroupItem__label"
-                                          title="Undock navigation"
-                                        >
-                                          Undock navigation
-                                        </span>
-                                      </button>
-                                    </li>
-                                  </EuiListGroupItem>
-                                </ul>
-                              </EuiListGroup>
-                            </div>
-                          </div>
-                        </EuiCollapsibleNavGroup>
-                      </EuiShowFor>
+                                  kibana
+                                </span>
+                              </button>
+                            </li>
+                          </EuiListGroupItem>
+                        </ul>
+                      </EuiListGroup>
                     </div>
-                  </EuiFlexItem>
-                </nav>
-              </EuiOutsideClickDetector>
-            </div>
-          </EuiFocusTrap>
+                  </div>
+                </EuiCollapsibleNavGroup>
+                <EuiShowFor
+                  sizes={
+                    Array [
+                      "l",
+                      "xl",
+                    ]
+                  }
+                >
+                  <EuiCollapsibleNavGroup>
+                    <div
+                      className="euiCollapsibleNavGroup"
+                      id="mockId"
+                    >
+                      <div
+                        className="euiCollapsibleNavGroup__children"
+                      >
+                        <EuiListGroup
+                          flush={true}
+                        >
+                          <ul
+                            className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+                          >
+                            <EuiListGroupItem
+                              aria-label="Undock primary navigation"
+                              buttonRef={
+                                Object {
+                                  "current": <button
+                                    aria-label="Undock primary navigation"
+                                    class="euiListGroupItem__button"
+                                    data-test-subj="collapsible-nav-lock"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiListGroupItem__icon"
+                                      color="inherit"
+                                      data-euiicon-type="lock"
+                                    />
+                                    <span
+                                      class="euiListGroupItem__label"
+                                      title="Undock navigation"
+                                    >
+                                      Undock navigation
+                                    </span>
+                                  </button>,
+                                }
+                              }
+                              color="subdued"
+                              data-test-subj="collapsible-nav-lock"
+                              iconType="lock"
+                              label="Undock navigation"
+                              onClick={[Function]}
+                              size="xs"
+                            >
+                              <li
+                                className="euiListGroupItem euiListGroupItem--xSmall euiListGroupItem--subdued euiListGroupItem-isClickable"
+                              >
+                                <button
+                                  aria-label="Undock primary navigation"
+                                  className="euiListGroupItem__button"
+                                  data-test-subj="collapsible-nav-lock"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  type="button"
+                                >
+                                  <EuiIcon
+                                    className="euiListGroupItem__icon"
+                                    color="inherit"
+                                    type="lock"
+                                  >
+                                    <span
+                                      className="euiListGroupItem__icon"
+                                      color="inherit"
+                                      data-euiicon-type="lock"
+                                    />
+                                  </EuiIcon>
+                                  <span
+                                    className="euiListGroupItem__label"
+                                    title="Undock navigation"
+                                  >
+                                    Undock navigation
+                                  </span>
+                                </button>
+                              </li>
+                            </EuiListGroupItem>
+                          </ul>
+                        </EuiListGroup>
+                      </div>
+                    </div>
+                  </EuiCollapsibleNavGroup>
+                </EuiShowFor>
+              </div>
+            </EuiFlexItem>
+          </nav>
         </EuiFlyout>
       </EuiCollapsibleNav>
     </CollapsibleNav>
