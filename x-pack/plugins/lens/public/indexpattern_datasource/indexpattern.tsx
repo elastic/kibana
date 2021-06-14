@@ -323,6 +323,11 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
+
+    canCloseDimensionEditor: (state) => {
+      return !state.isDimensionClosePrevented;
+    },
+
     getDropProps,
     onDrop,
 
