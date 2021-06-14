@@ -394,6 +394,13 @@ export const getActivityLogRequestLoaded: (
   isLoadedResourceState(activityLog)
 );
 
+export const getActivityLogIterableData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
+  const emptyArray: ActivityLog['data'] = [];
+  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
+});
+
 export const getActivityLogError: (
   state: Immutable<EndpointState>
 ) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {

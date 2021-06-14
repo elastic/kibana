@@ -19,13 +19,17 @@ import { EndpointAction } from '../../store/action';
 import {
   getActivityLogDataPaging,
   getActivityLogError,
+  getActivityLogIterableData,
+  getActivityLogRequestLoaded,
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
 export const EndpointActivityLog = memo(
   ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
-    const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
-    const activityError = useEndpointSelector(getActivityLogError);
+    const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
+    const activityLogLoaded = useEndpointSelector(getActivityLogRequestLoaded);
+    const activityLogData = useEndpointSelector(getActivityLogIterableData);
+    const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
     const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
     // TODO
@@ -44,8 +48,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {(activityLog.type === 'LoadedResourceState' && !activityLog.data.data.length) ||
-        activityError ? (
+        {activityLogLoading || activityLogError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
             titleSize="s"
@@ -56,11 +59,11 @@ export const EndpointActivityLog = memo(
           <>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-            {activityLoading ? (
+            {activityLogLoading ? (
               <EuiLoadingContent lines={3} />
             ) : (
-              activityLog.type === 'LoadedResourceState' &&
-              activityLog.data.data.map((logEntry) => (
+              activityLogLoaded &&
+              activityLogData.map((logEntry) => (
                 <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
               ))
             )}
