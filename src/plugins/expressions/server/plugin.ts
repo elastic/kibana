@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
@@ -24,7 +25,7 @@ export class ExpressionsServerPlugin
       environment: 'server',
     });
 
-    const setup = this.expressions.setup();
+    const setup = this.expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }
