@@ -189,6 +189,332 @@ describe('find()', () => {
     expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
   });
 
+  test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
+    jest.resetAllMocks();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureRuleTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
+    });
+    const injectReferencesFn = jest.fn().mockReturnValue({
+      bar: true,
+      parameterThatIsSavedObjectId: '9',
+    });
+    alertTypeRegistry.list.mockReturnValue(
+      new Set([
+        ...listedTypes,
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          id: '123',
+          name: 'myType',
+          producer: 'myApp',
+          enabledInLicense: true,
+        },
+      ])
+    );
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: 'myType',
+      name: 'myType',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'myApp',
+    }));
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: '123',
+            schedule: { interval: '20s' },
+            params: {
+              bar: true,
+              parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+            {
+              name: 'soRef_0',
+              type: 'someSavedObjectType',
+              id: '9',
+            },
+          ],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const result = await alertsClient.find({ options: {} });
+
+    expect(injectReferencesFn).toHaveBeenCalledTimes(1);
+    expect(injectReferencesFn).toHaveBeenCalledWith(
+      {
+        bar: true,
+        parameterThatIsSavedObjectRef: 'soRef_0',
+      },
+      [
+        { id: '1', name: 'action_0', type: 'action' },
+        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
+      ]
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+    Object {
+      "data": Array [
+        Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "myType",
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "schedule": Object {
+            "interval": "10s",
+          },
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "123",
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "id": "2",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+            "parameterThatIsSavedObjectId": "9",
+          },
+          "schedule": Object {
+            "interval": "20s",
+          },
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        },
+      ],
+      "page": 1,
+      "perPage": 10,
+      "total": 2,
+    }
+    `);
+  });
+
+  test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
+    jest.resetAllMocks();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureRuleTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
+    });
+    const injectReferencesFn = jest.fn().mockImplementation(() => {
+      throw new Error('something went wrong!');
+    });
+    alertTypeRegistry.list.mockReturnValue(
+      new Set([
+        ...listedTypes,
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          id: '123',
+          name: 'myType',
+          producer: 'myApp',
+          enabledInLicense: true,
+        },
+      ])
+    );
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: 'myType',
+      name: 'myType',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'myApp',
+    }));
+    alertTypeRegistry.get.mockImplementationOnce(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: injectReferencesFn,
+      },
+    }));
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: '123',
+            schedule: { interval: '20s' },
+            params: {
+              bar: true,
+              parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+            {
+              name: 'soRef_0',
+              type: 'someSavedObjectType',
+              id: '9',
+            },
+          ],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
+    );
+  });
+
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
       const filter = esKuery.fromKueryExpression(
