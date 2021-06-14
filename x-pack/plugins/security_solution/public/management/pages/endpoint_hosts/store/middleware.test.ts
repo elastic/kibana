@@ -18,7 +18,7 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
-  EndpointAction,
+  ActivityLog,
   ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
@@ -233,16 +233,40 @@ describe('endpoint list middleware', () => {
         },
       });
     };
+
     const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
-    const activityLog = [
-      fleetActionGenerator.generate({
-        agents: [endpointList.hosts[0].metadata.agent.id],
-      }),
-    ];
+    const actionData = fleetActionGenerator.generate({
+      agents: [endpointList.hosts[0].metadata.agent.id],
+    });
+    const responseData = fleetActionGenerator.generateResponse({
+      agent_id: endpointList.hosts[0].metadata.agent.id,
+    });
+    const getMockEndpointActivityLog = () =>
+      ({
+        total: 2,
+        page: 1,
+        pageSize: 50,
+        data: [
+          {
+            type: 'response',
+            item: {
+              id: '',
+              data: responseData,
+            },
+          },
+          {
+            type: 'action',
+            item: {
+              id: '',
+              data: actionData,
+            },
+          },
+        ],
+      } as ActivityLog);
     const dispatchGetActivityLog = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(activityLog),
+        payload: createLoadedResourceState(getMockEndpointActivityLog()),
       });
     };
 
@@ -270,11 +294,10 @@ describe('endpoint list middleware', () => {
 
       dispatchGetActivityLog();
       const loadedDispatchedResponse = await loadedDispatched;
-      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<
-        EndpointAction[]
-      >).data;
+      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
+        .data;
 
-      expect(activityLogData).toEqual(activityLog);
+      expect(activityLogData).toEqual(getMockEndpointActivityLog());
     });
   });
 });
