@@ -50,36 +50,46 @@ export const installTemplates = async (
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
+
+  const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
+    (acc, dataStream) => {
+      acc.push(
+        installTemplateForDataStream({
+          pkg: installablePackage,
+          esClient,
+          dataStream,
+        })
+      );
+      return acc;
+    },
+    []
+  );
+
+  const res = await Promise.all(installTemplatePromises);
+  const installedTemplates = res.flat();
+
   // get template refs to save
-  const installedTemplateRefs = dataStreams.map((dataStream) => ({
-    id: generateTemplateName(dataStream),
-    type: ElasticsearchAssetType.indexTemplate,
-  }));
+  const templateRefs = installedTemplates.flatMap((installedTemplate) => {
+    const indexTemplates = [
+      {
+        id: installedTemplate.templateName,
+        type: ElasticsearchAssetType.indexTemplate,
+      },
+    ];
+    const componentTemplates = installedTemplate.indexTemplate.composed_of.map(
+      (componentTemplateId) => ({
+        id: componentTemplateId,
+        type: ElasticsearchAssetType.componentTemplate,
+      })
+    );
+    return indexTemplates.concat(componentTemplates);
+  });
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
+  // await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
+  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, templateRefs);
 
-  if (dataStreams) {
-    const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
-      (acc, dataStream) => {
-        acc.push(
-          installTemplateForDataStream({
-            pkg: installablePackage,
-            esClient,
-            dataStream,
-          })
-        );
-        return acc;
-      },
-      []
-    );
-
-    const res = await Promise.all(installTemplatePromises);
-    const installedTemplates = res.flat();
-
-    return installedTemplates;
-  }
-  return [];
+  return installedTemplates;
 };
 
 const installPreBuiltTemplates = async (paths: string[], esClient: ElasticsearchClient) => {
@@ -200,7 +210,7 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(userSettingsSuffix);
 
-async function buildComponentTemplates(
+function buildComponentTemplates(
   templateName: string,
   registryElasticsearch: RegistryElasticsearch | undefined
 ) {
@@ -240,7 +250,7 @@ async function installDataStreamComponentTemplates(
   registryElasticsearch: RegistryElasticsearch | undefined,
   esClient: ElasticsearchClient
 ) {
-  const templates = await buildComponentTemplates(templateName, registryElasticsearch);
+  const templates = buildComponentTemplates(templateName, registryElasticsearch);
   const templateNames = Object.keys(templates);
   const templateEntries = Object.entries(templates);
 

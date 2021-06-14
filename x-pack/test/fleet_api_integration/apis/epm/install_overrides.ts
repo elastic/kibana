@@ -18,9 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
   const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
-  };
+  const deletePackage = async (pkgkey: string) =>
+    supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
 
   describe('installs packages that include settings and mappings overrides', async () => {
     after(async () => {
@@ -77,9 +76,39 @@ export default function ({ getService }: FtrProviderContext) {
         }));
 
         // Make sure that the lifecycle name gets set correct in the settings
-        const storedTemplate = body.component_templates[0].component_template.template.settings;
+        let storedTemplate = body.component_templates[0].component_template.template.settings;
         const stubTemplate = {};
         expect(storedTemplate).to.eql(stubTemplate);
+
+        const userSettingsOverrides = {
+          number_of_shards: 3,
+          index: {
+            lifecycle: { name: 'overridden by user' },
+          },
+        };
+
+        ({ body } = await es.transport.request({
+          method: 'PUT',
+          path: `/_component_template/${templateName}-user_settings`,
+          body: {
+            template: { settings: userSettingsOverrides },
+          },
+        }));
+
+        ({ body } = await es.transport.request({
+          method: 'GET',
+          path: `/_component_template/${templateName}-user_settings`,
+        }));
+        // templateName = 'logs-overrides.test';
+        // console.log({ GET: JSON.stringify(body) });
+        // Make sure that the lifecycle name gets set correct in the settings
+        storedTemplate = body.component_templates[0].component_template.template.settings;
+        expect(storedTemplate).to.eql({
+          index: {
+            number_of_shards: 3,
+            lifecycle: { name: 'overridden by user' },
+          },
+        });
       } else {
         warnAndSkipTest(this, log);
       }
