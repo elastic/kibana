@@ -93,7 +93,7 @@ instead of
 export { AType } from '...'`.
 ```
 
-Using the non-`type` variation will increase the bundle size unnecessarily.
+Using the non-`type` variation will increase the bundle size unnecessarily and may unwillingly provide access to the implementation of `AType` class.
 
 2. Don't use `export *` in these top level index.ts files
 
