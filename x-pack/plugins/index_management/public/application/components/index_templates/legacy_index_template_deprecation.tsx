@@ -34,7 +34,7 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
       {showCta && history && (
         <p>
           <FormattedMessage
-            id="xpack.idxMgmt.home.indexTemplatesDescription"
+            id="xpack.idxMgmt.legacyIndexTemplatesDeprecation.description"
             defaultMessage="{createTemplateButton} or {learnMoreLink}"
             values={{
               createTemplateButton: (
