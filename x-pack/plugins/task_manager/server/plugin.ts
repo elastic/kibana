@@ -95,15 +95,13 @@ export class TaskManagerPlugin
       this.config!
     );
 
-    core.getStartServices().then(async () => {
-      core.status.set(
-        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
-          map(([derivedStatus, serviceStatus]) =>
-            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
-          )
+    core.status.set(
+      combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+        map(([derivedStatus, serviceStatus]) =>
+          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
         )
-      );
-    });
+      )
+    );
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
