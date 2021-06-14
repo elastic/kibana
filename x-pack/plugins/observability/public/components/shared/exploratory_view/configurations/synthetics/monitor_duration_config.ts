@@ -15,7 +15,7 @@ export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps
     id: seriesId,
     reportType: 'uptime-duration',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar_stacked'],
+    seriesTypes: [],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
