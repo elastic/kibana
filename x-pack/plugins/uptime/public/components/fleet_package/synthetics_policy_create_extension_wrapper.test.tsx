@@ -9,21 +9,9 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import {
-  defaultSimpleFields,
-  defaultTLSFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPAdvancedFields,
-} from './contexts';
 import { SyntheticsPolicyCreateExtensionWrapper } from './synthetics_policy_create_extension_wrapper';
+import { defaultConfig } from './synthetics_policy_create_extension';
 import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types';
-
-const defaultConfig = {
-  ...defaultSimpleFields,
-  ...defaultTLSFields,
-  ...defaultHTTPAdvancedFields,
-  ...defaultTCPAdvancedFields,
-};
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -266,6 +254,10 @@ const defaultNewPolicy: NewPackagePolicy = {
   },
 };
 
+const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
+const defaultICMPConfig = defaultConfig[DataStream.ICMP];
+const defaultTCPConfig = defaultConfig[DataStream.TCP];
+
 describe('<SyntheticsPolicyCreateExtension />', () => {
   const onChange = jest.fn();
   const WrappedComponent = ({ newPolicy = defaultNewPolicy }) => {
@@ -283,21 +275,21 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType.value).toEqual(DataStream.HTTP);
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -425,7 +417,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType.value).toEqual(DataStream.HTTP);
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     await waitFor(() => {
@@ -452,7 +444,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
@@ -466,29 +458,6 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(getByLabelText('Request payload')).toBeInTheDocument();
 
     fireEvent.change(monitorType, { target: { value: DataStream.ICMP } });
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        isValid: false,
-        updatedPolicy: {
-          ...defaultNewPolicy,
-          inputs: [
-            {
-              ...defaultNewPolicy.inputs[0],
-              enabled: false,
-            },
-            {
-              ...defaultNewPolicy.inputs[1],
-              enabled: false,
-            },
-            {
-              ...defaultNewPolicy.inputs[2],
-              enabled: true,
-            },
-          ],
-        },
-      });
-    });
 
     // expect ICMP fields to be in the DOM
     expect(getByLabelText('Wait in seconds')).toBeInTheDocument();
@@ -721,23 +690,27 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
-      expect(ca.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
     });
     await waitFor(() => {
       fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
-      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
     });
     await waitFor(() => {
       fireEvent.change(clientKey, { target: { value: 'clientKey' } });
-      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
     });
     await waitFor(() => {
       fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
-      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value);
+      expect(clientKeyPassphrase.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
+      );
     });
     await waitFor(() => {
       fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
-      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value);
+      expect(verificationMode.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
+      );
     });
 
     await waitFor(() => {
