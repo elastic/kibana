@@ -29,6 +29,7 @@ export type ElasticsearchClientConfig = Pick<
   | 'hosts'
   | 'username'
   | 'password'
+  | 'serviceAccountToken'
 > & {
   pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
@@ -74,11 +75,16 @@ export function parseClientOptions(
     };
   }
 
-  if (config.username && config.password && !scoped) {
-    clientOptions.auth = {
-      username: config.username,
-      password: config.password,
-    };
+  if (!scoped) {
+    if (config.username && config.password) {
+      clientOptions.auth = {
+        username: config.username,
+        password: config.password,
+      };
+    } else if (config.serviceAccountToken) {
+      // TODO: change once ES client has native support for service account tokens: https://github.com/elastic/elasticsearch-js/issues/1477
+      clientOptions.headers!.authorization = `Bearer ${config.serviceAccountToken}`;
+    }
   }
 
   clientOptions.nodes = config.hosts.map((host) => convertHost(host));

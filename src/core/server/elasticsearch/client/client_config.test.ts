@@ -204,11 +204,27 @@ describe('parseClientOptions', () => {
         );
       });
 
+      it('adds an authorization header if `serviceAccountToken` is set', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              serviceAccountToken: 'ABC123',
+            }),
+            false
+          )
+        ).toEqual(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: `Bearer ABC123`,
+            }),
+          })
+        );
+      });
+
       it('does not add auth to the nodes', () => {
         const options = parseClientOptions(
           createConfig({
-            username: 'user',
-            password: 'pass',
+            serviceAccountToken: 'ABC123',
             hosts: ['http://node-A:9200'],
           }),
           true
@@ -240,6 +256,34 @@ describe('parseClientOptions', () => {
           createConfig({
             username: 'user',
             password: 'pass',
+            hosts: ['http://node-A:9200'],
+          }),
+          true
+        );
+        expect(options.nodes).toMatchInlineSnapshot(`
+                  Array [
+                    Object {
+                      "url": "http://node-a:9200/",
+                    },
+                  ]
+              `);
+      });
+
+      it('does not add the authorization header even if `serviceAccountToken` is set', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              serviceAccountToken: 'ABC123',
+            }),
+            true
+          ).headers
+        ).not.toHaveProperty('authorization');
+      });
+
+      it('does not add auth to the nodes even if `serviceAccountToken` is set', () => {
+        const options = parseClientOptions(
+          createConfig({
+            serviceAccountToken: 'ABC123',
             hosts: ['http://node-A:9200'],
           }),
           true

@@ -377,3 +377,22 @@ test('#username throws if equal to "elastic", only while running from source', (
   );
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });
+
+test('serviceAccountToken throws if username is also set', () => {
+  const obj = {
+    username: 'elastic',
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
+  );
+});
+
+test('serviceAccountToken does not throw if username is not set', () => {
+  const obj = {
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).not.toThrow();
+});
