@@ -19,6 +19,8 @@ jest.mock('../../kibana_services', () => ({
     },
     tutorialService: {
       getModuleNotices: () => [],
+      setTutorial: jest.fn(),
+      getCustomComponent: jest.fn(),
     },
   }),
 }));
