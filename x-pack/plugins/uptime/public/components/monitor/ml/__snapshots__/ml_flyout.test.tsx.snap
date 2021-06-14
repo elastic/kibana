@@ -81,8 +81,14 @@ exports[`ML Flyout component renders without errors 1`] = `
 
 exports[`ML Flyout component shows license info if no ml available 1`] = `
 <div
+  data-eui="EuiFlyout"
   data-test-subj="uptimeMLFlyout"
+  role="dialog"
 >
+  <button
+    data-test-subj="euiFlyoutCloseButton"
+    type="button"
+  />
   <div
     class="euiFlyoutHeader"
   >
