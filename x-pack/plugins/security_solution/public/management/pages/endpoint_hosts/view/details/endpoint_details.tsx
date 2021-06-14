@@ -36,6 +36,7 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignPolicyAction } from '../../../../../../../fleet/public';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
+import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -80,20 +81,7 @@ export const EndpointDetails = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
             defaultMessage: 'Agent Status',
           }),
-          description: (
-            <EuiBadge
-              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
-              data-test-subj="hostDetailsAgentStatusBadge"
-            >
-              <EuiText size="m">
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
-                  values={{ hostStatus }}
-                />
-              </EuiText>
-            </EuiBadge>
-          ),
+          description: <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={details} />,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
