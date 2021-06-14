@@ -687,6 +687,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   namespace: string | undefined;
   ruleType: NormalizedAlertType<
     AlertTypeParams,
+    AlertTypeParams,
     AlertTypeState,
     {
       [x: string]: unknown;
