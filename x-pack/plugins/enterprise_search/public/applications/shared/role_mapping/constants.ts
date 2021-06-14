@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductName } from '../types';
+
 export const ANY_AUTH_PROVIDER = '*';
 
 export const ANY_AUTH_PROVIDER_OPTION_LABEL = i18n.translate(
@@ -73,6 +75,13 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
   }
 );
 
+export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.attributeValueError',
+  {
+    defaultMessage: 'Attribute value is required',
+  }
+);
+
 export const DELETE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.deleteRoleMappingTitle',
   {
@@ -97,7 +106,7 @@ export const DELETE_ROLE_MAPPING_BUTTON = i18n.translate(
 export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.filterRoleMappingsPlaceholder',
   {
-    defaultMessage: 'Filter roles...',
+    defaultMessage: 'Filter role mappings',
   }
 );
 
@@ -116,21 +125,6 @@ export const ADD_ROLE_MAPPING_TITLE = i18n.translate(
 export const MANAGE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.manageRoleMappingTitle',
   { defaultMessage: 'Manage role mapping' }
-);
-
-export const EMPTY_ROLE_MAPPINGS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.emptyRoleMappingsTitle',
-  {
-    defaultMessage: 'No role mappings yet',
-  }
-);
-
-export const ROLE_MAPPINGS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.roleMappingsDescription',
-  {
-    defaultMessage:
-      'Define role mappings for elasticsearch-native and elasticsearch-saml authentication.',
-  }
 );
 
 export const ROLE_MAPPING_NOT_FOUND = i18n.translate(
@@ -161,13 +155,6 @@ export const ROLE_MAPPING_FLYOUT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ROLE_MAPPING_ADD_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.roleMappingAddButton',
-  {
-    defaultMessage: 'Add mapping',
-  }
-);
-
 export const ROLE_MAPPING_FLYOUT_CREATE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCreateButton',
   {
@@ -190,4 +177,31 @@ export const SAVE_ROLE_MAPPING = i18n.translate(
 export const UPDATE_ROLE_MAPPING = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.updateRoleMappingButtonLabel',
   { defaultMessage: 'Update role mapping' }
+);
+
+export const ROLE_MAPPINGS_HEADING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingTitle',
+  { defaultMessage: 'Role mappings' }
+);
+
+export const ROLE_MAPPINGS_HEADING_DESCRIPTION = (productName: ProductName) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.roleMappingsHeadingDescription', {
+    defaultMessage:
+      'Role mappings provide an interface to associate native or SAML-governed role attributes with {productName} permissions.',
+    values: { productName },
+  });
+
+export const ROLE_MAPPINGS_HEADING_DOCS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingDocsLink',
+  { defaultMessage: 'Learn more about role mappings' }
+);
+
+export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsHeadingButton',
+  { defaultMessage: 'Create a new role mapping' }
+);
+
+export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.noResults.message',
+  { defaultMessage: 'Create a new role mapping' }
 );

@@ -14,7 +14,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     this.tags('ciGroup2');
     const esArchiver = getService('esArchiver');
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'test/new_visualize_flow/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     loadTestFile(require.resolve('./dashboard_embedding'));

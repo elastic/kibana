@@ -29,7 +29,6 @@ export const Line: FC<Props> = ({ chartData }) => {
       xAccessor={'time'}
       yAccessors={['value']}
       data={chartData}
-      yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       lineSeriesStyle={lineSeriesStyle}
       color={LINE_COLOR}
