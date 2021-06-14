@@ -21,35 +21,23 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'upd', label: 'Monitor duration' },
-    { id: 'upp', label: 'Pings histogram' },
+    { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
   ],
   ux: [
-    { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
     { id: 'cwv', label: 'Core Web Vitals' },
   ],
   mobile: [
     {
-      id: 'mkpi',
+      id: 'kpi',
       label: 'KPI over time',
     },
   ],
-  apm: [
-    { id: 'svl', label: 'Latency' },
-    { id: 'tpt', label: 'Throughput' },
-  ],
-  infra_logs: [
-    {
-      id: 'logs',
-      label: 'Logs Frequency',
-    },
-  ],
-  infra_metrics: [
-    { id: 'cpu', label: 'CPU usage' },
-    { id: 'mem', label: 'Memory usage' },
-    { id: 'nwk', label: 'Network activity' },
-  ],
+  apm: [],
+  infra_logs: [],
+  infra_metrics: [],
 };
 
 export function SeriesBuilder({
@@ -78,7 +66,7 @@ export function SeriesBuilder({
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
-      seriesId,
+      dataType,
       indexPattern,
       reportType: reportType!,
     });

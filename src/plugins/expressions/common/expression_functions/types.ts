@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
-import { TypeToString } from '../types/common';
+import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
@@ -47,7 +46,7 @@ export interface ExpressionFunctionDefinition<
   /**
    * Name of type of value this function outputs.
    */
-  type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+  type?: TypeString<Output> | UnmappedTypeStrings;
 
   /**
    * List of allowed type names for input value of this function. If this
