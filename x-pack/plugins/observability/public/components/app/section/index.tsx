@@ -37,9 +37,7 @@ export function SectionContainer({ title, appLink, children, hasError }: Props) 
         }
         extraAction={
           appLink?.href && (
-            <EuiLink href={core.http.basePath.prepend(appLink.href)}>
-              <EuiButton size="s">{appLink.label}</EuiButton>
-            </EuiLink>
+  <EuiButton href={core.http.basePath.prepend(appLink.href)}>{appLink.label}</EuiButton>
           )
         }
       >
