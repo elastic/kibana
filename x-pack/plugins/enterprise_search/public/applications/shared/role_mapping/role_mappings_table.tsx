@@ -84,7 +84,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const roleCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'roleType',
     name: ROLE_LABEL,
-    render: (_, { rules }: SharedRoleMapping) => getFirstAttributeValue(rules),
+    render: (_, { roleType }: SharedRoleMapping) => roleType,
   };
 
   const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
