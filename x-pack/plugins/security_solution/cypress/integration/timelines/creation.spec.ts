@@ -13,6 +13,7 @@ import {
   NOTES_TEXT,
   PIN_EVENT,
   SERVER_SIDE_EVENT_COUNT,
+  STAR_ICON,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_PANEL,
@@ -110,14 +111,12 @@ describe('Timelines', (): void => {
     });
 
     it('can be marked as favorite', () => {
-      cy.intercept('PATCH', '/api/timeline/_favorite').as('markAsFavourite');
       markAsFavorite();
-      cy.wait('@markAsFavourite', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
 
+      cy.get(STAR_ICON).should('not.exist');
       cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
       cy.visit(OVERVIEW_URL);
       cy.get(OVERVIEW_REVENT_TIMELINES).should('contain', timeline.title);
-      openTimelineUsingToggle();
     });
   });
 });
