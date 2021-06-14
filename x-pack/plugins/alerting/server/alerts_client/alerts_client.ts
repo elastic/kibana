@@ -366,7 +366,12 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw<Params>(
+      createdAlert.id,
+      createdAlert.attributes.alertTypeId,
+      createdAlert.attributes,
+      references
+    );
   }
 
   public async get<Params extends AlertTypeParams = never>({
@@ -398,7 +403,12 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes.alertTypeId,
+      result.attributes,
+      result.references
+    );
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -527,6 +537,7 @@ export class AlertsClient {
       }
       return this.getAlertFromRaw<Params>(
         id,
+        attributes.alertTypeId,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
         references
       );
@@ -1456,10 +1467,11 @@ export class AlertsClient {
 
   private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
+    ruleTypeId: string,
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
   ): Alert {
-    const ruleType = this.alertTypeRegistry.get(rawAlert.alertTypeId);
+    const ruleType = this.alertTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
