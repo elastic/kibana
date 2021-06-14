@@ -8,7 +8,7 @@
 
 import { getType } from './get_type';
 // @ts-expect-error
-import { parse } from '../../../grammar/grammar';
+import { parse } from '../../../grammar';
 
 export type ExpressionArgAST = string | boolean | number | Ast;
 
