@@ -29,7 +29,7 @@ import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import {
   isFailedResourceState,
