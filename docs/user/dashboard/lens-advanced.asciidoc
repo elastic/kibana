@@ -296,6 +296,38 @@ image::images/lens_advanced_5_2.png[Line chart with cumulative sum of orders mad
 . Click *Save and return*.
 
 [discrete]
+[[compare-time-ranges]]
+=== Compare time ranges
+
+*Lens* allows you to shift individual dimensions in time to compare the currently selected time range with historical data. 
+To compare current sales numbers with sales from a week ago, follow these steps: 
+
+. Open *Lens*.
+
+. From the *Chart Type* dropdown, select *Line*.
+
+. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+
+. Copy the *Count of Records* series by dragging it to the empty drop target of the *Vertical axis* dimension group (*Drop a field or click to add*)
+
+. Shift the second *Count of Records* series by one week to do a week-over-week comparison
+
+.. Click the new *Count of Records [1]* dimension
+
+.. Click *Add advanced options* below the field selector
+
+.. Click *Time shift*
+
+[role="screenshot"]
+image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
+
+Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one, spanning the same duration.
+For example if *Last 7 days* is selected in the time picker in the top right, *previous* will show data from 14 days ago to 7 days ago.
+
+If multiple time shifts are used in a single chart, a multiple of the date histogram interval should be chosen - otherwise data points might not line up in the chart and empty spots can occur.
+For example if a daily interval is used, shifting one series by *36h* and another one by *1d* is not recommended. In this scenario either reduce the interval to *12h* or create two separate charts.  
+
+[discrete]
 [[view-customers-over-time-by-continents]]
 === View table of customers by category over time
 
