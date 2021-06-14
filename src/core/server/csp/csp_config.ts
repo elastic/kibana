@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { config, FRAME_ANCESTORS_RULE } from './config';
+import { config, CspConfigType } from './config';
+import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -50,8 +51,9 @@ export interface ICspConfig {
  * @public
  */
 export class CspConfig implements ICspConfig {
-  static readonly DEFAULT = new CspConfig();
+  static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
 
+  readonly #directives: CspDirectives;
   public readonly rules: string[];
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
@@ -62,16 +64,17 @@ export class CspConfig implements ICspConfig {
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
-    const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
-
-    this.rules = [...source.rules];
-    this.strict = source.strict;
-    this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.disableEmbedding = source.disableEmbedding;
-    if (!rawCspConfig.rules?.length && source.disableEmbedding) {
-      this.rules.push(FRAME_ANCESTORS_RULE);
+  constructor(rawCspConfig: CspConfigType) {
+    this.#directives = CspDirectives.fromConfig(rawCspConfig);
+    if (!rawCspConfig.rules?.length && rawCspConfig.disableEmbedding) {
+      this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
-    this.header = this.rules.join('; ');
+
+    this.rules = this.#directives.getRules();
+    this.header = this.#directives.getCspHeader();
+
+    this.strict = rawCspConfig.strict;
+    this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;
+    this.disableEmbedding = rawCspConfig.disableEmbedding;
   }
 }
