@@ -15,6 +15,7 @@ import { HttpService } from './http_service';
 import { CoreContext } from '../core_context';
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
+import type { CspConfigType } from '../csp';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -60,7 +61,10 @@ configService.atPath.mockImplementation((path) => {
       script_src: [],
       worker_src: [],
       style_src: [],
-    } as any);
+      strict: false,
+      disableEmbedding: false,
+      warnLegacyBrowsers: true,
+    } as CspConfigType);
   }
   throw new Error(`Unexpected config path: ${path}`);
 });

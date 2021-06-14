@@ -16,6 +16,7 @@ import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
 import { KibanaRequest } from './router';
 import { Env } from '../config';
+import type { CspConfigType } from '../csp';
 
 import { contextServiceMock } from '../context/context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
@@ -69,7 +70,14 @@ configService.atPath.mockImplementation((path) => {
     } as any);
   }
   if (path === 'csp') {
-    return new BehaviorSubject({} as any);
+    return new BehaviorSubject({
+      script_src: [],
+      worker_src: [],
+      style_src: [],
+      strict: false,
+      disableEmbedding: false,
+      warnLegacyBrowsers: true,
+    } as CspConfigType);
   }
   throw new Error(`Unexpected config path: ${path}`);
 });
