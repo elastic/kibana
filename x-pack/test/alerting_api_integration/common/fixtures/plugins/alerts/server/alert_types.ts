@@ -536,6 +536,19 @@ export function defineAlertTypes(
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
+  const exampleAlwaysFiringAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'example.always-firing',
+    name: 'Always firing',
+    actionGroups: [
+      { id: 'small', name: 'Small t-shirt' },
+      { id: 'medium', name: 'Medium t-shirt' },
+      { id: 'large', name: 'Large t-shirt' },
+    ],
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    async executor() {},
+    producer: 'alertsFixture',
+  };
 
   alerting.registerType(getAlwaysFiringAlertType());
   alerting.registerType(getCumulativeFiringAlertType());
@@ -550,4 +563,5 @@ export function defineAlertTypes(
   alerting.registerType(throwAlertType);
   alerting.registerType(longRunningAlertType);
   alerting.registerType(goldNoopAlertType);
+  alerting.registerType(exampleAlwaysFiringAlertType);
 }
