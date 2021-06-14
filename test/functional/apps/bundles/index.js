@@ -18,6 +18,15 @@ export default function ({ getService }) {
 
     let buildNum;
     before(async () => {
+      // Wait for status to become green
+      let status;
+      const start = Date.now();
+      do {
+        const resp = await supertest.get('/api/status');
+        status = resp.status;
+        // Stop polling once status stabilizes OR once 40s has passed
+      } while (status !== 200 && Date.now() - start < 40_000);
+
       const resp = await supertest.get('/api/status').expect(200);
       buildNum = resp.body.version.build_number;
     });
