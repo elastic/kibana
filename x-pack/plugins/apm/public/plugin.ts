@@ -107,7 +107,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
               // APM navigation
               {
                 label: 'APM',
-                sortKey: 200,
+                sortKey: 400,
                 entries: [
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
@@ -118,7 +118,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
               // UX navigation
               {
                 label: 'User Experience',
-                sortKey: 201,
+                sortKey: 500,
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
