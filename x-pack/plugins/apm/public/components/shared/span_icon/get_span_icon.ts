@@ -33,13 +33,14 @@ const defaultTypeIcons: { [key: string]: string } = {
   resource: globeIcon,
 };
 
-const typeIcons: { [key: string]: { [key: string]: string } } = {
+export const typeIcons: { [type: string]: { [subType: string]: string } } = {
   aws: {
-    servicename: awsIcon,
+    servicename: 'logoAWS',
   },
   db: {
     cassandra: cassandraIcon,
-    dynamodb: awsIcon,
+    cosmosdb: 'logoAzure',
+    dynamodb: 'logoAWS',
     elasticsearch: elasticsearchIcon,
     mongodb: mongodbIcon,
     mysql: mysqlIcon,
@@ -52,8 +53,18 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
     websocket: websocketIcon,
   },
   messaging: {
+    azurequeue: 'logoAzure',
+    azureservicebus: 'logoAzure',
     jms: javaIcon,
     kafka: kafkaIcon,
+    sns: 'logoAWS',
+    sqs: 'logoAWS',
+  },
+  storage: {
+    azureblob: 'logoAzure',
+    azurefile: 'logoAzure',
+    azuretable: 'logoAzure',
+    s3: 'logoAWS',
   },
   template: {
     handlebars: handlebarsIcon,
