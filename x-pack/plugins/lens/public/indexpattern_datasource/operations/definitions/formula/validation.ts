@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject } from 'lodash';
+import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
@@ -58,6 +58,10 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; count: number; params: string };
   };
+  tooManyQueries: {
+    message: string;
+    type: {};
+  };
 }
 type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
@@ -90,15 +94,76 @@ export function hasInvalidOperations(
   return {
     // avoid duplicates
     names: Array.from(new Set(nodes.map(({ name }) => name))),
-    locations: nodes.map(({ location }) => location),
+    locations: nodes.map(({ location }) => location).filter((a) => a) as TinymathLocation[],
   };
 }
 
+export const getRawQueryValidationError = (text: string, operations: Record<string, unknown>) => {
+  // try to extract the query context here
+  const singleLine = text.split('\n').join('');
+  const allArgs = singleLine.split(',').filter((args) => /(kql|lucene)/.test(args));
+  // check for the presence of a valid ES operation
+  const containsOneValidOperation = Object.keys(operations).some((operation) =>
+    singleLine.includes(operation)
+  );
+  // no args or no valid operation, no more work to do here
+  if (allArgs.length === 0 || !containsOneValidOperation) {
+    return;
+  }
+  // at this point each entry in allArgs may contain one or more
+  // in the worst case it would be a math chain of count operation
+  // For instance: count(kql=...) + count(lucene=...) - count(kql=...)
+  // therefore before partition them, split them by "count" keywork and filter only string with a length
+  const flattenArgs = allArgs.flatMap((arg) =>
+    arg.split('count').filter((subArg) => /(kql|lucene)/.test(subArg))
+  );
+  const [kqlQueries, luceneQueries] = partition(flattenArgs, (arg) => /kql/.test(arg));
+  const errors = [];
+  for (const kqlQuery of kqlQueries) {
+    const result = validateQueryQuotes(kqlQuery, 'kql');
+    if (result) {
+      errors.push(result);
+    }
+  }
+  for (const luceneQuery of luceneQueries) {
+    const result = validateQueryQuotes(luceneQuery, 'lucene');
+    if (result) {
+      errors.push(result);
+    }
+  }
+  return errors.length ? errors : undefined;
+};
+
+const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
+  // check if the raw argument has the minimal requirements
+  // use the rest operator here to handle cases where comparison operations are used in the query
+  const [, ...rawValue] = rawQuery.split('=');
+  const fullRawValue = (rawValue || ['']).join('');
+  const cleanedRawValue = fullRawValue.trim();
+  // it must start with a single quote, and quotes must have a closure
+  if (
+    cleanedRawValue.length &&
+    (cleanedRawValue[0] !== "'" || !/'\s*([^']+?)\s*'/.test(fullRawValue)) &&
+    // there's a special case when it's valid as two single quote strings
+    cleanedRawValue !== "''"
+  ) {
+    return i18n.translate('xpack.lens.indexPattern.formulaOperationQueryError', {
+      defaultMessage: `Single quotes are required for {language}='' at {rawQuery}`,
+      values: { language, rawQuery },
+    });
+  }
+};
+
 export const getQueryValidationError = (
-  query: string,
-  language: 'kql' | 'lucene',
+  { value: query, name: language, text }: TinymathNamedArgument,
   indexPattern: IndexPattern
 ): string | undefined => {
+  // check if the raw argument has the minimal requirements
+  const result = validateQueryQuotes(text, language as 'kql' | 'lucene');
+  // forward the error here is ok?
+  if (result) {
+    return result;
+  }
   try {
     if (language === 'kql') {
       esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query), indexPattern);
@@ -113,7 +178,7 @@ export const getQueryValidationError = (
 
 function getMessageFromId<K extends ErrorTypes>({
   messageId,
-  values: { ...values },
+  values,
   locations,
 }: {
   messageId: K;
@@ -203,6 +268,11 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, count: out.count, params: out.params },
       });
       break;
+    case 'tooManyQueries':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
+        defaultMessage: 'Use only one of kql= or lucene=, not both',
+      });
+      break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -218,12 +288,22 @@ function getMessageFromId<K extends ErrorTypes>({
 }
 
 export function tryToParse(
-  formula: string
+  formula: string,
+  operations: Record<string, unknown>
 ): { root: TinymathAST; error: null } | { root: null; error: ErrorWrapper } {
   let root;
   try {
     root = parse(formula);
   } catch (e) {
+    // A tradeoff is required here, unless we want to reimplement a full parser
+    // Internally the function has the following logic:
+    // * if the formula contains no existing ES operation, assume it's a plain parse failure
+    // * if the formula contains at least one existing operation, check for query problems
+    const maybeQueryProblems = getRawQueryValidationError(formula, operations);
+    if (maybeQueryProblems) {
+      // need to emulate an error shape here
+      return { root: null, error: { message: maybeQueryProblems[0], locations: [] } };
+    }
     return {
       root: null,
       error: getMessageFromId({
@@ -319,7 +399,10 @@ function getQueryValidationErrors(
   const errors: ErrorWrapper[] = [];
   (namedArguments ?? []).forEach((arg) => {
     if (arg.name === 'kql' || arg.name === 'lucene') {
-      const message = getQueryValidationError(arg.value, arg.name, indexPattern);
+      const message = getQueryValidationError(
+        arg as TinymathNamedArgument & { name: 'kql' | 'lucene' },
+        indexPattern
+      );
       if (message) {
         errors.push({
           message,
@@ -329,6 +412,12 @@ function getQueryValidationErrors(
     }
   });
   return errors;
+}
+
+function checkSingleQuery(namedArguments: TinymathNamedArgument[] | undefined) {
+  return namedArguments
+    ? namedArguments.filter((arg) => arg.name === 'kql' || arg.name === 'lucene').length > 1
+    : undefined;
 }
 
 function validateNameArguments(
@@ -349,7 +438,7 @@ function validateNameArguments(
           operation: node.name,
           params: missingParams.map(({ name }) => name).join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -362,7 +451,7 @@ function validateNameArguments(
           operation: node.name,
           params: wrongTypeParams.map(({ name }) => name).join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
@@ -375,13 +464,23 @@ function validateNameArguments(
           operation: node.name,
           params: duplicateParams.join(', '),
         },
-        locations: [node.location],
+        locations: node.location ? [node.location] : [],
       })
     );
   }
   const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern);
   if (queryValidationErrors.length) {
     errors.push(...queryValidationErrors);
+  }
+  const hasTooManyQueries = checkSingleQuery(namedArguments);
+  if (hasTooManyQueries) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'tooManyQueries',
+        values: {},
+        locations: node.location ? [node.location] : [],
+      })
+    );
   }
   return errors;
 }
@@ -426,7 +525,7 @@ function runFullASTValidation(
                     type: 'field',
                     argument: `math operation`,
                   },
-                  locations: [node.location],
+                  locations: node.location ? [node.location] : [],
                 })
               );
             } else {
@@ -436,9 +535,13 @@ function runFullASTValidation(
                   values: {
                     operation: node.name,
                     type: 'field',
-                    argument: getValueOrName(firstArg),
+                    argument:
+                      getValueOrName(firstArg) ||
+                      i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
+                        defaultMessage: 'no field',
+                      }),
                   },
-                  locations: [node.location],
+                  locations: node.location ? [node.location] : [],
                 })
               );
             }
@@ -452,7 +555,7 @@ function runFullASTValidation(
                 values: {
                   operation: node.name,
                 },
-                locations: [node.location],
+                locations: node.location ? [node.location] : [],
               })
             );
           }
@@ -464,7 +567,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         } else {
@@ -493,9 +596,13 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
                 type: 'operation',
-                argument: getValueOrName(firstArg),
+                argument:
+                  getValueOrName(firstArg) ||
+                  i18n.translate('xpack.lens.indexPattern.formulaNoOperation', {
+                    defaultMessage: 'no operation',
+                  }),
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         }
@@ -506,7 +613,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: [node.location],
+              locations: node.location ? [node.location] : [],
             })
           );
         } else {
@@ -606,7 +713,11 @@ export function validateParams(
 }
 
 export function shouldHaveFieldArgument(node: TinymathFunction) {
-  return !['count'].includes(node.name);
+  return hasFunctionFieldArgument(node.name);
+}
+
+export function hasFunctionFieldArgument(type: string) {
+  return !['count'].includes(type);
 }
 
 export function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTypes['type']) {
@@ -628,7 +739,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             type: 'operation',
             argument: `()`,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -640,7 +751,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -659,7 +770,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }
@@ -678,7 +789,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             count: mandatoryArguments.length - node.args.length,
             params: missingArgs.map(({ name }) => name).join(', '),
           },
-          locations: [node.location],
+          locations: node.location ? [node.location] : [],
         })
       );
     }

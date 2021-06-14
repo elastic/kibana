@@ -2894,6 +2894,33 @@ Alias: `type`
 == U
 
 [float]
+[[uiSetting_fn]]
+=== `uiSetting`
+
+Returns a UI settings parameter value.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `parameter`
+|`string`
+|The parameter name.
+
+|`default`
+|`any`
+|A default value in case of the parameter is not set.
+
+Default: `null`
+|===
+
+*Returns:* `ui_setting`
+
+[float]
 [[urlparam_fn]]
 === `urlparam`
 
