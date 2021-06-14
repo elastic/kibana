@@ -261,7 +261,7 @@ function getTileSpatialFilter(geometryFieldName: string, tileBounds: ESBounds): 
     maxLon: tileBounds.bottom_right.lon,
     maxLat: tileBounds.top_left.lat,
   };
-  const tileExtentFilter = createExtentFilter(tileExtent, geometryFieldName);
+  const tileExtentFilter = createExtentFilter(tileExtent, [geometryFieldName]);
   return tileExtentFilter.query;
 }
 
