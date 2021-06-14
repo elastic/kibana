@@ -50,5 +50,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // verifying the count of saved objects after importing .json
       await expect(importedSavedObjects).to.be('Export 33 objects');
     });
+
+    // This test is because of this bug - https://github.com/elastic/kibana/issues/101430
+    // This test is also getting backported into 7.13.x
+    it('should be able to import 7.12.x saved objects -by value panels with drilldowns into 7.x', async function () {
+      await retry.tryForTime(10000, async () => {
+        const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
+        // Kibana always has 1 advanced setting as a saved object
+        await expect(existingSavedObjects).to.be('Export 1 object');
+      });
+      await PageObjects.savedObjects.importFile(
+        path.join(__dirname, 'exports', '_7.12_import_saved_objects.ndjson')
+      );
+      await PageObjects.savedObjects.checkImportSucceeded();
+      await PageObjects.savedObjects.clickImportDone();
+      const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
+      // verifying the count of saved objects after importing .json
+      await expect(importedSavedObjects).to.be('Export 16 objects');
+    });
   });
 }
