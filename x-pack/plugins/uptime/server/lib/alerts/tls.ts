@@ -22,26 +22,13 @@ export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
-  count: number;
-  agingCount: number;
-  agingCommonNameAndDate: string;
-  expiringCount: number;
-  expiringCommonNameAndDate: string;
-  hasAging: true | null;
-  hasExpired: true | null;
+  commonName: string;
+  issuer: string;
+  summary: string;
 }
 
-const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
-
-const mapCertsToSummaryString = (
-  certs: Cert[],
-  certLimitMessage: (cert: Cert) => string,
-  maxSummaryItems: number
-): string =>
-  certs
-    .slice(0, maxSummaryItems)
-    .map((cert) => `${cert.common_name}, ${certLimitMessage(cert)}`)
-    .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
+const mapCertsToSummaryString = (cert: Cert, certLimitMessage: (cert: Cert) => string): string =>
+  certLimitMessage(cert);
 
 const getValidAfter = ({ not_after: date }: Cert) => {
   if (!date) return 'Error, missing `certificate_not_valid_after` date.';
@@ -60,27 +47,21 @@ const getValidBefore = ({ not_before: date }: Cert): string => {
 };
 
 export const getCertSummary = (
-  certs: Cert[],
+  cert: Cert,
   expirationThreshold: number,
-  ageThreshold: number,
-  maxSummaryItems: number = 3
+  ageThreshold: number
 ): TlsAlertState => {
-  certs.sort((a, b) => sortCerts(a.not_after ?? '', b.not_after ?? ''));
-  const expiring = certs.filter(
-    (cert) => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
-  );
-
-  certs.sort((a, b) => sortCerts(a.not_before ?? '', b.not_before ?? ''));
-  const aging = certs.filter((cert) => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
+  const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
+  const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
 
   return {
-    count: certs.length,
-    agingCount: aging.length,
-    agingCommonNameAndDate: mapCertsToSummaryString(aging, getValidBefore, maxSummaryItems),
-    expiringCommonNameAndDate: mapCertsToSummaryString(expiring, getValidAfter, maxSummaryItems),
-    expiringCount: expiring.length,
-    hasAging: aging.length > 0 ? true : null,
-    hasExpired: expiring.length > 0 ? true : null,
+    commonName: cert.common_name ?? '',
+    issuer: cert.issuer ?? '',
+    summary: isExpiring
+      ? mapCertsToSummaryString(cert, getValidAfter)
+      : isAging
+      ? mapCertsToSummaryString(cert, getValidBefore)
+      : '',
   };
 };
 
@@ -129,26 +110,30 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
       const foundCerts = total > 0;
 
       if (foundCerts) {
-        const absoluteExpirationThreshold = moment()
-          .add(
-            dynamicSettings.certExpirationThreshold ??
-              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-            'd'
-          )
-          .valueOf();
-        const absoluteAgeThreshold = moment()
-          .subtract(
-            dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-            'd'
-          )
-          .valueOf();
-        const alertInstance = alertInstanceFactory(TLS.id);
-        const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
-        alertInstance.replaceState({
-          ...updateState(state, foundCerts),
-          ...summary,
+        certs.forEach((cert) => {
+          const absoluteExpirationThreshold = moment()
+            .add(
+              dynamicSettings.certExpirationThreshold ??
+                DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
+              'd'
+            )
+            .valueOf();
+          const absoluteAgeThreshold = moment()
+            .subtract(
+              dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
+              'd'
+            )
+            .valueOf();
+          const alertInstance = alertInstanceFactory(
+            `${TLS.id}-${cert.common_name}-${cert.issuer}`
+          );
+          const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
+          alertInstance.replaceState({
+            ...updateState(state, foundCerts),
+            ...summary,
+          });
+          alertInstance.scheduleActions(TLS.id);
         });
-        alertInstance.scheduleActions(TLS.id);
       }
 
       return updateState(state, foundCerts);

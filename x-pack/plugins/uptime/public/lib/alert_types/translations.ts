@@ -9,28 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
-    defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
-
-{expiringConditionalOpen}
-Expiring cert count: {expiringCount}
-Expiring Certificates: {expiringCommonNameAndDate}
-{expiringConditionalClose}
-
-{agingConditionalOpen}
-Aging cert count: {agingCount}
-Aging Certificates: {agingCommonNameAndDate}
-{agingConditionalClose}
+    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is expiring or becoming too old. {summary}
 `,
     values: {
-      count: '{{state.count}}',
-      expiringCount: '{{state.expiringCount}}',
-      expiringCommonNameAndDate: '{{state.expiringCommonNameAndDate}}',
-      expiringConditionalOpen: '{{#state.hasExpired}}',
-      expiringConditionalClose: '{{/state.hasExpired}}',
-      agingCount: '{{state.agingCount}}',
-      agingCommonNameAndDate: '{{state.agingCommonNameAndDate}}',
-      agingConditionalOpen: '{{#state.hasAging}}',
-      agingConditionalClose: '{{/state.hasAging}}',
+      commonName: '{{state.commonName}}',
+      issuer: '{{state.issuer}}',
+      summary: '{{state.summary}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
