@@ -74,6 +74,8 @@ Logs::
 Machine Learning::
 * Updates datafeed_high_count_network_denies.json {kibana-pull}101681[#101681]
 * Fixes management app race condition {kibana-pull}100785[#100785]
+* Fixes missing selected-interval styling for Explorer anomaly charts and 
+mismatched scheduled markers styling {kibana-pull}100272[#100272]
 Maps::
 * Fixes an issue where EMS Boundaries with joins were unable to render {kibana-pull}101604[#101604]
 Sharing::
