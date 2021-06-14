@@ -59,11 +59,11 @@ export const asyncSearchServiceProvider = (
     loadedFieldValuePairs: 0,
     loadedHistograms: 0,
     getOverallProgress: () =>
-      progress.loadedHistogramStepsize * 0.05 +
-      progress.loadedOverallHistogram * 0.05 +
-      progress.loadedFieldCanditates * 0.05 +
-      progress.loadedFieldValuePairs * 0.05 +
-      progress.loadedHistograms * 0.8,
+      progress.loadedHistogramStepsize * 0.025 +
+      progress.loadedOverallHistogram * 0.025 +
+      progress.loadedFieldCanditates * 0.025 +
+      progress.loadedFieldValuePairs * 0.025 +
+      progress.loadedHistograms * 0.9,
   };
 
   const values: SearchServiceValue[] = [];
