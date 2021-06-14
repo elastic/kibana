@@ -188,9 +188,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   private readonly _isClustered: boolean;
   private readonly _clusterSource: ESGeoGridSource;
-  private readonly _clusterStyle: IVectorStyle;
+  private readonly _clusterStyle: VectorStyle;
   private readonly _documentSource: ESSearchSource;
-  private readonly _documentStyle: IVectorStyle;
+  private readonly _documentStyle: VectorStyle;
 
   constructor(options: BlendedVectorLayerArguments) {
     super({
@@ -199,7 +199,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     });
 
     this._documentSource = this._source as ESSearchSource; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
+    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
     const clusterStyleDescriptor = getClusterStyleDescriptor(
@@ -283,7 +283,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 

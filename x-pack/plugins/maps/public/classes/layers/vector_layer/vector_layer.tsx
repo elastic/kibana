@@ -163,7 +163,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._style;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._style;
   }
 
