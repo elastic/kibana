@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -58,6 +58,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
     const newComment = useEventFiltersSelector(getNewComment);
+    const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
@@ -90,11 +91,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const handleOnChangeName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
+        const name = e.target.value.toString().trim();
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: { ...exception, name: e.target.value.toString() },
-            hasNameError: !e.target.value,
+            entry: { ...exception, name },
+            hasNameError: !name,
           },
         });
       },
@@ -140,7 +142,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const nameInputMemo = useMemo(
       () => (
-        <EuiFormRow label={NAME_LABEL} fullWidth isInvalid={hasNameError} error={NAME_ERROR}>
+        <EuiFormRow
+          label={NAME_LABEL}
+          fullWidth
+          isInvalid={hasNameError && hasBeenInputNameVisited}
+          error={NAME_ERROR}
+        >
           <EuiFieldText
             id="eventFiltersFormInputName"
             placeholder={NAME_PLACEHOLDER}
@@ -148,12 +155,13 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
             onChange={handleOnChangeName}
             fullWidth
             aria-label={NAME_PLACEHOLDER}
-            required
+            required={hasBeenInputNameVisited}
             maxLength={256}
+            onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
           />
         </EuiFormRow>
       ),
-      [hasNameError, exception?.name, handleOnChangeName]
+      [hasNameError, exception?.name, handleOnChangeName, hasBeenInputNameVisited]
     );
 
     const osInputMemo = useMemo(

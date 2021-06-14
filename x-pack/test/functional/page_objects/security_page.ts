@@ -207,18 +207,15 @@ export class SecurityPageObject extends FtrService {
     }
 
     if (expectedResult === 'chrome') {
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
-        20000
-      );
+      await this.find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
       this.log.debug(`Finished login process currentUrl = ${await this.browser.getCurrentUrl()}`);
     }
   }
 
   async initTests() {
     this.log.debug('SecurityPage:initTests');
-    await this.esArchiver.load('empty_kibana');
-    await this.esArchiver.loadIfNeeded('logstash_functional');
+    await this.esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+    await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     await this.browser.setWindowSize(1600, 1000);
   }
 
