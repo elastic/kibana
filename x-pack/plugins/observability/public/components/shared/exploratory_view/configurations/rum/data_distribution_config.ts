@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
+import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -19,13 +19,13 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
-  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
@@ -34,24 +34,23 @@ import {
   FID_LABEL,
   LCP_LABEL,
   PAGE_LOAD_TIME_LABEL,
-  PAGE_VIEWS_LABEL,
+  PAGES_LOADED_LABEL,
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    defaultSeriesType: 'bar_stacked',
-    reportType: 'kpi-trends',
+    reportType: 'data-distribution',
+    defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: 'performance.metric',
     },
     yAxisColumns: [
       {
-        sourceField: 'business.kpi',
-        operationType: 'median',
+        sourceField: RECORDS_FIELD,
+        label: PAGES_LOADED_LABEL,
       },
     ],
     hasOperationType: false,
@@ -69,11 +68,6 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       },
     ],
     breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    filters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
-    ],
-    labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     reportDefinitions: [
       {
         field: SERVICE_NAME,
@@ -83,29 +77,31 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
         field: SERVICE_ENVIRONMENT,
       },
       {
-        field: 'business.kpi',
+        field: 'performance.metric',
         custom: true,
         options: [
-          { field: RECORDS_FIELD, id: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
-          {
-            label: PAGE_LOAD_TIME_LABEL,
-            field: TRANSACTION_DURATION,
-            id: TRANSACTION_DURATION,
-            columnType: OPERATION_COLUMN,
-          },
+          { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
           {
             label: BACKEND_TIME_LABEL,
-            field: TRANSACTION_TIME_TO_FIRST_BYTE,
             id: TRANSACTION_TIME_TO_FIRST_BYTE,
-            columnType: OPERATION_COLUMN,
+            field: TRANSACTION_TIME_TO_FIRST_BYTE,
           },
-          { label: FCP_LABEL, field: FCP_FIELD, id: FCP_FIELD, columnType: OPERATION_COLUMN },
-          { label: TBT_LABEL, field: TBT_FIELD, id: TBT_FIELD, columnType: OPERATION_COLUMN },
-          { label: LCP_LABEL, field: LCP_FIELD, id: LCP_FIELD, columnType: OPERATION_COLUMN },
-          { label: FID_LABEL, field: FID_FIELD, id: FID_FIELD, columnType: OPERATION_COLUMN },
-          { label: CLS_LABEL, field: CLS_FIELD, id: CLS_FIELD, columnType: OPERATION_COLUMN },
+          { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
+          { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
+          { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
+          { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
+          { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
         ],
       },
     ],
+    filters: [
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+    ],
+    labels: {
+      ...FieldLabels,
+      [SERVICE_NAME]: WEB_APPLICATION_LABEL,
+      [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
+    },
   };
 }
