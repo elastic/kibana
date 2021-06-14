@@ -69,7 +69,6 @@ describe('searchAfterAndBulkCreate', () => {
     wrapHits = wrapHitsFactory({
       ruleSO,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      isRuleRegistryEnabled: false,
     });
   });
 

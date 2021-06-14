@@ -408,7 +408,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
-        isRuleRegistryEnabled,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

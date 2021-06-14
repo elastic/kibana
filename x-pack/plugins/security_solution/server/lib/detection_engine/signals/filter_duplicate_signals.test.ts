@@ -45,14 +45,4 @@ describe('filterDuplicateSignals', () => {
       expect(filterDuplicateSignals(mockRuleId3, mockSignals, false).length).toEqual(2);
     });
   });
-
-  // describe('RAC implementation', () => {
-  //   it('filters duplicate signals', () => {
-  //     expect(filterDuplicateSignals(mockRuleId1, mockSignals, false).length).toEqual(1);
-  //   });
-  //
-  //   it('does not filter non-duplicate signals', () => {
-  //     expect(filterDuplicateSignals(mockRuleId3, mockSignals, false).length).toEqual(2);
-  //   });
-  // });
 });
