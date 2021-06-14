@@ -12,6 +12,17 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('kibana server cache-control', () => {
+    before(async () => {
+      // Wait for status to become green
+      let status;
+      const start = Date.now();
+      do {
+        const resp = await supertest.get('/api/status');
+        status = resp.status;
+        // Stop polling once status stabilizes OR once 40s has passed
+      } while (status !== 200 && Date.now() - start < 40_000);
+    });
+
     it('properly marks responses as private, with directives to disable caching', async () => {
       await supertest
         .get('/api/status')
