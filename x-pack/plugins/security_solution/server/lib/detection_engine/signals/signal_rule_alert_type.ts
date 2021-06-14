@@ -235,17 +235,20 @@ export const signalRulesAlertType = ({
 
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
-          result = await mlExecutor({
-            rule: mlRuleSO,
-            ml,
-            listClient,
-            exceptionItems,
-            services,
-            logger,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await mlExecutor({
+              rule: mlRuleSO,
+              tuple,
+              ml,
+              listClient,
+              exceptionItems,
+              services,
+              logger,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
           for (const tuple of tuples) {
