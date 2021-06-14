@@ -6,27 +6,25 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
-import { MONITORS_DURATION_LABEL } from '../constants/labels';
+import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
 
-export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    reportType: 'uptime-duration',
+    reportType: 'data-distribution',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar_stacked'],
+    seriesTypes: [],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: 'performance.metric',
     },
     yAxisColumns: [
       {
-        operationType: 'average',
-        sourceField: 'monitor.duration.us',
-        label: MONITORS_DURATION_LABEL,
+        sourceField: RECORDS_FIELD,
+        label: PINGS_LABEL,
       },
     ],
-    hasOperationType: true,
+    hasOperationType: false,
     defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
     breakdowns: [
       'observer.geo.name',
@@ -43,6 +41,13 @@ export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps
       },
       {
         field: 'url.full',
+      },
+      {
+        field: 'performance.metric',
+        custom: true,
+        options: [
+          { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
+        ],
       },
     ],
     labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
