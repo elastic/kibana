@@ -31,10 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  describe('discover integration with runtime fields editor', function describeIndexTests() {
+  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    // flaky https://github.com/elastic/kibana/issues/100966
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
       const table = await PageObjects.discover.getDocTable();

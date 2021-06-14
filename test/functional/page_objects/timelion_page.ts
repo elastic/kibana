@@ -21,7 +21,7 @@ export class TimelionPageObject extends FtrService {
     });
 
     this.log.debug('load kibana index');
-    await this.esArchiver.load('timelion');
+    await this.esArchiver.load('test/functional/fixtures/es_archiver/timelion');
 
     await this.common.navigateToApp('timelion');
   }

@@ -15,11 +15,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
-      await esArchiver.load('delete_with_references');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('delete_with_references');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references'
+      );
     });
 
     it('should delete the tag', async () => {
