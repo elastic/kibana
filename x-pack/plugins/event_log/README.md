@@ -101,11 +101,20 @@ Below is a document in the expected structure, with descriptions of the fields:
     logger: "name of the logger",
   },
 
-  // Rule fields. All of them are supported.
+  // Rule fields.
   // https://www.elastic.co/guide/en/ecs/current/ecs-rule.html
   rule: {
+    // Fields currently are populated:
+    id: "a823fd56-5467-4727-acb1-66809737d943", // rule id
+    category: "test", // rule type id
+    license: "basic", // rule type minimumLicenseRequired
+    name: "rule-name", //
+    ruleset: "alerts", // rule type producer
+    // Fields currently are not populated:
     author: ["Elastic"],
-    id: "a823fd56-5467-4727-acb1-66809737d943",
+    description: "Some rule description",
+    version: '1',
+    uuid: "uuid"
     // etc
   },
 
