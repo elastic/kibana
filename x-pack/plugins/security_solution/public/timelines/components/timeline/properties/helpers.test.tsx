@@ -10,7 +10,11 @@ import { mount } from 'enzyme';
 
 import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
-import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
+import {
+  apolloClientObservable,
+  kibanaObservable,
+  TestProviders,
+} from '../../../../common/mock/test_providers';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
@@ -146,6 +150,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
         kibanaObservable,
         storage
       );
@@ -182,6 +187,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
         kibanaObservable,
         storage
       );
@@ -217,6 +223,7 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
         kibanaObservable,
         storage
       );
