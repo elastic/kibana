@@ -365,8 +365,9 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  const component = mount(<DocViewTable {...props} />);
-  it('renders multifield rows', () => {
+  it('renders multifield rows if showMultiFields flag is set', () => {
+    const propsWithFlag = { ...props, showMultiFields: true };
+    const component = mount(<DocViewTable {...propsWithFlag} />);
     const categoryMultifieldRow = findTestSubject(
       component,
       'tableDocViewRow-multifieldsTitle-category'
@@ -375,16 +376,29 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(1);
 
-    const customerNameMultiFieldRow = findTestSubject(
-      component,
-      'tableDocViewRow-multifieldsTitle-customer_first_name'
-    );
-    expect(customerNameMultiFieldRow.length).toBe(1);
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
       1
     );
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       1
+    );
+  });
+
+  it('does not render multifield rows if showMultiFields flag is not set', () => {
+    const component = mount(<DocViewTable {...props} />);
+    const categoryMultifieldRow = findTestSubject(
+      component,
+      'tableDocViewRow-multifieldsTitle-category'
+    );
+    expect(categoryMultifieldRow.length).toBe(0);
+    const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
+    expect(categoryKeywordRow.length).toBe(0);
+
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
+      0
+    );
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
+      0
     );
   });
 });
