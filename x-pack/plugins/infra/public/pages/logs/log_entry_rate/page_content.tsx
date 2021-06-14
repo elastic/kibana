@@ -19,7 +19,7 @@ import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
+import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
@@ -90,9 +90,12 @@ export const LogEntryRatePageContent = memo(() => {
 
   if (!hasLogAnalysisCapabilites) {
     return (
-      <AnomaliesPageTemplate isEmptyState={true}>
-        <SubscriptionSplashContent />
-      </AnomaliesPageTemplate>
+      <SubscriptionSplashPage
+        data-test-subj="logsLogEntryRatePage"
+        pageHeader={{
+          pageTitle: anomaliesTitle,
+        }}
+      />
     );
   } else if (!hasLogAnalysisReadCapabilities) {
     return (

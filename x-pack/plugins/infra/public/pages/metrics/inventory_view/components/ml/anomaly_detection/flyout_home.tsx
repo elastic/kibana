@@ -16,7 +16,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
 import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
-import { SubscriptionSplashContent } from '../../../../../../components/subscription_splash_content';
+import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
   MissingResultsPrivilegesPrompt,
@@ -81,7 +81,7 @@ export const FlyoutHome = (props: Props) => {
   });
 
   if (!hasInfraMLCapabilities) {
-    return <SubscriptionSplashContent includePageTemplate={false} />;
+    return <SubscriptionSplashPrompt />;
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
   } else if (hostSetupStatus.type === 'initializing' || k8sSetupStatus.type === 'initializing') {

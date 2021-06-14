@@ -9,19 +9,28 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { HttpStart } from '../../../../../src/core/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
-import { LoadingPage, LoadingPrompt } from '../components/loading_page';
+import { LoadingPrompt } from '../components/loading_page';
+import { PageTemplate } from './page_template';
+import type { LazyObservabilityPageTemplateProps } from '../../../observability/public';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
-export const SubscriptionSplashContent: React.FC<{
-  includePageTemplate?: boolean;
-}> = ({ includePageTemplate = true }) => {
+export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
+  templateProps
+) => {
+  return (
+    <PageTemplate {...templateProps} isEmptyState={true}>
+      <SubscriptionSplashPrompt />
+    </PageTemplate>
+  );
+};
+
+export const SubscriptionSplashPrompt: React.FC = () => {
   const { services } = useKibana<{ http: HttpStart }>();
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
 
@@ -30,11 +39,7 @@ export const SubscriptionSplashContent: React.FC<{
   }, [checkTrialAvailability]);
 
   if (loadState === 'pending') {
-    return includePageTemplate ? (
-      <LoadingPage message={loadingMessage} />
-    ) : (
-      <LoadingPrompt message={loadingMessage} />
-    );
+    return <LoadingPrompt message={loadingMessage} />;
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';

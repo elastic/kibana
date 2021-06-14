@@ -18,7 +18,7 @@ import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
+import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
@@ -52,9 +52,12 @@ export const LogEntryCategoriesPageContent = () => {
 
   if (!hasLogAnalysisCapabilites) {
     return (
-      <CategoriesPageTemplate isEmptyState={true}>
-        <SubscriptionSplashContent />
-      </CategoriesPageTemplate>
+      <SubscriptionSplashPage
+        data-test-subj="logsLogEntryCategoriesPage"
+        pageHeader={{
+          pageTitle: logCategoriesTitle,
+        }}
+      />
     );
   } else if (!hasLogAnalysisReadCapabilities) {
     return (
