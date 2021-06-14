@@ -67,7 +67,7 @@ The 7.13.2 release includes the following bug fixes.
 === Bug Fixes
 Fleet::
 * Fixes the double install button on the Integrations page {kibana-pull}101511[#101511]
-* Fixes packages being upgraded accidentally after adding to policy {kibana-pull}101542[#101542]
+* Fixes an issue where integration packages were accidentally upgraded when they were added to an agent policy {kibana-pull}101542[#101542]
 Lens & Visualizations::
 * Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations that don't have a defined timefield {kibana-pull}100864[#100864]
 Logs::
@@ -75,6 +75,8 @@ Logs::
 Machine Learning::
 * Updates datafeed_high_count_network_denies.json {kibana-pull}101681[#101681]
 * Fixes management app race condition {kibana-pull}100785[#100785]
+* Fixes missing selected-interval styling for Explorer anomaly charts and 
+mismatched scheduled markers styling {kibana-pull}100272[#100272]
 Maps::
 * Fixes an issue where EMS Boundaries with joins were unable to render {kibana-pull}101604[#101604]
 Sharing::
