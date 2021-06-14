@@ -9,8 +9,15 @@ Returns Kibana Platform \*setup\* life-cycle contract. Useful to return the same
 <b>Signature:</b>
 
 ```typescript
-setup(): ExpressionsServiceSetup;
+setup(...args: unknown[]): ExpressionsServiceSetup;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  args | <code>unknown[]</code> |  |
+
 <b>Returns:</b>
 
 `ExpressionsServiceSetup`
