@@ -44,18 +44,14 @@ const assertStatsAndMetrics = (body) => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   describe('kibana stats api', () => {
-    before(() =>
-      kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      )
+    before('make sure there are some saved objects', () =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/saved_objects/basic')
     );
-    after(() =>
-      kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
-      )
+    after('cleanup saved objects changes', () =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/saved_objects/basic')
     );
 
     describe('basic', () => {

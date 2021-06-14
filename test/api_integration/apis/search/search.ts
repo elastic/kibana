@@ -99,6 +99,26 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.message).to.contain('banana not found');
       });
 
+      it('should return 400 when index type is provided in OSS', async () => {
+        const resp = await supertest
+          .post(`/internal/search/es`)
+          .send({
+            indexType: 'baad',
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+              },
+            },
+          })
+          .expect(400);
+
+        verifyErrorResponse(resp.body, 400);
+
+        expect(resp.body.message).to.contain('Unsupported index pattern');
+      });
+
       it('should return 400 with illegal ES argument', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
