@@ -148,8 +148,15 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
+export interface AppRequestedEndpointActivityLog {
+  type: 'appRequestedEndpointActivityLog';
+  payload: {
+    page: number;
+    pageSize: number;
+  };
+}
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
-  payload: EndpointState['endpointDetails']['activityLog'];
+  payload: EndpointState['endpointDetails']['activityLog']['logData'];
 };
 
 export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
@@ -161,6 +168,7 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | AppRequestedEndpointActivityLog
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
