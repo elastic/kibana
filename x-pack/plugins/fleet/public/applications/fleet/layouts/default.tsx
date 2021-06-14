@@ -23,16 +23,11 @@ import { useLink, useConfig, useUrlModal } from '../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
 interface Props {
-  showSettings?: boolean;
   section?: Section;
   children?: React.ReactNode;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({
-  section,
-  children,
-  showSettings = true,
-}) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
   const { modal, setModal } = useUrlModal();

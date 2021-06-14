@@ -50,7 +50,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
-    <DefaultLayout showSettings={false}>
+    <DefaultLayout>
       <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
     </DefaultLayout>
   </EuiErrorBoundary>
