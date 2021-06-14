@@ -29,7 +29,9 @@ export const useObservable = <Args extends unknown[], Result>(
 
   const start = useCallback(
     (...args: Args) => {
-      subRef.current?.unsubscribe();
+      if (subRef.current) {
+        subRef.current.unsubscribe();
+      }
       setLoading(true);
       setResult(undefined);
       setError(undefined);
@@ -54,7 +56,9 @@ export const useObservable = <Args extends unknown[], Result>(
 
   useEffect(
     () => () => {
-      subRef.current?.unsubscribe();
+      if (subRef.current) {
+        subRef.current.unsubscribe();
+      }
     },
     []
   );
