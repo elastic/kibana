@@ -19,7 +19,7 @@ import { crawlerDataServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
   i18n.translate(
-    'xpack.enterpriseSearch.appSearch.crawlerOverview.domainsTable.action.delete.successMessage',
+    'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.delete.successMessage',
     {
       defaultMessage: 'Successfully deleted "{domainUrl}"',
       values: {
