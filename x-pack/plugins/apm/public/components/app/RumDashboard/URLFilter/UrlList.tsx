@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { px, truncate, unit } from '../../../../style/variables';
-
-const BadgeText = styled.div`
-  display: inline-block;
-  ${truncate(px(unit * 12))};
-  vertical-align: middle;
-`;
+import { EuiFlexItem } from '@elastic/eui';
+import { FilterValueLabel } from '../../../../../../observability/public';
+import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
-  value: string[];
-  onRemove: (val: string) => void;
+  values: string[];
+  IndexPattern?: IndexPattern;
+  onChange: (name: LocalUIFilterName, values: string[]) => void;
 }
 
 const formatUrlValue = (val: string) => {
@@ -43,33 +38,31 @@ const formatUrlValue = (val: string) => {
   return val.replace(extraDomain, '..');
 };
 
-const removeFilterLabel = i18n.translate(
-  'xpack.apm.uifilter.badge.removeFilter',
-  { defaultMessage: 'Remove filter' }
-);
+export function UrlList({ values, onChange, indexPattern }: Props) {
+  const name = 'transactionUrl';
 
-export function UrlList({ onRemove, value }: Props) {
+  if (!indexPattern) {
+    return null;
+  }
+
   return (
-    <EuiFlexGrid gutterSize="s">
-      {value.map((val) => (
-        <EuiFlexItem key={val} grow={false}>
-          <EuiBadge
-            color="hollow"
-            onClick={() => {
-              onRemove(val);
+    <>
+      {values.map((value) => (
+        <EuiFlexItem key={value} grow={false}>
+          <FilterValueLabel
+            indexPattern={indexPattern}
+            removeFilter={() => {
+              onChange(name, value);
             }}
-            onClickAriaLabel={removeFilterLabel}
-            iconOnClick={() => {
-              onRemove(val);
-            }}
-            iconOnClickAriaLabel={removeFilterLabel}
-            iconType="cross"
-            iconSide="right"
-          >
-            <BadgeText>{formatUrlValue(val)}</BadgeText>
-          </EuiBadge>
+            invertFilter={(val) => {}}
+            field={'url.full'}
+            value={formatUrlValue(value)}
+            negate={false}
+            label={'URL'}
+            allowExclusion={false}
+          />
         </EuiFlexItem>
       ))}
-    </EuiFlexGrid>
+    </>
   );
 }

@@ -25,6 +25,7 @@ import { SelectedFilters } from './SelectedFilters';
 import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
 import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import { useIndexPattern } from './use_index_pattern';
 
 const filterNames: LocalUIFilterName[] = [
   'location',
@@ -38,11 +39,11 @@ const RUM_DATA_FILTERS = [
 ];
 
 function LocalUIFilters() {
+  const { indexPatternTitle, indexPattern } = useIndexPattern();
+
   const { filters = [], setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
   });
-
-  const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const {
     urlParams: { start, end },
@@ -61,40 +62,42 @@ function LocalUIFilters() {
   );
 
   const content = (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem>
-        <URLFilter />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFilterGroup fullWidth={true}>
-          {filters.map((filter) => (
-            <FieldValueSuggestions
-              key={filter.name}
-              sourceField={filter.fieldName}
-              indexPatternTitle={indexPattern?.title}
-              label={filter.title}
-              asCombobox={false}
-              selectedValue={filter.value}
-              asFilterButton={true}
-              onChange={(values) => {
-                setFilterValue(filter.name, values || []);
-              }}
-              filters={RUM_DATA_FILTERS}
-              time={{ from: start!, to: end! }}
-            />
-          ))}
-        </EuiFilterGroup>
-        <EuiSpacer size="xs" />
-        <SelectedFilters
-          filters={filters}
-          onChange={(name, values) => {
-            setFilterValue(name, values);
-          }}
-          clearValues={clearValues}
-          indexPatternTitle={indexPattern?.title}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <URLFilter />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFilterGroup fullWidth={true}>
+            {filters.map((filter) => (
+              <FieldValueSuggestions
+                key={filter.name}
+                sourceField={filter.fieldName}
+                indexPatternTitle={indexPatternTitle}
+                label={filter.title}
+                asCombobox={false}
+                selectedValue={filter.value}
+                asFilterButton={true}
+                onChange={(values) => {
+                  setFilterValue(filter.name, values || []);
+                }}
+                filters={RUM_DATA_FILTERS}
+                time={{ from: start!, to: end! }}
+              />
+            ))}
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <SelectedFilters
+        filters={filters}
+        onChange={(name, values) => {
+          setFilterValue(name, values);
+        }}
+        clearValues={clearValues}
+        indexPattern={indexPattern}
+      />
+    </>
   );
 
   return isSmall ? (
