@@ -456,7 +456,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:expressions:expressionRevealImage:legacyRendererLibrary' : {
+  'labs:expressions:expressionRevealImage:legacyRendererLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
