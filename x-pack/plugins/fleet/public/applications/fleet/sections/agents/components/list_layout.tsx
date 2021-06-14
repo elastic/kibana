@@ -14,7 +14,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
-import { AgentEnrollmentFlyout } from '../components';
+import { AgentEnrollmentFlyout } from '../../../components';
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
   const { getHref } = useLink();
