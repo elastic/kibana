@@ -9,7 +9,7 @@ export { canRedirectRequest } from './can_redirect_request';
 export {
   AuthenticationService,
   AuthenticationServiceStart,
-  AuthenticationServiceStartInternal,
+  InternalAuthenticationServiceStart,
 } from './authentication_service';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';

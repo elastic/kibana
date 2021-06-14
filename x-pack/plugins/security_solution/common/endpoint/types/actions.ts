@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { HostIsolationRequestSchema } from '../schema/actions';
+import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -44,10 +44,16 @@ export interface HostIsolationResponse {
   action: string;
 }
 
-export interface PendingActionsResponse {
+export interface EndpointPendingActions {
   agent_id: string;
   pending_actions: {
     /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
     [key: string]: number;
   };
 }
+
+export interface PendingActionsResponse {
+  data: EndpointPendingActions[];
+}
+
+export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
