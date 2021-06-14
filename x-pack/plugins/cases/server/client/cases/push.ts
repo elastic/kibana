@@ -25,6 +25,7 @@ import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } fro
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
+import { casesConnectors } from '../../connectors';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -110,8 +111,7 @@ export const push = async (
     });
 
     const connectorMappings = await casesClientInternal.configuration.getMappings({
-      connectorId: connector.id,
-      connectorType: connector.actionTypeId,
+      connector: theCase.connector,
     });
 
     if (connectorMappings.length === 0) {
@@ -125,6 +125,7 @@ export const push = async (
       connector: connector as ActionConnector,
       mappings: connectorMappings[0].attributes.mappings,
       alerts,
+      casesConnectors,
     });
 
     const pushRes = await actionsClient.execute({
