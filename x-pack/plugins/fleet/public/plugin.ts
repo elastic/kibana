@@ -14,12 +14,13 @@ import type {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -73,7 +74,7 @@ export interface FleetStartServices extends CoreStart, FleetStartDeps {
   cloud?: CloudSetup;
 }
 
-export class FleetPlugin {
+export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
   private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
@@ -84,7 +85,7 @@ export class FleetPlugin {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -138,7 +139,6 @@ export class FleetPlugin {
           FleetStartDeps,
           FleetStart
         ];
-
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
@@ -195,7 +195,7 @@ export class FleetPlugin {
     return {};
   }
 
-  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
+  public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
 
     return {

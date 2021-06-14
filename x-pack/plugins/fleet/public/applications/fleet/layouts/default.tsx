@@ -13,17 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
 
 import type { Section } from '../sections';
 import { SettingFlyout } from '../components';
-import { useLink, useConfig, useUrlModal, useStartServices } from '../hooks';
+import { useLink, useConfig, useUrlModal } from '../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
 interface Props {
@@ -32,8 +28,6 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
-
 export const DefaultLayout: React.FunctionComponent<Props> = ({
   section,
   children,
@@ -41,7 +35,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
-  const { modal, setModal, getModalHref } = useUrlModal();
+  const { modal, setModal } = useUrlModal();
 
   return (
     <>

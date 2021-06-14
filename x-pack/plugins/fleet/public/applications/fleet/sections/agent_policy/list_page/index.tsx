@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiSpacer,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -25,7 +24,6 @@ import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-import { WithHeaderLayout } from '../../../layouts';
 import {
   useCapabilities,
   useGetAgentPolicies,
@@ -40,37 +38,6 @@ import { AgentPolicySummaryLine, SearchBar } from '../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
-
-const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
-  <WithHeaderLayout
-    leftColumn={
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyList.pageTitle"
-                defaultMessage="Agent policies"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyList.pageSubtitle"
-                defaultMessage="Use agent policies to manage your agents and the data they collect."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
-    {children}
-  </WithHeaderLayout>
-);
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
