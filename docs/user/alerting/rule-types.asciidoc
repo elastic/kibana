@@ -21,10 +21,10 @@ Stack rules are built into {kib}.  To access the *Stack Rules* feature and creat
 |===
 
 | <<rule-type-index-threshold>>
-| Aggregate field values from documents using {es} queries, compares them to threshold values, and schedules actions to run when the thresholds are met.
+| Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
 
 | <<rule-type-es-query>>
-| Run a user-configured {es} query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
+| Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
 
 |===
 
