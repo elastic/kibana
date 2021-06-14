@@ -16,7 +16,7 @@ import {
 import React, { useCallback } from 'react';
 import * as i18n from './translations';
 
-export interface CasesNavigation<T = React.MouseEvent | MouseEvent, K = null> {
+export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = null> {
   href: K extends 'configurable' ? (arg: T) => string : string;
   onClick: (arg: T) => void;
 }
