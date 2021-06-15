@@ -7,7 +7,7 @@ steps:
 
   - wait
 
-  - command: exit 1
+  - command: echo 'Hello World'
     label: Test
 
   - wait: ~
