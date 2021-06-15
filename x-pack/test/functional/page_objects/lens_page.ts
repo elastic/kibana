@@ -43,7 +43,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isLensPageOrFail() {
-      return await testSubjects.existOrFail('lnsApp');
+      return await testSubjects.existOrFail('lnsApp', { timeout: 1000 });
     },
 
     /**

@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../sections';
-import { AlphaMessaging, SettingFlyout } from '../components';
+import { SettingFlyout } from '../components';
 import { useLink, useConfig, useUrlModal } from '../hooks';
 
 interface Props {
@@ -144,7 +144,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           ) : null}
           {children}
         </Wrapper>
-        <AlphaMessaging />
       </Container>
     </>
   );
