@@ -16,30 +16,22 @@ export function logHealthMetrics(
   logger: Logger,
   config: TaskManagerConfig
 ) {
-  let contextMessage;
-
   let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
   const logAsError =
     monitoredHealth.status === HealthStatus.Error && !isEmpty(monitoredHealth.stats);
   const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
 
-  if (driftInSeconds >= config.monitored_stats_warn_drift_in_seconds) {
-    contextMessage = `Detected drift of ${driftInSeconds}s`;
+  if (driftInSeconds >= config.monitored_stats_warn_delayed_task_start_in_seconds) {
+    logger.warn(
+      `Detected delay task start of ${driftInSeconds}s (which exceeds configured value of ${config.monitored_stats_warn_delayed_task_start_in_seconds}s)`
+    );
     logAsWarn = true;
   }
 
   if (logAsError) {
-    logger.error(
-      `Latest Monitored Stats (${contextMessage ?? `error status`}): ${JSON.stringify(
-        monitoredHealth
-      )}`
-    );
+    logger.error(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
   } else if (logAsWarn) {
-    logger.warn(
-      `Latest Monitored Stats (${contextMessage ?? `warning status`}): ${JSON.stringify(
-        monitoredHealth
-      )}`
-    );
+    logger.warn(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
   } else {
     logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
   }

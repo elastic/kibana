@@ -18,7 +18,7 @@ export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
-export const DEFAULT_MONITORING_STATS_WARN_DRIFT_IN_SECONDS = 60;
+export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -110,8 +110,9 @@ export const configSchema = schema.object(
         defaultValue: {},
       }),
     }),
-    monitored_stats_warn_drift_in_seconds: schema.number({
-      defaultValue: DEFAULT_MONITORING_STATS_WARN_DRIFT_IN_SECONDS,
+    /* The amount of seconds we allow a task to delay before print a warning server log */
+    monitored_stats_warn_delayed_task_start_in_seconds: schema.number({
+      defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
     }),
   },
   {

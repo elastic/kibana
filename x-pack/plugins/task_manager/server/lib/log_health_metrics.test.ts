@@ -14,10 +14,10 @@ import { logHealthMetrics } from './log_health_metrics';
 import { Logger } from '../../../../../src/core/server';
 
 describe('logHealthMetrics', () => {
-  it('should log as debug if there the status is OK', () => {
+  it('should log as debug if status is OK', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_drift_in_seconds: 60,
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
     const health = getMockMonitoredHealth();
 
@@ -29,10 +29,10 @@ describe('logHealthMetrics', () => {
     expect(firstDebug).toMatchObject(health);
   });
 
-  it('should log as warn if there the status is Warn', () => {
+  it('should log as warn if status is Warn', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_drift_in_seconds: 60,
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
     const health = getMockMonitoredHealth({
       status: HealthStatus.Warning,
@@ -42,17 +42,17 @@ describe('logHealthMetrics', () => {
 
     const logMessage = JSON.parse(
       ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (warning status): ',
+        'Latest Monitored Stats: ',
         ''
       )
     );
     expect(logMessage).toMatchObject(health);
   });
 
-  it('should log as error if there the status is Error', () => {
+  it('should log as error if status is Error', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_drift_in_seconds: 60,
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
     const health = getMockMonitoredHealth({
       status: HealthStatus.Error,
@@ -62,17 +62,17 @@ describe('logHealthMetrics', () => {
 
     const logMessage = JSON.parse(
       ((logger as jest.Mocked<Logger>).error.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (error status): ',
+        'Latest Monitored Stats: ',
         ''
       )
     );
     expect(logMessage).toMatchObject(health);
   });
 
-  it('should log as warn if there the drift exceeds the threshold', () => {
+  it('should log as warn if drift exceeds the threshold', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_drift_in_seconds: 60,
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
     const health = getMockMonitoredHealth({
       stats: {
@@ -88,19 +88,23 @@ describe('logHealthMetrics', () => {
 
     logHealthMetrics(health, logger, config);
 
-    const logMessage = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        `Latest Monitored Stats (Detected drift of 60s): `,
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
+      `Detected delay task start of 60s (which exceeds configured value of 60s)`
+    );
+
+    const secondMessage = JSON.parse(
+      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
+        `Latest Monitored Stats: `,
         ''
       )
     );
-    expect(logMessage).toMatchObject(health);
+    expect(secondMessage).toMatchObject(health);
   });
 
   it('should log as debug if there are no stats', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_drift_in_seconds: 60,
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
     const health = {
       id: '1',
