@@ -93,7 +93,7 @@ export class RemoteClusterEdit extends Component {
           <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
-              defaultMessage="Loading remote cluster..."
+              defaultMessage="Loading remote cluster…"
             />
           </SectionLoading>
         </EuiPageContent>
