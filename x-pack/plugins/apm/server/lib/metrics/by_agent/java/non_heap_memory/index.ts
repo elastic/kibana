@@ -7,7 +7,6 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_NON_HEAP_MEMORY_MAX,
   METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
@@ -62,24 +61,23 @@ export async function getNonHeapMemoryChart({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return withApmSpan('get_non_heap_memory_charts', () =>
-    fetchAndTransformMetrics({
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      chartBase,
-      aggs: {
-        nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
-        nonHeapMemoryCommitted: {
-          avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED },
-        },
-        nonHeapMemoryUsed: {
-          avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED },
-        },
+  return fetchAndTransformMetrics({
+    environment,
+    kuery,
+    setup,
+    serviceName,
+    serviceNodeName,
+    chartBase,
+    aggs: {
+      nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
+      nonHeapMemoryCommitted: {
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED },
       },
-      additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
-    })
-  );
+      nonHeapMemoryUsed: {
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED },
+      },
+    },
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+    operationName: 'get_non_heap_memory_charts',
+  });
 }
