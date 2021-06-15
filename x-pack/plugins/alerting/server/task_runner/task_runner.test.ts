@@ -261,6 +261,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -270,7 +271,6 @@ describe('Task Runner', () => {
             "alerts",
           ],
           "kind": "alert",
-          "start": "1970-01-01T00:00:00.000Z",
         },
         "kibana": Object {
           "saved_objects": Array [
@@ -384,7 +384,6 @@ describe('Task Runner', () => {
         action: 'execute-start',
         category: ['alerts'],
         kind: 'alert',
-        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         saved_objects: [
@@ -586,6 +585,7 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -593,7 +593,6 @@ describe('Task Runner', () => {
         action: 'execute-start',
         category: ['alerts'],
         kind: 'alert',
-        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         saved_objects: [
@@ -824,6 +823,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -835,7 +835,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -1113,6 +1112,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1124,7 +1124,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -1395,6 +1394,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1406,7 +1406,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -1914,6 +1913,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1925,7 +1925,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2240,6 +2239,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2251,7 +2251,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2343,6 +2342,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2354,7 +2354,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2454,6 +2453,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2465,7 +2465,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2565,6 +2564,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2576,7 +2576,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2675,6 +2674,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2686,7 +2686,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -2953,6 +2952,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -2964,7 +2964,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -3237,6 +3236,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -3248,7 +3248,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -3439,6 +3438,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -3450,7 +3450,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -3632,6 +3631,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -3643,7 +3643,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -3831,6 +3830,7 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -3842,7 +3842,6 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
-              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "saved_objects": Array [
