@@ -10,6 +10,7 @@ import moment from 'moment';
 import * as Rx from 'rxjs';
 import { NEWSFEED_DEFAULT_SERVICE_BASE_URL } from '../../common/constants';
 import { ApiItem, FetchResult, NewsfeedPluginBrowserConfig } from '../types';
+import { INewsfeedApiDriver } from './types';
 import { convertItems } from './convert_items';
 import type { NewsfeedStorage } from './storage';
 
@@ -19,7 +20,7 @@ interface NewsfeedResponse {
   items: ApiItem[];
 }
 
-export class NewsfeedApiDriver {
+export class NewsfeedApiDriver implements INewsfeedApiDriver {
   private readonly kibanaVersion: string;
   private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
 
