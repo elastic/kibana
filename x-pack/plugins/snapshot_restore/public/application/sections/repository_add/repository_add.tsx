@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { SectionError } from '../../../shared_imports';
@@ -79,25 +79,27 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   };
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryTitle"
               defaultMessage="Register repository"
             />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <RepositoryForm
-          repository={emptyRepository}
-          isSaving={isSaving}
-          saveError={renderSaveError()}
-          clearSaveError={clearSaveError}
-          onSave={onSave}
-        />
-      </EuiPageContent>
-    </EuiPageBody>
+          </span>
+        }
+      />
+
+      <EuiSpacer size="l" />
+
+      <RepositoryForm
+        repository={emptyRepository}
+        isSaving={isSaving}
+        saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+      />
+    </EuiPageContentBody>
   );
 };
