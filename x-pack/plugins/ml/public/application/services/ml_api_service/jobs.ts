@@ -330,8 +330,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  datafeedPreview(job: Job, datafeed: Datafeed) {
-    const body = JSON.stringify({ job, datafeed });
+  datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
+    const body = JSON.stringify({ datafeedId, job, datafeed });
     return httpService.http<{
       total: number;
       categories: Array<{ count?: number; category: Category }>;
