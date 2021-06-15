@@ -7,4 +7,3 @@
  */
 export const PLUGIN_ID = 'expressionRevealImage';
 export const PLUGIN_NAME = 'expressionRevealImage';
-export const LEGACY_RENDERER_LIBRARY = `labs:expressions:${PLUGIN_NAME}:legacyRendererLibrary`;

@@ -8,10 +8,8 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { LEGACY_RENDERER_LIBRARY } from '../common';
 import { revealImageFunction } from './expression_functions';
 import { revealImageRenderer } from './expression_renderers';
-import { revealImage as revealImageRendererLegacy } from './expression_renderers_legacy';
 import { ExpressionService, ExpressionServiceSetup, ExpressionServiceStart } from './services';
 
 interface SetupDeps {
@@ -37,12 +35,7 @@ export class ExpressionRevealImagePlugin
 
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
-
-    if (!core.uiSettings.get(LEGACY_RENDERER_LIBRARY, false)) {
-      expressions.registerRenderer(revealImageRenderer);
-    } else {
-      expressions.registerRenderer(revealImageRendererLegacy);
-    }
+    expressions.registerRenderer(revealImageRenderer);
 
     const setup = { ...this.expressionService.setup() };
 
