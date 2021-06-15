@@ -25,47 +25,19 @@ import {
   RawMonitoringStats,
 } from '../monitoring';
 import { TaskManagerConfig } from '../config';
+import { logHealthMetrics } from '../lib/log_health_metrics';
 
-type MonitoredHealth = RawMonitoringStats & { id: string; status: HealthStatus; timestamp: string };
+export type MonitoredHealth = RawMonitoringStats & {
+  id: string;
+  status: HealthStatus;
+  timestamp: string;
+};
 
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: 'Task Manager is healthy',
   [ServiceStatusLevels.degraded.toString()]: 'Task Manager is unhealthy',
   [ServiceStatusLevels.unavailable.toString()]: 'Task Manager is unavailable',
 };
-
-export function logHealthMetrics(
-  monitoredHealth: MonitoredHealth,
-  logger: Logger,
-  config: TaskManagerConfig
-) {
-  let contextMessage;
-
-  let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
-  const logAsError = monitoredHealth.status === HealthStatus.Error;
-  const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
-
-  if (driftInSeconds >= config.monitored_stats_warn_drift_in_seconds) {
-    contextMessage = `Detected drift of ${driftInSeconds}s`;
-    logAsWarn = true;
-  }
-
-  if (logAsError) {
-    logger.error(
-      `Latest Monitored Stats (${contextMessage ?? `error status`}): ${JSON.stringify(
-        monitoredHealth
-      )}`
-    );
-  } else if (logAsWarn) {
-    logger.warn(
-      `Latest Monitored Stats (${contextMessage ?? `warning status`}): ${JSON.stringify(
-        monitoredHealth
-      )}`
-    );
-  } else {
-    logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
-  }
-}
 
 /**
  * We enforce a `meta` of `never` because this meta gets duplicated into *every dependant plugin*, and
@@ -106,6 +78,21 @@ export function healthRoute(
         : hasStatus(summarizedStats.stats, HealthStatus.Warning)
         ? HealthStatus.Warning
         : HealthStatus.OK;
+    // console.log({
+    //   healthStatus,
+    //   hasError: hasStatus(summarizedStats.stats, HealthStatus.Error),
+    //   hasExpiredHotTimestamps: hasExpiredHotTimestamps(
+    //     summarizedStats,
+    //     now,
+    //     requiredHotStatsFreshness
+    //   ),
+    //   hasExpiredColdTimestamps: hasExpiredColdTimestamps(
+    //     summarizedStats,
+    //     now,
+    //     requiredColdStatsFreshness
+    //   ),
+    //   hasWarning: hasStatus(summarizedStats.stats, HealthStatus.Warning),
+    // });
     return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
   }
 
@@ -198,7 +185,13 @@ function hasExpiredColdTimestamps(
 
 function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {
   return Object.values(stats)
-    .map((stat) => stat?.status === status)
+    .map((stat) => {
+      const result = stat?.status === status;
+      if (result) {
+        // console.log('yes bro', { status, stat })
+      }
+      return result;
+    })
     .includes(true);
 }
 

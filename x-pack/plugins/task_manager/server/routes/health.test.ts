@@ -10,7 +10,7 @@ import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
 import uuid from 'uuid';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { healthRoute } from './health';
+import { healthRoute, MonitoredHealth } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
@@ -23,6 +23,10 @@ import {
 } from '../monitoring';
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
+
+jest.mock('../lib/log_health_metrics', () => ({
+  logHealthMetrics: jest.fn(),
+}));
 
 describe('healthRoute', () => {
   beforeEach(() => {
@@ -43,6 +47,7 @@ describe('healthRoute', () => {
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
+    ignoreCapacityEstimationWarning();
 
     const mockStat = mockHealthStats();
     await sleep(10);
@@ -81,13 +86,10 @@ describe('healthRoute', () => {
       ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
     });
 
-    const firstError = JSON.parse(
-      ((logger as jest.Mocked<Logger>).error.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (error status): ',
-        ''
-      )
+    const secondDebug = JSON.parse(
+      (logger as jest.Mocked<Logger>).debug.mock.calls[1][0].replace('Latest Monitored Stats: ', '')
     );
-    expect(firstError).not.toMatchObject({
+    expect(secondDebug).not.toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -95,60 +97,24 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({}))
       ),
     });
-    expect(firstError).toMatchObject({
+    expect(secondDebug).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
     });
 
-    expect(logger.debug).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
+    ignoreCapacityEstimationWarning(() => HealthStatus.Warning);
 
-    const warnRuntimeStat = mockHealthStats({
-      stats: {
-        runtime: {
-          customStatus: HealthStatus.Warning,
-        },
-      },
-    });
-    const oneSecondFromNow = Date.now() + 1000;
-    const warnConfigurationStat = mockHealthStats({
-      last_update: new Date(oneSecondFromNow).toISOString(),
-      stats: {
-        configuration: {
-          customStatus: HealthStatus.Warning,
-        },
-        runtime: {
-          value: {
-            polling: {
-              last_successful_poll: new Date(oneSecondFromNow).toISOString(),
-            },
-          },
-        },
-      },
-    });
-    const twoSecondsFromNow = Date.now() + 2000;
-    const warnWorkloadStat = mockHealthStats({
-      last_update: new Date(twoSecondsFromNow).toISOString(),
-      stats: {
-        workload: {
-          customStatus: HealthStatus.Warning,
-        },
-        runtime: {
-          value: {
-            polling: {
-              last_successful_poll: new Date(twoSecondsFromNow).toISOString(),
-            },
-          },
-        },
-      },
-    });
+    const warnRuntimeStat = mockHealthStats();
+    const warnConfigurationStat = mockHealthStats();
+    const warnWorkloadStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -222,28 +188,11 @@ describe('healthRoute', () => {
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
+    ignoreCapacityEstimationWarning(() => HealthStatus.Error);
 
-    const errorRuntimeStat = mockHealthStats({
-      stats: {
-        runtime: {
-          customStatus: HealthStatus.Error,
-        },
-      },
-    });
-    const errorConfigurationStat = mockHealthStats({
-      stats: {
-        configuration: {
-          customStatus: HealthStatus.Error,
-        },
-      },
-    });
-    const errorWorkloadStat = mockHealthStats({
-      stats: {
-        workload: {
-          customStatus: HealthStatus.Error,
-        },
-      },
-    });
+    const errorRuntimeStat = mockHealthStats();
+    const errorConfigurationStat = mockHealthStats();
+    const errorWorkloadStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -317,6 +266,7 @@ describe('healthRoute', () => {
   it(`logs at a warn level if the drift is over configured value`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
+    ignoreCapacityEstimationWarning();
 
     const stat = mockHealthStats({
       stats: {
@@ -594,6 +544,28 @@ describe('healthRoute', () => {
 function ignoreCapacityEstimation(stats: RawMonitoringStats) {
   stats.stats.capacity_estimation = expect.any(Object);
   return stats;
+}
+
+function ignoreCapacityEstimationWarning(manuallyControlHealthStatus?: () => HealthStatus) {
+  const { logHealthMetrics: logHealthMetricsMock } = jest.requireMock('../lib/log_health_metrics');
+  const { logHealthMetrics } = jest.requireActual('../lib/log_health_metrics');
+  logHealthMetricsMock.mockImplementation((health: MonitoredHealth, ...rest: object[]) => {
+    if (health.status !== HealthStatus.OK) {
+      if (
+        [
+          health.stats.configuration?.status,
+          health.stats.runtime?.status,
+          health.stats.workload?.status,
+        ].every((status) => status === HealthStatus.OK)
+      ) {
+        health.status = HealthStatus.OK;
+      }
+    }
+    if (manuallyControlHealthStatus) {
+      health.status = manuallyControlHealthStatus();
+    }
+    return logHealthMetrics(health, ...rest);
+  });
 }
 
 function mockHealthStats(overrides = {}) {

@@ -50,9 +50,8 @@ export enum HealthStatus {
 interface MonitoredStat<T> {
   timestamp: string;
   value: T;
-  customStatus?: HealthStatus;
 }
-export type RawMonitoredStat<T extends JsonObject> = Omit<MonitoredStat<T>, 'customStatus'> & {
+export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
 };
 
@@ -129,7 +128,7 @@ export function summarizeMonitoringStats(
       ? {
           configuration: {
             ...configuration,
-            status: configuration.customStatus ?? HealthStatus.OK,
+            status: HealthStatus.OK,
           },
         }
       : {}),
@@ -137,13 +136,7 @@ export function summarizeMonitoringStats(
       ? {
           runtime: {
             timestamp: runtime.timestamp,
-            ...(() => {
-              const summarized = summarizeTaskRunStat(runtime.value, config);
-              return {
-                ...summarized,
-                status: runtime.customStatus ?? summarized.status,
-              };
-            })(),
+            ...summarizeTaskRunStat(runtime.value, config),
           },
         }
       : {}),
@@ -151,13 +144,7 @@ export function summarizeMonitoringStats(
       ? {
           workload: {
             timestamp: workload.timestamp,
-            ...(() => {
-              const summarized = summarizeWorkloadStat(workload.value);
-              return {
-                ...summarized,
-                status: workload.customStatus ?? summarized.status,
-              };
-            })(),
+            ...summarizeWorkloadStat(workload.value),
           },
         }
       : {}),
