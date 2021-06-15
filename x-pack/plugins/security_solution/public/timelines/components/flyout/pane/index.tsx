@@ -20,7 +20,7 @@ import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
-  visible: boolean;
+  visible?: boolean;
 }
 
 const EuiFlyoutContainer = styled.div`
@@ -32,7 +32,10 @@ const EuiFlyoutContainer = styled.div`
   }
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId, visible }) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
+  timelineId,
+  visible = true,
+}) => {
   const dispatch = useDispatch();
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
