@@ -7,11 +7,7 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import {
-  registerRoleMappingsRoute,
-  registerRoleMappingRoute,
-  registerNewRoleMappingRoute,
-} from './role_mappings';
+import { registerRoleMappingsRoute, registerRoleMappingRoute } from './role_mappings';
 
 const roleMappingBaseSchema = {
   rules: { username: 'user' },
@@ -80,29 +76,6 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('GET /api/app_search/role_mappings/{id}', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/role_mappings/{id}',
-      });
-
-      registerRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
-      });
-    });
-  });
-
   describe('PUT /api/app_search/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
@@ -157,29 +130,6 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/role_mappings/:id',
-      });
-    });
-  });
-
-  describe('GET /api/app_search/role_mappings/new', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/role_mappings/new',
-      });
-
-      registerNewRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/new',
       });
     });
   });
