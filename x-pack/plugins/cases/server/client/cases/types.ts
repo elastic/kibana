@@ -57,6 +57,7 @@ export interface EntityInformation {
   updatedBy: CaseResponse['updated_by'];
 }
 export interface TransformerArgs {
+  caseUrl?: string;
   date?: string;
   previousValue?: string;
   user?: string;

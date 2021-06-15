@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { getCaseUrl, wrapError, escapeHatch, getCaseUrl } from '../utils';
+import { getCaseUrl, wrapError, escapeHatch } from '../utils';
 
 import { throwErrors, CasePushRequestParamsRt } from '../../../../common';
 import { RouteDeps } from '../types';
@@ -30,7 +30,6 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
-        console.log('REQUEST', { ...request });
 
         const casesClient = await context.cases.getCasesClient();
 
@@ -45,7 +44,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           body: await casesClient.cases.push({
             caseId: params.case_id,
             connectorId: params.connector_id,
-            caseUrl:
+            ...(url != null ? { caseUrl: url } : {}),
           }),
         });
       } catch (error) {

@@ -52,6 +52,10 @@ export interface PushParams {
    */
   caseId: string;
   /**
+   * The Kibana url of a case
+   */
+  caseUrl?: string;
+  /**
    * The ID of an external system to push to
    */
   connectorId: string;
@@ -63,7 +67,7 @@ export interface PushParams {
  * @ignore
  */
 export const push = async (
-  { connectorId, caseId }: PushParams,
+  { connectorId, caseId, caseUrl }: PushParams,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient,
   casesClientInternal: CasesClientInternal
@@ -118,16 +122,15 @@ export const push = async (
       throw new Error('Connector mapping has not been created');
     }
 
-    console.log('we have to figure out the effin url');
-
     const externalServiceIncident = await createIncident({
       actionsClient,
-      theCase,
-      userActions,
-      connector: connector as ActionConnector,
-      mappings: connectorMappings[0].attributes.mappings,
       alerts,
       casesConnectors,
+      caseUrl,
+      connector: connector as ActionConnector,
+      mappings: connectorMappings[0].attributes.mappings,
+      theCase,
+      userActions,
     });
 
     const pushRes = await actionsClient.execute({

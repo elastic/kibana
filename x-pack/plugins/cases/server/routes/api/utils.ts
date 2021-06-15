@@ -33,4 +33,17 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const getCaseUrl = (url: string | undefined) => {};
+export const getCaseUrl = (url: string | string[] | undefined): string | null => {
+  const caseUrl = Array.isArray(url) ? url[0] : url;
+  if (caseUrl != null) {
+    const possibleCaseUrl = caseUrl.split('?')[0];
+    if (
+      possibleCaseUrl.length &&
+      (possibleCaseUrl.includes('security/cases') ||
+        possibleCaseUrl.includes('observability/cases'))
+    ) {
+      return possibleCaseUrl;
+    }
+  }
+  return null;
+};

@@ -41,12 +41,13 @@ import { CasesConnectorsMap } from '../../connectors';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
-  theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
-  connector: ActionConnector;
-  mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
+  caseUrl?: string;
+  connector: ActionConnector;
+  mappings: ConnectorMappingsAttributes[];
+  theCase: CaseResponse;
+  userActions: CaseUserActionsResponse;
 }
 
 export const getLatestPushInfo = (
@@ -95,12 +96,13 @@ const countAlerts = (comments: CaseResponse['comments']): number =>
 
 export const createIncident = async ({
   actionsClient,
-  theCase,
-  userActions,
-  connector,
-  mappings,
   alerts,
   casesConnectors,
+  caseUrl,
+  connector,
+  mappings,
+  theCase,
+  userActions,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -152,7 +154,7 @@ export const createIncident = async ({
   });
 
   incident = { ...incident, ...transformedFields, externalId };
-  console.log('HEYHEY', { transformedFields, theCase });
+
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
@@ -175,8 +177,7 @@ export const createIncident = async ({
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
-      console.log('COMMENTS', theCase);
-      comments = transformComments(commentsToBeUpdated, ['informationAdded']);
+      comments = transformComments(commentsToBeUpdated, ['informationAdded'], caseUrl);
     }
   }
 
@@ -231,21 +232,40 @@ export const FIELD_INFORMATION = (
 };
 
 export const transformers: Record<string, Transformer> = {
-  informationCreated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
+  informationCreated: ({
+    caseUrl,
+    date,
+    user,
+    value,
+    ...rest
+  }: TransformerArgs): TransformerArgs => ({
     value: `${value} ${FIELD_INFORMATION('create', date, user)}`,
     ...rest,
   }),
-  informationUpdated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
+  informationUpdated: ({
+    caseUrl,
+    date,
+    user,
+    value,
+    ...rest
+  }: TransformerArgs): TransformerArgs => ({
     value: `${value} ${FIELD_INFORMATION('update', date, user)}`,
     ...rest,
   }),
-  informationAdded: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => {
-    console.log('HEYHO', { rest });
-    return {
-      value: `${value} ${FIELD_INFORMATION('add', date, user)}`,
-      ...rest,
-    };
-  },
+  informationAdded: ({
+    caseUrl,
+    date,
+    user,
+    value,
+    ...rest
+  }: TransformerArgs): TransformerArgs => ({
+    value: `${value} ${
+      caseUrl != null
+        ? `[${FIELD_INFORMATION('add', date, user)}](${caseUrl})`
+        : FIELD_INFORMATION('add', date, user)
+    }`,
+    ...rest,
+  }),
   append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
     value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
     ...rest,
@@ -307,7 +327,8 @@ export const transformFields = <
 
 export const transformComments = (
   comments: CaseResponse['comments'] = [],
-  pipes: string[]
+  pipes: string[],
+  caseUrl?: string
 ): ExternalServiceComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
@@ -319,6 +340,7 @@ export const transformComments = (
         updatedAt: c.updated_at,
         updatedBy: c.updated_by,
       }),
+      ...(caseUrl != null ? { caseUrl: `${caseUrl}/${c.id}` } : {}),
     }).value,
     commentId: c.id,
   }));
