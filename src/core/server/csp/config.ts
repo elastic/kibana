@@ -47,12 +47,12 @@ export const config: ServiceConfigDescriptor<CspConfigType> = {
       if (cspConfig?.rules) {
         addDeprecation({
           message:
-            'csp.rules is deprecated in favor of per-directive definitions. ' +
+            'csp.rules is deprecated in favor of directive specific configuration. ' +
             'Please use `csp.script_src`, `csp.worker_src` and `csp.style_src` instead',
           correctiveActions: {
             manualSteps: [
               `Remove "csp.rules" from the Kibana config file"`,
-              `Add per-directive definitions to the config file, using "csp.script_src", "csp.worker_src" and "csp.style_src"`,
+              `Add directive specific configurations to the config file, using "csp.script_src", "csp.worker_src" and "csp.style_src"`,
             ],
           },
         });

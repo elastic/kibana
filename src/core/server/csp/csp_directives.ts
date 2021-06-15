@@ -60,7 +60,7 @@ export class CspDirectives {
 const parseRules = (rules: string[]): Partial<Record<CspDirectiveName, string[]>> => {
   const directives: Partial<Record<CspDirectiveName, string[]>> = {};
   rules.forEach((rule) => {
-    const [name, ...values] = rule.trim().split(' ');
+    const [name, ...values] = rule.replace(/\s+/g, ' ').trim().split(' ');
     directives[name as CspDirectiveName] = values;
   });
   return directives;

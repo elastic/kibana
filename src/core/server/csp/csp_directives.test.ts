@@ -111,6 +111,41 @@ describe('CspDirectives', () => {
       );
     });
 
+    it('handles multiple whitespaces when parsing rules', () => {
+      const config = cspConfig.schema.validate({
+        rules: [`  script-src  'self'  http://foo.com `, `  worker-src   'self'  `],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'self' http://foo.com",
+          "worker-src 'self'",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'self' http://foo.com; worker-src 'self'"`
+      );
+    });
+
+    it('supports unregistered directives', () => {
+      const config = cspConfig.schema.validate({
+        rules: [`script-src 'self' http://foo.com`, `img-src 'self'`, 'foo bar'],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'self' http://foo.com",
+          "img-src 'self'",
+          "foo bar",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'self' http://foo.com; img-src 'self'; foo bar"`
+      );
+    });
+
     it('adds default value for config with directives', () => {
       const config = cspConfig.schema.validate({
         script_src: [`baz`],
