@@ -1,16 +1,14 @@
 [role="xpack"]
 [[geo-alerting]]
-=== Geo rule type
+=== Tracking containment
 
-Alerting now includes one additional stack rule: <<rule-type-tracking-containment>>.
-
-As with other stack rules, you need `all` access to the *Stack Rules* feature
-to be able to create and edit a geo rule.
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
+<<maps, Maps>> offers the Tracking containment rule type which runs an {es} query over indices to determine whether any
+documents are currently contained within any boundaries from the specified boundary index.
+In the event that an entity is contained within a boundary, an alert may be generated.
 
 [float]
-==== Geo alerting requirements
-To create a *Tracking containment* rule, the following requirements must be present:
+==== Requirements
+To create a Tracking containment rule, the following requirements must be present:
 
 - *Tracks index or index pattern*: An index containing a `geo_point` field, `date` field,
 and some form of entity identifier. An entity identifier is a `keyword` or `number`
@@ -29,22 +27,12 @@ than the current time minus the amount of the interval. If data older than
 `now - <current interval>` is ingested, it won't trigger a rule.
 
 [float]
-==== Creating a geo rule
-Click the *Create* button in the <<create-and-manage-rules, rule management UI>>.
-Complete the <<defining-rules-general-details, general rule details>>.
+==== Create the rule
 
-[role="screenshot"]
-image::user/alerting/images/alert-types-tracking-select.png[Choosing a tracking rule type]
+Fill in the <<defining-rules-general-details, rule details>>, then select Tracking containment.
 
 [float]
-[[rule-type-tracking-containment]]
-==== Tracking containment
-The Tracking containment rule type runs an {es} query over indices, determining if any
-documents are currently contained within any boundaries from the specified boundary index.
-In the event that an entity is contained within a boundary, an alert may be generated.
-
-[float]
-===== Defining the conditions
+==== Define the conditions
 Tracking containment rules have 3 clauses that define the condition to detect,
 as well as 2 Kuery bars used to provide additional filtering context for each of the indices.
 
@@ -60,6 +48,9 @@ or exits.
 Index (Boundary):: This clause requires an *index or index pattern*, a *`geo_shape` field*
 identifying boundaries, and an optional *Human-readable boundary name* for better alerting
 messages.
+
+[float]
+==== Add action
 
 Conditions for how a rule is tracked can be specified uniquely for each individual action.
 A rule can be triggered either when a containment condition is met or when an entity

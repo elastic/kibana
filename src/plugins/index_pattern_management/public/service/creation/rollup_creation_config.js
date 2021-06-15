@@ -1,43 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { RollupPrompt } from './components/rollup_prompt';
-import { IndexPatternCreationConfig } from '../../../../../src/plugins/index_pattern_management/public';
+import { IndexPatternCreationConfig } from '.';
 
 const rollupIndexPatternTypeName = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'rollup index pattern' }
 );
 
 const rollupIndexPatternButtonText = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonText',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Rollup index pattern' }
 );
 
 const rollupIndexPatternButtonDescription = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonDescription',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform limited aggregations against summarized data' }
 );
 
 const rollupIndexPatternNoMatchError = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.noMatchError',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.noMatchError',
   { defaultMessage: 'Rollup index pattern error: must match one rollup index' }
 );
 
 const rollupIndexPatternTooManyMatchesError = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.tooManyMatchesError',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.tooManyMatchesError',
   { defaultMessage: 'Rollup index pattern error: can only match one rollup index' }
 );
 
 const rollupIndexPatternIndexLabel = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.indexLabel',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.indexLabel',
   { defaultMessage: 'Rollup' }
 );
 
@@ -127,7 +128,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
     if (error) {
       const errorMessage = i18n.translate(
-        'xpack.rollupJobs.editRollupIndexPattern.createIndex.uncaughtError',
+        'indexPatternManagement.editRollupIndexPattern.createIndex.uncaughtError',
         {
           defaultMessage: 'Rollup index pattern error: {error}',
           values: {
