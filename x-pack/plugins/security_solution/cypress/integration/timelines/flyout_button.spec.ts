@@ -64,7 +64,7 @@ describe('timeline flyout button', () => {
     cy.get(`${CREATE_NEW_TIMELINE}`)
       .pipe(($el) => $el.trigger('focus'))
       .should('have.focus');
-    cy.root().type('{esc}');
+    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
     cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
   });
 
