@@ -33,15 +33,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./persistent_context'));
-      loadTestFile(require.resolve('./colors'));
-      loadTestFile(require.resolve('./chart_data'));
-      loadTestFile(require.resolve('./time_shift'));
-      loadTestFile(require.resolve('./drag_and_drop'));
-      loadTestFile(require.resolve('./geo_field'));
-      loadTestFile(require.resolve('./lens_reporting'));
-      loadTestFile(require.resolve('./lens_tagging'));
-      loadTestFile(require.resolve('./formula'));
+      // loadTestFile(require.resolve('./persistent_context'));
+      // loadTestFile(require.resolve('./colors'));
+      // loadTestFile(require.resolve('./chart_data'));
+      // loadTestFile(require.resolve('./time_shift'));
+      // loadTestFile(require.resolve('./drag_and_drop'));
+      // loadTestFile(require.resolve('./geo_field'));
+      // loadTestFile(require.resolve('./lens_reporting'));
+      // loadTestFile(require.resolve('./lens_tagging'));
+      // loadTestFile(require.resolve('./formula'));
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
