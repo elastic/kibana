@@ -111,21 +111,22 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       width: '40px',
       isExpander: true,
       render: (item: DataVisualizerTableItem) => {
-        if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
+        const displayName = item.displayName ?? item.fieldName;
+        if (displayName === undefined) return null;
+        const direction = expandedRowItemIds.includes(displayName) ? 'arrowUp' : 'arrowDown';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
             onClick={() => toggleDetails(item)}
             aria-label={
-              expandedRowItemIds.includes(item.fieldName)
+              expandedRowItemIds.includes(displayName)
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
-                    values: { fieldName: item.fieldName },
+                    values: { fieldName: displayName },
                   })
                 : i18n.translate('xpack.dataVisualizer.dataGrid.rowExpand', {
                     defaultMessage: 'Show details for {fieldName}',
-                    values: { fieldName: item.fieldName },
+                    values: { fieldName: displayName },
                   })
             }
             iconType={direction}
@@ -157,11 +158,15 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         }),
         sortable: true,
         truncateText: true,
-        render: (fieldName: string) => (
-          <EuiText size="s">
-            <b>{fieldName}</b>
-          </EuiText>
-        ),
+        render: (fieldName: string, item: DataVisualizerTableItem) => {
+          const displayName = item.displayName ?? item.fieldName;
+
+          return (
+            <EuiText size="s">
+              <b>{displayName}</b>
+            </EuiText>
+          );
+        },
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnName',
       },

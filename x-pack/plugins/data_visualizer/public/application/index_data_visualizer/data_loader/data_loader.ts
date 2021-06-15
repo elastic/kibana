@@ -49,10 +49,10 @@ export class DataLoader {
     this._indexPattern.fields.forEach((field) => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
       if (this.isDisplayField(fieldName) === true) {
-        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
-          aggregatableFields.push(fieldName);
+        if (field.aggregatable === true || field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
+          aggregatableFields.push(field.name);
         } else {
-          nonAggregatableFields.push(fieldName);
+          nonAggregatableFields.push(field.name);
         }
       }
     });

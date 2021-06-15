@@ -533,7 +533,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
     const metricExistsFields = allMetricFields.filter((f) => {
       return aggregatableExistsFields.find((existsF) => {
-        return existsF.fieldName === f.displayName;
+        return existsF.fieldName === f.spec.name;
       });
     });
 
@@ -562,7 +562,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
     metricFieldsToShow.forEach((field) => {
       const fieldData = aggregatableFields.find((f) => {
-        return f.fieldName === field.displayName;
+        return f.fieldName === field.spec.name;
       });
 
       const metricConfig: FieldVisConfig = {
@@ -572,6 +572,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         loading: true,
         aggregatable: true,
       };
+      if (field.displayName !== metricConfig.fieldName) {
+        metricConfig.displayName = field.displayName;
+      }
 
       configs.push(metricConfig);
     });
@@ -607,7 +610,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
     allNonMetricFields.forEach((f) => {
       const checkAggregatableField = aggregatableExistsFields.find(
-        (existsField) => existsField.fieldName === f.displayName
+        (existsField) => existsField.fieldName === f.spec.name
       );
 
       if (checkAggregatableField !== undefined) {
@@ -615,7 +618,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         nonMetricFieldData.push(checkAggregatableField);
       } else {
         const checkNonAggregatableField = nonAggregatableExistsFields.find(
-          (existsField) => existsField.fieldName === f.displayName
+          (existsField) => existsField.fieldName === f.spec.name
         );
 
         if (checkNonAggregatableField !== undefined) {
@@ -643,7 +646,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     const configs: FieldVisConfig[] = [];
 
     nonMetricFieldsToShow.forEach((field) => {
-      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.displayName);
+      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
 
       const nonMetricConfig = {
         ...fieldData,
@@ -663,6 +666,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         // field types that do not yet have a specific card type.
         nonMetricConfig.type = field.type;
         nonMetricConfig.isUnsupportedType = true;
+      }
+
+      if (field.displayName !== nonMetricConfig.fieldName) {
+        nonMetricConfig.displayName = field.displayName;
       }
 
       configs.push(nonMetricConfig);
