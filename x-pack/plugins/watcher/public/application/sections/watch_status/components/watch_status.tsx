@@ -97,7 +97,7 @@ export const WatchStatus = ({
 
   if (errorCode) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <PageError errorCode={errorCode} id={id} />
       </EuiPageContent>
     );

@@ -13,8 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function PageErrorNotExist({ id }: { id?: string }) {
   return (
     <EuiEmptyPrompt
-      iconType="search"
-      iconColor="primary"
+      iconType="alert"
       title={
         <h1>
           <FormattedMessage

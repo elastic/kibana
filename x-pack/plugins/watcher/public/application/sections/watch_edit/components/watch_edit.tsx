@@ -10,19 +10,20 @@ import { isEqual } from 'lodash';
 
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Watch } from '../../../models/watch';
+
 import { WATCH_TYPES } from '../../../../../common/constants';
 import { BaseWatch } from '../../../../../common/types/watch_types';
-import { getPageErrorCode, PageError, SectionLoading, SectionError } from '../../../components';
+import { getPageErrorCode, PageError, SectionLoading } from '../../../components';
 import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
+import { useAppContext } from '../../../app_context';
+import { Watch } from '../../../models/watch';
+import { PageError as GenericPageError } from '../../../shared_imports';
+import { WatchContext } from '../watch_context';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
 import { MonitoringWatchEdit } from './monitoring_watch_edit';
-import { WatchContext } from '../watch_context';
-import { useAppContext } from '../../../app_context';
 
 const getTitle = (watch: BaseWatch) => {
   if (watch.isNew) {
@@ -115,7 +116,7 @@ export const WatchEdit = ({
           const loadedWatch = await loadWatch(id);
           dispatch({ command: 'setWatch', payload: loadedWatch });
         } catch (error) {
-          dispatch({ command: 'setError', payload: error });
+          dispatch({ command: 'setError', payload: error.body });
         }
       } else if (type) {
         const WatchType = Watch.getWatchTypes()[type];
@@ -135,26 +136,21 @@ export const WatchEdit = ({
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <PageError errorCode={errorCode} id={id} />
       </EuiPageContent>
     );
-  }
-
-  if (loadError) {
-    // TODO Use pageError here
+  } else if (loadError) {
     return (
-      <EuiPageContent>
-        <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.watcher.sections.watchEdit.errorTitle"
-              defaultMessage="Error loading watch"
-            />
-          }
-          error={loadError}
-        />
-      </EuiPageContent>
+      <GenericPageError
+        title={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchEdit.errorTitle"
+            defaultMessage="Error loading watch"
+          />
+        }
+        error={loadError}
+      />
     );
   }
 
