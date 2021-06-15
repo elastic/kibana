@@ -6,6 +6,7 @@
  */
 export { Loading } from './loading';
 export { Error } from './error';
+export { FleetSetupLoading } from './fleet_setup_loading';
 export { PackageIcon } from './package_icon';
 export { ContextMenuActions } from './context_menu_actions';
 export { LinkedAgentCount } from './linked_agent_count';
