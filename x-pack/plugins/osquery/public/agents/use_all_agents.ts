@@ -35,27 +35,22 @@ export const useAllAgents = (
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      const kueryFragments: string[] = [];
-      if (osqueryPolicies.length) {
-        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
-      }
+      const policyFragment = osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ');
+      let kuery = `last_checkin_status: online and (${policyFragment})`;
 
       if (searchValue) {
-        kueryFragments.push(
-          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
-        );
+        kuery += `and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
       return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
+          kuery,
           perPage,
-          showInactive: true,
         },
       });
     },
     {
-      enabled: !osqueryPoliciesLoading,
+      enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
       onError: (error) =>
         toasts.addError(error as Error, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
