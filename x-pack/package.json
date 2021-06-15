@@ -128,7 +128,7 @@
     "@kbn/ui-framework": "1.0.0",
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
-    "@slack/client": "^4.8.0",
+    "@slack/web-api": "^5.15.0",
     "@turf/boolean-contains": "6.0.1",
     "@types/json-stable-stringify": "^1.0.32",
     "angular-resource": "1.4.9",
