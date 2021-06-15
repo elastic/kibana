@@ -15,7 +15,7 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<alert-management, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+<<create-and-manage-rules, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [cols="2*<"]
 |===
