@@ -67,7 +67,7 @@ describe('url state', () => {
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).should('have.attr', 'title', ABSOLUTE_DATE.endTime);
   });
 
-  it('sets the url state when start and end date are set', () => {
+  it.skip('sets the url state when start and end date are set', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateDates();
