@@ -88,7 +88,7 @@ export const CrawlerOverviewLogic = kea<
             },
           }
         );
-        const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
+        const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
         setSuccessMessage(DELETE_DOMAIN_MESSAGE(domain.url));
       } catch (e) {

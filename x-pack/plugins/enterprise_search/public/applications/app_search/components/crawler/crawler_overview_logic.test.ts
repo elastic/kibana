@@ -40,7 +40,7 @@ const MOCK_SERVER_DATA: CrawlerDataFromServer = {
   domains: [
     {
       id: '507f1f77bcf86cd799439011',
-      name: 'moviedatabase.com',
+      name: 'elastic.co',
       created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
       document_count: 13,
       sitemaps: [],
