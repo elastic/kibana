@@ -14,44 +14,42 @@ import {
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function fetchServicePathsFromTraceIds(
   setup: Setup & SetupTimeRange,
   traceIds: string[]
 ) {
-  return withApmSpan('get_service_paths_from_trace_ids', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    // make sure there's a range so ES can skip shards
-    const dayInMs = 24 * 60 * 60 * 1000;
-    const start = setup.start - dayInMs;
-    const end = setup.end + dayInMs;
+  // make sure there's a range so ES can skip shards
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = setup.start - dayInMs;
+  const end = setup.end + dayInMs;
 
-    const serviceMapParams = {
-      apm: {
-        events: [ProcessorEvent.span, ProcessorEvent.transaction],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  [TRACE_ID]: traceIds,
-                },
+  const serviceMapParams = {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                [TRACE_ID]: traceIds,
               },
-              ...rangeQuery(start, end),
-            ],
-          },
+            },
+            ...rangeQuery(start, end),
+          ],
         },
-        aggs: {
-          service_map: {
-            scripted_metric: {
-              init_script: {
-                lang: 'painless',
-                source: `state.eventsById = new HashMap();
+      },
+      aggs: {
+        service_map: {
+          scripted_metric: {
+            init_script: {
+              lang: 'painless',
+              source: `state.eventsById = new HashMap();
 
               String[] fieldsToCopy = new String[] {
                   'parent.id',
@@ -65,10 +63,10 @@ export async function fetchServicePathsFromTraceIds(
                   'agent.name'
                 };
                 state.fieldsToCopy = fieldsToCopy;`,
-              },
-              map_script: {
-                lang: 'painless',
-                source: `def id;
+            },
+            map_script: {
+              lang: 'painless',
+              source: `def id;
                 if (!doc['span.id'].empty) {
                   id = doc['span.id'].value;
                 } else {
@@ -85,14 +83,14 @@ export async function fetchServicePathsFromTraceIds(
                 }
 
                 state.eventsById[id] = copy`,
-              },
-              combine_script: {
-                lang: 'painless',
-                source: `return state.eventsById;`,
-              },
-              reduce_script: {
-                lang: 'painless',
-                source: `
+            },
+            combine_script: {
+              lang: 'painless',
+              source: `return state.eventsById;`,
+            },
+            reduce_script: {
+              lang: 'painless',
+              source: `
               def getDestination ( def event ) {
                 def destination = new HashMap();
                 destination['span.destination.service.resource'] = event['span.destination.service.resource'];
@@ -208,29 +206,29 @@ export async function fetchServicePathsFromTraceIds(
               response.discoveredServices = discoveredServices;
 
               return response;`,
-              },
             },
           },
         } as const,
       },
-    };
+    },
+  };
 
-    const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-      serviceMapParams
-    );
+  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
+    'get_service_paths_from_trace_ids',
+    serviceMapParams
+  );
 
-    return serviceMapFromTraceIdsScriptResponse as {
-      aggregations?: {
-        service_map: {
-          value: {
-            paths: ConnectionNode[][];
-            discoveredServices: Array<{
-              from: ExternalConnectionNode;
-              to: ServiceConnectionNode;
-            }>;
-          };
+  return serviceMapFromTraceIdsScriptResponse as {
+    aggregations?: {
+      service_map: {
+        value: {
+          paths: ConnectionNode[][];
+          discoveredServices: Array<{
+            from: ExternalConnectionNode;
+            to: ServiceConnectionNode;
+          }>;
         };
       };
     };
-  });
+  };
 }

@@ -37,7 +37,12 @@ import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
 } from '../../../../constants';
-import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
+import {
+  useCapabilities,
+  useGetPackageInfoByKey,
+  useLink,
+  useAgentPolicyContext,
+} from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type {
   CreatePackagePolicyRouteState,
@@ -79,6 +84,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
+  const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
@@ -87,6 +93,7 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
+  const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -211,23 +218,41 @@ export function Detail() {
         search,
         hash,
       });
-      const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-        CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
-        INTEGRATIONS_PLUGIN_ID,
-        {
-          path: currentPath,
-        },
-      ];
+
+      const path = pagePathGetters.add_integration_to_policy({
+        pkgkey,
+        ...(integration ? { integration } : {}),
+        ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
+      })[1];
+
+      let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+        CreatePackagePolicyRouteState['onCancelNavigateTo'];
+
+      if (agentPolicyIdFromContext) {
+        redirectToPath = [
+          PLUGIN_ID,
+          {
+            path: `#${
+              pagePathGetters.policy_details({
+                policyId: agentPolicyIdFromContext,
+              })[1]
+            }`,
+          },
+        ];
+      } else {
+        redirectToPath = [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: currentPath,
+          },
+        ];
+      }
+
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
         onCancelNavigateTo: redirectToPath,
         onCancelUrl: currentPath,
       };
-
-      const path = pagePathGetters.add_integration_to_policy({
-        pkgkey,
-        ...(integration ? { integration } : {}),
-      })[1];
 
       services.application.navigateToApp(PLUGIN_ID, {
         // Necessary because of Fleet's HashRouter. Can be changed when
@@ -236,7 +261,16 @@ export function Detail() {
         state: redirectBackRouteState,
       });
     },
-    [history, hash, pathname, search, pkgkey, integration, services.application]
+    [
+      history,
+      hash,
+      pathname,
+      search,
+      pkgkey,
+      integration,
+      services.application,
+      agentPolicyIdFromContext,
+    ]
   );
 
   const headerRightContent = useMemo(
@@ -284,6 +318,9 @@ export function Detail() {
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                       ...(integration ? { integration } : {}),
+                      ...(agentPolicyIdFromContext
+                        ? { agentPolicyId: agentPolicyIdFromContext }
+                        : {}),
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
@@ -325,6 +362,7 @@ export function Detail() {
       packageInstallStatus,
       pkgkey,
       updateAvailable,
+      agentPolicyIdFromContext,
     ]
   );
 
