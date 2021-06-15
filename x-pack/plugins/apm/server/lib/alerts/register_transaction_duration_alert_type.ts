@@ -15,7 +15,6 @@ import {
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,
-  getEnvironmentEsFieldValue,
   getEnvironmentEsField,
 } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
