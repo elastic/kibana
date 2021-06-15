@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { satisfies } from 'semver';
 
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
@@ -61,18 +62,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   });
 
   /* Platform and version fields are supported since osquer_manger@0.3.0 */
-  const isFieldSupported = useMemo(() => {
-    if (!integrationPackageVersion) return false;
-
-    try {
-      return (
-        parseInt(integrationPackageVersion.split('.')[0], 10) >= 0 &&
-        parseInt(integrationPackageVersion.split('.')[1], 10) >= 3
-      );
-    } catch (e) {
-      return false;
-    }
-  }, [integrationPackageVersion]);
+  const isFieldSupported = useMemo(
+    () => (integrationPackageVersion ? satisfies(integrationPackageVersion, '>=0.3.0') : false),
+    [integrationPackageVersion]
+  );
 
   const { submit } = form;
 
