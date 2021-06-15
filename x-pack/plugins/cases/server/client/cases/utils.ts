@@ -148,9 +148,10 @@ export const createIncident = async ({
   });
 
   const transformedFields = transformFields<BasicParams, ExternalServiceParams, Incident>({
-    params,
-    fields,
+    caseUrl,
     currentIncident,
+    fields,
+    params,
   });
 
   incident = { ...incident, ...transformedFields, externalId };
@@ -239,7 +240,11 @@ export const transformers: Record<string, Transformer> = {
     value,
     ...rest
   }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('create', date, user)}`,
+    value: `${value} ${
+      caseUrl != null
+        ? `[${FIELD_INFORMATION('create', date, user)}](${caseUrl} )`
+        : FIELD_INFORMATION('create', date, user)
+    }`,
     ...rest,
   }),
   informationUpdated: ({
@@ -249,7 +254,11 @@ export const transformers: Record<string, Transformer> = {
     value,
     ...rest
   }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('update', date, user)}`,
+    value: `${value} ${
+      caseUrl != null
+        ? `[${FIELD_INFORMATION('update', date, user)}](${caseUrl} )`
+        : FIELD_INFORMATION('update', date, user)
+    }`,
     ...rest,
   }),
   informationAdded: ({
@@ -261,7 +270,7 @@ export const transformers: Record<string, Transformer> = {
   }: TransformerArgs): TransformerArgs => ({
     value: `${value} ${
       caseUrl != null
-        ? `[${FIELD_INFORMATION('add', date, user)}](${caseUrl})`
+        ? `[${FIELD_INFORMATION('add', date, user)}](${caseUrl} )`
         : FIELD_INFORMATION('add', date, user)
     }`,
     ...rest,
@@ -307,19 +316,21 @@ export const transformFields = <
   S extends Record<string, unknown>,
   R extends {}
 >({
-  params,
-  fields,
+  caseUrl,
   currentIncident,
+  fields,
+  params,
 }: TransformFieldsArgs<P, S>): R => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
       ...prev,
       [cur.key]: transform({
-        value: cur.value,
+        caseUrl,
         date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
+        user: getEntity(params),
+        value: cur.value,
       }).value,
     };
   }, {} as R);

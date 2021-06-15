@@ -33,16 +33,21 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const getCaseUrl = (url: string | string[] | undefined): string | null => {
+export const getCaseUrl = (url: string | string[] | undefined, caseId: string): string | null => {
   const caseUrl = Array.isArray(url) ? url[0] : url;
   if (caseUrl != null) {
-    const possibleCaseUrl = caseUrl.split('?')[0];
-    if (
-      possibleCaseUrl.length &&
-      (possibleCaseUrl.includes('security/cases') ||
-        possibleCaseUrl.includes('observability/cases'))
-    ) {
-      return possibleCaseUrl;
+    // split at case id to get cases base url. if we split at ? we might get the comment or whatever else included in the url
+    let possibleCaseUrl;
+    let appName;
+    if (caseUrl.includes('app/security')) {
+      appName = 'app/security';
+      possibleCaseUrl = caseUrl.split(`/${appName}`)[0];
+    } else if (caseUrl.includes('app/observability')) {
+      appName = 'app/observability';
+      possibleCaseUrl = caseUrl.split(`/${appName}`)[0];
+    }
+    if (appName != null) {
+      return `${possibleCaseUrl}/${appName}/cases/${caseId}`;
     }
   }
   return null;

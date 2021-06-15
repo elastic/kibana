@@ -38,7 +38,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const url = getCaseUrl(request.headers.referer);
+        const url = getCaseUrl(request.headers.referer, params.case_id);
 
         return response.ok({
           body: await casesClient.cases.push({

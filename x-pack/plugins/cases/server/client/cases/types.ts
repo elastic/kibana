@@ -66,6 +66,7 @@ export interface TransformerArgs {
 
 export type Transformer = (args: TransformerArgs) => TransformerArgs;
 export interface TransformFieldsArgs<P, S> {
+  caseUrl?: string;
   currentIncident?: S;
   fields: PipedField[];
   params: P;
