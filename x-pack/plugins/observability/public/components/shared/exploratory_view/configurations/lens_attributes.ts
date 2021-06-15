@@ -55,6 +55,7 @@ export const parseCustomFieldName = (
   let fieldName = sourceField;
   let columnType;
   let columnFilters;
+  let timeScale;
   let columnLabel;
 
   const rdf = reportViewConfig.reportDefinitions ?? [];
@@ -70,17 +71,19 @@ export const parseCustomFieldName = (
         );
         columnType = currField?.columnType;
         columnFilters = currField?.columnFilters;
+        timeScale = currField?.timeScale;
         columnLabel = currField?.label;
       }
     } else if (customField.options?.[0].field || customField.options?.[0].id) {
       fieldName = customField.options?.[0].field || customField.options?.[0].id;
       columnType = customField.options?.[0].columnType;
       columnFilters = customField.options?.[0].columnFilters;
+      timeScale = customField.options?.[0].timeScale;
       columnLabel = customField.options?.[0].label;
     }
   }
 
-  return { fieldName, columnType, columnFilters, columnLabel };
+  return { fieldName, columnType, columnFilters, timeScale, columnLabel };
 };
 
 export class LensAttributes {
@@ -263,15 +266,14 @@ export class LensAttributes {
     label?: string,
     colIndex?: number
   ) {
-    const { fieldMeta, columnType, fieldName, columnFilters, columnLabel } = this.getFieldMeta(
-      sourceField
-    );
+    const { fieldMeta, columnType, fieldName, columnFilters, timeScale, columnLabel } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
 
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
         columnLabel || label,
-        colIndex !== undefined ? columnFilters?.[colIndex] : undefined
+        colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
+        timeScale
       );
     }
 
@@ -291,13 +293,11 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string) {
-    const { fieldName, columnType, columnFilters, columnLabel } = this.getCustomFieldName(
-      sourceField
-    );
+    const { fieldName, columnType, columnFilters, timeScale, columnLabel } = this.getCustomFieldName(sourceField);
 
     const fieldMeta = this.indexPattern.getFieldByName(fieldName);
 
-    return { fieldMeta, fieldName, columnType, columnFilters, columnLabel };
+    return { fieldMeta, fieldName, columnType, columnFilters, timeScale, columnLabel };
   }
 
   getMainYAxis() {
@@ -330,7 +330,7 @@ export class LensAttributes {
     return lensColumns;
   }
 
-  getRecordsColumn(label?: string, columnFilter?: ColumnFilter): CountIndexPatternColumn {
+  getRecordsColumn(label?: string, columnFilter?: ColumnFilter, timeScale?: string): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
@@ -339,6 +339,7 @@ export class LensAttributes {
       scale: 'ratio',
       sourceField: 'Records',
       filter: columnFilter,
+      timeScale: timeScale,
     } as CountIndexPatternColumn;
   }
 

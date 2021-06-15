@@ -47,6 +47,7 @@ export interface ReportDefinition {
     description?: string;
     columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
     columnFilters?: ColumnFilter[];
+    timeScale?: string;
   }>;
 }
 

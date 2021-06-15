@@ -13,12 +13,14 @@ import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
 import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
+import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
 
 interface Props {
   reportType: keyof typeof ReportViewTypes;
   indexPattern: IndexPattern;
   dataType: AppDataType;
 }
+
 
 export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
   switch (dataType) {
@@ -36,8 +38,10 @@ export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props)
       }
       return getSyntheticsKPIConfig({ indexPattern });
     case 'mobile':
+      if (reportType === 'dist') {
+        return getMobileKPIDistributionConfig({ indexPattern });
+      }
       return getMobileKPIConfig({ indexPattern });
-
     default:
       return getKPITrendsLensConfig({ indexPattern });
   }
