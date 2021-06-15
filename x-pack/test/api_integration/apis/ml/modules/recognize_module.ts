@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_auditbeat', 'siem_auditbeat_auth'],
+        moduleIds: ['security_auth', 'siem_auditbeat', 'siem_auditbeat_auth'],
       },
     },
     {
@@ -105,6 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         moduleIds: [
+          'security_auth',
           'security_network',
           'security_windows',
           'siem_winlogbeat',
@@ -148,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_linux', 'security_network', 'security_windows'],
+        moduleIds: ['security_auth', 'security_linux', 'security_network', 'security_windows'],
       },
     },
     {
