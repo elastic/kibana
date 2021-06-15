@@ -44,7 +44,7 @@ export const TYPE = i18n.translate('xpack.timelines.timeline.typeTooltip', {
 });
 
 export const REMOVE_COLUMN = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.pane.removeColumnButtonLabel',
+  'xpack.timelines.timeline.flyout.pane.removeColumnButtonLabel',
   {
     defaultMessage: 'Remove column',
   }
