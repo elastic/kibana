@@ -109,6 +109,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
+  const updateLayer = useCallback(
+    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    [layerId, setState]
+  );
+
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
@@ -158,7 +163,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
-  const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
+  const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
     const currentField =
@@ -401,13 +406,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       | IndexPatternLayer
                       | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                   ) => {
-                    setState(
-                      mergeLayer({
-                        state,
-                        layerId,
-                        newLayer:
-                          typeof setter === 'function' ? setter(state.layers[layerId]) : setter,
-                      })
+                    updateLayer(
+                      typeof setter === 'function' ? setter(state.layers[layerId]) : setter
                     );
                   }}
                   validation={validation}
@@ -618,20 +618,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const onFormatChange = useCallback(
     (newFormat) => {
-      setState(
-        mergeLayer({
-          state,
-          layerId,
-          newLayer: updateColumnParam({
-            layer: state.layers[layerId],
-            columnId,
-            paramName: 'format',
-            value: newFormat,
-          }),
+      updateLayer(
+        updateColumnParam({
+          layer: state.layers[layerId],
+          columnId,
+          paramName: 'format',
+          value: newFormat,
         })
       );
     },
-    [columnId, layerId, setState, state]
+    [columnId, layerId, state.layers, updateLayer]
   );
 
   return (
@@ -691,27 +687,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: {
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          label: value,
-                          customLabel:
-                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                              selectedColumn,
-                              state.indexPatterns[state.layers[layerId].indexPatternId],
-                              state.layers[layerId].columns
-                            ) !== value,
-                        },
-                      },
+                updateLayer({
+                  columns: {
+                    ...state.layers[layerId].columns,
+                    [columnId]: {
+                      ...selectedColumn,
+                      label: value,
+                      customLabel:
+                        operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                          selectedColumn,
+                          state.indexPatterns[state.layers[layerId].indexPatternId],
+                          state.layers[layerId].columns
+                        ) !== value,
                     },
-                  })
-                );
+                  },
+                });
               }}
             />
           )}
@@ -720,9 +710,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
-              setColumns={(columnOrder) =>
-                setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
-              }
+              setColumns={(columnOrder) => updateLayer({ columnOrder })}
               getFieldByName={currentIndexPattern.getFieldByName}
             />
           )}
