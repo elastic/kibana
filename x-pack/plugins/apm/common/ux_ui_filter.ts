@@ -99,7 +99,7 @@ export interface UxLocalUIFilter {
   value: string[];
 }
 
-type LocalUIFilterMap = {
+type UxLocalUIFilterMap = {
   [key in UxLocalUIFilterName]: UxLocalUIFilter;
 };
 
@@ -117,4 +117,4 @@ export const uxLocalUIFilters = uxLocalUIFilterNames.reduce((acc, key) => {
       name: key,
     },
   };
-}, {} as LocalUIFilterMap);
+}, {} as UxLocalUIFilterMap);
