@@ -16,6 +16,7 @@ import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server
 import {
   getEnvironmentLabel,
   getEnvironmentEsFieldValue,
+  getEnvironmentEsField,
 } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -153,10 +154,6 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        const parsedEnvironment = getEnvironmentEsFieldValue(
-          alertParams.environment
-        );
-
         services
           .alertWithLifecycle({
             id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
@@ -164,9 +161,7 @@ export function registerTransactionDurationAlertType({
             )}`,
             fields: {
               [SERVICE_NAME]: alertParams.serviceName,
-              ...(parsedEnvironment
-                ? { [SERVICE_ENVIRONMENT]: parsedEnvironment }
-                : {}),
+              ...getEnvironmentEsField(alertParams.environment),
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,

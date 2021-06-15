@@ -12,7 +12,11 @@ import {
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -103,7 +107,10 @@ export function registerErrorCountAlertType({
                 multi_terms: {
                   terms: [
                     { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT, missing: '' },
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                      missing: ENVIRONMENT_NOT_DEFINED.value,
+                    },
                   ],
                   size: 10000,
                 },
@@ -136,7 +143,7 @@ export function registerErrorCountAlertType({
 
             return {
               serviceName: latest['service.name'] as string,
-              environment: latest['service.environment'] as string | undefined,
+              environment: latest['service.environment'] as string,
               errorCount: bucket.doc_count,
             };
           }) ?? [];
@@ -153,9 +160,7 @@ export function registerErrorCountAlertType({
                   .join('_'),
                 fields: {
                   [SERVICE_NAME]: serviceName,
-                  ...(environment
-                    ? { [SERVICE_ENVIRONMENT]: environment }
-                    : {}),
+                  ...getEnvironmentEsField(environment),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
@@ -163,7 +168,7 @@ export function registerErrorCountAlertType({
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
                 serviceName,
-                environment: environment || ENVIRONMENT_NOT_DEFINED.text,
+                environment: getEnvironmentLabel(environment),
                 threshold: alertParams.threshold,
                 triggerValue: errorCount,
                 interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
