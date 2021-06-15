@@ -41,6 +41,7 @@ test('set correct defaults', () => {
         "authorization",
       ],
       "requestTimeout": "PT30S",
+      "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
       "sniffInterval": false,
       "sniffOnConnectionFault": false,
