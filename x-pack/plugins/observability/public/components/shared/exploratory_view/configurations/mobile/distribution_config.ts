@@ -7,7 +7,7 @@
 
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -48,9 +48,8 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
       'labels.net_connection_carrier_isoCountryCode',
     ],
     filters: [
-      ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
-      ...buildPhraseFilter('processor.event', 'transaction', indexPattern)
-  ],
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+    ],
     labels: {
       ...FieldLabels,
       [SERVICE_NAME]: 'Mobile app',

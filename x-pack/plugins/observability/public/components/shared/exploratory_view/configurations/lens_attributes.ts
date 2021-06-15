@@ -170,10 +170,10 @@ export class LensAttributes {
     this.visualization.layers[0].splitAccessor = undefined;
   }
 
-  getNumberRangeColumn(sourceField: string): RangeIndexPatternColumn {
+  getNumberRangeColumn(sourceField: string, label?: string): RangeIndexPatternColumn {
     return {
       sourceField,
-      label: this.reportViewConfig.labels[sourceField],
+      label: this.reportViewConfig.labels[sourceField] ?? label,
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
@@ -200,7 +200,7 @@ export class LensAttributes {
         return this.getPercentileNumberColumn(sourceField, operationType);
       }
     }
-    return this.getNumberRangeColumn(sourceField);
+    return this.getNumberRangeColumn(sourceField, label);
   }
 
   getNumberOperationColumn(
@@ -266,7 +266,14 @@ export class LensAttributes {
     label?: string,
     colIndex?: number
   ) {
-    const { fieldMeta, columnType, fieldName, columnFilters, timeScale, columnLabel } = this.getFieldMeta(sourceField);
+    const {
+      fieldMeta,
+      columnType,
+      fieldName,
+      columnFilters,
+      timeScale,
+      columnLabel,
+    } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
 
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
@@ -293,7 +300,13 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string) {
-    const { fieldName, columnType, columnFilters, timeScale, columnLabel } = this.getCustomFieldName(sourceField);
+    const {
+      fieldName,
+      columnType,
+      columnFilters,
+      timeScale,
+      columnLabel,
+    } = this.getCustomFieldName(sourceField);
 
     const fieldMeta = this.indexPattern.getFieldByName(fieldName);
 
@@ -330,7 +343,11 @@ export class LensAttributes {
     return lensColumns;
   }
 
-  getRecordsColumn(label?: string, columnFilter?: ColumnFilter, timeScale?: string): CountIndexPatternColumn {
+  getRecordsColumn(
+    label?: string,
+    columnFilter?: ColumnFilter,
+    timeScale?: string
+  ): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
@@ -339,7 +356,7 @@ export class LensAttributes {
       scale: 'ratio',
       sourceField: 'Records',
       filter: columnFilter,
-      timeScale: timeScale,
+      timeScale,
     } as CountIndexPatternColumn;
   }
 
