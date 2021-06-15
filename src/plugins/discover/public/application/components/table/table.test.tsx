@@ -262,9 +262,6 @@ describe('DocViewTable at Discover Doc', () => {
 });
 
 describe('DocViewTable at Discover Doc with Fields API', () => {
-  beforeAll(() => {
-    jest.clearAllMocks();
-  });
   const indexPatterneCommerce = ({
     fields: {
       getAll: () => [
