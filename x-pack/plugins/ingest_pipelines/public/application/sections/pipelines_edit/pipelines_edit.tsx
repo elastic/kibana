@@ -95,7 +95,8 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
             <h2>
               <FormattedMessage
                 id="xpack.ingestPipelines.edit.fetchPipelineError"
-                defaultMessage="Unable to load existing pipeline"
+                defaultMessage="Unable to load '{name}'"
+                values={{ name: decodedPipelineName }}
               />
             </h2>
           }

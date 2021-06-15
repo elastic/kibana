@@ -86,7 +86,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <h2 data-test-subj="pipelineLoadError">
               <FormattedMessage
                 id="xpack.ingestPipelines.list.loadErrorTitle"
-                defaultMessage="Unable to load pipelines."
+                defaultMessage="Unable to load pipelines"
               />
             </h2>
           }
