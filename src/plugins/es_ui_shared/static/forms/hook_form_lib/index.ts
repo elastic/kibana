@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-// Only export the useForm hook. The "useField" hook is for internal use
-// as the consumer of the library must use the <UseField /> component
-export { useForm, useFormData } from './hooks';
+// We don't export the "useField" hook as it is for internal use.
+// The consumer of the library must use the <UseField /> component to create a field
+export { useForm, useFormData, useFormIsModified } from './hooks';
 export { getFieldValidityAndErrorMessage } from './helpers';
 
 export * from './form_context';

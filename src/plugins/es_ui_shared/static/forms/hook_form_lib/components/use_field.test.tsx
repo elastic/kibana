@@ -10,7 +10,7 @@ import React, { useEffect, FunctionComponent } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed } from '../shared_imports';
-import { FormHook, OnUpdateHandler, FieldConfig } from '../types';
+import { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
 import { UseField } from './use_field';
@@ -51,6 +51,124 @@ describe('<UseField />', () => {
     expect(data.internal).toEqual({
       name: 'John',
       lastName: 'Snow',
+    });
+  });
+
+  describe('state', () => {
+    describe('isPristine, isDirty, isModified', () => {
+      // Dummy component to handle object type data
+      const ObjectField: React.FC<{ field: FieldHook }> = ({ field: { value, setValue } }) => {
+        const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          // Make sure to set the field value to an **object**
+          setValue(JSON.parse(e.target.value));
+        };
+
+        return <input onChange={onFieldChange} data-test-subj="testField" />;
+      };
+
+      const objectInitialValue = { initial: 'value' };
+
+      interface PristineDirtyModifiedState {
+        isModified: boolean;
+        isDirty: boolean;
+        isPristine: boolean;
+      }
+
+      const getChildrenFunc = (
+        cb: (state: PristineDirtyModifiedState) => void,
+        Component?: React.ComponentType<{ field: FieldHook }>
+      ) => (field: FieldHook) => {
+        const { onChange, isModified, isPristine, isDirty } = field;
+
+        // Forward the field state to our jest.fn() spy
+        cb({ isModified, isPristine, isDirty });
+
+        // Render the child component if any (useful to test the Object field type)
+        return Component ? (
+          <Component field={field} />
+        ) : (
+          <input onChange={onChange} data-test-subj="testField" />
+        );
+      };
+
+      interface Props {
+        fieldProps: Record<string, any>;
+      }
+
+      const TestComp = ({ fieldProps }: Props) => {
+        const { form } = useForm();
+        return (
+          <Form form={form}>
+            <UseField path="name" {...fieldProps} />
+          </Form>
+        );
+      };
+
+      const onIsModifiedChange = jest.fn();
+      const lastValue = (): PristineDirtyModifiedState =>
+        onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
+
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onIsModifiedChange },
+        memoryRouter: { wrapComponent: false },
+      });
+
+      [
+        {
+          description: 'should update the state for field without default values',
+          initialValue: '',
+          changedValue: 'changed',
+          fieldProps: { children: getChildrenFunc(onIsModifiedChange) },
+        },
+        {
+          description: 'should update the state for field with default value in their config',
+          initialValue: 'initialValue',
+          changedValue: 'changed',
+          fieldProps: {
+            children: getChildrenFunc(onIsModifiedChange),
+            config: { defaultValue: 'initialValue' },
+          },
+        },
+        {
+          description: 'should update the state for field with default value passed through props',
+          initialValue: 'initialValue',
+          changedValue: 'changed',
+          fieldProps: {
+            children: getChildrenFunc(onIsModifiedChange),
+            defaultValue: 'initialValue',
+          },
+        },
+        // "Object" field type must be JSON.serialized to compare old and new value
+        // this test makes sure this is done and "isModified" is indeed "false" when
+        // putting back the original object
+        {
+          description: 'should update the state for field with object field type',
+          initialValue: JSON.stringify(objectInitialValue),
+          changedValue: JSON.stringify({ foo: 'bar' }),
+          fieldProps: {
+            children: getChildrenFunc(onIsModifiedChange, ObjectField),
+            defaultValue: objectInitialValue,
+          },
+        },
+      ].forEach(({ description, fieldProps, initialValue, changedValue }) => {
+        test(description, async () => {
+          const { form } = await setup({ fieldProps });
+
+          expect(lastValue()).toEqual({ isPristine: true, isDirty: false, isModified: false });
+
+          await act(async () => {
+            form.setInputValue('testField', changedValue);
+          });
+
+          expect(lastValue()).toEqual({ isPristine: false, isDirty: true, isModified: true });
+
+          // Put back to the initial value --> isModified should be false
+          await act(async () => {
+            form.setInputValue('testField', initialValue);
+          });
+          expect(lastValue()).toEqual({ isPristine: false, isDirty: true, isModified: false });
+        });
+      });
     });
   });
 

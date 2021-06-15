@@ -106,6 +106,8 @@ export interface FieldHook<T = unknown, I = T> {
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
+  readonly isDirty: boolean;
+  readonly isModified: boolean;
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
