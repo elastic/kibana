@@ -211,6 +211,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   useInvalidFilterQuery({
+    id: timelineId,
     filterQuery: combinedQueries?.filterQuery,
     kqlError: combinedQueries?.kqlError,
     query: kqlQuery,
