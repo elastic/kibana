@@ -319,6 +319,6 @@ Here's a short list of few different aspects to check:
 
 * The default values set by the Value type are based on the current data range displayed on the data table.
 
-** If a `Number` custom configuration is used, check the color stops value are covering the current data range.
+** If a custom `Number` configuration is used, check that the color stop values are covering the current data range.
 
 ** If a `Percent` configuration is used, when the data range changes this has an effect on colors displayed.
