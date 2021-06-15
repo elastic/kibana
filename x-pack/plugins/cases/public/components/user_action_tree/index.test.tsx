@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import routeData from 'react-router-dom';
 
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
@@ -15,7 +16,6 @@ import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common';
-import { routeData } from '../__mock__/router';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -63,7 +63,7 @@ describe(`UserActionTree`, () => {
     const formHookMock = getFormMock(sampleData);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
-    // jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+
     jest
       .spyOn(routeData, 'useParams')
       .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
