@@ -152,31 +152,33 @@ export const createGridColumns = (
 
     const additionalActions: EuiListGroupItemProps[] = [];
 
-    if (!isReadOnly) {
+    additionalActions.push({
+      color: 'text',
+      size: 'xs',
+      onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
+      iconType: 'empty',
+      label: i18n.translate('xpack.lens.table.resize.reset', {
+        defaultMessage: 'Reset width',
+      }),
+      'data-test-subj': 'lensDatatableResetWidth',
+      isDisabled: initialWidth == null,
+    });
+    if (!isTransposed) {
       additionalActions.push({
         color: 'text',
         size: 'xs',
-        onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
-        iconType: 'empty',
-        label: i18n.translate('xpack.lens.table.resize.reset', {
-          defaultMessage: 'Reset width',
+        onClick: () => onColumnHide({ columnId: originalColumnId || field }),
+        iconType: 'eyeClosed',
+        label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+          defaultMessage: 'Hide',
         }),
-        'data-test-subj': 'lensDatatableResetWidth',
-        isDisabled: initialWidth == null,
+        'data-test-subj': 'lensDatatableHide',
+        isDisabled: !isHidden && visibleColumns.length <= 1,
       });
-      if (!isTransposed) {
-        additionalActions.push({
-          color: 'text',
-          size: 'xs',
-          onClick: () => onColumnHide({ columnId: originalColumnId || field }),
-          iconType: 'eyeClosed',
-          label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-            defaultMessage: 'Hide',
-          }),
-          'data-test-subj': 'lensDatatableHide',
-          isDisabled: !isHidden && visibleColumns.length <= 1,
-        });
-      } else if (columnArgs?.bucketValues) {
+    }
+
+    if (!isReadOnly) {
+      if (isTransposed && columnArgs?.bucketValues) {
         const bucketValues = columnArgs?.bucketValues;
         additionalActions.push({
           color: 'text',
