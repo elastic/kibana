@@ -92,6 +92,11 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
+      {canViewRoleMappings && (
+        <Route path={ROLE_MAPPINGS_PATH}>
+          <RoleMappings />
+        </Route>
+      )}
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           <Switch>
@@ -110,11 +115,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             <Route exact path={CREDENTIALS_PATH}>
               <Credentials />
             </Route>
-            {canViewRoleMappings && (
-              <Route path={ROLE_MAPPINGS_PATH}>
-                <RoleMappings />
-              </Route>
-            )}
             {canManageEngines && (
               <Route exact path={ENGINE_CREATION_PATH}>
                 <EngineCreation />

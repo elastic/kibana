@@ -17,8 +17,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ProductName } from '../types';
-
 import {
   ROLE_MAPPINGS_HEADING_TITLE,
   ROLE_MAPPINGS_HEADING_DESCRIPTION,
@@ -27,7 +25,7 @@ import {
 } from './constants';
 
 interface Props {
-  productName: ProductName;
+  productName: string;
   onClick(): void;
 }
 
@@ -35,7 +33,7 @@ interface Props {
 const ROLE_MAPPINGS_DOCS_HREF = '#TODO';
 
 export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) => (
-  <>
+  <header>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiTitle>
@@ -58,5 +56,5 @@ export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) =
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer />
-  </>
+  </header>
 );

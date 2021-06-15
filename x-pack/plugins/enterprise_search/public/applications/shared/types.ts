@@ -35,5 +35,3 @@ export interface RoleMapping {
     content: string;
   };
 }
-
-export type ProductName = 'App Search' | 'Workplace Search';
