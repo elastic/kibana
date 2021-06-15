@@ -18,10 +18,6 @@ interface HTTPContextProviderProps {
   children: ReactNode;
 }
 
-/**
- * Exports Synthetics-specific package policy instructions
- * for use in the Ingest app create / edit package policy
- */
 export const HTTPContextProvider = ({ defaultValues, children }: HTTPContextProviderProps) => {
   const httpAdvancedFields: IHTTPAdvancedFields | undefined = defaultValues
     ? {

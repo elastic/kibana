@@ -157,49 +157,6 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       return getDefaultConfig();
     }, [currentPolicy]);
 
-    // const simpleFields = {
-    //   [ConfigKeys.APM_SERVICE_NAME]: defaultConfig[ConfigKeys.APM_SERVICE_NAME],
-    //   [ConfigKeys.HOSTS]: defaultConfig[ConfigKeys.HOSTS],
-    //   [ConfigKeys.MAX_REDIRECTS]: defaultConfig[ConfigKeys.MAX_REDIRECTS],
-    //   [ConfigKeys.MONITOR_TYPE]: defaultConfig[ConfigKeys.MONITOR_TYPE],
-    //   [ConfigKeys.SCHEDULE]: defaultConfig[ConfigKeys.SCHEDULE],
-    //   [ConfigKeys.TAGS]: defaultConfig[ConfigKeys.TAGS],
-    //   [ConfigKeys.TIMEOUT]: defaultConfig[ConfigKeys.TIMEOUT],
-    //   [ConfigKeys.URLS]: defaultConfig[ConfigKeys.URLS],
-    //   [ConfigKeys.WAIT]: defaultConfig[ConfigKeys.WAIT],
-    // };
-    // const httpAdvancedFields = {
-    //   [ConfigKeys.USERNAME]: defaultConfig[ConfigKeys.USERNAME],
-    //   [ConfigKeys.PASSWORD]: defaultConfig[ConfigKeys.PASSWORD],
-    //   [ConfigKeys.PROXY_URL]: defaultConfig[ConfigKeys.PROXY_URL],
-    //   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]:
-    //     defaultConfig[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE],
-    //   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]:
-    //     defaultConfig[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE],
-    //   [ConfigKeys.RESPONSE_BODY_INDEX]: defaultConfig[ConfigKeys.RESPONSE_BODY_INDEX],
-    //   [ConfigKeys.RESPONSE_HEADERS_CHECK]: defaultConfig[ConfigKeys.RESPONSE_HEADERS_CHECK],
-    //   [ConfigKeys.RESPONSE_HEADERS_INDEX]: defaultConfig[ConfigKeys.RESPONSE_HEADERS_INDEX],
-    //   [ConfigKeys.RESPONSE_STATUS_CHECK]: defaultConfig[ConfigKeys.RESPONSE_STATUS_CHECK],
-    //   [ConfigKeys.REQUEST_BODY_CHECK]: defaultConfig[ConfigKeys.REQUEST_BODY_CHECK],
-    //   [ConfigKeys.REQUEST_HEADERS_CHECK]: defaultConfig[ConfigKeys.REQUEST_HEADERS_CHECK],
-    //   [ConfigKeys.REQUEST_METHOD_CHECK]: defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK],
-    // };
-    // const tcpAdvancedFields = {
-    //   [ConfigKeys.PROXY_URL]: defaultConfig[ConfigKeys.PROXY_URL],
-    //   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: defaultConfig[ConfigKeys.PROXY_USE_LOCAL_RESOLVER],
-    //   [ConfigKeys.RESPONSE_RECEIVE_CHECK]: defaultConfig[ConfigKeys.RESPONSE_RECEIVE_CHECK],
-    //   [ConfigKeys.REQUEST_SEND_CHECK]: defaultConfig[ConfigKeys.REQUEST_SEND_CHECK],
-    // };
-    // const tlsFields = {
-    //   [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-    //     defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-    //   [ConfigKeys.TLS_CERTIFICATE]: defaultConfig[ConfigKeys.TLS_CERTIFICATE],
-    //   [ConfigKeys.TLS_KEY]: defaultConfig[ConfigKeys.TLS_KEY],
-    //   [ConfigKeys.TLS_KEY_PASSPHRASE]: defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE],
-    //   [ConfigKeys.TLS_VERIFICATION_MODE]: defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE],
-    //   [ConfigKeys.TLS_VERSION]: defaultConfig[ConfigKeys.TLS_VERSION],
-    // };
-
     return (
       <MonitorTypeContextProvider defaultValue={monitorType}>
         <HTTPContextProvider defaultValues={defaultConfig[DataStream.HTTP]}>
