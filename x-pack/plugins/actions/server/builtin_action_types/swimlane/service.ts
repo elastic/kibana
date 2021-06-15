@@ -101,7 +101,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to create record in application with id ${appId}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
+          }. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -136,7 +136,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to update record in application with id ${appId}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
+          }. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -182,7 +182,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to create comment in application with id ${appId}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
+          }. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }

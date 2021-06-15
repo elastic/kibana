@@ -38,10 +38,11 @@ describe('Swimlane Service', () => {
     connectorType: 'all',
     mappings,
   };
+  const apiToken = 'token';
 
   const headers = {
     'Content-Type': 'application/json',
-    'Private-Token': 'token',
+    'Private-Token': apiToken,
   };
 
   const incident = {
@@ -62,7 +63,7 @@ describe('Swimlane Service', () => {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
         config,
-        secrets: { apiToken: 'token' },
+        secrets: { apiToken },
       },
       logger,
       configurationUtilities
@@ -83,7 +84,7 @@ describe('Swimlane Service', () => {
               appId: '99999',
               mappings,
             },
-            secrets: { apiToken: '121212' },
+            secrets: { apiToken },
           },
           logger,
           configurationUtilities
@@ -100,7 +101,7 @@ describe('Swimlane Service', () => {
               // @ts-ignore
               appId: null,
             },
-            secrets: { apiToken: 'token' },
+            secrets: { apiToken },
           },
           logger,
           configurationUtilities
@@ -118,7 +119,7 @@ describe('Swimlane Service', () => {
               // @ts-ignore
               mappings: null,
             },
-            secrets: { apiToken: 'token' },
+            secrets: { apiToken },
           },
           logger,
           configurationUtilities
@@ -205,14 +206,218 @@ describe('Swimlane Service', () => {
       });
 
       await expect(service.createRecord({ incident })).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred.`
       );
     });
   });
 
-  // TODO: Implement
-  describe('updateRecord', () => {});
+  describe('updateRecord', () => {
+    const data = {
+      id: '123',
+      name: 'title',
+      modifiedDate: '2021-06-01T17:29:51.092Z',
+    };
+    const incidentId = '123';
 
-  // TODO: Implement
-  describe('createComment', () => {});
+    test('it updates a record correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data,
+      }));
+
+      const res = await service.updateRecord({
+        incident,
+        incidentId,
+      });
+
+      expect(res).toEqual({
+        id: '123',
+        title: 'title',
+        pushedDate: '2021-06-01T17:29:51.092Z',
+        url: `${config.apiUrl.slice(0, -1)}/record/${config.appId}/123`,
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data,
+      }));
+
+      await service.updateRecord({
+        incident,
+        incidentId,
+      });
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        headers,
+        data: {
+          applicationId: config.appId,
+          id: incidentId,
+          values: {
+            [mappings.ruleNameConfig.id]: 'Rule Name',
+            [mappings.alertSourceConfig.id]: 'Alert Source',
+            [mappings.caseNameConfig.id]: 'Case Name',
+            [mappings.caseIdConfig.id]: 'Case Id',
+            [mappings.commentsConfig.id]: 'Comments',
+            [mappings.severityConfig.id]: 'Severity',
+            [mappings.descriptionConfig.id]: 'Description',
+            [mappings.alertIdConfig.id]: 'Alert Id',
+          },
+        },
+        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record/${incidentId}`,
+        method: 'patch',
+        configurationUtilities,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+
+      await expect(service.updateRecord({ incident, incidentId })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Error: An error has occurred.`
+      );
+    });
+  });
+
+  describe('createComment', () => {
+    const data = {
+      id: '123',
+      name: 'title',
+      modifiedDate: '2021-06-01T17:29:51.092Z',
+    };
+    const incidentId = '123';
+    const comment = { commentId: '456', comment: 'A comment' };
+    const createdDate = '2021-06-01T17:29:51.092Z';
+
+    test('it updates a record correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data,
+      }));
+
+      const res = await service.createComment({
+        comment,
+        incidentId,
+        createdDate,
+      });
+
+      expect(res).toEqual({
+        commentId: '456',
+        pushedDate: '2021-06-01T17:29:51.092Z',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data,
+      }));
+
+      await service.createComment({
+        comment,
+        incidentId,
+        createdDate,
+      });
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        headers,
+        data: {
+          createdDate,
+          fieldId: mappings.commentsConfig.id,
+          isRichText: true,
+          message: comment.comment,
+        },
+        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record/${incidentId}/${
+          mappings.commentsConfig.id
+        }/comment`,
+        method: 'post',
+        configurationUtilities,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+
+      await expect(service.createComment({ comment, incidentId, createdDate })).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create comment in application with id ${config.appId}. Error: An error has occurred.`
+      );
+    });
+  });
+
+  describe('error messages', () => {
+    const errorResponse = { ErrorCode: '1', Argument: 'Invalid field' };
+
+    test('it contains the response error', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore
+        error.response = { data: errorResponse };
+        throw error;
+      });
+
+      await expect(
+        service.createRecord({
+          incident,
+        })
+      ).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: Invalid field (1)`
+      );
+    });
+
+    test('it shows an empty string for reason if the ErrorCode is undefined', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore
+        error.response = { data: { ErrorCode: '1' } };
+        throw error;
+      });
+
+      await expect(
+        service.createRecord({
+          incident,
+        })
+      ).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+      );
+    });
+
+    test('it shows an empty string for reason if the Argument is undefined', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore
+        error.response = { data: { Argument: 'Invalid field' } };
+        throw error;
+      });
+
+      await expect(
+        service.createRecord({
+          incident,
+        })
+      ).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+      );
+    });
+
+    test('it shows an empty string for reason if data is undefined', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore
+        error.response = {};
+        throw error;
+      });
+
+      await expect(
+        service.createRecord({
+          incident,
+        })
+      ).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+      );
+    });
+  });
 });

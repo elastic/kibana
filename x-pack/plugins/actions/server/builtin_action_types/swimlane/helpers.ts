@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import {
-  CreateRecordParams,
-  MappingConfigType,
-  SwimlaneDataComments,
-  SwimlaneDataValues,
-  SwimlaneRecordPayload,
-} from './types';
+import { TypeOf } from '@kbn/config-schema';
+import { ConfigMappingSchema } from './schema';
+import { CreateRecordParams, Incident, MappingConfigType, SwimlaneRecordPayload } from './types';
+
+type ConfigMapping = Omit<TypeOf<typeof ConfigMappingSchema>, 'commentsConfig'>;
+
+const mappingKeysToIncidentKeys: Record<keyof ConfigMapping, keyof Incident> = {
+  ruleNameConfig: 'ruleName',
+  alertIdConfig: 'alertId',
+  alertSourceConfig: 'alertSource',
+  caseIdConfig: 'caseId',
+  caseNameConfig: 'caseName',
+  severityConfig: 'severity',
+  descriptionConfig: 'description',
+};
 
 export const getBodyForEventAction = (
   applicationId: string,
@@ -22,50 +30,32 @@ export const getBodyForEventAction = (
   const data: SwimlaneRecordPayload = {
     applicationId,
     ...(incidentId ? { id: incidentId } : {}),
+    values: {},
   };
 
-  const values: SwimlaneDataValues = {};
-  const comments: SwimlaneDataComments = {};
-
-  for (const mappingsKey of Object.keys(mappingConfig)) {
-    const fieldMap = mappingConfig[mappingsKey];
+  return (Object.keys(mappingConfig) as Array<keyof ConfigMapping>).reduce((acc, key) => {
+    const fieldMap = mappingConfig[key];
 
     if (!fieldMap) {
-      continue;
+      return acc;
     }
 
-    const createdDate = new Date().toISOString();
     const { id, fieldType } = fieldMap;
-    const paramName = mappingsKey.replace('Config', '') as keyof CreateRecordParams['incident'];
-
+    const paramName = mappingKeysToIncidentKeys[key];
     const value = params[paramName];
 
     if (value) {
       switch (fieldType) {
-        case 'comments': {
-          comments[id] = [
-            ...(comments[id] != null ? comments[id] : []),
-            { fieldId: id, message: value, createdDate, isRichText: true },
-          ];
-          break;
-        }
         case 'numeric': {
           const number = Number(value);
-          values[id] = isNaN(number) ? 0 : number;
-          break;
+          return { ...acc, values: { ...acc.values, [id]: isNaN(number) ? 0 : number } };
         }
         default: {
-          values[id] = value;
-          break;
+          return { ...acc, values: { ...acc.values, [id]: value } };
         }
       }
     }
-  }
 
-  data.values = values;
-  if (Object.keys(comments).length) {
-    data.comments = comments;
-  }
-
-  return data;
+    return acc;
+  }, data);
 };

@@ -20,8 +20,7 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;
 export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;
 
-export type MappingConfigType = TypeOf<typeof ConfigMappingSchema> &
-  Record<string, FieldConfig | null>;
+export type MappingConfigType = TypeOf<typeof ConfigMappingSchema>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
@@ -68,9 +67,8 @@ export interface FieldConfig {
 
 export interface SwimlaneRecordPayload {
   applicationId: string;
+  values: SwimlaneDataValues;
   id?: string;
-  values?: SwimlaneDataValues;
-  comments?: SwimlaneDataComments;
 }
 
 export interface ExternalService {
