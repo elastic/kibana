@@ -5,50 +5,42 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
-
-import { setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
-
-import { EuiCallOut } from '@elastic/eui';
-
-import { AccountHeader } from '../../components/layout';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { SourceSubNav } from './components/source_sub_nav';
 
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
-} from './constants';
-import { PrivateSourcesLayout } from './private_sources_layout';
+} from '../../../constants';
+import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 
-describe('PrivateSourcesLayout', () => {
+import { ViewContentHeader } from '../../shared/view_content_header';
+
+import { PrivateSourcesSidebar } from './private_sources_sidebar';
+
+describe('PrivateSourcesSidebar', () => {
   const mockValues = {
     account: { canCreatePersonalSources: true },
   };
-
-  const children = <p data-test-subj="TestChildren">test</p>;
 
   beforeEach(() => {
     setMockValues({ ...mockValues });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
+    const wrapper = shallow(<PrivateSourcesSidebar />);
 
-    expect(wrapper.find('[data-test-subj="TestChildren"]')).toHaveLength(1);
+    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(SourceSubNav)).toHaveLength(1);
-    expect(wrapper.find(AccountHeader)).toHaveLength(1);
   });
 
   it('uses correct title and description when private sources are enabled', () => {
-    const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
+    const wrapper = shallow(<PrivateSourcesSidebar />);
 
     expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(PRIVATE_CAN_CREATE_PAGE_TITLE);
     expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
@@ -58,17 +50,11 @@ describe('PrivateSourcesLayout', () => {
 
   it('uses correct title and description when private sources are disabled', () => {
     setMockValues({ account: { canCreatePersonalSources: false } });
-    const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
+    const wrapper = shallow(<PrivateSourcesSidebar />);
 
     expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(PRIVATE_VIEW_ONLY_PAGE_TITLE);
     expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
       PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION
     );
-  });
-
-  it('renders callout when in read-only mode', () => {
-    const wrapper = shallow(<PrivateSourcesLayout readOnlyMode>{children}</PrivateSourcesLayout>);
-
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 });
