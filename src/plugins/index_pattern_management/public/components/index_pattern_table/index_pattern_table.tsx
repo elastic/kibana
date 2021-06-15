@@ -54,10 +54,6 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
   defaultMessage: 'Index patterns',
 });
 
-const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRegionAriaLabel', {
-  defaultMessage: 'Index patterns',
-});
-
 interface Props extends RouteComponentProps {
   canSave: boolean;
 }
@@ -193,7 +189,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   }
 
   return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       <EuiPageHeader
         pageTitle={title}
         description={
