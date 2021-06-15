@@ -196,6 +196,7 @@ const TimelionVisComponent = ({
         <Settings
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
+          showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={handleCursorUpdate}
@@ -203,6 +204,7 @@ const TimelionVisComponent = ({
           baseTheme={kibana.services.chartTheme.useChartsBaseTheme()}
           tooltip={{
             snap: true,
+            headerFormatter: ({ value }) => tickFormat(value),
             type: TooltipType.VerticalCursor,
           }}
           externalPointerEvents={{ tooltip: { visible: false } }}
