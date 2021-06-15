@@ -17658,7 +17658,6 @@
     "xpack.remoteClusters.form.errors.serverNameMissing": "サーバー名が必要です。",
     "xpack.remoteClusters.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.remoteClusters.listBreadcrumbTitle": "リモートクラスター",
-    "xpack.remoteClusters.loadAction.errorTitle": "リモートクラスターの読み込み中にエラーが発生",
     "xpack.remoteClusters.readDocsButtonLabel": "リモートクラスタードキュメント",
     "xpack.remoteClusters.refreshAction.errorTitle": "リモートクラスターの更新中にエラーが発生",
     "xpack.remoteClusters.remoteClusterForm.actions.savingText": "保存中",
