@@ -126,7 +126,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -163,7 +167,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -200,7 +208,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -360,7 +372,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -397,7 +413,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -434,7 +454,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -566,7 +590,11 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -580,7 +608,11 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -594,7 +626,11 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },

@@ -180,34 +180,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig]
   );
 
-  const columns: EuiDataGridColumn[] = useMemo(
-    () =>
-      createGridColumns(
-        bucketColumns,
-        firstLocalTable,
-        handleFilterClick,
-        handleTransposedColumnClick,
-        isReadOnlySorted,
-        columnConfig,
-        visibleColumns,
-        formatFactory,
-        onColumnResize,
-        onColumnHide
-      ),
-    [
-      bucketColumns,
-      firstLocalTable,
-      handleFilterClick,
-      handleTransposedColumnClick,
-      isReadOnlySorted,
-      columnConfig,
-      visibleColumns,
-      formatFactory,
-      onColumnResize,
-      onColumnHide,
-    ]
-  );
-
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
@@ -236,6 +208,36 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       firstTable
     );
   }, [firstTable, isNumericMap, columnConfig]);
+
+  const columns: EuiDataGridColumn[] = useMemo(
+    () =>
+      createGridColumns(
+        bucketColumns,
+        firstLocalTable,
+        handleFilterClick,
+        handleTransposedColumnClick,
+        isReadOnlySorted,
+        columnConfig,
+        visibleColumns,
+        formatFactory,
+        onColumnResize,
+        onColumnHide,
+        alignments
+      ),
+    [
+      bucketColumns,
+      firstLocalTable,
+      handleFilterClick,
+      handleTransposedColumnClick,
+      isReadOnlySorted,
+      columnConfig,
+      visibleColumns,
+      formatFactory,
+      onColumnResize,
+      onColumnHide,
+      alignments,
+    ]
+  );
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {

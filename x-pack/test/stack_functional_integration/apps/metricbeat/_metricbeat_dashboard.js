@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
+
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+const ARCHIVE = resolve(INTEGRATION_TEST_ROOT, 'test/es_archives/metricbeat');
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
@@ -15,7 +20,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
   describe('check metricbeat Dashboard', function () {
     before(async function () {
-      await esArchiver.load('metricbeat');
+      await esArchiver.load(ARCHIVE);
 
       // this navigateToActualURL takes the place of navigating to the dashboard landing page,
       // filtering on the dashboard name, selecting it, setting the timepicker, and going to full screen
@@ -42,6 +47,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       await PageObjects.dashboard.waitForRenderComplete();
       await browser.setScreenshotSize(1000, 1000);
+    });
+
+    after(async function () {
+      await esArchiver.unload(ARCHIVE);
     });
 
     it('[Metricbeat System] Overview ECS should match snapshot', async function () {
