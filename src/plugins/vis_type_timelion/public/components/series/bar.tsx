@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { BarSeries, ScaleType, BarSeriesStyle } from '@elastic/charts';
-import type { Series } from '../../../common/vis_data';
+import type { VisSeries } from '../../../common/vis_data';
 
 interface BarSeriesComponentProps {
   index: number;
-  visData: Series;
+  visData: VisSeries;
   groupId: string;
 }
 
@@ -50,6 +50,7 @@ export const BarSeriesComponent = ({ index, groupId, visData }: BarSeriesCompone
     yAccessors={[1]}
     data={visData.data}
     sortIndex={index}
+    enableHistogramMode={false}
     color={visData.color}
     stackAccessors={visData.stack ? [0] : undefined}
     barSeriesStyle={getBarSeriesStyle(visData)}

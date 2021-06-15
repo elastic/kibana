@@ -37,6 +37,7 @@ import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
 import type { RangeFilterParams } from '../../../data/public';
+import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
 
@@ -59,6 +60,45 @@ const DefaultYAxis = () => (
     groupId={`${MAIN_GROUP_ID}`}
   />
 );
+
+const renderYAxis = (series: Series[]) => {
+  let isShowYAxisGridLines = true;
+
+  const yAxis = series
+    .map((data, index) => {
+      const yaxis = extractYAxis(data);
+
+      if (yaxis) {
+        const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
+        const gridLine = {
+          visible: isShowYAxisGridLines,
+        };
+
+        isShowYAxisGridLines = false;
+
+        return (
+          <Axis
+            groupId={`${groupId}`}
+            key={index}
+            id={yaxis.position + yaxis.axisLabel}
+            title={yaxis.axisLabel}
+            position={yaxis.position}
+            tickFormat={yaxis.tickFormatter}
+            gridLine={gridLine}
+            domain={withStaticPadding({
+              fit: yaxis.min === undefined && yaxis.max === undefined,
+              min: yaxis.min,
+              max: yaxis.max,
+            })}
+          />
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  return yAxis.length ? yAxis : <DefaultYAxis />;
+};
 
 const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
   ({
@@ -159,36 +199,6 @@ const TimelionVisComponent = ({
     return { legendPosition, showLegend };
   }, [chart]);
 
-  const yAxis = chart
-    .map((data, index) => {
-      const yaxis = extractYAxis(data);
-
-      if (yaxis) {
-        const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
-
-        return (
-          <Axis
-            groupId={`${groupId}`}
-            key={index}
-            id={yaxis.position + yaxis.axisLabel}
-            title={yaxis.axisLabel}
-            position={yaxis.position}
-            tickFormat={yaxis.tickFormatter}
-            gridLine={{
-              visible: groupId === MAIN_GROUP_ID,
-            }}
-            domain={withStaticPadding({
-              fit: yaxis.min === undefined && yaxis.max === undefined,
-              min: yaxis.min,
-              max: yaxis.max,
-            })}
-          />
-        );
-      }
-      return null;
-    })
-    .filter(Boolean);
-
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
@@ -210,9 +220,15 @@ const TimelionVisComponent = ({
           externalPointerEvents={{ tooltip: { visible: false } }}
         />
 
-        <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={tickFormat}
+          gridLine={{ visible: false }}
+        />
 
-        {yAxis.length ? yAxis : <DefaultYAxis />}
+        {renderYAxis(chart)}
 
         {chart.map((data, index) => {
           const visData = { ...data };
@@ -221,7 +237,6 @@ const TimelionVisComponent = ({
           if (!visData.color) {
             visData.color = colors[index % colors.length];
           }
-
           return (
             <SeriesComponent
               key={`${index}-${visData.label}`}

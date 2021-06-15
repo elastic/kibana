@@ -8,21 +8,24 @@
 
 import React from 'react';
 import { AreaSeries, ScaleType, CurveType, AreaSeriesStyle, PointShape } from '@elastic/charts';
-import type { Series } from '../../../common/vis_data';
+import type { VisSeries } from '../../../common/vis_data';
 
 interface AreaSeriesComponentProps {
   index: number;
-  visData: Series;
+  visData: VisSeries;
   groupId: string;
 }
+
+const isShowLines = (lines: VisSeries['lines'], points: VisSeries['points']) =>
+  lines?.show ? true : points?.show ? false : true;
 
 const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['visData']) =>
   ({
     line: {
-      opacity: 1,
+      opacity: isShowLines(lines, points) ? 1 : 0,
       stroke: color,
       strokeWidth: lines?.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
-      visible: lines?.show ?? points?.show ?? true,
+      visible: isShowLines(lines, points),
     },
     area: {
       fill: color,
