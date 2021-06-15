@@ -212,14 +212,15 @@ export const SW_FIELD_MAPPING_IS_REQUIRED = i18n.translate(
 export const EMPTY_MAPPING_WARNING_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningTitle',
   {
-    defaultMessage: 'Empty mapping',
+    defaultMessage: 'This connector has missing field mappings',
   }
 );
 
 export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningDesc',
   {
-    defaultMessage: `The mapping of the connector is empty. Create a connector of type Alerts before pushing to a case.`,
+    defaultMessage:
+      'This connector cannot be selected because it is missing the required case field mappings. You edit this connector to add required field mappings or select a connector of type Alerts.',
   }
 );
 

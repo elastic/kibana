@@ -29,13 +29,14 @@ export const SEVERITY_LABEL = i18n.translate('xpack.cases.connectors.swimlane.se
 export const EMPTY_MAPPING_WARNING_TITLE = i18n.translate(
   'xpack.cases.connectors.swimlane.emptyMappingWarningTitle',
   {
-    defaultMessage: 'Empty mapping',
+    defaultMessage: 'This connector has missing field mappings',
   }
 );
 
 export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.cases.connectors.swimlane.emptyMappingWarningDesc',
   {
-    defaultMessage: `The mapping of the connector is empty. Create a connector of type Cases before pushing to a case.`,
+    defaultMessage:
+      'This connector cannot be selected because it is missing the required case field mappings. You edit this connector to add required field mappings or select a connector of type Cases.',
   }
 );

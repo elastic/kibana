@@ -87,6 +87,7 @@ export function getActionType(): ActionTypeModel<
       const validationResult = {
         errors,
       };
+
       const hasIncident = actionParams.subActionParams && actionParams.subActionParams.incident;
 
       if (hasIncident && !actionParams.subActionParams.incident.ruleName?.length) {
