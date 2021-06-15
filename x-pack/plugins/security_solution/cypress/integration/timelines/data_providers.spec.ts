@@ -59,7 +59,7 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('displays the data provider action menu when Enter is pressed', (done) => {
+  it.skip('displays the data provider action menu when Enter is pressed', (done) => {
     openTimelineUsingToggle();
     addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
