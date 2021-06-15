@@ -14,9 +14,8 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes } from '../types';
+import { RuleRangeTuple, AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
@@ -31,9 +30,10 @@ export const threatMatchExecutor = async ({
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -43,9 +43,10 @@ export const threatMatchExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -67,7 +68,6 @@ export const threatMatchExecutor = async ({
     outputIndex: ruleParams.outputIndex,
     ruleSO: rule,
     searchAfterSize,
-    refresh,
     threatFilters: ruleParams.threatFilters ?? [],
     threatQuery: ruleParams.threatQuery,
     threatLanguage: ruleParams.threatLanguage,
@@ -76,5 +76,7 @@ export const threatMatchExecutor = async ({
     threatIndicatorPath: ruleParams.threatIndicatorPath,
     concurrentSearches: ruleParams.concurrentSearches ?? 1,
     itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    bulkCreate,
+    wrapHits,
   });
 };

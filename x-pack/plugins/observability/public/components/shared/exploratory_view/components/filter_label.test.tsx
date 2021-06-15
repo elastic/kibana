@@ -26,7 +26,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
       />
     );
@@ -49,7 +49,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
       />
     );
@@ -71,7 +71,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
       />
     );
@@ -96,7 +96,7 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={true}
-        seriesId={'kpi-trends'}
+        seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
       />
     );
