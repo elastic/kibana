@@ -13,32 +13,32 @@ import { RollupPrompt } from './components/rollup_prompt';
 import { IndexPatternCreationConfig } from '.';
 
 const rollupIndexPatternTypeName = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'rollup index pattern' }
 );
 
 const rollupIndexPatternButtonText = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonText',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Rollup index pattern' }
 );
 
 const rollupIndexPatternButtonDescription = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonDescription',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform limited aggregations against summarized data' }
 );
 
 const rollupIndexPatternNoMatchError = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.noMatchError',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.noMatchError',
   { defaultMessage: 'Rollup index pattern error: must match one rollup index' }
 );
 
 const rollupIndexPatternTooManyMatchesError = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.tooManyMatchesError',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.tooManyMatchesError',
   { defaultMessage: 'Rollup index pattern error: can only match one rollup index' }
 );
 
 const rollupIndexPatternIndexLabel = i18n.translate(
-  'xpack.rollupJobs.editRollupIndexPattern.createIndex.indexLabel',
+  'indexPatternManagement.editRollupIndexPattern.createIndex.indexLabel',
   { defaultMessage: 'Rollup' }
 );
 
@@ -128,7 +128,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
     if (error) {
       const errorMessage = i18n.translate(
-        'xpack.rollupJobs.editRollupIndexPattern.createIndex.uncaughtError',
+        'indexPatternManagement.editRollupIndexPattern.createIndex.uncaughtError',
         {
           defaultMessage: 'Rollup index pattern error: {error}',
           values: {

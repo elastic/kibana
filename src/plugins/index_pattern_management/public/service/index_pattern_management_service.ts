@@ -17,6 +17,8 @@ import {
   IndexPatternListConfig,
   RollupIndexPatternListConfig,
 } from './list';
+
+import { CONFIG_ROLLUPS } from '../constants';
 interface SetupDependencies {
   httpClient: HttpSetup;
   uiSettings: CoreSetup['uiSettings'];
@@ -43,17 +45,10 @@ export class IndexPatternManagementService {
     const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
     indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
 
-    // todo move to shared plugin
-    if (uiSettings.get('rollups:enableIndexPatterns')) {
+    if (uiSettings.get(CONFIG_ROLLUPS)) {
       creationManagerSetup.addCreationConfig(RollupIndexPatternCreationConfig);
       indexPatternListConfigSetup.addListConfig(RollupIndexPatternListConfig);
     }
-    /*
-    return {
-      creation: creationManagerSetup,
-      list: indexPatternListConfigSetup,
-    };
-    */
   }
 
   public start() {

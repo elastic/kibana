@@ -15,7 +15,7 @@ export const RollupPrompt = () => (
   <EuiCallOut color="warning" iconType="help" title="Beta feature">
     <p>
       {i18n.translate(
-        'xpack.rollupJobs.editRollupIndexPattern.rollupPrompt.betaCalloutParagraph1Text',
+        'indexPatternManagement.editRollupIndexPattern.rollupPrompt.betaCalloutParagraph1Text',
         {
           defaultMessage:
             "Kibana's support for rollup index patterns is in beta. You might encounter issues using " +
@@ -26,7 +26,7 @@ export const RollupPrompt = () => (
     </p>
     <p>
       {i18n.translate(
-        'xpack.rollupJobs.editRollupIndexPattern.rollupPrompt.betaCalloutParagraph2Text',
+        'indexPatternManagement.editRollupIndexPattern.rollupPrompt.betaCalloutParagraph2Text',
         {
           defaultMessage:
             'You can match a rollup index pattern against one rollup index and zero or more regular ' +

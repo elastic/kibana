@@ -46,15 +46,6 @@ export class RollupPlugin implements Plugin {
       indexManagement.extensionsService.addToggle(rollupToggleExtension);
     }
 
-    /*
-    const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
-
-    if (isRollupIndexPatternsEnabled) {
-      indexPatternManagement.creation.addCreationConfig(RollupIndexPatternCreationConfig);
-      indexPatternManagement.list.addListConfig(RollupIndexPatternListConfig);
-    }
-    */
-
     if (home) {
       home.featureCatalogue.register({
         id: 'rollup_jobs',
