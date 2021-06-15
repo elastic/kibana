@@ -166,15 +166,15 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
-      paddingSize="m"
+      paddingSize="l"
       ownFocus={false}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">
-            <EuiTitle size="s">
+            <EuiTitle>
               <h2
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
