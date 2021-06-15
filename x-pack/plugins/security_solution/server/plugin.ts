@@ -260,6 +260,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ready,
       });
 
+      // sec
+
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
