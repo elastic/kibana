@@ -13,8 +13,10 @@ import type {
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
+import { i18n } from '@kbn/i18n';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
+  KBN_IS_TILE_COMPLETE,
   KBN_TOO_MANY_FEATURES_PROPERTY,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_TYPE,
@@ -69,10 +71,16 @@ export class TiledVectorLayer extends VectorLayer {
       };
     }
 
-    // todo - use no results icon
+    const isComplete: boolean = tileMetas.every((tileMeta: Feature) => {
+      return tileMeta && tileMeta.properties && tileMeta.properties[KBN_IS_TILE_COMPLETE];
+    });
 
     const shapeTypeCountMeta: IVectorShapeTypeCounts = tileMetas.reduce(
-      (accumulator: IVectorShapeTypeCounts, tileMeta: any) => {
+      (accumulator: IVectorShapeTypeCounts, tileMeta: Feature) => {
+        if (!tileMeta || !tileMeta.properties) {
+          return accumulator;
+        }
+
         if (
           tileMeta.properties[KBN_TOO_MANY_FEATURES_PROPERTY] === true ||
           typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string'
@@ -105,8 +113,12 @@ export class TiledVectorLayer extends VectorLayer {
 
     return {
       icon: this.getCurrentStyle().getIconFromGeometryTypes(isLinesOnly, isPointsOnly),
-      tooltipContent: 'foobar', // todo - actually construct tooltip content
-      areResultsTrimmed: false, // todo - actually get trimmed info
+      tooltipContent: !isComplete
+        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+            defaultMessage: `Layer shows incomplete results`,
+          })
+        : null,
+      areResultsTrimmed: !isComplete,
     };
   }
 

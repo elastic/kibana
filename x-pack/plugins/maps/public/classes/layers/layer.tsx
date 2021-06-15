@@ -51,7 +51,7 @@ export interface ILayer {
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
   getSourceDataRequest(): DataRequest | undefined;
-  getMetaFromTiles(): any;
+  getMetaFromTiles(): Feature[];
   getSource(): ISource;
   getSourceForEditing(): ISource;
   syncData(syncContext: DataRequestContext): void;
@@ -174,7 +174,7 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  getMetaFromTiles(): any {
+  getMetaFromTiles(): Feature[] {
     return this._descriptor.__metaFromTiles;
   }
 

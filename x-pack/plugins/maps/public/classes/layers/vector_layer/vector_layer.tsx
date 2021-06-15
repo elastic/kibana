@@ -87,23 +87,14 @@ export interface VectorLayerArguments {
 
 export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
-
   getStyleEditorFields(): Promise<IField[]>;
-
   getJoins(): InnerJoin[];
-
   getValidJoins(): InnerJoin[];
-
   getSource(): IVectorSource;
-
   getFeatureById(id: string | number): Feature | null;
-
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
-
   hasJoins(): boolean;
-
   canShowTooltip(): boolean;
-
   getLeftJoinFields(): Promise<IField[]>;
 }
 
