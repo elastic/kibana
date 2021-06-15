@@ -6,12 +6,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { LicenseStatus } from './license_status';
-import { RevertToBasic } from './revert_to_basic';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPageContentBody, EuiPageHeader, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { StartTrial } from './start_trial';
 import { AddLicense } from './add_license';
+import { LicenseStatus } from './license_status';
+import { RevertToBasic } from './revert_to_basic';
 import { RequestTrialExtension } from './request_trial_extension';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 
 export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb: () => {} }) => {
   useEffect(() => {
@@ -19,17 +22,31 @@ export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb:
   });
 
   return (
-    <div>
-      <LicenseStatus />
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <FormattedMessage
+            id="xpack.licenseManagement.dashboard.pageTitle"
+            defaultMessage="License Management"
+          />
+        }
+      />
+
       <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem>
-          <AddLicense />
-        </EuiFlexItem>
-        <StartTrial telemetry={telemetry} />
-        <RequestTrialExtension />
-        <RevertToBasic />
-      </EuiFlexGroup>
-    </div>
+
+      <EuiPageContentBody>
+        <LicenseStatus />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem>
+            <AddLicense />
+          </EuiFlexItem>
+          <StartTrial telemetry={telemetry} />
+          <RequestTrialExtension />
+          <RevertToBasic />
+        </EuiFlexGroup>
+      </EuiPageContentBody>
+    </>
   );
 };
