@@ -2,7 +2,7 @@
   "id": "expressionRevealImage",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "server": true,
+  "server": false,
   "ui": true,
   "requiredPlugins": ["expressions", "presentationUtil"],
   "optionalPlugins": [],
