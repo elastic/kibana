@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface NotFoundErrors {
@@ -44,23 +44,29 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
   };
 
   return (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-          defaultMessage="There is a problem with this saved object"
-        />
-      }
-      iconType="alert"
-      color="danger"
-    >
-      <div>{getMessage()}</div>
-      <div>
-        <FormattedMessage
-          id="savedObjectsManagement.view.howToFixErrorDescription"
-          defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
-        />
-      </div>
-    </EuiCallOut>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={
+          <h2>
+            <FormattedMessage
+              id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+              defaultMessage="There is a problem with this saved object"
+            />
+          </h2>
+        }
+        body={
+          <>
+            <div>{getMessage()}</div>
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.view.howToFixErrorDescription"
+                defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
+              />
+            </p>
+          </>
+        }
+      />
+    </EuiPageContent>
   );
 };

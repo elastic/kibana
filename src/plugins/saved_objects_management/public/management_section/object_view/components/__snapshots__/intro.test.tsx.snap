@@ -2,68 +2,112 @@
 
 exports[`Intro component renders correctly 1`] = `
 <Intro>
-  <EuiCallOut
+  <EuiPageContent
     color="warning"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="Proceed with caution!"
-        id="savedObjectsManagement.view.howToModifyObjectTitle"
-        values={Object {}}
-      />
-    }
+    horizontalPosition="center"
+    verticalPosition="center"
   >
-    <div
-      className="euiCallOut euiCallOut--warning"
+    <EuiPanel
+      className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      color="warning"
+      paddingSize="l"
+      role="main"
     >
       <div
-        className="euiCallOutHeader"
+        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+        role="main"
       >
-        <EuiIcon
-          aria-hidden="true"
-          className="euiCallOutHeader__icon"
-          color="inherit"
-          size="m"
-          type="alert"
+        <EuiEmptyPrompt
+          body={
+            <div>
+              <FormattedMessage
+                defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
+                id="savedObjectsManagement.view.howToModifyObjectDescription"
+                values={Object {}}
+              />
+            </div>
+          }
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Proceed with caution!"
+                id="savedObjectsManagement.view.howToModifyObjectTitle"
+                values={Object {}}
+              />
+            </h2>
+          }
         >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="Proceed with caution!"
-            id="savedObjectsManagement.view.howToModifyObjectTitle"
-            values={Object {}}
+          <div
+            className="euiEmptyPrompt"
           >
-            Proceed with caution!
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        size="s"
-      >
-        <div
-          className="euiText euiText--small"
-        >
-          <div>
-            <FormattedMessage
-              defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
-              id="savedObjectsManagement.view.howToModifyObjectDescription"
-              values={Object {}}
+            <EuiIcon
+              color="subdued"
+              size="xxl"
+              type="alert"
             >
-              Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be.
-            </FormattedMessage>
+              <span
+                color="subdued"
+                data-euiicon-type="alert"
+                size="xxl"
+              />
+            </EuiIcon>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
+            <EuiTextColor
+              color="subdued"
+            >
+              <span
+                className="euiTextColor euiTextColor--subdued"
+              >
+                <EuiTitle
+                  size="m"
+                >
+                  <h2
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Proceed with caution!"
+                      id="savedObjectsManagement.view.howToModifyObjectTitle"
+                      values={Object {}}
+                    >
+                      Proceed with caution!
+                    </FormattedMessage>
+                  </h2>
+                </EuiTitle>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <EuiText>
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <div>
+                      <FormattedMessage
+                        defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
+                        id="savedObjectsManagement.view.howToModifyObjectDescription"
+                        values={Object {}}
+                      >
+                        Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be.
+                      </FormattedMessage>
+                    </div>
+                  </div>
+                </EuiText>
+              </span>
+            </EuiTextColor>
           </div>
-        </div>
-      </EuiText>
-    </div>
-  </EuiCallOut>
+        </EuiEmptyPrompt>
+      </div>
+    </EuiPanel>
+  </EuiPageContent>
 </Intro>
 `;
