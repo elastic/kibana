@@ -200,7 +200,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } = alert;
         try {
           expect(actions).to.eql([]);
-          expect(alertTypeId).to.eql('xpack.uptime.alerts.tls');
+          expect(alertTypeId).to.eql('xpack.uptime.alerts.tlsIndividual');
           expect(consumer).to.eql('uptime');
           expect(tags).to.eql(['uptime', 'certs']);
           expect(params).to.eql({});
