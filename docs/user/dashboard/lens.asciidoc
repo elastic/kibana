@@ -317,7 +317,7 @@ Here's a short list of few different aspects to check:
 
 * Make sure the right color continuity option is selected: if the number is below the first color stop value a continuity of type `Below` or `Above and below range` is required
 
-* The values set by default by the Value type are based on the current data range displayed on the data table.
+* The default values set by the Value type are based on the current data range displayed on the data table.
 
 ** If a `Number` custom configuration is used, check the color stops value are covering the current data range.
 
