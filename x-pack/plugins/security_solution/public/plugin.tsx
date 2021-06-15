@@ -16,6 +16,7 @@ import {
   StartServices,
   AppObservableLibs,
   SubPlugins,
+  StartedSubPlugins,
 } from './types';
 import {
   AppMountParameters,
@@ -45,6 +46,7 @@ import {
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
+  OVERVIEW_PATH,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -155,40 +157,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      exactRoute: true,
-      id: APP_ID,
-      title: APP_NAME,
-      appRoute: APP_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async () => {
-        const [{ application }] = await core.getStartServices();
-        application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
-        return () => true;
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.overview}`,
-      title: OVERVIEW,
-      order: 9000,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_OVERVIEW_PATH,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { overview: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-
-        return renderApp({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: `${APP_ID}:${SecurityPageName.detections}`,
       title: DETECTION_ENGINE,
       order: 9001,
@@ -199,9 +167,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
+        const { renderAppOld } = await this.lazyApplicationDependencies();
 
-        return renderApp({
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -221,8 +189,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-        return renderApp({
+        const { renderAppOld } = await this.lazyApplicationDependencies();
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -242,8 +210,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-        return renderApp({
+        const { renderAppOld } = await this.lazyApplicationDependencies();
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -263,8 +231,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-        return renderApp({
+        const { renderAppOld } = await this.lazyApplicationDependencies();
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -284,8 +252,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-        return renderApp({
+        const { renderAppOld } = await this.lazyApplicationDependencies();
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -305,12 +273,43 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderApp } = await this.lazyApplicationDependencies();
-        return renderApp({
+        const { renderAppOld } = await this.lazyApplicationDependencies();
+        return renderAppOld({
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: APP_ID,
+      title: APP_NAME,
+      appRoute: APP_PATH,
+      category: DEFAULT_APP_CATEGORIES.security,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      defaultPath: APP_OVERVIEW_PATH,
+      deepLinks: [
+        {
+          id: SecurityPageName.overview,
+          title: OVERVIEW,
+          path: OVERVIEW_PATH,
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9000,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+      ],
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const { renderApp } = await this.lazyApplicationDependencies();
+
+        return renderApp({
+          ...params,
+          services: await startServices,
+          store: await this.store(coreStart, startPlugins, subPlugins),
+          subPlugins,
         });
       },
     });
@@ -443,9 +442,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
+   * All started subPlugins.
+   */
+  private async startSubPlugins(
+    storage: Storage,
+    core: CoreStart,
+    plugins: StartPlugins
+  ): Promise<StartedSubPlugins> {
+    const subPlugins = await this.subPlugins();
+    return {
+      overview: subPlugins.overview.start(),
+      detections: subPlugins.detections.start(storage),
+      cases: subPlugins.cases.start(),
+      hosts: subPlugins.hosts.start(storage),
+      network: subPlugins.network.start(storage),
+      timelines: subPlugins.timelines.start(),
+      management: subPlugins.management.start(core, plugins),
+    };
+  }
+
+  /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
-  private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
+  private async store(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins,
+    subPlugins?: StartedSubPlugins // TODO: [1101] make it required when all sub plugins migrated
+  ): Promise<SecurityAppStore> {
     if (!this._store) {
       const experimentalFeatures = parseExperimentalConfigValue(
         this.config.enableExperimental || []
@@ -494,11 +517,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
-      const detectionsStart = detectionsSubPlugin.start(this.storage);
-      const hostsStart = hostsSubPlugin.start(this.storage);
-      const networkStart = networkSubPlugin.start(this.storage);
-      const timelinesStart = timelinesSubPlugin.start();
-      const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+      const detectionsStart = subPlugins
+        ? subPlugins.detections
+        : detectionsSubPlugin.start(this.storage);
+      const hostsStart = subPlugins ? subPlugins.hosts : hostsSubPlugin.start(this.storage);
+      const networkStart = subPlugins ? subPlugins.network : networkSubPlugin.start(this.storage);
+      const timelinesStart = subPlugins ? subPlugins.timelines : timelinesSubPlugin.start();
+      const managementSubPluginStart = subPlugins
+        ? subPlugins.management
+        : managementSubPlugin.start(coreStart, startPlugins);
 
       const timelineInitialState = {
         timeline: {

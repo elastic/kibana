@@ -10,8 +10,8 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
-import { renderApp } from './app';
+import { renderApp, renderAppOld } from './app';
 
 import { createStore, createInitialState } from './common/store';
-
-export { renderApp, createStore, createInitialState };
+// TODO: [1101] remove renderAppOld when all sections migrated
+export { renderApp, renderAppOld, createStore, createInitialState };
