@@ -125,6 +125,11 @@ export const useSavedSearch = ({
     fetchStatus: initialFetchStatus,
   });
 
+  /**
+   * Resets the fieldCounts cache and sends a reset message
+   * It is set to initial state (no documents, fetchCounter to 0)
+   * Needed when index pattern is switched or a new runtime field is added
+   */
   const sendResetMsg = useCallback(
     (fetchStatus?: FetchStatus) => {
       refs.current.fieldCounts = {};
@@ -140,7 +145,9 @@ export const useSavedSearch = ({
     },
     [data$, initialFetchStatus]
   );
-
+  /**
+   * Function to fetch data from ElasticSearch
+   */
   const fetchAll = useCallback(
     (reset = false) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {

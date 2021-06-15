@@ -158,6 +158,9 @@ export function useDiscoverState({
     [services, indexPattern, config, data, stateContainer, savedSearch.id]
   );
 
+  /**
+   * Function triggered when user changes index pattern in the sidebar
+   */
   const onChangeIndexPattern = useCallback(
     async (id: string) => {
       const nextIndexPattern = await indexPatterns.get(id);
@@ -175,7 +178,9 @@ export function useDiscoverState({
     },
     [config, indexPattern, indexPatterns, state.columns, state.sort, stateContainer]
   );
-
+  /**
+   * Function triggered when the user changes the query in the search bar
+   */
   const onUpdateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {
@@ -187,7 +192,7 @@ export function useDiscoverState({
   );
 
   /**
-   * Initial data fetching, also if index pattern changes
+   * Initial data fetching, also triggered when index pattern changes
    */
   useEffect(() => {
     if (!indexPattern) {
