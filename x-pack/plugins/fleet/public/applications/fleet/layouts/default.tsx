@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { EuiText, EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import type { Section } from '../sections';
 import { useLink, useConfig } from '../hooks';
@@ -35,18 +34,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                     <FormattedMessage id="xpack.fleet.overviewPageTitle" defaultMessage="Fleet" />
                   </h1>
                 </EuiTitle>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.fleet.betaBadge.labelText', {
-                    defaultMessage: 'Beta',
-                  })}
-                  tooltipContent={i18n.translate('xpack.fleet.betaBadge.tooltipText', {
-                    defaultMessage:
-                      'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
-                  })}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
