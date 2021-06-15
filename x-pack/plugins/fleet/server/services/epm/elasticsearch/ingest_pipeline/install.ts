@@ -191,7 +191,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
     ignore: [404],
   };
   const res = await esClient.ingest.getPipeline(
-    { id: FLEET_FINAL_PIPELINE_CONTENT },
+    { id: FLEET_FINAL_PIPELINE_ID },
     esClientRequestOptions
   );
 
@@ -201,6 +201,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
+        extension: 'yml',
       },
     });
     return { isCreated: true };

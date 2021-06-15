@@ -12,7 +12,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
 
-const FINAL_PIPELINE_ID = '.fleet_final_pipeline';
+const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 let pkgKey: string;
 
