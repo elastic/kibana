@@ -308,7 +308,7 @@ Pagination in a data table is unsupported in *Lens*. However, the <<types-of-vis
 [[why-my-value-is-not-of-the-right-color-using-value-based-coloring]]
 ===== Why mt value is not of the right color when using value-based coloring?
 
-There could be various reason for a specific value in the table to have a different color than expected.
+There could be various reasons for a specific value in the table to have a different color than expected.
 
 Here's a short list of few different aspects to check:
 * Make sure the value falls within the desidered color stop value defined in the panel. Color stop values are "inclusive".
