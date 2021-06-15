@@ -47,7 +47,7 @@ export function extractJobDetails(job, basePath, refreshJobList) {
 
   const jobTags = {
     id: 'analysisConfig',
-    title: i18n.translate('xpack.ml.jobsList.jobDetails.customSettingsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.jobTagsTitle', {
       defaultMessage: 'Job tags',
     }),
     position: 'right',
