@@ -5663,7 +5663,6 @@
     "xpack.apm.serviceHealthStatus.healthy": "运行正常",
     "xpack.apm.serviceHealthStatus.unknown": "未知",
     "xpack.apm.serviceHealthStatus.warning": "警告",
-    "xpack.apm.serviceIcons.alerts": "告警",
     "xpack.apm.serviceIcons.cloud": "云",
     "xpack.apm.serviceIcons.container": "容器",
     "xpack.apm.serviceIcons.service": "服务",
