@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { eqlExecutor } from './eql';
@@ -46,7 +46,11 @@ describe('eql_executor', () => {
     },
     references: [],
   };
-  const tuple = { from: moment(params.from), to: moment(params.to), maxSignals: params.maxSignals };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
+  };
   const searchAfterSize = 7;
 
   beforeEach(() => {
