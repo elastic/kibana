@@ -13,8 +13,7 @@ import { getCaseDetailsUrl, getCreateCaseUrl } from '../../common/components/lin
 import { RouteSpyState } from '../../common/utils/route/types';
 import * as i18n from './translations';
 import { GetUrlForApp } from '../../common/components/navigation/types';
-import { APP_ID, CASES_APP_ID } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const getBreadcrumbs = (
   params: RouteSpyState,

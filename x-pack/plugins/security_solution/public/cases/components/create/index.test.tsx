@@ -16,7 +16,7 @@ import { Create } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/public/containers/types';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { APP_ID, CASES_APP_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 jest.mock('../use_insert_timeline');

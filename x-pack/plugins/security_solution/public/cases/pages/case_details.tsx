@@ -17,7 +17,7 @@ import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
 import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
-import { APP_ID, CASES_APP_ID } from '../../../common/constants';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
