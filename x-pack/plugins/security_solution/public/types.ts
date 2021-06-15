@@ -87,3 +87,14 @@ export interface SubPlugins {
   timelines: Timelines;
   management: Management;
 }
+
+// TODO: [1101] find a better way to get those types
+export interface StartedSubPlugins {
+  detections: ReturnType<Detections['start']>;
+  cases: ReturnType<Cases['start']>;
+  hosts: ReturnType<Hosts['start']>;
+  network: ReturnType<Network['start']>;
+  overview: ReturnType<Overview['start']>;
+  timelines: ReturnType<Timelines['start']>;
+  management: ReturnType<Management['start']>;
+}
