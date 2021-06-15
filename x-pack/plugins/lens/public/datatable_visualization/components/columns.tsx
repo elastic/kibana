@@ -35,7 +35,8 @@ export const createGridColumns = (
   visibleColumns: string[],
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
-  onColumnHide: (eventData: { columnId: string }) => void
+  onColumnHide: (eventData: { columnId: string }) => void,
+  alignments: Record<string, 'left' | 'right' | 'center'>
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -200,11 +201,13 @@ export const createGridColumns = (
         });
       }
     }
+    const currentAlignment = alignments && alignments[field];
+    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
-      display: name,
+      display: <div className={alignmentClassName}>{name}</div>,
       displayAsText: name,
       actions: {
         showHide: false,
