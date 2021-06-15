@@ -1,0 +1,14 @@
+{
+  "baseUrl": "http://localhost:5620",
+  "defaultCommandTimeout": 60000,
+  "execTimeout": 120000,
+  "pageLoadTimeout": 120000,
+  "nodeVersion": "system",
+  "retries": {
+    "runMode": 2
+  },
+  "trashAssetsBeforeRuns": false,
+  "video": false,
+  "viewportHeight": 900,
+  "viewportWidth": 1440
+}
