@@ -167,28 +167,25 @@ const fetchReferences = async ({
 };
 
 const buildTransforms = (typeRegistry: ISavedObjectTypeRegistry) =>
-  typeRegistry.getAllTypes().reduce((transforms, type) => {
+  typeRegistry.getAllTypes().reduce((transformMap, type) => {
     if (type.management?.onExport) {
-      return {
-        ...transforms,
-        [type.name]: type.management.onExport,
-      };
+      transformMap.set(type.name, type.management.onExport);
     }
-    return transforms;
-  }, {} as Record<string, SavedObjectsExportTransform>);
+    return transformMap;
+  }, new Map<string, SavedObjectsExportTransform>());
 
 const buildIsExportable = (
   typeRegistry: ISavedObjectTypeRegistry
 ): SavedObjectsExportablePredicate<any> => {
-  const exportablePerType = typeRegistry.getAllTypes().reduce((transforms, type) => {
+  const exportablePerType = typeRegistry.getAllTypes().reduce((exportableMap, type) => {
     if (type.management?.isExportable) {
-      transforms[type.name] = type.management.isExportable;
+      exportableMap.set(type.name, type.management.isExportable);
     }
-    return transforms;
-  }, {} as Record<string, SavedObjectsExportablePredicate>);
+    return exportableMap;
+  }, new Map<string, SavedObjectsExportablePredicate>());
 
   return (obj: SavedObject) => {
-    const typePredicate = exportablePerType[obj.type];
+    const typePredicate = exportablePerType.get(obj.type);
     return typePredicate ? typePredicate(obj) : true;
   };
 };
