@@ -6,16 +6,23 @@
  */
 
 import { isObject } from 'lodash';
-import { GenericOperationDefinition, IndexPatternColumn } from '../index';
+import {
+  FieldBasedIndexPatternColumn,
+  GenericOperationDefinition,
+  IndexPatternColumn,
+} from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;
 
-export function getSafeFieldName(fieldName: string | undefined) {
-  // clean up the "Records" field for now
-  if (!fieldName || fieldName === 'Records') {
+export function getSafeFieldName({
+  sourceField: fieldName,
+  operationType,
+}: FieldBasedIndexPatternColumn) {
+  // return empty for the records field
+  if (!fieldName || operationType === 'count') {
     return '';
   }
   return fieldName;
@@ -30,15 +37,13 @@ export function generateFormula(
   if ('references' in previousColumn) {
     const metric = layer.columns[previousColumn.references[0]];
     if (metric && 'sourceField' in metric && metric.dataType === 'number') {
-      const fieldName = getSafeFieldName(metric.sourceField);
+      const fieldName = getSafeFieldName(metric);
       // TODO need to check the input type from the definition
       previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName})`;
     }
   } else {
     if (previousColumn && 'sourceField' in previousColumn && previousColumn.dataType === 'number') {
-      previousFormula += `${previousColumn.operationType}(${getSafeFieldName(
-        previousColumn?.sourceField
-      )}`;
+      previousFormula += `${previousColumn.operationType}(${getSafeFieldName(previousColumn)}`;
     }
   }
   const formulaNamedArgs = extractParamsForFormula(previousColumn, operationDefinitionMap);

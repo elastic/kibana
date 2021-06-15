@@ -420,7 +420,7 @@ function getQueryValidationErrors(
         errors.push({
           message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
             defaultMessage:
-              'Invalid time shift. Enter positive integer amount and one of the units s, m, h, d, w, M, y',
+              'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
           }),
           locations: [arg.location],
         });

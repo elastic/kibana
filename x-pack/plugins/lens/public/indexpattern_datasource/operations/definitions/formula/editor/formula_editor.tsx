@@ -49,7 +49,20 @@ import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
-export const MemoizedFormulaEditor = React.memo(FormulaEditor);
+export const WrappedFormulaEditor = ({
+  activeData,
+  ...rest
+}: ParamEditorProps<FormulaIndexPatternColumn>) => {
+  const dateHistogramInterval = getDateHistogramInterval(
+    rest.layer,
+    rest.indexPattern,
+    activeData,
+    rest.layerId
+  );
+  return <MemoizedFormulaEditor {...rest} dateHistogramInterval={dateHistogramInterval} />;
+};
+
+const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
@@ -62,9 +75,10 @@ export function FormulaEditor({
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
-  activeData,
-  layerId,
-}: ParamEditorProps<FormulaIndexPatternColumn>) {
+  dateHistogramInterval,
+}: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
+  dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
+}) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
     Array<{ severity: monaco.MarkerSeverity; message: string }>
@@ -81,7 +95,6 @@ export function FormulaEditor({
     operationDefinitionMap,
   ]);
 
-  const dateHistogramInterval = getDateHistogramInterval(layer, indexPattern, activeData, layerId);
   const baseInterval =
     'interval' in dateHistogramInterval
       ? dateHistogramInterval.interval?.asMilliseconds()
@@ -265,13 +278,7 @@ export function FormulaEditor({
                 const startPosition = offsetToRowColumn(text, locations[id].min);
                 const endPosition = offsetToRowColumn(text, locations[id].max);
                 newWarnings.push(
-                  ...getColumnTimeShiftWarnings(
-                    layer,
-                    indexPattern,
-                    activeData,
-                    layerId,
-                    column
-                  ).map((message) => ({
+                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column).map((message) => ({
                     message,
                     startColumn: startPosition.column + 1,
                     startLineNumber: startPosition.lineNumber,

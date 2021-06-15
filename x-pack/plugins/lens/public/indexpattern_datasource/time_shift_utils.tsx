@@ -124,19 +124,10 @@ export function getDateHistogramInterval(
   return { canShift: true };
 }
 
-export function getLayerTimeShiftChecks(
-  layer: IndexPatternLayer,
-  indexPattern: IndexPattern,
-  activeData: Record<string, Datatable> | undefined,
-  layerId: string
-) {
-  const { interval: dateHistogramInterval, canShift } = getDateHistogramInterval(
-    layer,
-    indexPattern,
-    activeData,
-    layerId
-  );
-
+export function getLayerTimeShiftChecks({
+  interval: dateHistogramInterval,
+  canShift,
+}: ReturnType<typeof getDateHistogramInterval>) {
   return {
     canShift,
     isValueTooSmall: (parsedValue: ReturnType<typeof parseTimeShift>) => {
@@ -239,23 +230,16 @@ export function getStateTimeShiftWarningMessages(
 }
 
 export function getColumnTimeShiftWarnings(
-  layer: IndexPatternLayer,
-  indexPattern: IndexPattern,
-  activeData: Record<string, Datatable> | undefined,
-  layerId: string,
+  dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
   column: IndexPatternColumn
 ) {
-  const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(
-    layer,
-    indexPattern,
-    activeData,
-    layerId
-  );
+  const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(dateHistogramInterval);
 
   const warnings: string[] = [];
 
   const parsedLocalValue = column.timeShift && parseTimeShift(column.timeShift);
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
+  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
   if (localValueTooSmall) {
     warnings.push(
       i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
@@ -263,9 +247,7 @@ export function getColumnTimeShiftWarnings(
           'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
       })
     );
-  }
-  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
-  if (localValueNotMultiple) {
+  } else if (localValueNotMultiple) {
     warnings.push(
       i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
         defaultMessage:

@@ -10,7 +10,7 @@ import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
-import { MemoizedFormulaEditor } from './editor';
+import { WrappedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
@@ -177,5 +177,5 @@ export const formulaOperation: OperationDefinition<
     return newLayer;
   },
 
-  paramEditor: MemoizedFormulaEditor,
+  paramEditor: WrappedFormulaEditor,
 };

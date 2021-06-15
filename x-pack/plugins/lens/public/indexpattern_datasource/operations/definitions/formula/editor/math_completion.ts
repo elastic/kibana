@@ -237,10 +237,11 @@ function getArgumentSuggestions(
     const { namedArguments } = groupArgsByType(ast.args);
     const list = [];
     if (operation.filterable) {
-      if (!namedArguments.find((arg) => arg.name === 'kql')) {
+      const hasFilterArgument = namedArguments.find(
+        (arg) => arg.name === 'kql' || arg.name === 'lucene'
+      );
+      if (!hasFilterArgument) {
         list.push('kql');
-      }
-      if (!namedArguments.find((arg) => arg.name === 'lucene')) {
         list.push('lucene');
       }
     }

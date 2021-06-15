@@ -19,7 +19,11 @@ import {
 } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
-import { getLayerTimeShiftChecks, timeShiftOptions } from '../time_shift_utils';
+import {
+  getDateHistogramInterval,
+  getLayerTimeShiftChecks,
+  timeShiftOptions,
+} from '../time_shift_utils';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {
@@ -86,10 +90,7 @@ export function TimeShift({
   }
 
   const { isValueTooSmall, isValueNotMultiple, canShift } = getLayerTimeShiftChecks(
-    layer,
-    indexPattern,
-    activeData,
-    layerId
+    getDateHistogramInterval(layer, indexPattern, activeData, layerId)
   );
 
   if (!canShift) {
