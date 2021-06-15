@@ -1795,12 +1795,14 @@ describe('state_helpers', () => {
 
       it('should promote the inner references when switching away from reference to field-based operation (case a2)', () => {
         const expectedCol = {
-          label: 'Count of records',
+          label: 'Count of records -3h',
           dataType: 'number' as const,
           isBucketed: false,
 
           operationType: 'count' as const,
           sourceField: 'Records',
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
         const layer: IndexPatternLayer = {
           indexPatternId: '1',
@@ -1815,6 +1817,8 @@ describe('state_helpers', () => {
               // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['col1'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };
@@ -1843,6 +1847,8 @@ describe('state_helpers', () => {
           isBucketed: false,
           sourceField: 'bytes',
           operationType: 'average' as const,
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
 
         const layer: IndexPatternLayer = {
@@ -1856,6 +1862,8 @@ describe('state_helpers', () => {
               isBucketed: false,
               operationType: 'differences',
               references: ['metric'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };

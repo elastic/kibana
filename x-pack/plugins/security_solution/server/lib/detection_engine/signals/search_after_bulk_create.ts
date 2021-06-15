@@ -8,7 +8,6 @@
 import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
-import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
@@ -31,14 +30,13 @@ export const searchAfterAndBulkCreate = async ({
   listClient,
   logger,
   eventsTelemetry,
-  id,
   inputIndexPattern,
-  signalsIndex,
   filter,
   pageSize,
-  refresh,
   buildRuleMessage,
   enrichment = identity,
+  bulkCreate,
+  wrapHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -149,6 +147,7 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
+          const wrappedDocs = wrapHits(enrichedEvents.hits.hits);
 
           const {
             bulkCreateDuration: bulkDuration,
@@ -156,16 +155,7 @@ export const searchAfterAndBulkCreate = async ({
             createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
-          } = await singleBulkCreate({
-            buildRuleMessage,
-            filteredEvents: enrichedEvents,
-            ruleSO,
-            services,
-            logger,
-            id,
-            signalsIndex,
-            refresh,
-          });
+          } = await bulkCreate(wrappedDocs);
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnType({
@@ -180,10 +170,10 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(buildRuleMessage(`created ${createdCount} signals`));
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
           logger.debug(
-            buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
+            buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(logger, eventsTelemetry, filteredEvents, buildRuleMessage);
+          sendAlertTelemetryEvents(logger, eventsTelemetry, enrichedEvents, buildRuleMessage);
         }
 
         if (!hasSortId) {
