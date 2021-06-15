@@ -94,7 +94,6 @@ export class TiledVectorLayer extends VectorLayer {
         }
 
         if (
-          tileMeta.properties[KBN_METADATA_FEATURE] === true ||
           typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string'
         ) {
           return accumulator;
