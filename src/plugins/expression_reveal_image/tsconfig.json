@@ -16,6 +16,5 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
-    { "path": "../presentation_util/tsconfig.json" },
   ]
 }
