@@ -26,6 +26,14 @@ export type ExpressionFunctionOverallMetric = ExpressionFunctionDefinition<
   Datatable
 >;
 
+function getValueAsNumberArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((innerVal) => Number(innerVal));
+  } else {
+    return [Number(value)];
+  }
+}
+
 /**
  * Calculates the overall metric of a specified column in the data table.
  *
@@ -58,43 +66,43 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
 
   inputTypes: ['datatable'],
 
-  help: i18n.translate('expressions.functions.overallSum.help', {
-    defaultMessage: 'Calculates the overall sum of a column in a data table',
+  help: i18n.translate('expressions.functions.overallMetric.help', {
+    defaultMessage: 'Calculates the overall sum, min, max or average of a column in a data table',
   }),
 
   args: {
     by: {
-      help: i18n.translate('expressions.functions.overallSum.args.byHelpText', {
-        defaultMessage: 'Column to split the overall sum calculation by',
+      help: i18n.translate('expressions.functions.overallMetric.args.byHelpText', {
+        defaultMessage: 'Column to split the overall calculation by',
       }),
       multi: true,
       types: ['string'],
       required: false,
     },
     metric: {
-      help: i18n.translate('expressions.functions.overallSum.metricHelpText', {
+      help: i18n.translate('expressions.functions.overallMetric.metricHelpText', {
         defaultMessage: 'Metric to calculate',
       }),
       types: ['string'],
       options: ['sum', 'min', 'max', 'average'],
     },
     inputColumnId: {
-      help: i18n.translate('expressions.functions.overallSum.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the overall sum of',
+      help: i18n.translate('expressions.functions.overallMetric.args.inputColumnIdHelpText', {
+        defaultMessage: 'Column to calculate the overall metric of',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnId: {
-      help: i18n.translate('expressions.functions.overallSum.args.outputColumnIdHelpText', {
-        defaultMessage: 'Column to store the resulting overall sum in',
+      help: i18n.translate('expressions.functions.overallMetric.args.outputColumnIdHelpText', {
+        defaultMessage: 'Column to store the resulting overall metric in',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnName: {
-      help: i18n.translate('expressions.functions.overallSum.args.outputColumnNameHelpText', {
-        defaultMessage: 'Name of the column to store the resulting overall sum in',
+      help: i18n.translate('expressions.functions.overallMetric.args.outputColumnNameHelpText', {
+        defaultMessage: 'Name of the column to store the resulting overall metric in',
       }),
       types: ['string'],
       required: false,
@@ -121,17 +129,20 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
 
       const currentValue = row[inputColumnId];
       if (currentValue != null) {
+        const currentNumberValues = getValueAsNumberArray(currentValue);
         switch (metric) {
           case 'average':
-            valueCounter[bucketIdentifier] = (valueCounter[bucketIdentifier] ?? 0) + 1;
+            valueCounter[bucketIdentifier] =
+              (valueCounter[bucketIdentifier] ?? 0) + currentNumberValues.length;
           case 'sum':
-            accumulators[bucketIdentifier] = accumulatorValue + Number(currentValue);
+            accumulators[bucketIdentifier] =
+              accumulatorValue + currentNumberValues.reduce((a, b) => a + b, 0);
             break;
           case 'min':
-            accumulators[bucketIdentifier] = Math.min(accumulatorValue, Number(currentValue));
+            accumulators[bucketIdentifier] = Math.min(accumulatorValue, ...currentNumberValues);
             break;
           case 'max':
-            accumulators[bucketIdentifier] = Math.max(accumulatorValue, Number(currentValue));
+            accumulators[bucketIdentifier] = Math.max(accumulatorValue, ...currentNumberValues);
             break;
         }
       }

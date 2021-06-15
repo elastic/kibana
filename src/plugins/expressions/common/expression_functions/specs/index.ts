@@ -6,33 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { clog } from './clog';
-import { font } from './font';
-import { variableSet } from './var_set';
-import { variable } from './var';
-import { AnyExpressionFunctionDefinition } from '../types';
-import { theme } from './theme';
-import { cumulativeSum } from './cumulative_sum';
-import { derivative } from './derivative';
-import { movingAverage } from './moving_average';
-import { mapColumn } from './map_column';
-import { math } from './math';
-import { overallMetric } from './overall_metric';
-
-export const functionSpecs: AnyExpressionFunctionDefinition[] = [
-  clog,
-  font,
-  variableSet,
-  variable,
-  theme,
-  cumulativeSum,
-  overallMetric,
-  derivative,
-  movingAverage,
-  mapColumn,
-  math,
-];
-
 export * from './clog';
 export * from './font';
 export * from './var_set';

@@ -164,6 +164,87 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result2.rows.map((row) => row.output)).toEqual([6, 8, 9, 6, 9, 6, 9, 8, 9]);
   });
 
+  it('handles array values', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: [7, 10] }, { val: [3, 1] }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', metric: 'sum' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([28, 28, 28, 28]);
+  });
+
+  it('takes array values into account for average calculation', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: [3, 4] }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', metric: 'average' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([3, 3]);
+  });
+
+  it('handles array values for split columns', () => {
+    const table: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'val', name: 'val', meta: { type: 'number' } },
+        { id: 'split', name: 'split', meta: { type: 'string' } },
+      ],
+      rows: [
+        { val: 1, split: 'A' },
+        { val: [2, 11], split: 'B' },
+        { val: 3 },
+        { val: 4, split: 'A' },
+        { val: 5 },
+        { val: 6, split: 'A' },
+        { val: 7, split: null },
+        { val: 8, split: 'B' },
+        { val: [9, 99], split: '' },
+      ],
+    };
+
+    const result = runFn(table, {
+      inputColumnId: 'val',
+      outputColumnId: 'output',
+      by: ['split'],
+      metric: 'sum',
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1 + 4 + 6,
+      2 + 11 + 8,
+      3 + 5 + 7 + 9 + 99,
+      1 + 4 + 6,
+      3 + 5 + 7 + 9 + 99,
+      1 + 4 + 6,
+      3 + 5 + 7 + 9 + 99,
+      2 + 11 + 8,
+      3 + 5 + 7 + 9 + 99,
+    ]);
+
+    const result2 = runFn(table, {
+      inputColumnId: 'val',
+      outputColumnId: 'output',
+      by: ['split'],
+      metric: 'max',
+    });
+    expect(result2.rows.map((row) => row.output)).toEqual([6, 11, 99, 6, 99, 6, 99, 11, 99]);
+  });
+
   it('calculates cumulative sum for multiple series by multiple split columns', () => {
     const result = runFn(
       {
