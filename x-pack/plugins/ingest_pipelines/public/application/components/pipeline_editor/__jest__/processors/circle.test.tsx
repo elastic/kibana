@@ -54,7 +54,7 @@ describe('Processor: Circle', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" is required parameter
+    // Expect form error as "field" and "shape_type" are required parameters
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
       'A shape type value is required.',
@@ -71,6 +71,8 @@ describe('Processor: Circle', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
     form.setSelectValue('shapeSelectorField', 'shape');
+    // Set the error distance
+    form.setInputValue('errorDistanceField.input', '10');
 
     await saveNewProcessor();
 
@@ -78,7 +80,7 @@ describe('Processor: Circle', () => {
 
     expect(processors[0].circle).toEqual({
       field: 'field_1',
-      error_distance: 1,
+      error_distance: 10,
       shape_type: 'shape',
     });
   });
