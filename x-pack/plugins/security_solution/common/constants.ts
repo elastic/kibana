@@ -71,12 +71,15 @@ export enum SecurityPageName {
   administration = 'administration',
 }
 
-/**
- * The ID of the cases plugin
- */
-export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
+export enum SecurityPageGroupName {
+  detect = 'detect',
+  explore = 'explore',
+  investigate = 'investigate',
+  manage = 'manage',
+}
 
-export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
+export const OVERVIEW_PATH = '/overview';
+export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
 export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;

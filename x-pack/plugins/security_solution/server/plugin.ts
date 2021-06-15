@@ -126,14 +126,16 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
+// TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrat
+// TODO: NEED to be removed but we need to talk to Jonathan
 const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
 
 /**
  * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
  */
-const securitySubPluginsNoCases = [
+// TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
+const securitySubPlugins = [
   APP_ID,
-  `${APP_ID}:${SecurityPageName.overview}`,
   `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
@@ -141,7 +143,7 @@ const securitySubPluginsNoCases = [
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
-const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
+const allSecuritySubPlugins = [...securitySubPlugins, casesSubPlugin];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
