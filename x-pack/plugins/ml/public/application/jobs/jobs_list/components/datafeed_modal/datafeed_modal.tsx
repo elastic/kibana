@@ -29,6 +29,8 @@ import {
   CurveType,
   LineSeries,
   Position,
+  RectAnnotation,
+  RectAnnotationDatum,
   ScaleType,
   Settings,
   timeFormatter,
@@ -70,6 +72,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
+  const [annotationData, setAnnotationData] = useState<RectAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
 
   const {
@@ -131,6 +134,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
 
       setSourceData(chartData.datafeedResults);
       setBucketData(chartData.bucketResults);
+      setAnnotationData(chartData.annotationResults);
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -278,7 +282,16 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         })}
                         position={Position.Left}
                       />
+                      <RectAnnotation
+                        key="annotation-results"
+                        dataValues={annotationData}
+                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.annotationSeriesId', {
+                          defaultMessage: 'Annotations',
+                        })}
+                        style={{ fill: euiTheme.euiColorDangerText }}
+                      />
                       <LineSeries
+                        key={'source-results'}
                         color={euiTheme.euiColorPrimary}
                         id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
                           defaultMessage: 'Source indices',
@@ -291,6 +304,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         curve={CurveType.LINEAR}
                       />
                       <LineSeries
+                        key={'job-results'}
                         color={euiTheme.euiColorAccentText}
                         id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
                           defaultMessage: 'Job results',

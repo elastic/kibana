@@ -6,6 +6,7 @@
  */
 
 import { sortBy, slice, get, cloneDeep } from 'lodash';
+import { estypes, ApiResponse } from '@elastic/elasticsearch';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -27,6 +28,7 @@ import {
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
+import { annotationServiceProvider } from '../annotation_service';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -620,13 +622,21 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const finalResults: GetDatafeedResultsChartDataResult = {
       bucketResults: [],
       datafeedResults: [],
+      annotationResults: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
-    const datafeedConfig = await getDatafeedByJobId(jobId);
+    const [DATAFEED, JOBS] = [0, 1];
+    const results = await Promise.all([
+      getDatafeedByJobId(jobId),
+      mlClient.getJobs({ job_id: jobId }),
+    ]);
 
-    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
-    if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
+    const datafeedConfig = results[DATAFEED] as estypes.MlDatafeed;
+    const jobsApiResponse = results[JOBS] as ApiResponse<estypes.MlGetJobsResponse> | undefined;
+    const jobsResponse = jobsApiResponse?.body as estypes.MlGetJobsResponse;
+
+    if (jobsResponse && (jobsResponse.count === 0 || jobsResponse.jobs === undefined)) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
 
@@ -706,6 +716,27 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       const timestamp = Number(dataForTime?.timestamp);
       const eventCount = dataForTime?.event_count;
       finalResults.bucketResults.push([timestamp, eventCount]);
+    });
+
+    const { getAnnotations } = annotationServiceProvider(client!);
+    const resp = await getAnnotations({
+      jobIds: [jobId],
+      earliestMs: start,
+      latestMs: end,
+      maxAnnotations: 1000,
+    });
+
+    const annotationResults = resp.annotations[jobId] || [];
+    annotationResults.forEach((annotation) => {
+      const timestamp = Number(annotation?.timestamp);
+      const endTimestamp = Number(annotation?.end_timestamp);
+      finalResults.annotationResults.push({
+        coordinates: {
+          x0: timestamp,
+          x1: endTimestamp,
+        },
+        details: annotation.annotation,
+      });
     });
 
     return finalResults;

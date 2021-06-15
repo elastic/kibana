@@ -80,6 +80,30 @@ export class JobDetailsUI extends Component {
         alertRules,
       } = extractJobDetails(job, basePath, refreshJobList);
 
+      datafeed.titleAction = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.ml.jobDetails.viewDatafeedTooltipText"
+              defaultMessage="View datafeed"
+            />
+          }
+        >
+          <EuiButtonIcon
+            size="xs"
+            aria-label={i18n.translate('xpack.ml.jobDetails.viewDatafeedAriaLabel', {
+              defaultMessage: 'View datafeed',
+            })}
+            iconType="visAreaStacked"
+            onClick={() =>
+              this.setState({
+                datafeedModalVisible: true,
+              })
+            }
+          />
+        </EuiToolTip>
+      );
+
       const tabs = [
         {
           id: 'job-settings',
@@ -106,6 +130,32 @@ export class JobDetailsUI extends Component {
               data-test-subj="mlJobDetails-job-config"
               sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]}
             />
+          ),
+        },
+        {
+          id: 'datafeed',
+          'data-test-subj': 'mlJobListTab-datafeed',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedLabel', {
+            defaultMessage: 'Datafeed',
+          }),
+          content: (
+            <>
+              <JobDetailsPane
+                data-test-subj="mlJobDetails-datafeed"
+                sections={[datafeed, datafeedTimingStats]}
+              />
+              {this.props.jobId && this.state.datafeedModalVisible ? (
+                <DatafeedModal
+                  onClose={() => {
+                    this.setState({
+                      datafeedModalVisible: false,
+                    });
+                  }}
+                  end={job.data_counts.latest_bucket_timestamp}
+                  jobId={this.props.jobId}
+                />
+              ) : null}
+            </>
           ),
         },
         {
@@ -140,58 +190,6 @@ export class JobDetailsUI extends Component {
       ];
 
       if (showFullDetails && datafeed.items.length) {
-        datafeed.titleAction = (
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.ml.jobDetails.viewDatafeedTooltipText"
-                defaultMessage="View datafeed"
-              />
-            }
-          >
-            <EuiButtonIcon
-              size="xs"
-              aria-label={i18n.translate('xpack.ml.jobDetails.viewDatafeedAriaLabel', {
-                defaultMessage: 'View datafeed',
-              })}
-              iconType="visAreaStacked"
-              onClick={() =>
-                this.setState({
-                  datafeedModalVisible: true,
-                })
-              }
-            />
-          </EuiToolTip>
-        );
-
-        // Datafeed should be at index 2 in tabs array for full details
-        tabs.splice(2, 0, {
-          id: 'datafeed',
-          'data-test-subj': 'mlJobListTab-datafeed',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedLabel', {
-            defaultMessage: 'Datafeed',
-          }),
-          content: (
-            <>
-              <JobDetailsPane
-                data-test-subj="mlJobDetails-datafeed"
-                sections={[datafeed, datafeedTimingStats]}
-              />
-              {this.props.jobId && this.state.datafeedModalVisible ? (
-                <DatafeedModal
-                  onClose={() => {
-                    this.setState({
-                      datafeedModalVisible: false,
-                    });
-                  }}
-                  end={job.data_counts.latest_bucket_timestamp}
-                  jobId={this.props.jobId}
-                />
-              ) : null}
-            </>
-          ),
-        });
-
         tabs.push(
           {
             id: 'datafeed-preview',

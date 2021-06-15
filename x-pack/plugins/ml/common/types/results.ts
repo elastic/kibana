@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { RectAnnotationDatum } from '@elastic/charts';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
@@ -13,6 +14,7 @@ export interface GetStoppedPartitionResult {
 export interface GetDatafeedResultsChartDataResult {
   bucketResults: number[][];
   datafeedResults: number[][];
+  annotationResults: RectAnnotationDatum[];
 }
 
 export interface DatafeedResultsChartDataParams {
