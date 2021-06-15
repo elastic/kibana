@@ -14,7 +14,7 @@ export function translateElements(elements: ElementFactory[] = []) {
     const { name } = element;
     const strings = getElementsStrings();
     const elementStrings = strings[name] ?? {};
-    element.displayName = elementStrings['displayName'] ?? element.displayName;
+    element.displayName = elementStrings.displayName ?? element.displayName;
     element.help = elementStrings.help ?? element.help;
 
     return () => element;
