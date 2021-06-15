@@ -6,12 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '../../../../core/public';
-import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
-import { IndexPatternListManager, IndexPatternListConfig } from './list';
-import { EnvironmentService } from './environment';
+import { HttpSetup, CoreSetup } from '../../../../core/public';
+import {
+  IndexPatternCreationManager,
+  IndexPatternCreationConfig,
+  RollupIndexPatternCreationConfig,
+} from './creation';
+import {
+  IndexPatternListManager,
+  IndexPatternListConfig,
+  RollupIndexPatternListConfig,
+} from './list';
+
+import { CONFIG_ROLLUPS } from '../constants';
 interface SetupDependencies {
   httpClient: HttpSetup;
+  uiSettings: CoreSetup['uiSettings'];
 }
 
 /**
@@ -22,26 +32,23 @@ interface SetupDependencies {
 export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
   indexPatternListConfig: IndexPatternListManager;
-  environmentService: EnvironmentService;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
-    this.environmentService = new EnvironmentService();
   }
 
-  public setup({ httpClient }: SetupDependencies) {
+  public setup({ httpClient, uiSettings }: SetupDependencies) {
     const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
     creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
 
     const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
     indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
 
-    return {
-      creation: creationManagerSetup,
-      list: indexPatternListConfigSetup,
-      environment: this.environmentService.setup(),
-    };
+    if (uiSettings.get(CONFIG_ROLLUPS)) {
+      creationManagerSetup.addCreationConfig(RollupIndexPatternCreationConfig);
+      indexPatternListConfigSetup.addListConfig(RollupIndexPatternListConfig);
+    }
   }
 
   public start() {

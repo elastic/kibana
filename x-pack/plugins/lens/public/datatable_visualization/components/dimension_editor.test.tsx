@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -211,5 +211,81 @@ describe('data table dimension editor', () => {
     );
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+  });
+
+  it('should not show the dynamic coloring option for a bucketed operation', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.datasourceLayers.first.getOperationForColumnId = jest.fn(
+      () => ({ isBucketed: true } as Operation)
+    );
+    state.columns[0].colorMode = 'cell';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+
+    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]').exists()).toBe(
+      false
+    );
+    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
+      false
+    );
+  });
+
+  it('should show the summary field for non numeric columns', () => {
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_function"]').exists()).toBe(
+      false
+    );
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  });
+
+  it('should set the summary row function default to "none"', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'none', label: 'None' }]);
+
+    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  });
+
+  it('should show the summary row label input ony when summary row is different from "none"', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    state.columns[0].summaryRow = 'sum';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'sum', label: 'Sum' }]);
+
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
+        .find(EuiFieldText)
+        .prop('value')
+    ).toBe('Sum');
+  });
+
+  it("should show the correct summary row name when user's changes summary label", () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    state.columns[0].summaryRow = 'sum';
+    state.columns[0].summaryLabel = 'MySum';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
+        .find(EuiComboBox)
+        .prop('selectedOptions')
+    ).toEqual([{ value: 'sum', label: 'Sum' }]);
+
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
+        .find(EuiFieldText)
+        .prop('value')
+    ).toBe('MySum');
   });
 });

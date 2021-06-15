@@ -52,7 +52,7 @@ describe('ExploratoryView', () => {
       data: {
         'ux-series': {
           dataType: 'ux' as const,
-          reportType: 'pld' as const,
+          reportType: 'dist' as const,
           breakdown: 'user_agent .name',
           reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },

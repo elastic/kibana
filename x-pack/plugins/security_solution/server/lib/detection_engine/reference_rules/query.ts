@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'typings/elasticsearch';
@@ -60,7 +60,7 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
           indexPattern,
           { query: customQuery, language: 'kuery' },
           []
-        ) as QueryContainer;
+        ) as estypes.QueryDslQueryContainer;
         const query: ESSearchRequest = {
           body: {
             query: esQuery,

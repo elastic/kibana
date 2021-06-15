@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
 
-interface SetValueOptions {
+export interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
@@ -96,14 +96,6 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.missingOrFail('mlLoadingIndicator');
       });
-    },
-
-    async assertKibanaHomeFileDataVisLinkExists() {
-      await testSubjects.existOrFail('homeSynopsisLinkml_file_data_visualizer');
-    },
-
-    async assertKibanaHomeFileDataVisLinkNotExists() {
-      await testSubjects.missingOrFail('homeSynopsisLinkml_file_data_visualizer');
     },
 
     async assertRadioGroupValue(testSubject: string, expectedValue: string) {
