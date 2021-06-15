@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternListConfig } from '../../types';
+import { IndexPatternListConfig } from '.';
 
 function isRollup(indexPattern) {
   return (
