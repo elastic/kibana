@@ -88,6 +88,12 @@ export type APMQueryParams = {
   latencyAggregationType?: string;
   comparisonEnabled?: boolean;
   comparisonType?: string;
+  transactionResult?: string;
+  host?: string;
+  containerId?: string;
+  podName?: string;
+  agentName?: string;
+  serviceVersion?: string;
 } & { [key in UxLocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

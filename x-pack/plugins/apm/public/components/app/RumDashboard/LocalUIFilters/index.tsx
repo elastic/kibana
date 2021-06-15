@@ -42,7 +42,7 @@ const filterNames: UxLocalUIFilterName[] = [
   'browser',
 ];
 
-const getExcludedName = (filterName: string) => {
+export const getExcludedName = (filterName: string) => {
   return `${filterName}Excluded` as UxLocalUIFilterName;
 };
 

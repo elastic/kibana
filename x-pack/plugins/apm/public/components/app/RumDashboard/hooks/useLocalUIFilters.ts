@@ -18,6 +18,7 @@ import {
 } from '../../../../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { getExcludedName } from '../LocalUIFilters';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 
@@ -54,13 +55,13 @@ export function useLocalUIFilters({
         (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
       );
 
-      const excludedName = `${name}Excluded`;
+      const excludedName = getExcludedName(name);
       setFilterValue(excludedName, [
         ...(uxUiFilters?.[excludedName] ?? []),
         value,
       ]);
     } else {
-      const includeName = name.split('Excluded')[0];
+      const includeName = name.split('Excluded')[0] as UxLocalUIFilterName;
       const excludedName = name;
 
       setFilterValue(
