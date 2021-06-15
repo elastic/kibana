@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { mlExecutor } from './ml';
@@ -29,7 +29,11 @@ describe('ml_executor', () => {
   let alertServices: AlertServicesMock;
   const params = getMlRuleParams();
   const mlSO = sampleRuleSO(params);
-  const tuple = { from: moment(params.from), to: moment(params.to), maxSignals: params.maxSignals };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
+  };
   const buildRuleMessage = buildRuleMessageFactory({
     id: mlSO.id,
     ruleId: mlSO.attributes.params.ruleId,

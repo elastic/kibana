@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { thresholdExecutor } from './threshold';
@@ -18,6 +18,7 @@ describe('threshold_executor', () => {
   const version = '8.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
+  const params = getThresholdRuleParams();
   const thresholdSO = {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -35,9 +36,14 @@ describe('threshold_executor', () => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: getThresholdRuleParams(),
+      params,
     },
     references: [],
+  };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
   };
   const buildRuleMessage = buildRuleMessageFactory({
     id: thresholdSO.id,
@@ -56,7 +62,7 @@ describe('threshold_executor', () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await thresholdExecutor({
         rule: thresholdSO,
-        tuple: { to: moment(), from: moment(), maxSignals: 100 },
+        tuple,
         exceptionItems,
         services: alertServices,
         version,
