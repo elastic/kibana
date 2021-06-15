@@ -7,7 +7,7 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import type { SaveModalContainerProps } from '../save_modal_container';
 import type { LensAttributeService } from '../../lens_attribute_service';
@@ -15,9 +15,17 @@ import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensAppServices } from '../types';
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
+function LoadingSpinnerWithOverlay() {
+  return (
+    <EuiOverlayMask>
+      <EuiLoadingSpinner />
+    </EuiOverlayMask>
+  );
+}
+
 const LensSavedModalLazy = (props: SaveModalContainerProps) => {
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<LoadingSpinnerWithOverlay />}>
       <SaveModal {...props} />
     </Suspense>
   );
@@ -42,15 +50,17 @@ export function getSaveModalComponent(
     }, []);
 
     if (!lensServices) {
-      return <EuiLoadingSpinner />;
+      return <LoadingSpinnerWithOverlay />;
     }
 
     const { ContextProvider: PresentationUtilContext } = lensServices.presentationUtil;
 
     return (
-      <PresentationUtilContext>
-        <LensSavedModalLazy {...props} lensServices={lensServices} />
-      </PresentationUtilContext>
+      <EuiOverlayMask>
+        <PresentationUtilContext>
+          <LensSavedModalLazy {...props} lensServices={lensServices} />
+        </PresentationUtilContext>
+      </EuiOverlayMask>
     );
   };
 }
