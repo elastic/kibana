@@ -161,7 +161,7 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"coke"', '"pepsi"'],
+          tags: ['coke', 'pepsi'],
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
@@ -190,7 +190,7 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"("', '"\\"double\\""'],
+          tags: ['(', '"double"'],
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],

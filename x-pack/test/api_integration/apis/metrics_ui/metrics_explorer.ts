@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Metrics Explorer API', () => {
     describe('with data', () => {
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('should work for multiple metrics', async () => {
         const postBody = {

@@ -50,7 +50,6 @@ describe('renderApp', () => {
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiCounter: () => {} },
       data: {
         query: {
           timefilter: {
@@ -69,6 +68,8 @@ describe('renderApp', () => {
     const embeddable = embeddablePluginMock.createStartContract();
 
     const pluginsStart = ({
+      data,
+      embeddable,
       observability: {
         navigation: {
           registerSections: () => jest.fn(),
@@ -83,8 +84,7 @@ describe('renderApp', () => {
         getAddAlertFlyout: jest.fn(),
         getEditAlertFlyout: jest.fn(),
       },
-      data,
-      embeddable,
+      usageCollection: { reportUiCounter: () => {} },
     } as unknown) as ApmPluginStartDeps;
 
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);

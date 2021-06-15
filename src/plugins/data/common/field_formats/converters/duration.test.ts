@@ -130,11 +130,11 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: -60,
-        output: '-60 Seconds',
+        output: '-60 seconds',
       },
       {
         input: -32.333,
-        output: '-32 Seconds',
+        output: '-32 seconds',
       },
     ],
   });
@@ -147,15 +147,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '0.00 Milliseconds',
+        output: '0.00 milliseconds',
       },
       {
         input: 658,
-        output: '0.00 Milliseconds',
+        output: '0.00 milliseconds',
       },
       {
         input: 3857,
-        output: '0.00 Milliseconds',
+        output: '0.00 milliseconds',
       },
     ],
   });
@@ -168,15 +168,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '1.99 Milliseconds',
+        output: '1.99 milliseconds',
       },
       {
         input: 658,
-        output: '0.66 Milliseconds',
+        output: '0.66 milliseconds',
       },
       {
         input: 3857,
-        output: '3.86 Milliseconds',
+        output: '3.86 milliseconds',
       },
     ],
   });
@@ -189,19 +189,19 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '2.0 Milliseconds',
+        output: '2.0 milliseconds',
       },
       {
         input: 0,
-        output: '0.0 Milliseconds',
+        output: '0.0 milliseconds',
       },
       {
         input: 658,
-        output: '0.7 Milliseconds',
+        output: '0.7 milliseconds',
       },
       {
         input: 3857,
-        output: '3.9 Milliseconds',
+        output: '3.9 milliseconds',
       },
     ],
   });
@@ -214,15 +214,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 600,
-        output: '10 Minutes',
+        output: '10 minutes',
       },
       {
         input: 30,
-        output: '30 Seconds',
+        output: '30 seconds',
       },
       {
         input: 3000,
-        output: '50 Minutes',
+        output: '50 minutes',
       },
     ],
   });
