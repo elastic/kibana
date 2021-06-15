@@ -18,7 +18,7 @@ export const loadClusters = () => async (dispatch) => {
   try {
     clusters = await sendLoadClustersRequest();
   } catch (error) {
-    dispatch({
+    return dispatch({
       type: LOAD_CLUSTERS_FAILURE,
       payload: { error },
     });
