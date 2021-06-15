@@ -205,6 +205,21 @@ The existing agents in {kib} are not migrated as part of the migration to Fleet.
 The existing agent API keys are invalidated and display as `Inactive` on the *Agents* page.
 ====
 
+[discrete]
+[[breaking-98039]]
+.Disable Explore underlying data context menu
+[%collapsible]
+====
+*Details* +
+The *Explore underlying data* context menu on dashboards is now disabled by default. For more information, refer to {kibana-pull}98039[#98039].
+
+*Impact* +
+To enable the *Explore underlying data* context menu, set `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled` to `true` in kibana.yml. 
+====
+
+// end::notable-breaking-changes[]
+
+
 [float]
 [[deprecations-7.13.0]]
 === Deprecations
