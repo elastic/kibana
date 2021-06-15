@@ -243,18 +243,11 @@ export class Execution<
     this.state.transitions.start();
 
     if (isObservable<Input>(input)) {
-      // `input$` should never complete
-      input.subscribe(
-        (value) => this.input$.next(value),
-        (error) => this.input$.error(error)
-      );
+      input.subscribe(this.input$);
     } else if (isPromise(input)) {
-      input.then(
-        (value) => this.input$.next(value),
-        (error) => this.input$.error(error)
-      );
+      from(input).subscribe(this.input$);
     } else {
-      this.input$.next(input);
+      of(input).subscribe(this.input$);
     }
 
     return this.result;
