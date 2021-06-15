@@ -7,7 +7,7 @@
 
 import { isEmpty, isString, flow } from 'lodash/fp';
 
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import {
   EsQueryConfig,
   Query,

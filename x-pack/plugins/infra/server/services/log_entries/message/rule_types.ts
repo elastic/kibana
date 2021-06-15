@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonValue } from '@kbn/utils';
+import { JsonValue } from '@kbn/common-utils';
 
 export interface LogMessageFormattingRule {
   when: LogMessageFormattingCondition;

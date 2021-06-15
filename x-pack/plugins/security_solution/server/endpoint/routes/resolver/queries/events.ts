@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from 'kibana/server';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { JsonArray, JsonObject, JsonValue } from '@kbn/utils';
+import { JsonArray, JsonObject, JsonValue } from '@kbn/common-utils';
 
 export { JsonArray, JsonObject, JsonValue };
 

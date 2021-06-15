@@ -7,7 +7,7 @@
 
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject, JsonValue } from '@kbn/utils';
+import { JsonObject, JsonValue } from '@kbn/common-utils';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 

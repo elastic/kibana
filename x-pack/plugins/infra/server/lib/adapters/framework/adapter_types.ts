@@ -8,7 +8,7 @@
 import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { JsonArray, JsonValue } from '@kbn/utils';
+import { JsonArray, JsonValue } from '@kbn/common-utils';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,

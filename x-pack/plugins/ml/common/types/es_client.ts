@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { buildEsQuery } from '../../../../../src/plugins/data/common/es_query/es_query';
 import type { DslQuery } from '../../../../../src/plugins/data/common/es_query/kuery';
 

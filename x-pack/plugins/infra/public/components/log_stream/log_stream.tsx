@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import { JsonValue } from '@kbn/utils';
+import { JsonValue } from '@kbn/common-utils';
 import { DataPublicPluginStart, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';

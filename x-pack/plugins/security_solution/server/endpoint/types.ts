@@ -8,7 +8,7 @@
 import { LoggerFactory } from 'kibana/server';
 
 import { SearchResponse } from '@elastic/elasticsearch/api/types';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { HostMetadata, MetadataQueryStrategyVersions } from '../../common/endpoint/types';

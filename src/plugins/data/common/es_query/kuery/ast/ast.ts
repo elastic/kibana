@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';

@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange } from '../utils/index';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonArray, JsonValue } from '@kbn/utils';
+import { JsonArray, JsonValue } from '@kbn/common-utils';
 import { LogMessagePart } from '../../../../common/log_entry';
 import {
   LogMessageFormattingCondition,

@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './package_json';
-export * from './path';
-export * from './repo_root';
-export * from './streams';
+export { JsonArray, JsonValue, JsonObject } from './typed_json';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 export interface AlertUrlNavigation {
   path: string;
 }

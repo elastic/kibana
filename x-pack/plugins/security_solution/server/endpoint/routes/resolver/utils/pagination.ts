@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,

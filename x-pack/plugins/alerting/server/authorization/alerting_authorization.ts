@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
