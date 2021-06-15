@@ -177,8 +177,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
   const isFormModified = useFormIsModified({ form });
 
   const { name: updatedName, type: updatedType, script: updatedScript } = formData;
-  const nameHasChanged = getFields().name?.isModified ?? false;
-  const typeHasChanged = getFields().type?.isModified ?? false;
+  const { name: nameField, type: typeField } = getFields();
+  const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
+  const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
   const isFormatVisible = get(formData, '__meta__.isFormatVisible');

@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 import type { FieldPreviewContext, FieldFormatConfig } from '../../types';
 import { parseEsError } from '../../lib/runtime_field_validation';
@@ -129,6 +130,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const currentDocIndex = currentDocument?._index;
   const totalDocs = documents.length;
+  const { name, document, script } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -216,7 +218,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
-    if (fieldTypeToProcess !== 'runtime') {
+    if (fieldTypeToProcess !== 'runtime' || !areAllParamsDefined) {
       return;
     }
 
@@ -264,7 +266,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         error: null,
       });
     }
-  }, [fieldTypeToProcess, params, currentDocIndex, getFieldPreview, notifications.toasts]);
+  }, [
+    fieldTypeToProcess,
+    areAllParamsDefined,
+    params,
+    currentDocIndex,
+    getFieldPreview,
+    notifications.toasts,
+  ]);
 
   const goToNextDoc = useCallback(() => {
     if (navDocsIndex >= totalDocs - 1) {
@@ -332,17 +341,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   useDebounce(
-    () => {
-      if (!areAllParamsDefined) {
-        return;
-      }
-
-      // Whenever updatePreview() changes (meaning whenever any of the params changes)
-      // we call it to update the preview response with the field value or possible error.
-      updatePreview();
-    },
+    // Whenever updatePreview() changes (meaning whenever any of the params changes)
+    // we call it to update the preview response with the field(s) value or possible error.
+    updatePreview,
     500,
-    [areAllParamsDefined, updatePreview]
+    [updatePreview]
   );
 
   /**
@@ -366,6 +369,16 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       index: currentDocument?._index,
     });
   }, [currentDocument, updateParams]);
+
+  /** If the script is null and we have a document we will preview the _source value */
+  useEffect(() => {
+    if (name && document && script === null) {
+      setPreviewResponse({
+        fields: [{ key: name, value: get(document, name) }],
+        error: null,
+      });
+    }
+  }, [name, document, script]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

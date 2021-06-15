@@ -33,10 +33,10 @@ export const FieldPreview = () => {
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
   const isEmptyPromptVisible =
-    previewCount === 0
-      ? true
-      : error !== null || fields.length > 0
+    error !== null || fields.length > 0
       ? false
+      : previewCount === 0
+      ? true
       : name === null || (script === null && format === null);
 
   const onFieldListResize = useCallback(({ height }: { height: number }) => {
