@@ -8,12 +8,12 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
 import { HostsTableType } from '../../../../hosts/store/model';
-
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { hostsPagePath } from '../../../../hosts/pages/types';
 
@@ -23,81 +23,86 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-type MlHostConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+export const MlHostConditionalContainer = React.memo(() => {
+  const { path } = useRouteMatch();
+  return (
+    <Switch>
+      <Route
+        strict
+        exact
+        path={path}
+        render={({ location }) => {
+          const queryStringDecoded = parse(location.search.substring(1), {
+            sort: false,
+          }) as Required<QueryStringType>;
 
-export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ url }) => (
-  <Switch>
-    <Route
-      strict
-      exact
-      path={url}
-      render={({ location }) => {
-        const queryStringDecoded = parse(location.search.substring(1), {
-          sort: false,
-        }) as Required<QueryStringType>;
-
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-          sort: false,
-          encode: false,
-        });
-        return <Redirect to={`?${reEncoded}`} />;
-      }}
-    />
-    <Route
-      path={`${url}/:hostName`}
-      render={({
-        location,
-        match: {
-          params: { hostName },
-        },
-      }) => {
-        const queryStringDecoded = parse(location.search.substring(1), {
-          sort: false,
-        }) as Required<QueryStringType>;
-
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        if (emptyEntity(hostName)) {
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
           const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
-
-          return <Redirect to={`/${HostsTableType.anomalies}?${reEncoded}`} />;
-        } else if (multipleEntities(hostName)) {
-          const hosts: string[] = getMultipleEntities(hostName);
-          queryStringDecoded.query = addEntitiesToKql(
-            ['host.name'],
-            hosts,
-            queryStringDecoded.query || ''
-          );
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          return <Redirect to={`${hostsPagePath}?${reEncoded}`} />;
+        }}
+      />
+      <Route
+        path={`${path}/:hostName`}
+        render={({
+          location,
+          match: {
+            params: { hostName },
+          },
+        }) => {
+          const queryStringDecoded = parse(location.search.substring(1), {
             sort: false,
-            encode: false,
-          });
+          }) as Required<QueryStringType>;
 
-          return <Redirect to={`/${HostsTableType.anomalies}?${reEncoded}`} />;
-        } else {
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-            sort: false,
-            encode: false,
-          });
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
+          if (emptyEntity(hostName)) {
+            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+              sort: false,
+              encode: false,
+            });
 
-          return <Redirect to={`/${hostName}/${HostsTableType.anomalies}?${reEncoded}`} />;
-        }
-      }}
-    />
-    <Route
-      path={`${hostsPagePath}/ml-hosts/`}
-      render={({ location: { search = '' } }) => (
-        <Redirect from={`${hostsPagePath}/ml-hosts/`} to={`${hostsPagePath}/ml-hosts${search}`} />
-      )}
-    />
-  </Switch>
-));
+            return <Redirect to={`${hostsPagePath}/${HostsTableType.anomalies}?${reEncoded}`} />;
+          } else if (multipleEntities(hostName)) {
+            const hosts: string[] = getMultipleEntities(hostName);
+            queryStringDecoded.query = addEntitiesToKql(
+              ['host.name'],
+              hosts,
+              queryStringDecoded.query || ''
+            );
+            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+              sort: false,
+              encode: false,
+            });
+
+            return <Redirect to={`${hostsPagePath}/${HostsTableType.anomalies}?${reEncoded}`} />;
+          } else {
+            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+              sort: false,
+              encode: false,
+            });
+
+            return (
+              <Redirect
+                to={`${hostsPagePath}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+              />
+            );
+          }
+        }}
+      />
+      <Route
+        path={`${hostsPagePath}/ml-hosts/`}
+        render={({ location: { search = '' } }) => (
+          <Redirect from={`${hostsPagePath}/ml-hosts/`} to={`${hostsPagePath}/ml-hosts${search}`} />
+        )}
+      />
+    </Switch>
+  );
+});
 
 MlHostConditionalContainer.displayName = 'MlHostConditionalContainer';

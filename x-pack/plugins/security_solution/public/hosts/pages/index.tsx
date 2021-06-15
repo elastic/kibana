@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps, useHistory, Redirect } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
@@ -46,12 +46,9 @@ export const HostsContainer = React.memo<Props>(() => {
         )}
       />
 
-      <Route
-        path={`${hostsPagePath}/ml-hosts`}
-        render={({ location, match }) => (
-          <MlHostConditionalContainer location={location} url={match.url} />
-        )}
-      />
+      <Route path={`${hostsPagePath}/ml-hosts`}>
+        <MlHostConditionalContainer />
+      </Route>
       <Route path={getHostsTabPath()}>
         <Hosts />
       </Route>
