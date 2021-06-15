@@ -351,7 +351,7 @@ export function App({
 
   return (
     <>
-      <div className="lnsApp">
+      <div className="lnsApp" data-test-subj="lnsApp">
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}

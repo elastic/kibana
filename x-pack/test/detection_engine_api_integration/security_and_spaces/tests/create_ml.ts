@@ -23,6 +23,7 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -76,14 +77,14 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
-      await esArchiver.load('auditbeat/hosts');
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await executeSetupModuleRequest(siemModule, 200);
       await forceStartDatafeeds(mlJobId, 200);
-      await esArchiver.load('security_solution/anomalies');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {
-      await esArchiver.unload('auditbeat/hosts');
-      await esArchiver.unload('security_solution/anomalies');
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
 
     beforeEach(async () => {
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         host: { name: ['mothra'] },
         event: { kind: 'signal' },
         signal: {
-          _meta: { version: 35 },
+          _meta: { version: SIGNALS_TEMPLATE_VERSION },
           parents: [
             {
               id:

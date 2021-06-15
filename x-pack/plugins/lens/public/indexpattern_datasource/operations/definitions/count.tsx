@@ -111,5 +111,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'elasticsearch',
+    signature: '',
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation', {
+      defaultMessage: `
+Calculates the number of documents.
+
+Example: Calculate the number of documents: 
+\`count()\`
+
+Example: Calculate the number of documents matching a certain filter:
+\`count(kql='price > 500')\`
+      `,
+    }),
+  },
   shiftable: true,
 };

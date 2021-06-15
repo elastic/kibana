@@ -25,18 +25,18 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       log.debug(`Importing file '${path}' ...`);
       await PageObjects.common.setFileInputPath(path);
 
-      await testSubjects.waitForDeleted('mlPageFileDataVisLoading');
+      await testSubjects.waitForDeleted('dataVisualizerPageFileLoading');
 
       if (expectError) {
-        await testSubjects.existOrFail('~mlFileUploadErrorCallout');
+        await testSubjects.existOrFail('~dataVisualizerFileUploadErrorCallout');
       } else {
-        await testSubjects.missingOrFail('~mlFileUploadErrorCallout');
-        await testSubjects.existOrFail('mlPageFileDataVisResults');
+        await testSubjects.missingOrFail('~dataVisualizerFileUploadErrorCallout');
+        await testSubjects.existOrFail('dataVisualizerPageFileResults');
       }
     },
 
     async assertFileTitle(expectedTitle: string) {
-      const actualTitle = await testSubjects.getVisibleText('mlFileDataVisResultsTitle');
+      const actualTitle = await testSubjects.getVisibleText('dataVisualizerFileResultsTitle');
       expect(actualTitle).to.eql(
         expectedTitle,
         `Expected file title to be '${expectedTitle}' (got '${actualTitle}')`
@@ -44,15 +44,15 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertFileContentPanelExists() {
-      await testSubjects.existOrFail('mlFileDataVisFileContentPanel');
+      await testSubjects.existOrFail('dataVisualizerFileFileContentPanel');
     },
 
     async assertSummaryPanelExists() {
-      await testSubjects.existOrFail('mlFileDataVisSummaryPanel');
+      await testSubjects.existOrFail('dataVisualizerFileSummaryPanel');
     },
 
     async assertFileStatsPanelExists() {
-      await testSubjects.existOrFail('mlFileDataVisFileStatsPanel');
+      await testSubjects.existOrFail('dataVisualizerFileFileStatsPanel');
     },
 
     async assertNumberOfFieldCards(number: number) {
@@ -64,7 +64,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertImportButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFileDataVisOpenImportPageButton');
+      const isEnabled = await testSubjects.isEnabled('dataVisualizerFileOpenImportPageButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -74,17 +74,17 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async navigateToFileImport() {
-      await testSubjects.click('mlFileDataVisOpenImportPageButton');
-      await testSubjects.existOrFail('mlPageFileDataVisImport');
+      await testSubjects.click('dataVisualizerFileOpenImportPageButton');
+      await testSubjects.existOrFail('dataVisualizerPageFileImport');
     },
 
     async assertImportSettingsPanelExists() {
-      await testSubjects.existOrFail('mlFileDataVisImportSettingsPanel');
+      await testSubjects.existOrFail('dataVisualizerFileImportSettingsPanel');
     },
 
     async assertIndexNameValue(expectedValue: string) {
       const actualIndexName = await testSubjects.getAttribute(
-        'mlFileDataVisIndexNameInput',
+        'dataVisualizerFileIndexNameInput',
         'value'
       );
       expect(actualIndexName).to.eql(
@@ -94,14 +94,16 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setIndexName(indexName: string) {
-      await mlCommonUI.setValueWithChecks('mlFileDataVisIndexNameInput', indexName, {
+      await mlCommonUI.setValueWithChecks('dataVisualizerFileIndexNameInput', indexName, {
         clearWithKeyboard: true,
       });
       await this.assertIndexNameValue(indexName);
     },
 
     async assertCreateIndexPatternCheckboxValue(expectedValue: boolean) {
-      const isChecked = await testSubjects.isChecked('mlFileDataVisCreateIndexPatternCheckbox');
+      const isChecked = await testSubjects.isChecked(
+        'dataVisualizerFileCreateIndexPatternCheckbox'
+      );
       expect(isChecked).to.eql(
         expectedValue,
         `Expected create index pattern checkbox to be ${expectedValue ? 'checked' : 'unchecked'}`
@@ -109,10 +111,12 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setCreateIndexPatternCheckboxState(newState: boolean) {
-      const isChecked = await testSubjects.isChecked('mlFileDataVisCreateIndexPatternCheckbox');
+      const isChecked = await testSubjects.isChecked(
+        'dataVisualizerFileCreateIndexPatternCheckbox'
+      );
       if (isChecked !== newState) {
         // this checkbox can't be clicked directly, instead click the corresponding label
-        const panel = await testSubjects.find('mlFileDataVisImportSettingsPanel');
+        const panel = await testSubjects.find('dataVisualizerFileImportSettingsPanel');
         const label = await panel.findByCssSelector('[for="createIndexPattern"]');
         await label.click();
       }
@@ -120,9 +124,9 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async startImportAndWaitForProcessing() {
-      await testSubjects.clickWhenNotDisabled('mlFileDataVisImportButton');
+      await testSubjects.clickWhenNotDisabled('dataVisualizerFileImportButton');
       await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail('mlFileImportSuccessCallout');
+        await testSubjects.existOrFail('dataVisualizerFileImportSuccessCallout');
       });
     },
 
