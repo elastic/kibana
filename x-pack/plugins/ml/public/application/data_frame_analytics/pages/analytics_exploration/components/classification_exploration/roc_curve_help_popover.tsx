@@ -35,7 +35,7 @@ export const RocCurveHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.ml.dataframe.analytics.rocCurveBasicExplanation"
-          defaultMessage="The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds."
+          defaultMessage="The ROC curve is a plot that represents the performance of the classification process at different predicted probability thresholds."
         />
       </p>
       <p>
