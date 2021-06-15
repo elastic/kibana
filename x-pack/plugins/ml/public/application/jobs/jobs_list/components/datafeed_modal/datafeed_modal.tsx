@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +22,9 @@ import {
   EuiSpacer,
   EuiTabs,
   EuiTab,
+  EuiText,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import {
   Axis,
@@ -74,6 +77,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const [bucketData, setBucketData] = useState<number[][]>([]);
   const [annotationData, setAnnotationData] = useState<RectAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
+  const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
 
   const {
     results: { getDatafeedResultChartData },
@@ -172,6 +176,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   );
 
   const { datafeedConfig, bucketSpan, isInitialized } = data;
+  const checkboxId = useMemo(() => htmlIdGenerator()(), []);
 
   return (
     <EuiModal
@@ -221,6 +226,21 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                       datafeedId={datafeedConfig.datafeed_id}
                       queryDelay={datafeedConfig.query_delay}
                       isEnabled={datafeedConfig.state === DATAFEED_STATE.STOPPED}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id={checkboxId}
+                      label={
+                        <EuiText size={'xs'}>
+                          <FormattedMessage
+                            id="xpack.ml.jobsList.datafeedModal.showAnnotationsCheckboxLabel"
+                            defaultMessage="Show annotations"
+                          />
+                        </EuiText>
+                      }
+                      checked={showAnnotations}
+                      onChange={() => setShowAnnotations(!showAnnotations)}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -282,14 +302,16 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         })}
                         position={Position.Left}
                       />
-                      <RectAnnotation
-                        key="annotation-results"
-                        dataValues={annotationData}
-                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.annotationSeriesId', {
-                          defaultMessage: 'Annotations',
-                        })}
-                        style={{ fill: euiTheme.euiColorDangerText }}
-                      />
+                      {showAnnotations ? (
+                        <RectAnnotation
+                          key="annotation-results"
+                          dataValues={annotationData}
+                          id={i18n.translate('xpack.ml.jobsList.datafeedModal.annotationSeriesId', {
+                            defaultMessage: 'Annotations',
+                          })}
+                          style={{ fill: euiTheme.euiColorDangerText }}
+                        />
+                      ) : null}
                       <LineSeries
                         key={'source-results'}
                         color={euiTheme.euiColorPrimary}
