@@ -49,12 +49,21 @@ const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => 
   link: '/',
   reason: 'a good reason',
 });
+const selectedAlertId = undefined;
+const setSelectedAlertId = jest.fn();
 
 describe('getAlertAnnotations', () => {
   describe('with no alerts', () => {
     it('returns an empty array', () => {
       expect(
-        getAlertAnnotations({ alerts: [], chartStartTime, getFormatter, theme })
+        getAlertAnnotations({
+          alerts: [],
+          chartStartTime,
+          getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
+          theme,
+        })
       ).toEqual([]);
     });
   });
@@ -66,6 +75,8 @@ describe('getAlertAnnotations', () => {
           alerts: [alert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.style.line.stroke
       ).toEqual(euiColorDanger);
@@ -77,6 +88,8 @@ describe('getAlertAnnotations', () => {
           alerts: [alert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
       ).toEqual('Alert');
@@ -88,6 +101,8 @@ describe('getAlertAnnotations', () => {
           alerts: [alert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].details
       ).toEqual('a good reason');
@@ -103,6 +118,8 @@ describe('getAlertAnnotations', () => {
             alerts: [alert],
             chartStartTime,
             getFormatter: getNoFormatter,
+            selectedAlertId,
+            setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
         ).toEqual(alert['rule.name']![0]);
@@ -118,6 +135,8 @@ describe('getAlertAnnotations', () => {
             alerts: [alert],
             chartStartTime: beforeChartStartTime,
             getFormatter,
+            selectedAlertId,
+            setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].dataValue
         ).toEqual(beforeChartStartTime);
@@ -137,6 +156,8 @@ describe('getAlertAnnotations', () => {
           alerts: [warningAlert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.style.line.stroke
       ).toEqual(euiColorWarning);
@@ -148,6 +169,8 @@ describe('getAlertAnnotations', () => {
           alerts: [warningAlert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
       ).toEqual('Warning Alert');
@@ -166,6 +189,8 @@ describe('getAlertAnnotations', () => {
           alerts: [criticalAlert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.style.line.stroke
       ).toEqual(euiColorDanger);
@@ -177,6 +202,8 @@ describe('getAlertAnnotations', () => {
           alerts: [criticalAlert],
           chartStartTime,
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
       ).toEqual('Critical Alert');
