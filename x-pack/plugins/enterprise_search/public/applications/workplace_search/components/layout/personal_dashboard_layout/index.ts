@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { Overview } from './components/overview';
-export { SourcesRouter } from './sources_router';
+export { PersonalDashboardLayout } from './personal_dashboard_layout';

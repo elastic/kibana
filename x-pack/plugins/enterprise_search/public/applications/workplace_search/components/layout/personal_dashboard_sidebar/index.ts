@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { Overview } from './components/overview';
-export { SourcesRouter } from './sources_router';
+export { PrivateSourcesSidebar } from './private_sources_sidebar';
+export { AccountSettingsSidebar } from './account_settings_sidebar';
