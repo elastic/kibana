@@ -313,7 +313,7 @@ There could be various reasons for a specific value in the table to have a diffe
 Here's a short list of few different aspects to check:
 * Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
 
-* Make sure to have the right value precision setup: value formatters could round up or down numeric values.
+* Make sure you have the right value precision setup: value formatters could round the numeric values up or down.
 
 * Make sure the right color continuity option is selected: if the number is below the first color stop value a continuity of type `Below` or `Above and below range` is required
 
