@@ -29,7 +29,7 @@ import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import {
   isFailedResourceState,
@@ -516,7 +516,6 @@ describe('when on the endpoint list page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
-    let elasticAgentId: string;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
     const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
       const {
@@ -545,8 +544,6 @@ describe('when on the endpoint list page', () => {
         },
         query_strategy_version,
       };
-
-      elasticAgentId = hostDetails.metadata.elastic.agent.id;
 
       const policy = docGenerator.generatePolicyPackagePolicy();
       policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
@@ -738,35 +735,9 @@ describe('when on the endpoint list page', () => {
       );
     });
 
-    it('should include the link to reassignment in Ingest', async () => {
-      coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
-      const renderResult = await renderAndWaitForData();
-      const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
-      expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Policy');
-      expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/fleet#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
-      );
-    });
-
     it('should show the Take Action button', async () => {
       const renderResult = await renderAndWaitForData();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
-    });
-
-    describe('when link to reassignment in Ingest is clicked', () => {
-      beforeEach(async () => {
-        coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
-        const renderResult = await renderAndWaitForData();
-        const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(linkToReassign);
-        });
-      });
-
-      it('should navigate to Ingest without full page refresh', () => {
-        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
-      });
     });
 
     describe('when showing host Policy Response panel', () => {
@@ -1138,6 +1109,13 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Ingest Agent Details page', async () => {
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
+    });
+
+    it('navigates to the Ingest Agent Details page with policy reassign', async () => {
+      const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
+      expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
+        `/app/fleet#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+      );
     });
   });
 });
