@@ -10,13 +10,13 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { AppLogic } from '../../../app_logic';
-import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
-} from '../../../views/content_sources/constants';
+} from '../../../constants';
+import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 import { ViewContentHeader } from '../../shared/view_content_header';
 
 export const PrivateSourcesSidebar = () => {
