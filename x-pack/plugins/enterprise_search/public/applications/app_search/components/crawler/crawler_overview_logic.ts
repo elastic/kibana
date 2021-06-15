@@ -14,7 +14,7 @@ import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDataFromServer, CrawlerDomain } from './types';
+import { CrawlerData, CrawlerDomain } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
