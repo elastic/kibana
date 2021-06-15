@@ -30,10 +30,8 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'cwv', label: 'Core Web Vitals' },
   ],
   mobile: [
-    {
-      id: 'kpi',
-      label: 'KPI over time',
-    },
+    { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
   ],
   apm: [],
   infra_logs: [],

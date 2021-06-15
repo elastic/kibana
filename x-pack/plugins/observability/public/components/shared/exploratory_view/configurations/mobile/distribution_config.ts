@@ -7,7 +7,7 @@
 
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
-import { buildPhrasesFilter } from '../utils';
+import { buildPhraseFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -15,21 +15,21 @@ import {
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
 
-export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    reportType: 'kpi-over-time',
-    defaultSeriesType: 'line',
+    reportType: 'data-distribution',
+    defaultSeriesType: 'bar',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: 'performance.metric',
     },
     yAxisColumns: [
       {
-        sourceField: 'business.kpi',
-        operationType: 'median',
+        sourceField: RECORDS_FIELD,
+        label: 'Transactions',
       },
     ],
-    hasOperationType: true,
+    hasOperationType: false,
     defaultFilters: [
       'labels.net_connection_carrier_name',
       'labels.device_model',
@@ -48,14 +48,12 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
       'labels.net_connection_carrier_isoCountryCode',
     ],
     filters: [
-      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
-    ],
+      ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
+      ...buildPhraseFilter('processor.event', 'transaction', indexPattern)
+  ],
     labels: {
       ...FieldLabels,
-      [TRANSACTION_DURATION]: 'Response latency',
       [SERVICE_NAME]: 'Mobile app',
-      [METRIC_SYSTEM_MEMORY_USAGE]: 'Memory usage',
-      [METRIC_SYSTEM_CPU_USAGE]: 'CPU usage',
     },
     reportDefinitions: [
       {
@@ -63,7 +61,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
         required: true,
       },
       {
-        field: 'business.kpi',
+        field: 'performance.metric',
         custom: true,
         options: [
           {
@@ -83,18 +81,6 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
             field: METRIC_SYSTEM_CPU_USAGE,
             id: METRIC_SYSTEM_CPU_USAGE,
             columnType: OPERATION_COLUMN,
-          },
-          { 
-            field: RECORDS_FIELD, 
-            id: RECORDS_FIELD, 
-            label: "Transactions per minute",
-            columnFilters: [
-              {
-                language: 'kuery',
-                query: `processor.event: transaction`,
-              }
-            ],
-            timeScale: 'm',
           },
         ],
       },
