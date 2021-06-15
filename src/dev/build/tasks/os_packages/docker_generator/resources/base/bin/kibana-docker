@@ -326,6 +326,7 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.monitored_stats_warn_delayed_task_start_in_seconds
 )
 
 longopts=''
