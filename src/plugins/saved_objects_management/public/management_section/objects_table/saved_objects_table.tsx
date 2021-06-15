@@ -416,7 +416,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         });
       }
       if (exportDetails.excludedObjects.length > 0) {
-        return notifications.toasts.addWarning({
+        return notifications.toasts.addSuccess({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.export.successWithExcludedObjectsNotification',
             {

@@ -305,7 +305,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should display a warning if the export contains excluded objects', async () => {
+    it('should display a specific message if the export contains excluded objects', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
@@ -344,7 +344,7 @@ describe('SavedObjectsTable', () => {
       await component.instance().onExport(true);
 
       expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
-      expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
           'Some objects were excluded from the export. ' +
