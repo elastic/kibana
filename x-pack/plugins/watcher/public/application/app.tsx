@@ -64,14 +64,14 @@ export const App = (deps: AppDeps) => {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType=""
+          iconType="alert"
           title={
-            <h2>
+            <h1>
               <FormattedMessage
                 id="xpack.watcher.app.licenseErrorTitle"
                 defaultMessage="License error"
               />
-            </h2>
+            </h1>
           }
           body={<p>{message}</p>}
           actions={[

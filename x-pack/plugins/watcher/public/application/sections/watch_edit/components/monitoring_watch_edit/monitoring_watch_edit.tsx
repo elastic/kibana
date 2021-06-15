@@ -32,7 +32,7 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt
         iconType=""
-        title={<h2>{pageTitle}</h2>}
+        title={<h1>{pageTitle}</h1>}
         body={<p>{systemWatchMessage}</p>}
         actions={[
           <EuiLink {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}>
