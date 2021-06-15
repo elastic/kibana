@@ -25,7 +25,6 @@ import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw'
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { should } from './get_service_metadata_icons';
-import { withApmSpan } from '../../utils/with_apm_span';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
@@ -59,7 +58,7 @@ export interface ServiceMetadataDetails {
   };
 }
 
-export function getServiceMetadataDetails({
+export async function getServiceMetadataDetails({
   serviceName,
   setup,
   searchAggregatedTransactions,
@@ -68,105 +67,106 @@ export function getServiceMetadataDetails({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }): Promise<ServiceMetadataDetails> {
-  return withApmSpan('get_service_metadata_details', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
 
-    const filter = [
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...rangeQuery(start, end),
-    ];
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...rangeQuery(start, end),
+  ];
 
-    const params = {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        size: 1,
-        _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
-        query: { bool: { filter, should } },
-        aggs: {
-          serviceVersions: {
-            terms: {
-              field: SERVICE_VERSION,
-              size: 10,
-              order: { _key: 'desc' as const },
-            },
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      size: 1,
+      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
+      query: { bool: { filter, should } },
+      aggs: {
+        serviceVersions: {
+          terms: {
+            field: SERVICE_VERSION,
+            size: 10,
+            order: { _key: 'desc' as const },
           },
-          availabilityZones: {
-            terms: {
-              field: CLOUD_AVAILABILITY_ZONE,
-              size: 10,
-            },
-          },
-          machineTypes: {
-            terms: {
-              field: CLOUD_MACHINE_TYPE,
-              size: 10,
-            },
-          },
-          totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
         },
+        availabilityZones: {
+          terms: {
+            field: CLOUD_AVAILABILITY_ZONE,
+            size: 10,
+          },
+        },
+        machineTypes: {
+          terms: {
+            field: CLOUD_MACHINE_TYPE,
+            size: 10,
+          },
+        },
+        totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
+    },
+  };
+
+  const response = await apmEventClient.search(
+    'get_service_metadata_details',
+    params
+  );
+
+  if (response.hits.total.value === 0) {
+    return {
+      service: undefined,
+      container: undefined,
+      cloud: undefined,
     };
+  }
 
-    const response = await apmEventClient.search(params);
+  const { service, agent, host, kubernetes, container, cloud } = response.hits
+    .hits[0]._source as ServiceMetadataDetailsRaw;
 
-    if (response.hits.total.value === 0) {
-      return {
-        service: undefined,
-        container: undefined,
-        cloud: undefined,
-      };
-    }
+  const serviceMetadataDetails = {
+    versions: response.aggregations?.serviceVersions.buckets.map(
+      (bucket) => bucket.key as string
+    ),
+    runtime: service.runtime,
+    framework: service.framework?.name,
+    agent,
+  };
 
-    const { service, agent, host, kubernetes, container, cloud } = response.hits
-      .hits[0]._source as ServiceMetadataDetailsRaw;
+  const totalNumberInstances =
+    response.aggregations?.totalNumberInstances.value;
 
-    const serviceMetadataDetails = {
-      versions: response.aggregations?.serviceVersions.buckets.map(
-        (bucket) => bucket.key as string
-      ),
-      runtime: service.runtime,
-      framework: service.framework?.name,
-      agent,
-    };
-
-    const totalNumberInstances =
-      response.aggregations?.totalNumberInstances.value;
-
-    const containerDetails =
-      host || container || totalNumberInstances || kubernetes
-        ? {
-            os: host?.os?.platform,
-            type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-            isContainerized: !!container?.id,
-            totalNumberInstances,
-          }
-        : undefined;
-
-    const cloudDetails = cloud
+  const containerDetails =
+    host || container || totalNumberInstances || kubernetes
       ? {
-          provider: cloud.provider,
-          projectName: cloud.project?.name,
-          availabilityZones: response.aggregations?.availabilityZones.buckets.map(
-            (bucket) => bucket.key as string
-          ),
-          machineTypes: response.aggregations?.machineTypes.buckets.map(
-            (bucket) => bucket.key as string
-          ),
+          os: host?.os?.platform,
+          type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
+          isContainerized: !!container?.id,
+          totalNumberInstances,
         }
       : undefined;
 
-    return {
-      service: serviceMetadataDetails,
-      container: containerDetails,
-      cloud: cloudDetails,
-    };
-  });
+  const cloudDetails = cloud
+    ? {
+        provider: cloud.provider,
+        projectName: cloud.project?.name,
+        availabilityZones: response.aggregations?.availabilityZones.buckets.map(
+          (bucket) => bucket.key as string
+        ),
+        machineTypes: response.aggregations?.machineTypes.buckets.map(
+          (bucket) => bucket.key as string
+        ),
+      }
+    : undefined;
+
+  return {
+    service: serviceMetadataDetails,
+    container: containerDetails,
+    cloud: cloudDetails,
+  };
 }

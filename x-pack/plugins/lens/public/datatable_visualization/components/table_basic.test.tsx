@@ -129,7 +129,7 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
-  test('it should not render actions on header when it is in read only mode', () => {
+  test('it should render hide and reset actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 
     expect(

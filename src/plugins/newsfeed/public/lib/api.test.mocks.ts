@@ -8,6 +8,7 @@
 
 import { storageMock } from './storage.mock';
 import { driverMock } from './driver.mock';
+import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';
 
 export const storageInstanceMock = storageMock.create();
 jest.doMock('./storage', () => ({
@@ -17,4 +18,8 @@ jest.doMock('./storage', () => ({
 export const driverInstanceMock = driverMock.create();
 jest.doMock('./driver', () => ({
   NewsfeedApiDriver: jest.fn().mockImplementation(() => driverInstanceMock),
+}));
+
+jest.doMock('./never_fetch_driver', () => ({
+  NeverFetchNewsfeedApiDriver: jest.fn(() => new NeverFetchNewsfeedApiDriver()),
 }));
