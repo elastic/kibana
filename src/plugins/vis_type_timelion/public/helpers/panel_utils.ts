@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import type { Position } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import type { TimefilterContract } from 'src/plugins/data/public';
 import type { IUiSettingsClient } from 'kibana/public';
 
@@ -34,7 +34,6 @@ export interface IAxis {
   tickGenerator?(axis: IAxis): number[];
   units?: { type: string; prefix: string; suffix: string };
   domain?: {
-    fit?: boolean;
     min?: number;
     max?: number;
   };
@@ -74,19 +73,11 @@ const adaptYaxisParams = (yaxis: IAxis) => {
     y.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
   }
 
-  const max = yaxis.max ? yaxis.max : undefined;
-  const min = yaxis.min ? yaxis.min : undefined;
-
-  y.domain = {
-    fit: min === undefined && max === undefined,
-    max,
-    min,
-  };
   return y;
 };
 
 export const extractYAxis = (series: Series) => {
-  let yaxis = (series._global?.yaxes ?? []).reduce(
+  const yaxis = (series._global?.yaxes ?? []).reduce(
     (acc: IAxis, item: IAxis) => ({
       ...acc,
       ...item,
@@ -94,9 +85,7 @@ export const extractYAxis = (series: Series) => {
     {}
   );
 
-  if (yaxis) {
-    yaxis = adaptYaxisParams(yaxis);
+  if (Object.keys(yaxis).length) {
+    return adaptYaxisParams(yaxis);
   }
-
-  return yaxis;
 };

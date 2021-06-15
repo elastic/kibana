@@ -13,6 +13,7 @@ import {
   Settings,
   Position,
   Axis,
+  AxisSpec,
   TooltipType,
   PointerEvent,
   LegendPositionConfig,
@@ -48,7 +49,24 @@ interface TimelionVisComponentProps {
 
 const MAIN_GROUP_ID = 1;
 
-const DefaultYAxis = () => <Axis id="left" position={Position.Left} groupId={`${MAIN_GROUP_ID}`} />;
+const DefaultYAxis = () => (
+  <Axis
+    id="left"
+    domain={withStaticPadding({
+      fit: false,
+    })}
+    position={Position.Left}
+    groupId={`${MAIN_GROUP_ID}`}
+  />
+);
+
+const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
+  ({
+    ...domain,
+    padding: 50,
+    // @ts-expect-error
+    paddingUnit: 'pixel',
+  } as AxisSpec['domain']);
 
 const TimelionVisComponent = ({
   interval,
@@ -141,6 +159,36 @@ const TimelionVisComponent = ({
     return { legendPosition, showLegend };
   }, [chart]);
 
+  const yAxis = chart
+    .map((data, index) => {
+      const yaxis = extractYAxis(data);
+
+      if (yaxis) {
+        const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
+
+        return (
+          <Axis
+            groupId={`${groupId}`}
+            key={index}
+            id={yaxis.position + yaxis.axisLabel}
+            title={yaxis.axisLabel}
+            position={yaxis.position}
+            tickFormat={yaxis.tickFormatter}
+            gridLine={{
+              visible: groupId === MAIN_GROUP_ID,
+            }}
+            domain={withStaticPadding({
+              fit: yaxis.min === undefined && yaxis.max === undefined,
+              min: yaxis.min,
+              max: yaxis.max,
+            })}
+          />
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
+
   return (
     <div className="timelionChart">
       <div className="timelionChart__topTitle">{title}</div>
@@ -162,27 +210,7 @@ const TimelionVisComponent = ({
 
         <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={tickFormat} />
 
-        {chart.length ? (
-          chart.map((data, index) => {
-            const yaxis = extractYAxis(data);
-
-            return yaxis ? (
-              <Axis
-                groupId={`${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`}
-                key={index}
-                id={yaxis.position + yaxis.axisLabel}
-                title={yaxis.axisLabel}
-                position={yaxis.position}
-                tickFormat={yaxis.tickFormatter}
-                domain={yaxis.domain}
-              />
-            ) : (
-              <DefaultYAxis />
-            );
-          })
-        ) : (
-          <DefaultYAxis />
-        )}
+        {yAxis.length ? yAxis : <DefaultYAxis />}
 
         {chart.map((data, index) => {
           const visData = { ...data };
