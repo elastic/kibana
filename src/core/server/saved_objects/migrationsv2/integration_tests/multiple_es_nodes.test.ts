@@ -64,49 +64,43 @@ async function fetchDocs(esClient: ElasticsearchClient, index: string, type: str
 
 interface RootConfig {
   logFileName: string;
+  hosts: string[];
 }
 
-function createRoot({ logFileName }: RootConfig) {
-  return kbnTestServer.createRoot(
-    {
-      elasticsearch: {
-        // TODO: Use esTestConfig.getUrl() once we figure out support for multiple URLs
-        hosts: ['http://elastic:changeme@localhost:9220', 'http://elastic:changeme@localhost:9221'],
-        username: kibanaServerTestUser.username,
-        password: kibanaServerTestUser.password,
-      },
-      migrations: {
-        skip: false,
-        enableV2: true,
-        batchSize: 100, // fixture contains 5000 docs
-      },
-      logging: {
-        appenders: {
-          file: {
-            type: 'file',
-            fileName: logFileName,
-            layout: {
-              type: 'json',
-            },
+function createRoot({ logFileName, hosts }: RootConfig) {
+  return kbnTestServer.createRoot({
+    elasticsearch: {
+      hosts,
+      username: kibanaServerTestUser.username,
+      password: kibanaServerTestUser.password,
+    },
+    migrations: {
+      skip: false,
+      enableV2: true,
+      batchSize: 100, // fixture contains 5000 docs
+    },
+    logging: {
+      appenders: {
+        file: {
+          type: 'file',
+          fileName: logFileName,
+          layout: {
+            type: 'json',
           },
         },
-        loggers: [
-          {
-            name: 'root',
-            appenders: ['file'],
-          },
-        ],
       },
+      loggers: [
+        {
+          name: 'root',
+          appenders: ['file'],
+        },
+      ],
     },
-    {
-      oss: true,
-    }
-  );
+  });
 }
 
 describe('migration v2', () => {
-  let esServer1: kbnTestServer.TestElasticsearchUtils;
-  let esServer2: kbnTestServer.TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   const migratedIndex = `.kibana_${pkg.version}_001`;
 
@@ -119,76 +113,51 @@ describe('migration v2', () => {
   });
 
   afterEach(async () => {
-    await root.shutdown();
-
-    if (esServer1) {
-      await esServer1.stop();
+    if (root) {
+      await root.shutdown();
     }
 
-    if (esServer2) {
-      await esServer2.stop();
+    if (esServer) {
+      await esServer.stop();
     }
   });
 
   it('migrates saved objects normally with multiple ES nodes', async () => {
+    const { startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'basic',
+          port: 9220,
+          clusterName: 'es-test-cluster',
+          esArgs: ['xpack.security.enabled=false'],
+          nodes: [
+            {
+              name: 'node-01',
+              // original SO (5000 total; 2500 of type `foo` + 2500 of type `bar`):
+              // [
+              //   { id: 'foo:1', type: 'foo', foo: { status: 'not_migrated_1' } },
+              //   { id: 'bar:1', type: 'bar', bar: { status: 'not_migrated_1' } },
+              //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
+              //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
+              // ];
+              dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_01.zip'),
+            },
+            {
+              name: 'node-02',
+              dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_02.zip'),
+            },
+          ],
+        },
+      },
+    });
+
+    esServer = await startES();
+
     root = createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}.log`),
+      hosts: esServer.hosts,
     });
-
-    const { startES: startES1 } = kbnTestServer.createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          // license: 'trial',
-          license: 'basic',
-          // original SO (2500 of type `foo` + 2500 of type `bar`):
-          // [
-          //   { id: 'foo:1', type: 'foo', foo: { status: 'not_migrated_1' } },
-          //   { id: 'bar:1', type: 'bar', bar: { status: 'not_migrated_1' } },
-          //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
-          //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
-          // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_01.zip'),
-          installDirName: 'es-test-cluster-01',
-          port: '9220',
-          clusterName: 'es-test-cluster',
-          esArgs: [
-            'node.name=es_01',
-            'discovery.type=zen',
-            'cluster.initial_master_nodes=es_01,es_02',
-            'xpack.security.enabled=false',
-          ],
-        },
-      },
-    });
-
-    const { startES: startES2 } = kbnTestServer.createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          // original SO (2500 of type `foo` + 2500 of type `bar`):
-          // [
-          //   { id: 'foo:1', type: 'foo', foo: { status: 'not_migrated_1' } },
-          //   { id: 'bar:1', type: 'bar', bar: { status: 'not_migrated_1' } },
-          //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
-          //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
-          // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_02.zip'),
-          installDirName: 'es-test-cluster-02',
-          port: '9221',
-          clusterName: 'es-test-cluster',
-          esArgs: [
-            'node.name=es_02',
-            'discovery.type=zen',
-            'cluster.initial_master_nodes=es_01,es_02',
-            'xpack.security.enabled=false',
-          ],
-        },
-      },
-    });
-
-    [esServer1, esServer2] = await Promise.all([startES1(), startES2()]);
 
     const setup = await root.setup();
     setup.savedObjects.registerType({
@@ -220,8 +189,8 @@ describe('migration v2', () => {
       },
     });
 
-    const start = await root.start();
-    const esClient = start.elasticsearch.client.asInternalUser;
+    await root.start();
+    const esClient = esServer.es.getClient();
 
     const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
     expect(migratedFooDocs.length).toBe(2500);
@@ -235,8 +204,8 @@ describe('migration v2', () => {
     expect(migratedBarDocs.length).toBe(2500);
     migratedBarDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`bar:${i}`);
-      expect(doc.foo.status).toBe(`migrated_${i}`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.bar.status).toBe(`migrated_${i}`);
+      expect(doc.migrationVersion.bar).toBe('7.14.0');
     });
   });
 });
