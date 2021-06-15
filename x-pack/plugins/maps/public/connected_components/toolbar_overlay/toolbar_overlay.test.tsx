@@ -27,6 +27,7 @@ test('Should only show set view control', async () => {
       pointDrawModeActive={false}
       showFitToBoundsButton={false}
       showTimesliderButton={false}
+      disableToolsControl={false}
     />
   );
   expect(component).toMatchSnapshot();
@@ -35,12 +36,13 @@ test('Should only show set view control', async () => {
 test('Should show all controls', async () => {
   const component = shallow(
     <ToolbarOverlay
-      showToolsControl={false}
+      showToolsControl={true}
       addFilters={async (filters: Filter[], actionId: string) => {}}
       showFitToBoundsButton={true}
       showTimesliderButton={true}
       shapeDrawModeActive={false}
       pointDrawModeActive={false}
+      disableToolsControl={false}
     />
   );
   expect(component).toMatchSnapshot();

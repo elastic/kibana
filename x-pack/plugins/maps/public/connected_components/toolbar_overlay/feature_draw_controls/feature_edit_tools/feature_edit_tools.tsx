@@ -9,8 +9,6 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DRAW_SHAPE } from '../../../../../common/constants';
-// @ts-expect-error
-import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { VectorCircleIcon } from '../../icons/vector_circle_icon';
 import { VectorLineIcon } from '../../icons/vector_line_icon';
 import { VectorSquareIcon } from '../../icons/vector_square_icon';

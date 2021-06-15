@@ -13,7 +13,7 @@ import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 import { DRAW_MODE } from '../../common';
-import { UPDATE_EDIT_STATE_LAYER } from './map_action_constants';
+import { UPDATE_EDIT_STATE } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
@@ -96,8 +96,8 @@ export function setDrawMode(drawMode: DRAW_MODE) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     if (drawMode === DRAW_MODE.NONE) {
       dispatch({
-        type: UPDATE_EDIT_STATE_LAYER,
-        layerId: null,
+        type: UPDATE_EDIT_STATE,
+        editState: undefined,
       });
     }
     dispatch({

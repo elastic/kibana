@@ -16,8 +16,8 @@ function mapStateToProps(state: MapStoreState) {
   const shapeDrawModeActive = getDrawMode(state) === DRAW_MODE.DRAW_SHAPES;
   const pointDrawModeActive = getDrawMode(state) === DRAW_MODE.DRAW_POINTS;
   return {
-    showToolsControl:
-      getGeoFieldNames(state).length !== 0 && !(shapeDrawModeActive || pointDrawModeActive),
+    showToolsControl: getGeoFieldNames(state).length !== 0,
+    disableToolsControl: shapeDrawModeActive || pointDrawModeActive,
     shapeDrawModeActive,
     pointDrawModeActive,
   };

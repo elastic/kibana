@@ -109,7 +109,6 @@ export class DrawTooltip extends Component<Props, State> {
 
     return (
       <EuiPopover
-        panelPaddingSize="s"
         id="drawInstructionsTooltip"
         button={tooltipAnchor}
         anchorPosition="rightCenter"

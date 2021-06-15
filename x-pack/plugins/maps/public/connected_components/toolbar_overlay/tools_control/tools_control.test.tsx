@@ -20,9 +20,10 @@ const defaultProps = {
       indexPatternId: '1',
     },
   ],
-  filterModeActive: false,
+  filterModeActive: true,
   activateDrawFilterMode: () => {},
   deactivateDrawMode: () => {},
+  disableToolsControl: false,
 };
 
 test('renders', async () => {

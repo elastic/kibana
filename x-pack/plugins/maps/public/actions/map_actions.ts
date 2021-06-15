@@ -45,9 +45,8 @@ import {
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
-  UPDATE_EDIT_STATE_SHAPE,
   UPDATE_MAP_SETTING,
-  UPDATE_EDIT_STATE_LAYER,
+  UPDATE_EDIT_STATE,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
@@ -328,10 +327,17 @@ export function updateDrawState(drawState: DrawState | null) {
 }
 
 export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const editState = getEditState(getState());
+    if (!editState) {
+      return;
+    }
     dispatch({
-      type: UPDATE_EDIT_STATE_SHAPE,
-      shapeToDraw,
+      type: UPDATE_EDIT_STATE,
+      editState: {
+        ...editState,
+        drawShape: shapeToDraw,
+      },
     });
   };
 }
@@ -346,8 +352,8 @@ export function updateEditLayer(layerId: string | null) {
       drawMode: DRAW_MODE.NONE,
     });
     dispatch({
-      type: UPDATE_EDIT_STATE_LAYER,
-      layerId,
+      type: UPDATE_EDIT_STATE,
+      editState: layerId ? { layerId } : undefined,
     });
   };
 }

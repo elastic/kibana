@@ -58,7 +58,7 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   initiateDraw: (drawState: DrawState) => void;
-  deactivateDrawMode: () => void;
+  disableToolsControl: boolean;
 }
 
 interface State {
@@ -79,7 +79,7 @@ export class ToolsControl extends Component<Props, State> {
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
     if (this.props.filterModeActive) {
-      this.props.deactivateDrawMode();
+      this.props.cancelDraw();
     }
   };
 
@@ -213,6 +213,7 @@ export class ToolsControl extends Component<Props, State> {
           title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
             defaultMessage: 'Tools',
           })}
+          isDisabled={this.props.disableToolsControl}
         />
       </EuiPanel>
     );
