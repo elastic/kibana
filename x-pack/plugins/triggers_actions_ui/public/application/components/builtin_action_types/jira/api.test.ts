@@ -99,10 +99,10 @@ describe('Jira API', () => {
     test('should call get issue types API', async () => {
       const abortCtrl = new AbortController();
       http.post.mockResolvedValueOnce(issueTypesResponse);
-      const res = await getIssueTypes({ http, signal: abortCtrl.signal, connectorId: 'test' });
+      const res = await getIssueTypes({ http, signal: abortCtrl.signal, connectorId: 'te/st' });
 
       expect(res).toEqual(issueTypesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issueTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });
@@ -116,12 +116,12 @@ describe('Jira API', () => {
       const res = await getFieldsByIssueType({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
         id: '10006',
       });
 
       expect(res).toEqual(fieldsResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"fieldsByIssueType","subActionParams":{"id":"10006"}}}',
         signal: abortCtrl.signal,
       });
@@ -135,12 +135,12 @@ describe('Jira API', () => {
       const res = await getIssues({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
         title: 'test issue',
       });
 
       expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issues","subActionParams":{"title":"test issue"}}}',
         signal: abortCtrl.signal,
       });
@@ -154,12 +154,12 @@ describe('Jira API', () => {
       const res = await getIssue({
         http,
         signal: abortCtrl.signal,
-        connectorId: 'test',
+        connectorId: 'te/st',
         id: 'RJ-107',
       });
 
       expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issue","subActionParams":{"id":"RJ-107"}}}',
         signal: abortCtrl.signal,
       });

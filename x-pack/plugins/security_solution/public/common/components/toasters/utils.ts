@@ -15,7 +15,7 @@ import { isAppError } from '../../utils/api';
 
 /**
  * Displays an error toast for the provided title and message
- *
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  * @param errorTitle Title of error to display in toaster and modal
  * @param errorMessages Message to display in error modal when clicked
  * @param dispatchToaster provided by useStateToaster()
@@ -41,7 +41,7 @@ export const displayErrorToast = (
 
 /**
  * Displays a warning toast for the provided title and message
- *
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  * @param title warning message to display in toaster and modal
  * @param dispatchToaster provided by useStateToaster()
  * @param id unique ID if necessary
@@ -65,7 +65,7 @@ export const displayWarningToast = (
 
 /**
  * Displays a success toast for the provided title and message
- *
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  * @param title success message to display in toaster and modal
  * @param dispatchToaster provided by useStateToaster()
  */
@@ -92,8 +92,16 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
 };
 
 /**
- * Displays an error toast with messages parsed from the error
+ * Displays an error toast with messages parsed from the error.
  *
+ * This has shortcomings and bugs compared to using the use_app_toasts because it takes naive guesses at the
+ * underlying data structure and does not display much about the error. This is not compatible with bsearch (async search)
+ * and sometimes can display to the user blank messages.
+ *
+ * The use_app_toasts has more feature rich logic and uses the Kibana toaster system to figure out which type of
+ * error you have in a more robust way then this function does and supersedes this function.
+ *
+ * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  * @param title error message to display in toaster and modal
  * @param error the error from which messages will be parsed
  * @param dispatchToaster provided by useStateToaster()

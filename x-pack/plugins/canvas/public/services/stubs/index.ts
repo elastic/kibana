@@ -8,18 +8,24 @@
 import { CanvasServices, services } from '../';
 import { embeddablesService } from './embeddables';
 import { expressionsService } from './expressions';
+import { reportingService } from './reporting';
 import { navLinkService } from './nav_link';
 import { notifyService } from './notify';
 import { labsService } from './labs';
 import { platformService } from './platform';
+import { searchService } from './search';
+import { workpadService } from './workpad';
 
 export const stubs: CanvasServices = {
   embeddables: embeddablesService,
   expressions: expressionsService,
+  reporting: reportingService,
   navLink: navLinkService,
   notify: notifyService,
   platform: platformService,
+  search: searchService,
   labs: labsService,
+  workpad: workpadService,
 };
 
 export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {

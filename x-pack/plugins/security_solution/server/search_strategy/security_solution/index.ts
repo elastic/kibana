@@ -11,7 +11,7 @@ import {
   PluginStart,
   shimHitsTotal,
 } from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -19,9 +19,11 @@ import {
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
+import { EndpointAppContext } from '../../endpoint/types';
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
-  data: PluginStart
+  data: PluginStart,
+  endpointContext: EndpointAppContext
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -42,7 +44,13 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             },
           };
         }),
-        mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
+        mergeMap((esSearchRes) =>
+          queryFactory.parse(request, esSearchRes, {
+            esClient: deps.esClient,
+            savedObjectsClient: deps.savedObjectsClient,
+            endpointContext,
+          })
+        )
       );
     },
     cancel: async (id, options, deps) => {

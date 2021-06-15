@@ -46,7 +46,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -90,7 +90,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -108,7 +108,7 @@ describe('Detection rules, machine learning', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', `${machineLearningRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
@@ -129,8 +129,10 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'Stopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningRule.machineLearningJob);
+      machineLearningRule.machineLearningJobs.forEach((machineLearningJob, jobIndex) => {
+        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('have.text', 'Stopped');
+        cy.get(MACHINE_LEARNING_JOB_ID).eq(jobIndex).should('have.text', machineLearningJob);
+      });
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(

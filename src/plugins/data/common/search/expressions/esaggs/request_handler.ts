@@ -9,15 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/common';
 
-import {
-  calculateBounds,
-  Filter,
-  getTime,
-  IndexPattern,
-  isRangeFilter,
-  Query,
-  TimeRange,
-} from '../../../../common';
+import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -40,28 +32,12 @@ export interface RequestHandlerParams {
   getNow?: () => Date;
 }
 
-function getRequestMainResponder(inspectorAdapters: Adapters, searchSessionId?: string) {
-  return inspectorAdapters.requests?.start(
-    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-      defaultMessage: 'Data',
-    }),
-    {
-      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-        defaultMessage:
-          'This request queries Elasticsearch to fetch the data for the visualization.',
-      }),
-      searchSessionId,
-    }
-  );
-}
-
 export const handleRequest = async ({
   abortSignal,
   aggs,
   filters,
   indexPattern,
   inspectorAdapters,
-  metricsAtAllLevels,
   partialRows,
   query,
   searchSessionId,
@@ -86,8 +62,15 @@ export const handleRequest = async ({
   const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
   const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
+  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
+  // pattern if it's available.
+  const defaultTimeField = indexPattern?.getTimeField?.();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
+  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
+
   aggs.setTimeRange(timeRange as TimeRange);
-  aggs.setTimeFields(timeFields);
+  aggs.setForceNow(forceNow);
+  aggs.setTimeFields(allTimeFields);
 
   // For now we need to mirror the history of the passed search source, since
   // the request inspector wouldn't work otherwise.
@@ -100,27 +83,17 @@ export const handleRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function () {
-    return aggs.toDsl(metricsAtAllLevels);
-  });
+  requestSearchSource.setField('aggs', aggs);
 
   requestSearchSource.onRequestStart((paramSearchSource, options) => {
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
-  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
-  // pattern if it's available.
-  const defaultTimeField = indexPattern?.getTimeField?.();
-  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
-  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
-
   // If a timeRange has been specified and we had at least one timeField available, create range
   // filters for that those time fields
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
-        .filter(isRangeFilter);
+      return aggs.getSearchSourceTimeFilter(forceNow);
     });
   }
 
@@ -128,35 +101,27 @@ export const handleRequest = async ({
   requestSearchSource.setField('query', query);
 
   inspectorAdapters.requests?.reset();
-  const requestResponder = getRequestMainResponder(inspectorAdapters, searchSessionId);
 
-  const response$ = await requestSearchSource.fetch$({
-    abortSignal,
-    sessionId: searchSessionId,
-    requestResponder,
-  });
-
-  // Note that rawResponse is not deeply cloned here, so downstream applications using courier
-  // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
-  // response data incorrectly in the inspector.
-  let response = await response$.toPromise();
-  for (const agg of aggs.aggs) {
-    if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
-      response = await agg.type.postFlightRequest(
-        response,
-        aggs,
-        agg,
-        requestSearchSource,
-        inspectorAdapters.requests,
-        abortSignal,
-        searchSessionId
-      );
-    }
-  }
+  const { rawResponse: response } = await requestSearchSource
+    .fetch$({
+      abortSignal,
+      sessionId: searchSessionId,
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+          defaultMessage: 'Data',
+        }),
+        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the data for the visualization.',
+        }),
+      },
+    })
+    .toPromise();
 
   const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
   const tabifyParams = {
-    metricsAtAllLevels,
+    metricsAtAllLevels: aggs.hierarchical,
     partialRows,
     timeRange: parsedTimeRange
       ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }

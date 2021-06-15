@@ -11,6 +11,7 @@ import { SetupPlugins } from '../plugin';
 
 export type CollectorDependencies = {
   kibanaIndex: string;
+  signalsIndex: string;
   core: CoreSetup;
   endpointAppContext: EndpointAppContext;
 } & Pick<SetupPlugins, 'ml' | 'usageCollection'>;

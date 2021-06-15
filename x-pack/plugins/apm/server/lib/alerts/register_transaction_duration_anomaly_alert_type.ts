@@ -8,15 +8,24 @@
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'typings/elasticsearch';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
   AlertType,
@@ -27,7 +36,6 @@ import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -47,12 +55,18 @@ const alertTypeConfig =
   ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
 
 export function registerTransactionDurationAnomalyAlertType({
-  registry,
-  ml,
   logger,
+  ruleDataClient,
+  alerting,
+  ml,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.TransactionDurationAnomaly,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -143,7 +157,7 @@ export function registerTransactionDurationAnomalyAlertType({
                         },
                       ]
                     : []),
-                ] as QueryContainer[],
+                ] as QueryDslQueryContainer[],
               },
             },
             aggs: {
@@ -166,7 +180,7 @@ export function registerTransactionDurationAnomalyAlertType({
                         { field: 'job_id' },
                       ] as const),
                       sort: {
-                        '@timestamp': 'desc' as const,
+                        timestamp: 'desc' as const,
                       },
                     },
                   },
@@ -211,6 +225,8 @@ export function registerTransactionDurationAnomalyAlertType({
 
           const parsedEnvironment = parseEnvironmentUrlParam(environment);
 
+          const severityLevel = getSeverity(score);
+
           services
             .alertWithLifecycle({
               id: [
@@ -227,6 +243,11 @@ export function registerTransactionDurationAnomalyAlertType({
                   ? { [SERVICE_ENVIRONMENT]: environment }
                   : {}),
                 [TRANSACTION_TYPE]: transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [ALERT_SEVERITY_LEVEL]: severityLevel,
+                [ALERT_SEVERITY_VALUE]: score,
+                [ALERT_EVALUATION_VALUE]: score,
+                [ALERT_EVALUATION_THRESHOLD]: threshold,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -234,7 +255,7 @@ export function registerTransactionDurationAnomalyAlertType({
               transactionType,
               environment,
               threshold: selectedOption?.label,
-              triggerValue: getSeverity(score),
+              triggerValue: severityLevel,
             });
         });
 

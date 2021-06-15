@@ -266,7 +266,7 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformRequestBody() with runtime mappings', () => {
+  test('getCreateTransformRequestBody() with runtime fields', () => {
     const runtimeMappings = {
       rt_bytes_bigger: {
         type: 'double',

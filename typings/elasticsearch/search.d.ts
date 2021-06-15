@@ -28,14 +28,14 @@ type KeysOfSources<T extends any[]> = T extends [infer U, ...infer V]
   : {};
 
 type CompositeKeysOf<
-  TAggregationContainer extends estypes.AggregationContainer
+  TAggregationContainer extends estypes.AggregationsAggregationContainer
 > = TAggregationContainer extends {
   composite: { sources: [...infer TSource] };
 }
   ? KeysOfSources<TSource>
   : unknown;
 
-type Source = estypes.SourceFilter | boolean | estypes.Fields;
+type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
   ? ValuesType<T>
@@ -49,16 +49,16 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = MaybeArray<string | estypes.DateField>;
-type DocValueFields = MaybeArray<string | estypes.DocValueField>;
+type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
+type DocValueFields = MaybeArray<string | estypes.SearchDocValueField>;
 
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
   TDocValueFields extends DocValueFields | undefined = undefined
-> = Omit<estypes.Hit, '_source' | 'fields'> &
+> = Omit<estypes.SearchHit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
-  (TFields extends estypes.Fields
+  (TFields extends Fields
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
@@ -77,16 +77,22 @@ type HitsOf<
 > = Array<
   SearchHit<
     TOptions extends { _source: false } ? undefined : TDocument,
-    TOptions extends { fields: estypes.Fields } ? TOptions['fields'] : undefined,
+    TOptions extends { fields: Fields } ? TOptions['fields'] : undefined,
     TOptions extends { docvalue_fields: DocValueFields } ? TOptions['docvalue_fields'] : undefined
   >
 >;
 
-type AggregationTypeName = Exclude<keyof estypes.AggregationContainer, 'aggs' | 'aggregations'>;
+type AggregationTypeName = Exclude<
+  keyof estypes.AggregationsAggregationContainer,
+  'aggs' | 'aggregations'
+>;
 
-type AggregationMap = Partial<Record<string, estypes.AggregationContainer>>;
+type AggregationMap = Partial<Record<string, estypes.AggregationsAggregationContainer>>;
 
-type TopLevelAggregationRequest = Pick<estypes.AggregationContainer, 'aggs' | 'aggregations'>;
+type TopLevelAggregationRequest = Pick<
+  estypes.AggregationsAggregationContainer,
+  'aggs' | 'aggregations'
+>;
 
 type MaybeKeyed<
   TAggregationContainer,
@@ -97,7 +103,7 @@ type MaybeKeyed<
   : { buckets: TBucket[] };
 
 export type AggregateOf<
-  TAggregationContainer extends estypes.AggregationContainer,
+  TAggregationContainer extends estypes.AggregationsAggregationContainer,
   TDocument
 > = (Record<AggregationTypeName, unknown> & {
   adjacency_matrix: {
@@ -518,9 +524,9 @@ export type AggregateOf<
         relation: 'eq' | 'gte';
       };
       max_score: number | null;
-      hits: TAggregationContainer extends { top_hits: estypes.TopHitsAggregation }
+      hits: TAggregationContainer extends { top_hits: estypes.AggregationsTopHitsAggregation }
         ? HitsOf<TAggregationContainer['top_hits'], TDocument>
-        : estypes.HitsMetadata<TDocument>;
+        : estypes.SearchHitsMetadata<TDocument>;
     };
   };
   top_metrics: {
@@ -542,7 +548,7 @@ export type AggregateOf<
 })[ValidAggregationKeysOf<TAggregationContainer> & AggregationTypeName];
 
 type AggregateOfMap<TAggregationMap extends AggregationMap, TDocument> = {
-  [TAggregationName in keyof TAggregationMap]: TAggregationMap[TAggregationName] extends estypes.AggregationContainer
+  [TAggregationName in keyof TAggregationMap]: TAggregationMap[TAggregationName] extends estypes.AggregationsAggregationContainer
     ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };

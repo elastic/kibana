@@ -22,6 +22,7 @@ import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain } from 'fp-ts/lib/Either';
+import { logIndexReferenceRT } from '../log_sources';
 
 export const TimestampFromString = new rt.Type<number, string>(
   'TimestampFromString',
@@ -38,6 +39,33 @@ export const TimestampFromString = new rt.Type<number, string>(
     ),
   (output) => new Date(output).toISOString()
 );
+
+/**
+ * Source configuration config file properties.
+ * These are properties that can appear in the kibana.yml file.
+ * This is a legacy method of providing properties, and will be deprecated in the future (v 8.0.0).
+ */
+
+export const sourceConfigurationConfigFilePropertiesRT = rt.type({
+  sources: rt.type({
+    default: rt.partial({
+      logAlias: rt.string, // Cannot be deprecated until 8.0.0. Will be converted to an indexName reference.
+      metricAlias: rt.string,
+      fields: rt.partial({
+        timestamp: rt.string,
+        message: rt.array(rt.string),
+        tiebreaker: rt.string,
+        host: rt.string,
+        container: rt.string,
+        pod: rt.string,
+      }),
+    }),
+  }),
+});
+
+export type SourceConfigurationConfigFileProperties = rt.TypeOf<
+  typeof sourceConfigurationConfigFilePropertiesRT
+>;
 
 /**
  * Log columns
@@ -103,7 +131,7 @@ export const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
   metricAlias: rt.string,
-  logAlias: rt.string,
+  logIndices: logIndexReferenceRT,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,
   fields: SourceConfigurationFieldsRT,
@@ -131,12 +159,6 @@ export const SavedSourceConfigurationRuntimeType = rt.intersection([
 
 export interface InfraSavedSourceConfiguration
   extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
-
-export const pickSavedSourceConfiguration = (
-  value: InfraSourceConfiguration
-): InfraSavedSourceConfiguration => {
-  return value;
-};
 
 /**
  * Static source configuration, the result of merging values from the config file and

@@ -39,9 +39,9 @@ describe('Closing alerts', () => {
     loginAndWaitForPage(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(newRule, '1', '100m', 100);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(100);
     deleteCustomRule();
   });
 

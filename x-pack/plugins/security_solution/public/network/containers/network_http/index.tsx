@@ -29,6 +29,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkHttpQuery';
 
@@ -67,7 +68,7 @@ export const useNetworkHttp = ({
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
   const getHttpSelector = useMemo(() => networkSelectors.httpSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getHttpSelector(state, type));
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -108,6 +109,7 @@ export const useNetworkHttp = ({
     refetch: refetch.current,
     totalCount: -1,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkHttpSearch = useCallback(
     (request: NetworkHttpRequestOptions | null) => {
@@ -139,16 +141,14 @@ export const useNetworkHttp = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_HTTP);
+                addWarning(i18n.ERROR_NETWORK_HTTP);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_HTTP,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -159,7 +159,7 @@ export const useNetworkHttp = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

@@ -20,6 +20,7 @@ import {
   getEmbeddable,
   getDocLinks,
 } from '../services';
+import type { BaseVisType } from '../vis_types';
 
 const NewVisModal = lazy(() => import('./new_vis_modal'));
 
@@ -29,6 +30,8 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
+  showAggsSelection?: boolean;
+  selectedVisType?: BaseVisType;
 }
 
 /**
@@ -41,6 +44,8 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
+  showAggsSelection,
+  selectedVisType,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;
@@ -78,6 +83,8 @@ export function showNewVisModal({
           usageCollection={getUsageCollector()}
           application={getApplication()}
           docLinks={getDocLinks()}
+          showAggsSelection={showAggsSelection}
+          selectedVisType={selectedVisType}
         />
       </Suspense>
     </I18nProvider>

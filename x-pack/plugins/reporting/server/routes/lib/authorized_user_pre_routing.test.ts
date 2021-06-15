@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
 import { ReportingInternalSetup } from '../../core';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../test_helpers';
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;
-const mockConfig: any = { 'server.basePath': '/sbp', 'roles.allow': ['reporting_user'] };
-const mockReportingConfigSchema = createMockConfigSchema(mockConfig);
-const mockReportingConfig = createMockConfig(mockReportingConfigSchema);
+const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
 
 const getMockContext = () =>
   (({
@@ -111,50 +105,64 @@ describe('authorized_user_pre_routing', function () {
     });
   });
 
-  it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
-    mockCore.getPluginSetupDeps = () =>
-      (({
-        // @ts-ignore
-        ...mockCore.pluginSetupDeps,
-        security: {
-          license: { isEnabled: () => true },
-          authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
+  describe('Deprecated: security roles for access control', () => {
+    beforeEach(async () => {
+      const mockReportingConfigDeprecated = createMockConfigSchema({
+        roles: {
+          allow: ['reporting_user'],
+          enabled: true,
         },
-      } as unknown) as ReportingInternalSetup);
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
-    const mockResponseFactory = getMockResponseFactory();
+      });
+      mockCore = await createMockReportingCore(mockReportingConfigDeprecated);
+    });
 
-    const mockHandler = () => {
-      throw new Error('Handler callback should not be called');
-    };
-    expect(
-      authorizedUserPreRouting(mockHandler)(getMockContext(), getMockRequest(), mockResponseFactory)
-    ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
-  });
-
-  it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
-    mockCore.getPluginSetupDeps = () =>
-      (({
-        // @ts-ignore
-        ...mockCore.pluginSetupDeps,
-        security: {
-          license: { isEnabled: () => true },
-          authc: {
-            getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
+    it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
+      mockCore.getPluginSetupDeps = () =>
+        (({
+          // @ts-ignore
+          ...mockCore.pluginSetupDeps,
+          security: {
+            license: { isEnabled: () => true },
+            authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
           },
-        },
-      } as unknown) as ReportingInternalSetup);
-    // @ts-ignore overloading config getter
-    mockCore.config = mockReportingConfig;
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
-    const mockResponseFactory = getMockResponseFactory();
+        } as unknown) as ReportingInternalSetup);
+      const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
+      const mockResponseFactory = getMockResponseFactory();
 
-    authorizedUserPreRouting((user) => {
-      expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
-      done();
-      return Promise.resolve({ status: 200, options: {} });
-    })(getMockContext(), getMockRequest(), mockResponseFactory);
+      const mockHandler = () => {
+        throw new Error('Handler callback should not be called');
+      };
+      expect(
+        authorizedUserPreRouting(mockHandler)(
+          getMockContext(),
+          getMockRequest(),
+          mockResponseFactory
+        )
+      ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
+    });
+
+    it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
+      mockCore.getPluginSetupDeps = () =>
+        (({
+          // @ts-ignore
+          ...mockCore.pluginSetupDeps,
+          security: {
+            license: { isEnabled: () => true },
+            authc: {
+              getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
+            },
+          },
+        } as unknown) as ReportingInternalSetup);
+      const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
+      const mockResponseFactory = getMockResponseFactory();
+
+      authorizedUserPreRouting((user) => {
+        expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
+        done();
+        return Promise.resolve({ status: 200, options: {} });
+      })(getMockContext(), getMockRequest(), mockResponseFactory);
+    });
+
+    it('should return from handler when security is enabled and user has superuser role', async function () {});
   });
-
-  it('should return from handler when security is enabled and user has superuser role', async function () {});
 });

@@ -8,18 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { DataSeries } from '../../types';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
-  series: DataSeries;
+  seriesId: string;
 }
 
-export function RemoveSeries({ series }: Props) {
-  const { removeSeries } = useUrlStorage();
+export function RemoveSeries({ seriesId }: Props) {
+  const { removeSeries } = useSeriesStorage();
 
   const onClick = () => {
-    removeSeries(series.id);
+    removeSeries(seriesId);
   };
   return (
     <EuiButtonIcon

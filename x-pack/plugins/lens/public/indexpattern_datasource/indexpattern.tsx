@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -45,7 +44,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -53,6 +52,10 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { DraggingIdentifier } from '../drag_drop';
+import { getTimeShiftWarningMessages } from './dimension_panel/time_shift';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -78,12 +81,14 @@ export function getIndexPatternDatasource({
   data,
   charts,
   indexPatternFieldEditor,
+  uiActions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
@@ -197,6 +202,7 @@ export function getIndexPatternDatasource({
             indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
             core={core}
+            uiActions={uiActions}
           />
         </I18nProvider>,
         domElement
@@ -317,8 +323,41 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
+
+    canCloseDimensionEditor: (state) => {
+      return !state.isDimensionClosePrevented;
+    },
+
     getDropProps,
     onDrop,
+
+    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
+        return undefined;
+      }
+
+      const draggedField = dragging as DraggingIdentifier & {
+        field: IndexPatternField;
+        indexPatternId: string;
+      };
+      const geoFieldType =
+        draggedField.field.esTypes &&
+        draggedField.field.esTypes.find((esType) => {
+          return ['geo_point', 'geo_shape'].includes(esType);
+        });
+      return geoFieldType
+        ? () => {
+            return (
+              <GeoFieldWorkspacePanel
+                uiActions={uiActions}
+                fieldType={geoFieldType}
+                indexPatternId={draggedField.indexPatternId}
+                fieldName={draggedField.field.name}
+              />
+            );
+          }
+        : undefined;
+    },
 
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
@@ -374,13 +413,20 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.values(state.layers).map((layer) =>
-        (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
-          (message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: message,
-          })
-        )
+      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
+        (
+          getErrorMessages(
+            layer,
+            state.indexPatterns[layer.indexPatternId],
+            state,
+            layerId,
+            core
+          ) ?? []
+        ).map((message) => ({
+          shortMessage: '', // Not displayed currently
+          longMessage: typeof message === 'string' ? message : message.message,
+          fixAction: typeof message === 'object' ? message.fixAction : undefined,
+        }))
       );
 
       // Single layer case, no need to explain more
@@ -416,6 +462,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
+    getWarningMessages: getTimeShiftWarningMessages,
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

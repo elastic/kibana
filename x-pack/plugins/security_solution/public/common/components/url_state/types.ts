@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
@@ -148,7 +147,6 @@ export interface UrlStateToRedux {
 }
 
 export interface SetInitialStateFromUrl<TCache> {
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
   filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
@@ -160,7 +158,6 @@ export interface SetInitialStateFromUrl<TCache> {
 }
 
 export type DispatchSetInitialStateFromUrl = <TCache>({
-  apolloClient,
   detailName,
   indexPattern,
   pageName,

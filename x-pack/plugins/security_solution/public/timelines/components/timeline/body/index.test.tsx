@@ -17,6 +17,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
+import { defaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -86,6 +87,8 @@ describe('Body', () => {
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
+    leadingControlColumns: [defaultControlColumn],
+    trailingControlColumns: [],
   };
 
   describe('rendering', () => {

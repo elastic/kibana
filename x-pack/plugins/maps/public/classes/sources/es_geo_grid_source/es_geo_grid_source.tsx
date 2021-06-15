@@ -27,6 +27,7 @@ import {
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   MVT_SOURCE_LAYER_NAME,
+  MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -38,7 +39,8 @@ import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { GeoJsonWithMeta } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
@@ -50,6 +52,7 @@ import { ISearchSource } from '../../../../../../../src/plugins/data/common/sear
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -420,12 +423,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }> {
+  ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -441,20 +439,19 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
+      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const geoField = await this._getGeoField();
     const urlTemplate = `${mvtUrlServicePath}\
-?x={x}\
-&y={y}\
-&z={z}\
-&geometryFieldName=${this._descriptor.geoField}\
+?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
 &requestType=${this._descriptor.requestType}\
 &geoFieldType=${geoField.type}`;
+
     return {
+      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
@@ -474,7 +471,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     }
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return true;
   }
 

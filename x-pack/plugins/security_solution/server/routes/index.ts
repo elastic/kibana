@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleDataClient } from '../../../rule_registry/server';
+
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -29,36 +31,50 @@ import { createRulesBulkRoute } from '../lib/detection_engine/routes/rules/creat
 import { updateRulesBulkRoute } from '../lib/detection_engine/routes/rules/update_rules_bulk_route';
 import { patchRulesBulkRoute } from '../lib/detection_engine/routes/rules/patch_rules_bulk_route';
 import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delete_rules_bulk_route';
+import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
-import { importTimelinesRoute } from '../lib/timeline/routes/timelines/import_timelines';
-import { exportTimelinesRoute } from '../lib/timeline/routes/timelines/export_timelines';
-import { createTimelinesRoute } from '../lib/timeline/routes/timelines/create_timelines';
-import { updateTimelinesRoute } from '../lib/timeline/routes/timelines/patch_timelines';
+import {
+  createTimelinesRoute,
+  deleteTimelinesRoute,
+  exportTimelinesRoute,
+  getTimelineRoute,
+  getTimelinesRoute,
+  importTimelinesRoute,
+  patchTimelinesRoute,
+  persistFavoriteRoute,
+} from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
+
+import { persistNoteRoute } from '../lib/timeline/routes/notes';
+
+import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
+
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-import { getTimelineRoute } from '../lib/timeline/routes/timelines/get_timeline';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient: RuleDataClient | null
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml);
-  readRulesRoute(router);
-  updateRulesRoute(router, ml);
-  patchRulesRoute(router, ml);
-  deleteRulesRoute(router);
-  findRulesRoute(router);
+  createRulesRoute(router, ml, ruleDataClient);
+  readRulesRoute(router, ruleDataClient);
+  updateRulesRoute(router, ml, ruleDataClient);
+  patchRulesRoute(router, ml, ruleDataClient);
+  deleteRulesRoute(router, ruleDataClient);
+  findRulesRoute(router, ruleDataClient);
+
+  // TODO: pass ruleDataClient to all relevant routes
 
   addPrepackedRulesRoute(router, config, security);
   getPrepackagedRulesStatusRoute(router, config, security);
@@ -66,9 +82,10 @@ export const initRoutes = (
   updateRulesBulkRoute(router, ml);
   patchRulesBulkRoute(router, ml);
   deleteRulesBulkRoute(router);
+  performBulkActionRoute(router, ml);
 
   createTimelinesRoute(router, config, security);
-  updateTimelinesRoute(router, config, security);
+  patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml);
   exportRulesRoute(router, config);
 
@@ -76,9 +93,15 @@ export const initRoutes = (
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
+  deleteTimelinesRoute(router, config, security);
+  persistFavoriteRoute(router, config, security);
 
   installPrepackedTimelinesRoute(router, config, security);
+
+  persistNoteRoute(router, config, security);
+  persistPinnedEventRoute(router, config, security);
 
   findRulesStatusesRoute(router);
 
@@ -86,7 +109,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router);
-  querySignalsRoute(router);
+  querySignalsRoute(router, config);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, security);
@@ -95,7 +118,7 @@ export const initRoutes = (
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
-  readIndexRoute(router);
+  readIndexRoute(router, config);
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags

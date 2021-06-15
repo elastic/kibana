@@ -6,23 +6,23 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
-import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
-import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
-import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
-import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
-import { getServiceInstancesPrimaryStatistics } from '../lib/services/get_service_instances/primary_statistics';
+import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
+import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
+import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
+import { getServiceInstancesDetailedStatisticsPeriods } from '../lib/services/get_service_instances/detailed_statistics';
+import { getServiceInstancesMainStatistics } from '../lib/services/get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
@@ -30,7 +30,6 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -40,6 +39,7 @@ import {
   kueryRt,
   rangeRt,
 } from './default_api_types';
+import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -294,9 +294,8 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
   },
 });
 
-const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
+const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -319,7 +318,7 @@ const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
       path: { serviceName },
       query: { kuery, transactionType, environment },
     } = params;
-    return getServiceErrorGroupPrimaryStatistics({
+    return getServiceErrorGroupMainStatistics({
       kuery,
       serviceName,
       setup,
@@ -329,9 +328,9 @@ const serviceErrorGroupsPrimaryStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceErrorGroupsComparisonStatisticsRoute = createApmServerRoute({
+const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
+    'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -446,9 +445,9 @@ const serviceThroughputRoute = createApmServerRoute({
   },
 });
 
-const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
+const serviceInstancesMainStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics',
+    'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -458,6 +457,7 @@ const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
       }),
+      comparisonRangeRt,
       environmentRt,
       kueryRt,
       rangeRt,
@@ -473,6 +473,8 @@ const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
       kuery,
       transactionType,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -481,25 +483,42 @@ const serviceInstancesPrimaryStatisticsRoute = createApmServerRoute({
 
     const { start, end } = setup;
 
-    const serviceInstances = await getServiceInstancesPrimaryStatistics({
-      environment,
-      kuery,
-      latencyAggregationType,
-      serviceName,
-      setup,
-      transactionType,
-      searchAggregatedTransactions,
-      start,
-      end,
-    });
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceInstancesMainStatistics({
+        environment,
+        kuery,
+        latencyAggregationType,
+        serviceName,
+        setup,
+        transactionType,
+        searchAggregatedTransactions,
+        start,
+        end,
+      }),
+      ...(comparisonStart && comparisonEnd
+        ? [
+            getServiceInstancesMainStatistics({
+              environment,
+              kuery,
+              latencyAggregationType,
+              serviceName,
+              setup,
+              transactionType,
+              searchAggregatedTransactions,
+              start: comparisonStart,
+              end: comparisonEnd,
+            }),
+          ]
+        : []),
+    ]);
 
-    return { serviceInstances };
+    return { currentPeriod, previousPeriod };
   },
 });
 
-const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
+const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics',
+    'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -537,7 +556,7 @@ const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
       setup
     );
 
-    return getServiceInstancesComparisonStatisticsPeriods({
+    return getServiceInstancesDetailedStatisticsPeriods({
       environment,
       kuery,
       latencyAggregationType,
@@ -553,7 +572,44 @@ const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceDependenciesRoute = createApmServerRoute({
+export const serviceInstancesMetadataDetails = createApmServerRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { serviceName, serviceNodeName } = resources.params.path;
+    const { transactionType, environment, kuery } = resources.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return await getServiceInstanceMetadataDetails({
+      searchAggregatedTransactions,
+      setup,
+      serviceName,
+      serviceNodeName,
+      transactionType,
+      environment,
+      kuery,
+    });
+  },
+});
+
+export const serviceDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
   params: t.type({
     path: t.type({
@@ -664,6 +720,42 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+const serviceAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/alerts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, params, ruleDataClient }) => {
+    const {
+      query: { start, end, environment, transactionType },
+      path: { serviceName },
+    } = params;
+
+    return {
+      alerts: await getServiceAlerts({
+        ruleDataClient,
+        start,
+        end,
+        serviceName,
+        environment,
+        transactionType,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(serviceMetadataDetailsRoute)
@@ -673,11 +765,13 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
   .add(serviceAnnotationsCreateRoute)
-  .add(serviceErrorGroupsPrimaryStatisticsRoute)
-  .add(serviceErrorGroupsComparisonStatisticsRoute)
+  .add(serviceErrorGroupsMainStatisticsRoute)
+  .add(serviceErrorGroupsDetailedStatisticsRoute)
+  .add(serviceInstancesMetadataDetails)
   .add(serviceThroughputRoute)
-  .add(serviceInstancesPrimaryStatisticsRoute)
-  .add(serviceInstancesComparisonStatisticsRoute)
+  .add(serviceInstancesMainStatisticsRoute)
+  .add(serviceInstancesDetailedStatisticsRoute)
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
-  .add(serviceProfilingStatisticsRoute);
+  .add(serviceProfilingStatisticsRoute)
+  .add(serviceAlertsRoute);

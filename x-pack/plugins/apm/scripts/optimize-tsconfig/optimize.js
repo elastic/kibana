@@ -85,8 +85,14 @@ async function setIgnoreChanges() {
   }
 }
 
-async function deleteApmTsConfig() {
-  await unlink(path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'));
+async function deleteTsConfigs() {
+  const toDelete = ['apm', 'observability', 'rule_registry'];
+
+  for (const app of toDelete) {
+    await unlink(
+      path.resolve(kibanaRoot, 'x-pack/plugins', app, 'tsconfig.json')
+    );
+  }
 }
 
 async function optimizeTsConfig() {
@@ -98,7 +104,7 @@ async function optimizeTsConfig() {
 
   await addApmFilesToTestTsConfig();
 
-  await deleteApmTsConfig();
+  await deleteTsConfigs();
 
   await setIgnoreChanges();
   // eslint-disable-next-line no-console

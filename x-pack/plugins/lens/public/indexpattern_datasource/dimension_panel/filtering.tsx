@@ -75,10 +75,10 @@ export function Filtering({
             anchorClassName="eui-fullWidth"
             panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
             button={
-              <EuiPanel paddingSize="none">
+              <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={true}>
                     <EuiLink
                       className="lnsFiltersOperation__popoverButton"
                       data-test-subj="indexPattern-filters-existingFilterTrigger"
@@ -96,12 +96,25 @@ export function Filtering({
                         })}
                     </EuiLink>
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="indexPattern-filter-by-remove"
+                      color="danger"
+                      aria-label={i18n.translate('xpack.lens.filterBy.removeLabel', {
+                        defaultMessage: 'Remove filter',
+                      })}
+                      onClick={() => {
+                        updateLayer(setFilter(columnId, layer, undefined));
+                      }}
+                      iconType="cross"
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             }
           >
             <QueryInput
-              indexPattern={indexPattern}
+              indexPatternTitle={indexPattern.title}
               data-test-subj="indexPattern-filter-by-input"
               value={selectedColumn.filter || defaultFilter}
               onChange={(newQuery) => {
@@ -111,19 +124,6 @@ export function Filtering({
               onSubmit={() => {}}
             />
           </EuiPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="indexPattern-filter-by-remove"
-            color="danger"
-            aria-label={i18n.translate('xpack.lens.filterBy.removeLabel', {
-              defaultMessage: 'Remove filter',
-            })}
-            onClick={() => {
-              updateLayer(setFilter(columnId, layer, undefined));
-            }}
-            iconType="cross"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

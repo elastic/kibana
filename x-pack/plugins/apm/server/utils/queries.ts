@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
+export { kqlQuery, rangeQuery } from '../../../observability/server';
 
-type QueryContainer = ESFilter;
+type QueryDslQueryContainer = ESFilter;
 
-export function environmentQuery(environment?: string): QueryContainer[] {
+export function environmentQuery(
+  environment?: string
+): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
@@ -25,31 +27,4 @@ export function environmentQuery(environment?: string): QueryContainer[] {
   }
 
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
-}
-
-export function rangeQuery(
-  start: number,
-  end: number,
-  field = '@timestamp'
-): QueryContainer[] {
-  return [
-    {
-      range: {
-        [field]: {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
-}
-
-export function kqlQuery(kql?: string) {
-  if (!kql) {
-    return [];
-  }
-
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }

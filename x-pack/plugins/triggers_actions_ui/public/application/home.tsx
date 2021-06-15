@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -26,11 +26,15 @@ import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+
+const ActionsConnectorsList = lazy(
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+);
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
 export interface MatchParams {
   section: Section;
@@ -86,7 +90,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageContent color="transparent">
         <EuiTitle size="m">
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -137,32 +141,24 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <EuiSpacer size="s" />
 
-        <Switch>
-          {canShowActions && (
-            <Route
-              exact
-              path={routeToConnectors}
-              component={() => (
-                <HealthContextProvider>
-                  <HealthCheck waitForCheck={true}>
-                    <ActionsConnectorsList />
-                  </HealthCheck>
-                </HealthContextProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Switch>
+              {canShowActions && (
+                <Route
+                  exact
+                  path={routeToConnectors}
+                  component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
+                />
               )}
-            />
-          )}
-          <Route
-            exact
-            path={routeToRules}
-            component={() => (
-              <HealthContextProvider>
-                <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <AlertsList />
-                </HealthCheck>
-              </HealthContextProvider>
-            )}
-          />
-        </Switch>
+              <Route
+                exact
+                path={routeToRules}
+                component={suspendedComponentWithProps(AlertsList, 'xl')}
+              />
+            </Switch>
+          </HealthCheck>
+        </HealthContextProvider>
       </EuiPageContent>
     </EuiPageBody>
   );

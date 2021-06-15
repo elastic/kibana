@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import '../../../__mocks__/react_router_history.mock';
-import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import {
+  mockFlashMessageHelpers,
+  setMockValues,
+  setMockActions,
+} from '../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
+import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
+import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SchemaRouter } from '../schema';
+import { SearchUI } from '../search_ui';
+import { SourceEngines } from '../source_engines';
+import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
 
@@ -37,7 +47,7 @@ describe('EngineRouter', () => {
   beforeEach(() => {
     setMockValues(values);
     setMockActions(actions);
-    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-engine' });
+    mockUseParams.mockReturnValue({ engineName: 'some-engine' });
   });
 
   describe('useEffect', () => {
@@ -81,7 +91,7 @@ describe('EngineRouter', () => {
   // any route views as they would be rendering with the wrong data.
   it('renders a loading component if the engine stored in state is stale', () => {
     setMockValues({ ...values, engineName: 'some-engine' });
-    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-new-engine' });
+    mockUseParams.mockReturnValue({ engineName: 'some-new-engine' });
     const wrapper = shallow(<EngineRouter />);
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
@@ -98,6 +108,28 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders a documents view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineDocuments: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(Documents)).toHaveLength(1);
+    expect(wrapper.find(DocumentDetail)).toHaveLength(1);
+  });
+
+  it('renders a schema view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineSchema: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SchemaRouter)).toHaveLength(1);
+  });
+
+  it('renders a synonyms view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineSynonyms: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(Synonyms)).toHaveLength(1);
   });
 
   it('renders a curations view', () => {
@@ -126,5 +158,26 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(ApiLogs)).toHaveLength(1);
+  });
+
+  it('renders a search ui view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SearchUI)).toHaveLength(1);
+  });
+
+  it('renders a source engines view', () => {
+    setMockValues({ ...values, myRole: { canViewMetaEngineSourceEngines: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SourceEngines)).toHaveLength(1);
+  });
+
+  it('renders a crawler view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineCrawler: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(CrawlerRouter)).toHaveLength(1);
   });
 });

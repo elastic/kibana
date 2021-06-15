@@ -9,5 +9,5 @@ Creates an empty response for a find operation. This is only intended to be used
 <b>Signature:</b>
 
 ```typescript
-static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
+static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;
 ```

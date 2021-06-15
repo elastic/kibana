@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
 import { meta } from '../../../__mocks__/meta.mock';
 
@@ -34,7 +34,6 @@ import { SourceContent } from './source_content';
 describe('SourceContent', () => {
   const setActivePage = jest.fn();
   const searchContentSourceDocuments = jest.fn();
-  const resetSourceState = jest.fn();
   const setContentFilterValue = jest.fn();
 
   const mockValues = {
@@ -51,7 +50,6 @@ describe('SourceContent', () => {
     setMockActions({
       setActivePage,
       searchContentSourceDocuments,
-      resetSourceState,
       setContentFilterValue,
     });
     setMockValues({ ...mockValues });

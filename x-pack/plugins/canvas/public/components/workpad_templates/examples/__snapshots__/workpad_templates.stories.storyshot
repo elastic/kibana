@@ -69,6 +69,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="arrowDown"
                   size="m"
                 />
@@ -130,8 +131,9 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     >
                       <span
                         className="euiButtonContent__icon"
+                        color="inherit"
                         data-euiicon-type="arrowDown"
-                        size="m"
+                        size="s"
                       />
                       <span
                         className="euiButtonEmpty__text"
@@ -180,21 +182,14 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
-                    title="; Sorted in ascending order"
                   >
                     Template name
                   </span>
                   <span
-                    aria-label="Sorted in ascending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortUp"
                     size="m"
                   />
-                  <span
-                    className="euiScreenReaderOnly"
-                  >
-                    Click to sort in descending order
-                  </span>
                 </span>
               </button>
             </th>
@@ -209,7 +204,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 }
               }
             >
-              <div
+              <span
                 className="euiTableCellContent"
               >
                 <span
@@ -217,7 +212,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   Description
                 </span>
-              </div>
+              </span>
             </th>
             <th
               className="euiTableHeaderCell"
@@ -230,7 +225,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 }
               }
             >
-              <div
+              <span
                 className="euiTableCellContent"
               >
                 <span
@@ -238,7 +233,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   Tags
                 </span>
-              </div>
+              </span>
             </th>
           </tr>
         </thead>
@@ -514,6 +509,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowLeft"
             size="m"
           />
@@ -556,6 +552,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
           />

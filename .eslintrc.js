@@ -712,6 +712,33 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'react-use',
                 message: 'Please use react-use/lib/{method} instead.',
               },
@@ -731,12 +758,22 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'lodash/set',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
                 message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
               },
             ],
           },
@@ -752,6 +789,18 @@ module.exports = {
             object: '_',
             property: 'set',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
           {
             object: 'lodash',
@@ -1115,6 +1164,118 @@ module.exports = {
       },
     },
     /**
+     * Metrics entities overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/metrics_entities/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/metrics_entities/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+    {
+      // typescript and javascript for front and back end
+      files: ['x-pack/plugins/metrics_entities/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['eslint-plugin-node'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'error',
+        'consistent-return': 'error',
+        'func-style': ['error', 'expression'],
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'error',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': ['error', { props: true }],
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // rely on typescript
+        'no-undef': 'off',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-escape': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'no-void': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+        'no-template-curly-in-string': 'error',
+        'sort-keys': 'error',
+        'prefer-destructuring': 'error',
+      },
+    },
+    /**
      * Alerting Services overrides
      */
     {
@@ -1141,6 +1302,22 @@ module.exports = {
       files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Discover overrides
+     */
+    {
+      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-expect-error': false,
+          },
+        ],
       },
     },
 
@@ -1193,7 +1370,7 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1378,6 +1555,10 @@ module.exports = {
             ],
             pathGroups: [
               {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
                 pattern: '{@kbn/**,src/**,kibana{,/**}}',
                 group: 'internal',
               },
@@ -1402,6 +1583,24 @@ module.exports = {
       },
     },
 
+    /**
+     * Do not allow `any`
+     */
+    {
+      files: [
+        'packages/kbn-analytics/**',
+        // 'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
     {
       files: [
         // core-team owned code
@@ -1424,21 +1623,6 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
-      },
-    },
-    {
-      files: [
-        '**/public/**/*.{js,mjs,ts,tsx}',
-        '**/common/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
-          },
-        ],
       },
     },
   ],

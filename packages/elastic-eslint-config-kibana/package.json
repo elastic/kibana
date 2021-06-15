@@ -16,8 +16,5 @@
   "bugs": {
     "url": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana",
-  "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  }
+  "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
 }

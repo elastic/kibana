@@ -13,10 +13,10 @@ import { Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
-import { getPluginApi } from '../get_plugin_api';
 import { groupPluginApi } from '../utils';
+import { getPluginApiMap } from '../get_plugin_api_map';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -46,6 +46,8 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p1!.isRequired).toBe(true);
   expect(p1!.signature?.length).toBe(1);
   expect(linkCount(p1!.signature!)).toBe(0);
+  expect(p1?.description).toBeDefined();
+  expect(p1?.description?.length).toBe(1);
 
   const p2 = fn?.children!.find((c) => c.label === 'b');
   expect(p2).toBeDefined();
@@ -53,12 +55,15 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p2!.type).toBe(TypeKind.NumberKind);
   expect(p2!.signature?.length).toBe(1);
   expect(linkCount(p2!.signature!)).toBe(0);
+  expect(p2?.description?.length).toBe(1);
 
   const p3 = fn?.children!.find((c) => c.label === 'c');
   expect(p3).toBeDefined();
   expect(p3!.isRequired).toBe(true);
   expect(p3!.type).toBe(TypeKind.ArrayKind);
   expect(linkCount(p3!.signature!)).toBe(1);
+  expect(p3?.description).toBeDefined();
+  expect(p3?.description?.length).toBe(1);
 
   const p4 = fn?.children!.find((c) => c.label === 'd');
   expect(p4).toBeDefined();
@@ -66,6 +71,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p4!.type).toBe(TypeKind.CompoundTypeKind);
   expect(p4!.signature?.length).toBe(1);
   expect(linkCount(p4!.signature!)).toBe(1);
+  expect(p4?.description?.length).toBe(1);
 
   const p5 = fn?.children!.find((c) => c.label === 'e');
   expect(p5).toBeDefined();
@@ -73,6 +79,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5!.type).toBe(TypeKind.StringKind);
   expect(p5!.signature?.length).toBe(1);
   expect(linkCount(p5!.signature!)).toBe(0);
+  expect(p5?.description?.length).toBe(1);
 }
 
 beforeAll(() => {
@@ -84,13 +91,31 @@ beforeAll(() => {
   expect(project.getSourceFiles().length).toBeGreaterThan(0);
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
+  const pluginB = getKibanaPlatformPlugin(
+    'pluginB',
+    Path.resolve(__dirname, '__fixtures__/src/plugin_b')
+  );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
-  doc = getPluginApi(project, plugins[0], plugins, log);
+  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const pluginStats: ApiStats = {
+    missingComments: [],
+    isAnyType: [],
+    noReferences: [],
+    apiCount: 3,
+    missingExports: 0,
+  };
 
+  doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, doc, log);
+  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats, log });
+  writePluginDocs(mdxOutputFolder, {
+    doc: pluginApiMap.pluginB,
+    plugin: pluginB,
+    pluginStats,
+    log,
+  });
 });
 
 it('Setup type is extracted', () => {
@@ -137,7 +162,12 @@ describe('functions', () => {
   it('function referencing missing type has link removed', () => {
     const fn = doc.client.find((c) => c.label === 'fnWithNonExportedRef');
     expect(linkCount(fn?.signature!)).toBe(0);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children!.length).toBe(1);
+    expect(fn?.children![0].signature).toBeDefined();
+    expect(linkCount(fn?.children![0].signature!)).toBe(0);
   });
+
   it('arrow function is exported correctly', () => {
     const fn = doc.client.find((c) => c.label === 'arrowFn');
     // Using the same data as the not an arrow function so this is refactored.
@@ -189,8 +219,7 @@ describe('objects', () => {
 
     const fn = obj?.children?.find((c) => c.label === 'notAnArrowFn');
     expect(fn?.signature).toBeDefined();
-    // Should just be typeof notAnArrowFn.
-    expect(linkCount(fn?.signature!)).toBe(1);
+    expect(linkCount(fn?.signature!)).toBe(3);
     // Comment should be the inline one.
     expect(fn?.description).toMatchInlineSnapshot(`
       Array [
@@ -217,6 +246,32 @@ describe('objects', () => {
 });
 
 describe('Misc types', () => {
+  it('Type using ReactElement has the right signature', () => {
+    const api = doc.client.find((c) => c.label === 'AReactElementFn');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "() => React.ReactElement<",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ">",
+      ]
+    `);
+  });
+
+  it('Type referencing not exported type has the link removed', () => {
+    const api = doc.client.find((c) => c.label === 'IRefANotExportedType');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+  });
+
   it('Explicitly typed array is returned with the correct type', () => {
     const aStrArray = doc.client.find((c) => c.label === 'aStrArray');
     expect(aStrArray).toBeDefined();
@@ -256,7 +311,7 @@ describe('Misc types', () => {
     expect(fnType?.type).toBe(TypeKind.TypeKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
       Array [
-        "(t: T) => ",
+        "<T>(t: T) => ",
         Object {
           "docId": "kibPluginAPluginApi",
           "pluginId": "pluginA",
@@ -323,6 +378,16 @@ describe('interfaces and classes', () => {
     expect(anInterface?.signature).toBeUndefined();
   });
 
+  it('deprecated interface exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'AnotherInterface');
+    expect(anInterface).toBeDefined();
+
+    expect(anInterface?.deprecated).toBeTruthy();
+    expect(anInterface?.references).toBeDefined();
+    expect(anInterface?.references!.length).toBe(2);
+    expect(anInterface?.removeBy).toEqual('8.0');
+  });
+
   it('Interface which extends exported correctly', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -331,9 +396,6 @@ describe('interfaces and classes', () => {
 
     expect(linkCount(exampleInterface?.signature!)).toBe(2);
 
-    // TODO: uncomment if the bug is fixed.
-    // This is wrong, the link should be to `AnotherInterface`
-    // Another bug, this link is not being captured.
     expect(exampleInterface?.signature).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -405,9 +467,19 @@ describe('interfaces and classes', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
+    // This covers FunctionType nodes.
     const fnWithGeneric = exampleInterface?.children?.find((c) => c.label === 'aFnWithGen');
     expect(fnWithGeneric).toBeDefined();
+    expect(fnWithGeneric?.children).toBeDefined();
+    expect(fnWithGeneric?.children!.length).toBe(1);
     expect(fnWithGeneric?.type).toBe(TypeKind.FunctionKind);
+
+    const param = fnWithGeneric?.children?.find((c) => c.label === 't');
+    expect(fnWithGeneric?.returnComment![0]).toBe('nothing!');
+    expect(param).toBeDefined();
+    expect(param?.description).toBeDefined();
+    expect(param?.description?.length).toBe(1);
+    expect(param!.description![0]).toBe('This a parameter.');
   });
 
   it('interfaces with internal tags are not exported', () => {

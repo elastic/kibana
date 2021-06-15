@@ -6,17 +6,20 @@
  */
 
 import React from 'react';
-import { HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { LogSourceProvider } from '../../containers/logs/log_source';
 import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
-  const { services } = useKibana<{ http: HttpStart }>();
+  const { services } = useKibanaContextForPlugin();
   return (
-    <LogSourceProvider sourceId={sourceId} fetch={services.http.fetch}>
+    <LogSourceProvider
+      sourceId={sourceId}
+      fetch={services.http.fetch}
+      indexPatternsService={services.data.indexPatterns}
+    >
       <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
     </LogSourceProvider>
   );

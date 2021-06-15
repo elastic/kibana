@@ -131,8 +131,12 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           Array [
             "Upgrade config from 4.0.0 to 4.0.1",
             Object {
-              "newVersion": "4.0.1",
-              "prevVersion": "4.0.0",
+              "kibana": Object {
+                "config": Object {
+                  "newVersion": "4.0.1",
+                  "prevVersion": "4.0.0",
+                },
+              },
             },
           ],
         ]

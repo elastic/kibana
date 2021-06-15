@@ -7,14 +7,22 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiPortal,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../sections';
-import { AlphaMessaging, SettingFlyout } from '../components';
-import { useLink, useConfig } from '../hooks';
+import { SettingFlyout } from '../components';
+import { useLink, useConfig, useUrlModal } from '../hooks';
 
 interface Props {
+  showNav?: boolean;
   showSettings?: boolean;
   section?: Section;
   children?: React.ReactNode;
@@ -47,96 +55,95 @@ const Nav = styled.nav`
 `;
 
 export const DefaultLayout: React.FunctionComponent<Props> = ({
+  showNav = true,
   showSettings = true,
   section,
   children,
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
-  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const { modal, setModal, getModalHref } = useUrlModal();
 
   return (
     <>
-      {isSettingsFlyoutOpen && (
-        <SettingFlyout
-          onClose={() => {
-            setIsSettingsFlyoutOpen(false);
-          }}
-        />
+      {modal === 'settings' && (
+        <EuiPortal>
+          <SettingFlyout
+            onClose={() => {
+              setModal(null);
+            }}
+          />
+        </EuiPortal>
       )}
+
       <Container>
         <Wrapper>
-          <Nav>
-            <EuiFlexGroup gutterSize="l" alignItems="center">
-              <EuiFlexItem>
-                <EuiTabs display="condensed">
-                  <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.overviewLinkText"
-                      defaultMessage="Overview"
-                    />
-                  </EuiTab>
-                  <EuiTab isSelected={section === 'epm'} href={getHref('integrations_all')}>
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.epmLinkText"
-                      defaultMessage="Integrations"
-                    />
-                  </EuiTab>
-                  <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.policiesLinkText"
-                      defaultMessage="Policies"
-                    />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={section === 'fleet'}
-                    href={getHref('fleet')}
-                    disabled={!agents?.enabled}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.agentsLinkText"
-                      defaultMessage="Agents"
-                    />
-                  </EuiTab>
-                  <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.dataStreamsLinkText"
-                      defaultMessage="Data streams"
-                    />
-                  </EuiTab>
-                </EuiTabs>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" direction="row">
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      iconType="popout"
-                      href="https://ela.st/fleet-feedback"
-                      target="_blank"
+          {showNav ? (
+            <Nav>
+              <EuiFlexGroup gutterSize="l" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTabs display="condensed">
+                    <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
+                      <FormattedMessage
+                        id="xpack.fleet.appNavigation.overviewLinkText"
+                        defaultMessage="Overview"
+                      />
+                    </EuiTab>
+                    <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
+                      <FormattedMessage
+                        id="xpack.fleet.appNavigation.policiesLinkText"
+                        defaultMessage="Policies"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={section === 'fleet'}
+                      href={getHref('fleet')}
+                      disabled={!agents?.enabled}
                     >
                       <FormattedMessage
-                        id="xpack.fleet.appNavigation.sendFeedbackButton"
-                        defaultMessage="Send feedback"
+                        id="xpack.fleet.appNavigation.agentsLinkText"
+                        defaultMessage="Agents"
                       />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  {showSettings ? (
+                    </EuiTab>
+                    <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
+                      <FormattedMessage
+                        id="xpack.fleet.appNavigation.dataStreamsLinkText"
+                        defaultMessage="Data streams"
+                      />
+                    </EuiTab>
+                  </EuiTabs>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" direction="row">
                     <EuiFlexItem>
-                      <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                      <EuiButtonEmpty
+                        iconType="popout"
+                        href="https://ela.st/fleet-feedback"
+                        target="_blank"
+                      >
                         <FormattedMessage
-                          id="xpack.fleet.appNavigation.settingsButton"
-                          defaultMessage="Fleet settings"
+                          id="xpack.fleet.appNavigation.sendFeedbackButton"
+                          defaultMessage="Send feedback"
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Nav>
+                    {showSettings ? (
+                      <EuiFlexItem>
+                        <EuiButtonEmpty iconType="gear" href={getModalHref('settings')}>
+                          <FormattedMessage
+                            id="xpack.fleet.appNavigation.settingsButton"
+                            defaultMessage="Fleet settings"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Nav>
+          ) : null}
           {children}
         </Wrapper>
-        <AlphaMessaging />
       </Container>
     </>
   );

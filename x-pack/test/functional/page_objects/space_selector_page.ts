@@ -6,195 +6,187 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
-  const log = getService('log');
-  const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['common']);
+export class SpaceSelectorPageObject extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+  private readonly log = this.ctx.getService('log');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly find = this.ctx.getService('find');
+  private readonly common = this.ctx.getPageObject('common');
 
-  class SpaceSelectorPage {
-    async initTests() {
-      log.debug('SpaceSelectorPage:initTests');
-    }
+  async initTests() {
+    this.log.debug('SpaceSelectorPage:initTests');
+  }
 
-    async clickSpaceCard(spaceId: string) {
-      return await retry.try(async () => {
-        log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
-        await testSubjects.click(`space-card-${spaceId}`);
-        await PageObjects.common.sleep(1000);
-      });
-    }
+  async clickSpaceCard(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
+      await this.testSubjects.click(`space-card-${spaceId}`);
+      await this.common.sleep(1000);
+    });
+  }
 
-    async expectHomePage(spaceId: string) {
-      return await this.expectRoute(spaceId, `/app/home#/`);
-    }
+  async expectHomePage(spaceId: string) {
+    return await this.expectRoute(spaceId, `/app/home#/`);
+  }
 
-    async expectRoute(spaceId: string, route: string) {
-      return await retry.try(async () => {
-        log.debug(`expectRoute(${spaceId}, ${route})`);
-        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
-        const url = await browser.getCurrentUrl();
-        if (spaceId === 'default') {
-          expect(url).to.contain(route);
-        } else {
-          expect(url).to.contain(`/s/${spaceId}${route}`);
-        }
-      });
-    }
-
-    async openSpacesNav() {
-      log.debug('openSpacesNav()');
-      return await testSubjects.click('spacesNavSelector');
-    }
-
-    async clickManageSpaces() {
-      await testSubjects.click('manageSpaces');
-    }
-
-    async clickCreateSpace() {
-      await testSubjects.click('createSpace');
-    }
-
-    async clickEnterSpaceName() {
-      await testSubjects.click('addSpaceName');
-    }
-
-    async addSpaceName(spaceName: string) {
-      await testSubjects.setValue('addSpaceName', spaceName);
-    }
-
-    async clickCustomizeSpaceAvatar(spaceId: string) {
-      await testSubjects.click(`space-avatar-${spaceId}`);
-    }
-
-    async clickSpaceInitials() {
-      await testSubjects.click('spaceLetterInitial');
-    }
-
-    async addSpaceInitials(spaceInitials: string) {
-      await testSubjects.setValue('spaceLetterInitial', spaceInitials);
-    }
-
-    async clickColorPicker() {
-      await testSubjects.click('colorPickerAnchor');
-    }
-
-    async setColorinPicker(hexValue: string) {
-      await testSubjects.setValue('colorPickerAnchor', hexValue);
-    }
-
-    async clickShowFeatures() {
-      await testSubjects.click('show-hide-section-link');
-    }
-
-    async clickChangeAllPriv() {
-      await testSubjects.click('changeAllPrivilegesButton');
-    }
-
-    async clickSaveSpaceCreation() {
-      await testSubjects.click('save-space-button');
-    }
-
-    async clickSpaceEditButton(spaceName: string) {
-      await testSubjects.click(`${spaceName}-editSpace`);
-    }
-
-    async clickGoToRolesPage() {
-      await testSubjects.click('rolesManagementPage');
-    }
-
-    async clickCancelSpaceCreation() {
-      await testSubjects.click('cancel-space-button');
-    }
-
-    async clickOnCustomizeURL() {
-      await testSubjects.click('CustomizeOrReset');
-    }
-
-    async clickOnSpaceURLDisplay() {
-      await testSubjects.click('spaceURLDisplay');
-    }
-
-    async setSpaceURL(spaceURL: string) {
-      await testSubjects.setValue('spaceURLDisplay', spaceURL);
-    }
-
-    async clickHideAllFeatures() {
-      await testSubjects.click('spc-toggle-all-features-hide');
-    }
-
-    async clickShowAllFeatures() {
-      await testSubjects.click('spc-toggle-all-features-show');
-    }
-
-    async openFeatureCategory(categoryName: string) {
-      const category = await find.byCssSelector(
-        `button[aria-controls=featureCategory_${categoryName}]`
-      );
-      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
-      if (!isCategoryExpanded) {
-        await category.click();
+  async expectRoute(spaceId: string, route: string) {
+    return await this.retry.try(async () => {
+      this.log.debug(`expectRoute(${spaceId}, ${route})`);
+      await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+      const url = await this.browser.getCurrentUrl();
+      if (spaceId === 'default') {
+        expect(url).to.contain(route);
+      } else {
+        expect(url).to.contain(`/s/${spaceId}${route}`);
       }
-    }
+    });
+  }
 
-    async closeFeatureCategory(categoryName: string) {
-      const category = await find.byCssSelector(
-        `button[aria-controls=featureCategory_${categoryName}]`
-      );
-      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
-      if (isCategoryExpanded) {
-        await category.click();
-      }
-    }
+  async openSpacesNav() {
+    this.log.debug('openSpacesNav()');
+    return await this.testSubjects.click('spacesNavSelector');
+  }
 
-    async toggleFeatureCategoryVisibility(categoryName: string) {
-      await testSubjects.click(`featureCategoryButton_${categoryName}`);
-    }
+  async clickManageSpaces() {
+    await this.testSubjects.click('manageSpaces');
+  }
 
-    async clickOnDescriptionOfSpace() {
-      await testSubjects.click('descriptionSpaceText');
-    }
+  async clickCreateSpace() {
+    await this.testSubjects.click('createSpace');
+  }
 
-    async setOnDescriptionOfSpace(descriptionSpace: string) {
-      await testSubjects.setValue('descriptionSpaceText', descriptionSpace);
-    }
+  async clickEnterSpaceName() {
+    await this.testSubjects.click('addSpaceName');
+  }
 
-    async clickOnDeleteSpaceButton(spaceName: string) {
-      await testSubjects.click(`${spaceName}-deleteSpace`);
-    }
+  async addSpaceName(spaceName: string) {
+    await this.testSubjects.setValue('addSpaceName', spaceName);
+  }
 
-    async setSpaceNameTobeDeleted(spaceName: string) {
-      await testSubjects.setValue('deleteSpaceInput', spaceName);
-    }
+  async clickCustomizeSpaceAvatar(spaceId: string) {
+    await this.testSubjects.click(`space-avatar-${spaceId}`);
+  }
 
-    async cancelDeletingSpace() {
-      await testSubjects.click('confirmModalCancelButton');
-    }
+  async clickSpaceInitials() {
+    await this.testSubjects.click('spaceLetterInitial');
+  }
 
-    async confirmDeletingSpace() {
-      await testSubjects.click('confirmModalConfirmButton');
-    }
+  async addSpaceInitials(spaceInitials: string) {
+    await this.testSubjects.setValue('spaceLetterInitial', spaceInitials);
+  }
 
-    async clickOnSpaceb() {
-      await testSubjects.click('space-avatar-space_b');
-    }
+  async clickColorPicker() {
+    await this.testSubjects.click('colorPickerAnchor');
+  }
 
-    async goToSpecificSpace(spaceName: string) {
-      await testSubjects.click(`${spaceName}-gotoSpace`);
-    }
+  async setColorinPicker(hexValue: string) {
+    await this.testSubjects.setValue('colorPickerAnchor', hexValue);
+  }
 
-    async clickSpaceAvatar(spaceId: string) {
-      return await retry.try(async () => {
-        log.info(`SpaceSelectorPage:clickSpaceAvatar(${spaceId})`);
-        await testSubjects.click(`space-avatar-${spaceId}`);
-        await PageObjects.common.sleep(1000);
-      });
+  async clickShowFeatures() {
+    await this.testSubjects.click('show-hide-section-link');
+  }
+
+  async clickChangeAllPriv() {
+    await this.testSubjects.click('changeAllPrivilegesButton');
+  }
+
+  async clickSaveSpaceCreation() {
+    await this.testSubjects.click('save-space-button');
+  }
+
+  async clickSpaceEditButton(spaceName: string) {
+    await this.testSubjects.click(`${spaceName}-editSpace`);
+  }
+
+  async clickGoToRolesPage() {
+    await this.testSubjects.click('rolesManagementPage');
+  }
+
+  async clickCancelSpaceCreation() {
+    await this.testSubjects.click('cancel-space-button');
+  }
+
+  async clickOnCustomizeURL() {
+    await this.testSubjects.click('CustomizeOrReset');
+  }
+
+  async clickOnSpaceURLDisplay() {
+    await this.testSubjects.click('spaceURLDisplay');
+  }
+
+  async setSpaceURL(spaceURL: string) {
+    await this.testSubjects.setValue('spaceURLDisplay', spaceURL);
+  }
+
+  async clickHideAllFeatures() {
+    await this.testSubjects.click('spc-toggle-all-features-hide');
+  }
+
+  async clickShowAllFeatures() {
+    await this.testSubjects.click('spc-toggle-all-features-show');
+  }
+
+  async openFeatureCategory(categoryName: string) {
+    const category = await this.find.byCssSelector(
+      `button[aria-controls=featureCategory_${categoryName}]`
+    );
+    const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+    if (!isCategoryExpanded) {
+      await category.click();
     }
   }
 
-  return new SpaceSelectorPage();
+  async closeFeatureCategory(categoryName: string) {
+    const category = await this.find.byCssSelector(
+      `button[aria-controls=featureCategory_${categoryName}]`
+    );
+    const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+    if (isCategoryExpanded) {
+      await category.click();
+    }
+  }
+
+  async toggleFeatureCategoryVisibility(categoryName: string) {
+    await this.testSubjects.click(`featureCategoryButton_${categoryName}`);
+  }
+
+  async clickOnDescriptionOfSpace() {
+    await this.testSubjects.click('descriptionSpaceText');
+  }
+
+  async setOnDescriptionOfSpace(descriptionSpace: string) {
+    await this.testSubjects.setValue('descriptionSpaceText', descriptionSpace);
+  }
+
+  async clickOnDeleteSpaceButton(spaceName: string) {
+    await this.testSubjects.click(`${spaceName}-deleteSpace`);
+  }
+
+  async cancelDeletingSpace() {
+    await this.testSubjects.click('confirmModalCancelButton');
+  }
+
+  async confirmDeletingSpace() {
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
+  async clickOnSpaceb() {
+    await this.testSubjects.click('space-avatar-space_b');
+  }
+
+  async goToSpecificSpace(spaceName: string) {
+    await this.testSubjects.click(`${spaceName}-gotoSpace`);
+  }
+
+  async clickSpaceAvatar(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.info(`SpaceSelectorPage:clickSpaceAvatar(${spaceId})`);
+      await this.testSubjects.click(`space-avatar-${spaceId}`);
+      await this.common.sleep(1000);
+    });
+  }
 }

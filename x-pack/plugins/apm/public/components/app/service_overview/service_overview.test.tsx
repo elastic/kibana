@@ -72,6 +72,7 @@ describe('ServiceOverview', () => {
         agentName: 'java',
         transactionType: 'request',
         transactionTypes: ['request'],
+        alerts: [],
       });
     jest
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
@@ -85,16 +86,16 @@ describe('ServiceOverview', () => {
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
+      'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
         error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
+      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics': {
         transactionGroups: [] as any[],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 

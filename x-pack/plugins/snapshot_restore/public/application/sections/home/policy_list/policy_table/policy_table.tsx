@@ -117,11 +117,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         // Alert user if last snapshot failed
         if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
           return (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              className="snapshotRestorePolicyTableSnapshotFailureContainer"
-            >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
@@ -89,7 +92,9 @@ export const createRules = async ({
         timelineId,
         timelineTitle,
         meta,
-        machineLearningJobId,
+        machineLearningJobId: machineLearningJobId
+          ? normalizeMachineLearningJobIds(machineLearningJobId)
+          : undefined,
         filters,
         maxSignals,
         riskScore,

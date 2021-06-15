@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
+import { EcsEventOutcome, EcsEventType } from 'src/core/server';
+import { AuditEvent } from '../../../security/server';
 
 export enum AlertAuditAction {
   CREATE = 'alert_create',
@@ -39,24 +40,24 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_instance_unmute: ['unmute instance of', 'unmuting instance of', 'unmuted instance of'],
 };
 
-const eventTypes: Record<AlertAuditAction, EventType> = {
-  alert_create: EventType.CREATION,
-  alert_get: EventType.ACCESS,
-  alert_update: EventType.CHANGE,
-  alert_update_api_key: EventType.CHANGE,
-  alert_enable: EventType.CHANGE,
-  alert_disable: EventType.CHANGE,
-  alert_delete: EventType.DELETION,
-  alert_find: EventType.ACCESS,
-  alert_mute: EventType.CHANGE,
-  alert_unmute: EventType.CHANGE,
-  alert_instance_mute: EventType.CHANGE,
-  alert_instance_unmute: EventType.CHANGE,
+const eventTypes: Record<AlertAuditAction, EcsEventType> = {
+  alert_create: 'creation',
+  alert_get: 'access',
+  alert_update: 'change',
+  alert_update_api_key: 'change',
+  alert_enable: 'change',
+  alert_disable: 'change',
+  alert_delete: 'deletion',
+  alert_find: 'access',
+  alert_mute: 'change',
+  alert_unmute: 'change',
+  alert_instance_mute: 'change',
+  alert_instance_unmute: 'change',
 };
 
 export interface AlertAuditEventParams {
   action: AlertAuditAction;
-  outcome?: EventOutcome;
+  outcome?: EcsEventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
@@ -71,7 +72,7 @@ export function alertAuditEvent({
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === EventOutcome.UNKNOWN
+    : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
@@ -80,9 +81,9 @@ export function alertAuditEvent({
     message,
     event: {
       action,
-      category: EventCategory.DATABASE,
-      type,
-      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     kibana: {
       saved_object: savedObject,

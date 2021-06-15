@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
@@ -33,6 +34,14 @@ import {
   pageSelector,
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
+  DUPLICATE_RULE_BULK_BTN,
+  RULES_ROW,
+  SELECT_ALL_RULES_BTN,
+  MODAL_CONFIRMATION_BTN,
+  RULES_DELETE_CONFIRMATION_MODAL,
+  ACTIVATE_RULE_BULK_BTN,
+  DEACTIVATE_RULE_BULK_BTN,
+  EXPORT_RULE_BULK_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -69,9 +78,18 @@ export const duplicateRuleFromMenu = () => {
     })
     .should(($el) => expect($el).to.be.visible);
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.be.visible');
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(($el) => $el.trigger('click'));
+};
+
+/**
+ * Check that the duplicated rule is on the table
+ * and it is deactivated (default)
+ */
+export const checkDuplicatedRule = () => {
+  cy.contains(RULE_NAME, duplicatedRuleName)
+    .parents(RULES_ROW)
+    .find(RULE_SWITCH)
+    .should('have.attr', 'aria-checked', 'false');
 };
 
 export const deleteFirstRule = () => {
@@ -87,6 +105,26 @@ export const deleteRule = () => {
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DELETE_RULE_BULK_BTN).click();
+};
+
+export const duplicateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+};
+
+export const activateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(ACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const deactivateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DEACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const exportSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(EXPORT_RULE_BULK_BTN).click();
 };
 
 export const exportFirstRule = () => {
@@ -132,6 +170,17 @@ export const selectNumberOfRules = (numberOfRules: number) => {
   }
 };
 
+export const selectAllRules = () => {
+  cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
+  cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const confirmRulesDelete = () => {
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('be.visible');
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
+};
+
 export const sortByActivatedRules = () => {
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesTableToBeRefreshed();
@@ -157,9 +206,10 @@ export const waitForRulesTableToBeAutoRefreshed = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
   cy.get(RULES_TABLE).should('exist');
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
-export const waitForRuleToBeActivated = () => {
+export const waitForRuleToChangeStatus = () => {
   cy.get(RULE_SWITCH_LOADER).should('exist');
   cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
@@ -198,8 +248,8 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   waitForRulesTableToBeRefreshed();
 };
 
-export const changeRowsPerPageTo300 = () => {
-  changeRowsPerPageTo(300);
+export const changeRowsPerPageTo100 = () => {
+  changeRowsPerPageTo(100);
 };
 
 export const goToPage = (pageNumber: number) => {

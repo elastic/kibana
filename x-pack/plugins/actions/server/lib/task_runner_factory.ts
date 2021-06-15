@@ -28,7 +28,7 @@ import {
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
 
 export interface TaskRunnerContext {

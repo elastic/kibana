@@ -1,0 +1,40 @@
+++++
+<div class="tabs" data-tab-group="apm-app-reader">
+  <div role="tablist" aria-label="APM app reader">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="classic-indices-tab"
+            id="classic-indices">
+      Classic APM indices
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="data-streams-tab"
+            id="data-streams"
+            tabindex="-1">
+      Data streams
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="classic-indices-tab"
+       aria-labelledby="classic-indices">
+++++
+
+include::content.asciidoc[tag=classic-indices]
+
+++++
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="data-streams-tab"
+       aria-labelledby="data-streams"
+       hidden="">
+++++
+
+include::content.asciidoc[tag=data-streams]
+
+++++
+  </div>
+</div>
+++++

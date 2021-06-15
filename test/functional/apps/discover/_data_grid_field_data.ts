@@ -22,8 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid field data tests', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
@@ -41,9 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
+        await PageObjects.discover.clickFieldListItemAdd('extension');
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(50);
+        expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
+        await PageObjects.discover.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {

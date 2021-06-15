@@ -18,8 +18,6 @@ export interface MinAgeField {
   minAgeToMilliSeconds: number;
 }
 
-export type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
-
 export interface ForcemergeFields {
   bestCompression: boolean;
 }
@@ -39,8 +37,13 @@ interface HotPhaseMetaFields extends ForcemergeFields {
    */
   customRollover: {
     enabled: boolean;
-    maxStorageSizeUnit?: string;
+    maxPrimaryShardSizeUnit?: string;
     maxAgeUnit?: string;
+
+    /**
+     * @deprecated This is the byte size unit for the max_size field which will by removed in version 8+ of the stack.
+     */
+    maxStorageSizeUnit?: string;
   };
 }
 

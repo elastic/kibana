@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   ElasticsearchClient,
@@ -61,6 +62,7 @@ import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messag
 import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { isLatestTransform } from '../../../common/types/transform';
+import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -251,7 +253,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const {
             body,
           } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
-            // @ts-expect-error query doesn't satisfy QueryContainer from @elastic/elasticsearch
+            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
           });
@@ -562,16 +564,17 @@ const previewTransformHandler: RequestHandler<
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
-        const isKeywordDuplicate =
-          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
-        if (isMetaField || isKeywordDuplicate) {
+        if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
           return acc;
         }
         acc[fieldName] = { ...fieldDefinition };
         return acc;
       }, {} as Record<string, { type: string }>);
 
-      body.generated_dest_index.mappings.properties = fields;
+      body.generated_dest_index.mappings!.properties = fields as Record<
+        string,
+        estypes.MappingProperty
+      >;
     }
     return res.ok({ body });
   } catch (e) {

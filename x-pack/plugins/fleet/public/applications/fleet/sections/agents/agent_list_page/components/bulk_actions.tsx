@@ -22,7 +22,7 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';
 import {
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
@@ -161,7 +161,7 @@ export const AgentBulkActions: React.FunctionComponent<{
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout
+          <AgentReassignAgentPolicyModal
             agents={agents}
             onClose={() => {
               setIsReassignFlyoutOpen(false);

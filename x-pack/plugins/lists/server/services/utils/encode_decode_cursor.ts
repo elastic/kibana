@@ -8,9 +8,11 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-
-import { CursorOrUndefined, SortFieldOrUndefined } from '../../../common/schemas';
-import { exactCheck } from '../../../common/shared_imports';
+import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
+import type {
+  CursorOrUndefined,
+  SortFieldOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 /**
  * Used only internally for this ad-hoc opaque cursor structure to keep track of the

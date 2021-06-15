@@ -12,48 +12,12 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "uptime",
         "id": "def-server.initServerWithKibana",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "server",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCoreSetup",
-                "text": "UptimeCoreSetup"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28
-            }
-          },
-          {
-            "type": "Object",
-            "label": "plugins",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCorePlugins",
-                "text": "UptimeCorePlugins"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28
-            }
-          }
-        ],
+        "tags": [],
+        "label": "initServerWithKibana",
+        "description": [],
         "signature": [
           "(server: ",
           "UptimeCoreSetup",
@@ -61,22 +25,59 @@
           "UptimeCorePlugins",
           ") => void"
         ],
-        "description": [],
-        "label": "initServerWithKibana",
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
           "lineNumber": 28
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "uptime",
+            "id": "def-server.initServerWithKibana.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "UptimeCoreSetup"
+            ],
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "uptime",
+            "id": "def-server.initServerWithKibana.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              "UptimeCorePlugins"
+            ],
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "uptime",
         "id": "def-server.KibanaServer",
         "type": "Interface",
+        "tags": [],
         "label": "KibanaServer",
+        "description": [],
         "signature": [
           {
             "pluginId": "uptime",
@@ -88,36 +89,50 @@
           " extends ",
           "Server"
         ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.KibanaServer.route",
-            "type": "Function",
-            "label": "route",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 25
-            },
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.KibanaRouteOptions",
-                "text": "KibanaRouteOptions"
-              },
-              ") => void"
-            ]
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
           "lineNumber": 24
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "uptime",
+            "id": "def-server.KibanaServer.route",
+            "type": "Function",
+            "tags": [],
+            "label": "route",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "KibanaRouteOptions",
+              ") => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uptime",
+                "id": "def-server.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "KibanaRouteOptions"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       }
     ],

@@ -5,128 +5,123 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import {
-  EuiLink,
-  EuiDataGrid,
-  EuiDataGridProps,
-  EuiDataGridColumn,
-  EuiDataGridSorting,
-  EuiLoadingContent,
-} from '@elastic/eui';
-import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
-import { ActionEdges, Direction } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
 
-const DataContext = createContext<ActionEdges>([]);
+interface ActionTableResultsButtonProps {
+  actionId: string;
+}
+
+const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ actionId }) => {
+  const navProps = useRouterNavigate(`live_queries/${actionId}`);
+
+  return <EuiButtonIcon iconType="visTable" {...navProps} />;
+});
+
+ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
-  const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
-      setPagination((currentPagination) => ({
-        ...currentPagination,
-        pageSize,
-        pageIndex: 0,
-      })),
-    [setPagination]
-  );
-  const onChangePage = useCallback(
-    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
-    [setPagination]
-  );
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
-
-  // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-
-  const { isLoading: actionsLoading, data: actionsData } = useAllActions({
-    activePage: pagination.pageIndex,
-    limit: pagination.pageSize,
+  const { data: actionsData } = useAllActions({
+    activePage: pageIndex,
+    limit: pageSize,
     direction: Direction.desc,
     sortField: '@timestamp',
   });
 
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]); // initialize to the full set of columns
+  const onTableChange = useCallback(({ page = {} }) => {
+    const { index, size } = page;
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
-    visibleColumns,
-    setVisibleColumns,
-  ]);
+    setPageIndex(index);
+    setPageSize(size);
+  }, []);
 
-  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const data = useContext(DataContext);
-      // @ts-expect-error fields is optional
-      const value = data[rowIndex].fields[columnId];
-
-      if (columnId === 'action_id') {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/${value}`);
-        return <EuiLink {...linkProps}>{value}</EuiLink>;
-      }
-
-      return !isEmpty(value) ? value : '-';
-    },
+  const renderQueryColumn = useCallback(
+    (_, item) => (
+      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+        {item._source.data.query}
+      </EuiCodeBlock>
+    ),
     []
   );
 
-  const tableSorting: EuiDataGridSorting = useMemo(
-    () => ({ columns: sortingColumns, onSort: setSortingColumns }),
-    [setSortingColumns, sortingColumns]
+  const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
+
+  const renderTimestampColumn = useCallback(
+    (_, item) => <>{formatDate(item.fields['@timestamp'][0])}</>,
+    []
   );
 
-  const tablePagination = useMemo(
+  const renderActionsColumn = useCallback(
+    (item) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    []
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'query',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
+          defaultMessage: 'Query',
+        }),
+        truncateText: true,
+        render: renderQueryColumn,
+      },
+      {
+        field: 'agents',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        width: '100px',
+        render: renderAgentsColumn,
+      },
+      {
+        field: 'created_at',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
+          defaultMessage: 'Created at',
+        }),
+        width: '200px',
+        render: renderTimestampColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
+          defaultMessage: 'View details',
+        }),
+        actions: [
+          {
+            render: renderActionsColumn,
+          },
+        ],
+      },
+    ],
+    [renderActionsColumn, renderAgentsColumn, renderQueryColumn, renderTimestampColumn]
+  );
+
+  const pagination = useMemo(
     () => ({
-      ...pagination,
-      pageSizeOptions: [10, 50, 100],
-      onChangeItemsPerPage,
-      onChangePage,
+      pageIndex,
+      pageSize,
+      totalItemCount: actionsData?.totalCount ?? 0,
+      pageSizeOptions: [20, 50, 100],
     }),
-    [onChangeItemsPerPage, onChangePage, pagination]
+    [actionsData?.totalCount, pageIndex, pageSize]
   );
-
-  useEffect(() => {
-    // @ts-expect-error update types
-    const newColumns = keys(actionsData?.actions[0]?.fields)
-      .sort()
-      .map((fieldName) => ({
-        id: fieldName,
-        displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: Direction.asc,
-      }));
-
-    if (!isEqual(columns, newColumns)) {
-      setColumns(newColumns);
-      setVisibleColumns(map('id', newColumns));
-    }
-    // @ts-expect-error update types
-  }, [columns, actionsData?.actions]);
-
-  if (actionsLoading) {
-    return <EuiLoadingContent lines={10} />;
-  }
 
   return (
-    // @ts-expect-error update types
-    // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-    <DataContext.Provider value={actionsData?.actions ?? []}>
-      <EuiDataGrid
-        aria-label="Osquery actions"
-        columns={columns}
-        columnVisibility={columnVisibility}
-        // @ts-expect-error update types
-        rowCount={actionsData?.totalCount ?? 0}
-        renderCellValue={renderCellValue}
-        sorting={tableSorting}
-        pagination={tablePagination}
-      />
-    </DataContext.Provider>
+    <EuiBasicTable
+      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
+      items={actionsData?.actions ?? []}
+      columns={columns}
+      pagination={pagination}
+      onChange={onTableChange}
+    />
   );
 };
 

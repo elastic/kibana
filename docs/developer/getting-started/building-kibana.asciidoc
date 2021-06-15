@@ -18,12 +18,12 @@ yarn build --help
 [discrete]
 === Building OS packages
 
-Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
-
+Packages are built using fpm, dpkg, and rpm, and Docker.  Package building has only been tested on Linux and is not supported on any other platform.
+Docker installation instructions can be found at https://docs.docker.com/engine/install/[Install Docker Engine].
 
 [source,bash]
 ----
-apt-get install ruby-dev rpm
+apt-get install ruby ruby-dev rpm dpkg build-essential
 gem install fpm -v 1.5.0
 yarn build --skip-archives
 ----

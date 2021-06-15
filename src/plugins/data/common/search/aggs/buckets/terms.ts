@@ -9,6 +9,7 @@
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+import moment from 'moment';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
@@ -101,25 +102,21 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        const requestResponder = inspectorRequestAdapter?.start(
-          i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-            defaultMessage: 'Other bucket',
-          }),
-          {
-            description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
-              defaultMessage:
-                'This request counts the number of documents that fall ' +
-                'outside the criterion of the data buckets.',
-            }),
-            searchSessionId,
-          }
-        );
-
-        const response = await nestedSearchSource
+        const { rawResponse: response } = await nestedSearchSource
           .fetch$({
             abortSignal,
             sessionId: searchSessionId,
-            requestResponder,
+            inspector: {
+              adapter: inspectorRequestAdapter,
+              title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+                defaultMessage: 'Other bucket',
+              }),
+              description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
+                defaultMessage:
+                  'This request counts the number of documents that fall ' +
+                  'outside the criterion of the data buckets.',
+              }),
+            },
           })
           .toPromise();
 
@@ -183,6 +180,54 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
+          if (
+            aggs?.hasTimeShifts() &&
+            Object.keys(aggs?.getTimeShifts()).length > 1 &&
+            aggs.timeRange
+          ) {
+            const shift = orderAgg.getTimeShift();
+            orderAgg = aggs.createAggConfig(
+              {
+                type: 'filtered_metric',
+                id: orderAgg.id,
+                params: {
+                  customBucket: aggs
+                    .createAggConfig(
+                      {
+                        type: 'filter',
+                        id: 'shift',
+                        params: {
+                          filter: {
+                            language: 'lucene',
+                            query: {
+                              range: {
+                                [aggs.timeFields![0]]: {
+                                  gte: moment(aggs.timeRange.from)
+                                    .subtract(shift || 0)
+                                    .toISOString(),
+                                  lte: moment(aggs.timeRange.to)
+                                    .subtract(shift || 0)
+                                    .toISOString(),
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      {
+                        addToAggConfigs: false,
+                      }
+                    )
+                    .serialize(),
+                  customMetric: orderAgg.serialize(),
+                },
+                enabled: false,
+              },
+              {
+                addToAggConfigs: false,
+              }
+            );
+          }
           if (orderAgg.type.name === 'count') {
             order._count = dir;
             return;

@@ -116,10 +116,15 @@ describe('telemetry_application_usage', () => {
                   minutesOnScreen: 10,
                   numberOfClicks: 10,
                 },
+                type: opts.type,
+                references: [],
+                score: 0,
               },
             ],
             total: 1,
-          } as any;
+            per_page: 10,
+            page: 1,
+          };
         case SAVED_OBJECTS_DAILY_TYPE:
           return {
             saved_objects: [
@@ -131,9 +136,21 @@ describe('telemetry_application_usage', () => {
                   minutesOnScreen: 0.5,
                   numberOfClicks: 1,
                 },
+                type: opts.type,
+                references: [],
+                score: 0,
               },
             ],
             total: 1,
+            per_page: 10,
+            page: 1,
+          };
+        default:
+          return {
+            saved_objects: [],
+            total: 0,
+            per_page: 10,
+            page: 1,
           };
       }
     });

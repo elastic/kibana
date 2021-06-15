@@ -57,7 +57,7 @@ import {
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
-import { TIMELINES_TABLE } from '../screens/timelines';
+import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
 
@@ -89,8 +89,14 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const goToNotesTab = () => {
-  return cy.get(NOTES_TAB_BUTTON).click({ force: true });
+export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(NOTES_TAB_BUTTON).trigger('click');
+      return $el.find(NOTES_TEXT_AREA);
+    })
+    .should('be.visible');
+  return cy.root().find(NOTES_TAB_BUTTON);
 };
 
 export const getNotePreviewByNoteId = (noteId: string) => {
@@ -98,17 +104,30 @@ export const getNotePreviewByNoteId = (noteId: string) => {
 };
 
 export const goToQueryTab = () => {
-  cy.get(QUERY_TAB_BUTTON).click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(QUERY_TAB_BUTTON).trigger('click');
+      return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('have.class', 'euiTab-isSelected');
 };
 
 export const addNotesToTimeline = (notes: string) => {
+  goToNotesTab().then(() => {
+    cy.get(NOTES_TEXT_AREA).type(notes);
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_NOTE_BUTTON).trigger('click');
+        return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
+      })
+      .should('have.text', '1');
+  });
+
+  goToQueryTab();
   goToNotesTab();
-  cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click({ force: true });
-  cy.get(QUERY_TAB_BUTTON).click();
 };
 
-export const addFilter = (filter: TimelineFilter) => {
+export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
@@ -116,11 +135,12 @@ export const addFilter = (filter: TimelineFilter) => {
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
-  cy.get(SAVE_FILTER_BTN).click();
+  return cy.get(SAVE_FILTER_BTN).click();
 };
 
-export const addDataProvider = (filter: TimelineFilter) => {
+export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
+  cy.wait(300);
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
@@ -157,13 +177,23 @@ export const closeOpenTimelineModal = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(CLOSE_TIMELINE_BTN).filter(':visible').trigger('click');
+      return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('not.be.visible');
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON)
+    .filter(':visible')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE)
+    .eq(0)
+    .pipe(($el) => $el.trigger('click'));
 };
 
 export const createNewTimelineTemplate = () => {
@@ -179,8 +209,8 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const markAsFavorite = () => {
-  cy.get(STAR_ICON).click();
+export const markAsFavorite = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(STAR_ICON).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -204,12 +234,19 @@ export const openTimelineTemplateFromSettings = (id: string) => {
   cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
 };
 
-export const openTimelineById = (timelineId: string) => {
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click({ force: true });
+export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
+  if (timelineId == null) {
+    // Log out if for some reason this happens to be null just in case for our tests we experience
+    // value of null. Some tests return an "any" which is why this could happen.
+    cy.log('"timelineId" is null or undefined');
+  }
+  // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
+  // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
 };
 
-export const pinFirstEvent = () => {
-  cy.get(PIN_EVENT).first().click({ force: true });
+export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const populateTimeline = () => {
@@ -258,10 +295,33 @@ export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };
 
-export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(TIMELINES_TABLE).should('exist');
-};
-
 export const waitForEventsPanelToBeLoaded = () => {
   cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
+};
+
+/**
+ * We keep clicking on the refresh button until we have the timeline we are looking
+ * for. NOTE: That because refresh happens so fast, the click handler in most cases
+ * is not on it reliably. You should not use a pipe off of this to get your timeline
+ * clicked as a pipe off the timeline link can product multiple URL loads which will
+ * add a different type of flake to your tests. You will usually have to use wait() for
+ * this like so:
+ *
+ * refreshTimelinesUntilTimeLinePresent(timelineId)
+ *   // This wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+ *   // request responses and indeterminism.
+ *   .then(() => cy.wait(1000))
+ *   .then(() => ... your code here ...)
+ * @param id The timeline id to click the refresh button until we find it.
+ */
+export const refreshTimelinesUntilTimeLinePresent = (
+  id: string
+): Cypress.Chainable<JQuery<HTMLHtmlElement>> => {
+  return cy
+    .root()
+    .pipe(($el) => {
+      $el.find(REFRESH_BUTTON).trigger('click');
+      return $el.find(TIMELINE(id));
+    })
+    .should('be.visible');
 };

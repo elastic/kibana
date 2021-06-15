@@ -63,7 +63,6 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
   },
   listeners: ({ actions }) => ({
     getSearchResults: async ({ query, resultFields }, breakpoint) => {
-      if (Object.keys(resultFields).length < 1) return;
       await breakpoint(250);
 
       const { http } = HttpLogic.values;

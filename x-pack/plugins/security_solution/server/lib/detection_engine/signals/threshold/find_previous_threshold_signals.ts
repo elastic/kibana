@@ -71,7 +71,7 @@ export const findPreviousThresholdSignals = async ({
   };
 
   return singleSearchAfter({
-    searchAfterSortId: undefined,
+    searchAfterSortIds: undefined,
     timestampOverride,
     index: indexPattern,
     from,
@@ -81,6 +81,5 @@ export const findPreviousThresholdSignals = async ({
     filter,
     pageSize: 10000, // TODO: multiple pages?
     buildRuleMessage,
-    excludeDocsWithTimestampOverride: false,
   });
 };

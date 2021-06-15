@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
 export async function enableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERTING_API_PATH}/rule/${id}/_enable`);
+  await http.post(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_enable`);
 }
 
 export async function enableAlerts({

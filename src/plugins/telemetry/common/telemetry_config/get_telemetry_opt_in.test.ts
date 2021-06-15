@@ -55,6 +55,7 @@ describe('getTelemetryOptIn', () => {
   // build a table of tests with version checks, with results for enabled false
   type VersionCheckTable = Array<Partial<CallGetTelemetryOptInParams>>;
 
+  // @ts-expect-error the test is intentionally testing malformed objects
   const EnabledFalseVersionChecks: VersionCheckTable = [
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0', result: false },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.1', result: false },
@@ -112,7 +113,7 @@ describe('getTelemetryOptIn', () => {
 interface CallGetTelemetryOptInParams {
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
-  lastVersionChecked?: any; // should be a string, but test with non-strings
+  lastVersionChecked?: string; // should be a string, but test with non-strings
   currentKibanaVersion: string;
   result?: boolean | null;
   enabled: boolean | null | undefined;

@@ -60,12 +60,28 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
-import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { defer, from } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  first,
+  last,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
+import { defer, EMPTY, from, Observable } from 'rxjs';
+import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { ISearchGeneric, ISearchOptions } from '../..';
+import {
+  AggConfigs,
+  ES_SEARCH_STRATEGY,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -75,9 +91,16 @@ import type {
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  UI_SETTINGS,
+  isErrorResponse,
+  isPartialResponse,
+  IKibanaSearchResponse,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -254,12 +277,19 @@ export class SearchSource {
    * Fetch this source from Elasticsearch, returning an observable over the response(s)
    * @param options
    */
-  fetch$(options: ISearchOptions = {}) {
+  fetch$(
+    options: ISearchOptions = {}
+  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
     const { getConfig } = this.dependencies;
-    return defer(() => this.requestIsStarting(options)).pipe(
-      tap(() => {
-        options.requestResponder?.stats(getRequestInspectorStats(this));
-      }),
+    const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
+
+    // Use the sync search strategy if legacy search is enabled.
+    // This still uses bfetch for batching.
+    if (!options?.strategy && syncSearchByDefault) {
+      options.strategy = ES_SEARCH_STRATEGY;
+    }
+
+    const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
@@ -267,27 +297,18 @@ export class SearchSource {
           options.indexPattern = searchRequest.index;
         }
 
-        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
-          ? from(this.legacyFetch(searchRequest, options))
-          : this.fetchSearch$(searchRequest, options);
+        return this.fetchSearch$(searchRequest, options);
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-        if ((response as any).error) {
+        if (!response || (response as any).error) {
           throw new RequestFailure(null, response);
-        } else {
-          options.requestResponder?.stats(getResponseInspectorStats(response, this));
-          options.requestResponder?.ok({ json: response });
         }
       }),
-      catchError((e) => {
-        options.requestResponder?.error({ json: e });
-        throw e;
-      }),
-      finalize(() => {
-        options.requestResponder?.json(this.getSearchRequestBody());
-      })
+      shareReplay()
     );
+
+    return this.inspectSearch(s$, options);
   }
 
   /**
@@ -295,7 +316,11 @@ export class SearchSource {
    * @deprecated Use fetch$ instead
    */
   fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options).toPromise();
+    return this.fetch$(options)
+      .toPromise()
+      .then((r) => {
+        return r.rawResponse as estypes.SearchResponse<any>;
+      });
   }
 
   /**
@@ -328,9 +353,105 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
+  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
+    const { id, title, description, adapter } = options.inspector || { title: '' };
+
+    const requestResponder = adapter?.start(title, {
+      id,
+      description,
+      searchSessionId: options.sessionId,
+    });
+
+    const trackRequestBody = () => {
+      try {
+        requestResponder?.json(this.getSearchRequestBody());
+      } catch (e) {} // eslint-disable-line no-empty
+    };
+
+    // Track request stats on first emit, swallow errors
+    const first$ = s$
+      .pipe(
+        first(undefined, null),
+        tap(() => {
+          requestResponder?.stats(getRequestInspectorStats(this));
+          trackRequestBody();
+        }),
+        catchError(() => {
+          trackRequestBody();
+          return EMPTY;
+        }),
+        finalize(() => {
+          first$.unsubscribe();
+        })
+      )
+      .subscribe();
+
+    // Track response stats on last emit, as well as errors
+    const last$ = s$
+      .pipe(
+        catchError((e) => {
+          requestResponder?.error({ json: e });
+          return EMPTY;
+        }),
+        last(undefined, null),
+        tap((finalResponse) => {
+          if (finalResponse) {
+            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
+            requestResponder?.ok({ json: finalResponse });
+          }
+        }),
+        finalize(() => {
+          last$.unsubscribe();
+        })
+      )
+      .subscribe();
+
+    return s$;
+  }
+
+  private hasPostFlightRequests() {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.aggs.some(
+        (agg) => agg.enabled && typeof agg.type.postFlightRequest === 'function'
+      );
+    } else {
+      return false;
+    }
+  }
+
+  private postFlightTransform(response: IEsSearchResponse<any>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
+  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      for (const agg of aggs.aggs) {
+        if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
+          response = await agg.type.postFlightRequest(
+            response,
+            aggs,
+            agg,
+            this,
+            options.inspector?.adapter,
+            options.abortSignal,
+            options.sessionId
+          );
+        }
+      }
+    }
+    return response;
+  }
+
   /**
    * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
+   * @return {Observable<SearchResponse<any>>}
    */
   private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
@@ -340,28 +461,46 @@ export class SearchSource {
     });
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
-    );
-  }
-
-  /**
-   * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
-   */
-  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { getConfig, legacy, onResponse } = this.dependencies;
-
-    return await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        getConfig,
-        onResponse,
-        legacy,
-      }
+      switchMap((response) => {
+        return new Observable<IKibanaSearchResponse<any>>((obs) => {
+          if (isErrorResponse(response)) {
+            obs.error(response);
+          } else if (isPartialResponse(response)) {
+            obs.next(this.postFlightTransform(response));
+          } else {
+            if (!this.hasPostFlightRequests()) {
+              obs.next(this.postFlightTransform(response));
+              obs.complete();
+            } else {
+              // Treat the complete response as partial, then run the postFlightRequests.
+              obs.next({
+                ...this.postFlightTransform(response),
+                isPartial: true,
+                isRunning: true,
+              });
+              const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
+                next: (responseWithOther) => {
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
+                },
+                error: (e) => {
+                  obs.error(e);
+                  sub.unsubscribe();
+                },
+                complete: () => {
+                  obs.complete();
+                  sub.unsubscribe();
+                },
+              });
+            }
+          }
+        });
+      }),
+      map((response) => onResponse(searchRequest, response))
     );
   }
 
@@ -452,6 +591,12 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
+      case 'aggs':
+        if ((val as any) instanceof AggConfigs) {
+          return addToBody('aggs', val.toDsl());
+        } else {
+          return addToBody('aggs', val);
+        }
       default:
         return addToBody(key, val);
     }
@@ -496,18 +641,15 @@ export class SearchSource {
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
     }
-    const metaFields = this.dependencies.getConfig(UI_SETTINGS.META_FIELDS);
     const sourceFiltersValues = sourceFilters.excludes;
     const wildcardField = bodyFields.find(
       (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
     );
-    const filterSourceFields = (fieldName: string) => {
-      return (
-        fieldName &&
-        !sourceFiltersValues.some((sourceFilter) => fieldName.match(sourceFilter)) &&
-        !metaFields.includes(fieldName)
-      );
-    };
+    const filter = fieldWildcardFilter(
+      sourceFiltersValues,
+      this.dependencies.getConfig(UI_SETTINGS.META_FIELDS)
+    );
+    const filterSourceFields = (fieldName: string) => fieldName && filter(fieldName);
     if (!wildcardField) {
       // we already have an explicit list of fields, so we just remove source filters from that list
       return bodyFields.filter((fld: SearchFieldValue) =>
@@ -557,6 +699,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
@@ -587,7 +730,7 @@ export class SearchSource {
         body._source = sourceFilters;
       }
 
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
+      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
@@ -668,17 +811,21 @@ export class SearchSource {
             const field2Name = this.getFieldName(fld2);
             return field1Name === field2Name;
           }
-        ).map((fld: SearchFieldValue) => {
-          const fieldName = this.getFieldName(fld);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            return typeof fld === 'string'
-              ? docvaluesIndex[fld]
-              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-          }
-          return fld;
-        });
+        )
+          .filter((fld: SearchFieldValue) => {
+            return !metaFields.includes(this.getFieldName(fld));
+          })
+          .map((fld: SearchFieldValue) => {
+            const fieldName = this.getFieldName(fld);
+            if (Object.keys(docvaluesIndex).includes(fieldName)) {
+              // either provide the field object from computed docvalues,
+              // or merge the user-provided field with the one in docvalues
+              return typeof fld === 'string'
+                ? docvaluesIndex[fld]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+            }
+            return fld;
+          });
       }
     } else {
       body.fields = filteredDocvalueFields;

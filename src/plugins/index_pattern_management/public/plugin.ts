@@ -77,13 +77,14 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, () =>
-          this.indexPatternManagementService.environmentService.getEnvironment().ml()
-        );
+        return mountManagementSection(core.getStartServices, params);
       },
     });
 
-    return this.indexPatternManagementService.setup({ httpClient: core.http });
+    return this.indexPatternManagementService.setup({
+      httpClient: core.http,
+      uiSettings: core.uiSettings,
+    });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {

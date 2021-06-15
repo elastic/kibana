@@ -70,6 +70,10 @@ describe('kibana_usage_collection', () => {
           "type": "kibana",
         },
         Object {
+          "isReady": true,
+          "type": "saved_objects_counts",
+        },
+        Object {
           "isReady": false,
           "type": "stack_management",
         },
@@ -92,6 +96,10 @@ describe('kibana_usage_collection', () => {
         Object {
           "isReady": false,
           "type": "core",
+        },
+        Object {
+          "isReady": false,
+          "type": "kibana_config_usage",
         },
         Object {
           "isReady": true,

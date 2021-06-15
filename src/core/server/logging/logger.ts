@@ -21,28 +21,28 @@ export class BaseLogger implements Logger {
     private readonly factory: LoggerFactory
   ) {}
 
-  public trace(message: string, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Trace, message, meta));
+  public trace<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
   }
 
-  public debug(message: string, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Debug, message, meta));
+  public debug<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
   }
 
-  public info(message: string, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Info, message, meta));
+  public info<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
   }
 
-  public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Warn, errorOrMessage, meta));
+  public warn<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
   }
 
-  public error(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Error, errorOrMessage, meta));
+  public error<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
   }
 
-  public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.log(this.createLogRecord(LogLevel.Fatal, errorOrMessage, meta));
+  public fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
+    this.log(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
   }
 
   public log(record: LogRecord) {
@@ -59,10 +59,10 @@ export class BaseLogger implements Logger {
     return this.factory.get(...[this.context, ...childContextPaths]);
   }
 
-  private createLogRecord(
+  private createLogRecord<Meta extends LogMeta>(
     level: LogLevel,
     errorOrMessage: string | Error,
-    meta?: LogMeta
+    meta?: Meta
   ): LogRecord {
     if (isError(errorOrMessage)) {
       return {

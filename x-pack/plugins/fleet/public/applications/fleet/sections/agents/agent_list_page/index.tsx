@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 
-import { AgentEnrollmentFlyout } from '../components';
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -37,11 +36,15 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
-import { ContextMenuActions } from '../../../components';
+import {
+  AgentEnrollmentFlyout,
+  AgentPolicySummaryLine,
+  ContextMenuActions,
+} from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentHealth,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
@@ -344,8 +347,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (!agent.policy_id) return true;
 
     const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isManaged = agentPolicy?.is_managed === true;
-    return !isManaged;
+    const isHosted = agentPolicy?.is_managed === true;
+    return !isHosted;
   };
 
   const columns = [
@@ -374,48 +377,24 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
-        const policyName = agentPoliciesIndexedById[policyId]?.name;
+        const agentPolicy = agentPoliciesIndexedById[policyId];
+        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
+
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} className="eui-textTruncate">
-              <EuiLink
-                href={getHref('policy_details', { policyId })}
-                className="eui-textTruncate"
-                title={policyName || policyId}
-              >
-                {policyName || policyId}
-              </EuiLink>
-            </EuiFlexItem>
-            {agent.policy_revision && (
+            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
+            {showWarning && (
               <EuiFlexItem grow={false}>
-                <EuiText color="default" size="xs" className="eui-textNoWrap">
+                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                  <EuiIcon size="m" type="alert" color="warning" />
+                  &nbsp;
                   <FormattedMessage
-                    id="xpack.fleet.agentList.revisionNumber"
-                    defaultMessage="rev. {revNumber}"
-                    values={{ revNumber: agent.policy_revision }}
+                    id="xpack.fleet.agentList.outOfDateLabel"
+                    defaultMessage="Out-of-date"
                   />
                 </EuiText>
               </EuiFlexItem>
             )}
-            {agent.policy_id &&
-              agent.policy_revision &&
-              agentPoliciesIndexedById[agent.policy_id] &&
-              agentPoliciesIndexedById[agent.policy_id].revision > agent.policy_revision && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <EuiIcon size="m" type="alert" color="warning" />
-                    &nbsp;
-                    {true && (
-                      <>
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.outOfDateLabel"
-                          defaultMessage="Out-of-date"
-                        />
-                      </>
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
           </EuiFlexGroup>
         );
       },
@@ -431,7 +410,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
-          {isAgentUpgradeable(agent, kibanaVersion) ? (
+          {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                 <EuiIcon size="m" type="alert" color="warning" />
@@ -505,14 +484,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   return (
     <>
       {isEnrollmentFlyoutOpen ? (
-        <AgentEnrollmentFlyout
-          agentPolicies={agentPolicies}
-          onClose={() => setIsEnrollmentFlyoutOpen(false)}
-        />
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            agentPolicies={agentPolicies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
+        </EuiPortal>
       ) : null}
       {agentToReassign && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout
+          <AgentReassignAgentPolicyModal
             agents={[agentToReassign]}
             onClose={() => {
               setAgentToReassign(undefined);
@@ -617,7 +598,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             emptyPrompt
           )
         }
-        items={totalAgents ? agents : []}
+        items={
+          totalAgents
+            ? showUpgradeable
+              ? agents.filter(
+                  (agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion)
+                )
+              : agents
+            : []
+        }
         itemId="id"
         columns={columns}
         pagination={{

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import {
   areFieldsAtDefaultSettings,
@@ -14,6 +14,7 @@ import {
   clearAllFields,
   resetAllFields,
   splitResultFields,
+  areFieldsEmpty,
 } from './utils';
 
 describe('clearAllFields', () => {
@@ -55,7 +56,7 @@ describe('convertServerResultFieldsToResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
+          foo: SchemaType.Text,
         }
       )
     ).toEqual({
@@ -131,8 +132,8 @@ describe('splitResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
-          bar: 'number' as SchemaTypes,
+          foo: SchemaType.Text,
+          bar: SchemaType.Number,
         }
       )
     ).toEqual({
@@ -141,6 +142,37 @@ describe('splitResultFields', () => {
       },
       textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
     });
+  });
+});
+
+describe('areFieldsEmpty', () => {
+  it('should return true if all fields are empty or have all properties disabled', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {},
+        bar: { raw: false, snippet: false },
+        baz: { raw: false },
+      })
+    ).toBe(true);
+  });
+
+  it('should return false otherwise', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toBe(false);
   });
 });
 

@@ -16,7 +16,7 @@ import {
 } from '../../../common/components/accessibility/helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
-import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
+import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
 import {
   DEFAULT_CATEGORY_NAME,
   defaultHeaders,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getMaxBytes, getMaxBytesFormatted } from '../get_max_bytes';
+import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
 
 export function validateFile(file: File, types: string[]) {
   if (file.size > getMaxBytes()) {

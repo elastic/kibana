@@ -46,6 +46,11 @@ describe('registerCloudProviderUsageCollector', () => {
     expect(collector.isReady()).toBe(true);
   });
 
+  test('isReady() => true when cloud details have been retrieved but none have been found', () => {
+    cloudDetailsMock.mockReturnValueOnce(null);
+    expect(collector.isReady()).toBe(true);
+  });
+
   test('initiates CloudDetector.detectCloudDetails when called', () => {
     expect(detectCloudServiceMock).toHaveBeenCalledTimes(1);
   });

@@ -8,9 +8,9 @@
 import React from 'react';
 import uuid from 'uuid';
 import { AppToast } from '../../../common/components/toasters';
-import { Case } from '../../containers/types';
 import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
+import { Case } from '../../../../../cases/common';
 
 export const createUpdateSuccessToaster = (
   theCase: Case,

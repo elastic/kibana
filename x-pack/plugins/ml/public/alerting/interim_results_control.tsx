@@ -25,7 +25,7 @@ export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
               defaultMessage="Include interim results"
             />
           }
-          checked={value}
+          checked={value ?? false}
           onChange={onChange.bind(null, !value)}
         />
       </EuiFormRow>

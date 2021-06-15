@@ -8,94 +8,86 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "securityOss",
       "id": "def-public.SecurityOssPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "SecurityOssPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-public.SecurityOssPluginSetup.insecureCluster",
-          "type": "Object",
-          "label": "insecureCluster",
-          "description": [],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 26
-          },
-          "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceSetup",
-              "text": "InsecureClusterServiceSetup"
-            }
-          ]
-        }
-      ],
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
         "lineNumber": 25
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "securityOss",
+          "id": "def-public.SecurityOssPluginSetup.insecureCluster",
+          "type": "Object",
+          "tags": [],
+          "label": "insecureCluster",
+          "description": [],
+          "signature": [
+            "InsecureClusterServiceSetup"
+          ],
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 26
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "securityOss",
       "id": "def-public.SecurityOssPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "SecurityOssPluginStart",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-public.SecurityOssPluginStart.insecureCluster",
-          "type": "Object",
-          "label": "insecureCluster",
-          "description": [],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 30
-          },
-          "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceStart",
-              "text": "InsecureClusterServiceStart"
-            }
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-public.SecurityOssPluginStart.anonymousAccess",
-          "type": "Object",
-          "label": "anonymousAccess",
-          "description": [],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 31
-          },
-          "signature": [
-            "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
-            {
-              "pluginId": "core",
-              "scope": "common",
-              "docId": "kibCorePluginApi",
-              "section": "def-common.Capabilities",
-              "text": "Capabilities"
-            },
-            ">; }"
-          ]
-        }
-      ],
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
         "lineNumber": 29
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "securityOss",
+          "id": "def-public.SecurityOssPluginStart.insecureCluster",
+          "type": "Object",
+          "tags": [],
+          "label": "insecureCluster",
+          "description": [],
+          "signature": [
+            "InsecureClusterServiceStart"
+          ],
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 30
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "securityOss",
+          "id": "def-public.SecurityOssPluginStart.anonymousAccess",
+          "type": "Object",
+          "tags": [],
+          "label": "anonymousAccess",
+          "description": [],
+          "signature": [
+            "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
+            "Capabilities",
+            ">; }"
+          ],
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 31
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -108,58 +100,78 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "securityOss",
       "id": "def-server.SecurityOssPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "SecurityOssPluginSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/security_oss/server/plugin.ts",
+        "lineNumber": 25
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "securityOss",
           "id": "def-server.SecurityOssPluginSetup.showInsecureClusterWarning$",
           "type": "Object",
+          "tags": [],
           "label": "showInsecureClusterWarning$",
           "description": [
             "\nAllows consumers to show/hide the insecure cluster warning."
+          ],
+          "signature": [
+            "BehaviorSubject",
+            "<boolean>"
           ],
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
             "lineNumber": 29
           },
-          "signature": [
-            "BehaviorSubject",
-            "<boolean>"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
+          "parentPluginId": "securityOss",
           "id": "def-server.SecurityOssPluginSetup.setAnonymousAccessServiceProvider",
           "type": "Function",
+          "tags": [],
           "label": "setAnonymousAccessServiceProvider",
           "description": [
             "\nSet the provider function that returns a service to deal with the anonymous access."
+          ],
+          "signature": [
+            "(provider: () => ",
+            "AnonymousAccessService",
+            ") => void"
           ],
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
             "lineNumber": 35
           },
-          "signature": [
-            "(provider: () => ",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
             {
-              "pluginId": "securityOss",
-              "scope": "server",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-server.AnonymousAccessService",
-              "text": "AnonymousAccessService"
-            },
-            ") => void"
+              "parentPluginId": "securityOss",
+              "id": "def-server.provider",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "() => ",
+                "AnonymousAccessService"
+              ],
+              "source": {
+                "path": "src/plugins/security_oss/server/plugin.ts",
+                "lineNumber": 35
+              },
+              "deprecated": false
+            }
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/security_oss/server/plugin.ts",
-        "lineNumber": 25
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -169,47 +181,53 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "securityOss",
         "id": "def-common.AppState",
         "type": "Interface",
+        "tags": [],
         "label": "AppState",
         "description": [
           "\nDefines Security OSS application state."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.AppState.insecureClusterAlert",
-            "type": "Object",
-            "label": "insecureClusterAlert",
-            "description": [],
-            "source": {
-              "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 13
-            },
-            "signature": [
-              "{ displayAlert: boolean; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.AppState.anonymousAccess",
-            "type": "Object",
-            "label": "anonymousAccess",
-            "description": [],
-            "source": {
-              "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 14
-            },
-            "signature": [
-              "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
-            ]
-          }
         ],
         "source": {
           "path": "src/plugins/security_oss/common/app_state.ts",
           "lineNumber": 12
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securityOss",
+            "id": "def-common.AppState.insecureClusterAlert",
+            "type": "Object",
+            "tags": [],
+            "label": "insecureClusterAlert",
+            "description": [],
+            "signature": [
+              "{ displayAlert: boolean; }"
+            ],
+            "source": {
+              "path": "src/plugins/security_oss/common/app_state.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securityOss",
+            "id": "def-common.AppState.anonymousAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "anonymousAccess",
+            "description": [],
+            "signature": [
+              "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
+            ],
+            "source": {
+              "path": "src/plugins/security_oss/common/app_state.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

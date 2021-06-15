@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -31,6 +31,7 @@ describe('Cloning a rollup job through create job wizard', () => {
   beforeAll(() => {
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+    initDocumentation(docLinksServiceMock.createStartContract());
   });
 
   beforeEach(() => {

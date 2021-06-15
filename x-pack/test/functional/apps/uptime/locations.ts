@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);
   const uptime = getService('uptime');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const monitor = () => uptime.monitor;
   const MONITOR_ID = 'location-testing-id';

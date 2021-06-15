@@ -26,6 +26,7 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -125,7 +126,7 @@ export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
 ): [boolean, FetchIndexReturn] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const previousIndexesName = useRef<string[]>([]);
@@ -138,6 +139,7 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
@@ -168,14 +170,13 @@ export const useFetchIndex = (
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
-                text: msg.message,
+              addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
               });
               searchSubscription$.current.unsubscribe();
@@ -186,7 +187,7 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, notifications.toasts, onlyCheckIfIndicesExist]
+    [data.search, addError, addWarning, onlyCheckIfIndicesExist]
   );
 
   useEffect(() => {
@@ -203,7 +204,7 @@ export const useFetchIndex = (
 };
 
 export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
@@ -215,6 +216,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     indexNames: string[];
     previousIndexNames: string;
   }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
+  const { addError, addWarning } = useAppToasts();
 
   const setLoading = useCallback(
     (loading: boolean) => {
@@ -257,14 +259,13 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
-                text: msg.message,
+              addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
               });
               searchSubscription$.current.unsubscribe();
@@ -275,7 +276,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, dispatch, notifications.toasts, setLoading, sourcererScopeName]
+    [data.search, dispatch, addError, addWarning, setLoading, sourcererScopeName]
   );
 
   useEffect(() => {

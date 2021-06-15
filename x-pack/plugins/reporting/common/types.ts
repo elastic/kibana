@@ -40,8 +40,8 @@ export interface LayoutParams {
 export interface ReportDocumentHead {
   _id: string;
   _index: string;
-  _seq_no: unknown;
-  _primary_term: unknown;
+  _seq_no: number;
+  _primary_term: number;
 }
 
 export interface TaskRunResult {

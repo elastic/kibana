@@ -21,7 +21,7 @@ export const sampleAttribute = {
             columns: {
               'x-axis-column': {
                 sourceField: 'transaction.duration.us',
-                label: 'Page load time (Seconds)',
+                label: 'Page load time',
                 dataType: 'number',
                 operationType: 'range',
                 isBucketed: true,

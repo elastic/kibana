@@ -73,7 +73,7 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
@@ -128,21 +128,6 @@ export class SessionService {
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
           this.currentApp = newAppName;
-          if (!this.getSessionId()) return;
-
-          // Apps required to clean up their sessions before unmounting
-          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
-          const message = `Application '${
-            this.state.get().appName
-          }' had an open session while navigating`;
-          if (initializerContext.env.mode.dev) {
-            coreStart.fatalErrors.add(message);
-          } else {
-            // this should never happen in prod because should be caught in dev mode
-            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
-            // eslint-disable-next-line no-console
-            console.warn(message);
-          }
         })
       );
     });
@@ -230,18 +215,6 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
-    // make sure apps can't clear other apps' sessions
-    const currentSessionApp = this.state.get().appName;
-    if (currentSessionApp && currentSessionApp !== this.currentApp) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
-          this.currentApp
-        }", owner: "${currentSessionApp}"`
-      );
-      return;
-    }
-
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

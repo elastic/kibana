@@ -160,14 +160,12 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -287,7 +285,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
             <h3
               className="euiTitle euiTitle--xsmall"
             >
-              Add your first panel
+              Add your first visualization
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -493,14 +491,12 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -594,10 +590,12 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       <PseudoLocaleWrapper>
         <EuiPage
           className="dshStartScreen"
+          data-test-subj="dashboardEmptyReadOnly"
           restrictWidth="500px"
         >
           <div
             className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+            data-test-subj="dashboardEmptyReadOnly"
             style={
               Object {
                 "maxWidth": "500px",
@@ -840,14 +838,12 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -941,10 +937,12 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       <PseudoLocaleWrapper>
         <EuiPage
           className="dshStartScreen"
+          data-test-subj="dashboardEmptyReadWrite"
           restrictWidth="500px"
         >
           <div
             className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+            data-test-subj="dashboardEmptyReadWrite"
             style={
               Object {
                 "maxWidth": "500px",
@@ -1027,30 +1025,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                                 className="euiTextColor euiTextColor--subdued"
                               >
                                 <p>
-                                  Click
-                                  <span>
-                                     
-                                  </span>
-                                  <EuiLink
-                                    aria-label="Edit dashboard"
-                                    data-test-subj=""
-                                    onClick={[MockFunction]}
-                                  >
-                                    <button
-                                      aria-label="Edit dashboard"
-                                      className="euiLink euiLink--primary"
-                                      data-test-subj=""
-                                      disabled={false}
-                                      onClick={[MockFunction]}
-                                      type="button"
-                                    >
-                                      Edit
-                                    </button>
-                                  </EuiLink>
-                                  <span>
-                                     
-                                  </span>
-                                  in the menu bar above to start adding panels.
+                                  Click edit in the menu bar above to start adding panels.
                                 </p>
                               </div>
                             </EuiTextColor>

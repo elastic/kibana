@@ -7,13 +7,14 @@
 
 import React from 'react';
 
-export const EngineIcon: React.FC = () => (
+export const EngineIcon: React.FC = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
+    className="euiIcon"
+    width={18}
+    height={18}
+    {...props}
     viewBox="0 0 18 18"
-    width="18"
-    height="18"
-    className="euiIcon engineIcon"
     aria-hidden="true"
   >
     <path

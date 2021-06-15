@@ -1,33 +1,8 @@
 [role="xpack"]
 [[rule-types]]
-== Rules
+== Rule types
 
-Kibana provides two types of rules:
-
-* Stack rules, which are built into {kib}
-* Domain-specific rules, which are registered by {kib} apps.
-
-[float]
-==== Standard stack rules
-
-{kib} provides two stack rules: 
-
-* <<rule-type-index-threshold>>
-* <<rule-type-es-query>>
-
-Users require the `all` privilege to access the *Stack Rules* feature and create and edit rules.
-See <<kibana-feature-privileges, feature privileges>> for more information.
-
-[float]
-==== Domain-specific rules
-
-For domain-specific rules, refer to the documentation for that app.
-{kib} supports these rules:
-
-* {observability-guide}/create-alerts.html[Observability rules]
-* {security-guide}/prebuilt-rules.html[Security rules]
-* <<geo-alerting, Maps rules>>
-* {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides two types of rules:  rules specific to the Elastic Stack and rules specific to a domain.
 
 [NOTE]
 ==============================================
@@ -36,7 +11,46 @@ For a comparison of the Elastic subscription levels,
 see {subscriptions}[the subscription page].
 ==============================================
 
+[float]
+[[stack-rules]]
+=== Stack rules
 
-include::stack-rules/index-threshold.asciidoc[]
-include::stack-rules/es-query.asciidoc[]
-include::map-rules/geo-rule-types.asciidoc[]
+<<alert-management, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+
+[cols="2*<"]
+|===
+
+| <<rule-type-index-threshold>>
+| Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
+
+| <<rule-type-es-query>>
+| Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
+
+|===
+
+[float]
+[[domain-specific-rules]]
+=== Domain rules
+
+Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <<xpack-ml, Machine Learning>>.
+
+[cols="2*<"]
+|===
+
+| {observability-guide}/create-alerts.html[Observability rules]
+| Detect complex conditions in the *Logs*, *Metrics*, and *Uptime* apps.
+
+| {security-guide}/prebuilt-rules.html[Security rules]
+| Detect suspicous source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
+
+| <<geo-alerting, Maps rules>>
+| Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
+
+| {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
+| Run scheduled checks on an anomaly detection job to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+
+|===
+
+include::rule-types/index-threshold.asciidoc[]
+include::rule-types/es-query.asciidoc[]
+include::rule-types/geo-rule-types.asciidoc[]

@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';
 import { pageObjects } from '../functional/page_objects';
 
@@ -29,6 +29,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     __dirname,
     '../security_api_integration/fixtures/saml/saml_provider'
   );
+
+  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
 
   return {
     testFiles: [resolve(__dirname, './tests/login_selector')],
@@ -59,6 +61,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${samlIdPPlugin}`,
+        `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--xpack.security.loginHelp="Some-login-help."`,
@@ -94,7 +97,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
     },
     apps: kibanaFunctionalConfig.get('apps'),
-    esArchiver: { directory: resolve(__dirname, 'es_archives') },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

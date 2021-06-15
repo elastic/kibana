@@ -6,7 +6,6 @@
  */
 
 import { suggestEMSTermJoinConfig } from './ems_autosuggest';
-import { FORMAT_TYPE } from '../../common';
 import { FeatureCollection } from 'geojson';
 
 class MockFileLayer {
@@ -19,16 +18,28 @@ class MockFileLayer {
     this._id = url;
     this._fields = fields;
   }
-  getDefaultFormatUrl() {
-    return this._url;
-  }
 
   getFields() {
     return this._fields;
   }
 
-  getDefaultFormatType() {
-    return FORMAT_TYPE.GEOJSON;
+  getGeoJson() {
+    if (this._url === 'world_countries') {
+      return ({
+        type: 'FeatureCollection',
+        features: [
+          { properties: { iso2: 'CA', iso3: 'CAN' } },
+          { properties: { iso2: 'US', iso3: 'USA' } },
+        ],
+      } as unknown) as FeatureCollection;
+    } else if (this._url === 'zips') {
+      return ({
+        type: 'FeatureCollection',
+        features: [{ properties: { zip: '40204' } }, { properties: { zip: '40205' } }],
+      } as unknown) as FeatureCollection;
+    } else {
+      throw new Error(`unrecognized mock url ${this._url}`);
+    }
   }
 
   hasId(id: string) {
@@ -43,24 +54,6 @@ jest.mock('../util', () => {
         new MockFileLayer('world_countries', [{ id: 'iso2' }, { id: 'iso3' }]),
         new MockFileLayer('zips', [{ id: 'zip' }]),
       ];
-    },
-    async fetchGeoJson(url: string): Promise<FeatureCollection> {
-      if (url === 'world_countries') {
-        return ({
-          type: 'FeatureCollection',
-          features: [
-            { properties: { iso2: 'CA', iso3: 'CAN' } },
-            { properties: { iso2: 'US', iso3: 'USA' } },
-          ],
-        } as unknown) as FeatureCollection;
-      } else if (url === 'zips') {
-        return ({
-          type: 'FeatureCollection',
-          features: [{ properties: { zip: '40204' } }, { properties: { zip: '40205' } }],
-        } as unknown) as FeatureCollection;
-      } else {
-        throw new Error(`unrecognized mock url ${url}`);
-      }
     },
   };
 });

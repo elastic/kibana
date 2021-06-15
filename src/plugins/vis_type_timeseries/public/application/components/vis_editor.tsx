@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
+import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
@@ -29,7 +30,7 @@ import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
 import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
@@ -79,6 +80,9 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             ? TIME_RANGE_DATA_MODES.LAST_VALUE
             : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
+        ...(!this.props.vis.id && {
+          id: uuid(),
+        }),
       },
       extractedIndexPatterns: [''],
     };
@@ -97,19 +101,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
-
-    const extractedIndexPatterns = extractIndexPatternValues(
-      this.state.model,
-      this.state.defaultIndex
-    );
-    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
-        this.setState({
-          visFields,
-          extractedIndexPatterns,
-        });
-      });
-    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   abortableFetchFields = (extractedIndexPatterns: IndexPatternValue[]) => {
@@ -124,15 +115,25 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       return;
     }
     const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
-    const nextModel = {
-      ...this.state.model,
-      ...partialModel,
-    };
     let dirty = true;
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
       dirty = false;
+    }
+
+    const nextModel = {
+      ...this.state.model,
+      ...partialModel,
+    };
+    const extractedIndexPatterns = extractIndexPatternValues(nextModel, this.state.defaultIndex);
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        });
+      });
     }
 
     this.setState({

@@ -11,6 +11,16 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import dashboardObj from './dashboard.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 145 | 1 | 133 | 9 |
+
 ## Client
 
 ### Setup
@@ -34,7 +44,21 @@ import dashboardObj from './dashboard.json';
 ### Consts, variables and types
 <DocDefinitionList data={dashboardObj.client.misc}/>
 
+## Server
+
+### Setup
+<DocDefinitionList data={[dashboardObj.server.setup]}/>
+
+### Start
+<DocDefinitionList data={[dashboardObj.server.start]}/>
+
+### Functions
+<DocDefinitionList data={dashboardObj.server.functions}/>
+
 ## Common
+
+### Objects
+<DocDefinitionList data={dashboardObj.common.objects}/>
 
 ### Functions
 <DocDefinitionList data={dashboardObj.common.functions}/>

@@ -14,7 +14,7 @@ import { Field } from '../../../../../../../../../common/types/fields';
 import {
   newJobCapsService,
   filterCategoryFields,
-} from '../../../../../../../services/new_job_capabilities_service';
+} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { MultiMetricJobCreator, PopulationJobCreator } from '../../../../../common/job_creator';
 
 interface Props {

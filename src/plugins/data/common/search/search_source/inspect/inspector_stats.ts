@@ -50,7 +50,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
 /** @public */
 export function getResponseInspectorStats(
-  resp: estypes.SearchResponse<unknown>,
+  resp?: estypes.SearchResponse<unknown>,
   searchSource?: ISearchSource
 ) {
   const lastRequest =

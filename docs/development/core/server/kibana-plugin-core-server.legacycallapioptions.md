@@ -6,6 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
+>  7.16
 > 
 
 The set of options that defines how API call should be made and result be processed.

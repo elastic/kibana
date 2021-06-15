@@ -39,7 +39,7 @@ export function getSupportedFilterAggs(
     ];
   }
 
-  throw new Error(`The field ${fieldName} does not exist in the index or runtime mappings`);
+  throw new Error(`The field ${fieldName} does not exist in the index or runtime fields`);
 }
 
 /**

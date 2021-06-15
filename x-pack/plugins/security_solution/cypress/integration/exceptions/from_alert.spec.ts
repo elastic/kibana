@@ -43,7 +43,7 @@ describe('From alert', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule);
+    createCustomRule(newRule, 'rule_testing', '10s');
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 

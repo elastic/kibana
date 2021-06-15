@@ -6,13 +6,13 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { rerender } from '../../../test_helpers';
 
 import { LoadingState, EmptyState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
@@ -141,26 +141,6 @@ describe('EnginesOverview', () => {
           expect(
             wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
           ).toEqual('/meta_engine_creation');
-        });
-
-        describe('when metaEngines is empty', () => {
-          it('contains an EuiEmptyPrompt that takes users to the create meta engine page', () => {
-            setMockValues({
-              ...valuesWithEngines,
-              hasPlatinumLicense: true,
-              myRole: { canManageEngines: true },
-              metaEngines: [],
-            });
-            const wrapper = shallow(<EnginesOverview />);
-            const metaEnginesTable = wrapper.find(MetaEnginesTable).dive();
-            const emptyPrompt = metaEnginesTable.dive().find(EuiEmptyPrompt).dive();
-
-            expect(
-              emptyPrompt
-                .find('[data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"]')
-                .prop('to')
-            ).toEqual('/meta_engine_creation');
-          });
         });
       });
     });

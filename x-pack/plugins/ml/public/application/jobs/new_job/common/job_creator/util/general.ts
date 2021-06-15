@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
@@ -79,8 +79,9 @@ export function getRichDetectors(
       byField,
       overField,
       partitionField,
-      excludeFrequent: d.exclude_frequent || null,
-      description: d.detector_description || null,
+      excludeFrequent: d.exclude_frequent ?? null,
+      description: d.detector_description ?? null,
+      useNull: d.use_null ?? null,
     };
   });
 }

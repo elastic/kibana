@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Service Principal Addition",
-  "note": "The Azure Fleet Integration or Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add service principal\" and event.outcome:(success or Success)",
   "references": [
     "https://msrc-blog.microsoft.com/2020/12/13/customer-guidance-on-recent-nation-state-cyber-attacks/",
@@ -57,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

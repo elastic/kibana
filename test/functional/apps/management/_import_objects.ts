@@ -12,6 +12,7 @@ import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function uniq<T>(input: T[]): T[] {
   return [...new Set(input)];
 }
@@ -23,19 +24,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95660
-  // FLAKY: https://github.com/elastic/kibana/issues/95706
-  describe.skip('import objects', function describeIndexTests() {
+  describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('management');
+        await esArchiver.load('test/functional/fixtures/es_archiver/management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/management');
       });
 
       it('should import saved objects', async function () {
@@ -214,14 +213,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        await esArchiver.load('saved_objects_imports');
+        await esArchiver.load('test/functional/fixtures/es_archiver/saved_objects_imports');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('saved_objects_imports');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/saved_objects_imports');
       });
 
       it('should import saved objects', async function () {
@@ -314,7 +313,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // but as the initial popin can take a few ms before fading, we need to wait a little
         // to avoid clicking twice on the same modal.
         await delay(1000);
-        await PageObjects.common.clickConfirmOnModal(false);
+        await PageObjects.common.clickConfirmOnModal(true);
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
         expect(isSuccessful).to.be(true);
@@ -335,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // but as the initial popin can take a few ms before fading, we need to wait a little
         // to avoid clicking twice on the same modal.
         await delay(1000);
-        await PageObjects.common.clickConfirmOnModal(false);
+        await PageObjects.common.clickConfirmOnModal(true);
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
         expect(isSuccessful).to.be(true);

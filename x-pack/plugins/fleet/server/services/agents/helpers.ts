@@ -11,7 +11,7 @@ import type { SearchHit } from '../../../../../../typings/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
-  | estypes.MultiGetHit<FleetServerAgent>
+  | estypes.MgetHit<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
@@ -21,7 +21,6 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
     id: hit._id,
     ...hit._source,
     policy_revision: hit._source?.policy_revision_idx,
-    current_error_events: [],
     access_api_key: undefined,
     status: undefined,
     packages: hit._source?.packages ?? [],

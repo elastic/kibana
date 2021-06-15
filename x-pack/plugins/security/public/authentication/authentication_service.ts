@@ -42,6 +42,11 @@ export interface AuthenticationServiceSetup {
   areAPIKeysEnabled: () => Promise<boolean>;
 }
 
+/**
+ * Start has the same contract as Setup for now.
+ */
+export type AuthenticationServiceStart = AuthenticationServiceSetup;
+
 export class AuthenticationService {
   public setup({
     application,

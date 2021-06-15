@@ -9,10 +9,12 @@
 import { ToolBarPagerText } from './tool_bar_pager_text';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createToolBarPagerTextDirective(reactDirective: any) {
   return reactDirective(ToolBarPagerText);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createToolBarPagerButtonsDirective(reactDirective: any) {
   return reactDirective(ToolBarPagerButtons);
 }

@@ -6,8 +6,10 @@
  */
 
 import uuid from 'uuid';
-import { SavedObject } from 'kibana/server';
-import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
   RuleParams,
@@ -26,8 +28,8 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerting/common';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { SanitizedAlert } from '../../../../../alerting/common';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
@@ -103,7 +105,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
       return {
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
-        machineLearningJobId: params.machine_learning_job_id,
+        machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
       };
     }
     default: {
@@ -267,10 +269,11 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: Alert<RuleParams>,
+  rule: SanitizedAlert<RuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: IRuleStatusSOAttributes
 ): FullResponseSchema => {
+  const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {
     // Alerting framework params
     id: rule.id,
@@ -290,11 +293,30 @@ export const internalRuleToAPIResponse = (
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     actions: ruleActions?.actions ?? [],
     // Rule status
-    status: ruleStatus?.attributes.status ?? undefined,
-    status_date: ruleStatus?.attributes.statusDate ?? undefined,
-    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
-    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
-    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
-    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
+    status: mergedStatus?.status ?? undefined,
+    status_date: mergedStatus?.statusDate ?? undefined,
+    last_failure_at: mergedStatus?.lastFailureAt ?? undefined,
+    last_success_at: mergedStatus?.lastSuccessAt ?? undefined,
+    last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
+    last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
   };
+};
+
+export const mergeAlertWithSidecarStatus = (
+  alert: SanitizedAlert<RuleParams>,
+  status: IRuleStatusSOAttributes
+): IRuleStatusSOAttributes => {
+  if (
+    new Date(alert.executionStatus.lastExecutionDate) > new Date(status.statusDate) &&
+    alert.executionStatus.status === 'error'
+  ) {
+    return {
+      ...status,
+      lastFailureMessage: `Reason: ${alert.executionStatus.error?.reason} Message: ${alert.executionStatus.error?.message}`,
+      lastFailureAt: alert.executionStatus.lastExecutionDate.toISOString(),
+      statusDate: alert.executionStatus.lastExecutionDate.toISOString(),
+      status: 'failed',
+    };
+  }
+  return status;
 };

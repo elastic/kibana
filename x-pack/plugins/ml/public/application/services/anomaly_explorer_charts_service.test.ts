@@ -102,6 +102,7 @@ describe('AnomalyExplorerChartsService', () => {
 
   test('should return anomaly data without explorer service', async () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
+      undefined,
       (combinedJobRecords as unknown) as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecords,
@@ -116,6 +117,7 @@ describe('AnomalyExplorerChartsService', () => {
 
   test('call anomalyChangeListener with empty series config', async () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
+      undefined,
       // @ts-ignore
       (combinedJobRecords as unknown) as Record<string, CombinedJob>,
       1000,
@@ -137,6 +139,7 @@ describe('AnomalyExplorerChartsService', () => {
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
+      undefined,
       (combinedJobRecords as unknown) as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecordsClone,

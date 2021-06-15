@@ -142,12 +142,15 @@ export const applicationUsageSchema = {
   metrics: commonSchema,
   infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
+  integrations: commonSchema,
   ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  observabilityCases: commonSchema,
   'observability-overview': commonSchema,
+  osquery: commonSchema,
   security_account: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it

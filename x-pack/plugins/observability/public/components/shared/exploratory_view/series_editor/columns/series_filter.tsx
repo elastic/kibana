@@ -19,7 +19,7 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -32,6 +32,7 @@ export interface Field {
   label: string;
   field: string;
   nested?: string;
+  isNegated?: boolean;
 }
 
 export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
@@ -39,24 +40,29 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
-  const options = defaultFilters.map((field) => {
+  const options: Field[] = defaultFilters.map((field) => {
     if (typeof field === 'string') {
       return { label: FieldLabels[field], field };
     }
-    return { label: FieldLabels[field.field], field: field.field, nested: field.nested };
-  });
-  const disabled = seriesId === NEW_SERIES_KEY && !isNew;
 
-  const { setSeries, series: urlSeries } = useUrlStorage(seriesId);
+    return {
+      field: field.field,
+      nested: field.nested,
+      isNegated: field.isNegated,
+      label: FieldLabels[field.field],
+    };
+  });
+
+  const { setSeries, getSeries } = useSeriesStorage();
+  const urlSeries = getSeries(seriesId);
 
   const button = (
     <EuiButtonEmpty
       flush="left"
       iconType="plus"
       onClick={() => {
-        setIsPopoverVisible(true);
+        setIsPopoverVisible((prevState) => !prevState);
       }}
-      isDisabled={disabled}
       size="s"
     >
       {i18n.translate('xpack.observability.expView.seriesEditor.addFilter', {
@@ -92,6 +98,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       field={selectedField.field}
       label={selectedField.label}
       nestedField={selectedField.nested}
+      isNegated={selectedField.isNegated}
       goBack={() => {
         setSelectedField(undefined);
       }}
@@ -105,13 +112,13 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs" alignItems="flexStart">
-      {!disabled && <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />}
+      <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={button}
           isOpen={isPopoverVisible}
           closePopover={closePopover}
-          anchorPosition="leftCenter"
+          anchorPosition={isNew ? 'leftCenter' : 'rightCenter'}
         >
           {!selectedField ? mainPanel : childPanel}
         </EuiPopover>
@@ -125,7 +132,6 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
             onClick={() => {
               setSeries(seriesId, { ...urlSeries, filters: undefined });
             }}
-            isDisabled={disabled}
             size="s"
           >
             {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {

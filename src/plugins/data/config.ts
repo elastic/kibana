@@ -15,6 +15,8 @@ export const configSchema = schema.object({
     }),
     valueSuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      terminateAfter: schema.duration({ defaultValue: 100000 }),
+      timeout: schema.duration({ defaultValue: 1000 }),
     }),
   }),
   search: schema.object({
@@ -30,3 +32,62 @@ export const configSchema = schema.object({
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export const searchSessionsConfigSchema = schema.object({
+  /**
+   * Turns the feature on \ off (incl. removing indicator and management screens)
+   */
+  enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * pageSize controls how many search session objects we load at once while monitoring
+   * session completion
+   */
+  pageSize: schema.number({ defaultValue: 100 }),
+  /**
+   * trackingInterval controls how often we track search session objects progress
+   */
+  trackingInterval: schema.duration({ defaultValue: '10s' }),
+
+  /**
+   * monitoringTaskTimeout controls for how long task manager waits for search session monitoring task to complete before considering it timed out,
+   * If tasks timeouts it receives cancel signal and next task starts in "trackingInterval" time
+   */
+  monitoringTaskTimeout: schema.duration({ defaultValue: '5m' }),
+
+  /**
+   * notTouchedTimeout controls how long do we store unpersisted search session results,
+   * after the last search in the session has completed
+   */
+  notTouchedTimeout: schema.duration({ defaultValue: '5m' }),
+  /**
+   * notTouchedInProgressTimeout controls how long do allow a search session to run after
+   * a user has navigated away without persisting
+   */
+  notTouchedInProgressTimeout: schema.duration({ defaultValue: '1m' }),
+  /**
+   * maxUpdateRetries controls how many retries we perform while attempting to save a search session
+   */
+  maxUpdateRetries: schema.number({ defaultValue: 3 }),
+
+  /**
+   * defaultExpiration controls how long search sessions are valid for, until they are expired.
+   */
+  defaultExpiration: schema.duration({ defaultValue: '7d' }),
+  management: schema.object({
+    /**
+     * maxSessions controls how many saved search sessions we display per page on the management screen.
+     */
+    maxSessions: schema.number({ defaultValue: 10000 }),
+    /**
+     * refreshInterval controls how often we refresh the management screen.
+     */
+    refreshInterval: schema.duration({ defaultValue: '10s' }),
+    /**
+     * refreshTimeout controls how often we refresh the management screen.
+     */
+    refreshTimeout: schema.duration({ defaultValue: '1m' }),
+    expiresSoonWarning: schema.duration({ defaultValue: '1d' }),
+  }),
+});
+
+export type SearchSessionsConfigSchema = TypeOf<typeof searchSessionsConfigSchema>;

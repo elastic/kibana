@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -53,7 +54,7 @@ export const useNetworkKpiUniqueFlows = ({
   skip = false,
   startDate,
 }: UseNetworkKpiUniqueFlows): [boolean, NetworkKpiUniqueFlowsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -76,6 +77,7 @@ export const useNetworkKpiUniqueFlows = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkKpiUniqueFlowsSearch = useCallback(
     (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
@@ -108,16 +110,14 @@ export const useNetworkKpiUniqueFlows = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_FLOWS);
+                addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_FLOWS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_KPI_UNIQUE_FLOWS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -128,7 +128,7 @@ export const useNetworkKpiUniqueFlows = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

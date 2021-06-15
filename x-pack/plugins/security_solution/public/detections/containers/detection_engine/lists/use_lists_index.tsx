@@ -7,11 +7,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-import { useReadListIndex, useCreateListIndex } from '../../../../shared_imports';
+import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import { isSecurityAppError } from '../../../../common/utils/api';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useListsPrivileges } from './use_lists_privileges';
 
 export interface UseListsIndexReturn {
   createIndex: () => void;
@@ -26,6 +27,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const { lists } = useKibana().services;
   const http = useHttp();
   const { addError } = useAppToasts();
+  const { canReadIndex } = useListsPrivileges();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
@@ -35,10 +37,10 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const loading = readLoading || createLoading;
 
   const readIndex = useCallback(() => {
-    if (lists) {
+    if (lists && canReadIndex) {
       readListIndex({ http });
     }
-  }, [http, lists, readListIndex]);
+  }, [http, lists, readListIndex, canReadIndex]);
 
   const createIndex = useCallback(() => {
     if (lists) {

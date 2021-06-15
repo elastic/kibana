@@ -9,46 +9,15 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const security = getService('security');
-  const createDataAnalystRole = async () => {
-    await security.role.create('data_analyst', {
-      metadata: {},
-      elasticsearch: {
-        cluster: [],
-        indices: [
-          {
-            names: ['ecommerce'],
-            privileges: ['read', 'view_index_metadata'],
-            allow_restricted_indices: false,
-          },
-        ],
-        run_as: [],
-      },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
-  };
-  const createDataAnalyst = async () => {
-    await security.user.create('data_analyst', {
-      password: 'data_analyst-password',
-      roles: ['data_analyst', 'kibana_user'],
-      full_name: 'a kibana user called data_a',
-    });
-  };
-  const createReportingUser = async () => {
-    await security.user.create('reporting_user', {
-      password: 'reporting_user-password',
-      roles: ['reporting_user', 'data_analyst', 'kibana_user'],
-      full_name: 'a reporting user',
-    });
-  };
-
-  describe('Reporting Functional Tests with Role-based Security configuration enabled', function () {
+  describe('Reporting Functional Tests with Security enabled', function () {
     this.tags('ciGroup2');
 
     before(async () => {
-      await createDataAnalystRole();
-      await createDataAnalyst();
-      await createReportingUser();
+      const reportingFunctional = getService('reportingFunctional');
+      await reportingFunctional.createDataAnalystRole();
+      await reportingFunctional.createDataAnalyst();
+      await reportingFunctional.createTestReportingUserRole();
+      await reportingFunctional.createTestReportingUser();
     });
 
     loadTestFile(require.resolve('./security_roles_privileges'));

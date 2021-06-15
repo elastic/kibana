@@ -116,12 +116,17 @@ kibana_vars=(
     server.compression.referrerWhitelist
     server.cors
     server.cors.origin
-    server.customResponseHeaders
+    server.securityResponseHeaders.strictTransportSecurity
+    server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.referrerPolicy
+    server.securityResponseHeaders.permissionsPolicy
+    server.securityResponseHeaders.disableEmbedding
     server.customResponseHeaders
     server.defaultRoute
     server.host
     server.keepAliveTimeout
     server.maxPayloadBytes
+    server.maxPayload
     server.name
     server.port
     server.rewriteBasePath
@@ -157,6 +162,7 @@ kibana_vars=(
     timelion.enabled
     vega.enableExternalUrls
     xpack.actions.allowedHosts
+    xpack.actions.customHostSettings
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
     xpack.actions.preconfiguredAlertHistoryEsIndex
@@ -169,6 +175,8 @@ kibana_vars=(
     xpack.actions.rejectUnauthorized
     xpack.actions.maxResponseContentLength
     xpack.actions.responseTimeout
+    xpack.actions.tls.verificationMode
+    xpack.actions.tls.proxyVerificationMode
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -224,6 +232,8 @@ kibana_vars=(
     xpack.maps.enabled
     xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
+    xpack.observability.unsafe.alertingExperience.enabled
+    xpack.observability.unsafe.cases.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -267,7 +277,9 @@ kibana_vars=(
     xpack.reporting.queue.pollIntervalErrorMultiplier
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
+    xpack.reporting.roles.enabled
     xpack.rollup.enabled
+    xpack.ruleRegistry.write.enabled
     xpack.searchprofiler.enabled
     xpack.security.audit.enabled
     xpack.security.audit.appender.type

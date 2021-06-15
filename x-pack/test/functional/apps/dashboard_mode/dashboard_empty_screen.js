@@ -10,14 +10,13 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
   describe('empty dashboard', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
@@ -29,9 +28,6 @@ export default function ({ getPageObjects, getService }) {
 
     it('adds Lens visualization to empty dashboard', async () => {
       const title = 'Dashboard Test Lens';
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({ title, redirectToOrigin: true });
       await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.exists(`embeddablePanelHeading-${title}`);
@@ -87,9 +83,6 @@ export default function ({ getPageObjects, getService }) {
       const title = 'non-dashboard Test Lens';
       await PageObjects.dashboard.loadSavedDashboard('empty dashboard test');
       await PageObjects.dashboard.switchToEditMode();
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({ title });
       await PageObjects.lens.notLinkedToOriginatingApp();
       await PageObjects.common.navigateToApp('dashboard');

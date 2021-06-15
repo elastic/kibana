@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.CronEditor",
         "type": "Class",
         "tags": [],
@@ -20,99 +21,92 @@
           "FieldToValueMap",
           ", any>"
         ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+          "lineNumber": 64
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "esUiShared",
             "id": "def-public.CronEditor.getDerivedStateFromProps",
             "type": "Function",
-            "label": "getDerivedStateFromProps",
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.CronEditor",
-                "text": "CronEditor"
-              },
-              ".getDerivedStateFromProps"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "props",
-                "isRequired": true,
-                "signature": [
-                  "Props"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 65
-                }
-              }
-            ],
             "tags": [],
-            "returnComment": [],
+            "label": "getDerivedStateFromProps",
+            "description": [],
+            "signature": [
+              "(props: Props) => ",
+              "FieldToValueMap"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 65
-            }
-          },
-          {
-            "id": "def-public.CronEditor.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.CronEditor.getDerivedStateFromProps.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "props",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Props"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 70
-                }
+                  "lineNumber": 65
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.CronEditor.Unnamed",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 70
-            }
-          },
-          {
-            "id": "def-public.CronEditor.onChangeFrequency",
-            "type": "Function",
+            },
+            "deprecated": false,
             "children": [
               {
-                "type": "CompoundType",
-                "label": "frequency",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "esUiShared",
-                    "scope": "public",
-                    "docId": "kibEsUiSharedPluginApi",
-                    "section": "def-public.Frequency",
-                    "text": "Frequency"
-                  }
-                ],
+                "parentPluginId": "esUiShared",
+                "id": "def-public.CronEditor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
                 "description": [],
+                "signature": [
+                  "Props"
+                ],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 80
-                }
+                  "lineNumber": 70
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.CronEditor.onChangeFrequency",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeFrequency",
+            "description": [],
             "signature": [
               "(frequency: ",
               {
@@ -124,346 +118,384 @@
               },
               ") => void"
             ],
-            "description": [],
-            "label": "onChangeFrequency",
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 80
             },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.CronEditor.onChangeFields",
-            "type": "Function",
+            "deprecated": false,
             "children": [
               {
-                "type": "Object",
-                "label": "fields",
-                "isRequired": true,
+                "parentPluginId": "esUiShared",
+                "id": "def-public.CronEditor.onChangeFrequency.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "frequency",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "esUiShared",
                     "scope": "public",
                     "docId": "kibEsUiSharedPluginApi",
-                    "section": "def-public.FieldToValueMap",
-                    "text": "FieldToValueMap"
+                    "section": "def-public.Frequency",
+                    "text": "Frequency"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-                  "lineNumber": 104
-                }
+                  "lineNumber": 80
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.CronEditor.onChangeFields",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeFields",
+            "description": [],
             "signature": [
               "(fields: ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.FieldToValueMap",
-                "text": "FieldToValueMap"
-              },
+              "FieldToValueMap",
               ") => void"
             ],
-            "description": [],
-            "label": "onChangeFields",
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 104
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.CronEditor.onChangeFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "FieldToValueMap"
+                ],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                  "lineNumber": 104
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "esUiShared",
             "id": "def-public.CronEditor.renderForm",
             "type": "Function",
+            "tags": [],
             "label": "renderForm",
+            "description": [],
             "signature": [
               "() => JSX.Element | undefined"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 140
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "esUiShared",
             "id": "def-public.CronEditor.render",
             "type": "Function",
+            "tags": [],
             "label": "render",
+            "description": [],
             "signature": [
               "() => JSX.Element"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
               "lineNumber": 215
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
-          "lineNumber": 64
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.attemptToURIDecode",
         "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "value",
-            "isRequired": false,
-            "signature": [
-              "string | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
-              "lineNumber": 15
-            }
-          }
-        ],
+        "tags": [],
+        "label": "attemptToURIDecode",
+        "description": [],
         "signature": [
           "(value?: string | undefined) => string | undefined"
         ],
-        "description": [],
-        "label": "attemptToURIDecode",
         "source": {
           "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
           "lineNumber": 15
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.attemptToURIDecode.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.AuthorizationProvider",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ privilegesEndpoint, httpClient, children }",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-              "lineNumber": 49
-            }
-          }
-        ],
+        "tags": [],
+        "label": "AuthorizationProvider",
+        "description": [],
         "signature": [
           "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
         ],
-        "description": [],
-        "label": "AuthorizationProvider",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
           "lineNumber": 49
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.AuthorizationProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ privilegesEndpoint, httpClient, children }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.extractQueryParams",
         "type": "Function",
+        "tags": [],
         "label": "extractQueryParams",
+        "description": [],
         "signature": [
           "(queryString: string) => ",
           "ParsedQuery",
           "<string>"
         ],
-        "description": [],
-        "children": [
-          {
-            "type": "string",
-            "label": "queryString",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
           "lineNumber": 11
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.extractQueryParams.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "esUiShared",
         "id": "def-public.JsonEditor",
         "type": "Function",
+        "tags": [],
         "label": "JsonEditor",
         "description": [],
+        "signature": [
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+        ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
           "lineNumber": 102
         },
-        "signature": [
-          "typeof JsonEditorComp"
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "Props<T>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          }
         ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.NotAuthorizedSection",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ title, message }",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
-              "lineNumber": 17
-            }
-          }
-        ],
+        "tags": [],
+        "label": "NotAuthorizedSection",
+        "description": [],
         "signature": [
           "({ title, message }: Props) => JSX.Element"
         ],
-        "description": [],
-        "label": "NotAuthorizedSection",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
           "lineNumber": 17
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.NotAuthorizedSection.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, message }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SectionError",
         "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
-            "isRequired": true,
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 24
-            }
-          }
-        ],
+        "tags": [],
+        "label": "SectionError",
+        "description": [],
         "signature": [
           "({ title, error, actions, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
-        "description": [],
-        "label": "SectionError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
           "lineNumber": 24
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SectionError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SectionLoading",
         "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "{ inline, children, ...rest }",
-            "isRequired": true,
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
-              "lineNumber": 26
-            }
-          }
-        ],
+        "tags": [],
+        "label": "SectionLoading",
+        "description": [],
         "signature": [
           "({ inline, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
-        "description": [],
-        "label": "SectionLoading",
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
           "lineNumber": 26
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SectionLoading.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ inline, children, ...rest }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+              "lineNumber": 26
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.sendRequest",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "httpClient",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 29
-            }
-          },
-          {
-            "type": "Object",
-            "label": "{ path, method, body, query, asSystemRequest }",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.SendRequestConfig",
-                "text": "SendRequestConfig"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 30
-            }
-          }
-        ],
+        "tags": [],
+        "label": "sendRequest",
+        "description": [],
         "signature": [
           "<D = any, E = any>(httpClient: ",
           {
@@ -491,41 +523,19 @@
           },
           "<D, E>>"
         ],
-        "description": [],
-        "label": "sendRequest",
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
           "lineNumber": 28
         },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.useAuthorizationContext",
-        "type": "Function",
-        "children": [],
-        "signature": [
-          "() => Authorization"
-        ],
-        "description": [],
-        "label": "useAuthorizationContext",
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 35
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.useRequest",
-        "type": "Function",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.sendRequest.$1",
             "type": "Object",
+            "tags": [],
             "label": "httpClient",
-            "isRequired": true,
+            "description": [],
             "signature": [
               {
                 "pluginId": "core",
@@ -535,32 +545,66 @@
                 "text": "HttpSetup"
               }
             ],
-            "description": [],
             "source": {
-              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 29
-            }
+            },
+            "deprecated": false,
+            "isRequired": true
           },
           {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.sendRequest.$2",
             "type": "Object",
-            "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
-            "isRequired": true,
+            "tags": [],
+            "label": "{ path, method, body, query, asSystemRequest }",
+            "description": [],
             "signature": [
               {
                 "pluginId": "esUiShared",
                 "scope": "public",
                 "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.UseRequestConfig",
-                "text": "UseRequestConfig"
+                "section": "def-public.SendRequestConfig",
+                "text": "SendRequestConfig"
               }
             ],
-            "description": [],
             "source": {
-              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 30
-            }
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
+        "id": "def-public.useAuthorizationContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useAuthorizationContext",
+        "description": [],
+        "signature": [
+          "() => Authorization"
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 35
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
+        "id": "def-public.useRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "useRequest",
+        "description": [],
         "signature": [
           "<D = any, E = Error>(httpClient: ",
           {
@@ -588,106 +632,169 @@
           },
           "<D, E>"
         ],
-        "description": [],
-        "label": "useRequest",
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
           "lineNumber": 28
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.useRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "httpClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-public.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.useRequest.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.UseRequestConfig",
+                "text": "UseRequestConfig"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.WithPrivileges",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ privileges: requiredPrivileges, children }",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
-              "lineNumber": 32
-            }
-          }
-        ],
+        "tags": [],
+        "label": "WithPrivileges",
+        "description": [],
         "signature": [
           "({ privileges: requiredPrivileges, children }: Props) => JSX.Element"
         ],
-        "description": [],
-        "label": "WithPrivileges",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
           "lineNumber": 32
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.WithPrivileges.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ privileges: requiredPrivileges, children }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+              "lineNumber": 32
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.Error",
         "type": "Interface",
+        "tags": [],
         "label": "Error",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+          "lineNumber": 12
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.Error.error",
             "type": "string",
+            "tags": [],
             "label": "error",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
               "lineNumber": 13
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.Error.cause",
             "type": "Array",
+            "tags": [],
             "label": "cause",
             "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
               "lineNumber": 14
             },
-            "signature": [
-              "string[] | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.Error.message",
             "type": "string",
+            "tags": [],
             "label": "message",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
               "lineNumber": 15
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 12
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.JsonEditorState",
         "type": "Interface",
+        "tags": [],
         "label": "JsonEditorState",
+        "description": [],
         "signature": [
           {
             "pluginId": "esUiShared",
@@ -698,116 +805,130 @@
           },
           "<T>"
         ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.JsonEditorState.data",
-            "type": "Object",
-            "label": "data",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 15
-            },
-            "signature": [
-              "{ raw: string; format(): T; }"
-            ]
-          },
-          {
-            "id": "def-public.JsonEditorState.validate",
-            "type": "Function",
-            "label": "validate",
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.JsonEditorState.isValid",
-            "type": "CompoundType",
-            "label": "isValid",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-              "lineNumber": 20
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
           "lineNumber": 14
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.JsonEditorState.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ raw: string; format(): T; }"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.JsonEditorState.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.JsonEditorState.isValid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isValid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.MissingPrivileges",
         "type": "Interface",
+        "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-public.MissingPrivileges.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 10
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
           "lineNumber": 9
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.MissingPrivileges.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.Privileges",
         "type": "Interface",
+        "tags": [],
         "label": "Privileges",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.Privileges.hasAllPrivileges",
             "type": "boolean",
+            "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.Privileges.missingPrivileges",
             "type": "Object",
+            "tags": [],
             "label": "missingPrivileges",
             "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 15
-            },
             "signature": [
               {
                 "pluginId": "esUiShared",
@@ -816,57 +937,65 @@
                 "section": "def-common.MissingPrivileges",
                 "text": "MissingPrivileges"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 13
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SendRequestConfig",
         "type": "Interface",
+        "tags": [],
         "label": "SendRequestConfig",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.SendRequestConfig.path",
             "type": "string",
+            "tags": [],
             "label": "path",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 12
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.SendRequestConfig.method",
             "type": "CompoundType",
+            "tags": [],
             "label": "method",
             "description": [],
+            "signature": [
+              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 13
             },
-            "signature": [
-              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.SendRequestConfig.query",
             "type": "Object",
+            "tags": [],
             "label": "query",
             "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 14
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -876,49 +1005,57 @@
                 "text": "HttpFetchQuery"
               },
               " | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.SendRequestConfig.body",
             "type": "Any",
+            "tags": [],
             "label": "body",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 15
             },
-            "signature": [
-              "any"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.SendRequestConfig.asSystemRequest",
             "type": "CompoundType",
+            "tags": [],
             "label": "asSystemRequest",
             "description": [
               "\nIf set, flags this as a \"system request\" to indicate that this is not a user-initiated request. For more information, see\nHttpFetchOptions#asSystemRequest."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
               "lineNumber": 20
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-          "lineNumber": 11
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SendRequestResponse",
         "type": "Interface",
+        "tags": [],
         "label": "SendRequestResponse",
+        "description": [],
         "signature": [
           {
             "pluginId": "esUiShared",
@@ -929,48 +1066,54 @@
           },
           "<D, E>"
         ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SendRequestResponse.data",
-            "type": "CompoundType",
-            "label": "data",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 24
-            },
-            "signature": [
-              "D | null"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SendRequestResponse.error",
-            "type": "CompoundType",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-              "lineNumber": 25
-            },
-            "signature": [
-              "E | null"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
           "lineNumber": 23
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SendRequestResponse.data",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "D | null"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SendRequestResponse.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "E | null"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.UseRequestConfig",
         "type": "Interface",
+        "tags": [],
         "label": "UseRequestConfig",
+        "description": [],
         "signature": [
           {
             "pluginId": "esUiShared",
@@ -988,62 +1131,70 @@
             "text": "SendRequestConfig"
           }
         ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UseRequestConfig.pollIntervalMs",
-            "type": "number",
-            "label": "pollIntervalMs",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 15
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UseRequestConfig.initialData",
-            "type": "Any",
-            "label": "initialData",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 16
-            },
-            "signature": [
-              "any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UseRequestConfig.deserializer",
-            "type": "Function",
-            "label": "deserializer",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "((data: any) => any) | undefined"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
           "lineNumber": 14
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.UseRequestConfig.pollIntervalMs",
+            "type": "number",
+            "tags": [],
+            "label": "pollIntervalMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.UseRequestConfig.initialData",
+            "type": "Any",
+            "tags": [],
+            "label": "initialData",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.UseRequestConfig.deserializer",
+            "type": "Function",
+            "tags": [],
+            "label": "deserializer",
+            "description": [],
+            "signature": [
+              "((data: any) => any) | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.UseRequestResponse",
         "type": "Interface",
+        "tags": [],
         "label": "UseRequestResponse",
+        "description": [],
         "signature": [
           {
             "pluginId": "esUiShared",
@@ -1054,108 +1205,118 @@
           },
           "<D, E>"
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.UseRequestResponse.isInitialRequest",
             "type": "boolean",
+            "tags": [],
             "label": "isInitialRequest",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 21
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.UseRequestResponse.isLoading",
             "type": "boolean",
+            "tags": [],
             "label": "isLoading",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 22
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.UseRequestResponse.error",
             "type": "CompoundType",
+            "tags": [],
             "label": "error",
             "description": [],
+            "signature": [
+              "E | null"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 23
             },
-            "signature": [
-              "E | null"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.UseRequestResponse.data",
             "type": "CompoundType",
+            "tags": [],
             "label": "data",
             "description": [],
+            "signature": [
+              "D | null | undefined"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 24
             },
-            "signature": [
-              "D | null | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-public.UseRequestResponse.resendRequest",
             "type": "Function",
+            "tags": [],
             "label": "resendRequest",
             "description": [],
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
               "lineNumber": 25
             },
-            "signature": [
-              "() => void"
-            ]
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-          "lineNumber": 20
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.Frequency",
         "type": "Type",
-        "label": "Frequency",
         "tags": [],
+        "label": "Frequency",
         "description": [],
+        "signature": [
+          "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
+        ],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.OnJsonEditorUpdateHandler",
         "type": "Type",
-        "label": "OnJsonEditorUpdateHandler",
         "tags": [],
+        "label": "OnJsonEditorUpdateHandler",
         "description": [],
-        "source": {
-          "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-          "lineNumber": 23
-        },
         "signature": [
           "(arg: ",
           {
@@ -1167,114 +1328,161 @@
           },
           "<T>) => void"
         ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+          "lineNumber": 23
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
-        "tags": [],
+        "parentPluginId": "esUiShared",
         "id": "def-public.AuthorizationContext",
         "type": "Object",
+        "tags": [],
         "label": "AuthorizationContext",
         "description": [],
+        "signature": [
+          "React.Context<Authorization>"
+        ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
           "lineNumber": 33
         },
-        "signature": [
-          "React.Context<Authorization>"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-public.indices",
         "type": "Object",
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE",
-            "type": "Array",
-            "label": "INDEX_ILLEGAL_CHARACTERS_VISIBLE",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 18
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.indices.indexNameBeginsWithPeriod",
-            "type": "Function",
-            "label": "indexNameBeginsWithPeriod",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 19
-            },
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameBeginsWithPeriod",
-                "text": "indexNameBeginsWithPeriod"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.indices.findIllegalCharactersInIndexName",
-            "type": "Function",
-            "label": "findIllegalCharactersInIndexName",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 20
-            },
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.findIllegalCharactersInIndexName",
-                "text": "findIllegalCharactersInIndexName"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.indices.indexNameContainsSpaces",
-            "type": "Function",
-            "label": "indexNameContainsSpaces",
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-              "lineNumber": 21
-            },
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.indexNameContainsSpaces",
-                "text": "indexNameContainsSpaces"
-              }
-            ]
-          }
-        ],
-        "description": [],
         "label": "indices",
+        "description": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/indices/index.ts",
           "lineNumber": 17
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE",
+            "type": "Array",
+            "tags": [],
+            "label": "INDEX_ILLEGAL_CHARACTERS_VISIBLE",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.indices.indexNameBeginsWithPeriod",
+            "type": "Function",
+            "tags": [],
+            "label": "indexNameBeginsWithPeriod",
+            "description": [],
+            "signature": [
+              "(indexName?: string | undefined) => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 12
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.indices.findIllegalCharactersInIndexName",
+            "type": "Function",
+            "tags": [],
+            "label": "findIllegalCharactersInIndexName",
+            "description": [],
+            "signature": [
+              "(indexName: string) => string[]"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 19
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.indices.indexNameContainsSpaces",
+            "type": "Function",
+            "tags": [],
+            "label": "indexNameContainsSpaces",
+            "description": [],
+            "signature": [
+              "(indexName: string) => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.indexName",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       }
     ]
@@ -1283,22 +1491,15 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-server.handleEsError",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
-            "isRequired": true,
-            "signature": [
-              "EsErrorHandlerParams"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-              "lineNumber": 23
-            }
-          }
+        "tags": [
+          "throws"
+        ],
+        "label": "handleEsError",
+        "description": [
+          "\nFor errors returned by the new elasticsearch js client.\n"
         ],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
@@ -1311,75 +1512,104 @@
           },
           "<any>"
         ],
-        "description": [],
-        "label": "handleEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-          "lineNumber": 23
+          "lineNumber": 25
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-server.handleEsError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
+            "description": [],
+            "signature": [
+              "EsErrorHandlerParams"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-server.isEsError",
         "type": "Function",
+        "tags": [],
         "label": "isEsError",
+        "description": [],
         "signature": [
           "(err: RequestError) => boolean"
         ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "RequestError"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
-              "lineNumber": 21
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
           "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-server.isEsError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "RequestError"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-server.parseEsError",
         "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
-              "lineNumber": 27
-            }
-          }
-        ],
+        "tags": [],
+        "label": "parseEsError",
+        "description": [],
         "signature": [
           "(err: string) => ParsedError"
         ],
-        "description": [],
-        "label": "parseEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
           "lineNumber": 27
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-server.parseEsError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1394,61 +1624,70 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "esUiShared",
         "id": "def-common.MissingPrivileges",
         "type": "Interface",
+        "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-common.MissingPrivileges.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 10
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
           "lineNumber": 9
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-common.MissingPrivileges.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "esUiShared",
         "id": "def-common.Privileges",
         "type": "Interface",
+        "tags": [],
         "label": "Privileges",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-common.Privileges.hasAllPrivileges",
             "type": "boolean",
+            "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "esUiShared",
             "id": "def-common.Privileges.missingPrivileges",
             "type": "Object",
+            "tags": [],
             "label": "missingPrivileges",
             "description": [],
-            "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-              "lineNumber": 15
-            },
             "signature": [
               {
                 "pluginId": "esUiShared",
@@ -1457,13 +1696,14 @@
                 "section": "def-common.MissingPrivileges",
                 "text": "MissingPrivileges"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-          "lineNumber": 13
-        },
         "initialIsOpen": false
       }
     ],

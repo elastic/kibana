@@ -7,6 +7,7 @@
 
 {kib} supports the following authentication mechanisms:
 
+- <<multiple-authentication-providers>>
 - <<basic-authentication>>
 - <<token-authentication>>
 - <<pki-authentication>>
@@ -16,7 +17,12 @@
 - <<anonymous-authentication>>
 - <<http-authentication>>
 
-Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+For an introduction to {kib}'s security features, including the login process, refer to <<tutorial-secure-access-to-kibana>>.
+
+[[multiple-authentication-providers]]
+==== Multiple authentication providers
+
+Enable multiple authentication mechanisms at the same time by specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
 
 When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
@@ -24,7 +30,7 @@ TIP: To provide login instructions to users, use the `xpack.security.loginHelp` 
 
 If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
 
-TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
+TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting.
 
 Here is how your `kibana.yml` and Login Selector UI can look like if you deal with multiple authentication providers:
 
@@ -292,9 +298,9 @@ xpack.security.authc.providers:
     order: 1
 -----------------------------------------------
 
-IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. 
+IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications.
 At the end of the Kerberos handshake, {kib} forwards the service ticket to {es}, then {es} unpacks the service ticket and responds with an access and refresh token, which are used for subsequent authentication.
-On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host. 
+On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host.
 The HTTP service principal name must have the `HTTP/kibana.domain.local@KIBANA.DOMAIN.LOCAL` format.
 
 
@@ -386,7 +392,7 @@ xpack.security.authc.providers:
 [[anonymous-access-and-embedding]]
 ===== Anonymous access and embedding
 
-One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. 
+One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it.
 If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
 If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations:

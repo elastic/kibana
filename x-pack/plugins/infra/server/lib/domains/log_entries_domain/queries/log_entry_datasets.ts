@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { estypes } from '@elastic/elasticsearch';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';
 
@@ -14,6 +15,7 @@ export const createLogEntryDatasetsQuery = (
   timestampField: string,
   startTime: number,
   endTime: number,
+  runtimeMappings: estypes.MappingRuntimeFields,
   size: number,
   afterKey?: CompositeDatasetKey
 ) => ({
@@ -38,6 +40,7 @@ export const createLogEntryDatasetsQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     aggs: {
       dataset_buckets: {
         composite: {

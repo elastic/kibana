@@ -4,7 +4,7 @@
 
 ## LegacyElasticsearchError interface
 
-@<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore.
+@<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore.  7.16
 
 <b>Signature:</b>
 

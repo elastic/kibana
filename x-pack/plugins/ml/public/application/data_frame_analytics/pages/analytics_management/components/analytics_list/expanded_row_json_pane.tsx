@@ -11,11 +11,12 @@ import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 
 interface Props {
   json: object;
+  dataTestSubj: string;
 }
 
-export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
+export const ExpandedRowJsonPane: FC<Props> = ({ json, dataTestSubj }) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj={dataTestSubj}>
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiCodeEditor
@@ -24,6 +25,7 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
           mode="json"
           style={{ width: '100%' }}
           theme="textmate"
+          data-test-subj={`mlAnalyticsDetailsJsonPreview`}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>

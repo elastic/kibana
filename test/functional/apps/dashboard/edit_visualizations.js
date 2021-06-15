@@ -14,13 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   const originalMarkdownText = 'Original markdown text';
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await PageObjects.dashboard.clickMarkdownQuickButton();
+    await dashboardAddPanel.clickMarkdownQuickButton();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
     if (title) {
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('edit visualizations from dashboard', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

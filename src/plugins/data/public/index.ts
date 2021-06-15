@@ -305,7 +305,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -380,14 +380,17 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
+  IEsError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  Reason,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   WaitUntilNextSessionCompletesOptions,
+  isEsError,
 } from './search';
 
 export type {
@@ -408,7 +411,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,

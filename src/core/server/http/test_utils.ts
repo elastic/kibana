@@ -7,6 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import moment from 'moment';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '../config';
@@ -38,11 +39,13 @@ configService.atPath.mockImplementation((path) => {
         disableProtection: true,
         allowlist: [],
       },
+      securityResponseHeaders: {},
       customResponseHeaders: {},
       requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 120_000,
       socketTimeout: 120_000,
     } as any);

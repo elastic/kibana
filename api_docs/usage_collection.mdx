@@ -11,6 +11,16 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import usageCollectionObj from './usage_collection.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 57 | 0 | 16 | 2 |
+
 ## Client
 
 ### Setup
@@ -22,13 +32,13 @@ import usageCollectionObj from './usage_collection.json';
 ### Functions
 <DocDefinitionList data={usageCollectionObj.client.functions}/>
 
-### Enums
-<DocDefinitionList data={usageCollectionObj.client.enums}/>
+### Interfaces
+<DocDefinitionList data={usageCollectionObj.client.interfaces}/>
 
 ## Server
 
-### Classes
-<DocDefinitionList data={usageCollectionObj.server.classes}/>
+### Setup
+<DocDefinitionList data={[usageCollectionObj.server.setup]}/>
 
 ### Interfaces
 <DocDefinitionList data={usageCollectionObj.server.interfaces}/>

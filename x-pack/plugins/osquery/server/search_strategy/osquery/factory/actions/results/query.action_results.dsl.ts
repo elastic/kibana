@@ -12,8 +12,8 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 export const buildActionResultsQuery = ({
   actionId,
   filterQuery,
+  // pagination: { activePage, querySize },
   sort,
-  pagination: { activePage, querySize },
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -30,18 +30,39 @@ export const buildActionResultsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        responses: {
-          terms: {
-            script: {
-              lang: 'painless',
-              source: "if (doc['error'].size()==0) { return 'success' } else { return 'error' }",
+        aggs: {
+          global: {},
+          aggs: {
+            responses_by_action_id: {
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      match: {
+                        action_id: actionId,
+                      },
+                    },
+                  ],
+                },
+              },
+              aggs: {
+                responses: {
+                  terms: {
+                    script: {
+                      lang: 'painless',
+                      source:
+                        "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                    } as const,
+                  },
+                },
+              },
             },
           },
         },
       },
       query: { bool: { filter } },
-      from: activePage * querySize,
-      size: querySize,
+      // from: activePage * querySize,
+      size: 10000, // querySize,
       track_total_hits: true,
       fields: ['*'],
       sort: [

@@ -37,19 +37,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const expectedData = [
-      { x: '0.53.251.53', y: 4624.75 },
-      { x: '0.108.3.2', y: 7359.41 },
-      { x: '0.209.80.244', y: 6169.9 },
-      { x: '0.228.1.71', y: 7092.8 },
-      { x: '0.254.91.215', y: 3835.58 },
-      { x: '__other__', y: 5727.24 },
+      { x: '97.220.3.248', y: 19755 },
+      { x: '169.228.188.120', y: 18994 },
+      { x: '78.83.247.30', y: 17246 },
+      { x: '226.82.228.233', y: 15687 },
+      { x: '93.28.27.24', y: 15614.33 },
+      { x: 'Other', y: 5722.77 },
     ];
 
     function assertMatchesExpectedData(state: DebugState) {
       expect(
         state.bars![0].bars.map((bar) => ({
           x: bar.x,
-          y: Math.round(bar.y * 100) / 100,
+          y: Math.floor(bar.y * 100) / 100,
         }))
       ).to.eql(expectedData);
     }
@@ -76,10 +76,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it.skip('should render treemap chart', async () => {
-      await PageObjects.lens.switchToVisualization('treemap');
+      await PageObjects.lens.switchToVisualization('treemap', 'treemap');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
+    });
+
+    it('should render heatmap chart', async () => {
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.waitForVisualization();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
+
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
+
+      // assert axes
+      expect(debugState.axes!.x[0].labels).to.eql([
+        '97.220.3.248',
+        '169.228.188.120',
+        '78.83.247.30',
+        '226.82.228.233',
+        '93.28.27.24',
+        'Other',
+      ]);
+      expect(debugState.axes!.y[0].labels).to.eql(['']);
+
+      // assert cells
+      expect(debugState.heatmap!.cells.length).to.eql(6);
+
+      // assert legend
+      expect(debugState.legend!.items).to.eql([
+        { key: '6000', name: '> 6,000', color: '#6092c0' },
+        { key: '8000', name: '> 8,000', color: '#6092c0' },
+        { key: '10000', name: '> 10,000', color: '#a8bfda' },
+        { key: '12000', name: '> 12,000', color: '#ebeff5' },
+        { key: '14000', name: '> 14,000', color: '#ebeff5' },
+        { key: '16000', name: '> 16,000', color: '#ecb385' },
+        { key: '18000', name: '> 18,000', color: '#e7664c' },
+      ]);
     });
 
     it('should render datatable', async () => {
@@ -91,10 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );
-      expect(terms.map((term) => (term === 'Other' ? '__other__' : term))).to.eql(
-        expectedData.map(({ x }) => x)
-      );
-      expect(values.map((value) => Math.round(100 * Number(value.replace(',', ''))) / 100)).to.eql(
+      expect(terms).to.eql(expectedData.map(({ x }) => x));
+      expect(values.map((value) => Math.floor(100 * Number(value.replace(',', ''))) / 100)).to.eql(
         expectedData.map(({ y }) => y)
       );
     });

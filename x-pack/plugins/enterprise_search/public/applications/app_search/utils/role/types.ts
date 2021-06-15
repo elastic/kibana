@@ -49,12 +49,9 @@ export interface Role {
 export interface ASRoleMapping extends RoleMapping {
   accessAllEngines: boolean;
   engines: Engine[];
-  toolTip?: {
-    content: string;
-  };
 }
 
 export interface AdvanceRoleType {
-  type: RoleTypes;
+  id: RoleTypes;
   description: string;
 }

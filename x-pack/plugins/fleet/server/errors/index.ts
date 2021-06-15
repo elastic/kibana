@@ -40,13 +40,18 @@ export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
 export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
-export class FleetAdminUserInvalidError extends IngestManagerError {}
 export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
-export class AgentUnenrollmentError extends IngestManagerError {}
-export class AgentPolicyDeletionError extends IngestManagerError {}
+export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
 
 export class FleetSetupError extends IngestManagerError {}
+export class GenerateServiceTokenError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {

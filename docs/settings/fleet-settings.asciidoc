@@ -37,12 +37,10 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.agents.kibana.host`
-  | The hostname used by {agent} for accessing {kib}.
-| `xpack.fleet.agents.elasticsearch.host`
-  | The hostname used by {agent} for accessing {es}.
-| `xpack.fleet.agents.tlsCheckDisabled`
-  | Set to `true` to allow {fleet} to run on a {kib} instance without TLS enabled.
+| `xpack.fleet.agents.fleet_server.hosts`
+  | Hostnames used by {agent} for accessing {fleet-server}.
+| `xpack.fleet.agents.elasticsearch.hosts`
+  | Hostnames used by {agent} for accessing {es}.
 |===
 
 [NOTE]

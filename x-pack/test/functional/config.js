@@ -59,6 +59,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
+      resolve(__dirname, './apps/reporting'),
+      resolve(__dirname, './apps/observability'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -84,13 +86,16 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.maps.enableDrawingFeature=true',
+        '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
+        '--xpack.observability.unsafe.cases.enabled=true',
       ],
     },
     uiSettings: {
@@ -152,6 +157,9 @@ export default async function ({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
+      fleet: {
+        pathname: '/app/fleet',
+      },
       ml: {
         pathname: '/app/ml',
       },
@@ -202,11 +210,6 @@ export default async function ({ readConfigFile }) {
       },
     },
 
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
-    },
-
     // choose where screenshots should be saved
     screenshots: {
       directory: resolve(__dirname, 'screenshots'),
@@ -236,8 +239,8 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['all'],
-                visualize: ['all'],
+                canvas: ['minimal_all'],
+                visualize: ['minimal_all'],
               },
               spaces: ['*'],
             },

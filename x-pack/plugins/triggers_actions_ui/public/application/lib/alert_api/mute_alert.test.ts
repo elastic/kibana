@@ -12,12 +12,12 @@ const http = httpServiceMock.createStartContract();
 
 describe('muteAlertInstance', () => {
   test('should call mute instance alert API', async () => {
-    const result = await muteAlertInstance({ http, id: '1', instanceId: '123' });
+    const result = await muteAlertInstance({ http, id: '1/', instanceId: '12/3' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerting/rule/1/alert/123/_mute",
+          "/api/alerting/rule/1%2F/alert/12%2F3/_mute",
         ],
       ]
     `);

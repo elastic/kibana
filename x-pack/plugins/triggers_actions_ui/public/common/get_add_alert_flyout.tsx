@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import type { AlertAddProps } from '../application/sections/alert_form/alert_add';
+import React from 'react';
+import { AlertAdd } from '../application/sections/alert_form';
+import type { AlertAddProps } from '../types';
 
 export const getAddAlertFlyoutLazy = (props: AlertAddProps) => {
-  const AlertAddFlyoutLazy = lazy(() => import('../application/sections/alert_form/alert_add'));
-  return (
-    <Suspense fallback={null}>
-      <AlertAddFlyoutLazy {...props} />
-    </Suspense>
-  );
+  return <AlertAdd {...props} />;
 };

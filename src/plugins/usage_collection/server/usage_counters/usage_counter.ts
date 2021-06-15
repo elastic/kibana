@@ -20,13 +20,32 @@ export interface UsageCounterDeps {
   counter$: Rx.Subject<CounterMetric>;
 }
 
+/**
+ * Details about the counter to be incremented
+ */
 export interface IncrementCounterParams {
+  /** The name of the counter **/
   counterName: string;
+  /** The counter type ("count" by default) **/
   counterType?: string;
+  /** Increment the counter by this number (1 if not specified) **/
   incrementBy?: number;
 }
 
-export class UsageCounter {
+/**
+ * Usage Counter allows to keep track of any events that occur.
+ * By calling {@link IUsageCounter.incrementCounter} devs can notify this
+ * API whenever the event happens.
+ */
+export interface IUsageCounter {
+  /**
+   * Notifies the counter about a new event happening so it can increase the count internally.
+   * @param params {@link IncrementCounterParams}
+   */
+  incrementCounter: (params: IncrementCounterParams) => void;
+}
+
+export class UsageCounter implements IUsageCounter {
   private domainId: string;
   private counter$: Rx.Subject<CounterMetric>;
 

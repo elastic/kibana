@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
-import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
@@ -39,8 +39,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
-  const { core } = usePluginContext();
-  const theme = useContext(ThemeContext);
+  const { core, ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
@@ -65,18 +64,20 @@ export function OverviewPage({ routeParams }: Props) {
   });
 
   return (
-    <WithHeaderLayout
-      headerColor={theme.eui.euiColorEmptyShade}
-      bodyColor={theme.eui.euiPageBackgroundColor}
-      datePicker={
-        <DatePicker
-          rangeFrom={relativeTime.start}
-          rangeTo={relativeTime.end}
-          refreshInterval={refreshInterval}
-          refreshPaused={refreshPaused}
-        />
-      }
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: overviewPageTitle,
+        rightSideItems: [
+          <DatePicker
+            rangeFrom={relativeTime.start}
+            rangeTo={relativeTime.end}
+            refreshInterval={refreshInterval}
+            refreshPaused={refreshPaused}
+          />,
+        ],
+      }}
     >
+      <ObservabilityHeaderMenu />
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}
@@ -107,6 +108,10 @@ export function OverviewPage({ routeParams }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </WithHeaderLayout>
+    </ObservabilityPageTemplate>
   );
 }
+
+const overviewPageTitle = i18n.translate('xpack.observability.overview.pageTitle', {
+  defaultMessage: 'Overview',
+});

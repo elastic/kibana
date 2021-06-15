@@ -115,7 +115,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
           title={
             <h3>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.emptyTitle', {
-                defaultMessage: 'No recent logs',
+                defaultMessage: 'Perform your first API call',
               })}
             </h3>
           }

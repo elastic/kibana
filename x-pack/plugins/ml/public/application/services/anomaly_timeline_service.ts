@@ -11,7 +11,12 @@ import {
   TimeRange,
   UI_SETTINGS,
 } from '../../../../../../src/plugins/data/public';
-import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
+import {
+  getBoundsRoundedToInterval,
+  TimeBuckets,
+  TimeBucketsInterval,
+  TimeRangeBounds,
+} from '../util/time_buckets';
 import {
   ExplorerJob,
   OverallSwimlaneData,
@@ -92,9 +97,11 @@ export class AnomalyTimelineService {
    */
   public async loadOverallData(
     selectedJobs: ExplorerJob[],
-    chartWidth: number
+    chartWidth?: number,
+    bucketInterval?: TimeBucketsInterval,
+    overallScore?: number
   ): Promise<OverallSwimlaneData> {
-    const interval = this.getSwimlaneBucketInterval(selectedJobs, chartWidth);
+    const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
     if (!selectedJobs || !selectedJobs.length) {
       throw new Error('Explorer jobs collection is required');
@@ -121,16 +128,14 @@ export class AnomalyTimelineService {
       1,
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
-      interval.asSeconds() + 's'
+      interval.asSeconds() + 's',
+      overallScore
     );
     const overallSwimlaneData = this.processOverallResults(
       resp.results,
       searchBounds,
       interval.asSeconds()
     );
-
-    // eslint-disable-next-line no-console
-    console.log('Explorer overall swim lane data set:', overallSwimlaneData);
 
     return overallSwimlaneData;
   }
@@ -156,8 +161,10 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number,
-    influencersFilterQuery?: any
+    swimlaneContainerWidth?: number,
+    influencersFilterQuery?: any,
+    bucketInterval?: TimeBucketsInterval,
+    swimLaneSeverity?: number
   ): Promise<SwimlaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
@@ -165,10 +172,8 @@ export class AnomalyTimelineService {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
     }
 
-    const swimlaneBucketInterval = this.getSwimlaneBucketInterval(
-      selectedJobs,
-      swimlaneContainerWidth
-    );
+    const swimlaneBucketInterval =
+      bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth!);
 
     const searchBounds = getBoundsRoundedToInterval(
       timefilterBounds,
@@ -193,7 +198,8 @@ export class AnomalyTimelineService {
         searchBounds.max.valueOf(),
         intervalMs,
         perPage,
-        fromPage
+        fromPage,
+        swimLaneSeverity
       );
     } else {
       response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
@@ -206,7 +212,8 @@ export class AnomalyTimelineService {
         swimlaneLimit,
         perPage,
         fromPage,
-        influencersFilterQuery
+        influencersFilterQuery,
+        swimLaneSeverity
       );
     }
 
@@ -222,8 +229,6 @@ export class AnomalyTimelineService {
       viewBySwimlaneFieldName,
       swimlaneBucketInterval.asSeconds()
     );
-    // eslint-disable-next-line no-console
-    console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
 
     return viewBySwimlaneData;
   }

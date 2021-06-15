@@ -7,11 +7,9 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -41,23 +39,11 @@ describe('Hosts Table', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -86,21 +72,19 @@ describe('Hosts Table', () => {
 
       beforeEach(() => {
         wrapper = mount(
-          <MockedProvider>
-            <TestProviders store={store}>
-              <HostsTable
-                id="hostsQuery"
-                isInspect={false}
-                loading={false}
-                data={mockData}
-                totalCount={0}
-                fakeTotalCount={-1}
-                showMorePagesIndicator={false}
-                loadPage={loadPage}
-                type={hostsModel.HostsType.page}
-              />
-            </TestProviders>
-          </MockedProvider>
+          <TestProviders store={store}>
+            <HostsTable
+              id="hostsQuery"
+              isInspect={false}
+              loading={false}
+              data={mockData}
+              totalCount={0}
+              fakeTotalCount={-1}
+              showMorePagesIndicator={false}
+              loadPage={loadPage}
+              type={hostsModel.HostsType.page}
+            />
+          </TestProviders>
         );
       });
       test('Initial value of the store', () => {
@@ -110,9 +94,7 @@ describe('Hosts Table', () => {
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-          'Last seen Click to sort in ascending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
         expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
       });
 
@@ -127,9 +109,7 @@ describe('Hosts Table', () => {
           sortField: 'hostName',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-          'Host nameClick to sort in descending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

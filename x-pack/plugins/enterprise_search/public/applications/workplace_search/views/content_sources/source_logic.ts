@@ -13,6 +13,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   setQueuedSuccessMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
@@ -88,13 +89,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        resetSourceState: () => false,
+        resetSourceState: () => true,
       },
     ],
     buttonLoading: [
@@ -146,6 +148,11 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         actions.onInitializeSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
+        }
+        if (response.errors) {
+          setErrorMessage(response.errors);
+        } else {
+          clearFlashMessages();
         }
       } catch (e) {
         if (e.response.status === 404) {

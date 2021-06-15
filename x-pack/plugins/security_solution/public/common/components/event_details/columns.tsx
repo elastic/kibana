@@ -15,13 +15,14 @@ import {
   EuiPanel,
   EuiToolTip,
   EuiIconTip,
+  EuiText,
 } from '@elastic/eui';
+import { get, isEmpty } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
-
 import { onFocusReFocusDraggable } from '../accessibility/helpers';
 import { BrowserFields } from '../../containers/source';
-import { ToStringArray } from '../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
@@ -59,7 +60,10 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const FullWidthFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
-
+export const getFieldFromBrowserField = memoizeOne(
+  (keys: string[], browserFields: BrowserFields): BrowserFields => get(browserFields, keys),
+  (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
+);
 export const getColumns = ({
   browserFields,
   columnHeaders,
@@ -99,7 +103,7 @@ export const getColumns = ({
               toggleColumn({
                 columnHeaderType: defaultColumnHeaderType,
                 id: field,
-                width: DEFAULT_COLUMN_MIN_WIDTH,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
               })
             }
             disabled={data.isObjectArray && data.type !== 'geo_point'}
@@ -113,102 +117,125 @@ export const getColumns = ({
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    render: (field: string, data: EventFieldsData) => (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={data.type}>
-            <EuiIcon data-test-subj="field-type-icon" type={getIconFromType(data.type)} />
-          </EuiToolTip>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          {data.isObjectArray && data.type !== 'geo_point' ? (
-            <>{field}</>
-          ) : (
-            <DroppableWrapper
-              droppableId={getDroppableId(
-                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-              )}
-              key={getDroppableId(
-                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-              )}
-              isDropDisabled={true}
-              type={DRAG_TYPE_FIELD}
-              renderClone={(provided) => (
-                <div
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  ref={provided.innerRef}
-                  tabIndex={-1}
-                >
-                  <DragEffects>
-                    <DraggableFieldBadge fieldId={field} />
-                  </DragEffects>
-                </div>
-              )}
-            >
-              <DraggableFieldsBrowserField
-                browserFields={browserFields}
-                categoryId={data.category}
-                fieldName={field}
-                fieldCategory={data.category}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
+    render: (field: string, data: EventFieldsData) => {
+      const fieldFromBrowserField = getFieldFromBrowserField(
+        [data.category, 'fields', field],
+        browserFields
+      );
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={data.type}>
+              <EuiIcon data-test-subj="field-type-icon" type={getIconFromType(data.type)} />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {(data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null ? (
+              <EuiText size="xs">{field}</EuiText>
+            ) : (
+              <DroppableWrapper
+                droppableId={getDroppableId(
+                  `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+                )}
+                key={getDroppableId(
+                  `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+                )}
+                isDropDisabled={true}
+                type={DRAG_TYPE_FIELD}
+                renderClone={(provided) => (
+                  <div
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    ref={provided.innerRef}
+                    tabIndex={-1}
+                  >
+                    <DragEffects>
+                      <DraggableFieldBadge fieldId={field} />
+                    </DragEffects>
+                  </div>
+                )}
+              >
+                <DraggableFieldsBrowserField
+                  browserFields={browserFields}
+                  categoryId={data.category}
+                  fieldName={field}
+                  fieldCategory={data.category}
+                  onUpdateColumns={onUpdateColumns}
+                  timelineId={timelineId}
+                  toggleColumn={toggleColumn}
+                />
+              </DroppableWrapper>
+            )}
+          </EuiFlexItem>
+          {!isEmpty(data.description) && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                aria-label={i18n.DESCRIPTION}
+                type="iInCircle"
+                color="subdued"
+                content={`${data.description} ${getExampleText(data.example)}`}
               />
-            </DroppableWrapper>
+            </EuiFlexItem>
           )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            aria-label={i18n.DESCRIPTION}
-            type="iInCircle"
-            color="subdued"
-            content={`${data.description || ''} ${getExampleText(data.example)}`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+        </EuiFlexGroup>
+      );
+    },
   },
   {
     field: 'values',
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
-      <FullWidthFlexGroup
-        direction="column"
-        alignItems="flexStart"
-        component="span"
-        gutterSize="none"
-      >
-        {values != null &&
-          values.map((value, i) => (
-            <FullWidthFlexItem
-              grow={false}
-              component="span"
-              key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-            >
-              <div data-colindex={3} onFocus={onFocusReFocusDraggable} role="button" tabIndex={0}>
-                {data.field === MESSAGE_FIELD_NAME ? (
-                  <OverflowField value={value} />
-                ) : (
-                  <FormattedFieldValue
-                    contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                    eventId={eventId}
-                    fieldFormat={data.format}
-                    fieldName={data.field}
-                    fieldType={data.type}
-                    isObjectArray={data.isObjectArray}
-                    value={value}
-                    linkValue={getLinkValue(data.field)}
-                  />
-                )}
-              </div>
-            </FullWidthFlexItem>
-          ))}
-      </FullWidthFlexGroup>
-    ),
+    render: (values: string[] | null | undefined, data: EventFieldsData) => {
+      const fieldFromBrowserField = getFieldFromBrowserField(
+        [data.category, 'fields', data.field],
+        browserFields
+      );
+      return (
+        <FullWidthFlexGroup
+          direction="column"
+          alignItems="flexStart"
+          component="span"
+          gutterSize="none"
+        >
+          {values != null &&
+            values.map((value, i) => {
+              if (fieldFromBrowserField == null) {
+                return <EuiText size="s">{value}</EuiText>;
+              }
+              return (
+                <FullWidthFlexItem
+                  grow={false}
+                  component="span"
+                  key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                >
+                  <div
+                    data-colindex={3}
+                    onFocus={onFocusReFocusDraggable}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {data.field === MESSAGE_FIELD_NAME ? (
+                      <OverflowField value={value} />
+                    ) : (
+                      <FormattedFieldValue
+                        contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                        eventId={eventId}
+                        fieldFormat={data.format}
+                        fieldName={data.field}
+                        fieldType={data.type}
+                        isObjectArray={data.isObjectArray}
+                        value={value}
+                        linkValue={getLinkValue(data.field)}
+                      />
+                    )}
+                  </div>
+                </FullWidthFlexItem>
+              );
+            })}
+        </FullWidthFlexGroup>
+      );
+    },
   },
   {
     field: 'valuesConcatenated',

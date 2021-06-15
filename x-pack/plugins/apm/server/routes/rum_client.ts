@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { LocalUIFilterName } from '../../common/ui_filter';
 import {
   Setup,
@@ -263,8 +264,12 @@ const rumJSErrors = createApmServerRoute({
 
 const rumHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-  params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
+  params: t.partial({
+    query: t.partial({
+      uiFilters: t.string,
+      start: isoToEpochRt,
+      end: isoToEpochRt,
+    }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {

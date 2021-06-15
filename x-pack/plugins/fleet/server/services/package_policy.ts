@@ -23,13 +23,18 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
   ListResult,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import { IngestManagerError, ingestErrorToResponseOptions } from '../errors';
+import {
+  HostedAgentPolicyRestrictionRelatedError,
+  IngestManagerError,
+  ingestErrorToResponseOptions,
+} from '../errors';
 import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
@@ -51,10 +56,6 @@ import { appContextService } from '.';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-function getDataset(st: string) {
-  return st.split('.')[1];
-}
-
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
@@ -74,8 +75,8 @@ class PackagePolicyService {
       throw new Error('Agent policy not found');
     }
     if (parentAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(
-        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
       );
     }
     if (
@@ -107,9 +108,10 @@ class PackagePolicyService {
       else {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
+            esClient,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
-            esClient,
+            pkgVersion: packagePolicy.package.version,
           }),
           pkgInfoPromise,
         ]);
@@ -127,7 +129,7 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     const isoDate = new Date().toISOString();
@@ -346,6 +348,8 @@ class PackagePolicyService {
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
+
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -353,7 +357,7 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -429,7 +433,7 @@ class PackagePolicyService {
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
-      const [pkgInfo, defaultOutputId] = await Promise.all([
+      const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: pkgInstall.name,
@@ -437,23 +441,24 @@ class PackagePolicyService {
         }),
         outputService.getDefaultOutputId(soClient),
       ]);
-      if (pkgInfo) {
+      if (packageInfo) {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToPackagePolicy(pkgInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
       }
     }
   }
 
   public async compilePackagePolicyInputs(
     pkgInfo: PackageInfo,
+    vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, input);
-      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, input);
+      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
+      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
       return {
         ...input,
         compiled_input: compiledInput,
@@ -503,13 +508,20 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 async function _compilePackagePolicyInput(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
-  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
+  const packagePolicyTemplate = input.policy_template
+    ? pkgInfo.policy_templates?.find(
+        (policyTemplate) => policyTemplate.name === input.policy_template
+      )
+    : pkgInfo.policy_templates?.[0];
+
+  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
     return undefined;
   }
 
-  const packageInputs = pkgInfo.policy_templates[0].inputs;
+  const packageInputs = packagePolicyTemplate.inputs;
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
@@ -528,8 +540,8 @@ async function _compilePackagePolicyInput(
   }
 
   return compileTemplate(
-    // Populate template variables from input vars
-    Object.assign({}, input.vars),
+    // Populate template variables from package- and input-level vars
+    Object.assign({}, vars, input.vars),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -537,10 +549,11 @@ async function _compilePackagePolicyInput(
 async function _compilePackageStreams(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, input, stream)
+    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -549,13 +562,14 @@ async function _compilePackageStreams(
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   stream: PackagePolicyInputStream
 ) {
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDataset(stream.data_stream.dataset);
+
   const packageDataStreams = pkgInfo.data_streams;
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
@@ -564,8 +578,11 @@ async function _compilePackageStream(
   const packageDataStream = packageDataStreams.find(
     (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
+
   if (!packageDataStream) {
-    throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
+    throw new Error(
+      `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
+    );
   }
 
   const streamFromPkg = (packageDataStream.streams || []).find(
@@ -576,8 +593,10 @@ async function _compilePackageStream(
   }
 
   if (!streamFromPkg.template_path) {
-    throw new Error(`Stream template path not found for dataset ${datasetPath}`);
+    throw new Error(`Stream template path not found for dataset ${stream.data_stream.dataset}`);
   }
+
+  const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
     registryPkgInfo,
@@ -587,19 +606,57 @@ async function _compilePackageStream(
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
     throw new Error(
-      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${datasetPath}`
+      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${stream.data_stream.dataset}`
     );
   }
 
   const yaml = compileTemplate(
-    // Populate template variables from input vars and stream vars
-    Object.assign({}, input.vars, stream.vars),
+    // Populate template variables from package-, input-, and stream-level vars
+    Object.assign({}, vars, input.vars, stream.vars),
     pkgStreamTemplate.buffer.toString()
   );
 
   stream.compiled_stream = yaml;
 
   return { ...stream };
+}
+
+function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+  const resultInputs = [...newInputs];
+
+  for (const input of resultInputs) {
+    const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
+    if (input.vars && oldInput?.vars) {
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+    }
+    if (input.streams && oldInput?.streams) {
+      for (const stream of input.streams) {
+        const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
+        if (stream.vars && oldStream?.vars) {
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+        }
+      }
+    }
+  }
+
+  return resultInputs;
+}
+
+function _enforceFrozenVars(
+  oldVars: Record<string, PackagePolicyConfigRecordEntry>,
+  newVars: Record<string, PackagePolicyConfigRecordEntry>
+) {
+  const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (val.frozen) {
+      resultVars[key] = val;
+    } else {
+      resultVars[key] = newVars[key];
+    }
+  }
+  return resultVars;
 }
 
 export type PackagePolicyServiceInterface = PackagePolicyService;

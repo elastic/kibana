@@ -7,50 +7,56 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-public.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 17
-        },
         "signature": [
           "\"ese\""
         ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-public.EQL_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "EQL_SEARCH_STRATEGY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 19
-        },
         "signature": [
           "\"eql\""
         ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "start": {
+      "parentPluginId": "dataEnhanced",
       "id": "def-public.DataEnhancedStart",
       "type": "Type",
-      "label": "DataEnhancedStart",
       "tags": [],
+      "label": "DataEnhancedStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
-        "lineNumber": 38
-      },
       "signature": [
         "void"
       ],
+      "source": {
+        "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
+        "lineNumber": 37
+      },
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -58,6 +64,7 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.EnhancedDataServerPlugin",
         "type": "Class",
         "tags": [],
@@ -79,24 +86,41 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<void, void, SetupDependencies, ",
-          "StartDependencies",
+          "<void, void, ",
+          "DataEnhancedSetupDependencies",
+          ", ",
+          "DataEnhancedStartDependencies",
           ">"
         ],
+        "source": {
+          "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
+                "id": "def-server.EnhancedDataServerPlugin.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "initializerContext",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -105,26 +129,25 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 48
-                }
+                  "lineNumber": 26
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 48
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -135,21 +158,24 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              },
-              ", unknown>, deps: SetupDependencies) => void"
+              "DataEnhancedStartDependencies",
+              ", unknown>, deps: ",
+              "DataEnhancedSetupDependencies",
+              ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
+                "id": "def-server.EnhancedDataServerPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -159,46 +185,43 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStart",
-                    "text": "DataPluginStart"
-                  },
+                  "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
-                }
+                  "lineNumber": 31
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dataEnhanced",
+                "id": "def-server.EnhancedDataServerPlugin.setup.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "deps",
-                "isRequired": true,
-                "signature": [
-                  "SetupDependencies"
-                ],
                 "description": [],
+                "signature": [
+                  "DataEnhancedSetupDependencies"
+                ],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
-                }
+                  "lineNumber": 31
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 53
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -209,21 +232,22 @@
                 "text": "CoreStart"
               },
               ", { taskManager }: ",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.StartDependencies",
-                "text": "StartDependencies"
-              },
+              "DataEnhancedStartDependencies",
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
+                "id": "def-server.EnhancedDataServerPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -233,60 +257,52 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
-                }
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dataEnhanced",
+                "id": "def-server.EnhancedDataServerPlugin.start.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "{ taskManager }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.StartDependencies",
-                    "text": "StartDependencies"
-                  }
-                ],
                 "description": [],
+                "signature": [
+                  "DataEnhancedStartDependencies"
+                ],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
-                }
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 95
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.stop",
             "type": "Function",
+            "tags": [],
             "label": "stop",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 101
-            }
+              "lineNumber": 60
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 42
-        },
         "initialIsOpen": false
       }
     ],
@@ -295,33 +311,37 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 17
-        },
         "signature": [
           "\"ese\""
         ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.EQL_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "EQL_SEARCH_STRATEGY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 19
-        },
         "signature": [
           "\"eql\""
         ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
@@ -329,600 +349,10 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "id": "def-common.pollSearch",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "search",
-            "isRequired": true,
-            "signature": [
-              "() => Promise<Response>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "type": "Function",
-            "label": "cancel",
-            "isRequired": false,
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "type": "Object",
-            "label": "{ pollInterval = 1000, abortSignal }",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "common",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-common.IAsyncSearchOptions",
-                "text": "IAsyncSearchOptions"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
-              "lineNumber": 18
-            }
-          }
-        ],
-        "signature": [
-          "<Response extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any>>(search: () => Promise<Response>, cancel?: (() => void) | undefined, { pollInterval, abortSignal }?: ",
-          {
-            "pluginId": "dataEnhanced",
-            "scope": "common",
-            "docId": "kibDataEnhancedPluginApi",
-            "section": "def-common.IAsyncSearchOptions",
-            "text": "IAsyncSearchOptions"
-          },
-          ") => ",
-          "Observable",
-          "<Response>"
-        ],
-        "description": [],
-        "label": "pollSearch",
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
-          "lineNumber": 15
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
-      {
-        "id": "def-common.EqlSearchStrategyRequest",
-        "type": "Interface",
-        "label": "EqlSearchStrategyRequest",
-        "signature": [
-          {
-            "pluginId": "dataEnhanced",
-            "scope": "common",
-            "docId": "kibDataEnhancedPluginApi",
-            "section": "def-common.EqlSearchStrategyRequest",
-            "text": "EqlSearchStrategyRequest"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<",
-          {
-            "pluginId": "dataEnhanced",
-            "scope": "common",
-            "docId": "kibDataEnhancedPluginApi",
-            "section": "def-common.EqlRequestParams",
-            "text": "EqlRequestParams"
-          },
-          ">"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.EqlSearchStrategyRequest.options",
-            "type": "Object",
-            "label": "options",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-              "lineNumber": 24
-            },
-            "signature": [
-              "TransportRequestOptions",
-              " | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 23
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.IAsyncSearchOptions",
-        "type": "Interface",
-        "label": "IAsyncSearchOptions",
-        "signature": [
-          {
-            "pluginId": "dataEnhanced",
-            "scope": "common",
-            "docId": "kibDataEnhancedPluginApi",
-            "section": "def-common.IAsyncSearchOptions",
-            "text": "IAsyncSearchOptions"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
-          }
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.IAsyncSearchOptions.pollInterval",
-            "type": "number",
-            "label": "pollInterval",
-            "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request"
-            ],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-              "lineNumber": 33
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 29
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SearchSessionRequestInfo",
-        "type": "Interface",
-        "label": "SearchSessionRequestInfo",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionRequestInfo.id",
-            "type": "string",
-            "label": "id",
-            "description": [
-              "\nID of the async search request"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 73
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionRequestInfo.strategy",
-            "type": "string",
-            "label": "strategy",
-            "description": [
-              "\nSearch strategy used to submit the search request"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 77
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionRequestInfo.status",
-            "type": "string",
-            "label": "status",
-            "description": [
-              "\nstatus"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 81
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionRequestInfo.error",
-            "type": "string",
-            "label": "error",
-            "description": [
-              "\nAn optional error. Set if status is set to error."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 85
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/session/types.ts",
-          "lineNumber": 69
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SearchSessionSavedObjectAttributes",
-        "type": "Interface",
-        "label": "SearchSessionSavedObjectAttributes",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.sessionId",
-            "type": "string",
-            "label": "sessionId",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.name",
-            "type": "string",
-            "label": "name",
-            "description": [
-              "\nUser-facing session name to be displayed in session management"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.appId",
-            "type": "string",
-            "label": "appId",
-            "description": [
-              "\nApp that created the session. e.g 'discover'"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 21
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.created",
-            "type": "string",
-            "label": "created",
-            "description": [
-              "\nCreation time of the session"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 25
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.touched",
-            "type": "string",
-            "label": "touched",
-            "description": [
-              "\nLast touch time of the session"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 29
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.expires",
-            "type": "string",
-            "label": "expires",
-            "description": [
-              "\nExpiration time of the session. Expiration itself is managed by Elasticsearch."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 33
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.status",
-            "type": "Enum",
-            "label": "status",
-            "description": [
-              "\nstatus"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 37
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionStatus",
-                "text": "SearchSessionStatus"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.urlGeneratorId",
-            "type": "string",
-            "label": "urlGeneratorId",
-            "description": [
-              "\nurlGeneratorId"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 41
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.initialState",
-            "type": "Object",
-            "label": "initialState",
-            "description": [
-              "\nThe application state that was used to create the session.\nShould be used, for example, to re-load an expired search session."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 46
-            },
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.restoreState",
-            "type": "Object",
-            "label": "restoreState",
-            "description": [
-              "\nApplication state that should be used to restore the session.\nFor example, relative dates are conveted to absolute ones."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 51
-            },
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.idMapping",
-            "type": "Object",
-            "label": "idMapping",
-            "description": [
-              "\nMapping of search request hashes to their corresponsing info (async search id, etc.)"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 55
-            },
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionRequestInfo",
-                "text": "SearchSessionRequestInfo"
-              },
-              ">"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.persisted",
-            "type": "boolean",
-            "label": "persisted",
-            "description": [
-              "\nThis value is true if the session was actively stored by the user. If it is false, the session may be purged by the system."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 60
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.realmType",
-            "type": "string",
-            "label": "realmType",
-            "description": [
-              "\nThe realm type/name & username uniquely identifies the user who created this search session"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 64
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.realmName",
-            "type": "string",
-            "label": "realmName",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 65
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchSessionSavedObjectAttributes.username",
-            "type": "string",
-            "label": "username",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 66
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/session/types.ts",
-          "lineNumber": 12
-        },
-        "initialIsOpen": false
-      }
-    ],
-    "enums": [
-      {
-        "id": "def-common.SearchSessionStatus",
-        "type": "Enum",
-        "label": "SearchSessionStatus",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/search/session/status.ts",
-          "lineNumber": 9
-        },
-        "initialIsOpen": false
-      }
-    ],
-    "misc": [
-      {
-        "tags": [],
-        "id": "def-common.ENHANCED_ES_SEARCH_STRATEGY",
-        "type": "string",
-        "label": "ENHANCED_ES_SEARCH_STRATEGY",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 17
-        },
-        "signature": [
-          "\"ese\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.EQL_SEARCH_STRATEGY",
-        "type": "string",
-        "label": "EQL_SEARCH_STRATEGY",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 19
-        },
-        "signature": [
-          "\"eql\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.EqlRequestParams",
-        "type": "Type",
-        "label": "EqlRequestParams",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 21
-        },
-        "signature": [
-          "EqlSearch<Record<string, unknown>>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.EqlSearchStrategyResponse",
-        "type": "Type",
-        "label": "EqlSearchStrategyResponse",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
-          "lineNumber": 27
-        },
-        "signature": [
-          "IKibanaSearchResponse<ApiResponse<T, unknown>>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.SEARCH_SESSION_TYPE",
-        "type": "string",
-        "label": "SEARCH_SESSION_TYPE",
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/search/session/types.ts",
-          "lineNumber": 11
-        },
-        "signature": [
-          "\"search-session\""
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

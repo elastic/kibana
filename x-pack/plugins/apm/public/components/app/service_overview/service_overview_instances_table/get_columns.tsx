@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import React, { ReactNode } from 'react';
+import { ActionMenu } from '../../../../../../observability/public';
 import { isJavaAgentName } from '../../../../../common/agent_name';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
@@ -26,23 +31,32 @@ import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
-import { PrimaryStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
+import { InstanceActionsMenu } from './instance_actions_menu';
+import { MainStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 
-type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
   agentName,
   latencyAggregationType,
-  comparisonStatsData,
+  detailedStatsData,
   comparisonEnabled,
+  toggleRowDetails,
+  itemIdToExpandedRowMap,
+  toggleRowActionMenu,
+  itemIdToOpenActionMenuRowMap,
 }: {
   serviceName: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
-  comparisonStatsData?: ServiceInstanceComparisonStatistics;
+  detailedStatsData?: ServiceInstanceDetailedStatistics;
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<PrimaryStatsServiceInstanceItem>> {
+  toggleRowDetails: (selectedServiceNodeName: string) => void;
+  itemIdToExpandedRowMap: Record<string, ReactNode>;
+  toggleRowActionMenu: (selectedServiceNodeName: string) => void;
+  itemIdToOpenActionMenuRowMap: Record<string, boolean>;
+}): Array<EuiBasicTableColumn<MainStatsServiceInstanceItem>> {
   return [
     {
       field: 'serviceNodeName',
@@ -82,14 +96,14 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'latencyValue',
+      field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
-          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.latency;
+          detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
-          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.latency;
+          detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
         return (
           <SparkPlot
             color="euiColorVis1"
@@ -104,7 +118,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'throughputValue',
+      field: 'throughput',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
@@ -112,9 +126,9 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
-          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
+          detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
         const previousPeriodTimestamp =
-          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
+          detailedStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
         return (
           <SparkPlot
             compact
@@ -130,7 +144,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'errorRateValue',
+      field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Error rate' }
@@ -138,9 +152,9 @@ export function getColumns({
       width: px(unit * 8),
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
-          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
+          detailedStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
         const previousPeriodTimestamp =
-          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
+          detailedStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
         return (
           <SparkPlot
             compact
@@ -156,7 +170,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'cpuUsageValue',
+      field: 'cpuUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
@@ -164,9 +178,9 @@ export function getColumns({
       width: px(unit * 8),
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
-          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
+          detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
         const previousPeriodTimestamp =
-          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
+          detailedStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
         return (
           <SparkPlot
             compact
@@ -182,7 +196,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'memoryUsageValue',
+      field: 'memoryUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
@@ -190,9 +204,9 @@ export function getColumns({
       width: px(unit * 9),
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
-          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
+          detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
         const previousPeriodTimestamp =
-          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
+          detailedStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
         return (
           <SparkPlot
             compact
@@ -206,6 +220,60 @@ export function getColumns({
         );
       },
       sortable: true,
+    },
+    {
+      width: '40px',
+      render: (instanceItem: MainStatsServiceInstanceItem) => {
+        return (
+          <ActionMenu
+            id="instanceActionMenu"
+            closePopover={() =>
+              toggleRowActionMenu(instanceItem.serviceNodeName)
+            }
+            isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
+            anchorPosition="leftCenter"
+            button={
+              <EuiButtonIcon
+                aria-label="Edit"
+                data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
+                iconType="boxesHorizontal"
+                onClick={() =>
+                  toggleRowActionMenu(instanceItem.serviceNodeName)
+                }
+              />
+            }
+          >
+            <InstanceActionsMenu
+              serviceName={serviceName}
+              serviceNodeName={instanceItem.serviceNodeName}
+              onClose={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
+            />
+          </ActionMenu>
+        );
+      },
+    },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render: (instanceItem: MainStatsServiceInstanceItem) => {
+        return (
+          <EuiButtonIcon
+            data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
+            onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
+            aria-label={
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'Collapse'
+                : 'Expand'
+            }
+            iconType={
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'arrowUp'
+                : 'arrowDown'
+            }
+          />
+        );
+      },
     },
   ];
 }

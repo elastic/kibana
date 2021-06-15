@@ -34,9 +34,9 @@ export interface BucketSpanEstimatorData {
   };
   fields: Array<string | null>;
   index: string;
-  query: any;
-  splitField: string | undefined;
-  timeField: string | undefined;
-  runtimeMappings: RuntimeMappings | undefined;
-  indicesOptions: IndicesOptions | undefined;
+  query?: any;
+  splitField?: string;
+  timeField?: string;
+  runtimeMappings?: RuntimeMappings;
+  indicesOptions?: IndicesOptions;
 }

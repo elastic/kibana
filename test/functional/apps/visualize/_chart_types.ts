@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('chart types', function () {
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
     });
@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickAggBasedVisualizations();
       const expectedChartTypes = [
         'Area',
+        'Coordinate Map',
         'Data table',
         'Gauge',
         'Goal',
@@ -43,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Line',
         'Metric',
         'Pie',
+        'Region Map',
         'Tag cloud',
         'Timelion',
         'Vertical bar',

@@ -230,7 +230,7 @@ export class MonitoringPlugin
     if (this.cluster) {
       this.cluster.close();
     }
-    if (this.licenseService) {
+    if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();
     }
     this.bulkUploader?.stop();
@@ -262,7 +262,12 @@ export class MonitoringPlugin
                 read: [],
               },
               alerting: {
-                all: ALERTS,
+                rule: {
+                  all: ALERTS,
+                },
+                alert: {
+                  all: ALERTS,
+                },
               },
               ui: [],
             },
@@ -333,6 +338,7 @@ export class MonitoringPlugin
               }
             },
             server: {
+              log: this.log,
               route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {

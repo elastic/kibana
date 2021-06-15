@@ -70,7 +70,8 @@ authc.getCurrentUser.mockResolvedValue(
   })
 );
 
-describe('APIKeysGridPage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/97085
+describe.skip('APIKeysGridPage', () => {
   it('loads and displays API keys', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Duration } from 'moment';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { Dictionary } from '../../../../../common/types/common';
 
@@ -25,8 +24,10 @@ import {
 import { AnnotationsTable } from '../../../../../common/types/annotations';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import { TimeBucketsInterval } from '../../../util/time_buckets';
 
 export interface ExplorerState {
+  overallAnnotations: AnnotationsTable;
   annotations: AnnotationsTable;
   anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
@@ -45,7 +46,7 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: Duration | undefined;
+  swimlaneBucketInterval: TimeBucketsInterval | undefined;
   swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
@@ -57,6 +58,7 @@ export interface ExplorerState {
   viewByFromPage: number;
   viewBySwimlaneOptions: string[];
   swimlaneLimit?: number;
+  swimLaneSeverity?: number;
 }
 
 function getDefaultIndexPattern() {
@@ -65,6 +67,11 @@ function getDefaultIndexPattern() {
 
 export function getExplorerDefaultState(): ExplorerState {
   return {
+    overallAnnotations: {
+      error: undefined,
+      annotationsData: [],
+      aggregations: {},
+    },
     annotations: {
       error: undefined,
       annotationsData: [],

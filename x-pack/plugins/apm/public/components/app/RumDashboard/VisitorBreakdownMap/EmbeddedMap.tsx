@@ -83,10 +83,6 @@ export function EmbeddedMapComponent() {
     attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
-    refreshConfig: {
-      value: 0,
-      pause: false,
-    },
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     query: {
@@ -109,7 +105,6 @@ export function EmbeddedMapComponent() {
     isLocked,
     getLayerName,
     loadFeatureProperties,
-    loadFeatureGeometry,
   }: RenderTooltipContentParams) {
     const props = {
       addFilters,
@@ -117,7 +112,6 @@ export function EmbeddedMapComponent() {
       isLocked,
       getLayerName,
       loadFeatureProperties,
-      loadFeatureGeometry,
     };
 
     return <MapToolTip {...props} features={features} />;

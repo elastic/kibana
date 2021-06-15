@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { NetworkEvent } from '../../../common/runtime_types';
 
@@ -30,7 +30,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
           { term: { 'synthetics.type': 'journey/network_info' } },
           { term: { 'monitor.check_group': checkGroup } },
           { term: { 'synthetics.step.index': Number(stepIndex) } },
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     // NOTE: This limit may need tweaking in the future. Users can technically perform multiple
@@ -58,7 +58,8 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
       requestSentTime,
       loadEndTime,
       timings: event._source.synthetics.payload.timings,
-      bytesDownloadedCompressed: event._source.http?.response?.encoded_data_length,
+      transferSize: event._source.synthetics.payload.transfer_size,
+      resourceSize: event._source.synthetics.payload.resource_size,
       certificates: securityDetails
         ? {
             issuer: securityDetails.issuer?.common_name,
