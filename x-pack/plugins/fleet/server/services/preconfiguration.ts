@@ -22,7 +22,7 @@ import type {
 } from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_LATEST_KEYWORD,
+  LATEST_PACKAGE_KEYWORD,
 } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -78,7 +78,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     savedObjectsClient: soClient,
     esClient,
     packagesToInstall: packages.map((pkg) =>
-      pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+      pkg.version === LATEST_PACKAGE_KEYWORD ? pkg.name : pkg
     ),
     force: true, // Always force outdated packages to be installed if a later version isn't installed
   });

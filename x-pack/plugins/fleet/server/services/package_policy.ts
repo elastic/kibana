@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
@@ -29,7 +30,7 @@ import type {
   ListWithKuery,
   ListResult,
 } from '../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, LATEST_PACKAGE_KEYWORD } from '../constants';
 import {
   HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
@@ -425,6 +426,54 @@ class PackagePolicyService {
     }
 
     return result;
+  }
+
+  public async performUpgradeDryRun(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<any> {
+    const packagePolicy = await this.get(soClient, id);
+    if (!packagePolicy) {
+      throw new Error(
+        i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
+          defaultMessage: 'Package policy with id {id} not found',
+          values: { id },
+        })
+      );
+    }
+
+    if (!packagePolicy.package?.name) {
+      throw new Error(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
+          defaultMessage: 'Package policy with id {id} has no named package',
+          values: { id },
+        })
+      );
+    }
+
+    const pkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: LATEST_PACKAGE_KEYWORD,
+    });
+
+    try {
+      let inputs = packagePolicy.inputs.map((input) =>
+        assignStreamIdToInput(packagePolicy.id, input)
+      );
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+
+      return {
+        ...packagePolicy,
+        inputs,
+        package: {
+          ...packagePolicy.package,
+          version: pkgInfo.version,
+        },
+      };
+    } catch (e) {
+      return `Error: ${e.message}`;
+    }
   }
 
   public async buildPackagePolicyFromPackage(

@@ -17,6 +17,7 @@ import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
 } from '../../types';
 import type { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -168,6 +169,29 @@ export const deletePackagePolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const upgradePackagePolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    for (const id of request.body.packagePolicyIds) {
+      if (request.body.dryRun) {
+        const body: DeletePackagePoliciesResponse = await packagePolicyService.performUpgradeDryRun(
+          soClient,
+          id
+        );
+        return response.ok({
+          body,
+        });
+      }
+    }
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

@@ -13,7 +13,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common';
 import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, LATEST_PACKAGE_KEYWORD } from '../../../constants';
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -114,7 +114,7 @@ export async function getPackageInfo(options: {
 
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: pkgVersion === LATEST_PACKAGE_KEYWORD ? latestPackage.version : pkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });

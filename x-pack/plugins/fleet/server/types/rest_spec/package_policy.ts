@@ -36,3 +36,10 @@ export const DeletePackagePoliciesRequestSchema = {
     force: schema.maybe(schema.boolean()),
   }),
 };
+
+export const UpgradePackagePoliciesRequestSchema = {
+  body: schema.object({
+    packagePolicyIds: schema.arrayOf(schema.string()),
+    dryRun: schema.maybe(schema.boolean()),
+  }),
+};

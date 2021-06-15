@@ -12,7 +12,7 @@ import { defaultPackages } from './epm';
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
 
-export const PRECONFIGURATION_LATEST_KEYWORD = 'latest';
+export const LATEST_PACKAGE_KEYWORD = 'latest';
 
 type PreconfiguredAgentPolicyWithDefaultInputs = Omit<
   PreconfiguredAgentPolicy,
@@ -58,7 +58,7 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
 
 export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({
   name,
-  version: PRECONFIGURATION_LATEST_KEYWORD,
+  version: LATEST_PACKAGE_KEYWORD,
 }));
 
 // these are currently identical. we can separate if they later diverge
