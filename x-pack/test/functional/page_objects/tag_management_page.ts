@@ -56,8 +56,7 @@ class TagModal extends FtrService {
       await this.testSubjects.setValue('createModalField-name', fields.name);
     }
     if (fields.color !== undefined) {
-      // EuiColorPicker does not allow to specify data-test-subj for the colorpicker input
-      await this.testSubjects.setValue('euiColorPickerAnchor', fields.color);
+      await this.testSubjects.setValue('~createModalField-color', fields.color);
     }
     if (fields.description !== undefined) {
       await this.testSubjects.click('createModalField-description');
