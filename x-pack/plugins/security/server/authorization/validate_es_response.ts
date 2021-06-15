@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { HasPrivilegesResponse } from './types';
 
 const anyBoolean = schema.boolean();
+const anyBooleanArray = schema.arrayOf(anyBoolean);
 const anyString = schema.string();
 const anyObject = schema.object({}, { unknowns: 'allow' });
 
@@ -48,9 +49,7 @@ function buildValidationSchema(application: string, actions: string[], resources
           throw new Error('Payload did not match expected actions');
         }
 
-        Object.values(value).forEach((actionResult) => {
-          anyBoolean.validate(actionResult);
-        });
+        anyBooleanArray.validate(Object.values(value));
       },
     }
   );
