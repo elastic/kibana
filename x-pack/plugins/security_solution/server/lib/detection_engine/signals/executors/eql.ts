@@ -7,9 +7,9 @@
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
-import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -21,13 +21,12 @@ import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
 import { EqlRuleParams } from '../../schemas/rule_schemas';
-import { RefreshTypes } from '../../types';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleStatusService } from '../rule_status_service';
-import { bulkInsertSignals, filterDuplicateSignals } from '../single_bulk_create';
+import { filterDuplicateSignals } from '../filter_duplicate_signals';
 import {
   AlertAttributes,
+  BulkCreate,
   EqlSignalSearchResponse,
   SearchAfterAndBulkCreateReturnType,
   WrappedSignalHit,
@@ -37,26 +36,24 @@ import { createSearchAfterReturnType, makeFloatString, wrapSignal } from '../uti
 export const eqlExecutor = async ({
   rule,
   exceptionItems,
-  ruleStatusService,
   services,
   version,
-  searchAfterSize,
   logger,
-  refresh,
+  searchAfterSize,
+  bulkCreate,
 }: {
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
-  searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    await ruleStatusService.partialFailure(
+    result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
     );
     result.warning = true;
@@ -125,7 +122,7 @@ export const eqlExecutor = async ({
   }
 
   if (newSignals.length > 0) {
-    const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
+    const insertResult = await bulkCreate(newSignals);
     result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
     result.createdSignalsCount += insertResult.createdItemsCount;
     result.createdSignals = insertResult.createdItems;
