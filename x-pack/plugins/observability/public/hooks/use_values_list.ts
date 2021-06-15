@@ -20,7 +20,7 @@ export interface Props {
   keepHistory?: boolean;
 }
 
-interface ListItem {
+export interface ListItem {
   label: string;
   count: number;
 }
