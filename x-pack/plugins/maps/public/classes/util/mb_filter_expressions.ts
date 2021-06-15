@@ -9,10 +9,10 @@ import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
 } from '../../../common/constants';
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true];
+export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_METADATA_FEATURE], true];
 const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 function getFilterExpression(geometryFilter: unknown[], hasJoins: boolean) {

@@ -23,7 +23,7 @@ import {
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
@@ -886,7 +886,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
-        ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
+        ['==', ['get', KBN_METADATA_FEATURE], true],
         ['==', ['get', KBN_IS_TILE_COMPLETE], false],
       ]);
       mbMap.setPaintProperty(

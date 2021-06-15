@@ -18,8 +18,9 @@ import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   GEOTILE_GRID_AGG_NAME,
+  KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
   MAX_ZOOM,
   MVT_SOURCE_LAYER_NAME,
@@ -143,7 +144,8 @@ export async function getGridTile({
       const metaDataFeature: Feature = {
         type: 'Feature',
         properties: {
-          [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+          [KBN_METADATA_FEATURE]: true,
+          [KBN_FEATURE_COUNT]: features.length,
           [KBN_IS_TILE_COMPLETE]: true,
           [KBN_VECTOR_SHAPE_TYPE_COUNTS]:
             requestType === RENDER_AS.GRID
@@ -268,8 +270,9 @@ export async function getTile({
         {
           type: 'Feature',
           properties: {
-            [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+            [KBN_METADATA_FEATURE]: true,
             [KBN_IS_TILE_COMPLETE]: false,
+            [KBN_FEATURE_COUNT]: 0,
           },
           geometry: esBboxToGeoJsonPolygon(
             // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
@@ -321,9 +324,10 @@ export async function getTile({
     const metadataFeature = {
       type: 'Feature',
       properties: {
-        [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+        [KBN_METADATA_FEATURE]: true,
         [KBN_IS_TILE_COMPLETE]: true,
         [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
+        [KBN_FEATURE_COUNT]: features.length,
       },
       // todo - constrain to actual features
       geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),

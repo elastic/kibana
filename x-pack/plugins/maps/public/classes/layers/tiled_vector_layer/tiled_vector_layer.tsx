@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type {
   Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,
@@ -14,10 +16,12 @@ import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
+  KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
@@ -62,11 +66,27 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent() {
+    const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
     const tileMetas = this.getMetaFromTiles();
     if (!tileMetas) {
       return {
-        icon: this.getCurrentStyle().getIcon(),
-        tooltipContent: 'foobar',
+        icon: noResultsIcon,
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
+    const totalFeatures: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
+      const count = !tileMeta || !tileMeta.properties ? 0 : tileMeta.properties[KBN_FEATURE_COUNT];
+      return count + acc;
+    }, 0);
+
+    if (totalFeatures === 0) {
+      return {
+        icon: noResultsIcon,
+        tooltipContent: i18n.translate('xpack.maps.tiledLayer.noResultsFoundTooltip', {
+          defaultMessage: `No results found.`,
+        }),
         areResultsTrimmed: false,
       };
     }
@@ -82,7 +102,7 @@ export class TiledVectorLayer extends VectorLayer {
         }
 
         if (
-          tileMeta.properties[KBN_TOO_MANY_FEATURES_PROPERTY] === true ||
+          tileMeta.properties[KBN_METADATA_FEATURE] === true ||
           typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string'
         ) {
           return accumulator;
@@ -264,7 +284,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
       sourceLayer: sourceMeta.layerName,
-      filter: ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
+      filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
     return mbFeatures as Feature[];
