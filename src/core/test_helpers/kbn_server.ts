@@ -9,6 +9,7 @@
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
   createTestEsCluster,
+  CreateTestEsClusterOptions,
   DEFAULT_SUPERUSER_PASS,
   esTestConfig,
   kbnTestConfig,
@@ -161,10 +162,7 @@ export function createTestServers({
 }: {
   adjustTimeout: (timeout: number) => void;
   settings?: {
-    es?: {
-      license: 'basic' | 'gold' | 'trial';
-      [key: string]: any;
-    };
+    es?: Partial<CreateTestEsClusterOptions>;
     kbn?: {
       /**
        * An array of directories paths, passed in via absolute path strings
@@ -238,7 +236,7 @@ export function createTestServers({
 
         // Override provided configs, we know what the elastic user is now
         kbnSettings.elasticsearch = {
-          hosts: [esTestConfig.getUrl()],
+          hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
         };
@@ -247,8 +245,7 @@ export function createTestServers({
       return {
         stop: async () => await es.cleanup(),
         es,
-        // TODO: Need to support multiple URLs here
-        hosts: [esTestConfig.getUrl()],
+        hosts: es.getHostUrls(),
         username: kibanaServerTestUser.username,
         password: kibanaServerTestUser.password,
       };

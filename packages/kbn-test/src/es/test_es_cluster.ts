@@ -19,10 +19,28 @@ import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';
 
-interface TestClusterFactoryOptions {
+interface TestEsClusterNodesOptions {
+  name: string;
+  /**
+   * Depending on the test you are running, it may be necessary to
+   * configure a separate data archive for each node in the cluster.
+   * In that case, you can configure each of the archive paths here.
+   *
+   * Specifying a top-level `dataArchive` is not necessary if you are using
+   * this option; per-node archives will always be used if provided.
+   */
+  dataArchive?: string;
+}
+
+export interface CreateTestEsClusterOptions {
+  /**
+   * Port to run Elasticsearch on. If you configure a
+   * multi-node cluster with the `nodes` option, this
+   * port will be incremented by one for each added node.
+   */
   port?: number;
   password?: string;
-  license?: 'basic' | 'trial'; // | 'oss'
+  license?: 'basic' | 'gold' | 'trial'; // | 'oss'
   basePath?: string;
   esFrom?: string;
   /**
@@ -33,8 +51,16 @@ interface TestClusterFactoryOptions {
    * - stop Elasticsearch server
    * - go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}
    * - archive data folder: zip -r my_archive.zip data
-   * */
+   */
   dataArchive?: string;
+  /**
+   * Node-specific configuration if you wish to run a multi-node
+   * cluster. One node will be added for each item in the array.
+   *
+   * If this option is not provided, the config will default
+   * to a single-node cluster.
+   */
+  nodes?: TestEsClusterNodesOptions[];
   esArgs?: string[];
   esJavaOpts?: string;
   clusterName?: string;
@@ -42,7 +68,7 @@ interface TestClusterFactoryOptions {
   ssl?: boolean;
 }
 
-export function createTestEsCluster(options: TestClusterFactoryOptions) {
+export function createTestEsCluster(options: CreateTestEsClusterOptions) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -51,6 +77,7 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
     basePath = Path.resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
+    nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
@@ -59,13 +86,16 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
-  const esArgs = [
+  const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `http.port=${port}`,
-    'discovery.type=single-node',
     `transport.port=${esTestConfig.getTransportPort()}`,
-    ...customEsArgs,
+    // For multi-node clusters, we make all nodes master-eligible by default.
+    ...(nodes.length > 1
+      ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
+      : ['discovery.type=single-node']),
   ];
+
+  const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   const config = {
     version: esTestConfig.getVersion(),
@@ -77,9 +107,18 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
     esArgs,
   };
 
-  const cluster = new Cluster({ log, ssl });
-
   return new (class EsTestCluster {
+    ports: number[] = [];
+    nodes: Cluster[] = [];
+
+    constructor() {
+      for (let i = 0; i < nodes.length; i++) {
+        this.nodes.push(new Cluster({ log, ssl }));
+        // If this isn't the first node, we increment the port of the last node
+        this.ports.push(i === 0 ? port : port + i);
+      }
+    }
+
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
@@ -88,31 +127,51 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
     }
 
     async start() {
-      let installPath;
+      let installPath: string;
 
+      // We only install once using the first node. If the cluster has
+      // multiple nodes, they'll all share the same ESinstallation.
+      const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        installPath = (await cluster.installSource(config)).installPath;
+        installPath = (await firstNode.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
-        installPath = (await cluster.installSnapshot(config)).installPath;
+        installPath = (await firstNode.installSnapshot(config)).installPath;
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {
         throw new Error(`unknown option esFrom "${esFrom}"`);
       }
 
-      if (dataArchive) {
-        await cluster.extractDataDirectory(installPath, dataArchive);
-      }
+      for (let i = 0; i < this.nodes.length; i++) {
+        const node = nodes[i];
+        const nodePort = this.ports[i];
+        const overriddenArgs = [`node.name=${node.name}`, `http.port=${nodePort}`];
 
-      await cluster.start(installPath, {
-        password: config.password,
-        esArgs,
-        esJavaOpts,
-      });
+        const archive = node.dataArchive || dataArchive;
+        if (archive) {
+          const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
+          await this.nodes[i].extractDataDirectory(
+            installPath,
+            node.dataArchive || dataArchive,
+            nodeDataDirectory
+          );
+          overriddenArgs.push(`path.data=${Path.resolve(installPath, nodeDataDirectory)}`);
+        }
+
+        log.info(`[es] starting node ${node.name} on port ${nodePort}`);
+        await this.nodes[i].start(installPath, {
+          password: config.password,
+          esArgs: assignArgs(esArgs, overriddenArgs),
+          esJavaOpts,
+        });
+      }
     }
 
     async stop() {
-      await cluster.stop();
+      for (const node of this.nodes) {
+        log.info(`[es] stopping node ${node.name}`);
+        await node.stop();
+      }
       log.info('[es] stopped');
     }
 
@@ -137,5 +196,47 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
 
       return format(parts);
     }
+
+    /**
+     * Returns a list of host URLs for the cluster. Intended for use
+     * when configuring Kibana's `elasticsearch.hosts` in a test.
+     *
+     * If the cluster has multiple nodes, each node URL will be included
+     * in this list.
+     */
+    getHostUrls(): string[] {
+      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
+    }
   })();
+}
+
+/**
+ * Like `Object.assign`, but for arrays of `key=val` strings. Takes an arbitrary
+ * number of arrays, and allows values in subsequent args to override previous
+ * values for the same key.
+ *
+ * @example
+ *
+ * assignArgs(['foo=a', 'bar=b'], ['foo=c', 'baz=d']); // returns ['foo=c', 'bar=b', 'baz=d']
+ */
+function assignArgs(...args: string[][]): string[] {
+  const toArgsObject = (argList: string[]) => {
+    const obj: Record<string, string> = {};
+
+    argList.forEach((arg) => {
+      const [key, val] = arg.split('=');
+      obj[key] = val;
+    });
+
+    return obj;
+  };
+
+  return Object.entries(
+    args.reduce((acc, cur) => {
+      return {
+        ...acc,
+        ...toArgsObject(cur),
+      };
+    }, {})
+  ).map(([key, val]) => `${key}=${val}`);
 }

@@ -133,19 +133,20 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpakcs a tar or zip file containing the data directory for an
+   * Unpacks a tar or zip file containing the data directory for an
    * ES cluster.
    *
    * @param {String} installPath
    * @param {String} archivePath
+   * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath) {
+  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
     // decompress excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, 'data');
+    const extractPath = path.resolve(installPath, extractDirName);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Extract path: ${extractPath}`);
 
