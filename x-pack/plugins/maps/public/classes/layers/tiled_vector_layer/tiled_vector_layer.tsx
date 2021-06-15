@@ -93,9 +93,7 @@ export class TiledVectorLayer extends VectorLayer {
           return accumulator;
         }
 
-        if (
-          typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string'
-        ) {
+        if (typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string') {
           return accumulator;
         }
         const counts = JSON.parse(tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]);
