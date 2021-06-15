@@ -155,16 +155,6 @@ describe('Generic Rules', () => {
             ],
           },
           Object {
-            "constant": "][",
-          },
-          Object {
-            "field": "log.level",
-            "highlights": Array [],
-            "value": Array [
-              "TEST_LEVEL",
-            ],
-          },
-          Object {
             "constant": "] ",
           },
           Object {
@@ -250,16 +240,6 @@ describe('Generic Rules', () => {
             "highlights": Array [],
             "value": Array [
               "generic.test",
-            ],
-          },
-          Object {
-            "constant": "][",
-          },
-          Object {
-            "field": "log.level",
-            "highlights": Array [],
-            "value": Array [
-              "TEST_LEVEL",
             ],
           },
           Object {
