@@ -80,7 +80,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         <StyledKQLEuiPanel color="subdued" paddingSize="s">
           <GlobalKQLHeader />
         </StyledKQLEuiPanel>
-        <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer">
+        <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer" hasShadow={false}>
           {children}
         </EuiPanel>
       </StyledKibanaPageTemplate>

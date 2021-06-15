@@ -10,11 +10,7 @@ import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_heade
 
 export const GlobalKQLHeader = React.memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
-  return (
-    <div>
-      <OutPortal node={globalKQLHeaderPortalNode} />
-    </div>
-  );
+  return <OutPortal node={globalKQLHeaderPortalNode} />;
 });
 
 GlobalKQLHeader.displayName = 'GlobalKQLHeader';
