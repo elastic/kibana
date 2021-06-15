@@ -155,7 +155,7 @@ describe('muteAll()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when muting an alert', async () => {
+    test('logs audit event when muting a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -181,7 +181,7 @@ describe('muteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_mute',
+            action: 'rule_mute',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -189,7 +189,7 @@ describe('muteAll()', () => {
       );
     });
 
-    test('logs audit event when not authorised to mute an alert', async () => {
+    test('logs audit event when not authorised to mute a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -217,7 +217,7 @@ describe('muteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_mute',
+            action: 'rule_mute',
             outcome: 'failure',
           }),
           kibana: {

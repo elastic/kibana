@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AlertAuditAction, alertAuditEvent } from './audit_events';
+import { RuleAuditAction, ruleAuditEvent } from './audit_events';
 
-describe('#alertAuditEvent', () => {
+describe('#ruleAuditEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
-      alertAuditEvent({
-        action: AlertAuditAction.CREATE,
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id: 'ALERT_ID' },
       })
@@ -19,7 +19,7 @@ describe('#alertAuditEvent', () => {
       Object {
         "error": undefined,
         "event": Object {
-          "action": "alert_create",
+          "action": "rule_create",
           "category": Array [
             "database",
           ],
@@ -41,15 +41,15 @@ describe('#alertAuditEvent', () => {
 
   test('creates event with `success` outcome', () => {
     expect(
-      alertAuditEvent({
-        action: AlertAuditAction.CREATE,
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
         savedObject: { type: 'alert', id: 'ALERT_ID' },
       })
     ).toMatchInlineSnapshot(`
       Object {
         "error": undefined,
         "event": Object {
-          "action": "alert_create",
+          "action": "rule_create",
           "category": Array [
             "database",
           ],
@@ -64,15 +64,15 @@ describe('#alertAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User has created alert [id=ALERT_ID]",
+        "message": "User has created rule [id=ALERT_ID]",
       }
     `);
   });
 
   test('creates event with `failure` outcome', () => {
     expect(
-      alertAuditEvent({
-        action: AlertAuditAction.CREATE,
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
         savedObject: { type: 'alert', id: 'ALERT_ID' },
         error: new Error('ERROR_MESSAGE'),
       })
@@ -83,7 +83,7 @@ describe('#alertAuditEvent', () => {
           "message": "ERROR_MESSAGE",
         },
         "event": Object {
-          "action": "alert_create",
+          "action": "rule_create",
           "category": Array [
             "database",
           ],
@@ -98,7 +98,7 @@ describe('#alertAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "Failed attempt to create alert [id=ALERT_ID]",
+        "message": "Failed attempt to create rule [id=ALERT_ID]",
       }
     `);
   });

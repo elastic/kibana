@@ -226,7 +226,7 @@ describe('create()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when creating an alert', async () => {
+    test('logs audit event when creating a rule', async () => {
       const data = getMockData({
         enabled: false,
         actions: [],
@@ -241,7 +241,7 @@ describe('create()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_create',
+            action: 'rule_create',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: 'mock-saved-object-id', type: 'alert' } },
@@ -249,7 +249,7 @@ describe('create()', () => {
       );
     });
 
-    test('logs audit event when not authorised to create an alert', async () => {
+    test('logs audit event when not authorised to create a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
@@ -263,7 +263,7 @@ describe('create()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_create',
+            action: 'rule_create',
             outcome: 'failure',
           }),
           kibana: {
