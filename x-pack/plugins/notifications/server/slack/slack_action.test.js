@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { WebClient } from '@slack/client';
+import { WebClient } from '@slack/web-api';
 import { ActionResult } from '../';
 import {
   SLACK_ACTION_ID,
