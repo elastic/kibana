@@ -23,6 +23,7 @@ import {
   Form,
   useForm,
   useFormData,
+  useFormIsModified,
   FormHook,
   UseField,
   TextField,
@@ -67,6 +68,8 @@ export interface Props {
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
+  /** Handler to receive update on the form "dirty" state */
+  onFormModifiedChange?: (isDirty: boolean) => void;
   syntaxError: ScriptSyntaxError;
 }
 
@@ -147,7 +150,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
   const {
     links,
     namesNotAllowed,
@@ -164,19 +167,19 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted } = form;
+  const { submit, isValid: isFormValid, isSubmitted, getFields } = form;
   const { clear: clearSyntaxError } = syntaxError;
-
-  const [{ type }] = useFormData<FieldFormInternal>({ form });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
   const [formData] = useFormData({ form });
+  const isFormModified = useFormIsModified({ form });
+
   const { name: updatedName, type: updatedType, script: updatedScript } = formData;
-  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
-  const typeHasChanged =
-    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+  const nameHasChanged = getFields().name?.isModified ?? false;
+  const typeHasChanged = getFields().type?.isModified ?? false;
+
   const isValueVisible = get(formData, '__meta__.isValueVisible');
   const isFormatVisible = get(formData, '__meta__.isFormatVisible');
 
@@ -190,7 +193,7 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     // Whenever the field "type" changes we clear any possible painless syntax
     // error as it is possibly stale.
     clearSyntaxError();
-  }, [type, clearSyntaxError]);
+  }, [updatedType, clearSyntaxError]);
 
   useEffect(() => {
     updatePreviewParams({
@@ -210,6 +213,12 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
       setIsPanelVisible(false);
     }
   }, [isValueVisible, isFormatVisible, setIsPanelVisible]);
+
+  useEffect(() => {
+    if (onFormModifiedChange) {
+      onFormModifiedChange(isFormModified);
+    }
+  }, [isFormModified, onFormModifiedChange]);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">

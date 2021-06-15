@@ -39,6 +39,9 @@ const flyoutPanelsContext = createContext<Context>({
   },
 });
 
+const limitWidthToWindow = (width: number, { innerWidth }: Window): number =>
+  Math.min(width, innerWidth * 0.8);
+
 export interface Props {
   /**
    * The total max width with all the panels in the DOM
@@ -111,16 +114,17 @@ export const Panels: React.FC<Props> = ({
     if (fixedPanelWidths) {
       const totalWidth = Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0);
       currentWidth = Math.min(maxWidth, totalWidth);
-      flyoutDOMelement.style.width = `${currentWidth}px`;
-      flyoutDOMelement.style.minWidth = `${currentWidth}px`;
-      flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
+      // As EUI declares both min-width and max-width on the .euiFlyout CSS class
+      // we need to override  both values
+      flyoutDOMelement.style.minWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+      flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
     } else {
       const totalPercentWidth = Math.min(
         100,
         Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
       );
       currentWidth = (maxWidth * totalPercentWidth) / 100;
-      flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
+      flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
     }
   }, [panels, maxWidth, fixedPanelWidths, flyoutClassName, flyoutDOMelement]);
 

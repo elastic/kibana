@@ -30,11 +30,12 @@ import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview, useFieldPreviewContext } from './preview';
+import { ModifiedFieldModal } from './confirm_modals';
 
 const geti18nTexts = (field?: Field) => {
   return {
-    closeButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCloseButtonLabel', {
-      defaultMessage: 'Close',
+    cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
     saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
       defaultMessage: 'Save',
@@ -77,6 +78,11 @@ const geti18nTexts = (field?: Field) => {
       }
     ),
   };
+};
+
+const defaultModalVisibility = {
+  confirmChangeNameOrType: false,
+  confirmUnsavedChanges: false,
 };
 
 export interface Props {
@@ -122,8 +128,9 @@ const FieldEditorFlyoutContentComponent = ({
   );
 
   const [isValidating, setIsValidating] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [confirmContent, setConfirmContent] = useState<string>('');
+  const [isFormModified, setIsFormModified] = useState(false);
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
   const hasErrors = isFormValid === false || painlessSyntaxError !== null;
@@ -161,51 +168,86 @@ const FieldEditorFlyoutContentComponent = ({
       }
 
       if (isEditingExistingField && (nameChange || typeChange)) {
-        setIsModalVisible(true);
+        setModalVisibility({
+          ...defaultModalVisibility,
+          confirmChangeNameOrType: true,
+        });
       } else {
         onSave(data);
       }
     }
   }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
 
-  const modal = isModalVisible ? (
-    <EuiConfirmModal
-      title={i18nTexts.titleConfirmChanges}
-      data-test-subj="runtimeFieldSaveConfirmModal"
-      cancelButtonText={i18nTexts.cancelButtonText}
-      confirmButtonText={i18nTexts.confirmButtonText}
-      confirmButtonDisabled={confirmContent?.toUpperCase() !== 'CHANGE'}
-      onCancel={() => {
-        setIsModalVisible(false);
-        setConfirmContent('');
-      }}
-      onConfirm={async () => {
-        const { data } = await submit();
-        onSave(data);
-      }}
-    >
-      <EuiCallOut
-        color="warning"
-        title={i18nTexts.warningChangingFields}
-        iconType="alert"
-        size="s"
-      />
-      <EuiSpacer />
-      <EuiFormRow label={i18nTexts.typeConfirm}>
-        <EuiFieldText
-          value={confirmContent}
-          onChange={(e) => setConfirmContent(e.target.value)}
-          data-test-subj="saveModalConfirmText"
+  const onClickCancel = useCallback(() => {
+    if (isFormModified) {
+      setModalVisibility({
+        ...defaultModalVisibility,
+        confirmUnsavedChanges: true,
+      });
+      return;
+    }
+
+    onCancel();
+  }, [onCancel, isFormModified]);
+
+  const renderModal = () => {
+    if (modalVisibility.confirmChangeNameOrType) {
+      return (
+        <EuiConfirmModal
+          title={i18nTexts.titleConfirmChanges}
+          data-test-subj="runtimeFieldSaveConfirmModal"
+          cancelButtonText={i18nTexts.cancelButtonText}
+          confirmButtonText={i18nTexts.confirmButtonText}
+          confirmButtonDisabled={confirmContent?.toUpperCase() !== 'CHANGE'}
+          onCancel={() => {
+            setModalVisibility(defaultModalVisibility);
+            setConfirmContent('');
+          }}
+          onConfirm={async () => {
+            const { data } = await submit();
+            onSave(data);
+          }}
+        >
+          <EuiCallOut
+            color="warning"
+            title={i18nTexts.warningChangingFields}
+            iconType="alert"
+            size="s"
+          />
+          <EuiSpacer />
+          <EuiFormRow label={i18nTexts.typeConfirm}>
+            <EuiFieldText
+              value={confirmContent}
+              onChange={(e) => setConfirmContent(e.target.value)}
+              data-test-subj="saveModalConfirmText"
+            />
+          </EuiFormRow>
+        </EuiConfirmModal>
+      );
+    }
+
+    if (modalVisibility.confirmUnsavedChanges) {
+      return (
+        <ModifiedFieldModal
+          onConfirm={() => {
+            setModalVisibility(defaultModalVisibility);
+            onCancel();
+          }}
+          onCancel={() => {
+            setModalVisibility(defaultModalVisibility);
+          }}
         />
-      </EuiFormRow>
-    </EuiConfirmModal>
-  ) : null;
+      );
+    }
+
+    return null;
+  };
 
   return (
     <>
       <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180} fixedPanelWidths>
         {/* Editor panel */}
-        <FlyoutPanels.Item width={558}>
+        <FlyoutPanels.Item width={600}>
           <FlyoutPanels.Content>
             <FlyoutPanels.Header>
               <EuiTitle data-test-subj="flyoutTitle">
@@ -239,7 +281,12 @@ const FieldEditorFlyoutContentComponent = ({
               </EuiText>
             </FlyoutPanels.Header>
 
-            <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
+            <FieldEditor
+              field={field}
+              onChange={setFormState}
+              onFormModifiedChange={setIsFormModified}
+              syntaxError={syntaxError}
+            />
           </FlyoutPanels.Content>
 
           <FlyoutPanels.Footer>
@@ -260,10 +307,10 @@ const FieldEditorFlyoutContentComponent = ({
                   <EuiButtonEmpty
                     iconType="cross"
                     flush="left"
-                    onClick={onCancel}
+                    onClick={onClickCancel}
                     data-test-subj="closeFlyoutButton"
                   >
-                    {i18nTexts.closeButtonLabel}
+                    {i18nTexts.cancelButtonLabel}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
 
@@ -292,7 +339,7 @@ const FieldEditorFlyoutContentComponent = ({
         )}
       </FlyoutPanels.Group>
 
-      {modal}
+      {renderModal()}
     </>
   );
 };
