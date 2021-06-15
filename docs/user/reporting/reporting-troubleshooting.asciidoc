@@ -93,6 +93,31 @@ Whenever possible, a Reporting error message tries to be as self-explanatory as 
 along with the solution.
 
 [float]
+==== `StatusCodeError: [version_conflict_engine_exception]`
+If you are running multiple instances of Kibana in a cluster, they share the work of executing report jobs to evenly distribute
+the work load. Each instance searches the reporting index for "pending" jobs that the user has requested. It is possible for
+multiple instances to find the same job in these searches. Only the instance that successfully updated the job status to
+"processing" will actually execute the report job. The other instances that unsuccessfully tried to make the same update will log
+something similar to this:
+
+```
+StatusCodeError: [version_conflict_engine_exception] [...]: version conflict, required seqNo [6124], primary term [1]. current document has seqNo [6125] and primary term [1], with { ... }
+  status: 409,
+  displayName: 'Conflict',
+  path: '/.reporting-...',
+  body: {
+    error: {
+      type: 'version_conflict_engine_exception',
+      reason: '[...]: version conflict, required seqNo [6124], primary term [1]. current document has seqNo [6125] and primary term [1]',
+    },
+  },
+  statusCode: 409
+}
+
+```
+These messages alone don't indicate a problem. They show normal events that happen in a healthy system.
+
+[float]
 ==== Max attempts reached
 There are two primary causes of this error:
 
