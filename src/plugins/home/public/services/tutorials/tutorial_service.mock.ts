@@ -30,8 +30,6 @@ const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
     getModuleNotices: jest.fn(() => []),
     getCustomStatusCheck: jest.fn(),
     getCustomComponent: jest.fn(),
-    setTutorial: jest.fn(),
-    getTutorial: jest.fn(),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

@@ -186,7 +186,7 @@ class InstructionSetUi extends React.Component {
           textPre={instruction.textPre}
           textPost={instruction.textPost}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
-          customComponent={instruction.customComponent}
+          customComponentName={instruction.customComponentName}
         />
       );
       return {

@@ -104,7 +104,6 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'apmApp',
     artifacts,
     customStatusCheckName: 'apm_fleet_server_status_check',
-    customComponentName: 'TutorialFleetInstructions',
     onPrem: onPremInstructions(indices),
     elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/apm/assets/apm.png',

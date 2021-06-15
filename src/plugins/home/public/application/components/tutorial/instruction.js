@@ -24,7 +24,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getServices } from '../../kibana_services';
 
-export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
+export function Instruction({
+  commands,
+  paramValues,
+  textPost,
+  textPre,
+  replaceTemplateStrings,
+  customComponentName,
+}) {
   const { tutorialService, http, uiSettings, getBasePath } = getServices();
 
   let pre;
@@ -41,7 +48,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       </div>
     );
   }
-  const customComponent = tutorialService.getCustomComponent();
+  const customComponent = tutorialService.getCustomComponent(customComponentName);
   //Memoize the custom component so it wont rerender everytime
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
@@ -112,5 +119,5 @@ Instruction.propTypes = {
   textPost: PropTypes.string,
   textPre: PropTypes.string,
   replaceTemplateStrings: PropTypes.func.isRequired,
-  customComponent: PropTypes.string,
+  customComponentName: PropTypes.string,
 };

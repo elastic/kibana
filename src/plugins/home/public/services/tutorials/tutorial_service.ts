@@ -34,7 +34,6 @@ export class TutorialService {
   private tutorialModuleNotices: { [key: string]: TutorialModuleNoticeComponent } = {};
   private customStatusCheck: Record<string, CustomStatusCheckCallback> = {};
   private customComponent: Record<string, CustomComponent> = {};
-  private tutorial: any;
 
   public setup() {
     return {
@@ -107,20 +106,12 @@ export class TutorialService {
     return Object.values(this.tutorialModuleNotices);
   }
 
-  public getCustomStatusCheck() {
-    return this.customStatusCheck[this.tutorial?.customComponentName];
+  public getCustomStatusCheck(customStatusCheckName: string) {
+    return this.customStatusCheck[customStatusCheckName];
   }
 
-  public getCustomComponent() {
-    return this.customComponent[this.tutorial?.customComponentName];
-  }
-
-  public setTutorial(tutorial: any) {
-    this.tutorial = tutorial;
-  }
-
-  public getTutorial() {
-    return this.tutorial;
+  public getCustomComponent(customComponentName: string) {
+    return this.customComponent[customComponentName];
   }
 }
 

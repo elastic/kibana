@@ -72,7 +72,6 @@ class TutorialUi extends React.Component {
     }
 
     if (tutorial) {
-      getServices().tutorialService.setTutorial(tutorial);
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState(
         {
@@ -174,7 +173,9 @@ class TutorialUi extends React.Component {
 
     //Checks if a custom status check callback  was registered in the CLIENT
     //that matches the same name registered in the SERVER (customStatusCheckName)
-    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck();
+    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
+      this.state.tutorial.customStatusCheckName
+    );
 
     const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
       ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),

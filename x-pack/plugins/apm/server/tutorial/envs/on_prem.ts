@@ -71,7 +71,9 @@ export function onPremInstructions({
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.FLEET,
-            instructions: [{ customComponent: 'apm_fleet' }],
+            instructions: [
+              { customComponentName: 'TutorialFleetInstructions' },
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.OSX,
