@@ -11,10 +11,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
+import { ScopedHistory } from 'kibana/public';
 
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { TemplateDeserialized } from '../../../../common';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 
@@ -76,6 +77,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
           saveError={saveError}
           clearSaveError={clearSaveError}
           isLegacy={isLegacy}
+          history={history as ScopedHistory}
         />
       </EuiPageContent>
     </EuiPageBody>
