@@ -32,7 +32,6 @@ export const createThreatSignals = async ({
   outputIndex,
   ruleSO,
   searchAfterSize,
-  refresh,
   threatFilters,
   threatQuery,
   threatLanguage,
@@ -41,6 +40,8 @@ export const createThreatSignals = async ({
   threatIndicatorPath,
   concurrentSearches,
   itemsPerSearch,
+  bulkCreate,
+  wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -55,6 +56,7 @@ export const createThreatSignals = async ({
     createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
+    warningMessages: [],
   };
 
   let threatListCount = await getThreatListCount({
@@ -120,10 +122,11 @@ export const createThreatSignals = async ({
           outputIndex,
           ruleSO,
           searchAfterSize,
-          refresh,
           buildRuleMessage,
           currentThreatList: slicedChunk,
           currentResult: results,
+          bulkCreate,
+          wrapHits,
         })
     );
     const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
