@@ -30,11 +30,11 @@ export const pendingActionsResponseMock = (): PendingActionsResponse => ({
   ],
 });
 
-export type PendingActionsHttpMockProviders = ResponseProvidersInterface<{
+export type PendingActionsHttpMockInterface = ResponseProvidersInterface<{
   pendingActions: () => PendingActionsResponse;
 }>;
 
-export const pendingActionsHttpMocks = httpHandlerMockFactory<PendingActionsHttpMockProviders>([
+export const pendingActionsHttpMock = httpHandlerMockFactory<PendingActionsHttpMockInterface>([
   {
     id: 'pendingActions',
     method: 'get',

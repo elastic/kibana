@@ -8,7 +8,7 @@
 import { KibanaServices } from '../kibana';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { fetchPendingActionsByAgentId } from './endpoint_pending_actions';
-import { pendingActionsHttpMocks, pendingActionsResponseMock } from './mocks';
+import { pendingActionsHttpMock, pendingActionsResponseMock } from './mocks';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 
 jest.mock('../kibana');
@@ -19,7 +19,7 @@ describe('when using endpoint pending actions api service', () => {
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
     coreHttp = coreStartMock.http;
-    pendingActionsHttpMocks(coreHttp);
+    pendingActionsHttpMock(coreHttp);
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
   });
 

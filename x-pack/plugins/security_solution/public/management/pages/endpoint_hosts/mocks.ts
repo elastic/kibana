@@ -29,6 +29,10 @@ import {
   GetAgentPoliciesResponse,
   GetPackagesResponse,
 } from '../../../../../fleet/common';
+import {
+  PendingActionsHttpMockInterface,
+  pendingActionsHttpMock,
+} from '../../../common/lib/endpoint_pending_actions/mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
@@ -135,7 +139,8 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
 
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
   EndpointPolicyResponseHttpMockInterface &
-  FleetApisHttpMockInterface;
+  FleetApisHttpMockInterface &
+  PendingActionsHttpMockInterface;
 /**
  * HTTP Mocks that support the Endpoint List and Details page
  */
@@ -143,4 +148,5 @@ export const endpointPageHttpMock = composeHttpHandlerMocks<EndpointPageHttpMock
   endpointMetadataHttpMocks,
   endpointPolicyResponseHttpMock,
   fleetApisHttpMock,
+  pendingActionsHttpMock,
 ]);
