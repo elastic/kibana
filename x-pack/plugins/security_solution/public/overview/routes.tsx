@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { OVERVIEW_PATH, SecurityPageName } from '../../common/constants';
+import { SecuritySubPluginRoutes } from '../app/types';
 
 import { Overview } from './pages';
-import { NotFoundPage } from '../app/404';
 
 export const OverviewRoutes = () => (
-  <Switch>
-    <Route path="/" render={() => <Overview />} />
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
+  <TrackApplicationView viewId={SecurityPageName.overview}>
+    <Overview />
+  </TrackApplicationView>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: OVERVIEW_PATH,
+    render: OverviewRoutes,
+  },
+];

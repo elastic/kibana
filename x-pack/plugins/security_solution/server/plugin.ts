@@ -132,8 +132,8 @@ const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
  * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
  */
 const securitySubPluginsNoCases = [
+  // TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
   APP_ID,
-  `${APP_ID}:${SecurityPageName.overview}`,
   `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,

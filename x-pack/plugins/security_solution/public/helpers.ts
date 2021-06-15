@@ -51,7 +51,8 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 
   switch (pageName) {
     case SecurityPageName.overview:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.overview,
         replace: true,
         path,
       });
