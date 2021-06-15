@@ -5,9 +5,36 @@
  * 2.0.
  */
 
-export const FINAL_PIPELINE_ID = '.fleet_final_pipeline';
+export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-export const FINAL_PIPELINE = `---
+export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
+
+export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
+  template: {
+    settings: {
+      index: {
+        final_pipeline: FLEET_FINAL_PIPELINE_ID,
+      },
+    },
+    mappings: {
+      properties: {
+        event: {
+          properties: {
+            ingested: {
+              type: 'date',
+            },
+            agent_id_status: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const FLEET_FINAL_PIPELINE_CONTENT = `---
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:

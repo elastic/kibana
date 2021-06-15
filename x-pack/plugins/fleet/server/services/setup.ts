@@ -21,6 +21,9 @@ import { awaitIfPending } from './setup_utils';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
+import { getInstallations, installPackage } from './epm/packages';
+import { pkgToPkgKey } from './epm/registry';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -43,9 +46,8 @@ async function createSetupSideEffects(
     settingsService.settingsSetup(soClient),
   ]);
 
-  await ensureFleetFinalPipelineIsInstalled(esClient);
-
   await awaitIfFleetServerSetupPending();
+  await ensureFleetGlobalEsAssets(soClient, esClient);
 
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
@@ -75,6 +77,49 @@ async function createSetupSideEffects(
     isInitialized: true,
     nonFatalErrors,
   };
+}
+
+/**
+ * Ensure ES assets shared by all Fleet index template are installed
+ */
+export async function ensureFleetGlobalEsAssets(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const logger = appContextService.getLogger();
+  // Ensure Global Fleet ES assets are installed
+  const globalAssetsRes = await Promise.all([
+    ensureDefaultComponentTemplate(esClient),
+    ensureFleetFinalPipelineIsInstalled(esClient),
+  ]);
+
+  if (globalAssetsRes.some((asset) => asset.isCreated)) {
+    // Update existing index template
+    const packages = await getInstallations(soClient);
+
+    await Promise.all(
+      packages.saved_objects.map(async ({ attributes: installation }) => {
+        if (installation.install_source !== 'registry') {
+          logger.error(
+            `Package need to manually be reinstalled ${installation.name} after installing Fleet global assets`
+          );
+          return;
+        }
+        await installPackage({
+          installSource: installation.install_source,
+          savedObjectsClient: soClient,
+          pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
+          esClient,
+          // Force install the pacakge will update the index template and the datastream write indices
+          force: true,
+        }).catch((err) => {
+          logger.error(
+            `Package need to manually be reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
+          );
+        });
+      })
+    );
+  }
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(

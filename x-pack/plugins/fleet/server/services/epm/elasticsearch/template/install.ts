@@ -20,6 +20,10 @@ import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
+import {
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+} from '../../../../constants';
 
 import {
   generateMappings,
@@ -249,6 +253,28 @@ async function installDataStreamComponentTemplates(
   // TODO: Check return values for errors
   await Promise.all(componentPromises);
   return templates;
+}
+
+export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClient) {
+  const { body: getTemplateRes } = await esClient.cluster.getComponentTemplate(
+    {
+      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  const existingTemplate = getTemplateRes?.component_templates?.[0];
+  if (!existingTemplate) {
+    await putComponentTemplate(
+      FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+      FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+      esClient
+    );
+  }
+
+  return { isCreated: !existingTemplate };
 }
 
 export async function installTemplate({

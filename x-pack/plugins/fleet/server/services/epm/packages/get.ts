@@ -101,6 +101,8 @@ export async function getPackageSavedObjects(
   });
 }
 
+export const getInstallations = getPackageSavedObjects;
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
