@@ -78,21 +78,6 @@ export function healthRoute(
         : hasStatus(summarizedStats.stats, HealthStatus.Warning)
         ? HealthStatus.Warning
         : HealthStatus.OK;
-    // console.log({
-    //   healthStatus,
-    //   hasError: hasStatus(summarizedStats.stats, HealthStatus.Error),
-    //   hasExpiredHotTimestamps: hasExpiredHotTimestamps(
-    //     summarizedStats,
-    //     now,
-    //     requiredHotStatsFreshness
-    //   ),
-    //   hasExpiredColdTimestamps: hasExpiredColdTimestamps(
-    //     summarizedStats,
-    //     now,
-    //     requiredColdStatsFreshness
-    //   ),
-    //   hasWarning: hasStatus(summarizedStats.stats, HealthStatus.Warning),
-    // });
     return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
   }
 
@@ -185,13 +170,7 @@ function hasExpiredColdTimestamps(
 
 function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {
   return Object.values(stats)
-    .map((stat) => {
-      const result = stat?.status === status;
-      if (result) {
-        // console.log('yes bro', { status, stat })
-      }
-      return result;
-    })
+    .map((stat) => stat?.status === status)
     .includes(true);
 }
 
