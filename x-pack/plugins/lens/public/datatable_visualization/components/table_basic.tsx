@@ -278,9 +278,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [formatters, columnConfig, props.uiSettings]
   );
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
-    visibleColumns,
-  ]);
+  const columnVisibility = useMemo(
+    () => ({
+      visibleColumns,
+      setVisibleColumns: () => {},
+    }),
+    [visibleColumns]
+  );
 
   const sorting = useMemo<EuiDataGridSorting>(
     () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
