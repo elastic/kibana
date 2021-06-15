@@ -2,17 +2,10 @@
 
 exports[`Source Viewer component renders error state 1`] = `
 <SourceViewer
-  docProps={
-    Object {
-      "id": "1",
-      "index": "index1",
-      "indexPatternId": "xyz",
-      "indexPatternService": Object {
-        "get": [MockFunction],
-      },
-    }
-  }
   hasLineNumbers={true}
+  id="1"
+  index="index1"
+  indexPatternId="xyz"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -191,17 +184,10 @@ exports[`Source Viewer component renders error state 1`] = `
 
 exports[`Source Viewer component renders json code editor 1`] = `
 <SourceViewer
-  docProps={
-    Object {
-      "id": "1",
-      "index": "index1",
-      "indexPatternId": "xyz",
-      "indexPatternService": Object {
-        "get": [MockFunction],
-      },
-    }
-  }
   hasLineNumbers={true}
+  id="1"
+  index="index1"
+  indexPatternId="xyz"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -522,17 +508,10 @@ exports[`Source Viewer component renders json code editor 1`] = `
 
 exports[`Source Viewer component renders loading state 1`] = `
 <SourceViewer
-  docProps={
-    Object {
-      "id": "1",
-      "index": "index1",
-      "indexPatternId": "xyz",
-      "indexPatternService": Object {
-        "get": [MockFunction],
-      },
-    }
-  }
   hasLineNumbers={true}
+  id="1"
+  index="index1"
+  indexPatternId="xyz"
   intl={
     Object {
       "defaultFormats": Object {},

@@ -188,6 +188,20 @@ export class DiscoverPlugin
       order: 10,
       component: DocViewTable,
     });
+    this.docViewsRegistry!.addDocView({
+      title: i18n.translate('discover.docViews.json.jsonTitle', {
+        defaultMessage: 'JSON',
+      }),
+      order: 20,
+      component: ({ hit, indexPattern }) => (
+        <SourceViewer
+          index={hit._index}
+          id={hit._id}
+          indexPatternId={indexPattern?.id || ''}
+          hasLineNumbers
+        />
+      ),
+    });
 
     const {
       appMounted,
@@ -265,26 +279,6 @@ export class DiscoverPlugin
 
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
-        const useNewFieldsApi = !core.uiSettings.get('discover:searchFieldsFromSource');
-
-        this.docViewsRegistry!.addDocView({
-          title: i18n.translate('discover.docViews.json.jsonTitle', {
-            defaultMessage: 'JSON',
-          }),
-          order: 20,
-          component: ({ hit, indexPattern }) => (
-            <SourceViewer
-              docProps={{
-                index: hit._index,
-                id: hit._id,
-                indexPatternId: indexPattern?.id || '',
-                indexPatternService: dataStart.indexPatterns,
-                requestAllFields: useNewFieldsApi,
-              }}
-              hasLineNumbers
-            />
-          ),
-        });
 
         const { renderApp } = await import('./application/application');
         params.element.classList.add('dscAppWrapper');

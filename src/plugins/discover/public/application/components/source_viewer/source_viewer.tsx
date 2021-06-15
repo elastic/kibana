@@ -10,21 +10,37 @@ import { monaco } from '@kbn/monaco';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '../doc/use_es_doc_search';
-import { DocProps } from '../doc/doc';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
 import { ElasticRequestState } from '../doc/elastic_request_state';
+import { getServices } from '../../../../public/kibana_services';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 interface SourceViewerProps {
-  docProps: DocProps;
+  id: string;
+  index: string;
+  indexPatternId: string;
   hasLineNumbers: boolean;
   width?: number;
 }
 
-export const SourceViewer = ({ docProps, width, hasLineNumbers }: SourceViewerProps) => {
+export const SourceViewer = ({
+  id,
+  index,
+  indexPatternId,
+  width,
+  hasLineNumbers,
+}: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
-
-  const [reqState, hit] = useEsDocSearch({ ...docProps });
+  const indexPatternService = getServices().data.indexPatterns;
+  const useNewFieldsApi = getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const [reqState, hit] = useEsDocSearch({
+    id,
+    index,
+    indexPatternId,
+    indexPatternService,
+    requestAllFields: useNewFieldsApi,
+  });
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found) {
