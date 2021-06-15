@@ -418,6 +418,9 @@ export class DocLinksService {
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
         },
+        ecs: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
       },
     });
   }
@@ -621,5 +624,8 @@ export interface DocLinksStart {
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
     }>;
+    readonly ecs: {
+      readonly guide: string;
+    };
   };
 }
