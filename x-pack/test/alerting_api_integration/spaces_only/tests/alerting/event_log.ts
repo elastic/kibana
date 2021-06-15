@@ -76,6 +76,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
+            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
             ['execute-action', { equal: 2 }],
             ['new-instance', { equal: 1 }],
@@ -103,12 +104,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(getEventsByAction(events, 'new-instance').length).equal(1);
 
       const executeEvents = getEventsByAction(events, 'execute');
+      const executeStartEvents = getEventsByAction(events, 'execute-start');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
       const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
+      const executeStartTimes = getTimestamps(executeStartEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
       const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
@@ -118,6 +121,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+      expect(executeStartTimes.length === executeTimes.length).to.be(true);
+      executeStartTimes.forEach((est, index) => expect(est === executeTimes[index]).to.be(true));
       expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
@@ -125,6 +130,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeStatuses = ['ok', 'active', 'active'];
       for (const event of events) {
         switch (event?.event?.action) {
+          case 'execute-start':
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `alert execution start: "${alertId}"`,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+              },
+            });
+            break;
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
@@ -262,6 +283,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
+            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
             ['execute-action', { equal: 2 }],
             ['new-instance', { equal: 1 }],
@@ -272,12 +294,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       });
 
       const executeEvents = getEventsByAction(events, 'execute');
+      const executeStartEvents = getEventsByAction(events, 'execute-start');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
       const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
+      const executeStartTimes = getTimestamps(executeStartEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
       const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
@@ -287,6 +311,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+      expect(executeStartTimes.length === executeTimes.length).to.be(true);
+      executeStartTimes.forEach((est, index) => expect(est === executeTimes[index]).to.be(true));
       expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
@@ -294,6 +320,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeStatuses = ['ok', 'active', 'active'];
       for (const event of events) {
         switch (event?.event?.action) {
+          case 'execute-start':
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `alert execution start: "${alertId}"`,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+              },
+            });
+            break;
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
@@ -407,14 +449,35 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
+          actions: new Map([
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
+          ]),
         });
       });
 
-      const event = events[0];
-      expect(event).to.be.ok();
+      const startEvent = events[0];
+      const executeEvent = events[1];
 
-      validateEvent(event, {
+      expect(startEvent).to.be.ok();
+      expect(executeEvent).to.be.ok();
+
+      validateEvent(startEvent, {
+        spaceId: Spaces.space1.id,
+        savedObjects: [
+          { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+        ],
+        message: `alert execution start: "${alertId}"`,
+        rule: {
+          id: alertId,
+          category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+          namespace: Spaces.space1.id,
+        },
+      });
+
+      validateEvent(executeEvent, {
         spaceId: Spaces.space1.id,
         savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
         outcome: 'failure',
