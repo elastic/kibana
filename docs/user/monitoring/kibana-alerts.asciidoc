@@ -9,7 +9,7 @@ best practices recommended by Elastic. However, you can tailor them to meet your
 specific needs.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-kibana-alerts.png["{kib} alerts in {stack-monitor-app}"]
+image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
 
 When you open *{stack-monitor-app}*, the preconfigured rules are created 
 automatically. They are initially configured to detect and notify on various 
@@ -23,10 +23,7 @@ been recreated as rules in {kib} {alert-features}. For this reason, the existing
 The default action for all {stack-monitor-app} rules is to write to {kib} logs 
 and display a notification in the UI.
 
-[role="screenshot"]
-image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
-
-NOTE: To review and modify all available rules, use *Enter setup mode* on the 
+To review and modify all available rules, use *Enter setup mode* on the 
 *Cluster overview* page in *{stack-monitor-app}*:
 
 [role="screenshot"]
