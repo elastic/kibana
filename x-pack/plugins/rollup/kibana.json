@@ -5,7 +5,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "indexPatternManagement",
     "management",
     "licensing",
     "features"
