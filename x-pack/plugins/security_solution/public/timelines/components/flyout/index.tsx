@@ -19,12 +19,6 @@ import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
 
-const Visible = styled.div<{ show?: boolean }>`
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-`;
-
-Visible.displayName = 'Visible';
-
 interface OwnProps {
   timelineId: TimelineId;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -124,9 +118,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
         <EuiFocusTrap disabled={!focusOwnership}>
-          <Visible show={show}>
-            <Pane timelineId={timelineId} />
-          </Visible>
+          <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
         <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
       </>
