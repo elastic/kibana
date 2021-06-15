@@ -4,8 +4,8 @@
 [3] We need the tooltip <span /> to be 100% to display the text ellipsis of the field value
 */
 
-$previewFieldItemHeight: 64px; /* [1] */
-$previewShowMoreHeight: 48px; /* [2] */
+$previewFieldItemHeight: 40px; /* [1] */
+$previewShowMoreHeight: 40px; /* [2] */
 
 .indexPatternFieldEditor__previewFieldList {
   position: relative;
@@ -19,6 +19,7 @@ $previewShowMoreHeight: 48px; /* [2] */
     &--highlighted {
       $backgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
       background: $backgroundColor;
+      font-weight: 600;
     }
 
     &__key, &__value {

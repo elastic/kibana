@@ -17,8 +17,8 @@ import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';
 
-const ITEM_HEIGHT = 64;
-const SHOW_MORE_HEIGHT = 48;
+const ITEM_HEIGHT = 40;
+const SHOW_MORE_HEIGHT = 40;
 const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
 
 export interface Field {
