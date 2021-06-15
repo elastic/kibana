@@ -777,8 +777,12 @@ export interface CountResponse {
 
 // @public
 export class CspConfig implements ICspConfig {
+    // (undocumented)
+    #private;
+    // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    constructor(rawCspConfig: CspConfigType);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
