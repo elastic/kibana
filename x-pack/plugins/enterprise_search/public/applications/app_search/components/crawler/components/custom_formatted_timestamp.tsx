@@ -19,7 +19,7 @@ export const CustomFormattedTimestamp: React.FC<CustomFormattedTimestampProps> =
   timestamp,
 }) => {
   const date = new Date(timestamp);
-  const isDateToday = date > new Date(new Date(Date.now()).toDateString());
+  const isDateToday = date >= new Date(new Date(Date.now()).toDateString());
   return isDateToday ? (
     <FormattedRelative value={date} />
   ) : (
