@@ -12,17 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPageHeader,
   EuiLoadingSpinner,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
   EuiCallOut,
 } from '@elastic/eui';
 
@@ -30,6 +25,8 @@ import { withKibana } from '../../../../../../../src/plugins/kibana_react/public
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouterLinkProps, listBreadcrumb } from '../../services';
+import { documentationLinks } from '../../services/documentation_links';
+
 import { JobTable } from './job_table';
 import { DetailPanel } from './detail_panel';
 
@@ -87,18 +84,6 @@ export class JobListUi extends Component {
     this.props.closeDetailPanel();
   }
 
-  getHeaderSection() {
-    return (
-      <EuiPageContentHeaderSection data-test-subj="jobListPageHeader">
-        <EuiTitle size="l">
-          <h1>
-            <FormattedMessage id="xpack.rollupJobs.jobListTitle" defaultMessage="Rollup Jobs" />
-          </h1>
-        </EuiTitle>
-      </EuiPageContentHeaderSection>
-    );
-  }
-
   renderNoPermission() {
     const title = i18n.translate('xpack.rollupJobs.jobList.noPermissionTitle', {
       defaultMessage: 'Permission error',
@@ -130,101 +115,112 @@ export class JobListUi extends Component {
     const title = i18n.translate('xpack.rollupJobs.jobList.loadingErrorTitle', {
       defaultMessage: 'Error loading rollup jobs',
     });
+
     return (
-      <Fragment>
-        {this.getHeaderSection()}
-        <EuiSpacer size="m" />
-        <EuiCallOut data-test-subj="jobListError" title={title} color="danger" iconType="alert">
-          {statusCode} {errorString}
-        </EuiCallOut>
-      </Fragment>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          data-test-subj="jobListError"
+          title={<h2>{title}</h2>}
+          body={
+            <p>
+              {statusCode} {errorString}
+            </p>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiEmptyPrompt
-        data-test-subj="jobListEmptyPrompt"
-        iconType="indexRollupApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.rollupJobs.jobList.emptyPromptTitle"
-              defaultMessage="Create your first rollup job"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiEmptyPrompt
+          data-test-subj="jobListEmptyPrompt"
+          iconType="indexRollupApp"
+          title={
+            <h1>
               <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                defaultMessage="Rollup jobs summarize and store historical data in a smaller index
-                  for future analysis."
+                id="xpack.rollupJobs.jobList.emptyPromptTitle"
+                defaultMessage="Create your first rollup job"
               />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            data-test-subj="createRollupJobButton"
-            {...getRouterLinkProps(`/create`)}
-            fill
-            iconType="plusInCircle"
-          >
-            <FormattedMessage
-              id="xpack.rollupJobs.jobList.emptyPrompt.createButtonLabel"
-              defaultMessage="Create rollup job"
-            />
-          </EuiButton>
-        }
-      />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobList.emptyPromptDescription"
+                  defaultMessage="Rollup jobs summarize and store historical data in a smaller index
+                  for future analysis."
+                />
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              data-test-subj="createRollupJobButton"
+              {...getRouterLinkProps('/create')}
+              fill
+              iconType="plusInCircle"
+            >
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.emptyPrompt.createButtonLabel"
+                defaultMessage="Create rollup job"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
   renderLoading() {
     return (
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} data-test-subj="jobListLoading">
-          <EuiText>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.loadingTitle"
-                defaultMessage="Loading rollup jobs..."
-              />
-            </EuiTextColor>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiEmptyPrompt
+          title={<EuiLoadingSpinner size="xl" />}
+          body={
+            <FormattedMessage
+              id="xpack.rollupJobs.jobList.loadingTitle"
+              defaultMessage="Loading rollup jobs…"
+            />
+          }
+        />
+      </EuiPageContent>
     );
   }
 
   renderList() {
-    const { isLoading } = this.props;
-
     return (
-      <Fragment>
-        <EuiPageContentHeader>
-          {this.getHeaderSection()}
-
-          <EuiPageContentHeaderSection>
-            <EuiButton fill {...getRouterLinkProps(`/create`)}>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <span data-test-subj="jobListPageHeader">
+              <FormattedMessage id="xpack.rollupJobs.jobListTitle" defaultMessage="Rollup Jobs" />
+            </span>
+          }
+          rightSideItems={[
+            <EuiButtonEmpty
+              href={documentationLinks.rollupJobs}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
               <FormattedMessage
-                id="xpack.rollupJobs.jobList.createButtonLabel"
-                defaultMessage="Create rollup job"
+                id="xpack.rollupJobs.rollupJobsDocsLinkText"
+                defaultMessage="Rollup Jobs docs"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+            </EuiButtonEmpty>,
+          ]}
+        />
 
-        {isLoading ? this.renderLoading() : <JobTable />}
+        <EuiSpacer size="l" />
+
+        <JobTable />
 
         <DetailPanel />
-      </Fragment>
+      </>
     );
   }
 
@@ -241,15 +237,13 @@ export class JobListUi extends Component {
       }
     } else if (!isLoading && !hasJobs) {
       content = this.renderEmpty();
+    } else if (isLoading) {
+      content = this.renderLoading();
     } else {
       content = this.renderList();
     }
 
-    return (
-      <EuiPageContent horizontalPosition="center" className="rollupJobsListPanel">
-        {content}
-      </EuiPageContent>
-    );
+    return content;
   }
 }
 

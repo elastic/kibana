@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, debounce, first, mapValues } from 'lodash';
 
@@ -18,11 +18,10 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPageContent,
-  EuiPageContentHeader,
+  EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiTitle,
 } from '@elastic/eui';
 
 import {
@@ -522,33 +521,33 @@ export class JobCreateUi extends Component {
       }
 
       saveErrorFeedback = (
-        <Fragment>
+        <>
+          <EuiSpacer />
+
           <EuiCallOut title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 
           <EuiSpacer />
-        </Fragment>
+        </>
       );
     }
 
     return (
-      <Fragment>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.createTitle"
-                  defaultMessage="Create rollup job"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageContentHeader>
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+        <EuiPageHeader
+          pageTitle={
+            <FormattedMessage
+              id="xpack.rollupJobs.createTitle"
+              defaultMessage="Create rollup job"
+            />
+          }
+        />
+
+        <>
+          <EuiStepsHorizontal steps={this.getSteps()} />
 
           {saveErrorFeedback}
-
-          <EuiStepsHorizontal steps={this.getSteps()} />
 
           <EuiSpacer />
 
@@ -557,9 +556,10 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-        </EuiPageContent>
-        {savingFeedback}
-      </Fragment>
+
+          {savingFeedback}
+        </>
+      </EuiPageContentBody>
     );
   }
 
