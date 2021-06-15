@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
+import { assertNever } from '@kbn/std';
 import {
   AlertEvent,
   DataStream,
@@ -387,11 +388,48 @@ const eventsDefaultDataStream = {
   namespace: 'default',
 };
 
+enum AlertTypes {
+  MALWARE = 'MALWARE',
+  MEMORY_SIGNATURE = 'MEMORY_SIGNATURE',
+  MEMORY_SHELLCODE = 'MEMORY_SHELLCODE',
+}
+
 const alertsDefaultDataStream = {
   type: 'logs',
   dataset: 'endpoint.alerts',
   namespace: 'default',
 };
+
+const alertsDefaultDll = [
+  {
+    pe: {
+      architecture: 'x64',
+    },
+    code_signature: {
+      subject_name: 'Cybereason Inc',
+      trusted: true,
+    },
+
+    hash: {
+      md5: '1f2d082566b0fc5f2c238a5180db7451',
+      sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+      sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+    },
+
+    path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+    Ext: {
+      compile_time: 1534424710,
+      mapped_address: 5362483200,
+      mapped_size: 0,
+      malware_classification: {
+        identifier: 'Whitelisted',
+        score: 0,
+        threshold: 0,
+        version: '3.0.0',
+      },
+    },
+  },
+];
 
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
@@ -501,16 +539,15 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       data_stream: metadataDataStream,
     };
   }
-
   /**
-   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
    * @param ancestry - an array of ancestors for the generated alert
    * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
    */
-  public generateAlert({
+  public generateMalwareAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID,
@@ -611,37 +648,138 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           },
         },
       },
-      dll: [
-        {
-          pe: {
-            architecture: 'x64',
-          },
-          code_signature: {
-            subject_name: 'Cybereason Inc',
-            trusted: true,
-          },
+      dll: alertsDefaultDll,
+    };
+  }
 
-          hash: {
-            md5: '1f2d082566b0fc5f2c238a5180db7451',
-            sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
-            sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
-          },
-
-          path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
-          Ext: {
-            compile_time: 1534424710,
-            mapped_address: 5362483200,
-            mapped_size: 0,
-            malware_classification: {
-              identifier: 'Whitelisted',
-              score: 0,
-              threshold: 0,
-              version: '3.0.0',
+  /**
+   * Creates a memory alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateMemoryAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+    alertType,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+    alertType?: AlertTypes;
+  } = {}): AlertEvent {
+    const processName = this.randomProcessName();
+    const isShellcode = alertType === AlertTypes.MEMORY_SHELLCODE;
+    return {
+      ...this.commonInfo,
+      data_stream: alertsDataStream,
+      '@timestamp': ts,
+      ecs: {
+        version: '1.6.0',
+      },
+      // disabling naming-convention to accommodate external field
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Memory_protection: {
+        feature: isShellcode ? 'shellcode_thread' : 'signature',
+        self_injection: true,
+      },
+      event: {
+        action: 'start',
+        kind: 'alert',
+        category: 'memory',
+        code: 'memory_signature',
+        id: this.seededUUIDv4(),
+        dataset: 'endpoint',
+        module: 'endpoint',
+        type: 'info',
+        sequence: this.sequence++,
+      },
+      file: {},
+      process: {
+        pid: 2,
+        name: processName,
+        start: ts,
+        uptime: 0,
+        entity_id: entityID,
+        executable: `C:/fake/${processName}`,
+        parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
+        hash: {
+          md5: 'fake md5',
+          sha1: 'fake sha1',
+          sha256: 'fake sha256',
+        },
+        Ext: {
+          ancestry,
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
             },
+          ],
+          user: 'SYSTEM',
+          token: {
+            integrity_level_name: 'high',
+          },
+          malware_signature: {
+            all_names: 'Windows.Trojan.FakeAgent',
+            identifier: 'diagnostic-malware-signature-v1-fake',
           },
         },
-      ],
+      },
+      dll: alertsDefaultDll,
     };
+  }
+  /**
+   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
+    const alertType = this.randomChoice(Object.values(AlertTypes));
+    switch (alertType) {
+      case AlertTypes.MALWARE:
+        return this.generateMalwareAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+        });
+      case AlertTypes.MEMORY_SIGNATURE:
+      case AlertTypes.MEMORY_SHELLCODE:
+        return this.generateMemoryAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+          alertType,
+        });
+      default:
+        return assertNever(alertType);
+    }
   }
 
   /**

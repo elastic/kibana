@@ -297,6 +297,12 @@ export type AlertEvent = Partial<{
       }>;
     }>;
   }>;
+  // disabling naming-convention to accommodate external field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection: Partial<{
+    feature: ECSField<string>;
+    self_injection: ECSField<boolean>;
+  }>;
   process: Partial<{
     command_line: ECSField<string>;
     ppid: ECSField<number>;
@@ -330,6 +336,10 @@ export type AlertEvent = Partial<{
         >;
       }>;
       user: ECSField<string>;
+      malware_signature: Partial<{
+        all_names: ECSField<string>;
+        identifier: ECSField<string>;
+      }>;
     }>;
   }>;
   file: Partial<{
