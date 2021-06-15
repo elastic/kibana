@@ -11,6 +11,7 @@ import {
 } from '../../../../common/ux_ui_filter';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { UxUIFilters } from '../../../../typings/ui_filters';
+import { environmentQuery } from '../../../utils/queries';
 
 export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
   const localFilterValues = uiFilters;
@@ -33,5 +34,5 @@ export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
       };
     }) as ESFilter[];
 
-  return mappedFilters;
+  return [...mappedFilters, ...environmentQuery(uiFilters.environment)];
 }

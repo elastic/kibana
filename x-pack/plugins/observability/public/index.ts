@@ -43,6 +43,8 @@ export {
   FieldValueSuggestions,
 } from './components/shared/';
 
+export type { LazyObservabilityPageTemplateProps } from './components/shared';
+
 export {
   useTrackPageview,
   useUiTracker,
