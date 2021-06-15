@@ -98,6 +98,14 @@ export interface IVectorLayer extends ILayer {
   getLeftJoinFields(): Promise<IField[]>;
 }
 
+const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
+  icon: noResultsIcon,
+  tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
+    defaultMessage: `No results found.`,
+  }),
+};
+
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
@@ -201,14 +209,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     const featureCollection = this._getSourceFeatureCollection();
 
-    const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
     if (!featureCollection || featureCollection.features.length === 0) {
-      return {
-        icon: noResultsIcon,
-        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`,
-        }),
-      };
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
     if (

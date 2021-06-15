@@ -16,7 +16,6 @@ import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   KBN_FEATURE_COUNT,
@@ -27,7 +26,11 @@ import {
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { VectorLayer, VectorLayerArguments } from '../vector_layer';
+import {
+  VectorLayer,
+  VectorLayerArguments,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+} from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
@@ -66,14 +69,9 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent() {
-    const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
     const tileMetas = this.getMetaFromTiles();
     if (!tileMetas) {
-      return {
-        icon: noResultsIcon,
-        tooltipContent: null,
-        areResultsTrimmed: false,
-      };
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
     const totalFeatures: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
@@ -82,13 +80,7 @@ export class TiledVectorLayer extends VectorLayer {
     }, 0);
 
     if (totalFeatures === 0) {
-      return {
-        icon: noResultsIcon,
-        tooltipContent: i18n.translate('xpack.maps.tiledLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`,
-        }),
-        areResultsTrimmed: false,
-      };
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
     const isComplete: boolean = tileMetas.every((tileMeta: Feature) => {
