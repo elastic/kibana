@@ -24,6 +24,7 @@ import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public'
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
+import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
@@ -32,6 +33,7 @@ import type { FleetConfigType } from '../common/types';
 import { FLEET_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
+import { createPackageSearchProvider } from './search_provider';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
@@ -60,6 +62,7 @@ export interface FleetSetupDeps {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -187,6 +190,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });
+    }
+
+    if (deps.globalSearch) {
+      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
     }
 
     return {};

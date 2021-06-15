@@ -10,7 +10,8 @@
     "features",
     "cloud",
     "usageCollection",
-    "home"
+    "home",
+    "globalSearch"
   ],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaReact", "esUiShared", "home", "infra", "kibanaUtils"]
