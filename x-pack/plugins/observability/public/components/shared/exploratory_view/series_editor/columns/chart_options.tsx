@@ -13,17 +13,18 @@ import { SeriesChartTypesSelect } from '../../series_builder/columns/chart_types
 
 interface Props {
   series: DataSeries;
+  seriesId: string;
 }
 
-export function ChartOptions({ series }: Props) {
+export function ChartOptions({ series, seriesId }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <SeriesChartTypesSelect seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
+        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={series.seriesTypes[0]} />
       </EuiFlexItem>
       {series.hasOperationType && (
         <EuiFlexItem grow={false}>
-          <OperationTypeSelect seriesId={series.id} />
+          <OperationTypeSelect seriesId={seriesId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
