@@ -110,7 +110,7 @@ export const configSchema = schema.object(
         defaultValue: {},
       }),
     }),
-    /* The amount of seconds we allow a task to delay before print a warning server log */
+    /* The amount of seconds we allow a task to delay before printing a warning server log */
     monitored_stats_warn_delayed_task_start_in_seconds: schema.number({
       defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
     }),
