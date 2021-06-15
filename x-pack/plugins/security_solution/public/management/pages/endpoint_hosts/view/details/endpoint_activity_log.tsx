@@ -21,6 +21,7 @@ import {
   getActivityLogError,
   getActivityLogIterableData,
   getActivityLogRequestLoaded,
+  getLastLoadedActivityLogData,
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
@@ -28,6 +29,7 @@ export const EndpointActivityLog = memo(
   ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
     const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
     const activityLogLoaded = useEndpointSelector(getActivityLogRequestLoaded);
+    const activityLastLogData = useEndpointSelector(getLastLoadedActivityLogData);
     const activityLogData = useEndpointSelector(getActivityLogIterableData);
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
@@ -48,7 +50,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {activityLogLoading || activityLogError ? (
+        {(activityLogLoaded && !activityLogData.length) || activityLogError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
             titleSize="s"
@@ -59,14 +61,15 @@ export const EndpointActivityLog = memo(
           <>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-            {activityLogLoading ? (
-              <EuiLoadingContent lines={3} />
-            ) : (
-              activityLogLoaded &&
+            {activityLogLoaded &&
               activityLogData.map((logEntry) => (
                 <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
-              ))
-            )}
+              ))}
+            {activityLogLoading &&
+              activityLastLogData?.data.map((logEntry) => (
+                <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
+              ))}
+            {activityLogLoading && <EuiLoadingContent lines={3} />}
             <EuiButton size="s" fill onClick={getActivityLog}>
               {'show more'}
             </EuiButton>
