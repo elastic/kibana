@@ -20,7 +20,6 @@ import {
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
