@@ -83,6 +83,35 @@ export function getActions(
       },
       'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
     });
+    actions.push({
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldTitle', {
+        defaultMessage: 'Delete index pattern field',
+      }),
+      description: i18n.translate(
+        'xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription',
+        {
+          defaultMessage: 'Delete index pattern field',
+        }
+      ),
+      type: 'icon',
+      icon: 'trash',
+      available: (item: FieldVisConfig) => {
+        return item.deletable === true;
+      },
+      onClick: (item: FieldVisConfig) => {
+        actionFlyoutRef.current = indexPatternFieldEditor?.openDeleteModal({
+          ctx: { indexPattern },
+          fieldName: item.fieldName!,
+          onDelete: () => {
+            const refresh: Refresh = {
+              lastRefresh: Date.now(),
+            };
+            dataVisualizerRefresh$.next(refresh);
+          },
+        });
+      },
+      'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
+    });
   }
   return actions;
 }

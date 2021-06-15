@@ -31,6 +31,7 @@ export interface FieldVisConfig {
   stats?: FieldVisStats;
   fieldFormat?: any;
   isUnsupportedType?: boolean;
+  deletable?: boolean;
 }
 
 export interface FileBasedFieldVisConfig {

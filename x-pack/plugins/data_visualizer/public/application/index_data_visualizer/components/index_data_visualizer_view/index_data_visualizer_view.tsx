@@ -571,6 +571,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         type: JOB_FIELD_TYPES.NUMBER,
         loading: true,
         aggregatable: true,
+        deletable: field.runtimeField !== undefined,
       };
       if (field.displayName !== metricConfig.fieldName) {
         metricConfig.displayName = field.displayName;
@@ -654,6 +655,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         aggregatable: field.aggregatable,
         scripted: field.scripted,
         loading: fieldData.existsInDocs,
+        deletable: field.runtimeField !== undefined,
       };
 
       // Map the field type from the Kibana index pattern to the field type
