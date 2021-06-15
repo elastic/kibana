@@ -386,6 +386,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(event?.message).to.eql(message);
 
+    expect(event?.kibana?.task).to.eql(undefined);
+
     if (errorMessage) {
       expect(event?.error?.message).to.eql(errorMessage);
     }

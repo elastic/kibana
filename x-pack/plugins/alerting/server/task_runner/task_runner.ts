@@ -54,6 +54,9 @@ import { getEsErrorMessage } from '../lib/errors';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
+// 1,000,000 nanoseconds in 1 millisecond
+const Millis2Nanos = 1000 * 1000;
+
 type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
@@ -494,6 +497,7 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
+    const scheduleDelay = Date.now() - this.taskInstance.runAt.getTime();
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
@@ -513,13 +517,16 @@ export class TaskRunner<
             namespace,
           },
         ],
+        task: {
+          scheduled: this.taskInstance.runAt.toISOString(),
+          schedule_delay: Millis2Nanos * scheduleDelay,
+        },
       },
       rule: {
         id: alertId,
         license: this.alertType.minimumLicenseRequired,
         category: this.alertType.id,
         ruleset: this.alertType.producer,
-        namespace,
       },
     };
 
@@ -814,7 +821,6 @@ function generateNewAndRecoveredInstanceEvents<
         license: ruleType.minimumLicenseRequired,
         category: ruleType.id,
         ruleset: ruleType.producer,
-        namespace,
         name: rule.name,
       },
     };

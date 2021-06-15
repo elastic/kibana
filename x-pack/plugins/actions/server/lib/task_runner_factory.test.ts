@@ -132,6 +132,9 @@ test('executes the task by calling the executor with proper parameters', async (
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -253,6 +256,9 @@ test('uses API key when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -287,6 +293,9 @@ test(`doesn't use API key when not provided`, async () => {
     request: expect.objectContaining({
       headers: {},
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
