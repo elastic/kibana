@@ -1622,7 +1622,7 @@ export class AlertsClient {
         ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
         : (ruleParams as Params);
     } catch (err) {
-      throw new Error(
+      throw Boom.badRequest(
         `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
       );
     }
