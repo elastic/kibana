@@ -15,7 +15,7 @@ interface Props {
   title: React.ReactNode;
   error: Error;
   actions?: JSX.Element;
-  centerErrorContent?: boolean;
+  isCentered?: boolean;
 }
 
 /*
@@ -29,7 +29,7 @@ export const PageError: React.FunctionComponent<Props> = ({
   title,
   error,
   actions,
-  centerErrorContent,
+  isCentered,
   ...rest
 }) => {
   const {
@@ -64,7 +64,7 @@ export const PageError: React.FunctionComponent<Props> = ({
     </EuiPageContent>
   );
 
-  if (centerErrorContent) {
+  if (isCentered) {
     return <div className={APP_WRAPPER_CLASS}>{errorContent}</div>;
   }
 

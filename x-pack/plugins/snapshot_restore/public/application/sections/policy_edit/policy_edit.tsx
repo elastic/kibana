@@ -193,7 +193,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">

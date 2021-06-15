@@ -113,7 +113,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">

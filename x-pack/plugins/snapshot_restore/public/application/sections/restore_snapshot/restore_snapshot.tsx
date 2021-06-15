@@ -144,7 +144,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
