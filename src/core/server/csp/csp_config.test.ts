@@ -70,6 +70,72 @@ describe('CspConfig', () => {
       expect(config.warnLegacyBrowsers).not.toEqual(CspConfig.DEFAULT.warnLegacyBrowsers);
     });
 
+    test('allows "worker_src" to be set and changes header', () => {
+      const config = new CspConfig({
+        ...defaultConfig,
+        rules: [],
+        worker_src: ['foo', 'bar'],
+      });
+      expect(config.rules).toEqual([`worker-src foo bar`]);
+      expect(config.header).toEqual(`worker-src foo bar`);
+    });
+
+    test('allows "style_src" to be set and changes header', () => {
+      const config = new CspConfig({
+        ...defaultConfig,
+        rules: [],
+        style_src: ['foo', 'bar'],
+      });
+      expect(config.rules).toEqual([`style-src foo bar`]);
+      expect(config.header).toEqual(`style-src foo bar`);
+    });
+
+    test('allows "script_src" to be set and changes header', () => {
+      const config = new CspConfig({
+        ...defaultConfig,
+        rules: [],
+        script_src: ['foo', 'bar'],
+      });
+      expect(config.rules).toEqual([`script-src foo bar`]);
+      expect(config.header).toEqual(`script-src foo bar`);
+    });
+
+    test('allows all directives to be set and changes header', () => {
+      const config = new CspConfig({
+        ...defaultConfig,
+        rules: [],
+        script_src: ['script', 'foo'],
+        worker_src: ['worker', 'bar'],
+        style_src: ['style', 'dolly'],
+      });
+      expect(config.rules).toEqual([
+        `script-src script foo`,
+        `worker-src worker bar`,
+        `style-src style dolly`,
+      ]);
+      expect(config.header).toEqual(
+        `script-src script foo; worker-src worker bar; style-src style dolly`
+      );
+    });
+
+    test('applies defaults when `rules` is undefined', () => {
+      const config = new CspConfig({
+        ...defaultConfig,
+        rules: undefined,
+        script_src: ['script'],
+        worker_src: ['worker'],
+        style_src: ['style'],
+      });
+      expect(config.rules).toEqual([
+        `script-src 'unsafe-eval' 'self' script`,
+        `worker-src blob: 'self' worker`,
+        `style-src 'unsafe-inline' 'self' style`,
+      ]);
+      expect(config.header).toEqual(
+        `script-src 'unsafe-eval' 'self' script; worker-src blob: 'self' worker; style-src 'unsafe-inline' 'self' style`
+      );
+    });
+
     describe('allows "disableEmbedding" to be set', () => {
       const disableEmbedding = true;
 
