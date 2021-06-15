@@ -960,7 +960,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" ownFocus={false}>
+      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
