@@ -21,7 +21,8 @@
     "optionalPlugins": [
       "home",
       "reporting",
-      "usageCollection"
+      "usageCollection",
+      "expressionRevealImage"
     ],
     "requiredBundles": [
       "discover",

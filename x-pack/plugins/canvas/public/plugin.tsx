@@ -22,6 +22,10 @@ import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRevealImagePluginSetup,
+  ExpressionRevealImagePluginStart,
+} from '../../../../src/plugins/expression_reveal_image/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -46,6 +50,8 @@ export interface CanvasSetupDeps {
   usageCollection?: UsageCollectionSetup;
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
+
+  expressionRevealImage?: ExpressionRevealImagePluginSetup;
 }
 
 export interface CanvasStartDeps {
@@ -57,6 +63,8 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+
+  expressionRevealImage?: ExpressionRevealImagePluginStart;
 }
 
 /**
@@ -130,6 +138,12 @@ export class CanvasPlugin
 
     if (setupPlugins.home) {
       setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
+
+    if (plugins.expressionRevealImage) {
+      canvasApi.addElements(plugins.expressionRevealImage.getElements());
+      canvasApi.addViewUIs(plugins.expressionRevealImage.getViews());
+      canvasApi.addRenderers(plugins.expressionRevealImage.getRenderers());
     }
 
     canvasApi.addArgumentUIs(async () => {
