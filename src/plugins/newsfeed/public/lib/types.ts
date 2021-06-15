@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
+import type { Observable } from 'rxjs';
+import type { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 
-export function plugin() {
-  return new ScreenshotModePlugin();
+export interface INewsfeedApiDriver {
+  /**
+   * Check whether newsfeed items should be (re-)fetched
+   */
+  shouldFetch(): boolean;
+
+  fetchNewsfeedItems(config: NewsfeedPluginBrowserConfig['service']): Observable<FetchResult>;
 }
-
-export {
-  KBN_SCREENSHOT_MODE_HEADER,
-  setScreenshotModeEnabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
-} from '../common';
-
-export { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
