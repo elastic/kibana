@@ -13,6 +13,7 @@ const renderers = [
   'error',
   'image',
   'repeatImage',
+  'revealImage',
   'markdown',
   'metric',
   'pie',

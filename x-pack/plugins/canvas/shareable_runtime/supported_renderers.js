@@ -38,4 +38,6 @@ export const renderFunctions = [
   text,
 ];
 
+export const addSupportedRenderFunctions = (renderers = []) => renderFunctions.concat(renderers);
+
 export const renderFunctionNames = renderFunctions.map((fn) => fn.name);
