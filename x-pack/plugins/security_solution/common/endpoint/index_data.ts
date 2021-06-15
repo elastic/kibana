@@ -14,6 +14,7 @@ import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
   AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
   AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -437,7 +438,7 @@ const indexFleetActionsForHost = async (
 
     await esClient.index(
       {
-        index: '.fleet-actions-results',
+        index: AGENT_ACTIONS_RESULTS_INDEX,
         body: actionResponse,
       },
       ES_INDEX_OPTIONS

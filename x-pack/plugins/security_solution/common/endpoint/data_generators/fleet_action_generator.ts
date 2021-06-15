@@ -13,7 +13,7 @@ import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../ty
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
-  /** Generate a random endpoint Action (isolate or unisolate */
+  /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     const timeStamp = new Date(this.randomPastDate());
 
