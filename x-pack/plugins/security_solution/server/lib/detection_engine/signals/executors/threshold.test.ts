@@ -7,12 +7,15 @@
 
 import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { thresholdExecutor } from './threshold';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
+import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
@@ -54,6 +57,9 @@ describe('threshold_executor', () => {
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+    );
     logger = loggingSystemMock.createLogger();
   });
 
@@ -69,7 +75,13 @@ describe('threshold_executor', () => {
         logger,
         buildRuleMessage,
         startedAt: new Date(),
-        bulkCreate: jest.fn(),
+        bulkCreate: jest.fn().mockImplementation((hits) => ({
+          errors: [],
+          success: true,
+          bulkCreateDuration: '0',
+          createdItemsCount: 0,
+          createdItems: [],
+        })),
         wrapHits: jest.fn(),
       });
       expect(response.warningMessages.length).toEqual(1);
