@@ -118,6 +118,8 @@ export const push = async (
       throw new Error('Connector mapping has not been created');
     }
 
+    console.log('we have to figure out the effin url');
+
     const externalServiceIncident = await createIncident({
       actionsClient,
       theCase,

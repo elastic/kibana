@@ -89,6 +89,10 @@ const countAlerts = (comments: CaseResponse['comments']): number =>
     return total;
   }, 0) ?? 0;
 
+// const createKibanaCaseUrl = (theCase: CaseResponse): string => {
+//   const getBase =
+// }
+
 export const createIncident = async ({
   actionsClient,
   theCase,
@@ -148,7 +152,7 @@ export const createIncident = async ({
   });
 
   incident = { ...incident, ...transformedFields, externalId };
-
+  console.log('HEYHEY', { transformedFields, theCase });
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
@@ -171,6 +175,7 @@ export const createIncident = async ({
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
+      console.log('COMMENTS', theCase);
       comments = transformComments(commentsToBeUpdated, ['informationAdded']);
     }
   }
@@ -234,10 +239,13 @@ export const transformers: Record<string, Transformer> = {
     value: `${value} ${FIELD_INFORMATION('update', date, user)}`,
     ...rest,
   }),
-  informationAdded: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('add', date, user)}`,
-    ...rest,
-  }),
+  informationAdded: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => {
+    console.log('HEYHO', { rest });
+    return {
+      value: `${value} ${FIELD_INFORMATION('add', date, user)}`,
+      ...rest,
+    };
+  },
   append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
     value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
     ...rest,

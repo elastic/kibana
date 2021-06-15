@@ -32,3 +32,5 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 }
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+export const getCaseUrl = (url: string | undefined) => {};
