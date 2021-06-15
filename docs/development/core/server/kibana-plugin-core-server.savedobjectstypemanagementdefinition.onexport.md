@@ -10,6 +10,8 @@ It can be used to either mutate the exported objects, or add additional objects 
 
 See [the transform type documentation](./kibana-plugin-core-server.savedobjectsexporttransform.md) for more info and examples.
 
+When implementing both `isExportable` and `onExport`<!-- -->, it is mandatory that `isExportable` returns the same value for an object before and after going though the export transform. E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
+
 <b>Signature:</b>
 
 ```typescript

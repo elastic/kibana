@@ -4,9 +4,9 @@
 
 ## SavedObjectsTypeManagementDefinition.isExportable property
 
-Allow to specify exportability with an object granularity.
+Optional hook to specify whether an object should be exportable.
 
-If specified, `isExportable` will be called during export for each of this type's objects, and the ones not matching the predicate will be evicted from the export.
+If specified, `isExportable` will be called during export for each of this type's objects in the export, and the ones not matching the predicate will be excluded from the export.
 
 When implementing both `isExportable` and `onExport`<!-- -->, it is mandatory that `isExportable` returns the same value for an object before and after going though the export transform. E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
 
@@ -18,11 +18,11 @@ isExportable?: SavedObjectsExportablePredicate<Attributes>;
 
 ## Remarks
 
-this is only used when `importableAndExportable` is true
+`importableAndExportable` must be `true` to specify this property.
 
 ## Example
 
-Registering a type with per-object exportability
+Registering a type with a per-object exportability predicate
 
 ```ts
 // src/plugins/my_plugin/server/plugin.ts
