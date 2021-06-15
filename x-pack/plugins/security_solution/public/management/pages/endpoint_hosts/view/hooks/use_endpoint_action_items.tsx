@@ -17,7 +17,8 @@ import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
-import { isEndpointHostIsolated } from '../../../../../common/utils/validators/is_endpoint_host_isolated';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useLicense } from '../../../../../common/hooks/use_license';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -26,6 +27,7 @@ import { isEndpointHostIsolated } from '../../../../../common/utils/validators/i
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
@@ -58,9 +60,9 @@ export const useEndpointActionItems = (
         selected_endpoint: endpointId,
       });
 
-      return [
-        isIsolated
-          ? {
+      const isolationActions = isIsolated // Un-isolate is always available to users regardless of license level
+        ? [
+            {
               'data-test-subj': 'unIsolateLink',
               icon: 'logoSecurity',
               key: 'unIsolateHost',
@@ -75,8 +77,11 @@ export const useEndpointActionItems = (
                   defaultMessage="Unisolate host"
                 />
               ),
-            }
-          : {
+            },
+          ]
+        : isPlatinumPlus // For Platinum++ licenses, users also have ability to isolate
+        ? [
+            {
               'data-test-subj': 'isolateLink',
               icon: 'logoSecurity',
               key: 'isolateHost',
@@ -92,6 +97,11 @@ export const useEndpointActionItems = (
                 />
               ),
             },
+          ]
+        : [];
+
+      return [
+        ...isolationActions,
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
@@ -183,5 +193,12 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
+  }, [
+    allCurrentUrlParams,
+    endpointMetadata,
+    fleetAgentPolicies,
+    formatUrl,
+    getUrlForApp,
+    isPlatinumPlus,
+  ]);
 };
