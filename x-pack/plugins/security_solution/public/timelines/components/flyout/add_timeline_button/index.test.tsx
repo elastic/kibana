@@ -14,6 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { mockOpenTimelineQueryResults, TestProviders } from '../../../../common/mock';
 import { getAllTimeline, useGetAllTimeline } from '../../../containers/all';
+import { mockHistory, Router } from '../../../../common/mock/router';
 
 jest.mock('../../open_timeline/use_timeline_status', () => {
   const originalModule = jest.requireActual('../../open_timeline/use_timeline_status');
@@ -184,7 +185,9 @@ describe('AddTimelineButton', () => {
 
       wrapper = mount(
         <TestProviders>
-          <AddTimelineButton {...props} />
+          <Router history={mockHistory}>
+            <AddTimelineButton {...props} />
+          </Router>
         </TestProviders>
       );
     });
