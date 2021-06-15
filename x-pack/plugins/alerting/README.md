@@ -118,6 +118,8 @@ The following table describes the properties of the `options` object.
 |executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
+|useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
+|useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 
 ### Executor
 
@@ -172,6 +174,19 @@ For example, if the `context` has one variable `foo` which is an object that has
 }
 ```
 
+### useSavedObjectReferences Hooks
+
+This is an optional pair of functions that can be implemented by a rule type. Both `extractReferences` and `injectReferences` functions must be implemented if either is impemented.
+
+**useSavedObjectReferences.extractReferences**
+
+This function should take the rule type params as input and extract out any saved object IDs stored within the params. For each saved object ID, a new saved object reference should be created and a saved object reference should replace the saved object ID in the rule params. This function should return the modified rule type params (with saved object references, not IDs) and an array of saved object references. Note that any extracted saved object reference name must not start with the prefix `action_`, which is reserved for use by the framework.
+
+
+**useSavedObjectReferences.injectReferences**
+
+
+This function should take the rule type params (with saved object references) and the saved object references array as input and inject the saved object ID in place of any saved object references in the rule type params. Note that any error thrown within this function will be propagated.
 ## Licensing
 
 Currently most rule types are free features. But some rule types are subscription features, such as the tracking containment rule.
@@ -209,6 +224,13 @@ import {
 interface MyRuleTypeParams extends AlertTypeParams {
 	server: string;
 	threshold: number;
+	testSavedObjectId: string;
+}
+
+interface MyRuleTypeExtractedParams extends AlertTypeParams {
+	server: string;
+	threshold: number;
+	testSavedObjectRef: string;
 }
 
 interface MyRuleTypeState extends AlertTypeState {
@@ -273,6 +295,7 @@ const myRuleType: AlertType<
 		rule,
 	}: AlertExecutorOptions<
 		MyRuleTypeParams,
+		MyRuleTypeExtractedParams,
 		MyRuleTypeState,
 		MyRuleTypeAlertState,
 		MyRuleTypeAlertContext,
@@ -319,8 +342,28 @@ const myRuleType: AlertType<
 		};
 	},
 	producer: 'alerting',
-	useSavedObjectReferences?: {
-		
+	useSavedObjectReferences: {
+		extractReferences: (params: Params): RuleParamsAndRefs<ExtractedParams> => {
+			const { testSavedObjectId, ...otherParams } = params;
+
+			const testSavedObjectRef = 'testRef_0';
+			const references = [
+				{
+					name: `testRef_0`,
+					id: testSavedObjectId,
+					type: 'index-pattern',
+				},
+			];
+			return { params: { ...otherParams, testSavedObjectRef }, references };
+		},
+		injectReferences: (params: SavedObjectAttributes, references: SavedObjectReference[]) => {
+			const { testSavedObjectRef, ...otherParams } = params;
+			const reference = references.find((ref) => ref.name === testSavedObjectRef);
+			if (!reference) {
+				throw new Error(`Test reference "${testSavedObjectRef}"`);
+			}
+			return { ...otherParams, testSavedObjectId: reference.id } as Params;
+		},
 	}
 };
 
