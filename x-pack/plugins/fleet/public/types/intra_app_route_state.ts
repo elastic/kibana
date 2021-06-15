@@ -39,6 +39,11 @@ export interface AgentDetailsReassignPolicyAction {
   onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
 }
 
+export interface IntegrationsAppBrowseRouteState {
+  /** The agent policy that we are browsing integrations for */
+  forAgentPolicyId: string;
+}
+
 /**
  * All possible Route states.
  */
