@@ -7,7 +7,6 @@
 
 import { SearchAfterAndBulkCreateParams, WrappedSignalHit, WrapSequences } from './types';
 import { buildSignalGroupFromSequence } from './build_bulk_body';
-import { filterDuplicateSignals } from './filter_duplicate_signals';
 
 export const wrapSequencesFactory = ({
   ruleSO,
@@ -22,5 +21,5 @@ export const wrapSequencesFactory = ({
     []
   );
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
+  return wrappedDocs;
 };
