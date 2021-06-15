@@ -134,21 +134,31 @@ similar-ish environment locally (which wasn't done during the initial investigat
 
 ## 5.1 Enabling clustering mode
 
-Enabling clustering mode will be done using the `clustering.enabled` configuration property.
+Enabling clustering mode will be done using the `node.enabled` configuration property.
 
 If clustering is enabled by default, then no configuration would be required by users, and
 Kibana would automatically use all available cores. However, more detailed configuration
 would be available for users with more advanced use cases:
 ```yaml
-clustering:
+node:
   enabled: true               # enabled by default
+
   coordinator:
     max_old_space_size: 1gb   # optional, allows to configure memory limit for coordinator only
-  workers:                    # when provided, total # of workers would be based on # of items in this list
-    - name: foo               # not technically necessary, but useful for logging purposes
-      max_old_space_size: 1gb # optional, allows to configure memory limits per-worker
-    - name: bar
+
+  # Basic config for multiple workers with the same options
+  workers:                    # when count is provided, all workers share the same config
+    count: 2                  # worker names (for logging) are generated: `worker-1`, `worker-2`
+    max_old_space_size: 1gb   # optional, allows to configure memory limits per-worker
+
+  # Alternative advanced config, allowing for worker "types" to be configured
+  workers:
+    foo:                      # the key here would be used as the worker name
+      count: 2
       max_old_space_size: 1gb
+    bar:
+      count: 1
+      max_old_space_size: 512mb
 ```
 
 This per-worker design would give us the flexibility to eventually provide more fine-grained configuration,
@@ -160,12 +170,12 @@ For some of our changes (such as the `/status` API, see below), we will need som
 communication. This will need to pass through the coordinator, which will also serve as an 'event bus',
 or IPC forwarder.
 
-This IPC API will be exposed from the clustering service:
+This IPC API will be exposed from the node service:
 
 ```ts
-export interface ClusteringServiceSetup {
+export interface NodeServiceSetup {
   // [...]
-  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
+  broadcast: (type: string, payload?: WorkerMessagePayload, options?: BroadcastOptions) => void;
   addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
 }
 ```
@@ -176,6 +186,7 @@ given plugin will only be invoked for messages sent by the same plugin.
 Notes:
 -  To reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
    It will avoid forcing (most) code to check which mode Kibana is running before calling them.
+     - In the case where `sendToSelf` is true, we would still attempt to broadcast the message.
 -  We could eventually use an Observable pattern instead of a handler pattern to subscribe to messages.
 
 ## 5.3 Executing code on a single worker
@@ -189,10 +200,10 @@ such single-process jobs, as it doesn't actually run a Kibana server.
 
 There are various ways to address such use-cases. What seems to be the best compromise right now would be the
 concept of 'main worker'. The coordinator would arbitrarily elect a worker as the 'main' one at startup. The
-clustering service would then expose an API to let workers identify themselves as main or not.
+node service would then expose an API to let workers identify themselves as main or not.
 
 ```ts
-export interface ClusteringServiceSetup {
+export interface NodeServiceSetup {
   // [...]
   isMainWorker: () => boolean;
 }
@@ -202,18 +213,18 @@ Notes:
 - In non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and 
   non-clustered modes.
 
-## 5.4 The clustering service API
+## 5.4 The node service API
 
-We propose adding a new clustering service to Core, which will be responsible for adding the necessary cluster APIs,
+We propose adding a new node service to Core, which will be responsible for adding the necessary cluster APIs,
 and handling interaction with Node's `cluster` API. This service would be accessible via Core's setup and start contracts
-(`coreSetup.clustering` and `coreStart.clustering`).
+(`coreSetup.node` and `coreStart.node`).
 
-At the moment, no need to extend Core's request handler context with clustering related APIs has been identified.
+At the moment, no need to extend Core's request handler context with node related APIs has been identified.
 
 The initial contract interface would look like this:
 
 ```ts
-type ClusterMessagePayload = Serializable;
+type WorkerMessagePayload = Serializable;
 
 interface BroadcastOptions {
   /**
@@ -228,7 +239,7 @@ interface BroadcastOptions {
   persist?: boolean;
 }
 
-export interface ClusteringServiceSetup {
+export interface NodeServiceSetup {
   /**
    * Return true if clustering mode is enabled, false otherwise
    */
@@ -241,7 +252,7 @@ export interface ClusteringServiceSetup {
    * Broadcast a message to other workers.
    * In non-clustered mode, this is a no-op.
    */
-  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
+  broadcast: (type: string, payload?: WorkerMessagePayload, options?: BroadcastOptions) => void;
   /**
    * Registers a handler for given `type` of IPC messages
    * In non-clustered mode, this is a no-op that returns a no-op unsubscription callback.
@@ -262,14 +273,14 @@ To take the example of SO migration, the `KibanaMigrator.runMigrations` implemen
 
 ```ts
 runMigration() {
-   if (clustering.isMainWorker()) {
+   if (node.isMainWorker()) {
      this.runMigrationsInternal().then((result) => {
         applyMigrationState(result);
         // persist: true will send message even if subscriber subscribes after the message was actually sent
-        clustering.broadcast('migration-complete', { payload: result }, { persist: true });
+        node.broadcast('migration-complete', { payload: result }, { persist: true });
       })
    } else {
-     const unsubscribe = clustering.addMessageHandler('migration-complete', ({ payload: result }) => {
+     const unsubscribe = node.addMessageHandler('migration-complete', ({ payload: result }) => {
        applyMigrationState(result);
        unsubscribe();
      });
@@ -288,7 +299,7 @@ This is not identified as necessary at the moment, and IPC broadcast should be s
 the added complexity and risk of implicit dependencies if possible.
 
 If we do eventually need shared state, we would probably have to use syscall libraries to share buffers such as
-[mmap-io](https://www.npmjs.com/package/mmap-io), and expose a higher level API for that from the `clustering` service. More
+[mmap-io](https://www.npmjs.com/package/mmap-io), and expose a higher level API for that from the `node` service. More
 research would be required if this proved to be a necessity.
 
 # 6. Technical impact
@@ -323,8 +334,7 @@ with each worker sending the coordinator log messages via IPC. While this is a m
 of our logging system, it solves several problems:
 - Preserves backwards compatibility.
 - Avoids the issue of interleaved log messages that could occur with multiple processes writing to the same file or stdout.
-- Provides a solution for the rolling-file appender (see below), as the coordinator would handle rolling all log file
-(small caveat being a slight loss in file size precision).
+- Provides a solution for the rolling-file appender (see below), as the coordinator would handle rolling all log files
 - The changes to BaseLogger could potentially have the added benefit of paving the way for our future logging MDC.
 
 We could add the process name information to the log messages, and add a new conversion to be able to display it with 
@@ -479,8 +489,8 @@ Kibana instance id? Are there situations where having the same instance UUID for
 Is there any part of the code that needs to be executed only once in a multi-worker mode, such as initialization code, 
 or starting schedulers? 
 
-An example would be Reporting's queueFactory pooling. As we want to only be running a single headless at a time per 
-Kibana instance, only one worker should have pooling enabled.
+An example would be Reporting's queueFactory polling. As we want to only be running a single headless at a time per 
+Kibana instance, only one worker should have polling enabled.
 
 ### 6.2.2 Identified required changes
 
@@ -488,7 +498,7 @@ Kibana instance, only one worker should have pooling enabled.
 
 We will probably want to restrict to a single headless per Kibana instance. For that, we will have to change the logic 
 in [createQueueFactory](https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/x-pack/plugins/reporting/server/lib/create_queue.ts#L60-L64) 
-to only have the 'main' worker be pooling for reporting tasks.
+to only have the 'main' worker be polling for reporting tasks.
 
 #### Telemetry
 
@@ -592,18 +602,19 @@ In the prepratory phase, we will evolve the existing POC to validate the finer d
 a more detailed testing strategy that can be used to benchmark our future work.
 
 ## Phase 1
-To start implementation, we will make the required changes in Core, adding the `clustering.enabled` configuration property
-in development mode only. This way, we allow developers to test their features against clustering mode and to adapt their code
-to use the new `clustering` API and service. At this point we will also aim to document any identified breaking changes and
+To start implementation, we will make the required changes in Core, adding the `node.enabled` configuration property.
+At first, we'll include a big warning in the logs to make it clear that this shouldn't be used in production yet.
+This way, we allow developers to test their features against clustering mode and to adapt their code
+to use the new `node` API and service. At this point we will also aim to document any identified breaking changes and
 add deprecation notices where applicable, to allow developers time to prepare for 8.0.
 
 ## Phase 2
-When all the required changes have been performed in plugin code, we will enable the `clustering` configuration on production
+When all the required changes have been performed in plugin code, we will enable the `node` configuration on production
 mode as a `beta` feature. We would ideally also add telemetry collection for the clustering usages (relevant metrics TBD)
 to have a precise vision of the adoption of the feature.
 
 ## Phase 3
-Once the new feature has been validated and we are comfortable considering it GA, we will enable `clustering` by default.
+Once the new feature has been validated and we are comfortable considering it GA, we will enable `node` by default.
 (We could alternatively enable it by default from the outset, still with a `beta` label).
 
 # 10. How we teach this
