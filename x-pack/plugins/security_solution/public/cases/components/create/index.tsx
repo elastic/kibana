@@ -12,7 +12,7 @@ import { getCaseDetailsUrl, getCaseUrl } from '../../../common/components/link_t
 import { useKibana } from '../../../common/lib/kibana';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { useInsertTimeline } from '../use_insert_timeline';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID, SecurityPageName } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 
@@ -24,16 +24,18 @@ export const Create = React.memo(() => {
   const search = useGetUrlSearch(navTabs.case);
   const onSuccess = useCallback(
     async ({ id }) =>
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      navigateToApp(CASES_APP_ID, {
         path: getCaseDetailsUrl({ id, search }),
       }),
     [navigateToApp, search]
   );
-  const handleSetIsCancel = useCallback(() => {
-    navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-      path: getCaseUrl(search),
-    });
-  }, [navigateToApp, search]);
+  const handleSetIsCancel = useCallback(
+    async () =>
+      navigateToApp(CASES_APP_ID, {
+        path: getCaseUrl(search),
+      }),
+    [navigateToApp, search]
+  );
 
   return (
     <EuiPanel>

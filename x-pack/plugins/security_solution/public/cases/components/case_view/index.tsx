@@ -23,7 +23,11 @@ import { Case } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
+import {
+  APP_ID,
+  CASES_APP_ID,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+} from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -181,7 +185,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            return navigateToApp(CASES_APP_ID, {
               path: allCasesLink,
             });
           },
@@ -192,7 +196,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            return navigateToApp(CASES_APP_ID, {
               path: getCaseDetailsUrl({ id: caseId }),
             });
           },
@@ -204,7 +208,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            return navigateToApp(CASES_APP_ID, {
               path: getConfigureCasesUrl(search),
             });
           },

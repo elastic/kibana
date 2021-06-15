@@ -15,7 +15,7 @@ import {
 } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 
 export interface AllCasesNavProps {
   detailName: string;
@@ -36,7 +36,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCreateCaseUrl(urlSearch),
       });
     },
@@ -46,7 +46,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const goToCaseConfigure = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getConfigureCasesUrl(urlSearch),
       });
     },
@@ -59,7 +59,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
       onClick: async ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        return navigateToApp(CASES_APP_ID, {
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },

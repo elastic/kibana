@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { Case, CaseStatuses, StatusAll } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import { Ecs } from '../../../../common/ecs';
 import { SecurityPageName } from '../../../app/types';
 import {
@@ -80,7 +80,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      navigateToApp(CASES_APP_ID, {
         path: getCaseDetailsUrl({ id }),
       });
     },
@@ -134,7 +134,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCreateCaseUrl(urlSearch),
       });
     },
