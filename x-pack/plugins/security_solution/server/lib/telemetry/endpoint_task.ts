@@ -100,8 +100,13 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    // TODO:@pjhampton - I do stuff
-    this.logger.debug(`this is where I get the data`);
+    // 1. [PH] Get the fleet agents - TODO ~ local fleet agent DNS issues
+    // 2. [PH/CD] Get the fleet index (policies) ~~> List<PolicyConfig>
+    const policyConfigs = this.sender.fetchFleetPolicyConfigs();
+    // 3. [PH] Get the endpoint policy failure responses
+    // 4. [CD] Get the EP metrics
+    // 5. [PH/CD] Document restructuring / Join on agent / host id
+    // 6. [PH/CD] Send to dedicated infra web channel
 
     return 0; // hits
   };
