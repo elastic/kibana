@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export { EnterpriseSearchPageTemplate, PageTemplateProps } from './page_template';
+.enterpriseSearchPageTemplate {
+  position: relative;
 
-// TODO: Delete these once KibanaPageTemplate migration is done
-export { Layout } from './layout';
-export { SideNav, SideNavLink, SideNavItem } from './side_nav';
+  &__content {
+    // Note: relative positioning is required for our centered Loading component
+    position: relative;
+  }
+}
