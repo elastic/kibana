@@ -90,10 +90,6 @@ const countAlerts = (comments: CaseResponse['comments']): number =>
     return total;
   }, 0) ?? 0;
 
-// const createKibanaCaseUrl = (theCase: CaseResponse): string => {
-//   const getBase =
-// }
-
 export const createIncident = async ({
   actionsClient,
   alerts,
