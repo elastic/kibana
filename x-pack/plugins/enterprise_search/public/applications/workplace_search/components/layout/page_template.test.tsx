@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+jest.mock('./nav', () => ({
+  useWorkplaceSearchNav: () => [],
+}));
+
 import React from 'react';
 
 import { shallow } from 'enzyme';

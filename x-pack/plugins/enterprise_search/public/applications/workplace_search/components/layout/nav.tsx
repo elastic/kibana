@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSideNavItemType, EuiSpacer } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SideNav, SideNavLink } from '../../../shared/layout';
+import { generateNavLink, SideNav, SideNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
   SOURCES_PATH,
@@ -19,6 +19,47 @@ import {
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
+
+export const useWorkplaceSearchNav = () => {
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'root',
+      name: NAV.OVERVIEW,
+      ...generateNavLink({ to: '/', isRoot: true }),
+    },
+    {
+      id: 'sources',
+      name: NAV.SOURCES,
+      ...generateNavLink({ to: SOURCES_PATH }),
+      items: [], // TODO: Source subnav
+    },
+    {
+      id: 'groups',
+      name: NAV.GROUPS,
+      ...generateNavLink({ to: GROUPS_PATH }),
+      items: [], // TODO: Group subnav
+    },
+    {
+      id: 'usersRoles',
+      name: NAV.ROLE_MAPPINGS,
+      ...generateNavLink({ to: ROLE_MAPPINGS_PATH }),
+    },
+    {
+      id: 'security',
+      name: NAV.SECURITY,
+      ...generateNavLink({ to: SECURITY_PATH }),
+    },
+    {
+      id: 'settings',
+      name: NAV.SETTINGS,
+      ...generateNavLink({ to: ORG_SETTINGS_PATH }),
+      items: [], // TODO: Settings subnav
+    },
+  ];
+  return navItems;
+};
+
+// TODO: Delete below once fully migrated to KibanaPageTemplate
 
 interface Props {
   sourcesSubNav?: React.ReactNode;

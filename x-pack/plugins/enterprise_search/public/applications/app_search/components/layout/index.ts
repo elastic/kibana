@@ -6,4 +6,5 @@
  */
 
 export { AppSearchPageTemplate } from './page_template';
+export { useAppSearchNav } from './nav';
 export { KibanaHeaderActions } from './kibana_header_actions';

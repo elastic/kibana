@@ -12,6 +12,8 @@ import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplate, PageTemplateProps } from '../../../shared/layout';
 import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
+import { useAppSearchNav } from './nav';
+
 export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
   children,
   pageChrome,
@@ -23,7 +25,7 @@ export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
       {...pageTemplateProps}
       solutionNav={{
         name: APP_SEARCH_PLUGIN.NAME,
-        items: [], // TODO: Nav items
+        items: useAppSearchNav(),
       }}
       setPageChrome={pageChrome && <SetAppSearchChrome trail={pageChrome} />}
     >

@@ -12,6 +12,8 @@ import { SetWorkplaceSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplate, PageTemplateProps } from '../../../shared/layout';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
+import { useWorkplaceSearchNav } from './nav';
+
 export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
   children,
   pageChrome,
@@ -24,7 +26,7 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
       {...pageTemplateProps}
       solutionNav={{
         name: WORKPLACE_SEARCH_PLUGIN.NAME,
-        items: [], // TODO: Nav items
+        items: useWorkplaceSearchNav(),
       }}
       setPageChrome={pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
     >
