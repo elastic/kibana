@@ -9,7 +9,6 @@ import { LicenseStatus as PresentationComponent } from './license_status';
 import { connect } from 'react-redux';
 import {
   getLicense,
-  getExpirationDateFormatted,
   isExpired,
 } from '../../../store/reducers/license_management';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +28,6 @@ const mapStateToProps = (state) => {
         ),
     type,
     isExpired: isExpired(state),
-    expiryDate: getExpirationDateFormatted(state),
   };
 };
 

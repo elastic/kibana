@@ -14,6 +14,7 @@ import { AddLicense } from './add_license';
 import { LicenseStatus } from './license_status';
 import { RevertToBasic } from './revert_to_basic';
 import { RequestTrialExtension } from './request_trial_extension';
+import { LicenseExpiration } from './license_expiration';
 
 
 export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb: () => {} }) => {
@@ -31,6 +32,7 @@ export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb:
             defaultMessage="License Management"
           />
         }
+        description={<LicenseExpiration />}
       />
 
       <EuiSpacer size="l" />

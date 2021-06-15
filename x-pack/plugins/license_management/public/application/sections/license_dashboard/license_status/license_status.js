@@ -5,39 +5,25 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiTitle,
-  EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class LicenseStatus extends React.PureComponent {
   render() {
-    const { isExpired, status, type, expiryDate } = this.props;
+    const { isExpired, status, type } = this.props;
     const typeTitleCase = type.charAt(0).toUpperCase() + type.substr(1).toLowerCase();
     let icon;
     let title;
-    let message;
     if (isExpired) {
       icon = <EuiIcon color="danger" type="alert" />;
-      message = (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
-            defaultMessage="Your license expired on {expiryDate}"
-            values={{
-              expiryDate: <strong>{expiryDate}</strong>,
-            }}
-          />
-        </Fragment>
-      );
       title = (
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
@@ -49,24 +35,6 @@ export class LicenseStatus extends React.PureComponent {
       );
     } else {
       icon = <EuiIcon color="success" type="checkInCircleFilled" size="l" />;
-      message = expiryDate ? (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
-            defaultMessage="Your license will expire on {expiryDate}"
-            values={{
-              expiryDate: <strong>{expiryDate}</strong>,
-            }}
-          />
-        </Fragment>
-      ) : (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
-            defaultMessage="Your license will never expire."
-          />
-        </Fragment>
-      );
       title = (
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
@@ -88,10 +56,6 @@ export class LicenseStatus extends React.PureComponent {
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <EuiSpacer />
-
-        <EuiText data-test-subj="licenseSubText">{message}</EuiText>
       </EuiTextAlign>
     );
   }
