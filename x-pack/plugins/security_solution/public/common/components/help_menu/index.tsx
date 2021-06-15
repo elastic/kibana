@@ -32,7 +32,7 @@ export const HelpMenu = React.memo(() => {
           content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation.ecs', {
             defaultMessage: 'ECS documentation',
           }),
-          href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+          href: docLinks.links.ecs.guide,
           iconType: 'documents',
           linkType: 'custom',
           target: '_blank',
