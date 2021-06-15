@@ -23,7 +23,12 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
-import { AGENT_POLICY_API_ROUTES, GetAgentPoliciesResponse } from '../../../../../fleet/common';
+import {
+  AGENT_POLICY_API_ROUTES,
+  EPM_API_ROUTES,
+  GetAgentPoliciesResponse,
+  GetPackagesResponse,
+} from '../../../../../fleet/common';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
@@ -88,6 +93,7 @@ export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPol
 
 type FleetApisHttpMockInterface = ResponseProvidersInterface<{
   agentPolicy: () => GetAgentPoliciesResponse;
+  packageList: () => GetPackagesResponse;
 }>;
 export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterface>([
   {
@@ -110,6 +116,18 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
         perPage: 10,
         total: 1,
         page: 1,
+      };
+    },
+  },
+  {
+    id: 'packageList',
+    method: 'get',
+    path: EPM_API_ROUTES.LIST_PATTERN,
+    handler() {
+      const generator = new EndpointDocGenerator('seed');
+
+      return {
+        response: [generator.generateEpmPackage()],
       };
     },
   },
