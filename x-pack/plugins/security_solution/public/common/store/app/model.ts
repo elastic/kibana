@@ -18,6 +18,8 @@ export interface Error {
   id: string;
   title: string;
   message: string[];
+  hash?: string;
+  displayError?: boolean;
 }
 
 export type ErrorModel = Error[];

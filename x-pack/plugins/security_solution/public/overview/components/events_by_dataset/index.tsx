@@ -129,7 +129,14 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     return [combinedQueries];
   }, [combinedQueries, kibana, indexPattern, query, filters]);
 
-  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: uniqueQueryId,
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({

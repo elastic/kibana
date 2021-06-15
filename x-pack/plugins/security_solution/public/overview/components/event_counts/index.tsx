@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 import { filterHostData } from '../../../hosts/pages/navigation/alerts_query_tab_body';
@@ -57,7 +58,7 @@ const EventCountsComponent: React.FC<Props> = ({
     [filters, indexPattern, query, uiSettings]
   );
 
-  const [networkFilterQuery, networkKqlError] = useMemo(
+  const [networkFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -69,6 +70,7 @@ const EventCountsComponent: React.FC<Props> = ({
   );
 
   useInvalidFilterQuery({
+    id: OverviewHostQueryId,
     filterQuery: hostFilterQuery || networkFilterQuery,
     kqlError: hostKqlError,
     query,

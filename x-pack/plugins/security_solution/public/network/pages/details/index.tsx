@@ -29,7 +29,7 @@ import { FlowTargetSelectConnected } from '../../components/flow_target_select_c
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useNetworkDetails } from '../../containers/details';
+import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -101,7 +101,7 @@ const NetworkDetailsComponent: React.FC = () => {
     filters,
   });
 
-  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
     docValueFields,

@@ -261,7 +261,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     fields: getTimelineQueryFields(),
     language: kqlQuery.language,
     limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
+    filterQuery: combinedQueries?.filterQuery,
     startDate: start,
     skip: !canQueryTimeline() || combinedQueries?.filterQuery === undefined,
     sort: timelineQuerySortField,

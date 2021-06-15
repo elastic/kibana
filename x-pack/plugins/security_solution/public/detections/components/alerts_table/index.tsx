@@ -135,6 +135,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   useInvalidFilterQuery({
+    id: timelineId,
     filterQuery: getGlobalQuery([])?.filterQuery,
     kqlError: getGlobalQuery([])?.kqlError,
     query: globalQuery,

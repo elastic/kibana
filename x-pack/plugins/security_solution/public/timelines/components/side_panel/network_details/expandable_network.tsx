@@ -105,8 +105,6 @@ export const ExpandableNetworkDetails = ({
     filters,
   });
 
-  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
-
   const [loading, { id, networkDetails }] = useNetworkDetails({
     docValueFields,
     skip: isInitializing || filterQuery === undefined,
@@ -114,6 +112,8 @@ export const ExpandableNetworkDetails = ({
     indexNames: selectedPatterns,
     ip,
   });
+
+  useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),

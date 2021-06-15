@@ -113,7 +113,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     [filters, indexPattern, uiSettings, query]
   );
 
-  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     return () => {
