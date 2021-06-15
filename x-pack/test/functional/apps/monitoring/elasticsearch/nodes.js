@@ -249,7 +249,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('with only online nodes', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100438
+    describe.skip('with only online nodes', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {

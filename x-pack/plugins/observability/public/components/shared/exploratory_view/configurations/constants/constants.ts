@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewTypeId } from '../../types';
+import { ReportViewTypeId } from '../../types';
 import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
@@ -13,7 +13,6 @@ import {
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
-  CPU_USAGE_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
   FCP_LABEL,
@@ -23,25 +22,18 @@ import {
   KPI_LABEL,
   LCP_LABEL,
   LOCATION_LABEL,
-  LOGS_FREQUENCY_LABEL,
-  MEMORY_USAGE_LABEL,
   METRIC_LABEL,
-  MONITOR_DURATION_LABEL,
   MONITOR_ID_LABEL,
   MONITOR_NAME_LABEL,
   MONITOR_STATUS_LABEL,
   MONITOR_TYPE_LABEL,
-  NETWORK_ACTIVITY_LABEL,
   OBSERVER_LOCATION_LABEL,
   OS_LABEL,
   PERF_DIST_LABEL,
   PORT_LABEL,
-  SERVICE_LATENCY_LABEL,
   SERVICE_NAME_LABEL,
-  SERVICE_THROUGHPUT_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
-  UPTIME_PINGS_LABEL,
   URL_LABEL,
 } from './labels';
 
@@ -83,31 +75,9 @@ export const FieldLabels: Record<string, string> = {
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  pld: PERF_DIST_LABEL,
-  upd: MONITOR_DURATION_LABEL,
-  upp: UPTIME_PINGS_LABEL,
-  svl: SERVICE_LATENCY_LABEL,
+  dist: PERF_DIST_LABEL,
   kpi: KIP_OVER_TIME_LABEL,
-  tpt: SERVICE_THROUGHPUT_LABEL,
-  cpu: CPU_USAGE_LABEL,
-  logs: LOGS_FREQUENCY_LABEL,
-  mem: MEMORY_USAGE_LABEL,
-  nwk: NETWORK_ACTIVITY_LABEL,
   cwv: CORE_WEB_VITALS_LABEL,
-};
-
-export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
-  upd: 'synthetics',
-  upp: 'synthetics',
-  tpt: 'apm',
-  svl: 'apm',
-  kpi: 'ux',
-  pld: 'ux',
-  nwk: 'infra_metrics',
-  mem: 'infra_metrics',
-  logs: 'infra_logs',
-  cpu: 'infra_metrics',
-  cwv: 'ux',
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
