@@ -234,9 +234,9 @@ export const expandFirstTimelineEventDetails = () => {
 };
 
 export const markAsFavorite = () => {
-  cy.root().pipe(($el) => {
-    return $el.find(STAR_ICON).trigger('click');
-  });
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(STAR_ICON).should('be.visible').pipe(click);
+  
   cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
