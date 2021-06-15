@@ -35,7 +35,7 @@ export const ENVIRONMENT_NOT_DEFINED = {
   text: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
-export function parseEnvironmentUrlParam(environment: string) {
+export function getEnvironmentEsFieldValue(environment: string) {
   if (
     environment !== ENVIRONMENT_NOT_DEFINED_VALUE &&
     environment !== ENVIRONMENT_ALL_VALUE

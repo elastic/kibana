@@ -35,7 +35,7 @@ import {
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
+import { getEnvironmentEsFieldValue } from '../../../common/environment_filter_values';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -222,7 +222,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
-          const parsedEnvironment = parseEnvironmentUrlParam(environment);
+          const parsedEnvironment = getEnvironmentEsFieldValue(environment);
           const severityLevel = getSeverity(score);
 
           services

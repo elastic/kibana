@@ -15,7 +15,7 @@ import {
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,
-  parseEnvironmentUrlParam,
+  getEnvironmentEsFieldValue,
 } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -153,7 +153,7 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        const parsedEnvironment = parseEnvironmentUrlParam(
+        const parsedEnvironment = getEnvironmentEsFieldValue(
           alertParams.environment
         );
 
