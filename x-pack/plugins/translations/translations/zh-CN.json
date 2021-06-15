@@ -17915,7 +17915,6 @@
     "xpack.remoteClusters.form.errors.serverNameMissing": "服务器名必填。",
     "xpack.remoteClusters.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.remoteClusters.listBreadcrumbTitle": "远程集群",
-    "xpack.remoteClusters.loadAction.errorTitle": "加载远程集群时出错",
     "xpack.remoteClusters.readDocsButtonLabel": "远程集群文档",
     "xpack.remoteClusters.refreshAction.errorTitle": "刷新远程集群时出错",
     "xpack.remoteClusters.remoteClusterForm.actions.savingText": "正在保存",
