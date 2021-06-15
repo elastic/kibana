@@ -23,6 +23,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { PLUGIN_ID } from '../../../fleet/common';
 import { pagePathGetters } from '../../../fleet/public';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
@@ -130,7 +131,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     (agentId) => (
       <EuiLink
         className="eui-textTruncate"
-        href={getUrlForApp('fleet', {
+        href={getUrlForApp(PLUGIN_ID, {
           path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
         })}
         target="_blank"
