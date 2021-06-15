@@ -125,7 +125,7 @@ export function CustomizablePalette({
                   'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
                   {
                     defaultMessage:
-                      'Decide how colors should behave before the first color stop and after the last one.',
+                      'Specify how colors appear before the first color stop, and after the last color stop.',
                   }
                 )}
                 position="top"
