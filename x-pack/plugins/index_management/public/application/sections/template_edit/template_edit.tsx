@@ -9,14 +9,15 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
+import { attemptToURIDecode } from '../../../shared_imports';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
-import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -154,6 +155,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             clearSaveError={clearSaveError}
             isEditing={true}
             isLegacy={isLegacy}
+            history={history as ScopedHistory}
           />
         </Fragment>
       );
