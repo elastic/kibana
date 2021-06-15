@@ -178,7 +178,7 @@ export const UserActionTree = React.memo(
       (id: string) => {
         const moveToTarget = document.getElementById(`${id}-permLink`);
         if (moveToTarget != null) {
-          const yOffset = -60;
+          const yOffset = -200;
           const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({
             top: y,
