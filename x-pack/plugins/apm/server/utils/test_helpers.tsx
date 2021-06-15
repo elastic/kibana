@@ -17,6 +17,7 @@ interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
+  uiFilters?: Record<string, string>;
 }
 
 interface MockSetup {
@@ -86,7 +87,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: {},
+    uiFilters: options?.uiFilters ?? {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',
@@ -109,7 +110,7 @@ export async function inspectSearchParams(
   }
 
   return {
-    params: spy.mock.calls[0][0],
+    params: spy.mock.calls[0][1],
     response,
     error,
     spy,
