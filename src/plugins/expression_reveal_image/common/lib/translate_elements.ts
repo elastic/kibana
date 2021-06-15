@@ -9,10 +9,10 @@ import { ElementFactory } from '../types';
 import { getElementsStrings } from '../i18n';
 
 export function translateElements(elements: ElementFactory[] = []) {
+  const strings = getElementsStrings();
   return elements.map((elFactory) => {
     const element = elFactory();
     const { name } = element;
-    const strings = getElementsStrings();
     const elementStrings = strings[name] ?? {};
     element.displayName = elementStrings.displayName ?? element.displayName;
     element.help = elementStrings.help ?? element.help;
