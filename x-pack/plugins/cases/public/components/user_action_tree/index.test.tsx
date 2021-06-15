@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import routeData from 'react-router-dom';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import routeData from 'react-router';
 
 import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
@@ -110,8 +111,10 @@ describe(`UserActionTree`, () => {
         <UserActionTree {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
+    });
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
@@ -135,8 +138,10 @@ describe(`UserActionTree`, () => {
         <UserActionTree {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-    expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
+    });
   });
   it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
@@ -352,12 +357,13 @@ describe(`UserActionTree`, () => {
         <UserActionTree {...props} />
       </TestProviders>
     );
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="comment-create-action-${commentId}"]`)
-        .first()
-        .hasClass('outlined')
-    ).toEqual(true);
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find(`[data-test-subj="comment-create-action-${commentId}"]`)
+          .first()
+          .hasClass('outlined')
+      ).toEqual(true);
+    });
   });
 });
