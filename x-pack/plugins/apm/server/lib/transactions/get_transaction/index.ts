@@ -13,9 +13,8 @@ import { rangeQuery } from '../../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
-export function getTransaction({
+export async function getTransaction({
   transactionId,
   traceId,
   setup,
@@ -24,27 +23,25 @@ export function getTransaction({
   traceId?: string;
   setup: Setup | (Setup & SetupTimeRange);
 }) {
-  return withApmSpan('get_transaction', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const resp = await apmEventClient.search({
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      body: {
-        size: 1,
-        query: {
-          bool: {
-            filter: asMutableArray([
-              { term: { [TRANSACTION_ID]: transactionId } },
-              ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
-              ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
-            ]),
-          },
+  const resp = await apmEventClient.search('get_transaction', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
+    body: {
+      size: 1,
+      query: {
+        bool: {
+          filter: asMutableArray([
+            { term: { [TRANSACTION_ID]: transactionId } },
+            ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+            ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
+          ]),
         },
       },
-    });
-
-    return resp.hits.hits[0]?._source;
+    },
   });
+
+  return resp.hits.hits[0]?._source;
 }
