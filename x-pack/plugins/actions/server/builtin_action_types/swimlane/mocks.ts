@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExternalService } from './types';
+import { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } from './types';
 
 export const applicationFields = [
   {
@@ -75,16 +75,19 @@ export const recordResponseCreate = {
   id: '123456',
   title: 'neato',
   url: 'swimlane.com',
+  pushedDate: '2021-06-01T17:29:51.092Z',
 };
 
 export const recordResponseUpdate = {
   id: '98765',
   title: 'not neato',
   url: 'laneswim.com',
+  pushedDate: '2021-06-01T17:29:51.092Z',
 };
 
 export const commentResponse = {
-  id: '123456',
+  commentId: '123456',
+  pushedDate: '2021-06-01T17:29:51.092Z',
 };
 
 const createMock = (): jest.Mocked<ExternalService> => {
@@ -99,17 +102,30 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const executorParams = {
-  ruleName: 'rule-name',
-  alertSource: 'alert-source',
-  caseId: 'case-id',
-  caseName: 'case-name',
-  comments: 'comments',
-  severity: 'severity',
-  alertId: 'alert-id',
+const executorParams: ExecutorSubActionPushParams = {
+  incident: {
+    ruleName: 'rule name',
+    alertId: '123456',
+    caseName: 'case name',
+    severity: 'critical',
+    alertSource: 'elastic',
+    caseId: '123456',
+    description: 'case desc',
+    externalId: 'incident-3',
+  },
+  comments: [
+    {
+      commentId: 'case-comment-1',
+      comment: 'A comment',
+    },
+    {
+      commentId: 'case-comment-2',
+      comment: 'Another comment',
+    },
+  ],
 };
 
-const apiParams = {
+const apiParams: PushToServiceApiParams = {
   ...executorParams,
 };
 

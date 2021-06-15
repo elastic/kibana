@@ -55,7 +55,9 @@ export interface ExternalServiceIncidentResponse {
   pushedDate: string;
 }
 export interface ExternalServiceCommentResponse {
+  commentId: string;
   pushedDate: string;
+  externalCommentId?: string;
 }
 
 export interface FieldConfig {
@@ -87,6 +89,10 @@ export interface GetApplicationHandlerArgs {
   externalService: ExternalService;
 }
 
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
+}
+
 export interface ExternalServiceApi {
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
@@ -103,7 +109,7 @@ export type SwimlaneDataComments = Record<string, SwimlaneComment[]>;
 
 export interface SimpleComment {
   comment: SwimlaneComment['message'];
-  commentId?: string;
+  commentId: string;
 }
 
 export interface CreateCommentParams {

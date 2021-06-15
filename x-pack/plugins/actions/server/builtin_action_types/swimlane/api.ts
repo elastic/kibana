@@ -10,6 +10,7 @@ import {
   ExternalServiceApi,
   Incident,
   PushToServiceApiHandlerArgs,
+  PushToServiceResponse,
 } from './types';
 
 const pushToServiceHandler = async ({
@@ -17,7 +18,7 @@ const pushToServiceHandler = async ({
   params,
 }: PushToServiceApiHandlerArgs): Promise<ExternalServiceIncidentResponse> => {
   const { comments } = params;
-  let res: ExternalServiceIncidentResponse;
+  let res: PushToServiceResponse;
   const { externalId, ...rest } = params.incident;
   const incident: Incident = rest;
 
@@ -33,12 +34,21 @@ const pushToServiceHandler = async ({
   const createdDate = new Date().toISOString();
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
+    res.comments = [];
     for (const currentComment of comments) {
-      await externalService.createComment({
+      const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
         createdDate,
       });
+
+      res.comments = [
+        ...(res.comments ?? []),
+        {
+          commentId: comment.commentId,
+          pushedDate: comment.pushedDate,
+        },
+      ];
     }
   }
 
