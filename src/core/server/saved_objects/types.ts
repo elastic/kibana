@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
  *
  * @public
  */
-export interface SavedObjectsType<Attributes = any> {
+export interface SavedObjectsType<Attributes = unknown> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -345,7 +345,7 @@ export interface SavedObjectsType<Attributes = any> {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
+export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
@@ -481,4 +481,4 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
  */
 export type SavedObjectsExportablePredicate<Attributes = unknown> = (
   obj: SavedObject<Attributes>
-) => boolean | Promise<boolean>;
+) => boolean;

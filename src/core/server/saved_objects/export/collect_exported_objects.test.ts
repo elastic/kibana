@@ -32,6 +32,8 @@ const createError = (parts: Partial<SavedObjectError> = {}): SavedObjectError =>
 
 const toIdTuple = (obj: SavedObject) => ({ type: obj.type, id: obj.id });
 
+const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.entries(record));
+
 describe('collectExportedObjects', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -98,7 +100,7 @@ describe('collectExportedObjects', () => {
       expect(applyExportTransformsMock).toHaveBeenCalledTimes(1);
       expect(applyExportTransformsMock).toHaveBeenCalledWith({
         objects: [obj1, obj2],
-        transforms: { foo: fooTransform },
+        transforms: toMap({ foo: fooTransform }),
         request,
       });
     });
@@ -420,12 +422,12 @@ describe('collectExportedObjects', () => {
       expect(applyExportTransformsMock).toHaveBeenCalledTimes(2);
       expect(applyExportTransformsMock).toHaveBeenCalledWith({
         objects: [foo1],
-        transforms: {},
+        transforms: toMap({}),
         request,
       });
       expect(applyExportTransformsMock).toHaveBeenCalledWith({
         objects: [bar2],
-        transforms: {},
+        transforms: toMap({}),
         request,
       });
     });

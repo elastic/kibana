@@ -190,22 +190,22 @@ const buildIsExportable = (
   };
 };
 
-const splitByExportability = async (
+const splitByExportability = (
   objects: SavedObject[],
   isExportable: SavedObjectsExportablePredicate<any>
 ) => {
   const exportableObjects: SavedObject[] = [];
   const nonExportableObjects: SavedObject[] = [];
-  await Promise.all(
-    objects.map(async (obj) => {
-      const exportable = await isExportable(obj);
-      if (exportable) {
-        exportableObjects.push(obj);
-      } else {
-        nonExportableObjects.push(obj);
-      }
-    })
-  );
+
+  objects.forEach((obj) => {
+    const exportable = isExportable(obj);
+    if (exportable) {
+      exportableObjects.push(obj);
+    } else {
+      nonExportableObjects.push(obj);
+    }
+  });
+
   return {
     exportable: exportableObjects,
     nonExportable: nonExportableObjects,
