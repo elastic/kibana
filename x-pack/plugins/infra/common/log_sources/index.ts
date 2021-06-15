@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './errors';
 export * from './log_source_configuration';
 export * from './resolved_log_source_configuration';

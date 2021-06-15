@@ -41,6 +41,7 @@ import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -73,6 +74,8 @@ const supportedFieldTypes = new Set([
   'ip_range',
   'histogram',
   'document',
+  'geo_point',
+  'geo_shape',
 ]);
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -83,6 +86,8 @@ const fieldTypeNames: Record<DataType, string> = {
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
   histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
+  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', { defaultMessage: 'geo_point' }),
+  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
 };
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
@@ -121,6 +126,7 @@ export function IndexPatternDataPanel({
   showNoDataPopover,
   dropOntoWorkspace,
   hasSuggestionForField,
+  uiActions,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -233,6 +239,7 @@ export function IndexPatternDataPanel({
           existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
+          uiActions={uiActions}
         />
       )}
     </>
@@ -286,6 +293,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts,
   dropOntoWorkspace,
   hasSuggestionForField,
+  uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
   core: CoreStart;
@@ -310,7 +318,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isMetaAccordionOpen: false,
   });
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
-  const allFields = currentIndexPattern.fields;
+  const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
+  const allFields = visualizeGeoFieldTrigger
+    ? currentIndexPattern.fields
+    : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
@@ -604,6 +615,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             gutterSize="s"
             alignItems="center"
             className="lnsInnerIndexPatternDataPanel__header"
+            responsive={false}
           >
             <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
@@ -806,6 +818,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
             removeField={removeField}
+            uiActions={uiActions}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageContent } from '@elastic/eui';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -19,9 +19,11 @@ export const ErrorConnecting: React.FC = () => {
       <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
-      <EuiPageContent hasBorder>
-        <ErrorStatePrompt />
-      </EuiPageContent>
+      <EuiPage restrictWidth>
+        <EuiPageContent hasBorder>
+          <ErrorStatePrompt />
+        </EuiPageContent>
+      </EuiPage>
     </>
   );
 };

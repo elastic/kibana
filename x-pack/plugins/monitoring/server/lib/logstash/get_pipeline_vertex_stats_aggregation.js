@@ -200,7 +200,7 @@ export function getPipelineVertexStatsAggregation(
   end = version.lastSeen;
 
   const query = createQuery({
-    type: 'logstash_stats',
+    types: ['stats', 'logstash_stats'],
     start,
     end,
     metric: LogstashMetric.getMetricFields(),

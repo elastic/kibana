@@ -232,6 +232,11 @@ function createHrefModule(core: CoreStart) {
               $attr.$set('href', core.http.basePath.prepend(url));
             }
           });
+
+          _$scope.$on('$locationChangeSuccess', () => {
+            const url = getSafeForExternalLink($attr.href as string);
+            $attr.$set('href', core.http.basePath.prepend(url));
+          });
         },
       },
     };

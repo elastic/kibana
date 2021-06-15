@@ -9,7 +9,13 @@
 export { filterHeaders } from './headers';
 export type { Headers, ResponseHeaders, KnownHeaders } from './headers';
 export { Router } from './router';
-export type { RequestHandler, RequestHandlerWrapper, IRouter, RouteRegistrar } from './router';
+export type {
+  RequestHandler,
+  RequestHandlerWrapper,
+  IRouter,
+  RouteRegistrar,
+  RouterRoute,
+} from './router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, KibanaRequest } from './request';
 export type {
   KibanaRequestEvents,

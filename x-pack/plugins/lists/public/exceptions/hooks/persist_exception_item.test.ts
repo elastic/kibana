@@ -6,18 +6,23 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import * as api from '@kbn/securitysolution-list-api';
+import { PersistHookProps } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ReturnPersistExceptionItem,
+  usePersistExceptionItem,
+} from '@kbn/securitysolution-list-hooks';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import * as api from '../api';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { PersistHookProps } from '../types';
-
-import { ReturnPersistExceptionItem, usePersistExceptionItem } from './persist_exception_item';
 
 const mockKibanaHttpService = coreMock.createStart().http;
+jest.mock('@kbn/securitysolution-list-api');
+
+// TODO: Port this test over to packages/kbn-securitysolution-list-hooks/src/use_persist_exception_item/index.test.ts once the other mocks are added to the kbn package system
 
 describe('usePersistExceptionItem', () => {
   const onError = jest.fn();

@@ -7,12 +7,16 @@
 
 import { CompleteTimeline, timeline } from './timeline';
 
-export interface TestCase {
+export interface TestCase extends TestCaseWithoutTimeline {
+  timeline: CompleteTimeline;
+}
+
+export interface TestCaseWithoutTimeline {
   name: string;
   tags: string[];
   description: string;
-  timeline: CompleteTimeline;
   reporter: string;
+  owner: string;
 }
 
 export interface Connector {
@@ -45,6 +49,7 @@ export const case1: TestCase = {
   description: 'This is the case description',
   timeline,
   reporter: 'elastic',
+  owner: 'securitySolution',
 };
 
 export const serviceNowConnector: Connector = {

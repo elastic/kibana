@@ -285,7 +285,7 @@ describe('GET role', () => {
               indices: [],
               applications: [
                 {
-                  application,
+                  application: reservedPrivilegesApplicationWildcard,
                   privileges: ['reserved_customApplication1', 'reserved_customApplication2'],
                   resources: ['*'],
                 },

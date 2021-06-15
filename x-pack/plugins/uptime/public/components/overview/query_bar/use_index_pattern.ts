@@ -9,18 +9,17 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIndexPattern } from '../../../state/actions';
 import { selectIndexPattern } from '../../../state/selectors';
-import { SyntaxType } from './use_query_bar';
 
-export const useIndexPattern = (queryLanguage?: string) => {
+export const useIndexPattern = () => {
   const dispatch = useDispatch();
   const indexPattern = useSelector(selectIndexPattern);
 
   useEffect(() => {
     // we only use index pattern for kql queries
-    if (!indexPattern.index_pattern && (!queryLanguage || queryLanguage === SyntaxType.kuery)) {
+    if (!indexPattern.index_pattern) {
       dispatch(getIndexPattern());
     }
-  }, [indexPattern.index_pattern, dispatch, queryLanguage]);
+  }, [indexPattern.index_pattern, dispatch]);
 
   return indexPattern;
 };

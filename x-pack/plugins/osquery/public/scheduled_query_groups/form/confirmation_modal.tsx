@@ -74,7 +74,7 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     <EuiSpacer size="l" />
     <FormattedMessage
       id="xpack.osquery.agentPolicy.confirmModalDescription"
-      defaultMessage="This action can not be undone. Are you sure you wish to continue?"
+      defaultMessage="Are you sure you wish to continue?"
     />
   </EuiConfirmModal>
 );

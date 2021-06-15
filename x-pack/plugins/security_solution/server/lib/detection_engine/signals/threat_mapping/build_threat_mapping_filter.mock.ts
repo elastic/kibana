@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Filter } from 'src/plugins/data/common';
 
 import { ThreatListDoc, ThreatListItem } from './types';

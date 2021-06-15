@@ -7,3 +7,4 @@
 
 export { SYNONYMS_TITLE } from './constants';
 export { Synonyms } from './synonyms';
+export { SynonymsLogic } from './synonyms_logic';

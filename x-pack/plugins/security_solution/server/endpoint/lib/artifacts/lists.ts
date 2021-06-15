@@ -6,29 +6,34 @@
  */
 
 import { createHash } from 'crypto';
-import { deflate } from 'zlib';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { validate } from '../../../../common/validate';
+import type {
+  Entry,
+  EntryNested,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
-  internalArtifactCompleteSchema,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
+import { ExceptionListClient } from '../../../../../lists/server';
+import {
   InternalArtifactCompleteSchema,
-  InternalArtifactSchema,
   TranslatedEntry,
   translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
+  TranslatedEntryMatchWildcardMatcher,
+  translatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   translatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -50,28 +55,6 @@ export async function buildArtifact(
     encodedSize: exceptionsBuffer.byteLength,
     body: exceptionsBuffer.toString('base64'),
   };
-}
-
-export async function maybeCompressArtifact(
-  uncompressedArtifact: InternalArtifactSchema
-): Promise<InternalArtifactSchema> {
-  const compressedArtifact = { ...uncompressedArtifact };
-  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
-    const compressedArtifactBody = await compressExceptionList(
-      Buffer.from(uncompressedArtifact.body, 'base64')
-    );
-    compressedArtifact.body = compressedArtifactBody.toString('base64');
-    compressedArtifact.encodedSize = compressedArtifactBody.byteLength;
-    compressedArtifact.compressionAlgorithm = 'zlib';
-    compressedArtifact.encodedSha256 = createHash('sha256')
-      .update(compressedArtifactBody)
-      .digest('hex');
-  }
-  return compressedArtifact;
-}
-
-export function isCompressed(artifact: InternalArtifactSchema) {
-  return artifact.compressionAlgorithm === 'zlib';
 }
 
 export async function getFilteredEndpointExceptionList(
@@ -203,6 +186,10 @@ function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryM
     : 'exact_cased';
 }
 
+function getMatcherWildcardFunction(field: string): TranslatedEntryMatchWildcardMatcher {
+  return field.endsWith('.caseless') ? 'wildcard_caseless' : 'wildcard_cased';
+}
+
 function normalizeFieldName(field: string): string {
   return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
 }
@@ -272,17 +259,16 @@ function translateEntry(
           }
         : undefined;
     }
+    case 'wildcard': {
+      const matcher = getMatcherWildcardFunction(entry.field);
+      return translatedEntryMatchWildcardMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
+    }
   }
-}
-
-export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    deflate(buffer, function (err, buf) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buf);
-      }
-    });
-  });
 }

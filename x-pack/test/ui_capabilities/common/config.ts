@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
 
@@ -30,7 +30,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
       },
-      esArchiver: {},
       esTestCluster: {
         ...xPackFunctionalTestsConfig.get('esTestCluster'),
         license,

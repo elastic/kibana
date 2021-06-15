@@ -35,8 +35,7 @@ import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { runResilientMigrator } from '../../migrationsv2';
-import { migrateRawDocs } from '../core/migrate_raw_docs';
-import { MigrationLogger } from '../core/migration_logger';
+import { migrateRawDocsSafely } from '../core/migrate_raw_docs';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -53,6 +52,7 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 export interface KibanaMigratorStatus {
   status: MigrationStatus;
   result?: MigrationResult[];
+  waitingIndex?: string;
 }
 
 /**
@@ -68,7 +68,7 @@ export class KibanaMigrator {
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
-    status: 'waiting',
+    status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
   private migrationsRetryDelay?: number;
@@ -135,7 +135,6 @@ export class KibanaMigrator {
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
-
       this.migrationResult = this.runMigrationsInternal().then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
@@ -185,11 +184,10 @@ export class KibanaMigrator {
               logger: this.log,
               preMigrationScript: indexMap[index].script,
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocs(
+                migrateRawDocsSafely(
                   this.serializer,
                   this.documentMigrator.migrateAndConvert,
-                  rawDocs,
-                  new MigrationLogger(this.log)
+                  rawDocs
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
@@ -206,6 +204,7 @@ export class KibanaMigrator {
           kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
+          setStatus: (status) => this.status$.next(status),
           pollInterval: this.soMigrationsConfig.pollInterval,
           scrollDuration: this.soMigrationsConfig.scrollDuration,
           serializer: this.serializer,

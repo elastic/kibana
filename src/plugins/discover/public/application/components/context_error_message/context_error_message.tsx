@@ -9,8 +9,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-// @ts-ignore
-import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
+import { FailureReason, LoadingStatus } from '../../angular/context_app_state';
 
 export interface ContextErrorMessageProps {
   /**
@@ -24,7 +23,7 @@ export interface ContextErrorMessageProps {
 }
 
 export function ContextErrorMessage({ status, reason }: ContextErrorMessageProps) {
-  if (status !== LOADING_STATUS.FAILED) {
+  if (status !== LoadingStatus.FAILED) {
     return null;
   }
   return (
@@ -41,7 +40,7 @@ export function ContextErrorMessage({ status, reason }: ContextErrorMessageProps
         data-test-subj="contextErrorMessageTitle"
       >
         <EuiText data-test-subj="contextErrorMessageBody">
-          {reason === FAILURE_REASONS.UNKNOWN && (
+          {reason === FailureReason.UNKNOWN && (
             <FormattedMessage
               id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
               defaultMessage="Please reload or go back to the document list to select a valid anchor document."

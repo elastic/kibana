@@ -12,10 +12,11 @@ import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { decodeCloudId } from '../../common';
 
 import { appContextService } from './app_context';
+import { normalizeHostsForAgents } from './hosts_utils';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
-let cachedAdminUser: null | { username: string; password: string } = null;
+const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
 
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
@@ -28,17 +29,11 @@ class OutputService {
 
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await this.getDefaultOutput(soClient);
-    const cloud = appContextService.getCloud();
-    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
-    const flagsUrl = appContextService.getConfig()!.agents.elasticsearch.host;
-    const defaultUrl = 'http://localhost:9200';
-    const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
 
     if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [defaultOutputUrl],
+        hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
       } as NewOutput;
 
@@ -51,12 +46,18 @@ class OutputService {
     };
   }
 
-  public async updateOutput(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    data: Partial<NewOutput>
-  ) {
-    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+  public getDefaultESHosts(): string[] {
+    const cloud = appContextService.getCloud();
+    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const cloudHosts = cloudUrl ? [cloudUrl] : undefined;
+    const flagHosts =
+      appContextService.getConfig()!.agents?.elasticsearch?.hosts &&
+      appContextService.getConfig()!.agents.elasticsearch.hosts?.length
+        ? appContextService.getConfig()!.agents.elasticsearch.hosts
+        : undefined;
+
+    return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
@@ -69,39 +70,20 @@ class OutputService {
     return outputs.saved_objects[0].id;
   }
 
-  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
-    if (useCache && cachedAdminUser) {
-      return cachedAdminUser;
-    }
-
-    const defaultOutputId = await this.getDefaultOutputId(soClient);
-    if (!defaultOutputId) {
-      return null;
-    }
-    const so = await appContextService
-      .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
-
-    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
-      return null;
-    }
-
-    cachedAdminUser = {
-      username: so!.attributes.fleet_enroll_username,
-      password: so!.attributes.fleet_enroll_password,
-    };
-
-    return cachedAdminUser;
-  }
-
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
     options?: { id?: string }
   ): Promise<Output> {
+    const data = { ...output };
+
+    if (data.hosts) {
+      data.hosts = data.hosts.map(normalizeHostsForAgents);
+    }
+
     const newSo = await soClient.create<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
-      output as Output,
+      data as Output,
       options
     );
 
@@ -125,7 +107,13 @@ class OutputService {
   }
 
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+    const updateData = { ...data };
+
+    if (updateData.hosts) {
+      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, updateData);
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -150,12 +138,6 @@ class OutputService {
       page: 1,
       perPage: 1000,
     };
-  }
-
-  // Warning! This method is not going to working in a scenario with multiple Kibana instances,
-  // in this case Kibana should be restarted if the Admin User change
-  public invalidateCache() {
-    cachedAdminUser = null;
   }
 }
 

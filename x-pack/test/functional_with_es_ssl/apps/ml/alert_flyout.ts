@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datafeed } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
@@ -56,7 +56,7 @@ function createTestJobAndDatafeed() {
       },
       query_delay: '120s',
       indices: ['ft_ecommerce'],
-    } as unknown) as Datafeed,
+    } as unknown) as estypes.MlDatafeed,
   };
 }
 
@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('ciGroup13');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -92,7 +92,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.api.deleteAnomalyDetectionJobES(testJobId);
       await ml.api.cleanMlIndices();
+      await ml.alerting.cleanAnomalyDetectionRules();
     });
 
     describe('overview page alert flyout controls', () => {
@@ -118,7 +120,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.alerting.assertPreviewButtonState(false);
         await ml.alerting.setTestInterval('2y');
         await ml.alerting.assertPreviewButtonState(true);
-        await ml.alerting.checkPreview('Triggers 2 times in the last 2y');
+
+        // don't check the exact number provided by the backend, just make sure it's > 0
+        await ml.alerting.checkPreview(/Found [1-9]\d* anomalies in the last 2y/);
 
         await ml.testExecution.logTestStep('should create an alert');
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');

@@ -325,6 +325,9 @@
             "nodejs": {
               "type": "long"
             },
+            "php": {
+              "type": "long"
+            },
             "python": {
               "type": "long"
             },
@@ -708,6 +711,90 @@
               }
             },
             "nodejs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "php": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -1578,25 +1665,40 @@
         "workpads": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Canvas Workpads in the cluster"
+              }
             }
           }
         },
         "pages": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pages across all Canvas Workpads"
+              }
             },
             "per_workpad": {
               "properties": {
                 "avg": {
-                  "type": "float"
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of pages across all Canvas Workpads"
+                  }
                 },
                 "min": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of pages found in a Canvas Workpad"
+                  }
                 },
                 "max": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of pages found in a Canvas Workpad"
+                  }
                 }
               }
             }
@@ -1605,18 +1707,30 @@
         "elements": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of elements across all Canvas Workpads"
+              }
             },
             "per_page": {
               "properties": {
                 "avg": {
-                  "type": "float"
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements per page across all Canvas Workpads"
+                  }
                 },
                 "min": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements on a page across all Canvas Workpads"
+                  }
                 },
                 "max": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements on a page across all Canvas Workpads"
+                  }
                 }
               }
             }
@@ -1625,24 +1739,57 @@
         "functions": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of functions in use across all Canvas Workpads"
+              }
             },
             "in_use": {
               "type": "array",
               "items": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in any Canvas Workpad"
+                }
+              }
+            },
+            "in_use_30d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
+                }
+              }
+            },
+            "in_use_90d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
+                }
               }
             },
             "per_element": {
               "properties": {
                 "avg": {
-                  "type": "float"
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average number of functions used per element across all Canvas Workpads"
+                  }
                 },
                 "min": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
+                  }
                 },
                 "max": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
+                  }
                 }
               }
             }
@@ -1651,18 +1798,30 @@
         "variables": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of variables defined across all Canvas Workpads"
+              }
             },
             "per_workpad": {
               "properties": {
                 "avg": {
-                  "type": "float"
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of variables set per Canvas Workpad"
+                  }
                 },
                 "min": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number variables set across all Canvas Workpads"
+                  }
                 },
                 "max": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of variables set across all Canvas Workpads"
+                  }
                 }
               }
             }
@@ -1671,25 +1830,40 @@
         "custom_elements": {
           "properties": {
             "count": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of custom Canvas elements"
+              }
             },
             "elements": {
               "properties": {
                 "min": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements used across all Canvas Custom Elements"
+                  }
                 },
                 "max": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements used across all Canvas Custom Elements"
+                  }
                 },
                 "avg": {
-                  "type": "float"
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements used in Canvas Custom Element"
+                  }
                 }
               }
             },
             "functions_in_use": {
               "type": "array",
               "items": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The functions in use by Canvas Custom Elements"
+                }
               }
             }
           }
@@ -1867,6 +2041,12 @@
                 "description": "The total number of enrolled agents in an unhealthy state"
               }
             },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
             "offline": {
               "type": "long",
               "_meta": {
@@ -1877,6 +2057,52 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
               }
             }
           }
@@ -1936,6 +2162,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2144,6 +2376,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2159,6 +2397,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2367,6 +2611,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2440,6 +2690,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2483,6 +2739,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2526,6 +2788,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
@@ -2557,6 +2825,754 @@
         },
         "timeCaptured": {
           "type": "date"
+        },
+        "layerTypes": {
+          "properties": {
+            "ems_basemap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers in cluster"
+                  }
+                }
+              }
+            },
+            "ems_region": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems file layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems file layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems file layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of file layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es cluster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es cluster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es cluster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es cluster layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_grids": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es grid layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es grid layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es grid layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es grid layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_heatmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es heatmap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es heatmap layers  per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es heatmap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es heatmap layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_top_hits": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es top hits layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es top hits layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es top hits layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es top hits layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_docs": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es document layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es document layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es document layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es document layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_point_to_point": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es point-to-point layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es point-to-point layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es point-to-point layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es point-to-point layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_tracks": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es track layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es track layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es track layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es track layers in cluster"
+                  }
+                }
+              }
+            },
+            "kbn_region": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of kbn region layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of kbn region layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of kbn region layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of kbn region layers in cluster"
+                  }
+                }
+              }
+            },
+            "kbn_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of kbn tms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of kbn tms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of kbn tms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of kbn tms layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-mvt layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-mvt layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-mvt layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux tms-mvt layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-raster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-raster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-raster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux-tms raster layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_wms": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux wms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux wms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux wms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux wms layers in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scalingOptions": {
+          "properties": {
+            "limit": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with limit scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with blended scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with mvt scaling option in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "joins": {
+          "properties": {
+            "term": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layers with term joins per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layers with term joins per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layers with term joins per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layers with term joins in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "basemaps": {
+          "properties": {
+            "auto": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with auto-style in cluster"
+                  }
+                }
+              }
+            },
+            "dark": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with dark-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with roadmap-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap_desaturated": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with desaturated-style in cluster"
+                  }
+                }
+              }
+            }
+          }
         },
         "attributesPerMap": {
           "properties": {
@@ -2615,6 +3631,40 @@
                     },
                     "avg": {
                       "type": "float"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ml": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "xpack.ml.anomaly_detection_alert": {
+              "properties": {
+                "count_by_result_type": {
+                  "properties": {
+                    "record": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using record result type"
+                      }
+                    },
+                    "influencer": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using influencer result type"
+                      }
+                    },
+                    "bucket": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using bucket result type"
+                      }
                     }
                   }
                 }
@@ -3601,14 +4651,20 @@
         "index_patterns": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
             }
           }
         },
         "saved_searches": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
             }
           }
         },
@@ -3617,12 +4673,30 @@
             "saved_searches": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
                 }
               }
             },
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
             }
           }
         }
@@ -3684,27 +4758,274 @@
     },
     "security_solution": {
       "properties": {
-        "detections": {
+        "detectionMetrics": {
           "properties": {
             "detection_rules": {
               "properties": {
-                "custom": {
+                "detection_rule_usage": {
                   "properties": {
-                    "enabled": {
-                      "type": "long"
+                    "query": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of query rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of query rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by query rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to query detection rule alerts"
+                          }
+                        }
+                      }
                     },
-                    "disabled": {
-                      "type": "long"
+                    "threshold": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threshold rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threshold rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by threshold rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to threshold detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "eql": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of eql rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of eql rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by eql rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to eql detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "machine_learning": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of machine_learning rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of machine_learning rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by machine_learning rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to machine_learning detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "threat_match": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat_match rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat_match rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by threat_match rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to threat_match detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "elastic_total": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of elastic rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of elastic rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by elastic rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to elastic detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "custom_total": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by custom rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to custom detection rule alerts"
+                          }
+                        }
+                      }
                     }
                   }
                 },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
+                "detection_rule_detail": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "rule_name": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The name of the detection rule"
+                        }
+                      },
+                      "rule_id": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The UUID id of the detection rule"
+                        }
+                      },
+                      "rule_type": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The type of detection rule. ie eql, query..."
+                        }
+                      },
+                      "rule_version": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The version of the rule"
+                        }
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "If the detection rule has been enabled by the user"
+                        }
+                      },
+                      "elastic_rule": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "If the detection rule has been authored by Elastic"
+                        }
+                      },
+                      "created_on": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "When the detection rule was created on the cluster"
+                        }
+                      },
+                      "updated_on": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "When the detection rule was updated on the cluster"
+                        }
+                      },
+                      "alert_count_daily": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of daily alerts generated by a rule"
+                        }
+                      },
+                      "cases_count_total": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of total cases generated by a rule"
+                        }
+                      }
                     }
                   }
                 }
@@ -3712,141 +5033,237 @@
             },
             "ml_jobs": {
               "properties": {
-                "custom": {
+                "ml_job_usage": {
                   "properties": {
-                    "enabled": {
-                      "type": "long"
+                    "custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules disabled"
+                          }
+                        }
+                      }
                     },
-                    "disabled": {
-                      "type": "long"
+                    "elastic": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules disabled"
+                          }
+                        }
+                      }
                     }
                   }
                 },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long"
-                    },
-                    "disabled": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "detectionMetrics": {
-          "properties": {
-            "ml_jobs": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "job_id": {
-                    "type": "keyword"
-                  },
-                  "open_time": {
-                    "type": "keyword"
-                  },
-                  "create_time": {
-                    "type": "keyword"
-                  },
-                  "finished_time": {
-                    "type": "keyword"
-                  },
-                  "state": {
-                    "type": "keyword"
-                  },
-                  "data_counts": {
+                "ml_job_metrics": {
+                  "type": "array",
+                  "items": {
                     "properties": {
-                      "bucket_count": {
-                        "type": "long"
+                      "job_id": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Identifier for the anomaly detection job"
+                        }
                       },
-                      "empty_bucket_count": {
-                        "type": "long"
+                      "open_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "For open jobs only, the elapsed time for which the job has been open"
+                        }
                       },
-                      "input_bytes": {
-                        "type": "long"
+                      "create_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The time the job was created"
+                        }
                       },
-                      "input_record_count": {
-                        "type": "long"
-                      },
-                      "last_data_time": {
-                        "type": "long"
-                      },
-                      "processed_record_count": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "model_size_stats": {
-                    "properties": {
-                      "bucket_allocation_failures_count": {
-                        "type": "long"
-                      },
-                      "model_bytes": {
-                        "type": "long"
-                      },
-                      "model_bytes_exceeded": {
-                        "type": "long"
-                      },
-                      "model_bytes_memory_limit": {
-                        "type": "long"
-                      },
-                      "peak_model_bytes": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "timing_stats": {
-                    "properties": {
-                      "average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "bucket_count": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "exponential_average_bucket_processing_time_per_hour_ms": {
-                        "type": "long"
-                      },
-                      "maximum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "minimum_bucket_processing_time_ms": {
-                        "type": "long"
-                      },
-                      "total_bucket_processing_time_ms": {
-                        "type": "long"
-                      }
-                    }
-                  },
-                  "datafeed": {
-                    "properties": {
-                      "datafeed_id": {
-                        "type": "keyword"
+                      "finished_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "If the job closed or failed, this is the time the job finished"
+                        }
                       },
                       "state": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The status of the anomaly detection job"
+                        }
+                      },
+                      "data_counts": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "empty_bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets which did not contain any data"
+                            }
+                          },
+                          "input_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of input data posted to the anomaly detection job"
+                            }
+                          },
+                          "input_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents posted to the anomaly detection job"
+                            }
+                          },
+                          "last_data_time": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The timestamp at which data was last analyzed, according to server time"
+                            }
+                          },
+                          "processed_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents that have been processed by the anomaly detection job"
+                            }
+                          }
+                        }
+                      },
+                      "model_size_stats": {
+                        "properties": {
+                          "bucket_allocation_failures_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
+                            }
+                          },
+                          "model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of memory used by the models"
+                            }
+                          },
+                          "model_bytes_exceeded": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
+                            }
+                          },
+                          "model_bytes_memory_limit": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The upper limit for model memory usage, checked on increasing values"
+                            }
+                          },
+                          "peak_model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The peak number of bytes of memory ever used by the models"
+                            }
+                          }
+                        }
                       },
                       "timing_stats": {
                         "properties": {
-                          "average_search_time_per_bucket_ms": {
-                            "type": "long"
-                          },
                           "bucket_count": {
-                            "type": "long"
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
                           },
-                          "exponential_average_search_time_per_hour_ms": {
-                            "type": "long"
+                          "exponential_average_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponential moving average of all bucket processing times, in milliseconds"
+                            }
                           },
-                          "search_count": {
-                            "type": "long"
+                          "exponential_average_bucket_processing_time_per_hour_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
+                            }
                           },
-                          "total_search_time_ms": {
-                            "type": "long"
+                          "maximum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Maximum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "minimum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Minimum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "total_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Sum of all bucket processing times, in milliseconds"
+                            }
+                          }
+                        }
+                      },
+                      "datafeed": {
+                        "properties": {
+                          "datafeed_id": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "A numerical character string that uniquely identifies the datafeed"
+                            }
+                          },
+                          "state": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "The status of the datafeed"
+                            }
+                          },
+                          "timing_stats": {
+                            "properties": {
+                              "average_search_time_per_bucket_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The average search time per bucket, in milliseconds"
+                                }
+                              },
+                              "bucket_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of buckets processed"
+                                }
+                              },
+                              "exponential_average_search_time_per_hour_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The exponential average search time per hour, in milliseconds"
+                                }
+                              },
+                              "search_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of searches run by the datafeed"
+                                }
+                              },
+                              "total_search_time_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The total time the datafeed spent searching, in milliseconds"
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -3860,26 +5277,44 @@
         "endpoints": {
           "properties": {
             "total_installed": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of installed endpoints"
+              }
             },
             "active_within_last_24_hours": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of active endpoints"
+              }
             },
             "os": {
               "type": "array",
               "items": {
                 "properties": {
                   "full_name": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Full name of the operating system"
+                    }
                   },
                   "platform": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "OS Platform. eg Centos, Ubuntu"
+                    }
                   },
                   "version": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
+                    }
                   },
                   "count": {
-                    "type": "long"
+                    "type": "long",
+                    "_meta": {
+                      "description": "The total number of endpoints from that platform"
+                    }
                   }
                 }
               }
@@ -3889,13 +5324,22 @@
                 "malware": {
                   "properties": {
                     "active": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of active malware policies"
+                      }
                     },
                     "inactive": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of inactive malware policies"
+                      }
                     },
                     "failure": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of failing malware policies"
+                      }
                     }
                   }
                 }
@@ -4110,13 +5554,13 @@
         "available": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is available in this installation."
+            "description": "Indicates if the Spaces feature is available in this installation."
           }
         },
         "enabled": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is enabled in this installation."
+            "description": "Indicates if the Spaces feature is enabled in this installation."
           }
         },
         "count": {
@@ -4206,7 +5650,10 @@
             "deprecation_logging": {
               "properties": {
                 "enabled": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Whether user has enabled Elasticsearch deprecation logging"
+                  }
                 }
               }
             }
@@ -4215,13 +5662,28 @@
         "ui_open": {
           "properties": {
             "cluster": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
+              }
             },
             "indices": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+              }
             },
             "overview": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the Overview page."
+              }
+            },
+            "kibana": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Kibana deprecations"
+              }
             }
           }
         },
@@ -4279,13 +5741,22 @@
                 "monitor_name_stats": {
                   "properties": {
                     "avg_length": {
-                      "type": "float"
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of monitor names"
+                      }
                     },
                     "max_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of monitor names"
+                      }
                     },
                     "min_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of monitor names"
+                      }
                     }
                   }
                 },
@@ -4293,21 +5764,36 @@
                   "type": "long"
                 },
                 "no_of_unique_monitors": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique configured monitors"
+                  }
                 },
                 "no_of_unique_observer_locations": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique monitor observer locations"
+                  }
                 },
                 "observer_location_name_stats": {
                   "properties": {
                     "avg_length": {
-                      "type": "float"
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of monitor observer location names"
+                      }
                     },
                     "max_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of monitor observer location names"
+                      }
                     },
                     "min_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of monitor observer location names"
+                      }
                     }
                   }
                 },
@@ -4316,6 +5802,43 @@
                 },
                 "settings_page": {
                   "type": "long"
+                },
+                "fleet_monitor_name_stats": {
+                  "properties": {
+                    "avg_length": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of fleet managed monitor names"
+                      }
+                    },
+                    "max_length": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of fleet managed monitor names"
+                      }
+                    },
+                    "min_length": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of fleet managed monitor names"
+                      }
+                    }
+                  }
+                },
+                "fleet_monitor_frequency": {
+                  "type": "array",
+                  "items": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "This field represents the average the monitor frequency of fleet managed monitors"
+                    }
+                  }
+                },
+                "fleet_no_of_unique_monitors": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique configured fleet managed monitors"
+                  }
                 }
               }
             }

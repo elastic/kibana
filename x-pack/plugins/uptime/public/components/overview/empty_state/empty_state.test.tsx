@@ -19,6 +19,7 @@ describe('EmptyState component', () => {
     statesIndexStatus = {
       indexExists: true,
       docCount: 1,
+      indices: 'heartbeat-*,synthetics-*',
     };
   });
 
@@ -72,6 +73,7 @@ describe('EmptyState component', () => {
     statesIndexStatus = {
       docCount: 0,
       indexExists: true,
+      indices: 'heartbeat-*,synthetics-*',
     };
     const text = 'If this is in the snapshot the test should fail';
     render(

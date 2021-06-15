@@ -237,52 +237,39 @@ test(`#bulkUpdate`, async () => {
   expect(result).toBe(returnValue);
 });
 
-test(`#addToNamespaces`, async () => {
+test(`#collectMultiNamespaceReferences`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    addToNamespaces: jest.fn().mockResolvedValue(returnValue),
+    collectMultiNamespaceReferences: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = Symbol();
-  const id = Symbol();
-  const namespaces = Symbol();
+  const objects = Symbol();
   const options = Symbol();
-  const result = await client.addToNamespaces(type, id, namespaces, options);
+  const result = await client.collectMultiNamespaceReferences(objects, options);
 
-  expect(mockRepository.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
-test(`#deleteFromNamespaces`, async () => {
+test(`#updateObjectsSpaces`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    deleteFromNamespaces: jest.fn().mockResolvedValue(returnValue),
+    updateObjectsSpaces: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = Symbol();
-  const id = Symbol();
-  const namespaces = Symbol();
+  const objects = Symbol();
+  const spacesToAdd = Symbol();
+  const spacesToRemove = Symbol();
   const options = Symbol();
-  const result = await client.deleteFromNamespaces(type, id, namespaces, options);
+  const result = await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
 
-  expect(mockRepository.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
-  expect(result).toBe(returnValue);
-});
-
-test(`#removeReferencesTo`, async () => {
-  const returnValue = Symbol();
-  const mockRepository = {
-    removeReferencesTo: jest.fn().mockResolvedValue(returnValue),
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  const options = Symbol();
-  const result = await client.removeReferencesTo(type, id, options);
-
-  expect(mockRepository.removeReferencesTo).toHaveBeenCalledWith(type, id, options);
+  expect(mockRepository.updateObjectsSpaces).toHaveBeenCalledWith(
+    objects,
+    spacesToAdd,
+    spacesToRemove,
+    options
+  );
   expect(result).toBe(returnValue);
 });

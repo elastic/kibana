@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
+Object {
+  "@timestamp": "2020-12-08T13:59:01.971Z",
+  "agent": Object {
+    "ephemeral_id": "d27b2271-06b4-48c8-a02a-cfd963c0b4d0",
+    "name": "java",
+    "version": "1.19.1-SNAPSHOT.null",
+  },
+  "container": Object {
+    "id": "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
+  },
+  "host": Object {
+    "architecture": "amd64",
+    "ip": "10.8.4.45",
+    "os": Object {
+      "platform": "Linux",
+    },
+  },
+  "kubernetes": Object {
+    "pod": Object {
+      "name": "opbeans-java-6bdd78cb5c-k2qz6",
+      "uid": "805e875d-1fda-42c0-bb54-23eb6faf54ab",
+    },
+  },
+  "service": Object {
+    "environment": "production",
+    "framework": Object {
+      "name": "Servlet API",
+    },
+    "language": Object {
+      "name": "Java",
+      "version": "11.0.9.1",
+    },
+    "name": "opbeans-java",
+    "node": Object {
+      "name": "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
+    },
+    "runtime": Object {
+      "name": "Java",
+      "version": "11.0.9.1",
+    },
+    "version": "2020-12-08 03:35:36",
+  },
+}
+`;

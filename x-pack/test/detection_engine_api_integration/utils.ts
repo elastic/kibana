@@ -12,8 +12,15 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import type { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
-import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
   CreateRulesSchema,
@@ -21,13 +28,6 @@ import {
   FullResponseSchema,
   QueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
-import {
-  CreateExceptionListItemSchema,
-  CreateExceptionListSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-} from '../../plugins/lists/common';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
@@ -412,7 +412,6 @@ export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): 
 export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -429,7 +428,6 @@ export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> =>
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
@@ -683,7 +681,7 @@ export const getWebHookAction = () => ({
 export const getRuleWithWebHookAction = (
   id: string,
   enabled = false,
-  rule?: QueryCreateSchema
+  rule?: CreateRulesSchema
 ): CreateRulesSchema | UpdateRulesSchema => {
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
@@ -721,7 +719,7 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 10000,
+  maxTimeout: number = 20000,
   timeoutWait: number = 10
 ): Promise<void> => {
   await new Promise<void>(async (resolve, reject) => {
@@ -888,7 +886,7 @@ export const createNewAction = async (supertest: SuperTest<supertestAsPromised.T
 
 /**
  * Helper to cut down on the noise in some of the tests. This
- * creates a new action and expects a 200 and does not do any retries.
+ * uses the find API to get an immutable rule by id.
  * @param supertest The supertest deps
  */
 export const findImmutableRuleById = async (
@@ -1009,7 +1007,7 @@ export const waitForRuleSuccessOrStatus = async (
       .send({ ids: [id] })
       .expect(200);
     return body[id]?.current_status?.status === status;
-  }, 'waitForRuleSuccess');
+  }, 'waitForRuleSuccessOrStatus');
 };
 
 /**

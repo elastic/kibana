@@ -381,26 +381,6 @@ export function registerAccountSourceReindexJobRoute({
   );
 }
 
-export function registerAccountSourceReindexJobStatusRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
-      validate: {
-        params: schema.object({
-          sourceId: schema.string(),
-          jobId: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
-    })
-  );
-}
-
 export function registerAccountSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -749,26 +729,6 @@ export function registerOrgSourceReindexJobRoute({
   );
 }
 
-export function registerOrgSourceReindexJobStatusRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
-      validate: {
-        params: schema.object({
-          sourceId: schema.string(),
-          jobId: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
-    })
-  );
-}
-
 export function registerOrgSourceDownloadDiagnosticsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -937,7 +897,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceDisplaySettingsConfig(dependencies);
   registerAccountSourceSchemasRoute(dependencies);
   registerAccountSourceReindexJobRoute(dependencies);
-  registerAccountSourceReindexJobStatusRoute(dependencies);
   registerAccountSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
@@ -953,7 +912,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceDisplaySettingsConfig(dependencies);
   registerOrgSourceSchemasRoute(dependencies);
   registerOrgSourceReindexJobRoute(dependencies);
-  registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);

@@ -7,7 +7,11 @@
 
 export * from './routes';
 export * as AgentStatusKueryHelper from './agent_status';
-export { packageToPackagePolicyInputs, packageToPackagePolicy } from './package_to_package_policy';
+export {
+  packageToPackagePolicyInputs,
+  packageToPackagePolicy,
+  getStreamsForInputType,
+} from './package_to_package_policy';
 export { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
@@ -16,3 +20,13 @@ export { isValidNamespace } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
+export { doesPackageHaveIntegrations } from './packages_with_integrations';
+export {
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+  countValidationErrors,
+} from './validate_package_policy';

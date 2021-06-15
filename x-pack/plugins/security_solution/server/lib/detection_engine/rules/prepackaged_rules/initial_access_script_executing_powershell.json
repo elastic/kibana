@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Script Executing PowerShell",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(cscript.exe or wscript.exe) and process.name:powershell.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"cscript.exe\", \"wscript.exe\") and process.name : \"powershell.exe\"\n",
   "risk_score": 21,
   "rule_id": "f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc",
   "severity": "low",
@@ -48,6 +48,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }

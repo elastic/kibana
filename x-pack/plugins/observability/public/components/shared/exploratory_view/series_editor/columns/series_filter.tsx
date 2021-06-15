@@ -19,7 +19,7 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -46,24 +46,23 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
     }
 
     return {
-      label: FieldLabels[field.field],
       field: field.field,
       nested: field.nested,
       isNegated: field.isNegated,
+      label: FieldLabels[field.field],
     };
   });
-  const disabled = seriesId === NEW_SERIES_KEY && !isNew;
 
-  const { setSeries, series: urlSeries } = useUrlStorage(seriesId);
+  const { setSeries, getSeries } = useSeriesStorage();
+  const urlSeries = getSeries(seriesId);
 
   const button = (
     <EuiButtonEmpty
       flush="left"
       iconType="plus"
       onClick={() => {
-        setIsPopoverVisible(true);
+        setIsPopoverVisible((prevState) => !prevState);
       }}
-      isDisabled={disabled}
       size="s"
     >
       {i18n.translate('xpack.observability.expView.seriesEditor.addFilter', {
@@ -113,13 +112,13 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs" alignItems="flexStart">
-      {!disabled && <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />}
+      <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={button}
           isOpen={isPopoverVisible}
           closePopover={closePopover}
-          anchorPosition="leftCenter"
+          anchorPosition={isNew ? 'leftCenter' : 'rightCenter'}
         >
           {!selectedField ? mainPanel : childPanel}
         </EuiPopover>
@@ -133,7 +132,6 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
             onClick={() => {
               setSeries(seriesId, { ...urlSeries, filters: undefined });
             }}
-            isDisabled={disabled}
             size="s"
           >
             {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {

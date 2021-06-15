@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import {
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatus,
+} from '../../../../../../src/plugins/data/common/';
 import { SearchStatus } from './types';
 
 export function getSessionStatus(session: SearchSessionSavedObjectAttributes): SearchSessionStatus {

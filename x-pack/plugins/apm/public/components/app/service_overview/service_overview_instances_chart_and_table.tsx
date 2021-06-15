@@ -33,14 +33,15 @@ export interface MainStatsServiceInstanceItem {
   cpuUsage: number;
   memoryUsage: number;
 }
+type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATS = {
-  mainStatsItems: [] as MainStatsServiceInstanceItem[],
-  mainStatsRequestId: undefined,
-  mainStatsItemCount: 0,
+  currentPeriodItems: [] as ApiResponseMainStats['currentPeriod'],
+  previousPeriodItems: [] as ApiResponseMainStats['previousPeriod'],
+  requestId: undefined,
+  currentPeriodItemsCount: 0,
 };
-
-type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_DETAILED_STATISTICS: ApiResponseDetailedStats = {
   currentPeriod: {},
@@ -117,28 +118,17 @@ export function ServiceOverviewInstancesChartAndTable({
             start,
             end,
             transactionType,
+            comparisonStart,
+            comparisonEnd,
           },
         },
       }).then((response) => {
-        const mainStatsItems = orderBy(
-          // need top-level sortable fields for the managed table
-          response.serviceInstances.map((item) => ({
-            ...item,
-            latency: item.latency ?? 0,
-            throughput: item.throughput ?? 0,
-            errorRate: item.errorRate ?? 0,
-            cpuUsage: item.cpuUsage ?? 0,
-            memoryUsage: item.memoryUsage ?? 0,
-          })),
-          field,
-          direction
-        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
-
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          mainStatsRequestId: uuid(),
-          mainStatsItems,
-          mainStatsItemCount: response.serviceInstances.length,
+          requestId: uuid(),
+          currentPeriodItems: response.currentPeriod,
+          currentPeriodItemsCount: response.currentPeriod.length,
+          previousPeriodItems: response.previousPeriod,
         };
       });
     },
@@ -162,10 +152,25 @@ export function ServiceOverviewInstancesChartAndTable({
   );
 
   const {
-    mainStatsItems,
-    mainStatsRequestId,
-    mainStatsItemCount,
+    currentPeriodItems,
+    previousPeriodItems,
+    requestId,
+    currentPeriodItemsCount,
   } = mainStatsData;
+
+  const currentPeriodOrderedItems = orderBy(
+    // need top-level sortable fields for the managed table
+    currentPeriodItems.map((item) => ({
+      ...item,
+      latency: item.latency ?? 0,
+      throughput: item.throughput ?? 0,
+      errorRate: item.errorRate ?? 0,
+      cpuUsage: item.cpuUsage ?? 0,
+      memoryUsage: item.memoryUsage ?? 0,
+    })),
+    field,
+    direction
+  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
@@ -177,7 +182,7 @@ export function ServiceOverviewInstancesChartAndTable({
         !end ||
         !transactionType ||
         !latencyAggregationType ||
-        !mainStatsItemCount
+        !currentPeriodItemsCount
       ) {
         return;
       }
@@ -198,7 +203,7 @@ export function ServiceOverviewInstancesChartAndTable({
             numBuckets: 20,
             transactionType,
             serviceNodeIds: JSON.stringify(
-              mainStatsItems.map((item) => item.serviceNodeName)
+              currentPeriodOrderedItems.map((item) => item.serviceNodeName)
             ),
             comparisonStart,
             comparisonEnd,
@@ -208,7 +213,7 @@ export function ServiceOverviewInstancesChartAndTable({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatsRequestId],
+    [requestId],
     { preservePreviousData: false }
   );
 
@@ -217,16 +222,17 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={mainStatsItems}
+          items={currentPeriodItems}
           status={mainStatsStatus}
+          comparisonItems={previousPeriodItems}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable
-            mainStatsItems={mainStatsItems}
+            mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
-            mainStatsItemCount={mainStatsItemCount}
+            mainStatsItemCount={currentPeriodItemsCount}
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}

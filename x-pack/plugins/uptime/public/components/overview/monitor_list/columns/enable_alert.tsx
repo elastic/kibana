@@ -21,13 +21,14 @@ import {
 import { MONITOR_ROUTE } from '../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
 import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
+import { Ping } from '../../../../../common/runtime_types/ping';
 
 interface Props {
   monitorId: string;
-  monitorName?: string;
+  selectedMonitor: Ping;
 }
 
-export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
+export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -66,7 +67,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
       createAlertAction.get({
         defaultActions,
         monitorId,
-        monitorName,
+        selectedMonitor,
       })
     );
     setIsLoading(true);
@@ -102,28 +103,26 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
 
   return hasDefaultConnectors || hasAlert ? (
     <div className="eui-displayInlineBlock" style={{ marginRight: 10 }}>
-      {
-        <EuiToolTip content={btnLabel}>
-          <>
-            <EuiSwitch
-              id={'enableDisableAlertSwitch'}
-              compressed={!isMonitorPage}
-              disabled={showSpinner}
-              label={btnLabel}
-              showLabel={!!isMonitorPage}
-              aria-label={btnLabel}
-              onChange={onAlertClick}
-              checked={!!hasAlert}
-              data-test-subj={
-                hasAlert
-                  ? 'uptimeDisableSimpleDownAlert' + monitorId
-                  : 'uptimeEnableSimpleDownAlert' + monitorId
-              }
-            />{' '}
-            {showSpinner && <EuiLoadingSpinner className="eui-alignMiddle" />}
-          </>
-        </EuiToolTip>
-      }
+      <EuiToolTip content={btnLabel}>
+        <>
+          <EuiSwitch
+            id={'enableDisableAlertSwitch'}
+            compressed={!isMonitorPage}
+            disabled={showSpinner}
+            label={btnLabel}
+            showLabel={!!isMonitorPage}
+            aria-label={btnLabel}
+            onChange={onAlertClick}
+            checked={!!hasAlert}
+            data-test-subj={
+              hasAlert
+                ? 'uptimeDisableSimpleDownAlert' + monitorId
+                : 'uptimeEnableSimpleDownAlert' + monitorId
+            }
+          />{' '}
+          {showSpinner && <EuiLoadingSpinner className="eui-alignMiddle" />}
+        </>
+      </EuiToolTip>
     </div>
   ) : (
     <DefineAlertConnectors />

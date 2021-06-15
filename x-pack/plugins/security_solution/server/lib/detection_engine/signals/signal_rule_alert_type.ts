@@ -12,8 +12,8 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { validateNonExact } from '../../../../common/validate';
-import { toError, toPromise } from '../../../../common/fp_utils';
+import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
 import {
   SIGNALS_ID,
@@ -27,7 +27,6 @@ import {
   isThreatMatchRule,
   isQueryRule,
 } from '../../../../common/detection_engine/utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
@@ -64,7 +63,10 @@ import {
   thresholdRuleParams,
   ruleParams,
   RuleParams,
+  savedQueryRuleParams,
 } from '../schemas/rule_schemas';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
 
 export const signalRulesAlertType = ({
   logger,
@@ -218,6 +220,19 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
+
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          services.scopedClusterClient.asCurrentUser,
+          buildRuleMessage,
+          refresh
+        );
+
+        const wrapHits = wrapHitsFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+        });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
@@ -225,11 +240,11 @@ export const signalRulesAlertType = ({
             ml,
             listClient,
             exceptionItems,
-            ruleStatusService,
             services,
             logger,
-            refresh,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
@@ -237,13 +252,13 @@ export const signalRulesAlertType = ({
             rule: thresholdRuleSO,
             tuples,
             exceptionItems,
-            ruleStatusService,
             services,
             version,
             logger,
-            refresh,
             buildRuleMessage,
             startedAt,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
@@ -256,12 +271,13 @@ export const signalRulesAlertType = ({
             version,
             searchAfterSize,
             logger,
-            refresh,
             eventsTelemetry,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isQueryRule(type)) {
-          const queryRuleSO = asTypeSpecificSO(savedObject, queryRuleParams);
+          const queryRuleSO = validateQueryRuleTypes(savedObject);
           result = await queryExecutor({
             rule: queryRuleSO,
             tuples,
@@ -271,25 +287,30 @@ export const signalRulesAlertType = ({
             version,
             searchAfterSize,
             logger,
-            refresh,
             eventsTelemetry,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
           result = await eqlExecutor({
             rule: eqlRuleSO,
             exceptionItems,
-            ruleStatusService,
             services,
             version,
             searchAfterSize,
+            bulkCreate,
             logger,
-            refresh,
           });
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
+        if (result.warningMessages.length) {
+          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          await ruleStatusService.partialFailure(warningMessage);
+        }
+
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
@@ -380,6 +401,14 @@ export const signalRulesAlertType = ({
       }
     },
   };
+};
+
+const validateQueryRuleTypes = (ruleSO: SavedObject<AlertAttributes>) => {
+  if (ruleSO.attributes.params.type === 'query') {
+    return asTypeSpecificSO(ruleSO, queryRuleParams);
+  } else {
+    return asTypeSpecificSO(ruleSO, savedQueryRuleParams);
+  }
 };
 
 /**

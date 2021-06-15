@@ -12,7 +12,7 @@ import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 import { UI_SETTINGS } from '../../../../../data/server';
 
-export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
+export default function buildRequest(config, tlConfig, scriptFields, runtimeFields, timeout) {
   const bool = { must: [] };
 
   const timeFilter = {
@@ -51,7 +51,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   (config.split || []).forEach((clause) => {
     const [field, arg] = clause.split(/:(\d+$)/);
     if (field && arg) {
-      const termsAgg = buildAggBody(field, scriptedFields);
+      const termsAgg = buildAggBody(field, scriptFields);
       termsAgg.size = parseInt(arg, 10);
       aggCursor[field] = {
         meta: { type: 'split' },
@@ -64,7 +64,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
     }
   });
 
-  _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
+  _.assign(aggCursor, createDateAgg(config, tlConfig, scriptFields));
 
   const request = {
     index: config.index,
@@ -75,6 +75,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       },
       aggs: aggs,
       size: 0,
+      runtime_mappings: runtimeFields,
     },
   };
 

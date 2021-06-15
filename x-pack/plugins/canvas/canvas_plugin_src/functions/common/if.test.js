@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { ifFn } from './if';
 
 describe('if', () => {
   const fn = functionWrapper(ifFn);
+  let testScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
 
   describe('spec', () => {
     it('is a function', () => {
@@ -19,52 +26,75 @@ describe('if', () => {
 
   describe('function', () => {
     describe('condition passed', () => {
-      it('with then', async () => {
-        expect(await fn(null, { condition: true, then: () => 'foo' })).toBe('foo');
-        expect(await fn(null, { condition: true, then: () => 'foo', else: () => 'bar' })).toBe(
-          'foo'
-        );
+      it('with then', () => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(fn(null, { condition: true, then: () => of('foo') })).toBe('(0|)', [
+            'foo',
+          ]);
+
+          expectObservable(
+            fn(null, { condition: true, then: () => of('foo'), else: () => of('bar') })
+          ).toBe('(0|)', ['foo']);
+        });
       });
 
-      it('without then', async () => {
-        expect(await fn(null, { condition: true })).toBe(null);
-        expect(await fn('some context', { condition: true })).toBe('some context');
+      it('without then', () => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(fn(null, { condition: true })).toBe('(0|)', [null]);
+          expectObservable(fn('some context', { condition: true })).toBe('(0|)', ['some context']);
+        });
       });
     });
 
     describe('condition failed', () => {
-      it('with else', async () =>
-        expect(
-          await fn('some context', { condition: false, then: () => 'foo', else: () => 'bar' })
-        ).toBe('bar'));
+      it('with else', () => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(
+            fn('some context', {
+              condition: false,
+              then: () => of('foo'),
+              else: () => of('bar'),
+            })
+          ).toBe('(0|)', ['bar']);
+        });
+      });
 
-      it('without else', async () =>
-        expect(await fn('some context', { condition: false, then: () => 'foo' })).toBe(
-          'some context'
-        ));
+      it('without else', () => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(
+            fn('some context', { condition: false, then: () => of('foo') })
+          ).toBe('(0|)', ['some context']);
+        });
+      });
     });
 
     describe('falsy values', () => {
-      describe('for then', () => {
-        it('with null', async () =>
-          expect(await fn('some context', { condition: true, then: () => null })).toBe(null));
-
-        it('with false', async () =>
-          expect(await fn('some context', { condition: true, then: () => false })).toBe(false));
-
-        it('with 0', async () =>
-          expect(await fn('some context', { condition: true, then: () => 0 })).toBe(0));
+      // eslint-disable-next-line no-unsanitized/method
+      it.each`
+        value
+        ${null}
+        ${false}
+        ${0}
+      `('for then with $value', ({ value }) => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(
+            fn('some context', { condition: true, then: () => of(value) })
+          ).toBe('(0|)', [value]);
+        });
       });
 
-      describe('for else', () => {
-        it('with null', async () =>
-          expect(await fn('some context', { condition: false, else: () => null })).toBe(null));
-
-        it('with false', async () =>
-          expect(await fn('some context', { condition: false, else: () => false })).toBe(false));
-
-        it('with 0', async () =>
-          expect(await fn('some context', { condition: false, else: () => 0 })).toBe(0));
+      // eslint-disable-next-line no-unsanitized/method
+      it.each`
+        value
+        ${null}
+        ${false}
+        ${0}
+      `('for else with $value', ({ value }) => {
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(
+            fn('some context', { condition: false, else: () => of(value) })
+          ).toBe('(0|)', [value]);
+        });
       });
     });
   });

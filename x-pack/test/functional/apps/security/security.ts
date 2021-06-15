@@ -20,12 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       afterEach(async () => {
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expectSuccess: false,
         });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
-        expect(errorMessage).to.be('Invalid username or password. Please try again.');
+        expect(errorMessage).to.be('Username or password is incorrect. Please try again.');
       });
 
       it('displays message acknowledging logout', async () => {

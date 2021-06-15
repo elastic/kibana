@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -30,14 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
-      await kibanaServer.importExport.load('discover');
-      log.info(
-        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
-      );
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -138,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(27);
+        expect(Math.round(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table containing the documents of the brushed range', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
@@ -332,10 +327,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
 
-        // check inspector panel request stats for timestamp
-        await inspector.open();
-
         const getRequestTimestamp = async () => {
+          // check inspector panel request stats for timestamp
+          await inspector.open();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
@@ -343,6 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
+          await inspector.close();
           return requestStatsRow[0][1];
         };
 

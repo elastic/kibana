@@ -10,9 +10,9 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { InternalApplicationStart } from '../../application';
-import { HttpStart } from '../../http';
-import { ChromeNavLink, ChromeNavLinkUpdateableFields, NavLinkWrapper } from './nav_link';
+import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
+import { HttpStart, IBasePath } from '../../http';
+import { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
@@ -59,18 +59,6 @@ export interface ChromeNavLinks {
   showOnly(id: string): void;
 
   /**
-   * Update the navlink for the given id with the updated attributes.
-   * Returns the updated navlink or `undefined` if it does not exist.
-   *
-   * @deprecated Uses the {@link AppBase.updater$} property when registering
-   * your application with {@link ApplicationSetup.register} instead.
-   *
-   * @param id
-   * @param values
-   */
-  update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
-
-  /**
    * Enable forced navigation mode, which will trigger a page refresh
    * when a nav link is clicked and only the hash is updated.
    *
@@ -101,7 +89,13 @@ export class NavLinksService {
         return new Map(
           [...apps]
             .filter(([, app]) => !app.chromeless)
-            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
+            .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
+              navLinks.push(
+                [appId, toNavLink(app, http.basePath)],
+                ...toNavDeepLinks(app, app.deepLinks, http.basePath)
+              );
+              return navLinks;
+            }, [])
         );
       })
     );
@@ -109,6 +103,7 @@ export class NavLinksService {
     // now that availableApps$ is an observable, we need to keep record of all
     // manual link modifications to be able to re-apply then after every
     // availableApps$ changes.
+    // Only in use by `showOnly` API, can be removed once dashboard_mode is removed in 8.0
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
@@ -153,25 +148,6 @@ export class NavLinksService {
         linkUpdaters$.next([...linkUpdaters$.value, updater]);
       },
 
-      update(id: string, values: ChromeNavLinkUpdateableFields) {
-        if (!this.has(id)) {
-          return;
-        }
-
-        const updater: LinksUpdater = (navLinks) =>
-          new Map(
-            [...navLinks.entries()].map(([linkId, link]) => {
-              return [linkId, link.id === id ? link.update(values) : link] as [
-                string,
-                NavLinkWrapper
-              ];
-            })
-          );
-
-        linkUpdaters$.next([...linkUpdaters$.value, updater]);
-        return this.get(id);
-      },
-
       enableForcedAppSwitcherNavigation() {
         forceAppSwitcherNavigation$.next(true);
       },
@@ -192,4 +168,22 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
     [...navLinks.values()].map((link) => link.properties),
     'order'
   );
+}
+
+function toNavDeepLinks(
+  app: PublicAppInfo,
+  deepLinks: PublicAppDeepLinkInfo[],
+  basePath: IBasePath
+): Array<[string, NavLinkWrapper]> {
+  if (!deepLinks) {
+    return [];
+  }
+  return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
+    const id = `${app.id}:${deepLink.id}`;
+    if (deepLink.path) {
+      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
+    }
+    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
+    return navDeepLinks;
+  }, []);
 }

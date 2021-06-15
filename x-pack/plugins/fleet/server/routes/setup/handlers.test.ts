@@ -48,13 +48,12 @@ describe('FleetSetupHandler', () => {
     mockSetupIngestManager.mockImplementation(() =>
       Promise.resolve({
         isInitialized: true,
-        preconfigurationError: undefined,
-        nonFatalPackageUpgradeErrors: [],
+        nonFatalErrors: [],
       })
     );
     await fleetSetupHandler(context, request, response);
 
-    const expectedBody: PostIngestSetupResponse = { isInitialized: true };
+    const expectedBody: PostIngestSetupResponse = { isInitialized: true, nonFatalErrors: [] };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });

@@ -69,6 +69,11 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       await this.saveNewPolicy();
     },
 
+    async increasePolicyListPageSize() {
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click(`tablePagination-100-rows`);
+    },
+
     async getPolicyList() {
       const policies = await testSubjects.findAll('policyTableRow');
       return mapAsync(policies, async (policy) => {

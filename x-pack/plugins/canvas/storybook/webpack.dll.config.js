@@ -77,13 +77,6 @@ module.exports = {
     filename: 'dll.js',
     library: DLL_NAME,
   },
-  // Include a require alias for legacy UI code and styles
-  resolve: {
-    alias: {
-      ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
-    },
-    symlinks: false,
-  },
   module: {
     rules: [
       {

@@ -36,9 +36,7 @@ export async function getChartPreviewData(
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const indexPattern = resolvedLogSourceConfiguration.indices;
-  const timestampField = resolvedLogSourceConfiguration.timestampField;
-
+  const { indices, timestampField, runtimeMappings } = resolvedLogSourceConfiguration;
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -51,8 +49,8 @@ export async function getChartPreviewData(
   const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indexPattern)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indexPattern);
+    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
+    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

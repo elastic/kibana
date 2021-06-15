@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -25,9 +25,10 @@ import { EngineNav, EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { KibanaHeaderActions } from './components/layout/kibana_header_actions';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
@@ -45,18 +46,28 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  return !config.host ? (
-    <AppSearchUnconfigured />
-  ) : (
-    <AppSearchConfigured {...(props as Required<InitialAppData>)} />
+  const { errorConnecting } = useValues(HttpLogic);
+
+  return (
+    <Switch>
+      <Route exact path={SETUP_GUIDE_PATH}>
+        <SetupGuide />
+      </Route>
+      <Route>
+        {!config.host ? (
+          <AppSearchUnconfigured />
+        ) : errorConnecting ? (
+          <ErrorConnecting />
+        ) : (
+          <AppSearchConfigured {...(props as Required<InitialAppData>)} />
+        )}
+      </Route>
+    </Switch>
   );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
   <Switch>
-    <Route exact path={SETUP_GUIDE_PATH}>
-      <SetupGuide />
-    </Route>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
@@ -67,79 +78,73 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   const {
     myRole: { canManageEngines, canManageMetaEngines, canViewRoleMappings },
   } = useValues(AppLogic(props));
-  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { readOnlyMode } = useValues(HttpLogic);
+
+  useEffect(() => {
+    renderHeaderActions(KibanaHeaderActions);
+  }, []);
 
   return (
     <Switch>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
           <Library />
         </Route>
       )}
-      <Route path={ENGINE_PATH}>
-        <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
-          <EngineRouter />
-        </Layout>
-      </Route>
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-          {errorConnecting ? (
-            <ErrorConnecting />
-          ) : (
-            <Switch>
-              <Route exact path={ROOT_PATH}>
-                <Redirect to={ENGINES_PATH} />
+          <Switch>
+            <Route exact path={ROOT_PATH}>
+              <Redirect to={ENGINES_PATH} />
+            </Route>
+            <Route exact path={ENGINES_PATH}>
+              <EnginesOverview />
+            </Route>
+            <Route path={ENGINE_PATH}>
+              <EngineRouter />
+            </Route>
+            <Route exact path={SETTINGS_PATH}>
+              <Settings />
+            </Route>
+            <Route exact path={CREDENTIALS_PATH}>
+              <Credentials />
+            </Route>
+            {canViewRoleMappings && (
+              <Route path={ROLE_MAPPINGS_PATH}>
+                <RoleMappings />
               </Route>
-              <Route exact path={ENGINES_PATH}>
-                <EnginesOverview />
+            )}
+            {canManageEngines && (
+              <Route exact path={ENGINE_CREATION_PATH}>
+                <EngineCreation />
               </Route>
-              <Route exact path={SETTINGS_PATH}>
-                <Settings />
+            )}
+            {canManageMetaEngines && (
+              <Route exact path={META_ENGINE_CREATION_PATH}>
+                <MetaEngineCreation />
               </Route>
-              <Route exact path={CREDENTIALS_PATH}>
-                <Credentials />
-              </Route>
-              {canViewRoleMappings && (
-                <Route path={ROLE_MAPPINGS_PATH}>
-                  <RoleMappingsRouter />
-                </Route>
-              )}
-              {canManageEngines && (
-                <Route exact path={ENGINE_CREATION_PATH}>
-                  <EngineCreation />
-                </Route>
-              )}
-              {canManageMetaEngines && (
-                <Route exact path={META_ENGINE_CREATION_PATH}>
-                  <MetaEngineCreation />
-                </Route>
-              )}
-              <Route>
-                <NotFound product={APP_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
-          )}
+            )}
+            <Route>
+              <NotFound product={APP_SEARCH_PLUGIN} />
+            </Route>
+          </Switch>
         </Layout>
       </Route>
     </Switch>
   );
 };
 
-interface AppSearchNavProps {
-  subNav?: React.ReactNode;
-}
-
-export const AppSearchNav: React.FC<AppSearchNavProps> = ({ subNav }) => {
+export const AppSearchNav: React.FC = () => {
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);
 
+  const isEngineRoute = !!useRouteMatch(ENGINE_PATH);
+
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to={ENGINES_PATH} subNav={subNav} isRoot>
+      <SideNavLink to={ENGINES_PATH} subNav={isEngineRoute ? <EngineNav /> : null} isRoot>
         {ENGINES_TITLE}
       </SideNavLink>
       {canViewSettings && <SideNavLink to={SETTINGS_PATH}>{SETTINGS_TITLE}</SideNavLink>}

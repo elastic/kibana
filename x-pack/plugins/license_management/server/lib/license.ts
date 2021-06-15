@@ -5,33 +5,22 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../licensing/server';
-import { CallAsCurrentUser } from '../types';
-
-const getLicensePath = (acknowledge: boolean) =>
-  `/_license${acknowledge ? '?acknowledge=true' : ''}`;
+import { IScopedClusterClient } from 'kibana/server';
+import { LicensingPluginStart } from '../../../licensing/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;
-  callAsCurrentUser: CallAsCurrentUser;
-  licensing: LicensingPluginSetup;
+  client: IScopedClusterClient;
+  licensing: LicensingPluginStart;
   license: { [key: string]: any };
 }
 
-export async function putLicense({
-  acknowledge,
-  callAsCurrentUser,
-  licensing,
-  license,
-}: PutLicenseArg) {
-  const options = {
-    method: 'POST',
-    path: getLicensePath(acknowledge),
-    body: license,
-  };
-
+export async function putLicense({ acknowledge, client, licensing, license }: PutLicenseArg) {
   try {
-    const response = await callAsCurrentUser('transport.request', options);
+    const { body: response } = await client.asCurrentUser.license.post({
+      body: license,
+      acknowledge,
+    });
     const { acknowledged, license_status: licenseStatus } = response;
 
     if (acknowledged && licenseStatus === 'valid') {

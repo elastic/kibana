@@ -7,28 +7,29 @@
 
 import * as t from 'io-ts';
 
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  SortOrder,
-  author,
-  building_block_type,
-  license,
   risk_score_mapping,
-  rule_name_override,
-  severity_mapping,
-  timestamp_override,
-  threshold,
-  type,
-  threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  listArray,
   threat_query,
   threat_index,
   threat_indicator_path,
   threat_mapping,
   threat_language,
   threat_filters,
-} from '../../../../../common/detection_engine/schemas/types';
+  threats,
+  type,
+  severity_mapping,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  SortOrder,
+  author,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  threshold,
+  BulkAction,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -38,6 +39,7 @@ import {
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/alert.ts
+ * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
   t.type({
@@ -211,6 +213,24 @@ export interface DuplicateRulesProps {
   rules: Rule[];
 }
 
+export interface BulkActionProps<Action extends BulkAction> {
+  action: Action;
+  query: string;
+}
+
+export interface BulkActionResult {
+  success: boolean;
+  rules_count: number;
+}
+
+export type BulkActionResponse<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResult;
+  [BulkAction.disable]: BulkActionResult;
+  [BulkAction.enable]: BulkActionResult;
+  [BulkAction.duplicate]: BulkActionResult;
+  [BulkAction.export]: Blob;
+}[Action];
+
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
@@ -247,7 +267,7 @@ export interface ExportDocumentsProps {
   ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface RuleStatus {
@@ -269,7 +289,7 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
-  last_look_back_date: string | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;

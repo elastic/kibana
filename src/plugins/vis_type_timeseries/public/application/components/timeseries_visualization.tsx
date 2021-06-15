@@ -12,7 +12,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
@@ -21,17 +21,18 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
-import { TimeseriesVisData, PanelData, isVisSeriesData } from '../../../common/types';
+import type { TimeseriesVisData, PanelData } from '../../../common/types';
+import { isVisSeriesData } from '../../../common/vis_data_utils';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { getClickFilterData } from './lib/get_click_filter_data';
 import { X_ACCESSOR_INDEX } from '../visualizations/constants';
 import { LastValueModeIndicator } from './last_value_mode_indicator';
 import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -102,6 +103,37 @@ function TimeseriesVisualization({
     [handlers, model]
   );
 
+  const handleFilterClick = useCallback(
+    async (series: PanelData[], points: Array<[GeometryValue, XYChartSeriesIdentifier]>) => {
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+
+      // it should work only if index pattern is found
+      if (!indexPattern) return;
+
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+
+      if (!tables) return;
+
+      const data = getClickFilterData(points, tables, model);
+
+      const event = {
+        name: 'filterBucket',
+        data: {
+          data,
+          negate: false,
+          timeFieldName: indexPattern.timeFieldName,
+        },
+      };
+
+      handlers.event(event);
+    },
+    [handlers, model]
+  );
+
   const handleUiState = useCallback(
     (field: string, value: { column: string; order: string }) => {
       uiState.set(field, value);
@@ -143,6 +175,7 @@ function TimeseriesVisualization({
                 `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
                 undefined
               )}
+              ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
             />
@@ -155,6 +188,7 @@ function TimeseriesVisualization({
             visData={visData}
             uiState={uiState}
             onBrush={onBrush}
+            onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}

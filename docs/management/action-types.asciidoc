@@ -72,6 +72,11 @@ image::images/connector-listing.png[Example connector listing in the Rules and C
 Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
 
 [float]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[connectors-list]]
 === Connector list
 
@@ -105,6 +110,19 @@ New connectors can be created by clicking the *Create connector* button, which w
 
 [role="screenshot"]
 image::images/connector-select-type.png[Connector select type]
+
+[float]
+[[importing-and-exporting-connectors]]
+=== Importing and exporting connectors
+
+To import and export connectors, use the <<managing-saved-objects, Saved Objects Management UI>>.
+After a successful import, the proper banner is displayed:
+[role="screenshot"]
+image::images/coonectors-import-banner.png[Connectors import banner, width=50%]
+
+If a connector is missing user sensitive information because of the import,  a **Fix** button appears in the list view.
+[role="screenshot"]
+image::images/connectors-with-missing-secrets.png[Connectors with missing secrets]
 
 [float]
 [[create-connectors]]

@@ -360,7 +360,9 @@ export const convertTimelineAsInput = (
       } else if (key === 'columns' && get(key, timeline) != null) {
         return set(
           key,
-          get(key, timeline).map((col: ColumnHeaderOptions) => omit(['width', '__typename'], col)),
+          get(key, timeline).map((col: ColumnHeaderOptions) =>
+            omit(['initialWidth', 'width', '__typename'], col)
+          ),
           acc
         );
       } else if (key === 'filters' && get(key, timeline) != null) {

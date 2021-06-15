@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import { SavedObjectAttributes } from '../../../../core/public';
+import type { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
+import type { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+
 import { extractSearchSourceReferences } from '../../../data/public';
-import { SavedObjectReference } from '../../../../core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
 
 import {
   EmbeddableFactoryDefinition,
@@ -21,8 +21,8 @@ import {
   IContainer,
   AttributeService,
 } from '../../../embeddable/public';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import {
+import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
   VisualizeEmbeddable,
@@ -31,7 +31,8 @@ import {
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { SerializedVis, Vis } from '../vis';
+import type { SerializedVis, Vis } from '../vis';
+import { createVisAsync } from '../vis_async';
 import {
   getCapabilities,
   getTypes,
@@ -47,10 +48,10 @@ import {
   injectControlsReferences,
 } from '../saved_visualizations/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { StartServicesGetter } from '../../../kibana_utils/public';
-import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { checkForDuplicateTitle } from '../../../saved_objects/public';
+import type { StartServicesGetter } from '../../../kibana_utils/public';
+import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -147,8 +148,8 @@ export class VisualizeEmbeddableFactory
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
       const visState = convertToSerializedVis(savedObject);
-      const vis = new Vis(savedObject.visState.type, visState);
-      await vis.setState(visState);
+      const vis = await createVisAsync(savedObject.visState.type, visState);
+
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
@@ -167,8 +168,7 @@ export class VisualizeEmbeddableFactory
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (input.savedVis) {
       const visState = input.savedVis;
-      const vis = new Vis(visState.type, visState);
-      await vis.setState(visState);
+      const vis = await createVisAsync(visState.type, visState);
       const savedVisualizations = getSavedVisualizationsLoader();
       return createVisEmbeddableFromObject(this.deps)(
         vis,

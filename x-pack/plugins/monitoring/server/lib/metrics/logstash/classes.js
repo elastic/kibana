@@ -263,9 +263,21 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
             unit: NORMALIZED_DERIVATIVE_UNIT,
           },
         },
+        metric_mb_deriv: {
+          derivative: {
+            buckets_path: 'sum_mb',
+            gap_policy: 'skip',
+            unit: NORMALIZED_DERIVATIVE_UNIT,
+          },
+        },
         sum: {
           sum_bucket: {
             buckets_path: 'by_node_id>nest>pipeline>events_stats',
+          },
+        },
+        sum_mb: {
+          sum_bucket: {
+            buckets_path: 'by_node_id>nest_mb>pipeline>events_stats',
           },
         },
         by_node_id: {
@@ -290,6 +302,27 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
                     events_stats: {
                       max: {
                         field: this.field,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            nest_mb: {
+              nested: {
+                path: 'logstash.node.stats.pipelines',
+              },
+              aggs: {
+                pipeline: {
+                  filter: {
+                    term: {
+                      'logstash.node.stats.pipelines.id': pipeline.id,
+                    },
+                  },
+                  aggs: {
+                    events_stats: {
+                      max: {
+                        field: this.mbField,
                       },
                     },
                   },
@@ -342,12 +375,42 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
             },
           },
         },
+        pipelines_mb_nested: {
+          nested: {
+            path: 'logstash.node.stats.pipelines',
+          },
+          aggs: {
+            by_pipeline_id: {
+              terms: {
+                field: 'logstash.node.stats.pipelines.id',
+                size: 1000,
+                ...termAggExtras,
+              },
+              aggs: {
+                to_root: {
+                  reverse_nested: {},
+                  aggs: {
+                    node_count: {
+                      cardinality: {
+                        field: this.field,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       };
     };
 
     this.calculation = (bucket) => {
       const pipelineNodesCounts = {};
-      const pipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
+      const legacyPipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
+      const mbPiplineBuckets = _.get(bucket, 'pipelines_mb_nested.by_pipeline_id.buckets', []);
+      const pipelineBuckets = legacyPipelineBuckets.length
+        ? legacyPipelineBuckets
+        : mbPiplineBuckets;
       pipelineBuckets.forEach((pipelineBucket) => {
         pipelineNodesCounts[pipelineBucket.key] = _.get(pipelineBucket, 'to_root.node_count.value');
       });

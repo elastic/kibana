@@ -15,6 +15,7 @@ import {
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { MapEmbeddableInput } from '../../../../../plugins/maps/public/embeddable';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -102,6 +103,31 @@ export function savedMap(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.map,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedMap.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'map',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedMap.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

@@ -27,7 +27,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
         <p>
           <FormattedMessage
             id="indexPatternManagement.warningCallOutLabel.callOutDetail"
-            defaultMessage="Please familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature.
+            defaultMessage="Familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature.
             Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and,
             if done incorrectly, can cause Kibana to become unusable."
             values={{
@@ -58,7 +58,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
         title={
           <FormattedMessage
             id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
-            defaultMessage="Scripted fields are deprecated."
+            defaultMessage="Scripted fields are deprecated"
             description="Deprecation warning title within scripted field editor"
           />
         }
@@ -67,13 +67,13 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
           <p>
             <FormattedMessage
               id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-              defaultMessage="For greater flexibility and Painless script support, {runtimeDocs}."
+              defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
               values={{
                 runtimeDocs: (
                   <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
                     <FormattedMessage
                       id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                      defaultMessage="use runtime fields"
+                      defaultMessage="runtime fields"
                     />
                   </EuiLink>
                 ),

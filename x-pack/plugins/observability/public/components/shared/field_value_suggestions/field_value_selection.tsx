@@ -16,19 +16,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { isEqual } from 'lodash';
 import { FieldValueSelectionProps } from './types';
 
-const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
+const formatOptions = (values?: string[], selectedValue?: string[]): EuiSelectableOption[] => {
   return (values ?? []).map((val) => ({
     label: val,
-    ...(value === val ? { checked: 'on' } : {}),
+    ...(selectedValue?.includes(val) ? { checked: 'on' } : {}),
   }));
 };
 
 export function FieldValueSelection({
   fullWidth,
   label,
-  value,
+  selectedValue,
   loading,
   values,
   setQuery,
@@ -39,12 +40,15 @@ export function FieldValueSelection({
   singleSelection,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
-  const [options, setOptions] = useState<EuiSelectableOption[]>(formatOptions(values, value));
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    formatOptions(values, selectedValue ?? [])
+  );
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
-    setOptions(formatOptions(values, value));
-  }, [values, value]);
+    setOptions(formatOptions(values, selectedValue));
+  }, [values, selectedValue]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -76,6 +80,14 @@ export function FieldValueSelection({
       {label}
     </EuiButton>
   );
+
+  const applyDisabled = () => {
+    const currSelected = (options ?? [])
+      .filter((opt) => opt?.checked === 'on')
+      .map(({ label: labelN }) => labelN);
+
+    return isEqual(selectedValue ?? [], currSelected);
+  };
 
   return (
     <Wrapper>
@@ -111,13 +123,10 @@ export function FieldValueSelection({
                 <EuiButton
                   size="s"
                   fullWidth
-                  disabled={
-                    !value &&
-                    (options.length === 0 || !options.find((opt) => opt?.checked === 'on'))
-                  }
+                  isDisabled={applyDisabled()}
                   onClick={() => {
-                    const selected = options.find((opt) => opt?.checked === 'on');
-                    onSelectionChange(selected?.label);
+                    const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
+                    onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
                     setIsPopoverOpen(false);
                   }}
                 >

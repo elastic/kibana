@@ -55,6 +55,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="uptimeDismissSyntheticsCallout"
                 onClick={[Function]}
               >
                 <FormattedMessage
@@ -115,6 +116,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButtonEmpty
+                data-test-subj="uptimeDismissSyntheticsCallout"
                 onClick={[Function]}
               >
                 <FormattedMessage

@@ -28,14 +28,18 @@ import {
   SubCaseAttributes,
   User,
 } from '../../../common/api';
-import { transformESConnectorToCaseConnector } from '../../routes/api/cases/helpers';
 import {
+  transformESConnectorToCaseConnector,
   flattenCommentSavedObjects,
   flattenSubCaseSavedObject,
   transformNewComment,
-} from '../../routes/api/utils';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
-import { CaseServiceSetup } from '../../services';
+} from '..';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
 
@@ -52,8 +56,9 @@ interface NewCommentResp {
 interface CommentableCaseParams {
   collection: SavedObject<ESCaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
-  soClient: SavedObjectsClientContract;
-  service: CaseServiceSetup;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  caseService: CasesService;
+  attachmentService: AttachmentService;
   logger: Logger;
 }
 
@@ -64,15 +69,24 @@ interface CommentableCaseParams {
 export class CommentableCase {
   private readonly collection: SavedObject<ESCaseAttributes>;
   private readonly subCase?: SavedObject<SubCaseAttributes>;
-  private readonly soClient: SavedObjectsClientContract;
-  private readonly service: CaseServiceSetup;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  private readonly caseService: CasesService;
+  private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
 
-  constructor({ collection, subCase, soClient, service, logger }: CommentableCaseParams) {
+  constructor({
+    collection,
+    subCase,
+    unsecuredSavedObjectsClient,
+    caseService,
+    attachmentService,
+    logger,
+  }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
-    this.soClient = soClient;
-    this.service = service;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
+    this.caseService = caseService;
+    this.attachmentService = attachmentService;
     this.logger = logger;
   }
 
@@ -109,6 +123,10 @@ export class CommentableCase {
     return this.subCase?.id;
   }
 
+  private get owner(): string {
+    return this.collection.attributes.owner;
+  }
+
   private buildRefsToCase(): SavedObjectReference[] {
     const subCaseSOType = SUB_CASE_SAVED_OBJECT;
     const caseSOType = CASE_SAVED_OBJECT;
@@ -129,8 +147,8 @@ export class CommentableCase {
       let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
 
       if (this.subCase) {
-        const updatedSubCase = await this.service.patchSubCase({
-          client: this.soClient,
+        const updatedSubCase = await this.caseService.patchSubCase({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           subCaseId: this.subCase.id,
           updatedAttributes: {
             updated_at: date,
@@ -151,8 +169,8 @@ export class CommentableCase {
         };
       }
 
-      const updatedCase = await this.service.patchCase({
-        client: this.soClient,
+      const updatedCase = await this.caseService.patchCase({
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseId: this.collection.id,
         updatedAttributes: {
           updated_at: date,
@@ -172,8 +190,9 @@ export class CommentableCase {
           version: updatedCase.version ?? this.collection.version,
         },
         subCase: updatedSubCaseAttributes,
-        soClient: this.soClient,
-        service: this.service,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+        caseService: this.caseService,
+        attachmentService: this.attachmentService,
         logger: this.logger,
       });
     } catch (error) {
@@ -201,9 +220,9 @@ export class CommentableCase {
       const { id, version, ...queryRestAttributes } = updateRequest;
 
       const [comment, commentableCase] = await Promise.all([
-        this.service.patchComment({
-          client: this.soClient,
-          commentId: id,
+        this.attachmentService.update({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          attachmentId: id,
           updatedAttributes: {
             ...queryRestAttributes,
             updated_at: updatedAt,
@@ -233,10 +252,12 @@ export class CommentableCase {
     createdDate,
     user,
     commentReq,
+    id,
   }: {
     createdDate: string;
     user: User;
     commentReq: CommentRequest;
+    id: string;
   }): Promise<NewCommentResp> {
     try {
       if (commentReq.type === CommentType.alert) {
@@ -249,9 +270,13 @@ export class CommentableCase {
         }
       }
 
+      if (commentReq.owner !== this.owner) {
+        throw Boom.badRequest('The owner field of the comment must match the case');
+      }
+
       const [comment, commentableCase] = await Promise.all([
-        this.service.postNewComment({
-          client: this.soClient,
+        this.attachmentService.create({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           attributes: transformNewComment({
             associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
             createdDate,
@@ -259,6 +284,7 @@ export class CommentableCase {
             ...user,
           }),
           references: this.buildRefsToCase(),
+          id,
         }),
         this.update({ date: createdDate, user }),
       ]);
@@ -287,23 +313,13 @@ export class CommentableCase {
 
   public async encode(): Promise<CaseResponse> {
     try {
-      const collectionCommentStats = await this.service.getAllCaseComments({
-        client: this.soClient,
+      const collectionComments = await this.caseService.getAllCaseComments({
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         id: this.collection.id,
         options: {
           fields: [],
           page: 1,
-          perPage: 1,
-        },
-      });
-
-      const collectionComments = await this.service.getAllCaseComments({
-        client: this.soClient,
-        id: this.collection.id,
-        options: {
-          fields: [],
-          page: 1,
-          perPage: collectionCommentStats.total,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       });
 
@@ -313,12 +329,12 @@ export class CommentableCase {
       const caseResponse = {
         comments: flattenCommentSavedObjects(collectionComments.saved_objects),
         totalAlerts: collectionTotalAlerts,
-        ...this.formatCollectionForEncoding(collectionCommentStats.total),
+        ...this.formatCollectionForEncoding(collectionComments.total),
       };
 
       if (this.subCase) {
-        const subCaseComments = await this.service.getAllSubCaseComments({
-          client: this.soClient,
+        const subCaseComments = await this.caseService.getAllSubCaseComments({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           id: this.subCase.id,
         });
         const totalAlerts =

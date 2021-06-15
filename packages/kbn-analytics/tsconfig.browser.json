@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.browser.json",
+  "compilerOptions": {
+    "incremental": true,
+    "outDir": "./target_web",
+    "stripInternal": true,
+    "declaration": false,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-analytics/src",
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

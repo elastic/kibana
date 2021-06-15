@@ -9,39 +9,43 @@
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { InterfaceDeclaration } from 'ts-morph';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
-import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { buildApiDeclaration } from './build_api_declaration';
-import { getSourceForNode } from './utils';
-import { getApiSectionId, isInternal } from '../utils';
-import { getSignature } from './get_signature';
+import { isInternal } from '../utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 export function buildInterfaceDec(
   node: InterfaceDeclaration,
   plugins: KibanaPlatformPlugin[],
   anchorLink: AnchorLink,
-  log: ToolingLog
+  currentPluginId: string,
+  log: ToolingLog,
+  captureReferences: boolean
 ): ApiDeclaration {
   return {
-    id: getApiSectionId(anchorLink),
+    ...buildBasicApiDeclaration({
+      currentPluginId,
+      anchorLink,
+      node,
+      plugins,
+      log,
+      captureReferences,
+      apiName: node.getName(),
+    }),
     type: TypeKind.InterfaceKind,
-    label: node.getName(),
-    signature: getSignature(node, plugins, log),
-    description: getCommentsFromNode(node),
-    tags: getJSDocTagNames(node),
     children: node.getMembers().reduce((acc, m) => {
-      const child = buildApiDeclaration(
-        m,
+      const child = buildApiDeclaration({
+        node: m,
         plugins,
         log,
-        anchorLink.pluginName,
-        anchorLink.scope,
-        anchorLink.apiName
-      );
+        currentPluginId: anchorLink.pluginName,
+        scope: anchorLink.scope,
+        captureReferences,
+        parentApiId: anchorLink.apiName,
+      });
       if (!isInternal(child)) {
         acc.push(child);
       }
       return acc;
     }, [] as ApiDeclaration[]),
-    source: getSourceForNode(node),
   };
 }

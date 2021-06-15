@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
-import { UXHasDataResponse } from '../../../../typings/fetch_overview_data';
+import { HasDataResponse } from '../../../../typings/fetch_overview_data';
 
 export interface IIndexPatternContext {
   loading: boolean;
@@ -48,7 +48,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const checkIfAppHasData = async (dataType: AppDataType) => {
-    const handler = getDataHandler(dataType === 'synthetics' ? 'uptime' : dataType);
+    const handler = getDataHandler(dataType);
     return handler?.hasData();
   };
 
@@ -59,17 +59,15 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
       if (hasAppData[dataType] === null) {
         setLoading(true);
         try {
-          let hasDataT = await checkIfAppHasData(dataType);
+          const hasDataResponse = (await checkIfAppHasData(dataType)) as HasDataResponse;
 
-          if (dataType === 'ux') {
-            hasDataT = (hasDataT as UXHasDataResponse).hasData as boolean;
-          }
+          const hasDataT = hasDataResponse.hasData;
 
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT || hasAppData?.[dataType]) {
             const obsvIndexP = new ObservabilityIndexPatterns(data);
-            const indPattern = await obsvIndexP.getIndexPattern(dataType);
+            const indPattern = await obsvIndexP.getIndexPattern(dataType, hasDataResponse.indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }

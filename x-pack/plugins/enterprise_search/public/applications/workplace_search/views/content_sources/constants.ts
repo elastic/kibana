@@ -257,6 +257,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -295,7 +302,7 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 

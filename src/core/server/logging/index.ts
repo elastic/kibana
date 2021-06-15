@@ -9,6 +9,11 @@ export { LogLevel } from '@kbn/logging';
 export type {
   DisposableAppender,
   Appender,
+  Ecs,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
   LogRecord,
   Layout,
   LoggerFactory,
@@ -16,8 +21,6 @@ export type {
   Logger,
   LogLevelId,
 } from '@kbn/logging';
-export { EcsEventType, EcsEventCategory, EcsEventKind } from './ecs';
-export type { EcsEvent } from './ecs';
 export { config } from './logging_config';
 export type {
   LoggingConfigType,

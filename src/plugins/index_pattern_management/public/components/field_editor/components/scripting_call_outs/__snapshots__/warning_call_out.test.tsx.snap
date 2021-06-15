@@ -12,7 +12,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Please familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable."
+          defaultMessage="Familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable."
           id="indexPatternManagement.warningCallOutLabel.callOutDetail"
           values={
             Object {
@@ -38,7 +38,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           }
         >
           <span>
-            Please familiarize yourself with 
+            Familiarize yourself with 
             <EuiLink
               target="_blank"
             >
@@ -96,7 +96,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     iconType="alert"
     title={
       <FormattedMessage
-        defaultMessage="Scripted fields are deprecated."
+        defaultMessage="Scripted fields are deprecated"
         description="Deprecation warning title within scripted field editor"
         id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
         values={Object {}}
@@ -112,12 +112,14 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -126,13 +128,13 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           className="euiCallOutHeader__title"
         >
           <FormattedMessage
-            defaultMessage="Scripted fields are deprecated."
+            defaultMessage="Scripted fields are deprecated"
             description="Deprecation warning title within scripted field editor"
             id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
             values={Object {}}
           >
             <span>
-              Scripted fields are deprecated.
+              Scripted fields are deprecated
             </span>
           </FormattedMessage>
         </span>
@@ -151,7 +153,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             >
               <p>
                 <FormattedMessage
-                  defaultMessage="For greater flexibility and Painless script support, {runtimeDocs}."
+                  defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
                   id="indexPatternManagement.scriptedFieldsDeprecatedBody"
                   values={
                     Object {
@@ -159,7 +161,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                         target="_blank"
                       >
                         <FormattedMessage
-                          defaultMessage="use runtime fields"
+                          defaultMessage="runtime fields"
                           id="indexPatternManagement.warningCallOutLabel.runtimeLink"
                           values={Object {}}
                         />
@@ -168,7 +170,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                   }
                 >
                   <span>
-                    For greater flexibility and Painless script support, 
+                    For greater flexibility and Painless script support, use 
                     <EuiLink
                       target="_blank"
                     >
@@ -178,12 +180,12 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                         type="button"
                       >
                         <FormattedMessage
-                          defaultMessage="use runtime fields"
+                          defaultMessage="runtime fields"
                           id="indexPatternManagement.warningCallOutLabel.runtimeLink"
                           values={Object {}}
                         >
                           <span>
-                            use runtime fields
+                            runtime fields
                           </span>
                         </FormattedMessage>
                       </button>

@@ -35,7 +35,7 @@ export async function deleteKibanaIndices({
   await client.indices.putSettings(
     {
       index: indexNames,
-      body: { index: { blocks: { read_only: false } } },
+      body: { settings: { blocks: { read_only: false } } },
     },
     {
       headers: ES_CLIENT_HEADERS,
@@ -165,6 +165,7 @@ export async function createDefaultSpace({
     {
       index,
       id: 'space:default',
+      refresh: 'wait_for',
       body: {
         type: 'space',
         updated_at: new Date().toISOString(),

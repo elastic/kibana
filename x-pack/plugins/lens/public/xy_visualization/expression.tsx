@@ -55,8 +55,9 @@ import {
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
-import { getAxesConfiguration } from './axes_configuration';
+import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
+import { getXDomain, XyEndzones } from './x_domain';
 
 declare global {
   interface Window {
@@ -134,6 +135,18 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Y right axis title',
       }),
     },
+    yLeftExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftExtent.help', {
+        defaultMessage: 'Y left axis extents',
+      }),
+    },
+    yRightExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yRightExtent.help', {
+        defaultMessage: 'Y right axis extents',
+      }),
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
@@ -183,6 +196,26 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
     },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
+      }),
+    },
+    hideEndzones: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
+        defaultMessage: 'Hide endzone markers for partial data',
+      }),
+    },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -196,7 +229,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -254,7 +287,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -330,9 +363,20 @@ export function XYChart({
   renderMode,
   syncColors,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
+  const {
+    legend,
+    layers,
+    fittingFunction,
+    gridlinesVisibilitySettings,
+    valueLabels,
+    hideEndzones,
+    yLeftExtent,
+    yRightExtent,
+    valuesInLegend,
+  } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
   if (filteredLayers.length === 0) {
@@ -387,15 +431,13 @@ export function XYChart({
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval,
-      }
-    : isHistogramViz
-    ? { minInterval }
-    : undefined;
+  const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    layers,
+    data,
+    minInterval,
+    Boolean(isTimeViz),
+    Boolean(isHistogramViz)
+  );
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -429,6 +471,33 @@ export function XYChart({
       },
     };
     return style;
+  };
+
+  const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
+    const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
+    const hasBarOrArea = Boolean(
+      axis.series.some((series) => {
+        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
+    );
+    const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+    let min: undefined | number;
+    let max: undefined | number;
+
+    if (extent.mode === 'custom') {
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound;
+        max = extent.upperBound;
+      }
+    }
+
+    return {
+      fit,
+      min,
+      max,
+    };
   };
 
   const shouldShowValueLabels =
@@ -541,7 +610,6 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend.position}
-        showLegendExtra={false}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -561,6 +629,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis
@@ -583,24 +652,43 @@ export function XYChart({
         }}
       />
 
-      {yAxesConfiguration.map((axis) => (
-        <Axis
-          key={axis.groupId}
-          id={axis.groupId}
-          groupId={axis.groupId}
-          position={axis.position}
-          title={getYAxesTitles(axis.series, axis.groupId)}
-          gridLine={{
-            visible:
-              axis.groupId === 'right'
-                ? gridlinesVisibilitySettings?.yRight
-                : gridlinesVisibilitySettings?.yLeft,
-          }}
-          hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter?.convert(d) || ''}
-          style={getYAxesStyle(axis.groupId)}
+      {yAxesConfiguration.map((axis) => {
+        return (
+          <Axis
+            key={axis.groupId}
+            id={axis.groupId}
+            groupId={axis.groupId}
+            position={axis.position}
+            title={getYAxesTitles(axis.series, axis.groupId)}
+            gridLine={{
+              visible:
+                axis.groupId === 'right'
+                  ? gridlinesVisibilitySettings?.yRight
+                  : gridlinesVisibilitySettings?.yLeft,
+            }}
+            hide={filteredLayers[0].hide}
+            tickFormat={(d) => axis.formatter?.convert(d) || ''}
+            style={getYAxesStyle(axis.groupId)}
+            domain={getYAxisDomain(axis)}
+          />
+        );
+      })}
+
+      {!hideEndzones && (
+        <XyEndzones
+          baseDomain={rawXDomain}
+          extendedDomain={xDomain}
+          darkMode={darkMode}
+          histogramMode={filteredLayers.every(
+            (layer) =>
+              layer.isHistogram &&
+              (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
+              (layer.seriesType.includes('stacked') ||
+                !layer.seriesType.includes('bar') ||
+                !chartHasMoreThanOneBarSeries)
+          )}
         />
-      ))}
+      )}
 
       {filteredLayers.flatMap((layer, layerIndex) =>
         layer.accessors.map((accessor, accessorIndex) => {
@@ -718,7 +806,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,
@@ -738,6 +826,7 @@ export function XYChart({
                 visible: !xAccessor,
                 radius: 5,
               },
+              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
             },
             lineSeriesStyle: {
               point: {

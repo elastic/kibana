@@ -78,25 +78,6 @@ describe('loadAlertType', () => {
 
     expect(await loadAlertType({ http, id: 'test-another' })).toEqual(alertType);
   });
-
-  test('should throw if required alertType is missing', async () => {
-    http.get.mockResolvedValueOnce([
-      {
-        id: 'test-another',
-        name: 'Test Another',
-        actionVariables: [],
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        recoveryActionGroup: RecoveredActionGroup,
-        producer: 'alerts',
-      },
-    ]);
-
-    expect(loadAlertType({ http, id: 'test' })).rejects.toMatchInlineSnapshot(
-      `[Error: Alert type "test" is not registered.]`
-    );
-  });
 });
 
 describe('loadAlert', () => {

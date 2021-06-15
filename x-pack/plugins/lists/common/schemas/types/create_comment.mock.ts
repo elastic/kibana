@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateComment, CreateCommentsArray } from './create_comment';
+import type { CreateComment, CreateCommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getCreateCommentsMock = (): CreateComment => ({
   comment: 'some comments',

@@ -129,6 +129,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            toggleTopN={toggleTopN}
             timelineId={timelineId}
             to={to}
           />

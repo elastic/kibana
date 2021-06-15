@@ -7,8 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { IndexPattern } from '..';
+import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
 import type { RequestAdapter } from '../../../inspector/common';
 
 export type ISearchGeneric = <

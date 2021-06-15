@@ -3,26 +3,41 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "reporting",
         "id": "def-public.ReportingAPIClient",
         "type": "Class",
         "tags": [],
         "label": "ReportingAPIClient",
         "description": [],
+        "source": {
+          "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-public.ReportingAPIClient.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "http",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -32,490 +47,554 @@
                     "text": "HttpSetup"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 50
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 50
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getReportURL",
             "type": "Function",
+            "tags": [],
             "label": "getReportURL",
+            "description": [],
             "signature": [
               "(jobId: string) => string"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.getReportURL.$1",
-                "type": "string",
-                "label": "jobId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 54
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 54
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getReportURL.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.downloadReport",
             "type": "Function",
+            "tags": [],
             "label": "downloadReport",
+            "description": [],
             "signature": [
               "(jobId: string) => void"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.downloadReport.$1",
-                "type": "string",
-                "label": "jobId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 61
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 61
-            }
-          },
-          {
-            "id": "def-public.ReportingAPIClient.deleteReport",
-            "type": "Function",
-            "label": "deleteReport",
-            "signature": [
-              "(jobId: string) => Promise<any>"
-            ],
-            "description": [],
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.ReportingAPIClient.deleteReport.$1",
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.downloadReport.$1",
                 "type": "string",
+                "tags": [],
                 "label": "jobId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 67
-                }
+                  "lineNumber": 61
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.deleteReport",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
+            "label": "deleteReport",
+            "description": [],
+            "signature": [
+              "(jobId: string) => Promise<any>"
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 67
-            }
-          },
-          {
-            "id": "def-public.ReportingAPIClient.list",
-            "type": "Function",
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.ReportingAPIClient.list.$1",
-                "type": "number",
-                "label": "page",
-                "isRequired": true,
-                "signature": [
-                  "number"
-                ],
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.deleteReport.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 73
-                }
-              },
-              {
-                "id": "def-public.ReportingAPIClient.list.$2",
-                "type": "Array",
-                "label": "jobIds",
-                "isRequired": true,
-                "signature": [
-                  "string[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 73
-                }
+                  "lineNumber": 67
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
             "signature": [
               "(page?: number, jobIds?: string[]) => Promise<",
               "JobQueueEntry",
               "[]>"
             ],
-            "description": [],
-            "label": "list",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 73
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.list.$1",
+                "type": "number",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 73
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.list.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "jobIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 73
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.total",
             "type": "Function",
+            "tags": [],
             "label": "total",
+            "description": [],
             "signature": [
               "() => Promise<number>"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 86
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getContent",
             "type": "Function",
+            "tags": [],
             "label": "getContent",
+            "description": [],
             "signature": [
               "(jobId: string) => Promise<",
               "JobContent",
               ">"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.getContent.$1",
-                "type": "string",
-                "label": "jobId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 92
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 92
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getContent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 92
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getInfo",
             "type": "Function",
+            "tags": [],
             "label": "getInfo",
+            "description": [],
             "signature": [
               "(jobId: string) => Promise<",
               "ReportApiJSON",
               ">"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.getInfo.$1",
-                "type": "string",
-                "label": "jobId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 98
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 98
-            }
-          },
-          {
-            "id": "def-public.ReportingAPIClient.findForJobIds",
-            "type": "Function",
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.ReportingAPIClient.findForJobIds.$1",
-                "type": "Array",
-                "label": "jobIds",
-                "isRequired": true,
-                "signature": [
-                  "string[]"
-                ],
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getInfo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 104
-                }
+                  "lineNumber": 98
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.findForJobIds",
+            "type": "Function",
+            "tags": [],
+            "label": "findForJobIds",
+            "description": [],
             "signature": [
               "(jobIds: string[]) => Promise<",
               "ReportDocument",
               "[]>"
             ],
-            "description": [],
-            "label": "findForJobIds",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 104
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.findForJobIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "jobIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 104
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getReportingJobPath",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.getReportingJobPath.$1",
-                "type": "string",
-                "label": "exportType",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 114
-                }
-              },
-              {
-                "id": "def-public.ReportingAPIClient.getReportingJobPath.$2",
-                "type": "Object",
-                "label": "jobParams",
-                "isRequired": true,
-                "signature": [
-                  "JobParams"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 114
-                }
-              }
-            ],
+            "tags": [],
+            "label": "getReportingJobPath",
+            "description": [],
             "signature": [
               "(exportType: string, jobParams: JobParams) => string"
             ],
-            "description": [],
-            "label": "getReportingJobPath",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 114
             },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.ReportingAPIClient.createReportingJob",
-            "type": "Function",
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.ReportingAPIClient.createReportingJob.$1",
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.$1",
                 "type": "string",
+                "tags": [],
                 "label": "exportType",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 122
-                }
+                  "lineNumber": 114
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
-                "id": "def-public.ReportingAPIClient.createReportingJob.$2",
-                "type": "Any",
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "jobParams",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
                 "description": [],
+                "signature": [
+                  "JobParams"
+                ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 122
-                }
+                  "lineNumber": 114
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.createReportingJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createReportingJob",
+            "description": [],
             "signature": [
               "(exportType: string, jobParams: any) => Promise<any>"
             ],
-            "description": [],
-            "label": "createReportingJob",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 122
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.createReportingJob.$1",
+                "type": "string",
+                "tags": [],
+                "label": "exportType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 122
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.createReportingJob.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "jobParams",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 122
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getManagementLink",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "getManagementLink",
+            "description": [],
             "signature": [
               "() => string"
             ],
-            "description": [],
-            "label": "getManagementLink",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 136
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getDownloadLink",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.ReportingAPIClient.getDownloadLink.$1",
-                "type": "string",
-                "label": "jobId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 139
-                }
-              }
-            ],
+            "tags": [],
+            "label": "getDownloadLink",
+            "description": [],
             "signature": [
               "(jobId: string) => string"
             ],
-            "description": [],
-            "label": "getDownloadLink",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 139
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getDownloadLink.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
+                  "lineNumber": 139
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getServerBasePath",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "getServerBasePath",
+            "description": [],
             "signature": [
               "() => string"
             ],
-            "description": [],
-            "label": "getServerBasePath",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 145
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.verifyConfig",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "verifyConfig",
+            "description": [],
             "signature": [
               "() => Promise<",
               "DiagnoseResponse",
               ">"
             ],
-            "description": [],
-            "label": "verifyConfig",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 150
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.verifyBrowser",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "verifyBrowser",
+            "description": [],
             "signature": [
               "() => Promise<",
               "DiagnoseResponse",
               ">"
             ],
-            "description": [],
-            "label": "verifyBrowser",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 158
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.verifyScreenCapture",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "verifyScreenCapture",
+            "description": [],
             "signature": [
               "() => Promise<",
               "DiagnoseResponse",
               ">"
             ],
-            "description": [],
-            "label": "verifyScreenCapture",
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 166
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-          "lineNumber": 47
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "reporting",
         "id": "def-public.ReportingPublicPlugin",
         "type": "Class",
         "tags": [],
@@ -554,23 +633,40 @@
             "text": "ReportingSetup"
           },
           ", ",
-          "ReportingPublicPluginSetupDendencies"
+          "ReportingPublicPluginSetupDendencies",
+          ", ",
+          "ReportingPublicPluginStartDendencies",
+          ">"
         ],
+        "source": {
+          "path": "x-pack/plugins/reporting/public/plugin.ts",
+          "lineNumber": 81
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingPublicPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 99
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-public.ReportingPublicPlugin.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "initializerContext",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -581,24 +677,23 @@
                   },
                   "<object>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 107
-                }
+                  "lineNumber": 99
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 107
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingPublicPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -608,7 +703,7 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { home, management, licensing, uiActions, share }: ",
+              "<object, unknown>, setupDeps: ",
               "ReportingPublicPluginSetupDendencies",
               ") => ",
               {
@@ -619,13 +714,19 @@
                 "text": "ReportingSetup"
               }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 110
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-public.ReportingPublicPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -636,38 +737,40 @@
                   },
                   "<object, unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 112
-                }
+                  "lineNumber": 110
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-public.ReportingPublicPlugin.setup.$2",
                 "type": "Object",
-                "label": "{ home, management, licensing, uiActions, share }",
-                "isRequired": true,
+                "tags": [],
+                "label": "setupDeps",
+                "description": [],
                 "signature": [
                   "ReportingPublicPluginSetupDendencies"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 113
-                }
+                  "lineNumber": 110
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 111
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingPublicPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -686,13 +789,19 @@
                 "text": "ReportingSetup"
               }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 190
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-public.ReportingPublicPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -702,60 +811,56 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 175
-                }
+                  "lineNumber": 190
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 175
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingPublicPlugin.stop",
             "type": "Function",
+            "tags": [],
             "label": "stop",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 194
-            }
+              "lineNumber": 209
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/public/plugin.ts",
-          "lineNumber": 85
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
+        "parentPluginId": "reporting",
         "id": "def-public.getDefaultLayoutSelectors",
         "type": "Function",
-        "children": [],
+        "tags": [],
+        "label": "getDefaultLayoutSelectors",
+        "description": [],
         "signature": [
           "() => ",
           "LayoutSelectorDictionary"
         ],
-        "description": [],
-        "label": "getDefaultLayoutSelectors",
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",
           "lineNumber": 14
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -765,18 +870,26 @@
     "misc": [],
     "objects": [],
     "start": {
+      "parentPluginId": "reporting",
       "id": "def-public.ReportingStart",
       "type": "Type",
-      "label": "ReportingStart",
       "tags": [],
+      "label": "ReportingStart",
       "description": [],
+      "signature": [
+        {
+          "pluginId": "reporting",
+          "scope": "public",
+          "docId": "kibReportingPluginApi",
+          "section": "def-public.ReportingSetup",
+          "text": "ReportingSetup"
+        }
+      ],
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
-        "lineNumber": 23
+        "lineNumber": 24
       },
-      "signature": [
-        "ReportingSetup"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -784,40 +897,83 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingCore",
         "type": "Class",
         "tags": [],
         "label": "ReportingCore",
         "description": [],
+        "source": {
+          "path": "x-pack/plugins/reporting/server/core.ts",
+          "lineNumber": 60
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getContract",
+            "type": "Function",
+            "tags": [],
+            "label": "getContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 72
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 74
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "logger",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "LevelLogger"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 69
-                }
+                  "lineNumber": 74
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.Unnamed.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "context",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -826,142 +982,157 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 69
-                }
+                  "lineNumber": 74
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 69
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.pluginSetup",
             "type": "Function",
+            "tags": [],
             "label": "pluginSetup",
+            "description": [],
             "signature": [
               "(setupDeps: ",
               "ReportingInternalSetup",
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 90
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.pluginSetup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "setupDeps",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "ReportingInternalSetup"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 79
-                }
+                  "lineNumber": 90
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 79
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.pluginStart",
             "type": "Function",
+            "tags": [],
             "label": "pluginStart",
+            "description": [],
             "signature": [
               "(startDeps: ",
               "ReportingInternalStart",
               ") => Promise<void>"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 104
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.pluginStart.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "startDeps",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "ReportingInternalStart"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 93
-                }
+                  "lineNumber": 104
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 93
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.pluginSetsUp",
             "type": "Function",
+            "tags": [],
             "label": "pluginSetsUp",
+            "description": [],
             "signature": [
               "() => Promise<boolean>"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 106
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginStartsUp",
-            "type": "Function",
-            "label": "pluginStartsUp",
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 117
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.pluginStartsUp",
+            "type": "Function",
+            "tags": [],
+            "label": "pluginStartsUp",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 128
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.pluginIsStarted",
             "type": "Function",
+            "tags": [],
             "label": "pluginIsStarted",
+            "description": [],
             "signature": [
               "() => boolean"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 124
-            }
+              "lineNumber": 135
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.setConfig",
             "type": "Function",
+            "tags": [],
             "label": "setConfig",
+            "description": [],
             "signature": [
               "(config: ",
               {
@@ -973,13 +1144,19 @@
               },
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 142
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.setConfig.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "config",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "reporting",
@@ -989,42 +1166,43 @@
                     "text": "ReportingConfig"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 131
-                }
+                  "lineNumber": 142
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 131
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.registerFeature",
             "type": "Function",
+            "tags": [],
             "label": "registerFeature",
+            "description": [
+              "\nIf xpack.reporting.roles.enabled === true, register Reporting as a feature\nthat is controlled by user role names"
+            ],
             "signature": [
               "() => void"
             ],
-            "description": [
-              "\nRegisters reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 139
-            }
+              "lineNumber": 151
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getConfig",
             "type": "Function",
+            "tags": [],
             "label": "getConfig",
+            "description": [],
             "signature": [
               "() => ",
               {
@@ -1035,54 +1213,78 @@
                 "text": "ReportingConfig"
               }
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 159
-            }
+              "lineNumber": 185
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getDeprecatedAllowedRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeprecatedAllowedRoles",
+            "description": [],
+            "signature": [
+              "() => false | string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 197
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getPluginStartDeps",
             "type": "Function",
+            "tags": [],
             "label": "getPluginStartDeps",
+            "description": [],
             "signature": [
               "() => Promise<",
               "ReportingInternalStart",
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 169
-            }
+              "lineNumber": 204
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getExportTypesRegistry",
             "type": "Function",
+            "tags": [],
             "label": "getExportTypesRegistry",
+            "description": [],
             "signature": [
               "() => ",
               "ExportTypesRegistry"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177
-            }
+              "lineNumber": 212
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.scheduleTask",
             "type": "Function",
+            "tags": [],
             "label": "scheduleTask",
+            "description": [],
             "signature": [
               "(report: ",
               "ReportTaskParams",
@@ -1098,131 +1300,139 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 216
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.scheduleTask.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "report",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "ReportTaskParams",
                   "<",
                   "BasePayload",
                   ">"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 181
-                }
+                  "lineNumber": 216
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 181
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getStore",
             "type": "Function",
+            "tags": [],
             "label": "getStore",
+            "description": [],
             "signature": [
               "() => Promise<",
               "ReportingStore",
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 185
-            }
+              "lineNumber": 220
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getLicenseInfo",
             "type": "Function",
+            "tags": [],
             "label": "getLicenseInfo",
+            "description": [],
             "signature": [
               "() => Promise<Record<string, ",
               "LicenseCheckResult",
               ">>"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 189
-            }
+              "lineNumber": 224
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getScreenshotsObservable",
             "type": "Function",
+            "tags": [],
             "label": "getScreenshotsObservable",
+            "description": [],
             "signature": [
               "() => Promise<",
               "ScreenshotsObservableFn",
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 199
-            }
+              "lineNumber": 234
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getEnableScreenshotMode",
+            "type": "Function",
+            "tags": [],
+            "label": "getEnableScreenshotMode",
+            "description": [],
+            "signature": [
+              "() => () => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 240
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getPluginSetupDeps",
             "type": "Function",
+            "tags": [],
             "label": "getPluginSetupDeps",
+            "description": [],
             "signature": [
               "() => ",
               "ReportingInternalSetup"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 208
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getElasticsearchService",
-            "type": "Function",
-            "label": "getElasticsearchService",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServiceSetup",
-                "text": "ElasticsearchServiceSetup"
-              }
-            ],
-            "description": [],
+              "lineNumber": 248
+            },
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 216
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getUiSettingsServiceFactory",
             "type": "Function",
+            "tags": [],
             "label": "getUiSettingsServiceFactory",
+            "description": [],
             "signature": [
               "(savedObjectsClient: Pick<",
               {
@@ -1232,7 +1442,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1242,13 +1452,19 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 260
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getUiSettingsServiceFactory.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "savedObjectsClient",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Pick<",
                   {
@@ -1258,26 +1474,25 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 225
-                }
+                  "lineNumber": 260
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 225
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getSpaceId",
             "type": "Function",
+            "tags": [],
             "label": "getSpaceId",
+            "description": [],
             "signature": [
               "(request: ",
               {
@@ -1291,13 +1506,19 @@
               "LevelLogger",
               ") => string | undefined"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 266
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getSpaceId.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1308,38 +1529,40 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 231
-                }
+                  "lineNumber": 266
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getSpaceId.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "logger",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "LevelLogger"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 231
-                }
+                  "lineNumber": 266
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 231
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getFakeRequest",
             "type": "Function",
+            "tags": [],
             "label": "getFakeRequest",
+            "description": [],
             "signature": [
               "(baseRequest: object, spaceId: string | undefined, logger?: ",
               "LevelLogger",
@@ -1353,62 +1576,73 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 280
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getFakeRequest.$1",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "baseRequest",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "object"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
-                }
+                  "lineNumber": 280
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getFakeRequest.$2",
                 "type": "string",
+                "tags": [],
                 "label": "spaceId",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   "string | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
-                }
+                  "lineNumber": 280
+                },
+                "deprecated": false,
+                "isRequired": false
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getFakeRequest.$3",
                 "type": "Object",
+                "tags": [],
                 "label": "logger",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "LevelLogger"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
-                }
+                  "lineNumber": 280
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 245
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getUiSettingsClient",
             "type": "Function",
+            "tags": [],
             "label": "getUiSettingsClient",
+            "description": [],
             "signature": [
               "(request: ",
               {
@@ -1430,13 +1664,19 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 300
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getUiSettingsClient.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1447,38 +1687,40 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 265
-                }
+                  "lineNumber": 300
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.getUiSettingsClient.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "logger",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "LevelLogger"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 265
-                }
+                  "lineNumber": 300
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 265
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getDataService",
             "type": "Function",
+            "tags": [],
             "label": "getDataService",
+            "description": [],
             "signature": [
               "() => Promise<",
               {
@@ -1490,19 +1732,21 @@
               },
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 275
-            }
+              "lineNumber": 310
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getEsClient",
             "type": "Function",
+            "tags": [],
             "label": "getEsClient",
+            "description": [],
             "signature": [
               "() => Promise<",
               {
@@ -1514,101 +1758,109 @@
               },
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 280
-            }
+              "lineNumber": 315
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.trackReport",
             "type": "Function",
+            "tags": [],
             "label": "trackReport",
+            "description": [],
             "signature": [
               "(reportId: string) => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 320
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.trackReport.$1",
                 "type": "string",
+                "tags": [],
                 "label": "reportId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 285
-                }
+                  "lineNumber": 320
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 285
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.untrackReport",
             "type": "Function",
+            "tags": [],
             "label": "untrackReport",
+            "description": [],
             "signature": [
               "(reportId: string) => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 324
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingCore.untrackReport.$1",
                 "type": "string",
+                "tags": [],
                 "label": "reportId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 289
-                }
+                  "lineNumber": 324
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 289
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.countConcurrentReports",
             "type": "Function",
+            "tags": [],
             "label": "countConcurrentReports",
+            "description": [],
             "signature": [
               "() => number"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 293
-            }
+              "lineNumber": 328
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 58
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingPlugin",
         "type": "Class",
         "tags": [],
@@ -1630,7 +1882,23 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<object, object, ",
+          "<",
+          {
+            "pluginId": "reporting",
+            "scope": "server",
+            "docId": "kibReportingPluginApi",
+            "section": "def-server.ReportingSetup",
+            "text": "ReportingSetup"
+          },
+          ", ",
+          {
+            "pluginId": "reporting",
+            "scope": "server",
+            "docId": "kibReportingPluginApi",
+            "section": "def-server.ReportingSetup",
+            "text": "ReportingSetup"
+          },
+          ", ",
           {
             "pluginId": "reporting",
             "scope": "server",
@@ -1648,21 +1916,35 @@
           },
           ">"
         ],
+        "source": {
+          "path": "x-pack/plugins/reporting/server/plugin.ts",
+          "lineNumber": 26
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingPlugin.Unnamed.$1",
                 "type": "Object",
-                "label": "context",
-                "isRequired": true,
+                "tags": [],
+                "label": "initContext",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1671,28 +1953,27 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
-                  "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 31
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 31
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -1710,15 +1991,28 @@
                 "section": "def-server.ReportingSetupDeps",
                 "text": "ReportingSetupDeps"
               },
-              ") => {}"
+              ") => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1729,17 +2023,20 @@
                   },
                   "<object, unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 37
-                }
+                  "lineNumber": 35
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingPlugin.setup.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "plugins",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "reporting",
@@ -1749,24 +2046,23 @@
                     "text": "ReportingSetupDeps"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 37
-                }
+                  "lineNumber": 35
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 37
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -1784,15 +2080,28 @@
                 "section": "def-server.ReportingStartDeps",
                 "text": "ReportingStartDeps"
               },
-              ") => {}"
+              ") => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1802,17 +2111,20 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 86
-                }
+                  "lineNumber": 88
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "reporting",
                 "id": "def-server.ReportingPlugin.start.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "plugins",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "reporting",
@@ -1822,34 +2134,29 @@
                     "text": "ReportingStartDeps"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 86
-                }
+                  "lineNumber": 88
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 86
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/plugin.ts",
-          "lineNumber": 25
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingConfig",
         "type": "Interface",
+        "tags": [],
         "label": "ReportingConfig",
+        "description": [],
         "signature": [
           {
             "pluginId": "reporting",
@@ -1858,51 +2165,55 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
           "ByteSizeValue",
-          "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ReportingConfig.kbnConfig",
-            "type": "Object",
-            "label": "kbnConfig",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/config/config.ts",
-              "lineNumber": 58
-            },
-            "signature": [
-              "Config<KbnServerConfigType>"
-            ]
-          }
+          "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/config/config.ts",
           "lineNumber": 57
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingConfig.kbnConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "kbnConfig",
+            "description": [],
+            "signature": [
+              "Config<KbnServerConfigType>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/config/config.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingSetupDeps",
         "type": "Interface",
+        "tags": [],
         "label": "ReportingSetupDeps",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/reporting/server/types.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingSetupDeps.licensing",
             "type": "Object",
+            "tags": [],
             "label": "licensing",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 29
-            },
             "signature": [
               {
                 "pluginId": "licensing",
@@ -1911,18 +2222,20 @@
                 "section": "def-server.LicensingPluginSetup",
                 "text": "LicensingPluginSetup"
               }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.features",
-            "type": "Object",
-            "label": "features",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 30
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
             "signature": [
               {
                 "pluginId": "features",
@@ -1931,18 +2244,20 @@
                 "section": "def-server.PluginSetupContract",
                 "text": "PluginSetupContract"
               }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.security",
-            "type": "Object",
-            "label": "security",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 31
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
             "signature": [
               {
                 "pluginId": "security",
@@ -1952,18 +2267,20 @@
                 "text": "SecurityPluginSetup"
               },
               " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.spaces",
-            "type": "Object",
-            "label": "spaces",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 32
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
             "signature": [
               {
                 "pluginId": "spaces",
@@ -1973,68 +2290,101 @@
                 "text": "SpacesPluginSetup"
               },
               " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.taskManager",
-            "type": "CompoundType",
-            "label": "taskManager",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 33
             },
-            "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerSetupContract",
-                "text": "TaskManagerSetupContract"
-              }
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.taskManager",
+            "type": "CompoundType",
             "tags": [],
-            "id": "def-server.ReportingSetupDeps.usageCollection",
-            "type": "Object",
-            "label": "usageCollection",
+            "label": "taskManager",
             "description": [],
+            "signature": [
+              "{ index: string; addMiddleware: (middleware: ",
+              "Middleware",
+              ") => void; } & Pick<",
+              "TaskTypeDictionary",
+              ", \"registerTaskDefinitions\">"
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 34
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
             "signature": [
-              "Pick<",
-              "CollectorSet",
-              ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
-            ]
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.screenshotMode",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotMode",
+                "scope": "server",
+                "docId": "kibScreenshotModePluginApi",
+                "section": "def-server.ScreenshotModePluginSetup",
+                "text": "ScreenshotModePluginSetup"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 28
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingStartDeps",
         "type": "Interface",
+        "tags": [],
         "label": "ReportingStartDeps",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/reporting/server/types.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingStartDeps.data",
             "type": "Object",
+            "tags": [],
             "label": "data",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 38
-            },
             "signature": [
               {
                 "pluginId": "data",
@@ -2043,277 +2393,345 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingStartDeps.taskManager",
-            "type": "CompoundType",
-            "label": "taskManager",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingStartDeps.taskManager",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerStartContract",
-                "text": "TaskManagerStartContract"
-              }
-            ]
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+              "TaskStore",
+              ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 37
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "reporting",
+      "id": "def-server.ReportingSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ReportingSetup",
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/reporting/server/types.ts",
+        "lineNumber": 44
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "reporting",
+          "id": "def-server.ReportingSetup.usesUiCapabilities",
+          "type": "Function",
+          "tags": [],
+          "label": "usesUiCapabilities",
+          "description": [],
+          "signature": [
+            "() => boolean"
+          ],
+          "source": {
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "lineNumber": 45
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [
       {
+        "parentPluginId": "reporting",
         "id": "def-common.CancellationToken",
         "type": "Class",
         "tags": [],
         "label": "CancellationToken",
         "description": [],
-        "children": [
-          {
-            "id": "def-common.CancellationToken.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "id": "def-common.CancellationToken.on",
-            "type": "Function",
-            "children": [
-              {
-                "id": "def-common.CancellationToken.on.$1",
-                "type": "Object",
-                "label": "callback",
-                "isRequired": true,
-                "signature": [
-                  "Function"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-                  "lineNumber": 19
-                }
-              }
-            ],
-            "signature": [
-              "(callback: Function) => void"
-            ],
-            "description": [],
-            "label": "on",
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 19
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-common.CancellationToken.cancel",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "label": "cancel",
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 32
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-common.CancellationToken.isCancelled",
-            "type": "Function",
-            "label": "isCancelled",
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 37
-            }
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
           "lineNumber": 10
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.CancellationToken.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.CancellationToken.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "(callback: Function) => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-common.CancellationToken.on.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "Function"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+                  "lineNumber": 19
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.CancellationToken.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.CancellationToken.isCancelled",
+            "type": "Function",
+            "tags": [],
+            "label": "isCancelled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "reporting",
         "id": "def-common.Poller",
         "type": "Class",
         "tags": [],
         "label": "Poller",
         "description": [],
-        "children": [
-          {
-            "id": "def-common.Poller.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-common.Poller.Unnamed.$1",
-                "type": "Object",
-                "label": "options",
-                "isRequired": true,
-                "signature": [
-                  "PollerOptions"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/common/poller.ts",
-                  "lineNumber": 32
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 32
-            }
-          },
-          {
-            "id": "def-common.Poller.getPollFrequency",
-            "type": "Function",
-            "label": "getPollFrequency",
-            "signature": [
-              "() => number"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 45
-            }
-          },
-          {
-            "id": "def-common.Poller._poll",
-            "type": "Function",
-            "label": "_poll",
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 49
-            }
-          },
-          {
-            "id": "def-common.Poller.start",
-            "type": "Function",
-            "label": "start",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 76
-            }
-          },
-          {
-            "id": "def-common.Poller.stop",
-            "type": "Function",
-            "label": "stop",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 89
-            }
-          },
-          {
-            "id": "def-common.Poller.isRunning",
-            "type": "Function",
-            "label": "isRunning",
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 103
-            }
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/reporting/common/poller.ts",
           "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-common.Poller.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "PollerOptions"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/reporting/common/poller.ts",
+                  "lineNumber": 32
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller.getPollFrequency",
+            "type": "Function",
+            "tags": [],
+            "label": "getPollFrequency",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller._poll",
+            "type": "Function",
+            "tags": [],
+            "label": "_poll",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 76
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 89
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.Poller.isRunning",
+            "type": "Function",
+            "tags": [],
+            "label": "isRunning",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 103
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
+        "parentPluginId": "reporting",
         "id": "def-common.getDefaultLayoutSelectors",
         "type": "Function",
-        "children": [],
+        "tags": [],
+        "label": "getDefaultLayoutSelectors",
+        "description": [],
         "signature": [
           "() => ",
           "LayoutSelectorDictionary"
         ],
-        "description": [],
-        "label": "getDefaultLayoutSelectors",
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",
           "lineNumber": 14
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2323,19 +2741,21 @@
     "misc": [],
     "objects": [
       {
+        "parentPluginId": "reporting",
         "id": "def-common.constants",
         "type": "Object",
-        "label": "constants",
         "tags": [],
+        "label": "constants",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/reporting/common/index.ts",
-          "lineNumber": 10
-        },
         "signature": [
           "typeof ",
           "x-pack/plugins/reporting/common/constants"
         ],
+        "source": {
+          "path": "x-pack/plugins/reporting/common/index.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ]

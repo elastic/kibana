@@ -6,6 +6,10 @@
  */
 
 import {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+} from '../../../../../../../src/core/server';
+import {
   IEsSearchResponse,
   ISearchRequestParams,
 } from '../../../../../../../src/plugins/data/common';
@@ -14,11 +18,17 @@ import {
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
+import { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
-    response: IEsSearchResponse
+    response: IEsSearchResponse,
+    deps?: {
+      esClient: IScopedClusterClient;
+      savedObjectsClient: SavedObjectsClientContract;
+      endpointContext: EndpointAppContext;
+    }
   ) => Promise<StrategyResponseType<T>>;
 }

@@ -252,10 +252,12 @@ describe('7.10.0 migrates with failure', () => {
     expect(migrationContext.log.error).toHaveBeenCalledWith(
       `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
       {
-        alertDocument: {
-          ...alert,
-          attributes: {
-            ...alert.attributes,
+        migrations: {
+          alertDocument: {
+            ...alert,
+            attributes: {
+              ...alert.attributes,
+            },
           },
         },
       }

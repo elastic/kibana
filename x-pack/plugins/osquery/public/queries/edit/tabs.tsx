@@ -15,9 +15,17 @@ interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
   isLive?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, isLive }) => {
+const ResultTabsComponent: React.FC<ResultTabsProps> = ({
+  actionId,
+  agentIds,
+  endDate,
+  isLive,
+  startDate,
+}) => {
   const tabs = useMemo(
     () => [
       {
@@ -36,12 +44,18 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, is
         content: (
           <>
             <EuiSpacer />
-            <ResultsTable actionId={actionId} isLive={isLive} />
+            <ResultsTable
+              actionId={actionId}
+              agentIds={agentIds}
+              isLive={isLive}
+              startDate={startDate}
+              endDate={endDate}
+            />
           </>
         ),
       },
     ],
-    [actionId, agentIds, isLive]
+    [actionId, agentIds, endDate, isLive, startDate]
   );
 
   return (

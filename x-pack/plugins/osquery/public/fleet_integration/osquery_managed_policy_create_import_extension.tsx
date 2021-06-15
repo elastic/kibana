@@ -8,7 +8,7 @@
 import { filter } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { produce } from 'immer';
 
 import { i18n } from '@kbn/i18n';
@@ -45,7 +45,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     application: { getUrlForApp },
     http,
   } = useKibana().services;
-  const { replace } = useHistory();
+  const { state: locationState } = useLocation();
+  const { replace, go } = useHistory();
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
@@ -95,6 +96,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   useEffect(() => {
     /*
+      in order to enable Osquery side nav we need to refresh the whole Kibana
+      TODO: Find a better solution
+    */
+    if (editMode && locationState?.forceRefresh) {
+      go(0);
+    }
+  }, [editMode, go, locationState]);
+
+  useEffect(() => {
+    /*
       by default Fleet set up streams with an empty scheduled query,
       this code removes that, so the user can schedule queries
       in the next step
@@ -124,6 +135,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
                 pagePathGetters.integration_policy_edit({
                   packagePolicyId: newPackagePolicy.id,
                 }),
+              state: {
+                forceRefresh: true,
+              },
             },
           ],
         } as CreatePackagePolicyRouteState,

@@ -430,6 +430,7 @@ export const metrics = {
     units: 'B',
   }),
   logstash_cluster_pipeline_throughput: new LogstashPipelineThroughputMetric({
+    mbField: 'logstash.node.stats.pipelines.events.out',
     field: 'logstash_stats.pipelines.events.out',
     label: pipelineThroughputLabel,
     description: pipelineThroughputDescription,

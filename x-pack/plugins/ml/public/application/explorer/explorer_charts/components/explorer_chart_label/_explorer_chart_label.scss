@@ -3,5 +3,7 @@
 }
 
 .ml-explorer-chart-label-badges {
-  margin-top: 3px;
+  margin-top: $euiSizeXS;
+  display: flex;
+  align-items: center;
 }

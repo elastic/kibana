@@ -16,9 +16,6 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { AppNavigation } from '../../components/navigation/app_navigation';
-import { RoutedTabs } from '../../components/navigation/routed_tabs';
-import { ColumnarPage } from '../../components/page';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
@@ -27,6 +24,7 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -40,7 +38,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
     initialize();
   });
 
-  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/infra/public/plugin.ts
+  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts
   const streamTab = {
     app: 'logs',
     title: streamTabTitle,
@@ -65,8 +63,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
     pathname: '/settings',
   };
 
+  const settingsLinkProps = useLinkProps({
+    app: 'logs',
+    pathname: 'settings',
+  });
+
   return (
-    <ColumnarPage>
+    <>
       <DocumentTitle title={pageTitle} />
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
@@ -74,6 +77,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
       {setHeaderActionMenu && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
           <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+                {settingsTabTitle}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AlertDropdown />
             </EuiFlexItem>
@@ -101,13 +109,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         ]}
         readOnlyBadge={!uiCapabilities?.logs?.save}
       />
-      <AppNavigation aria-label={pageTitle}>
-        <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
-          <EuiFlexItem>
-            <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </AppNavigation>
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
@@ -117,7 +118,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
       </Switch>
-    </ColumnarPage>
+    </>
   );
 };
 

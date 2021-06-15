@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 const indexPattern = ({
   fields: {
@@ -87,7 +88,7 @@ describe('DocViewTable at Discover', () => {
       scripted: 123,
       _underscore: 123,
     },
-  } as any;
+  } as ElasticSearchHit;
 
   const props = {
     hit,
@@ -185,7 +186,7 @@ describe('DocViewTable at Discover Context', () => {
         Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. \
         Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut',
     },
-  } as any;
+  } as ElasticSearchHit;
   const props = {
     hit,
     columns: ['extension'],
@@ -312,7 +313,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     },
     metaFields: ['_index', '_type', '_score', '_id'],
     flattenHit: jest.fn((hit) => {
-      const result = {} as Record<string, any>;
+      const result = {} as Record<string, unknown>;
       Object.keys(hit).forEach((key) => {
         if (key !== 'fields') {
           result[key] = hit[key];
@@ -325,7 +326,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       return result;
     }),
     formatHit: jest.fn((hit) => {
-      const result = {} as Record<string, any>;
+      const result = {} as Record<string, unknown>;
       Object.keys(hit).forEach((key) => {
         if (key !== 'fields') {
           result[key] = hit[key];
@@ -347,7 +348,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     _index: 'logstash-2014.09.09',
     _type: 'doc',
     _id: 'id123',
-    _score: null,
+    _score: 1.0,
     fields: {
       category: "Women's Clothing",
       'category.keyword': "Women's Clothing",
@@ -364,7 +365,6 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  // @ts-ignore
   const component = mount(<DocViewTable {...props} />);
   it('renders multifield rows', () => {
     const categoryMultifieldRow = findTestSubject(

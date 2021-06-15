@@ -275,9 +275,20 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
   every {kib} instance that has a unique <<kibana-index, `kibana.index`>> 
   setting. Defaults to `.reporting`.
 
+| [[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`
+  | deprecated:[7.14.0,This setting must be set to `false` in 8.0.] When `true`, grants users
+  access to the {report-features} by assigning reporting roles, specified by `xpack.reporting.roles.allow`. 
+  Granting access to users this way is deprecated. Set to `false` and use
+  {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
+  Defaults to `true`.
+
 | `xpack.reporting.roles.allow`
-  | Specifies the roles in addition to superusers that can use reporting.
-  Defaults to `[ "reporting_user" ]`. +
+  | deprecated:[7.14.0,This setting will be removed in 8.0.] Specifies the roles,
+  in addition to superusers, that can generate reports, using the {ref}/security-api.html#security-role-apis[{es} role management APIs].
+  Requires `xpack.reporting.roles.enabled` to be `true`.
+  Granting access to users this way is deprecated. Use
+  {kibana-ref}/kibana-privileges.html[{kib} privileges] instead.
+  Defaults to `[ "reporting_user" ]`.
 
 |===
 

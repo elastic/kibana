@@ -15,7 +15,25 @@ export async function hasStandaloneClusters(req, indexPatterns) {
     return list;
   }, []);
 
-  const filters = [standaloneClusterFilter];
+  const filters = [
+    standaloneClusterFilter,
+    {
+      bool: {
+        should: [
+          {
+            terms: {
+              type: ['logstash_stats', 'logstash_state', 'beats_stats', 'beats_state'],
+            },
+          },
+          {
+            terms: {
+              'metricset.name': ['logstash_stats', 'logstash_state', 'beats_stats', 'beats_state'],
+            },
+          },
+        ],
+      },
+    },
+  ];
   // Not every page will contain a time range so check for that
   if (req.payload.timeRange) {
     const start = req.payload.timeRange.min;

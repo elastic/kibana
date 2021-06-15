@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Modification of Boot Configuration",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:bcdedit.exe and process.args:(/set and (bootstatuspolicy and ignoreallfailures or no and recoveryenabled))",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"bcdedit.exe\" or process.pe.original_file_name == \"bcdedit.exe\") and\n  (process.args : \"/set\" and process.args : \"bootstatuspolicy\" and process.args : \"ignoreallfailures\") or\n  (process.args : \"no\" and process.args : \"recoveryenabled\")\n",
   "risk_score": 21,
   "rule_id": "69c251fb-a5d6-4035-b5ec-40438bd829ff",
   "severity": "low",
@@ -48,6 +48,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { CONTINUE_BUTTON_LABEL } from '../../../shared/constants';
 
@@ -25,8 +25,9 @@ import { filterEmptyValues } from './utils';
 interface Props {
   id: string;
   initialValues?: string[];
-  onSubmit?(values: string[]): void;
   onChange?(values: string[]): void;
+  onSubmit?(values: string[]): void;
+  showSubmitButton?: boolean;
   submitButtonText?: string;
   addRowText?: string;
   deleteRowLabel?: string;
@@ -36,15 +37,16 @@ interface Props {
 export const MultiInputRows: React.FC<Props> = ({
   id,
   initialValues = [''],
-  onSubmit,
   onChange,
+  onSubmit,
+  showSubmitButton = true,
   submitButtonText = CONTINUE_BUTTON_LABEL,
   addRowText = ADD_VALUE_BUTTON_LABEL,
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
   inputPlaceholder = INPUT_ROW_PLACEHOLDER,
 }) => {
   const logic = MultiInputRowsLogic({ id, values: initialValues });
-  const { values, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
+  const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
 
   useEffect(() => {
@@ -54,18 +56,34 @@ export const MultiInputRows: React.FC<Props> = ({
   }, [values]);
 
   return (
-    <>
-      {values.map((value: string, index: number) => (
-        <InputRow
-          key={`inputRow${index}`}
-          value={value}
-          placeholder={inputPlaceholder}
-          onChange={(newValue) => editValue(index, newValue)}
-          onDelete={() => deleteValue(index)}
-          disableDelete={hasOnlyOneValue}
-          deleteLabel={deleteRowLabel}
-        />
-      ))}
+    <EuiForm
+      id={id}
+      component={onSubmit ? 'form' : 'div'}
+      onSubmit={
+        onSubmit
+          ? (e: React.SyntheticEvent) => {
+              e.preventDefault();
+              onSubmit(filterEmptyValues(values));
+            }
+          : undefined
+      }
+    >
+      {values.map((value: string, index: number) => {
+        const firstRow = index === 0;
+        const lastRow = index === values.length - 1;
+        return (
+          <InputRow
+            key={`inputRow-${id}-${index}`}
+            value={value}
+            placeholder={inputPlaceholder}
+            autoFocus={addedNewRow ? lastRow : firstRow}
+            onChange={(newValue) => editValue(index, newValue)}
+            onDelete={() => deleteValue(index)}
+            disableDelete={hasOnlyOneValue}
+            deleteLabel={deleteRowLabel}
+          />
+        );
+      })}
       <EuiButtonEmpty
         size="s"
         iconType="plusInCircle"
@@ -75,19 +93,19 @@ export const MultiInputRows: React.FC<Props> = ({
       >
         {addRowText}
       </EuiButtonEmpty>
-      {onSubmit && (
+      {showSubmitButton && onSubmit && (
         <>
           <EuiSpacer />
           <EuiButton
             fill
             isDisabled={hasOnlyOneValue && hasEmptyValues}
-            onClick={() => onSubmit(filterEmptyValues(values))}
             data-test-subj="submitInputValuesButton"
+            type="submit"
           >
             {submitButtonText}
           </EuiButton>
         </>
       )}
-    </>
+    </EuiForm>
   );
 };

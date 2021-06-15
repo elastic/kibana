@@ -21,12 +21,7 @@ import {
   getQueryParameterActions,
   QUERY_PARAMETER_KEYS,
 } from './context/query_parameters';
-import {
-  createInitialLoadingStatusState,
-  FAILURE_REASONS,
-  LOADING_STATUS,
-  QueryActionsProvider,
-} from './context/query';
+import { createInitialLoadingStatusState, QueryActionsProvider } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
 getAngularModule().directive('contextApp', function ContextApp() {
@@ -39,6 +34,8 @@ getAngularModule().directive('contextApp', function ContextApp() {
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
+      appState: '=',
+      stateContainer: '=',
       filters: '=',
       predecessorCount: '=',
       successorCount: '=',
@@ -60,7 +57,6 @@ function ContextAppController($scope, Private) {
   );
   this.state.useNewFieldsApi = useNewFieldsApi;
   this.topNavMenu = navigation.ui.TopNavMenu;
-
   this.actions = _.mapValues(
     {
       ...queryParameterActions,
@@ -68,11 +64,6 @@ function ContextAppController($scope, Private) {
     },
     (action) => (...args) => action(this.state)(...args)
   );
-
-  this.constants = {
-    FAILURE_REASONS,
-    LOADING_STATUS,
-  };
 
   $scope.$watchGroup(
     [

@@ -21,16 +21,8 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './task';
 
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
+type BaseSearchTypes = string | number | boolean | object;
+export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
@@ -294,60 +286,41 @@ interface AllowlistFields {
 }
 
 // Allow list process fields within events.  This includes "process" and "Target.process".'
-/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistProcessFields: AllowlistFields = {
+  args: true,
   name: true,
   executable: true,
   command_line: true,
   hash: true,
   pid: true,
+  pe: {
+    original_file_name: true,
+  },
   uptime: true,
   Ext: {
     architecture: true,
     code_signature: true,
     dll: true,
+    malware_signature: true,
     token: {
       integrity_level_name: true,
     },
   },
-  parent: {
-    name: true,
-    executable: true,
-    command_line: true,
-    hash: true,
-    Ext: {
-      architecture: true,
-      code_signature: true,
-      dll: true,
-      token: {
-        integrity_level_name: true,
-      },
-    },
-    uptime: true,
-    pid: true,
-    ppid: true,
-  },
   thread: true,
 };
 
-// Allow list for the data we include in the events. True means that it is deep-cloned
-// blindly. Object contents means that we only copy the fields that appear explicitly in
-// the sub-object.
-const allowlistEventFields: AllowlistFields = {
-  '@timestamp': true,
-  agent: true,
-  Endpoint: true,
-  Memory_protection: true,
-  Ransomware: true,
-  data_stream: true,
-  ecs: true,
-  elastic: true,
-  event: true,
-  rule: {
-    id: true,
+// Allow list for event-related fields, which can also be nested under events[]
+const allowlistBaseEventFields: AllowlistFields = {
+  dll: {
     name: true,
-    ruleset: true,
+    path: true,
+    code_signature: true,
+    malware_signature: true,
+    pe: {
+      original_file_name: true,
+    },
   },
+  event: true,
   file: {
     name: true,
     path: true,
@@ -359,19 +332,62 @@ const allowlistEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_data: true,
       malware_classification: true,
       malware_signature: true,
       quarantine_result: true,
       quarantine_message: true,
     },
   },
+  process: {
+    parent: allowlistProcessFields,
+    ...allowlistProcessFields,
+  },
+  network: {
+    direction: true,
+  },
+  registry: {
+    hive: true,
+    key: true,
+    path: true,
+    value: true,
+  },
+  Target: {
+    process: {
+      parent: allowlistProcessFields,
+      ...allowlistProcessFields,
+    },
+  },
+  user: {
+    id: true,
+  },
+};
+
+// Allow list for the data we include in the events. True means that it is deep-cloned
+// blindly. Object contents means that we only copy the fields that appear explicitly in
+// the sub-object.
+const allowlistEventFields: AllowlistFields = {
+  '@timestamp': true,
+  agent: true,
+  Endpoint: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
+  Memory_protection: true,
+  Ransomware: true,
+  data_stream: true,
+  ecs: true,
+  elastic: true,
+  // behavioral protection re-nests some field sets under events.*
+  events: allowlistBaseEventFields,
+  rule: {
+    id: true,
+    name: true,
+    ruleset: true,
+    version: true,
+  },
   host: {
     os: true,
   },
-  process: allowlistProcessFields,
-  Target: {
-    process: allowlistProcessFields,
-  },
+  ...allowlistBaseEventFields,
 };
 
 export function copyAllowlistedFields(
@@ -383,6 +399,12 @@ export function copyAllowlistedFields(
     if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        const subValues = eventValue.filter((v) => typeof v === 'object');
+        return {
+          ...newEvent,
+          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
+        };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
         const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
         return {

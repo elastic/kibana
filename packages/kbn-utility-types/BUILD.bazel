@@ -57,15 +57,14 @@ ts_project(
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [],
-  deps = [":tsc"] + DEPS,
-  package_name = PKG_REQUIRE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = DEPS + [":tsc"],
+  package_name = "@kbn/utility-types",
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
   name = "npm_module",
-  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [
     ":%s" % PKG_BASE_NAME,
   ]

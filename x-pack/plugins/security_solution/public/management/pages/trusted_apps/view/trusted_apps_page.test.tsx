@@ -31,9 +31,9 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
-import { resolvePathVariables } from '../service/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -45,7 +45,9 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+    'Add a trusted application to improve performance or alleviate conflicts with other ' +
+    'applications running on your hosts. Trusted applications are applied to hosts running the Endpoint Security ' +
+    'integration on their agents.';
 
   const generator = new EndpointDocGenerator('policy-list');
 
@@ -167,8 +169,13 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should display a Add Trusted App button', async () => {
       const { getByTestId } = await renderWithListData();
-      const addButton = await getByTestId('trustedAppsListAddButton');
+      const addButton = getByTestId('trustedAppsListAddButton');
       expect(addButton.textContent).toBe('Add Trusted Application');
+    });
+
+    it('should display the searchbar', async () => {
+      const renderResult = await renderWithListData();
+      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
@@ -553,7 +560,7 @@ describe('When on the Trusted Apps Page', () => {
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
             // @ts-ignore
-            async (path: string, options: HttpFetchOptions) => {
+            async (_, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
                 resolveHttpPost = resolve;
@@ -626,18 +633,21 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
 
-          it('should close the flyout', async () => {
+          it('should close the flyout', () => {
             expect(renderResult.queryByTestId('addTrustedAppFlyout')).toBeNull();
           });
 
-          it('should show success toast notification', async () => {
+          it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual(
               '"one app" has been added to the Trusted Applications list.'
             );
           });
 
-          it('should trigger the List to reload', async () => {
-            expect(coreStart.http.get.mock.calls[0][0]).toEqual(TRUSTED_APPS_LIST_API);
+          it('should trigger the List to reload', () => {
+            const isCalled = coreStart.http.get.mock.calls.some(
+              (call) => call[0].toString() === TRUSTED_APPS_LIST_API
+            );
+            expect(isCalled).toEqual(true);
           });
         });
 
@@ -659,18 +669,18 @@ describe('When on the Trusted Apps Page', () => {
             });
           });
 
-          it('should continue to show the flyout', async () => {
+          it('should continue to show the flyout', () => {
             expect(renderResult.getByTestId('addTrustedAppFlyout')).not.toBeNull();
           });
 
-          it('should enable the Cancel Button', async () => {
+          it('should enable the Cancel Button', () => {
             expect(
               (renderResult.getByTestId('addTrustedAppFlyout-cancelButton') as HTMLButtonElement)
                 .disabled
             ).toBe(false);
           });
 
-          it('should show the dialog close button', async () => {
+          it('should show the dialog close button', () => {
             expect(renderResult.getByTestId('euiFlyoutCloseButton')).not.toBeNull();
           });
 
@@ -681,7 +691,7 @@ describe('When on the Trusted Apps Page', () => {
             ).toBe(false);
           });
 
-          it('should show API errors in the form', async () => {
+          it('should show API errors in the form', () => {
             expect(renderResult.container.querySelector('.euiForm__errors')).not.toBeNull();
           });
         });
@@ -859,6 +869,14 @@ describe('When on the Trusted Apps Page', () => {
 
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
+
+    it('should not display the searchbar', async () => {
+      const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsExistStateChanged');
+      });
+      expect(renderResult.queryByTestId('searchBar')).toBeNull();
+    });
   });
 
   describe('and the search is dispatched', () => {
@@ -880,9 +898,39 @@ describe('When on the Trusted Apps Page', () => {
 
     it('search action is dispatched', async () => {
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        fireEvent.click(renderResult.getByTestId('searchButton'));
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
+    });
+  });
+
+  describe('and the back button is present', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });
   });
 });

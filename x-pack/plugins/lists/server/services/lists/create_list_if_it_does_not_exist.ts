@@ -6,8 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import type {
   Description,
   DeserializerOrUndefined,
   Id,
@@ -17,8 +16,8 @@ import {
   Name,
   SerializerOrUndefined,
   Type,
-  Version,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 
 import { getList } from './get_list';
 import { createList } from './create_list';

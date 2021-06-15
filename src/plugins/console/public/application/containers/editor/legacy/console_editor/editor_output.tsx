@@ -9,6 +9,12 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+
+// Ensure the modes we might switch to dynamically are available
+import 'brace/mode/text';
+import 'brace/mode/json';
+import 'brace/mode/yaml';
+
 import { expandLiteralStrings } from '../../../../../shared_imports';
 import {
   useEditorReadContext,
@@ -19,11 +25,25 @@ import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/leg
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
+const isJSONContentType = (contentType?: string) =>
+  Boolean(contentType && contentType.indexOf('application/json') >= 0);
+
+/**
+ * Best effort expand literal strings
+ */
+const safeExpandLiteralStrings = (data: string): string => {
+  try {
+    return expandLiteralStrings(data);
+  } catch (e) {
+    return data;
+  }
+};
+
 function modeForContentType(contentType?: string) {
   if (!contentType) {
     return 'ace/mode/text';
   }
-  if (contentType.indexOf('application/json') >= 0) {
+  if (isJSONContentType(contentType)) {
     return 'ace/mode/json';
   } else if (contentType.indexOf('application/yaml') >= 0) {
     return 'ace/mode/yaml';
@@ -58,16 +78,21 @@ function EditorOutputUI() {
     const editor = editorInstanceRef.current!;
     if (data) {
       const mode = modeForContentType(data[0].response.contentType);
-      editor.session.setMode(mode);
       editor.update(
         data
-          .map((d) => d.response.value as string)
-          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : (a) => a)
-          .join('\n')
+          .map((result) => {
+            const { value, contentType } = result.response;
+            if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
+              return safeExpandLiteralStrings(value as string);
+            }
+            return value;
+          })
+          .join('\n'),
+        mode
       );
     } else if (error) {
-      editor.session.setMode(modeForContentType(error.response.contentType));
-      editor.update(error.response.value as string);
+      const mode = modeForContentType(error.response.contentType);
+      editor.update(error.response.value as string, mode);
     } else {
       editor.update('');
     }

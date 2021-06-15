@@ -276,12 +276,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
       name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Use legacy search',
+        defaultMessage: 'Use sync search',
       }),
       value: false,
       type: 'boolean',
       description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `Kibana uses a new search and batching infrastructure.
+        defaultMessage: `Kibana uses a new asynchronous search and infrastructure.
            Enable this option if you prefer to fallback to the legacy synchronous behavior`,
       }),
       deprecation: {
@@ -605,35 +605,35 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             }),
           },
           {
-            from: 'now-24h',
+            from: 'now-24h/h',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last24Hours', {
               defaultMessage: 'Last 24 hours',
             }),
           },
           {
-            from: 'now-7d',
+            from: 'now-7d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last7Days', {
               defaultMessage: 'Last 7 days',
             }),
           },
           {
-            from: 'now-30d',
+            from: 'now-30d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last30Days', {
               defaultMessage: 'Last 30 days',
             }),
           },
           {
-            from: 'now-90d',
+            from: 'now-90d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last90Days', {
               defaultMessage: 'Last 90 days',
             }),
           },
           {
-            from: 'now-1y',
+            from: 'now-1y/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last1Year', {
               defaultMessage: 'Last 1 year',
@@ -714,6 +714,19 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
       }),
       schema: schema.boolean(),
+    },
+    [UI_SETTINGS.SEARCH_TIMEOUT]: {
+      name: i18n.translate('data.advancedSettings.searchTimeout', {
+        defaultMessage: 'Search Timeout',
+      }),
+      value: 600000,
+      description: i18n.translate('data.advancedSettings.searchTimeoutDesc', {
+        defaultMessage:
+          'Change the maximum timeout for a search session or set to 0 to disable the timeout and allow queries to run to completion.',
+      }),
+      type: 'number',
+      category: ['search'],
+      schema: schema.number(),
     },
   };
 }

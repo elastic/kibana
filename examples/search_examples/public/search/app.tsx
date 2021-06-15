@@ -26,27 +26,27 @@ import {
   EuiCode,
   EuiComboBox,
   EuiFormLabel,
+  EuiFieldNumber,
+  EuiProgress,
   EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  IMyStrategyResponse,
-  SERVER_SEARCH_ROUTE_PATH,
-} from '../../common';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 import {
   DataPublicPluginStart,
+  IKibanaSearchResponse,
   IndexPattern,
   IndexPatternField,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
+import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -88,7 +88,10 @@ export const SearchExamplesApp = ({
 }: SearchExamplesAppDeps) => {
   const { IndexPatternSelect } = data.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
+  const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
+  const [total, setTotal] = useState<number>(100);
+  const [loaded, setLoaded] = useState<number>(0);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [fields, setFields] = useState<IndexPatternField[]>();
   const [selectedFields, setSelectedFields] = useState<IndexPatternField[]>([]);
@@ -99,7 +102,15 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
-  const [response, setResponse] = useState<Record<string, any>>({});
+  const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  function setResponse(response: IKibanaSearchResponse) {
+    setRawResponse(response.rawResponse);
+    setLoaded(response.loaded!);
+    setTotal(response.total!);
+    setTimeTook(response.rawResponse.took);
+  }
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
@@ -152,8 +163,7 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
-            setResponse(res.rawResponse);
-            setTimeTook(res.rawResponse.took);
+            setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
@@ -233,8 +243,8 @@ export const SearchExamplesApp = ({
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const res = await searchSource.fetch$().toPromise();
-      setResponse(res);
+      const { rawResponse: res } = await searchSource.fetch$().toPromise();
+      setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
@@ -247,7 +257,7 @@ export const SearchExamplesApp = ({
         }
       );
     } catch (e) {
-      setResponse(e.body);
+      setRawResponse(e.body);
       notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
     }
   };
@@ -258,6 +268,41 @@ export const SearchExamplesApp = ({
 
   const onMyStrategyClickHandler = () => {
     doAsyncSearch('myStrategy');
+  };
+
+  const onPartialResultsClickHandler = () => {
+    setSelectedTab(1);
+    const req = {
+      params: {
+        n: fibonacciN,
+      },
+    };
+
+    // Submit the search request using the `data.search` service.
+    setRequest(req.params);
+    const searchSubscription$ = data.search
+      .search(req, {
+        strategy: 'fibonacciStrategy',
+      })
+      .subscribe({
+        next: (res) => {
+          setResponse(res);
+          if (isCompleteResponse(res)) {
+            notifications.toasts.addSuccess({
+              title: 'Query result',
+              text: 'Query finished',
+            });
+            searchSubscription$.unsubscribe();
+          } else if (isErrorResponse(res)) {
+            // TODO: Make response error status clearer
+            notifications.toasts.addWarning('An error has occurred');
+            searchSubscription$.unsubscribe();
+          }
+        },
+        error: () => {
+          notifications.toasts.addDanger('Failed to run search');
+        },
+      });
   };
 
   const onClientSideSessionCacheClickHandler = () => {
@@ -284,7 +329,7 @@ export const SearchExamplesApp = ({
     doSearchSourceSearch(withOtherBucket);
   };
 
-  const reqTabs = [
+  const reqTabs: EuiTabbedContentTab[] = [
     {
       id: 'request',
       name: <EuiText data-test-subj="requestTab">Request</EuiText>,
@@ -318,6 +363,7 @@ export const SearchExamplesApp = ({
               values={{ time: timeTook ?? 'Unknown' }}
             />
           </EuiText>
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -326,7 +372,7 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="responseCodeBlock"
           >
-            {JSON.stringify(response, null, 2)}
+            {JSON.stringify(rawResponse, null, 2)}
           </EuiCodeBlock>
         </>
       ),
@@ -484,6 +530,37 @@ export const SearchExamplesApp = ({
                 </EuiText>
               </EuiText>
               <EuiSpacer />
+              <EuiTitle size="xs">
+                <h3>Handling partial results</h3>
+              </EuiTitle>
+              <EuiText>
+                The observable returned from <EuiCode>data.search</EuiCode> provides partial results
+                when the response is not yet complete. These can be handled to update a chart or
+                simply a progress bar:
+                <EuiSpacer />
+                <EuiCodeBlock language="html" fontSize="s" paddingSize="s" overflowHeight={450}>
+                  &lt;EuiProgress value=&#123;response.loaded&#125; max=&#123;response.total&#125;
+                  /&gt;
+                </EuiCodeBlock>
+                Below is an example showing a custom search strategy that emits partial Fibonacci
+                sequences up to the length provided, updates the response with each partial result,
+                and updates a progress bar (see the Response tab).
+                <EuiFieldNumber
+                  id="FibonacciN"
+                  placeholder="Number of Fibonacci numbers to generate"
+                  value={fibonacciN}
+                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
+                />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onPartialResultsClickHandler}
+                  iconType="play"
+                  data-test-subj="requestFibonacci"
+                >
+                  Request Fibonacci sequence
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
               <EuiTitle size="s">
                 <h3>Writing a custom search strategy</h3>
               </EuiTitle>
@@ -567,8 +644,13 @@ export const SearchExamplesApp = ({
                 </EuiButtonEmpty>
               </EuiText>
             </EuiFlexItem>
+
             <EuiFlexItem style={{ width: '60%' }}>
-              <EuiTabbedContent tabs={reqTabs} />
+              <EuiTabbedContent
+                tabs={reqTabs}
+                selectedTab={reqTabs[selectedTab]}
+                onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

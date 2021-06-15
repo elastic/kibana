@@ -321,20 +321,19 @@ https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown
 
 [[notifications-lifetime-banner]]`notifications:lifetime:banner`::
 The duration, in milliseconds, for banner notification displays. The default
-value is 3000000. Set this field to `Infinity` to disable banner notifications.
+value is 3000000.
 
 [[notificatios-lifetime-error]]`notifications:lifetime:error`::
 The duration, in milliseconds, for error notification displays. The default
-value is 300000. Set this field to `Infinity` to disable error notifications.
+value is 300000.
 
 [[notifications-lifetime-info]]`notifications:lifetime:info`::
 The duration, in milliseconds, for information notification displays. The
-default value is 5000. Set this field to `Infinity` to disable information
-notifications.
+default value is 5000.
 
 [[notifications-lifetime-warning]]`notifications:lifetime:warning`::
 The duration, in milliseconds, for warning notification displays. The default
-value is 10000. Set this field to `Infinity` to disable warning notifications.
+value is 10000.
 
 
 [float]

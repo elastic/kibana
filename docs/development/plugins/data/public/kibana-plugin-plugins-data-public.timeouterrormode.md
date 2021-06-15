@@ -14,7 +14,6 @@ export declare enum TimeoutErrorMode
 
 |  Member | Value | Description |
 |  --- | --- | --- |
-|  CHANGE | <code>2</code> |  |
-|  CONTACT | <code>1</code> |  |
-|  UPGRADE | <code>0</code> |  |
+|  CHANGE | <code>1</code> |  |
+|  CONTACT | <code>0</code> |  |
 

@@ -9,15 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +21,7 @@ import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
 import { getEngineBreadcrumbs } from '../engine';
 
+import { EmptyState } from './components';
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
@@ -46,9 +39,13 @@ const UNSAVED_MESSAGE = i18n.translate(
 );
 
 export const ResultSettings: React.FC = () => {
-  const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings } = useValues(
-    ResultSettingsLogic
-  );
+  const {
+    dataLoading,
+    schema,
+    stagedUpdates,
+    resultFieldsAtDefaultSettings,
+    resultFieldsEmpty,
+  } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -81,7 +78,7 @@ export const ResultSettings: React.FC = () => {
                   color="primary"
                   fill
                   onClick={saveResultSettings}
-                  disabled={!stagedUpdates}
+                  disabled={resultFieldsEmpty || !stagedUpdates}
                 >
                   {SAVE_BUTTON_LABEL}
                 </EuiButton>,
@@ -111,26 +108,7 @@ export const ResultSettings: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiPanel hasBorder>
-          <EuiEmptyPrompt
-            iconType="gear"
-            title={
-              <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaTitle',
-                  { defaultMessage: 'Engine does not have a schema' }
-                )}
-              </h2>
-            }
-            body={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaDescription',
-              {
-                defaultMessage:
-                  'You need one! A schema is created for you after you index some documents.',
-              }
-            )}
-          />
-        </EuiPanel>
+        <EmptyState />
       )}
     </>
   );

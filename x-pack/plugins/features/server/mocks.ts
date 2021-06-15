@@ -6,6 +6,10 @@
  */
 
 import { PluginSetupContract, PluginStartContract } from './plugin';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 const createSetup = (): jest.Mocked<PluginSetupContract> => {
   return {
@@ -14,6 +18,9 @@ const createSetup = (): jest.Mocked<PluginSetupContract> => {
     getFeaturesUICapabilities: jest.fn(),
     registerKibanaFeature: jest.fn(),
     registerElasticsearchFeature: jest.fn(),
+    enableReportingUiCapabilities: jest.fn(),
+    featurePrivilegeIterator: jest.fn().mockImplementation(featurePrivilegeIterator),
+    subFeaturePrivilegeIterator: jest.fn().mockImplementation(subFeaturePrivilegeIterator),
   };
 };
 

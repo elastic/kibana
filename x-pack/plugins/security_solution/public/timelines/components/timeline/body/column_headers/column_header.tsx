@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   getDraggableFieldId,
@@ -76,10 +77,10 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   const dispatch = useDispatch();
   const resizableSize = useMemo(
     () => ({
-      width: header.width,
+      width: header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
       height: 'auto',
     }),
-    [header.width]
+    [header.initialWidth]
   );
   const resizableStyle: {
     position: 'absolute' | 'relative';
@@ -220,7 +221,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         ref={dragProvided.innerRef}
       >
         <EventsThContent>
-          <PopoverContainer $width={header.width}>
+          <PopoverContainer $width={header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH}>
             <EuiPopover
               anchorPosition="downLeft"
               button={headerButton}
@@ -235,7 +236,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         </EventsThContent>
       </EventsTh>
     ),
-    [handleClosePopOverTrigger, headerButton, header.width, hoverActionsOwnFocus, panels]
+    [handleClosePopOverTrigger, headerButton, header.initialWidth, hoverActionsOwnFocus, panels]
   );
 
   const onFocus = useCallback(() => {

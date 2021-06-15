@@ -299,10 +299,10 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__tdGroupActions ${className}`,
   role: 'gridcell',
-}))<{ actionsColumnWidth: number }>`
+}))<{ width: number }>`
   align-items: center;
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0 ${({ width }) => `${width}px`};
   min-width: 0;
 `;
 

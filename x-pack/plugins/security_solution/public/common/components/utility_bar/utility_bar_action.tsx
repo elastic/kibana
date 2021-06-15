@@ -12,7 +12,17 @@ import { LinkIcon, LinkIconProps } from '../link_icon';
 import { BarAction } from './styles';
 
 const Popover = React.memo<UtilityBarActionProps>(
-  ({ children, color, iconSide, iconSize, iconType, popoverContent, disabled, ownFocus }) => {
+  ({
+    children,
+    color,
+    iconSide,
+    iconSize,
+    iconType,
+    popoverContent,
+    disabled,
+    ownFocus,
+    dataTestSubj,
+  }) => {
     const [popoverState, setPopoverState] = useState(false);
 
     const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
@@ -22,6 +32,7 @@ const Popover = React.memo<UtilityBarActionProps>(
         ownFocus={ownFocus}
         button={
           <LinkIcon
+            dataTestSubj={dataTestSubj}
             color={color}
             iconSide={iconSide}
             iconSize={iconSize}
@@ -46,7 +57,7 @@ Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: (closePopover: () => void) => React.ReactNode;
-  dataTestSubj?: string;
+  dataTestSubj: string;
   ownFocus?: boolean;
 }
 
@@ -67,6 +78,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     <BarAction data-test-subj={dataTestSubj}>
       {popoverContent ? (
         <Popover
+          dataTestSubj={`${dataTestSubj}-popover`}
           disabled={disabled}
           color={color}
           iconSide={iconSide}
@@ -80,6 +92,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       ) : (
         <LinkIcon
           color={color}
+          dataTestSubj={`${dataTestSubj}-linkIcon`}
           disabled={disabled}
           href={href}
           iconSide={iconSide}

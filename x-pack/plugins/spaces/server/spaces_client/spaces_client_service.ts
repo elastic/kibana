@@ -18,11 +18,19 @@ import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 
+/**
+ * For consumption by the security plugin only.
+ * @private
+ */
 export type SpacesClientWrapper = (
   request: KibanaRequest,
   baseClient: ISpacesClient
 ) => ISpacesClient;
 
+/**
+ * For consumption by the security plugin only.
+ * @private
+ */
 export type SpacesClientRepositoryFactory = (
   request: KibanaRequest,
   savedObjectsStart: SavedObjectsServiceStart

@@ -8,19 +8,17 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-test/src",
+    "sourceRoot": "../../../../../../packages/kbn-test/src",
     "types": [
       "jest",
       "node"
     ],
   },
   "include": [
-    "types/**/*",
     "src/**/*",
     "index.d.ts"
   ],
   "exclude": [
-    "types/ftr_globals/**/*",
     "**/__fixtures__/**/*"
   ]
 }

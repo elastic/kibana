@@ -23,14 +23,16 @@ import {
   DataType,
   OperationMetadata,
   FieldBasedIndexPatternColumn,
+  SumIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/common';
-import { FieldLabels } from './constants';
-import { DataSeries, UrlFilter } from '../types';
+import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN } from './constants';
+import { ColumnFilter, DataSeries, UrlFilter, URLReportDefinition } from '../types';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
@@ -48,10 +50,12 @@ function buildNumberColumn(sourceField: string) {
 export const parseCustomFieldName = (
   sourceField: string,
   reportViewConfig: DataSeries,
-  selectedDefinitions: Record<string, string>
+  selectedDefinitions: URLReportDefinition
 ) => {
   let fieldName = sourceField;
   let columnType;
+  let columnFilters;
+  let columnLabel;
 
   const rdf = reportViewConfig.reportDefinitions ?? [];
 
@@ -59,18 +63,24 @@ export const parseCustomFieldName = (
 
   if (customField) {
     if (selectedDefinitions[fieldName]) {
-      fieldName = selectedDefinitions[fieldName];
-      if (customField?.options)
-        columnType = customField?.options?.find(({ field }) => field === fieldName)?.columnType;
-    } else if (customField.defaultValue) {
-      fieldName = customField.defaultValue;
-    } else if (customField.options?.[0].field) {
-      fieldName = customField.options?.[0].field;
+      fieldName = selectedDefinitions[fieldName][0];
+      if (customField?.options) {
+        const currField = customField?.options?.find(
+          ({ field, id }) => field === fieldName || id === fieldName
+        );
+        columnType = currField?.columnType;
+        columnFilters = currField?.columnFilters;
+        columnLabel = currField?.label;
+      }
+    } else if (customField.options?.[0].field || customField.options?.[0].id) {
+      fieldName = customField.options?.[0].field || customField.options?.[0].id;
       columnType = customField.options?.[0].columnType;
+      columnFilters = customField.options?.[0].columnFilters;
+      columnLabel = customField.options?.[0].label;
     }
   }
 
-  return { fieldName, columnType };
+  return { fieldName, columnType, columnFilters, columnLabel };
 };
 
 export class LensAttributes {
@@ -80,7 +90,8 @@ export class LensAttributes {
   filters: UrlFilter[];
   seriesType: SeriesType;
   reportViewConfig: DataSeries;
-  reportDefinitions: Record<string, string>;
+  reportDefinitions: URLReportDefinition;
+  breakdownSource?: string;
 
   constructor(
     indexPattern: IndexPattern,
@@ -88,15 +99,21 @@ export class LensAttributes {
     seriesType?: SeriesType,
     filters?: UrlFilter[],
     operationType?: OperationType,
-    reportDefinitions?: Record<string, string>
+    reportDefinitions?: URLReportDefinition,
+    breakdownSource?: string
   ) {
     this.indexPattern = indexPattern;
     this.layers = {};
     this.filters = filters ?? [];
     this.reportDefinitions = reportDefinitions ?? {};
+    this.breakdownSource = breakdownSource;
 
-    if (typeof reportViewConfig.yAxisColumn.operationType !== undefined && operationType) {
-      reportViewConfig.yAxisColumn.operationType = operationType as FieldBasedIndexPatternColumn['operationType'];
+    if (operationType) {
+      reportViewConfig.yAxisColumns.forEach((yAxisColumn) => {
+        if (typeof yAxisColumn.operationType !== undefined) {
+          yAxisColumn.operationType = operationType as FieldBasedIndexPatternColumn['operationType'];
+        }
+      });
     }
     this.seriesType = seriesType ?? reportViewConfig.defaultSeriesType;
     this.reportViewConfig = reportViewConfig;
@@ -104,10 +121,10 @@ export class LensAttributes {
     this.visualization = this.getXyState();
   }
 
-  addBreakdown(sourceField: string) {
+  getBreakdownColumn(sourceField: string): TermsIndexPatternColumn {
     const fieldMeta = this.indexPattern.getFieldByName(sourceField);
 
-    this.layers.layer1.columns['break-down-column'] = {
+    return {
       sourceField,
       label: `Top values of ${FieldLabels[sourceField]}`,
       dataType: fieldMeta?.type as DataType,
@@ -115,15 +132,29 @@ export class LensAttributes {
       scale: 'ordinal',
       isBucketed: true,
       params: {
-        size: 3,
+        size: 10,
         orderBy: { type: 'column', columnId: 'y-axis-column' },
         orderDirection: 'desc',
         otherBucket: true,
         missingBucket: false,
       },
     };
+  }
 
-    this.layers.layer1.columnOrder = ['x-axis-column', 'break-down-column', 'y-axis-column'];
+  addBreakdown(sourceField: string) {
+    const { xAxisColumn } = this.reportViewConfig;
+    if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
+      // do nothing since this will be used a x axis source
+      return;
+    }
+    this.layers.layer1.columns['break-down-column'] = this.getBreakdownColumn(sourceField);
+
+    this.layers.layer1.columnOrder = [
+      'x-axis-column',
+      'break-down-column',
+      'y-axis-column',
+      ...Object.keys(this.getChildYAxises()),
+    ];
 
     this.visualization.layers[0].splitAccessor = 'break-down-column';
   }
@@ -152,10 +183,15 @@ export class LensAttributes {
     };
   }
 
-  getNumberColumn(sourceField: string, columnType?: string, operationType?: string) {
+  getNumberColumn(
+    sourceField: string,
+    columnType?: string,
+    operationType?: string,
+    label?: string
+  ) {
     if (columnType === 'operation' || operationType) {
-      if (operationType === 'median' || operationType === 'average') {
-        return this.getNumberOperationColumn(sourceField, operationType);
+      if (operationType === 'median' || operationType === 'average' || operationType === 'sum') {
+        return this.getNumberOperationColumn(sourceField, operationType, label);
       }
       if (operationType?.includes('th')) {
         return this.getPercentileNumberColumn(sourceField, operationType);
@@ -166,17 +202,20 @@ export class LensAttributes {
 
   getNumberOperationColumn(
     sourceField: string,
-    operationType: 'average' | 'median'
-  ): AvgIndexPatternColumn | MedianIndexPatternColumn {
+    operationType: 'average' | 'median' | 'sum',
+    label?: string
+  ): AvgIndexPatternColumn | MedianIndexPatternColumn | SumIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
-        defaultMessage: '{operationType} of {sourceField}',
-        values: {
-          sourceField: this.reportViewConfig.labels[sourceField],
-          operationType: capitalize(operationType),
-        },
-      }),
+      label:
+        label ||
+        i18n.translate('xpack.observability.expView.columns.operation.label', {
+          defaultMessage: '{operationType} of {sourceField}',
+          values: {
+            sourceField: this.reportViewConfig.labels[sourceField],
+            operationType: capitalize(operationType),
+          },
+        }),
       operationType,
     };
   }
@@ -211,22 +250,36 @@ export class LensAttributes {
   getXAxis() {
     const { xAxisColumn } = this.reportViewConfig;
 
-    return this.getColumnBasedOnType(xAxisColumn.sourceField!);
+    if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
+      return this.getBreakdownColumn(this.breakdownSource || this.reportViewConfig.breakdowns[0]);
+    }
+
+    return this.getColumnBasedOnType(xAxisColumn.sourceField!, undefined, xAxisColumn.label);
   }
 
-  getColumnBasedOnType(sourceField: string, operationType?: OperationType) {
-    const { fieldMeta, columnType, fieldName } = this.getFieldMeta(sourceField);
+  getColumnBasedOnType(
+    sourceField: string,
+    operationType?: OperationType,
+    label?: string,
+    colIndex?: number
+  ) {
+    const { fieldMeta, columnType, fieldName, columnFilters, columnLabel } = this.getFieldMeta(
+      sourceField
+    );
     const { type: fieldType } = fieldMeta ?? {};
 
-    if (fieldName === 'Records') {
-      return this.getRecordsColumn();
+    if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
+      return this.getRecordsColumn(
+        columnLabel || label,
+        colIndex !== undefined ? columnFilters?.[colIndex] : undefined
+      );
     }
 
     if (fieldType === 'date') {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      return this.getNumberColumn(fieldName, columnType, operationType);
+      return this.getNumberColumn(fieldName, columnType, operationType, columnLabel || label);
     }
 
     // FIXME review my approach again
@@ -238,24 +291,46 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string) {
-    const { fieldName, columnType } = this.getCustomFieldName(sourceField);
+    const { fieldName, columnType, columnFilters, columnLabel } = this.getCustomFieldName(
+      sourceField
+    );
 
     const fieldMeta = this.indexPattern.getFieldByName(fieldName);
 
-    return { fieldMeta, fieldName, columnType };
+    return { fieldMeta, fieldName, columnType, columnFilters, columnLabel };
   }
 
   getMainYAxis() {
-    const { sourceField, operationType, label } = this.reportViewConfig.yAxisColumn;
+    const { sourceField, operationType, label } = this.reportViewConfig.yAxisColumns[0];
 
     if (sourceField === 'Records' || !sourceField) {
       return this.getRecordsColumn(label);
     }
 
-    return this.getColumnBasedOnType(sourceField!, operationType);
+    return this.getColumnBasedOnType(sourceField!, operationType, label, 0);
   }
 
-  getRecordsColumn(label?: string): CountIndexPatternColumn {
+  getChildYAxises() {
+    const lensColumns: Record<string, FieldBasedIndexPatternColumn | SumIndexPatternColumn> = {};
+    const yAxisColumns = this.reportViewConfig.yAxisColumns;
+    // 1 means there is only main y axis
+    if (yAxisColumns.length === 1) {
+      return lensColumns;
+    }
+    for (let i = 1; i < yAxisColumns.length; i++) {
+      const { sourceField, operationType, label } = yAxisColumns[i];
+
+      lensColumns[`y-axis-column-${i}`] = this.getColumnBasedOnType(
+        sourceField!,
+        operationType,
+        label,
+        i
+      );
+    }
+    return lensColumns;
+  }
+
+  getRecordsColumn(label?: string, columnFilter?: ColumnFilter): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
@@ -263,15 +338,17 @@ export class LensAttributes {
       operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',
+      filter: columnFilter,
     } as CountIndexPatternColumn;
   }
 
   getLayer() {
     return {
-      columnOrder: ['x-axis-column', 'y-axis-column'],
+      columnOrder: ['x-axis-column', 'y-axis-column', ...Object.keys(this.getChildYAxises())],
       columns: {
         'x-axis-column': this.getXAxis(),
         'y-axis-column': this.getMainYAxis(),
+        ...this.getChildYAxises(),
       },
       incompleteColumns: {},
     };
@@ -289,14 +366,17 @@ export class LensAttributes {
       preferredSeriesType: 'line',
       layers: [
         {
-          accessors: ['y-axis-column'],
+          accessors: ['y-axis-column', ...Object.keys(this.getChildYAxises())],
           layerId: 'layer1',
           seriesType: this.seriesType ?? 'line',
           palette: this.reportViewConfig.palette,
-          yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
+          yConfig: this.reportViewConfig.yConfig || [
+            { forAccessor: 'y-axis-column', color: 'green' },
+          ],
           xAccessor: 'x-axis-column',
         },
       ],
+      ...(this.reportViewConfig.yTitle ? { yTitle: this.reportViewConfig.yTitle } : {}),
     };
   }
 

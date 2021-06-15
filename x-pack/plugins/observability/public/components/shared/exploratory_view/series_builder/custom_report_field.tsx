@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ReportDefinition } from '../types';
 
 interface Props {
@@ -17,13 +17,15 @@ interface Props {
   options: ReportDefinition['options'];
 }
 
-export function CustomReportField({ field, seriesId, options: opts, defaultValue }: Props) {
-  const { series, setSeries } = useUrlStorage(seriesId);
+export function CustomReportField({ field, seriesId, options: opts }: Props) {
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { reportDefinitions: rtd = {} } = series;
 
   const onChange = (value: string) => {
-    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: value } });
+    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: [value] } });
   };
 
   const { reportDefinitions } = series;
@@ -31,17 +33,16 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
   const options = opts ?? [];
 
   return (
-    <div style={{ maxWidth: 250 }}>
-      <EuiSuperSelect
-        compressed
-        prepend={'Metric'}
-        options={options.map(({ label, field: fd, description }) => ({
-          value: fd,
-          inputDisplay: label,
-        }))}
-        valueOfSelected={reportDefinitions?.[field] || defaultValue || options?.[0].field}
-        onChange={(value) => onChange(value)}
-      />
-    </div>
+    <EuiSuperSelect
+      fullWidth
+      compressed
+      prepend={'Metric'}
+      options={options.map(({ label, field: fd, id }) => ({
+        value: fd || id,
+        inputDisplay: label,
+      }))}
+      valueOfSelected={reportDefinitions?.[field]?.[0] || options?.[0].field || options?.[0].id}
+      onChange={(value) => onChange(value)}
+    />
   );
 }

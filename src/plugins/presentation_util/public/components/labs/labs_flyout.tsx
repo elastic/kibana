@@ -10,6 +10,8 @@ import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiTitle,
+  EuiSpacer,
+  EuiText,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -18,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
@@ -104,32 +107,47 @@ export const LabsFlyout = (props: Props) => {
 
   footer = (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
+            {strings.getCloseButtonLabel()}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="beaker" size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ProjectList {...{ projects, solutions, onStatusChange }} />
-      </EuiFlyoutBody>
-      {footer}
-    </EuiFlyout>
+    <EuiOverlayMask onClick={() => onClose()} headerZindexLocation="below">
+      <EuiFlyout onClose={onClose} hideCloseButton={true}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="beaker" size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
+              </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>{strings.getDescriptionMessage()}</p>
+          </EuiText>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <ProjectList {...{ projects, solutions, onStatusChange }} />
+        </EuiFlyoutBody>
+        {footer}
+      </EuiFlyout>
+    </EuiOverlayMask>
   );
 };
 

@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { DataViewLabels } from '../configurations/constants';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -24,7 +24,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -33,8 +35,16 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           <h2>
             {DataViewLabels[series.reportType] ??
               i18n.translate('xpack.observability.expView.heading.label', {
-                defaultMessage: 'Exploratory view',
+                defaultMessage: 'Analyze data',
+              })}{' '}
+            <EuiBetaBadge
+              style={{
+                verticalAlign: `middle`,
+              }}
+              label={i18n.translate('xpack.observability.expView.heading.experimental', {
+                defaultMessage: 'Experimental',
               })}
+            />
           </h2>
         </EuiText>
       </EuiFlexItem>

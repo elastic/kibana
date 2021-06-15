@@ -51,7 +51,6 @@
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
           "alert": "7b44fba6773e37c806ce290ea9b7024e",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
           "cases": "32aa96a6d3855ddda53010ae2048ac22",
           "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
@@ -2128,7 +2127,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"

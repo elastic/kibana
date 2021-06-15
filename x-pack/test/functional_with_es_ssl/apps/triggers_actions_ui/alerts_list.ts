@@ -50,12 +50,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAction;
   }
 
+  async function muteAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_mute_all`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
+  }
+
+  async function disableAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .post(`/api/alerting/rule/${alertId}/_disable`)
+      .set('kbn-xsrf', 'foo');
+    return alert;
+  }
+
   async function refreshAlertsList() {
     await testSubjects.click('rulesTab');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95591
-  describe.skip('alerts list', function () {
+  describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -138,25 +151,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
+      await disableAlert(createdAlert.id);
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'disableSwitch',
-        'true'
-      );
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'disableSwitch',
@@ -172,7 +173,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',
@@ -182,25 +182,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
+      await muteAlert(createdAlert.id);
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
         'muteSwitch',

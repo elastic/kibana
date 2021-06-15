@@ -450,3 +450,6 @@ const MIME_TYPE_PALETTE = buildMimeTypePalette();
 type ColourPalette = TimingColourPalette & MimeTypeColourPalette;
 
 export const colourPalette: ColourPalette = { ...TIMING_PALETTE, ...MIME_TYPE_PALETTE };
+
+export const formatTooltipHeading = (index: number, fullText: string): string =>
+  isNaN(index) ? fullText : `${index}. ${fullText}`;

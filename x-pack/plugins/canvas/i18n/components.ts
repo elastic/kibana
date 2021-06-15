@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BOLD_MD_TOKEN, CANVAS, HTML, JSON, KIBANA, PDF, POST, URL, ZIP } from './constants';
+import { BOLD_MD_TOKEN, CANVAS, HTML, JSON, PDF, URL, ZIP } from './constants';
 
 export const ComponentStrings = {
   AddEmbeddableFlyout: {
@@ -173,6 +173,12 @@ export const ComponentStrings = {
     getAssetAltText: () =>
       i18n.translate('xpack.canvas.assetpicker.assetAltText', {
         defaultMessage: 'Asset thumbnail',
+      }),
+  },
+  CanvasLoading: {
+    getLoadingLabel: () =>
+      i18n.translate('xpack.canvas.canvasLoading.loadingMessage', {
+        defaultMessage: 'Loading',
       }),
   },
   ColorManager: {
@@ -512,6 +518,20 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard shortcuts',
+      }),
+  },
+  LabsControl: {
+    getLabsButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsButtonLabel', {
+        defaultMessage: 'Labs',
+      }),
+    getAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsAriaLabel', {
+        defaultMessage: 'View labs projects',
+      }),
+    getTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsTooltip', {
+        defaultMessage: 'View labs projects',
       }),
   },
   Link: {
@@ -1370,6 +1390,14 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
       }),
+    getAutoplayListDurationManualText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.autoplayListDurationManual', {
+        defaultMessage: 'Manually',
+      }),
+    getDisableTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.disableTooltip', {
+        defaultMessage: 'Disable auto-play',
+      }),
   },
   WorkpadHeaderRefreshControlSettings: {
     getRefreshAriaLabel: () =>
@@ -1390,94 +1418,9 @@ export const ComponentStrings = {
           URL,
         },
       }),
-    getCopyReportingConfigMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyReportingConfigMessage', {
-        defaultMessage: 'Copied reporting configuration to clipboard',
-      }),
     getCopyShareConfigMessage: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
         defaultMessage: 'Copied share markup to clipboard',
-      }),
-    getExportPDFErrorTitle: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFErrorMessage', {
-        defaultMessage: "Failed to create {PDF} for '{workpadName}'",
-        values: {
-          PDF,
-          workpadName,
-        },
-      }),
-    getExportPDFMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFMessage', {
-        defaultMessage: 'Exporting {PDF}. You can track the progress in Management.',
-        values: {
-          PDF,
-        },
-      }),
-    getExportPDFTitle: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFTitle', {
-        defaultMessage: "{PDF} export of workpad '{workpadName}'",
-        values: {
-          PDF,
-          workpadName,
-        },
-      }),
-    getPDFFullPageLayoutHelpText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutHelpText', {
-        defaultMessage: 'Remove borders and footer logo',
-      }),
-    getPDFFullPageLayoutLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutLabel', {
-        defaultMessage: 'Full page layout',
-      }),
-    getPDFPanelAdvancedOptionsLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelAdvancedOptionsLabel', {
-        defaultMessage: 'Advanced options',
-      }),
-    getPDFPanelCopyAriaLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyAriaLabel', {
-        defaultMessage:
-          'Alternatively, you can generate a {PDF} from a script or with Watcher by using this {URL}. Press Enter to copy the {URL} to clipboard.',
-        values: {
-          PDF,
-          URL,
-        },
-      }),
-    getPDFPanelCopyButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyButtonLabel', {
-        defaultMessage: 'Copy {POST} {URL}',
-        values: {
-          POST,
-          URL,
-        },
-      }),
-    getPDFPanelCopyDescription: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyDescription', {
-        defaultMessage:
-          'Alternatively, copy this {POST} {URL} to call generation from outside {KIBANA} or from Watcher.',
-        values: {
-          POST,
-          KIBANA,
-          URL,
-        },
-      }),
-    getPDFPanelGenerateButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelGenerateButtonLabel', {
-        defaultMessage: 'Generate {PDF}',
-        values: {
-          PDF,
-        },
-      }),
-    getPDFPanelGenerateDescription: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelGenerateDescription', {
-        defaultMessage:
-          '{PDF}s can take a minute or two to generate based on the size of your workpad.',
-        values: {
-          PDF,
-        },
-      }),
-    getPDFPanelOptionsLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelOptionsLabel', {
-        defaultMessage: 'Options',
       }),
     getShareableZipErrorTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {

@@ -24,7 +24,7 @@ const bodySchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export function registerSaveRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerSaveRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: '/api/watcher/watch/{id}',
@@ -37,12 +37,12 @@ export function registerSaveRoute({ router, license, lib: { isEsError } }: Route
       const { id } = request.params;
       const { type, isNew, isActive, ...watchConfig } = request.body;
 
-      const dataClient = ctx.watcher!.client;
+      const dataClient = ctx.core.elasticsearch.client;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         try {
-          const existingWatch = await dataClient.callAsCurrentUser('watcher.getWatch', {
+          const { body: existingWatch } = await dataClient.asCurrentUser.watcher.getWatch({
             id,
           });
           if (existingWatch.found) {
@@ -58,7 +58,7 @@ export function registerSaveRoute({ router, license, lib: { isEsError } }: Route
             });
           }
         } catch (e) {
-          const es404 = isEsError(e) && e.statusCode === 404;
+          const es404 = e?.statusCode === 404;
           if (!es404) {
             throw e;
           }
@@ -81,21 +81,16 @@ export function registerSaveRoute({ router, license, lib: { isEsError } }: Route
 
       try {
         // Create new watch
+        const { body: putResult } = await dataClient.asCurrentUser.watcher.putWatch({
+          id,
+          active: isActive,
+          body: serializedWatch,
+        });
         return response.ok({
-          body: await dataClient.callAsCurrentUser('watcher.putWatch', {
-            id,
-            active: isActive,
-            body: serializedWatch,
-          }),
+          body: putResult,
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

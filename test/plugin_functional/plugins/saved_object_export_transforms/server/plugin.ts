@@ -90,8 +90,6 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
       },
     });
 
-    /////////////
-    /////////////
     // example of a SO type that will throw an object-transform-error
     savedObjects.registerType({
       name: 'test-export-transform-error',
@@ -134,8 +132,29 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         },
       },
     });
+
+    // example of a SO type that is exportable while being hidden
+    savedObjects.registerType({
+      name: 'test-actions-export-hidden',
+      hidden: true,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: {
+            type: 'boolean',
+          },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+      },
+    });
   }
 
   public start() {}
+
   public stop() {}
 }

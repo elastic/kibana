@@ -8,6 +8,7 @@
 import { DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { FleetStart } from '../../fleet/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import {
@@ -28,6 +29,7 @@ export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
   fleet: FleetStart;
+  lens?: LensPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 

@@ -63,7 +63,7 @@ describe('Policy Details', () => {
   describe('when displayed with invalid id', () => {
     let releaseApiFailure: () => void;
     beforeEach(() => {
-      http.get.mockImplementationOnce(async () => {
+      http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
         });
@@ -161,7 +161,7 @@ describe('Policy Details', () => {
 
       const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Endpoints5Online3Offline1Error1');
+      expect(agentsSummary.text()).toBe('Agents5Healthy3Unhealthy1Offline1');
     });
     it('should display cancel button', async () => {
       await asyncActions;

@@ -52,6 +52,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           connector_type_id: 'test.index-record',
+          is_missing_secrets: false,
           name: 'My action updated',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -193,6 +194,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             actionTypeId: 'test.index-record',
+            isMissingSecrets: false,
             name: 'My action updated',
             config: {
               unencrypted: `This value shouldn't get encrypted`,

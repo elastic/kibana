@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 import { autoInterval } from '../../_interval_options';
+import { InvalidEsCalendarIntervalError } from '../../../utils';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {
@@ -136,5 +137,15 @@ describe('TimeBuckets', () => {
     timeBuckets.getScaledDateFormat();
     const format = timeBuckets.getScaledDateFormat();
     expect(format).toEqual('HH:mm');
+  });
+
+  test('allows days but throws error on weeks', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    timeBuckets.setInterval('14d');
+    const interval = timeBuckets.getInterval(false);
+    expect(interval.esUnit).toEqual('d');
+
+    timeBuckets.setInterval('2w');
+    expect(() => timeBuckets.getInterval(false)).toThrow(InvalidEsCalendarIntervalError);
   });
 });

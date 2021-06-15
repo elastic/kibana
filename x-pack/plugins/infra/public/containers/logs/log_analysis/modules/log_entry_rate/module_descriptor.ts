@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from 'src/core/public';
 import {
   bucketSpan,
@@ -61,7 +62,7 @@ const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
+  { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
   fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
@@ -81,6 +82,12 @@ const setUpModule = async (
           bucketSpan,
         },
       },
+    },
+  ];
+  const datafeedOverrides = [
+    {
+      job_id: 'log-entry-rate' as const,
+      runtime_mappings: runtimeMappings,
     },
   ];
   const query =
@@ -107,6 +114,7 @@ const setUpModule = async (
       sourceId,
       indexPattern: indexNamePattern,
       jobOverrides,
+      datafeedOverrides,
       query,
     },
     fetch
@@ -120,6 +128,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateIndicesAPI(
@@ -135,6 +144,7 @@ const validateSetupIndices = async (
           validTypes: ['keyword'],
         },
       ],
+      runtimeMappings,
     },
     fetch
   );
@@ -145,9 +155,13 @@ const validateSetupDatasets = async (
   timestampField: string,
   startTime: number,
   endTime: number,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
+  return await callValidateDatasetsAPI(
+    { indices, timestampField, startTime, endTime, runtimeMappings },
+    fetch
+  );
 };
 
 export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {

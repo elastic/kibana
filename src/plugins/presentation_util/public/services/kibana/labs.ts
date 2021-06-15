@@ -7,13 +7,14 @@
  */
 
 import {
-  environmentNames,
   EnvironmentName,
   projectIDs,
   projects,
   ProjectID,
   Project,
   getProjectIDs,
+  SolutionName,
+  LABS_PROJECT_PREFIX,
 } from '../../../common';
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
@@ -30,14 +31,30 @@ export type LabsServiceFactory = KibanaPluginServiceFactory<
   PresentationUtilPluginStartDeps
 >;
 
+const clearLabsFromStorage = (storage: Storage) => {
+  projectIDs.forEach((projectID) => storage.removeItem(projectID));
+
+  // This is a redundancy, to catch any labs that may have been removed above.
+  // We could consider gathering telemetry to see how often this happens, or this may be unnecessary.
+  Object.keys(storage)
+    .filter((key) => key.startsWith(LABS_PROJECT_PREFIX))
+    .forEach((key) => storage.removeItem(key));
+};
+
 export const labsServiceFactory: LabsServiceFactory = ({ coreStart }) => {
   const { uiSettings } = coreStart;
   const localStorage = window.localStorage;
   const sessionStorage = window.sessionStorage;
 
-  const getProjects = () =>
+  const getProjects = (solutions: SolutionName[] = []) =>
     projectIDs.reduce((acc, id) => {
-      acc[id] = getProject(id);
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
       return acc;
     }, {} as { [id in ProjectID]: Project });
 
@@ -68,17 +85,18 @@ export const labsServiceFactory: LabsServiceFactory = ({ coreStart }) => {
   };
 
   const reset = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    environmentNames.forEach((env) =>
-      projectIDs.forEach((id) => setProjectStatus(id, env, projects[id].isActive))
-    );
+    clearLabsFromStorage(localStorage);
+    clearLabsFromStorage(sessionStorage);
+    projectIDs.forEach((id) => setProjectStatus(id, 'kibana', projects[id].isActive));
   };
+
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {
     getProjectIDs,
     getProjects,
     getProject,
+    isProjectEnabled,
     reset,
     setProjectStatus,
   };

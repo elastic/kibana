@@ -91,7 +91,7 @@ exports[`Header should render normally 1`] = `
                   />
                 </EuiIcon>
                 <FormattedMessage
-                  defaultMessage="Scripted fields are deprecated, {runtimeDocs}."
+                  defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
                   id="indexPatternManagement.editIndexPattern.deprecation"
                   values={
                     Object {
@@ -99,7 +99,7 @@ exports[`Header should render normally 1`] = `
                         target="_blank"
                       >
                         <FormattedMessage
-                          defaultMessage="use runtime fields instead"
+                          defaultMessage="runtime fields"
                           id="indexPatternManagement.header.runtimeLink"
                           values={Object {}}
                         />
@@ -108,7 +108,7 @@ exports[`Header should render normally 1`] = `
                   }
                 >
                   <span>
-                    Scripted fields are deprecated, 
+                    Scripted fields are deprecated. Use 
                     <EuiLink
                       target="_blank"
                     >
@@ -118,17 +118,17 @@ exports[`Header should render normally 1`] = `
                         type="button"
                       >
                         <FormattedMessage
-                          defaultMessage="use runtime fields instead"
+                          defaultMessage="runtime fields"
                           id="indexPatternManagement.header.runtimeLink"
                           values={Object {}}
                         >
                           <span>
-                            use runtime fields instead
+                            runtime fields
                           </span>
                         </FormattedMessage>
                       </button>
                     </EuiLink>
-                    .
+                     instead.
                   </span>
                 </FormattedMessage>
               </p>

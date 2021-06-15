@@ -14,9 +14,10 @@ import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
+import { initGetShareableReferencesApi } from './get_shareable_references';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
-import { initShareToSpacesApi } from './share_to_space';
+import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 
 export interface ExternalRouteDeps {
   externalRouter: SpacesRouter;
@@ -33,5 +34,6 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);
-  initShareToSpacesApi(deps);
+  initUpdateObjectsSpacesApi(deps);
+  initGetShareableReferencesApi(deps);
 }

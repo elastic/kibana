@@ -30,33 +30,32 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
 
+type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+
 export interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: MainStatsServiceInstanceItem[];
+  items?: ApiResponseMainStats['currentPeriod'];
   status: FETCH_STATUS;
+  comparisonItems?: ApiResponseMainStats['previousPeriod'];
 }
 
 export function InstancesLatencyDistributionChart({
   height,
   items = [],
   status,
+  comparisonItems = [],
 }: InstancesLatencyDistributionChartProps) {
   const history = useHistory();
   const hasData = items.length > 0;
 
   const theme = useTheme();
-  const chartTheme = {
-    ...useChartTheme(),
-    bubbleSeriesStyle: {
-      point: { strokeWidth: 0, fill: theme.eui.euiColorVis1, radius: 4 },
-    },
-  };
+  const chartTheme = useChartTheme();
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
@@ -96,7 +95,13 @@ export function InstancesLatencyDistributionChart({
   // there's just a single instance) they'll show along the origin. Make sure
   // the x-axis domain is [0, maxThroughput].
   const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
-  const xDomain = { min: 0, max: maxThroughput };
+  const maxComparisonThroughput = Math.max(
+    ...comparisonItems.map((item) => item.throughput ?? 0)
+  );
+  const xDomain = {
+    min: 0,
+    max: Math.max(maxThroughput, maxComparisonThroughput),
+  };
 
   return (
     <EuiPanel>
@@ -118,7 +123,7 @@ export function InstancesLatencyDistributionChart({
             xDomain={xDomain}
           />
           <BubbleSeries
-            color={theme.eui.euiColorVis1}
+            color={theme.eui.euiColorVis0}
             data={items}
             id={i18n.translate(
               'xpack.apm.instancesLatencyDistributionChartLegend',
@@ -128,7 +133,38 @@ export function InstancesLatencyDistributionChart({
             xScaleType={ScaleType.Linear}
             yAccessors={[(item) => item.latency]}
             yScaleType={ScaleType.Linear}
+            bubbleSeriesStyle={{
+              point: {
+                strokeWidth: 0,
+                radius: 4,
+                fill: theme.eui.euiColorVis0,
+              },
+            }}
           />
+
+          {!!comparisonItems.length && (
+            <BubbleSeries
+              data={comparisonItems}
+              id={i18n.translate(
+                'xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod',
+                { defaultMessage: 'Previous period' }
+              )}
+              xAccessor={(item) => item.throughput}
+              xScaleType={ScaleType.Linear}
+              yAccessors={[(item) => item.latency]}
+              yScaleType={ScaleType.Linear}
+              color={theme.eui.euiColorMediumShade}
+              bubbleSeriesStyle={{
+                point: {
+                  shape: 'square',
+                  radius: 4,
+                  fill: theme.eui.euiColorLightestShade,
+                  stroke: theme.eui.euiColorMediumShade,
+                  strokeWidth: 2,
+                },
+              }}
+            />
+          )}
           <Axis
             id="x-axis"
             labelFormat={asTransactionRate}

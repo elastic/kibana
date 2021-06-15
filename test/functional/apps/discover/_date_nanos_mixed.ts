@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('date_nanos_mixed', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('date_nanos_mixed');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
@@ -29,18 +29,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      esArchiver.unload('date_nanos_mixed');
+      esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
-      const rowData1 = await PageObjects.discover.getDocTableField(1);
-      expect(rowData1).to.be('Jan 1, 2019 @ 12:10:30.124000000');
-      const rowData2 = await PageObjects.discover.getDocTableField(2);
-      expect(rowData2).to.be('Jan 1, 2019 @ 12:10:30.123498765');
-      const rowData3 = await PageObjects.discover.getDocTableField(3);
-      expect(rowData3).to.be('Jan 1, 2019 @ 12:10:30.123456789');
-      const rowData4 = await PageObjects.discover.getDocTableField(4);
-      expect(rowData4).to.be('Jan 1, 2019 @ 12:10:30.123000000');
+      const isLegacy = await PageObjects.discover.useLegacyTable();
+      const rowData1 = await PageObjects.discover.getDocTableIndex(1);
+      expect(rowData1).to.contain('Jan 1, 2019 @ 12:10:30.124000000');
+      const rowData2 = await PageObjects.discover.getDocTableIndex(isLegacy ? 3 : 2);
+      expect(rowData2).to.contain('Jan 1, 2019 @ 12:10:30.123498765');
+      const rowData3 = await PageObjects.discover.getDocTableIndex(isLegacy ? 5 : 3);
+      expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
+      const rowData4 = await PageObjects.discover.getDocTableIndex(isLegacy ? 7 : 4);
+      expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
     });
   });
 }

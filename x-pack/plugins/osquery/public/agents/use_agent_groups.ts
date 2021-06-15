@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from './use_agent_policies';
 
@@ -24,7 +25,10 @@ interface UseAgentGroups {
 }
 
 export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);
@@ -96,6 +100,12 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
     },
     {
       enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_groups.fetchError', {
+            defaultMessage: 'Error while fetching agent groups',
+          }),
+        }),
     }
   );
 
