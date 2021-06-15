@@ -19,7 +19,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryDiagTask } from './task';
+import { TelemetryDiagTask } from './diagnostic_task';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;

@@ -6,7 +6,7 @@
  */
 
 import { TelemetryEventsSender } from './sender';
-import { TelemetryDiagTask } from './task';
+import { TelemetryDiagTask } from './diagnostic_task';
 
 /**
  * Creates a mocked Telemetry Events Sender
