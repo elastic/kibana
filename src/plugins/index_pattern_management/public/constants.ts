@@ -6,16 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
-}
-
-export {
-  KBN_SCREENSHOT_MODE_HEADER,
-  setScreenshotModeEnabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
-} from '../common';
-
-export { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
