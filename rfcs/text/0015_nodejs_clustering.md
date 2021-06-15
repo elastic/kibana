@@ -404,10 +404,57 @@ We will need to add some centralized status state in the coordinator. Also, as t
 from the coordinator, we will also need to have the workers retrieve the global status from the coordinator to serve 
 the status endpoint.
 
-We may also want to have the `/status` endpoint display each individual worker status in addition to the 
-global status, which may be breaking change in the `/status` API response format.
+Ultimately, we'd need to make the following updates to the `/status` API, neither of which
+is a breaking change:
+1. The response will return the highest-severity status level for each plugin, which will be
+determined by looking at the shared global status stored in the coordinator.
+2. We will introduce an extension to the existing `/status` response to allow inspecting
+per-worker statuses.
 
-### 6.1.4 PID file
+### 6.1.4 The stats API & metrics service
+
+The `/stats` endpoint is somewhat problematic in that it contains a handful of `process` metrics
+which will differ from worker-to-worker:
+```json
+{
+  // ...
+  "process": {
+    "memory": {
+      "heap": {
+        "total_bytes": 533581824,
+        "used_bytes": 296297424,
+        "size_limit": 4345298944
+      },
+      "resident_set_size_bytes": 563625984
+    },
+    "pid": 52646,
+    "event_loop_delay": 0.22967800498008728,
+    "uptime_ms": 1706021.930404
+  },
+  // ...
+}
+```
+
+As each request could be routed to a different worker, different results may come back each time.
+
+This endpoint, registered from the `usage_collection` plugin, is getting these stats from Core's
+`metrics` service (`getOpsMetrics$`), which is also used in the `monitoring` plugin for stats
+collection.
+
+While we could try to follow a plan similar to `/status` and have each worker report metrics to
+the coordinator, there isn't a particularly sensible way to consolidate these. (e.g. Taking
+the average of these values isn't really helpful in case there's a scenario where one process
+is, for example, experiencing a spike in `event_loop_delay` while the others are operating
+normally).
+
+Ultimately we could extend the API to provide per-worker stats, but the question remains what we
+should do with the existing `process` stats:
+1. Deprecate them? (breaking change)
+2. Accept a situation where they may be round-robined to different workers? (probably no)
+3. Try to consolidate them somehow? (can't think of a good way to do this)
+4. Always return stats for one process, e.g. main or coordinator? (doesn't give us the full picture)
+
+### 6.1.5 PID file
 
 Without changes, each worker is going to try to write and read the same PID file. Also, this breaks the whole pid file 
 usage, as the PID stored in the file will be a arbitrary worker’s PID, instead of the coordinator (main process) PID.
@@ -415,7 +462,7 @@ usage, as the PID stored in the file will be a arbitrary worker’s PID, instead
 In clustering mode, we will need to have to coordinator handle the PID file logic, and to disable pid file handling 
 in the worker's environment service.
 
-### 6.1.5 Saved Objects migration
+### 6.1.6 Saved Objects migration
 
 In the current state, all workers are going to try to perform the migration. Ideally, we would have only one process 
 perform the migration, and the other ones just wait for a ready signal. We can’t easily have the coordinator do it, 
@@ -424,7 +471,7 @@ so we would probably have to leverage the ‘main worker’ concept here.
 The SO migration v2 is supposed to be resilient to concurrent attempts though, as we already support multi-instances 
 Kibana, so this can probably be considered an improvement.
 
-### 6.1.6 Memory consumption
+### 6.1.7 Memory consumption
 
 In clustered mode, node options such as `max-old-space-size` will be used by all processes. 
 
@@ -437,7 +484,7 @@ Our plan for addressing this is to _disable clustering if a user has `max-old-sp
 possible to hit unpredictable behavior. To enable clustering, the user would simply remove `max-old-space-size` settings, and
 clustering would be on by default. They could alternatively configure memory settings for each worker individually, as shown above.
 
-### 6.1.7 Workers error handling
+### 6.1.8 Workers error handling
 
 When using `cluster`, the common best practice is to have the coordinator recreate ('restart') workers when they terminate unexpectedly. 
 However, given Kibana's architecture, some failures are not recoverable (workers failing because of config validation, failed migration...). 
@@ -449,7 +496,7 @@ As a first step, we plan to terminate the main Kibana process when any worker te
 this is already the behavior in non-cluster mode). In the future, we will look toward distinguishing between recoverable
 and non-recoverable errors as an enhancement, so that we can automatically restart workers on any recoverable error.
 
-### 6.1.8 Data folder
+### 6.1.9 Data folder
 
 The data folder (`path.data`) is currently the same for all workers. 
 
@@ -459,7 +506,7 @@ are accessing files in write mode, which could result in concurrency issues betw
 If that was confirmed, we would plan to create and use a distinct data folder for each worker, which would be non-breaking
 as we don't consider the layout of this directory to be part of our public API.
 
-### 6.1.9 instanceUUID
+### 6.1.10 instanceUUID
 
 The same instance UUID (`server.uuid` / `{dataFolder}/uuid`) is currently used by all the workers. 
 
@@ -547,22 +594,18 @@ Do we need the alerting task runner (`TaskRunner`, `TaskRunnerFactory`) to be ru
 
 ## 6.3 Summary of breaking changes
 
-### 6.3.1 status API
-
-If we want to have the status API returns each individual worker's status, we will need to change the output of the 
-status API in clustering mode. 
-
-Note that the new format for /api/status is still behind a v8format flag, meaning that if we do these changes before 8.0, 
-we won't be introducing any breaking change later.
-
-### 6.3.2 stats API
-
-TODO
-
-### 6.3.3 instanceUUID
+### 6.3.1 instanceUUID
 
 Depending on whether we are able to identify any cases where a shared uuid would be problematic, we may have to change
 the server.uuid configuration property when clustering mode is enabled, which would be a breaking change.
+
+At this point, we have not identified any places where this is strictly necessary.
+
+### 6.3.2 `/stats` API & metrics service
+
+The `process` memory usage reported here doesn't really make sense in a multi-process Kibana.
+One option to consider is breaking the API by deprecating `process`, or turning it into a list of
+process stats reported from each worker. This is an open question still.
 
 # 7. Drawbacks
 
@@ -631,6 +674,10 @@ Lastly, we'll take advantage of internal communications to kibana-contributors, 
 with the teams who we think will most likely be affected by these changes.
 
 # 11. Unresolved questions
+
+**Are breaking changes required for the `/stats` API & metrics service?**
+
+See 6.1.4 above.
 
 **Is it okay for the workers to share the same `path.data` directory?**
 
