@@ -31,25 +31,20 @@ describe('Newsfeed plugin', () => {
       plugin.setup(coreMock.createSetup());
     });
 
-    /**
-     * We assume for these tests that the newsfeed stream exposed by start will fetch newsfeed items
-     * on the first tick for new subscribers
-     */
-    let fakeFetch: jest.Mock;
-    let realFetch: typeof window.fetch;
-
     beforeEach(() => {
-      realFetch = window.fetch;
-      fakeFetch = jest.fn();
-      window.fetch = fakeFetch;
+      /**
+       * We assume for these tests that the newsfeed stream exposed by start will fetch newsfeed items
+       * on the first tick for new subscribers
+       */
+      jest.spyOn(window, 'fetch');
     });
 
     afterEach(() => {
-      window.fetch = realFetch;
+      jest.clearAllMocks();
     });
 
     describe('base case', () => {
-      it('makes fetch requests', async () => {
+      it('makes fetch requests', () => {
         const startContract = plugin.start(coreMock.createStart(), {
           screenshotMode: { isScreenshotMode: () => false },
         });
@@ -58,13 +53,13 @@ describe('Newsfeed plugin', () => {
           .pipe(take(1))
           .subscribe(() => {});
         jest.runOnlyPendingTimers();
-        expect(fakeFetch).toHaveBeenCalled();
+        expect(window.fetch).toHaveBeenCalled();
         sub.unsubscribe();
       });
     });
 
     describe('when in screenshot mode', () => {
-      it('makes no fetch requests in screenshot mode', async () => {
+      it('makes no fetch requests in screenshot mode', () => {
         const startContract = plugin.start(coreMock.createStart(), {
           screenshotMode: { isScreenshotMode: () => true },
         });
@@ -73,7 +68,7 @@ describe('Newsfeed plugin', () => {
           .pipe(take(1))
           .subscribe(() => {});
         jest.runOnlyPendingTimers();
-        expect(fakeFetch).not.toHaveBeenCalled();
+        expect(window.fetch).not.toHaveBeenCalled();
         sub.unsubscribe();
       });
     });
