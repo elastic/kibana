@@ -270,11 +270,9 @@ describe('Task Runner', () => {
             "alerts",
           ],
           "kind": "alert",
+          "start": "1970-01-01T00:00:00.000Z",
         },
         "kibana": Object {
-          "alerting": Object {
-            "status": "ok",
-          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -285,6 +283,7 @@ describe('Task Runner', () => {
             },
           ],
         },
+        "message": "alert execution start: \\"1\\"",
         "rule": Object {
           "category": "test",
           "id": "1",
@@ -379,6 +378,34 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute-start',
+        category: ['alerts'],
+        kind: 'alert',
+        start: '1970-01-01T00:00:00.000Z',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+            type_id: 'test',
+          },
+        ],
+      },
+      message: `alert execution start: "1"`,
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
+    });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'new-instance',
@@ -566,11 +593,9 @@ describe('Task Runner', () => {
         action: 'execute-start',
         category: ['alerts'],
         kind: 'alert',
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
-        alerting: {
-          status: 'active',
-        },
         saved_objects: [
           {
             id: '1',
@@ -581,6 +606,7 @@ describe('Task Runner', () => {
           },
         ],
       },
+      message: `alert execution start: \"1\"`,
       rule: {
         category: 'test',
         id: '1',
@@ -809,11 +835,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -824,6 +848,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1099,11 +1124,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1114,6 +1137,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1382,11 +1406,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1397,6 +1419,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1902,11 +1925,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1917,6 +1938,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2229,11 +2251,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "error",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2244,6 +2264,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2333,11 +2354,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "error",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2348,6 +2367,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2445,11 +2465,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "error",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2460,6 +2478,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2557,11 +2576,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "error",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2572,6 +2589,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2668,11 +2686,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "error",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2683,6 +2699,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2947,11 +2964,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2962,6 +2977,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3232,11 +3248,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3247,6 +3261,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3435,11 +3450,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "active",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3450,6 +3463,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3629,11 +3643,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "ok",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3644,6 +3656,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3829,11 +3842,9 @@ describe('Task Runner', () => {
                 "alerts",
               ],
               "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
-              "alerting": Object {
-                "status": "ok",
-              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3844,6 +3855,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
+            "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",

@@ -523,17 +523,15 @@ export class TaskRunner<
       },
     };
 
-    const startEvent = {
+    const startEvent = cloneDeep({
       ...event,
       event: {
         ...event.event,
         action: EVENT_LOG_ACTIONS.executeStart,
+        start: new Date().toISOString(),
       },
-      rule: {
-        ...event.rule,
-        id: alertId,
-      },
-    };
+      message: `alert execution start: "${alertId}"`,
+    });
     eventLogger.logEvent(startEvent);
 
     eventLogger.startTiming(event);
