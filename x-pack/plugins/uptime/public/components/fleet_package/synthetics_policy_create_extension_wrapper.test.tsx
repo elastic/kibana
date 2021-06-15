@@ -255,7 +255,6 @@ const defaultNewPolicy: NewPackagePolicy = {
 };
 
 const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
-const defaultICMPConfig = defaultConfig[DataStream.ICMP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<SyntheticsPolicyCreateExtension />', () => {

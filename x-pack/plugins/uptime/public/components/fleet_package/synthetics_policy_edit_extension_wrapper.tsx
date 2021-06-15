@@ -113,7 +113,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
                 });
                 acc[key] = {
                   value: requestBodyValue,
-                  type,
+                  type: requestBodyType,
                 };
                 break;
               case ConfigKeys.TLS_KEY_PASSPHRASE:

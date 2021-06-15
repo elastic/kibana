@@ -180,7 +180,11 @@ export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
 export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
 export type ICMPFields = IICMPSimpleFields;
 
-export type ICustomFields = HTTPFields & TCPFields & ICMPFields;
+export type ICustomFields = HTTPFields &
+  TCPFields &
+  ICMPFields & {
+    [ConfigKeys.NAME]: string;
+  };
 
 export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;

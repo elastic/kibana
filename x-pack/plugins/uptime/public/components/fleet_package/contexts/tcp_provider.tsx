@@ -23,7 +23,7 @@ interface TCPContextProviderProps {
  * for use in the Ingest app create / edit package policy
  */
 export const TCPContextProvider = ({ defaultValues, children }: TCPContextProviderProps) => {
-  const tcpSimpleFields: ITCPSimpleFields = defaultValues
+  const tcpSimpleFields: ITCPSimpleFields | undefined = defaultValues
     ? {
         [ConfigKeys.APM_SERVICE_NAME]: defaultValues[ConfigKeys.APM_SERVICE_NAME],
         [ConfigKeys.HOSTS]: defaultValues[ConfigKeys.HOSTS],
