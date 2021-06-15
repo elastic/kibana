@@ -25,7 +25,7 @@ import { EngineNav, EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
-import { KibanaHeaderActions } from './components/layout/kibana_header_actions';
+import { KibanaHeaderActions } from './components/layout';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappings } from './components/role_mappings';

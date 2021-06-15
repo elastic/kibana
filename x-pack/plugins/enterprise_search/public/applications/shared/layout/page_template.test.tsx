@@ -143,6 +143,27 @@ describe('EnterpriseSearchPageTemplate', () => {
     });
   });
 
+  describe('page chrome', () => {
+    const SetPageChrome = () => <div />;
+
+    it('renders a product-specific <SetPageChrome />', () => {
+      const wrapper = shallow(<EnterpriseSearchPageTemplate setPageChrome={<SetPageChrome />} />);
+
+      expect(wrapper.find(SetPageChrome).exists()).toBe(true);
+    });
+
+    it('invokes page chrome immediately (without waiting for isLoading to be finished)', () => {
+      const wrapper = shallow(
+        <EnterpriseSearchPageTemplate setPageChrome={<SetPageChrome />} isLoading />
+      );
+
+      expect(wrapper.find(SetPageChrome).exists()).toBe(true);
+
+      // This behavior is in contrast to page view telemetry, which is invoked after isLoading finishes
+      // In addition to the pageHeader prop also changing immediately, this makes navigation feel much snappier
+    });
+  });
+
   describe('EuiPageTemplate props', () => {
     it('overrides the restrictWidth prop', () => {
       const wrapper = shallow(<EnterpriseSearchPageTemplate restrictWidth />);

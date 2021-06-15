@@ -20,6 +20,7 @@ import {
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
+import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
 import './page_template.scss';
@@ -39,6 +40,10 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   hideFlashMessages?: boolean;
   isLoading?: boolean;
   emptyState?: React.ReactNode;
+  setPageChrome?: React.ReactNode;
+  // Used by product-specific page templates
+  pageChrome?: BreadcrumbTrail;
+  pageViewTelemetry?: string;
 };
 
 export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
@@ -48,6 +53,7 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
   isLoading,
   isEmptyState,
   emptyState,
+  setPageChrome,
   solutionNav,
   ...pageTemplateProps
 }) => {
@@ -70,6 +76,7 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
       isEmptyState={isEmptyState && !isLoading}
       solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
     >
+      {setPageChrome}
       {readOnlyMode && (
         <>
           <EuiCallOut
