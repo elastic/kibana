@@ -8,7 +8,7 @@
 import { Dispatch } from 'redux';
 import { CoreStart, HttpStart } from 'kibana/public';
 import {
-  EndpointAction,
+  ActivityLog,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
@@ -32,6 +32,8 @@ import {
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
+  getActivityLogDataPaging,
+  getLastLoadedActivityLogData,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -53,7 +55,7 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ServerReturnedEndpointPackageInfo } from './action';
@@ -336,21 +338,25 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         type: 'endpointDetailsActivityLogChanged',
         // ts error to be fixed when AsyncResourceState is refactored (#830)
         // @ts-expect-error
-        payload: createLoadingResourceState<EndpointAction[]>(getActivityLogData(getState())),
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
       });
 
       try {
-        const activityLog = await coreStart.http.get<EndpointAction[]>(
-          resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
-        );
+        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
-          payload: createLoadedResourceState<EndpointAction[]>(activityLog),
+          payload: createLoadedResourceState<ActivityLog>(activityLog),
         });
       } catch (error) {
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
-          payload: createFailedResourceState<EndpointAction[]>(error.body ?? error),
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
 
@@ -367,6 +373,56 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
+        });
+      }
+    }
+
+    // page activity log API
+    if (action.type === 'appRequestedEndpointActivityLog' && hasSelectedEndpoint(getState())) {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // ts error to be fixed when AsyncResourceState is refactored (#830)
+        // @ts-expect-error
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      });
+
+      try {
+        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
+
+        const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+        if (lastLoadedLogData !== undefined) {
+          const updatedLogDataItems = [
+            ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
+          ] as ActivityLog['data'];
+
+          const updatedLogData = {
+            total: activityLog.total,
+            page: activityLog.page,
+            pageSize: activityLog.pageSize,
+            data: updatedLogDataItems,
+          };
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+          });
+          // TODO dispatch 'noNewLogData' if !activityLog.length
+          // resets paging to previous state
+        } else {
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(activityLog),
+          });
+        }
+      } catch (error) {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
     }
