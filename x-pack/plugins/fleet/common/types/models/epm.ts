@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -301,8 +302,8 @@ export interface RegistryDataStream {
 }
 
 export interface RegistryElasticsearch {
-  'index_template.settings'?: object;
-  'index_template.mappings'?: object;
+  'index_template.settings'?: estypes.IndicesIndexSettings;
+  'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
 export interface RegistryDataStreamPermissions {

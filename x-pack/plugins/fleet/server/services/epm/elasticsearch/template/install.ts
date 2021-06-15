@@ -181,19 +181,28 @@ export async function installTemplateForDataStream({
   });
 }
 
+interface TemplateMapEntry {
+  template:
+    | {
+        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
+      }
+    | {
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+      };
+}
+type TemplateMap = Record<string, TemplateMapEntry>;
 function putComponentTemplate(
   esClient: ElasticsearchClient,
   params: {
-    body: object;
+    body: TemplateMapEntry;
     name: string;
     create?: boolean;
   }
 ): { clusterPromise: Promise<any>; name: string } {
   const { name, body, create = false } = params;
-
   return {
-    // @ts-expect-error body expected to be ClusterPutComponentTemplateRequest
     clusterPromise: esClient.cluster.putComponentTemplate(
+      // @ts-expect-error body is missing required key `settings`. TemplateMapEntry has settings *or* mappings
       { name, body, create },
       { ignore: [404] }
     ),
@@ -217,7 +226,8 @@ function buildComponentTemplates(
   const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
   const settingsTemplateName = `${templateName}${settingsSuffix}`;
   const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
-  const templatesMap: Record<string, { template: object }> = {};
+
+  const templatesMap: TemplateMap = {};
 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
     templatesMap[mappingsTemplateName] = {
