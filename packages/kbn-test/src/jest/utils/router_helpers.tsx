@@ -8,18 +8,39 @@
 
 import React, { Component, ComponentType } from 'react';
 import { MemoryRouter, Route, withRouter } from 'react-router-dom';
-import * as H from 'history';
+import { History, LocationDescriptor } from 'history';
 
-export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex: number = 0) => (
-  WrappedComponent: ComponentType
-) => (props: any) => (
+const stringifyPath = (path: LocationDescriptor): string => {
+  if (typeof path === 'string') {
+    return path;
+  }
+
+  return path.pathname || '/';
+};
+
+const locationDescriptorToRoutePath = (
+  paths: LocationDescriptor | LocationDescriptor[]
+): string | string[] => {
+  if (Array.isArray(paths)) {
+    return paths.map((path: LocationDescriptor) => {
+      return stringifyPath(path);
+    });
+  }
+
+  return stringifyPath(paths);
+};
+
+export const WithMemoryRouter = (
+  initialEntries: LocationDescriptor[] = ['/'],
+  initialIndex: number = 0
+) => (WrappedComponent: ComponentType) => (props: any) => (
   <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
     <WrappedComponent {...props} />
   </MemoryRouter>
 );
 
 export const WithRoute = (
-  componentRoutePath: string | string[] = '/',
+  componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],
   onRouter = (router: any) => {}
 ) => (WrappedComponent: ComponentType) => {
   // Create a class component that will catch the router
@@ -40,16 +61,16 @@ export const WithRoute = (
 
   return (props: any) => (
     <Route
-      path={componentRoutePath}
+      path={locationDescriptorToRoutePath(componentRoutePath)}
       render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
     />
   );
 };
 
 interface Router {
-  history: Partial<H.History>;
+  history: Partial<History>;
   route: {
-    location: H.Location;
+    location: LocationDescriptor;
   };
 }
 

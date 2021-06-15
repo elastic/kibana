@@ -6,6 +6,7 @@
  */
 
 import {
+  ActivityLog,
   HostInfo,
   Immutable,
   HostMetadata,
@@ -14,7 +15,6 @@ import {
   PolicyData,
   MetadataQueryStrategyVersions,
   HostStatus,
-  EndpointAction,
   HostIsolationResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
@@ -36,7 +36,11 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: AsyncResourceState<EndpointAction[]>;
+    activityLog: {
+      page: number;
+      pageSize: number;
+      logData: AsyncResourceState<ActivityLog>;
+    };
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
