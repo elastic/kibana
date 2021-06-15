@@ -73,7 +73,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_reveal_image/README.md[expressionRevealImage]
-| This plugin addes expression to the canvas to be rendered
+|Expression Reveal Image plugin is an extracted Canvas chart. It is registrating the revealImage chart, expression elements, functions and views to canvas and expression plugins.
 
 
 |<<kibana-expressions-plugin>>
