@@ -7,6 +7,12 @@
 
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
+import { ApmIndicesConfig } from '../common/typings';
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {
@@ -58,7 +64,7 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
 
     it('registered data handler', () => {

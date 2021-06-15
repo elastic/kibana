@@ -13,7 +13,6 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getEmptySections } from '../../../pages/overview/empty_section';
-import { UXHasDataResponse } from '../../../typings';
 import { EmptySection } from './empty_section';
 
 export function EmptySections() {
@@ -31,8 +30,7 @@ export function EmptySections() {
     } else {
       const app = hasDataMap[id];
       if (app) {
-        const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
-        return app.status === FETCH_STATUS.FAILURE || !_hasData;
+        return app.status === FETCH_STATUS.FAILURE || !app.hasData;
       }
     }
     return false;

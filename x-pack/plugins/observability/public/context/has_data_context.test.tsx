@@ -19,9 +19,15 @@ import * as pluginContext from '../hooks/use_plugin_context';
 import { PluginContextValue } from './plugin_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { ApmIndicesConfig } from '../../common/typings';
 
 const relativeStart = '2020-10-08T06:00:00.000Z';
 const relativeEnd = '2020-10-08T07:00:00.000Z';
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 function wrapper({ children }: { children: React.ReactElement }) {
   const history = createMemoryHistory();
@@ -280,7 +286,7 @@ describe('HasDataContextProvider', () => {
       describe('when apm returns true', () => {
         beforeAll(() => {
           registerApps([
-            { appName: 'apm', hasData: async () => ({ hasData: true, indices: 'apm-*' }) },
+            { appName: 'apm', hasData: async () => ({ hasData: true, indices: sampleAPMIndices }) },
           ]);
         });
 
@@ -320,7 +326,10 @@ describe('HasDataContextProvider', () => {
       describe('when apm returns false', () => {
         beforeAll(() => {
           registerApps([
-            { appName: 'apm', hasData: async () => ({ indices: 'apm-*', hasData: false }) },
+            {
+              appName: 'apm',
+              hasData: async () => ({ indices: sampleAPMIndices, hasData: false }),
+            },
           ]);
         });
 

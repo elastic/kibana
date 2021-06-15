@@ -25,6 +25,7 @@ import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -32,6 +33,11 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'infra_metrics' });
   unregisterDataHandler({ appName: 'synthetics' });
 }
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',
@@ -177,7 +183,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => ({ hasData: false, indices: 'apm-*' }),
+      hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -272,7 +278,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
       return (
@@ -289,7 +295,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -321,7 +327,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -355,7 +361,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -386,7 +392,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -420,7 +426,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching APM data');
         },
-        hasData: async () => ({ hasData: true, indices: 'apm-*' }),
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
