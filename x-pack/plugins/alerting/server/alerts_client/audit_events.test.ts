@@ -34,7 +34,7 @@ describe('#ruleAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User is creating alert [id=ALERT_ID]",
+        "message": "User is creating rule [id=ALERT_ID]",
       }
     `);
   });
