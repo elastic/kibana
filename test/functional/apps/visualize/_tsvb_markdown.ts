@@ -143,6 +143,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.markdownSwitchSubTab('data');
           await visualBuilder.selectAggType('Average');
           await visualBuilder.setFieldForAggregation('bytes');
+        });
+
+        beforeEach(async () => {
+          await visualBuilder.markdownSwitchSubTab('data');
           await visualBuilder.clickSeriesOption();
         });
 
@@ -159,6 +163,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const text = await visualBuilder.getMarkdownText();
           expect(text).to.be('5.616KB');
         });
+
+        afterEach(async () => await visualBuilder.markdownSwitchSubTab('markdown'));
       });
     });
   });

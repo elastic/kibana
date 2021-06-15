@@ -260,25 +260,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('applying field formats from Advanced Settings', () => {
-      const termsField = 'machine.os.raw';
-
-      const toggleSetFormatForFieldInIndexPatterns = async (fieldName: string) => {
+      const toggleSetFormatForMachineOsRaw = async () => {
         log.debug(
-          'Navigate to Advanced Settings Index Patterns and toggle Set Format for the specified field'
+          'Navigate to Advanced Settings Index Patterns and toggle Set Format for machine.os.raw'
         );
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.filterField(fieldName);
-        await PageObjects.settings.openControlsByName(fieldName);
+        await PageObjects.settings.openControlsByName('machine.os.raw');
         const formatRow = await testSubjects.find('formatRow');
-        const [formatRowToggle] = await formatRow.findAllByCssSelector('[data-test-subj="toggle"]');
+        const formatRowToggle = await formatRow.findByTestSubject('toggle');
         await formatRowToggle.click();
       };
 
       before(async () => {
         log.debug('Toggle on Set Format for machine.os.raw and set it to the title case');
-        await toggleSetFormatForFieldInIndexPatterns(termsField);
+        await toggleSetFormatForMachineOsRaw();
         await PageObjects.settings.setFieldFormat('string');
         await PageObjects.settings.setScriptedFieldStringTransform('title');
         await PageObjects.settings.controlChangeSave();
@@ -288,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.selectAggType('Average');
         await PageObjects.visualBuilder.setFieldForAggregation('bytes');
-        await PageObjects.visualBuilder.setMetricsGroupByTerms(termsField);
+        await PageObjects.visualBuilder.setMetricsGroupByTerms('machine.os.raw');
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       });
 
@@ -377,7 +374,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         log.debug('Toggle off Set Format for machine.os.raw');
-        await toggleSetFormatForFieldInIndexPatterns(termsField);
+        await toggleSetFormatForMachineOsRaw();
+        await PageObjects.settings.controlChangeSave();
       });
     });
   });

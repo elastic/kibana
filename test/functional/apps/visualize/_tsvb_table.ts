@@ -67,21 +67,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('applying field formats from Advanced Settings', () => {
-        const toggleSetFormatForMachineOsRawInIndexPatterns = async () => {
+        const toggleSetFormatForMachineOsRaw = async () => {
           await settings.navigateTo();
           await settings.clickKibanaIndexPatterns();
           await settings.clickIndexPatternLogstash();
-          await settings.filterField('machine.os.raw');
           await settings.openControlsByName('machine.os.raw');
           const formatRow = await testSubjects.find('formatRow');
-          const [formatRowToggle] = await formatRow.findAllByCssSelector(
-            '[data-test-subj="toggle"]'
-          );
+          const formatRowToggle = await formatRow.findByTestSubject('toggle');
           await formatRowToggle.click();
         };
 
         before(async () => {
-          await toggleSetFormatForMachineOsRawInIndexPatterns();
+          await toggleSetFormatForMachineOsRaw();
           await settings.setFieldFormat('string');
           await settings.setScriptedFieldStringTransform('upper');
           await settings.controlChangeSave();
@@ -122,7 +119,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(tableData).to.be(expected);
         });
 
-        after(async () => await toggleSetFormatForMachineOsRawInIndexPatterns());
+        after(async () => {
+          await toggleSetFormatForMachineOsRaw();
+          await settings.controlChangeSave();
+        });
       });
     });
   });
