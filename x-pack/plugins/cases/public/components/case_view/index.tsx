@@ -32,11 +32,7 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import {
-  getConnectorById,
-  normalizeActionConnector,
-  getNoneConnector,
-} from '../configure_cases/utils';
+import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { Ecs } from '../../../common';
@@ -44,6 +40,7 @@ import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../t
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { getConnectorById } from '../utils';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {

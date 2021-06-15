@@ -17,7 +17,6 @@ import { getSwimlaneServer } from '../../../../common/fixtures/plugins/actions_s
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
   const mockSwimlane = {
@@ -111,7 +110,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
     let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
-    // need to wait for kibanaServer to settle ...
     before(async () => {
       swimlaneServer = await getSwimlaneServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });

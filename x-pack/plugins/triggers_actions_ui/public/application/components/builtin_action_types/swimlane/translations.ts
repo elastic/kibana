@@ -272,3 +272,11 @@ export const SW_REQUIRED_ALERT_ID = i18n.translate(
     defaultMessage: 'Alert ID is required.',
   }
 );
+
+export const SW_ALERT_SOURCE_TOOLTIP = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceTooltip',
+  {
+    defaultMessage: 'The index of the alert. Use {index} in Detections.',
+    values: { index: '{{context.rule.output_index}}' },
+  }
+);

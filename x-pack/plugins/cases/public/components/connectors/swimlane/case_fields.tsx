@@ -12,16 +12,7 @@ import * as i18n from './translations';
 import { ConnectorTypes, SwimlaneFieldsType, SwimlaneConnectorType } from '../../../../common';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
-
-const casesRequiredFields = [
-  'caseIdConfig',
-  'caseNameConfig',
-  'descriptionConfig',
-  'commentsConfig',
-];
-
-const isAnyRequiredFieldNotSet = (mapping: Record<string, unknown> | undefined) =>
-  !casesRequiredFields.some((field) => mapping != null && mapping[field] != null);
+import { isAnyRequiredFieldNotSet } from './validator';
 
 const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
   connector,
@@ -51,7 +42,7 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
         />
       )}
       {showMappingWarning && (
-        <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="warning" iconType="help">
+        <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="danger" iconType="alert">
           {i18n.EMPTY_MAPPING_WARNING_DESC}
         </EuiCallOut>
       )}

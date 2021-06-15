@@ -10,10 +10,10 @@ import {
   CaseField,
   ActionType,
   ThirdPartyField,
-  ActionConnector,
   CaseConnector,
   CaseConnectorMapping,
 } from '../../containers/configure/types';
+import { CaseActionConnector } from '../types';
 
 export const setActionTypeToMapping = (
   caseField: CaseField,
@@ -54,13 +54,8 @@ export const getNoneConnector = (): CaseConnector => ({
   fields: null,
 });
 
-export const getConnectorById = (
-  id: string,
-  connectors: ActionConnector[]
-): ActionConnector | null => connectors.find((c) => c.id === id) ?? null;
-
 export const normalizeActionConnector = (
-  actionConnector: ActionConnector,
+  actionConnector: CaseActionConnector,
   fields: CaseConnector['fields'] = null
 ): CaseConnector => {
   const caseConnectorFieldsType = {
@@ -75,6 +70,6 @@ export const normalizeActionConnector = (
 };
 
 export const normalizeCaseConnector = (
-  connectors: ActionConnector[],
+  connectors: CaseActionConnector[],
   caseConnector: CaseConnector
-): ActionConnector | null => connectors.find((c) => c.id === caseConnector.id) ?? null;
+): CaseActionConnector | null => connectors.find((c) => c.id === caseConnector.id) ?? null;

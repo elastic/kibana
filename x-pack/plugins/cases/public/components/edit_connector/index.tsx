@@ -20,15 +20,15 @@ import {
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 
-import { Form, UseField, useForm } from '../../common/shared_imports';
+import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
 import { ActionConnector, ConnectorTypeFields } from '../../../common';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
+import { getConnectorById, getConnectorsFormValidators } from '../utils';
 
 interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
@@ -203,6 +203,11 @@ export const EditConnector = React.memo(
       });
     }, [dispatch]);
 
+    const connectorIdConfig = getConnectorsFormValidators({
+      config: schema.connectorId as FieldConfig,
+      connectors,
+    });
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -230,6 +235,7 @@ export const EditConnector = React.memo(
                 <EuiFlexItem>
                   <UseField
                     path="connectorId"
+                    config={connectorIdConfig}
                     component={ConnectorSelector}
                     componentProps={{
                       connectors,
