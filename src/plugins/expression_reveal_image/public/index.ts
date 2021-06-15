@@ -11,13 +11,13 @@ import { ExpressionRevealImagePlugin } from './plugin';
 import { revealImageRenderer } from './expression_renderers';
 import { revealImageElement } from './elements';
 import { revealImageUIView } from './ui_views';
+import { translateElements } from '../common/lib/translate_elements';
 
-export const elements = [revealImageElement];
+export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart } from './plugin';
+export const elements = translateElements([revealImageElement]);
 export const renderers = [revealImageRenderer];
 export const uiViews = [revealImageUIView];
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new ExpressionRevealImagePlugin();
 }

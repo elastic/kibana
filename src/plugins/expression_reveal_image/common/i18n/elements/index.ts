@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ElementStringDict } from '../../types';
 import { revealImage } from './dict';
 
 /**
@@ -16,6 +17,6 @@ import { revealImage } from './dict';
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
  */
-export const getElementsStrings = () => ({
+export const getElementsStrings = (): ElementStringDict => ({
   revealImage,
 });

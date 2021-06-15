@@ -12,7 +12,7 @@ import { LEGACY_RENDERER_LIBRARY } from '../common';
 import { revealImageFunction } from './expression_functions';
 import { revealImageRenderer } from './expression_renderers';
 import { revealImage as revealImageRendererLegacy } from './expression_renderers_legacy';
-import { ExpressionService, ExpressionsServiceSetup } from './services';
+import { ExpressionService, ExpressionServiceSetup, ExpressionServiceStart } from './services';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -22,10 +22,20 @@ interface StartDeps {
   expression: ExpressionsStart;
 }
 
-export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+export type ExpressionRevealImagePluginSetup = ExpressionServiceSetup;
+export type ExpressionRevealImagePluginStart = ExpressionServiceStart;
+
+export class ExpressionRevealImagePlugin
+  implements
+    Plugin<
+      ExpressionRevealImagePluginSetup,
+      ExpressionRevealImagePluginStart,
+      SetupDeps,
+      StartDeps
+    > {
   private readonly expressionService: ExpressionService = new ExpressionService();
 
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionsServiceSetup {
+  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
 
     if (!core.uiSettings.get(LEGACY_RENDERER_LIBRARY, false)) {
@@ -39,7 +49,7 @@ export class ExpressionRevealImagePlugin implements Plugin<void, void, SetupDeps
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): ExpressionRevealImagePluginStart {
     const start = { ...this.expressionService.start() };
 
     return Object.freeze(start);

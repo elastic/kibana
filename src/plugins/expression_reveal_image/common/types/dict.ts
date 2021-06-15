@@ -5,8 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './expression_functions';
-export * from './expression_renderers';
-export * from './elements';
-export * from './ui_views';
-export * from './dict';
+
+export interface ElementStrings {
+  displayName: string;
+  help: string;
+}
+
+export interface ElementStringDict {
+  [elementName: string]: ElementStrings;
+}

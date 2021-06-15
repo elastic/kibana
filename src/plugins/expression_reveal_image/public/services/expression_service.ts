@@ -11,18 +11,13 @@ import { ElementFactory, StartInitializer } from '../../common/types';
 import { elements, renderers, uiViews } from '../';
 import { RevealImageRendererConfig } from '../expression_renderers/types';
 
-export type ExpressionServiceSetup = Pick<
-  ExpressionService,
-  'getRenderers' | 'getViews' | 'getElements'
->;
-
-export interface ExpressionsServiceSetup {
+export interface ExpressionServiceSetup {
   getViews: () => Array<StartInitializer<unknown>>;
   getRenderers: () => Array<() => ExpressionRenderDefinition<RevealImageRendererConfig>>;
   getElements: () => ElementFactory[];
 }
 
-export type ExpressionsServiceStart = ExpressionsServiceSetup;
+export type ExpressionServiceStart = ExpressionServiceSetup;
 
 export class ExpressionService {
   public readonly getElements = (): ElementFactory[] => elements;
@@ -31,11 +26,11 @@ export class ExpressionService {
   > => renderers;
   public readonly getViews = (): Array<StartInitializer<unknown>> => uiViews;
 
-  public setup(...args: unknown[]): ExpressionsServiceSetup {
+  public setup(...args: unknown[]): ExpressionServiceSetup {
     return this;
   }
 
-  public start(...args: unknown[]): ExpressionsServiceStart {
+  public start(...args: unknown[]): ExpressionServiceStart {
     return this;
   }
 

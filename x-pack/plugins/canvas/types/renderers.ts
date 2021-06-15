@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
 type GenericRendererCallback = (callback: () => void) => void;
 
@@ -35,9 +35,9 @@ export interface RendererSpec<RendererConfig = {}> {
   /** The render type */
   name: string;
   /** The name to display */
-  displayName: string;
+  displayName?: string;
   /** A description of what is rendered */
-  help: string;
+  help?: string;
   /** Indicate whether the element should reuse the existing DOM element when re-rendering */
   reuseDomNode: boolean;
   /** The default width of the element in pixels */
@@ -50,5 +50,7 @@ export interface RendererSpec<RendererConfig = {}> {
 
 export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
 
-export type AnyRendererFactory = RendererFactory<any>;
+export type AnyRendererFactory =
+  | RendererFactory<any>
+  | Array<() => ExpressionRenderDefinition<any>>;
 export type AnyRendererSpec = RendererSpec<any>;

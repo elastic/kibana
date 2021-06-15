@@ -31,6 +31,7 @@
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
+    { "path": "../../../src/plugins/expression_reveal_image/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
