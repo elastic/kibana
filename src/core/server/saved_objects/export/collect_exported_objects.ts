@@ -35,8 +35,10 @@ interface CollectExportedObjectResult {
 interface ExcludedObject {
   id: string;
   type: string;
-  reason?: string;
+  reason: ExclusionReason;
 }
+
+export type ExclusionReason = 'predicate_error' | 'excluded';
 
 export const collectExportedObjects = async ({
   objects,
@@ -51,7 +53,7 @@ export const collectExportedObjects = async ({
 
   const collectedObjects: SavedObject[] = [];
   const collectedMissingRefs: CollectedReference[] = [];
-  const collectedNonExportableObjects: SavedObject[] = [];
+  const collectedNonExportableObjects: ExcludedObject[] = [];
   const alreadyProcessed: Set<string> = new Set();
 
   let currentObjects = objects;
@@ -110,10 +112,7 @@ export const collectExportedObjects = async ({
 
   return {
     objects: collectedObjects,
-    excludedObjects: collectedNonExportableObjects.map((obj) => ({
-      type: obj.type,
-      id: obj.id,
-    })),
+    excludedObjects: collectedNonExportableObjects,
     missingRefs: collectedMissingRefs,
   };
 };
@@ -195,14 +194,26 @@ const splitByExportability = (
   isExportable: SavedObjectsExportablePredicate<any>
 ) => {
   const exportableObjects: SavedObject[] = [];
-  const nonExportableObjects: SavedObject[] = [];
+  const nonExportableObjects: ExcludedObject[] = [];
 
   objects.forEach((obj) => {
-    const exportable = isExportable(obj);
-    if (exportable) {
-      exportableObjects.push(obj);
-    } else {
-      nonExportableObjects.push(obj);
+    try {
+      const exportable = isExportable(obj);
+      if (exportable) {
+        exportableObjects.push(obj);
+      } else {
+        nonExportableObjects.push({
+          id: obj.id,
+          type: obj.type,
+          reason: 'excluded',
+        });
+      }
+    } catch (e) {
+      nonExportableObjects.push({
+        id: obj.id,
+        type: obj.type,
+        reason: 'predicate_error',
+      });
     }
   });
 

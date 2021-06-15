@@ -12,7 +12,7 @@ import { httpServerMock } from '../../http/http_server.mocks';
 import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
-import { collectExportedObjects } from './collect_exported_objects';
+import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';
 import { SavedObjectsExportablePredicate } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
@@ -31,6 +31,11 @@ const createError = (parts: Partial<SavedObjectError> = {}): SavedObjectError =>
 });
 
 const toIdTuple = (obj: SavedObject) => ({ type: obj.type, id: obj.id });
+const toExcludedObject = (obj: SavedObject, reason: ExclusionReason = 'excluded') => ({
+  type: obj.type,
+  id: obj.id,
+  reason,
+});
 
 const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.entries(record));
 
@@ -209,7 +214,45 @@ describe('collectExportedObjects', () => {
       });
 
       expect(objects).toEqual([foo1, bar3]);
-      expect(excludedObjects).toEqual([foo2].map(toIdTuple));
+      expect(excludedObjects).toEqual([foo2].map((obj) => toExcludedObject(obj)));
+    });
+
+    it('excludes objects when the predicate throws', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const foo2 = createObject({
+        type: 'foo',
+        id: '2',
+      });
+      const bar3 = createObject({
+        type: 'bar',
+        id: '3',
+      });
+
+      registerType('foo', {
+        isExportable: (obj) => {
+          if (obj.id === '1') {
+            throw new Error('reason');
+          }
+          return true;
+        },
+      });
+      registerType('bar', { isExportable: () => true });
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1, foo2, bar3],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+      });
+
+      expect(objects).toEqual([foo2, bar3]);
+      expect(excludedObjects).toEqual(
+        [foo1].map((obj) => toExcludedObject(obj, 'predicate_error'))
+      );
     });
 
     it('excludes references filtered by the `isExportable` predicate', async () => {
@@ -255,7 +298,7 @@ describe('collectExportedObjects', () => {
       });
 
       expect(objects).toEqual([foo1, bar2]);
-      expect(excludedObjects).toEqual([excluded1].map(toIdTuple));
+      expect(excludedObjects).toEqual([excluded1].map((obj) => toExcludedObject(obj)));
     });
 
     it('excludes additional objects filtered by the `isExportable` predicate', async () => {
@@ -291,7 +334,7 @@ describe('collectExportedObjects', () => {
       });
 
       expect(objects).toEqual([foo1, bar2]);
-      expect(excludedObjects).toEqual([excluded1].map(toIdTuple));
+      expect(excludedObjects).toEqual([excluded1].map((obj) => toExcludedObject(obj)));
     });
 
     it('returns the missing references', async () => {
@@ -729,7 +772,7 @@ describe('collectExportedObjects', () => {
       });
 
       expect(objects).toEqual([foo1, bar2, dolly3]);
-      expect(excludedObjects).toEqual([baz4].map(toIdTuple));
+      expect(excludedObjects).toEqual([baz4].map((obj) => toExcludedObject(obj)));
     });
   });
 
