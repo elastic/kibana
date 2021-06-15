@@ -7,7 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 
-import type { AssetType, ServiceName } from '../../types';
+import type { ServiceName } from '../../types';
 import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
 
 export * from '../../constants';
@@ -20,8 +20,9 @@ export const DisplayedAssets: ServiceNameToAssetTypes = {
   kibana: Object.values(KibanaAssetType),
   elasticsearch: Object.values(ElasticsearchAssetType),
 };
+export type DisplayedAssetType = KibanaAssetType | ElasticsearchAssetType;
 
-export const AssetTitleMap: Record<AssetType, string> = {
+export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   dashboard: 'Dashboard',
   ilm_policy: 'ILM Policy',
   ingest_pipeline: 'Ingest Pipeline',
@@ -31,7 +32,6 @@ export const AssetTitleMap: Record<AssetType, string> = {
   component_template: 'Component Template',
   search: 'Saved Search',
   visualization: 'Visualization',
-  input: 'Agent input',
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
   lens: 'Lens',

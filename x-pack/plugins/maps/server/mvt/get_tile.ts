@@ -24,6 +24,7 @@ import {
 } from '../../common/constants';
 
 import {
+  createExtentFilter,
   convertRegularRespToGeoJson,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
@@ -254,21 +255,14 @@ export async function getTile({
 }
 
 function getTileSpatialFilter(geometryFieldName: string, tileBounds: ESBounds): unknown {
-  return {
-    geo_shape: {
-      [geometryFieldName]: {
-        shape: {
-          type: 'envelope',
-          // upper left and lower right points of the shape to represent a bounding rectangle in the format [[minLon, maxLat], [maxLon, minLat]]
-          coordinates: [
-            [tileBounds.top_left.lon, tileBounds.top_left.lat],
-            [tileBounds.bottom_right.lon, tileBounds.bottom_right.lat],
-          ],
-        },
-        relation: 'INTERSECTS',
-      },
-    },
+  const tileExtent = {
+    minLon: tileBounds.top_left.lon,
+    minLat: tileBounds.bottom_right.lat,
+    maxLon: tileBounds.bottom_right.lon,
+    maxLat: tileBounds.top_left.lat,
   };
+  const tileExtentFilter = createExtentFilter(tileExtent, [geometryFieldName]);
+  return tileExtentFilter.query;
 }
 
 function esBboxToGeoJsonPolygon(esBounds: ESBounds, tileBounds: ESBounds): Polygon {
