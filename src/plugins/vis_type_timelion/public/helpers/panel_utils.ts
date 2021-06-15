@@ -7,13 +7,15 @@
  */
 
 import moment from 'moment-timezone';
-import { Position } from '@elastic/charts';
-
-import { TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
+import type { Position } from '@elastic/charts';
+import type { TimefilterContract } from 'src/plugins/data/public';
+import type { IUiSettingsClient } from 'kibana/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
+import { tickFormatters } from './tick_formatters';
+
+import type { Series } from './timelion_request_handler';
 
 export interface IAxis {
   delta?: number;
@@ -59,4 +61,42 @@ export const createTickFormat = (
   const format = xaxisFormatterProvider(uiSettings)(interval);
 
   return (val: number) => moment(val).format(format);
+};
+
+/** While we support 2 versions of the timeline, we need this adapter. **/
+const adaptYaxisParams = (yaxis: IAxis) => {
+  const y = { ...yaxis };
+
+  if (y.units) {
+    const formatters = tickFormatters(y);
+    y.tickFormatter = formatters[y.units.type as keyof typeof formatters];
+  } else if (yaxis.tickDecimals) {
+    y.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
+  }
+
+  const max = yaxis.max ? yaxis.max : undefined;
+  const min = yaxis.min ? yaxis.min : undefined;
+
+  y.domain = {
+    fit: min === undefined && max === undefined,
+    max,
+    min,
+  };
+  return y;
+};
+
+export const extractYAxis = (series: Series) => {
+  let yaxis = (series._global?.yaxes ?? []).reduce(
+    (acc: IAxis, item: IAxis) => ({
+      ...acc,
+      ...item,
+    }),
+    {}
+  );
+
+  if (yaxis) {
+    yaxis = adaptYaxisParams(yaxis);
+  }
+
+  return yaxis;
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface Series {
+export interface VisSeries {
   yaxis?: number;
   label: string;
   lines?: {

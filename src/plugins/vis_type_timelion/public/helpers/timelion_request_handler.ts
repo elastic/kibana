@@ -12,7 +12,7 @@ import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
 import { getDataSearch } from '../helpers/plugin_services';
-import { Series as VisSeries } from '../../common/vis_data';
+import { VisSeries } from '../../common/vis_data';
 
 interface Stats {
   cacheCount: number;

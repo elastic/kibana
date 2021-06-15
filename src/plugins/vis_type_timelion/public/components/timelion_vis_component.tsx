@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { compact, cloneDeep, last, map } from 'lodash';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
+import { compact, last, map } from 'lodash';
 import {
   Chart,
   Settings,
@@ -23,13 +23,16 @@ import { useKibana } from '../../../kibana_react/public';
 
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
-import { createTickFormat, IAxis, validateLegendPositionValue } from '../helpers/panel_utils';
+import {
+  extractYAxis,
+  createTickFormat,
+  validateLegendPositionValue,
+} from '../helpers/panel_utils';
+
 import { colors } from '../helpers/chart_constants';
-import { tickFormatters } from '../helpers/tick_formatters';
 import { activeCursor$ } from '../helpers/active_cursor';
 
-import type { Series, Sheet } from '../helpers/timelion_request_handler';
-
+import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
 import type { RangeFilterParams } from '../../../data/public';
@@ -43,29 +46,6 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
-// @todo: remove this method, we should not modify global object
-const updateYAxes = (yaxes: IAxis[]) => {
-  yaxes.forEach((yaxis: IAxis) => {
-    if (yaxis) {
-      if (yaxis.units) {
-        const formatters = tickFormatters(yaxis);
-        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-      } else if (yaxis.tickDecimals) {
-        yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
-      }
-
-      const max = yaxis.max ? yaxis.max : undefined;
-      const min = yaxis.min ? yaxis.min : undefined;
-
-      yaxis.domain = {
-        fit: min === undefined && max === undefined,
-        max,
-        min,
-      };
-    }
-  });
-};
-
 const MAIN_GROUP_ID = 1;
 
 const DefaultYAxis = () => <Axis id="left" position={Position.Left} groupId={`${MAIN_GROUP_ID}`} />;
@@ -77,8 +57,8 @@ const TimelionVisComponent = ({
   onBrushEvent,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
-  const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const chartRef = useRef<Chart>(null);
+  const chart = seriesList.list;
 
   useEffect(() => {
     const subscription = activeCursor$.subscribe((cursor: PointerEvent) => {
@@ -89,25 +69,6 @@ const TimelionVisComponent = ({
       subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
-      const newSeries = { ...series };
-
-      if (!newSeries.color) {
-        const colorIndex = seriesIndex % colors.length;
-        newSeries.color = colors[colorIndex];
-      }
-
-      if (newSeries._global?.yaxes) {
-        updateYAxes(newSeries._global.yaxes);
-      }
-
-      return newSeries;
-    });
-
-    setChart(newChart);
-  }, [seriesList.list]);
 
   const handleCursorUpdate = useCallback((cursor: PointerEvent) => {
     activeCursor$.next(cursor);
@@ -203,12 +164,11 @@ const TimelionVisComponent = ({
 
         {chart.length ? (
           chart.map((data, index) => {
-            const { yaxis: y, _global } = data;
-            const yaxis = (_global?.yaxes ?? [])[y ? y - 1 : 0];
+            const yaxis = extractYAxis(data);
 
             return yaxis ? (
               <Axis
-                groupId={`${y ? y : MAIN_GROUP_ID}`}
+                groupId={`${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`}
                 key={index}
                 id={yaxis.position + yaxis.axisLabel}
                 title={yaxis.axisLabel}
@@ -225,14 +185,19 @@ const TimelionVisComponent = ({
         )}
 
         {chart.map((data, index) => {
+          const visData = { ...data };
           const SeriesComponent = data.bars ? BarSeriesComponent : AreaSeriesComponent;
+
+          if (!visData.color) {
+            visData.color = colors[index % colors.length];
+          }
 
           return (
             <SeriesComponent
-              key={`${index}-${data.label}`}
-              visData={data}
+              key={`${index}-${visData.label}`}
+              visData={visData}
               index={chart.length - index}
-              groupId={data.yaxis ? `${data.yaxis}` : `${MAIN_GROUP_ID}`}
+              groupId={`${visData.yaxis ? visData.yaxis : MAIN_GROUP_ID}`}
             />
           );
         })}

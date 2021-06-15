@@ -34,7 +34,7 @@ const getBarSeriesStyle = ({ color, bars }: BarSeriesComponentProps['visData']) 
     rect: {
       fill: color,
       opacity,
-      widthRatio: 1,
+      widthPixel: 1,
     },
   } as BarSeriesStyle;
 };
