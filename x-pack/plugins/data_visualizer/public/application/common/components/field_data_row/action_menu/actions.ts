@@ -110,7 +110,7 @@ export function getActions(
           },
         });
       },
-      'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
+      'data-test-subj': 'dataVisualizerActionDeleteIndexPatternFieldButton',
     });
   }
   return actions;

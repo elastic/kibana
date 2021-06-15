@@ -71,12 +71,12 @@ export function DataVisualizerIndexPatternManagement(
         setIsAddIndexPatternFieldPopoverOpen(false);
       }}
       ownFocus
-      data-test-subj="dataVisualizer-addRuntimeField-popover"
+      data-test-subj="dataVisualizerIndexPatternManagementPopover"
       button={
         <EuiButtonIcon
           color="text"
           iconType="boxesHorizontal"
-          data-test-subj="discoverIndexPatternActions"
+          data-test-subj="dataVisualizerIndexPatternManagementButton"
           aria-label={i18n.translate(
             'xpack.dataVisualizer.fieldChooser.indexPatterns.actionsPopoverLabel',
             {
@@ -90,12 +90,13 @@ export function DataVisualizerIndexPatternManagement(
       }
     >
       <EuiContextMenuPanel
+        data-test-subj="dataVisualizerIndexPatternManagementMenu"
         size="s"
         items={[
           <EuiContextMenuItem
             key="add"
             icon="indexOpen"
-            data-test-subj="indexPattern-add-field"
+            data-test-subj="dataVisualizerAddIndexPatternFieldAction"
             onClick={() => {
               setIsAddIndexPatternFieldPopoverOpen(false);
               addField();
@@ -108,7 +109,7 @@ export function DataVisualizerIndexPatternManagement(
           <EuiContextMenuItem
             key="manage"
             icon="indexSettings"
-            data-test-subj="indexPattern-manage-field"
+            data-test-subj="dataVisualizerManageIndexPatternAction"
             onClick={() => {
               setIsAddIndexPatternFieldPopoverOpen(false);
               application.navigateToApp('management', {

@@ -112,14 +112,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       isExpander: true,
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
-        if (displayName === undefined) return null;
-        const direction = expandedRowItemIds.includes(displayName) ? 'arrowUp' : 'arrowDown';
+        if (item.fieldName === undefined) return null;
+        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
             onClick={() => toggleDetails(item)}
             aria-label={
-              expandedRowItemIds.includes(displayName)
+              expandedRowItemIds.includes(item.fieldName)
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
                     values: { fieldName: displayName },
@@ -163,7 +163,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return (
             <EuiText size="s">
-              <b>{displayName}</b>
+              <b data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>{displayName}</b>
             </EuiText>
           );
         },
