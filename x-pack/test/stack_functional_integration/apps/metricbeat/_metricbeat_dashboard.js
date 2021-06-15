@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
-  describe.skip('check metricbeat Dashboard', function () {
+  describe('check metricbeat Dashboard', function () {
     before(async function () {
       await esArchiver.load(ARCHIVE);
 
