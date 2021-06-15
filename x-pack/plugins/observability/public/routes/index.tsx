@@ -113,6 +113,17 @@ export const routes = {
     },
     breadcrumb: [casesBreadcrumbs.cases],
   },
+  '/cases/:detailName/:commentId': {
+    handler: () => {
+      return <CaseDetailsPage />;
+    },
+    params: {
+      path: t.partial({
+        detailName: t.string,
+      }),
+    },
+    breadcrumb: [casesBreadcrumbs.cases],
+  },
   '/alerts': {
     handler: (routeParams: any) => {
       return <AlertsPage routeParams={routeParams} />;
