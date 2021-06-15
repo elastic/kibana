@@ -81,7 +81,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
         drawShape={this.props.drawShape}
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
-        drawActive={true}
+        enable={true}
       />
     );
   }
