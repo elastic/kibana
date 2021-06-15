@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
+import { Redirect, Route, Router, Switch, useHistory } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -36,32 +36,20 @@ export enum AllRulesTabs {
   exceptions = 'exceptions',
 }
 
-const allRulesTabs = {
-  [AllRulesTabs.rules]: {
+const allRulesTabs = [
+  {
     id: AllRulesTabs.rules,
     name: i18n.RULES_TAB,
     disabled: false,
-    href: '/all',
-    urlKey: SecurityPageName.rules,
-    pageId: SecurityPageName.rules,
+    href: '/rules',
   },
-  [AllRulesTabs.monitoring]: {
+  {
     id: AllRulesTabs.monitoring,
     name: i18n.MONITORING_TAB,
     disabled: false,
     href: '/rules/monitoring',
-    urlKey: SecurityPageName.rules,
-    pageId: SecurityPageName.rules,
   },
-  [AllRulesTabs.exceptions]: {
-    id: AllRulesTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-    href: '/exceptions',
-    urlKey: SecurityPageName.exceptions,
-    pageId: SecurityPageName.exceptions,
-  },
-};
+];
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -87,76 +75,46 @@ export const AllRules = React.memo<AllRulesProps>(
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
 
-    // const tabs = useMemo(
-    //   () => (
-    //     <EuiTabs>
-    //       {allRulesTabs.map((tab) => (
-    //         <EuiTab
-    //           data-test-subj={`allRulesTableTab-${tab.id}`}
-    //           onClick={() => setAllRulesTab(tab.id)}
-    //           isSelected={tab.id === allRulesTab}
-    //           disabled={tab.disabled}
-    //           key={tab.id}
-    //         >
-    //           {tab.name}
-    //         </EuiTab>
-    //       ))}
-    //     </EuiTabs>
-    //   ),
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    //   [allRulesTabs, allRulesTab, setAllRulesTab]
-    // );
+    const tabs = useMemo(
+      () => (
+        <EuiTabs>
+          {allRulesTabs.map((tab) => (
+            <EuiTab
+              data-test-subj={`allRulesTableTab-${tab.id}`}
+              onClick={() => setAllRulesTab(tab.id)}
+              isSelected={tab.id === allRulesTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [allRulesTabs, allRulesTab, setAllRulesTab]
+    );
 
     return (
       <>
         <EuiSpacer />
-        <SecuritySolutionTabNavigation navTabs={allRulesTabs} />
+        {tabs}
         <EuiSpacer />
-
-        <Switch>
-          <Route exact path="/rules">
-            <RulesTables
-              history={history}
-              formatUrl={formatUrl}
-              selectedTab={allRulesTab}
-              createPrePackagedRules={createPrePackagedRules}
-              hasPermissions={hasPermissions}
-              loading={loading}
-              loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-              refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
-              rulesCustomInstalled={rulesCustomInstalled}
-              rulesInstalled={rulesInstalled}
-              rulesNotInstalled={rulesNotInstalled}
-              rulesNotUpdated={rulesNotUpdated}
-              setRefreshRulesData={setRefreshRulesData}
-            />
-          </Route>
-          <Route path="/rules/monitoring">
-            <RulesTables
-              history={history}
-              formatUrl={formatUrl}
-              selectedTab={allRulesTab}
-              createPrePackagedRules={createPrePackagedRules}
-              hasPermissions={hasPermissions}
-              loading={loading}
-              loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-              refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
-              rulesCustomInstalled={rulesCustomInstalled}
-              rulesInstalled={rulesInstalled}
-              rulesNotInstalled={rulesNotInstalled}
-              rulesNotUpdated={rulesNotUpdated}
-              setRefreshRulesData={setRefreshRulesData}
-            />
-          </Route>
-          <Route path="/exceptions">
-            <ExceptionListsTable
-              formatUrl={formatUrl}
-              history={history}
-              hasPermissions={hasPermissions}
-              loading={loading}
-            />
-          </Route>
-        </Switch>
+        <RulesTables
+          history={history}
+          formatUrl={formatUrl}
+          selectedTab={allRulesTab}
+          createPrePackagedRules={createPrePackagedRules}
+          hasPermissions={hasPermissions}
+          loading={loading}
+          loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
+          refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
+          rulesCustomInstalled={rulesCustomInstalled}
+          rulesInstalled={rulesInstalled}
+          rulesNotInstalled={rulesNotInstalled}
+          rulesNotUpdated={rulesNotUpdated}
+          setRefreshRulesData={setRefreshRulesData}
+        />
       </>
     );
   }

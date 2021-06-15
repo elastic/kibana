@@ -17,7 +17,7 @@ export const BREADCRUMB_TITLE = i18n.translate(
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
-    defaultMessage: 'Detection alerts',
+    defaultMessage: 'Alerts',
   }
 );
 

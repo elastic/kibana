@@ -27,10 +27,7 @@ const DetectionEngineContainerComponent: React.FC = () => (
       <Route path="/rules/create">
         <CreateRulePage />
       </Route>
-      <Route path="/rules">
-        <RulesPage />
-      </Route>
-      <Route exact path="" strict>
+      <Route exact path="/rules">
         <RulesPage />
       </Route>
       <SpyRoute pageName={SecurityPageName.rules} />

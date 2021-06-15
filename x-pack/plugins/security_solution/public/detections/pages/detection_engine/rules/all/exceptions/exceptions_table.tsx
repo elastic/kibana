@@ -33,6 +33,8 @@ import { ReferenceErrorModal } from '../../../../../components/value_lists_manag
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
+import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../../../../../../common/constants';
 
 export type Func = () => Promise<void>;
 
@@ -394,6 +396,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           showModal={showReferenceErrorModal}
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
+        <SpyRoute pageName={SecurityPageName.exceptions} />
       </>
     );
   }

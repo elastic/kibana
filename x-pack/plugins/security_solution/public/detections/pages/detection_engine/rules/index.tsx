@@ -93,7 +93,7 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {

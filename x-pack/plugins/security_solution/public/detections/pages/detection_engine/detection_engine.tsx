@@ -105,7 +105,7 @@ const DetectionEnginePageComponent = () => {
   } = useListsConfig();
   const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;

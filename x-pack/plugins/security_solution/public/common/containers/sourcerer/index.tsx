@@ -17,7 +17,8 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
-  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
+  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default,
+  skip?: boolean
 ) => {
   const dispatch = useDispatch();
   const initialTimelineSourcerer = useRef(true);
