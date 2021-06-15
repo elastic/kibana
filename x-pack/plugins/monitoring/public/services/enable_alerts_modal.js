@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
+import { showAlertsToast } from '../alerts/lib/alerts_toast';
 
-export function enableAlertsModalProvider($http, $window) {
+export function enableAlertsModalProvider($http, $window, $injector) {
   function shouldShowAlertsModal() {
     const modalHasBeenShown = $window.sessionStorage.getItem('ALERTS_MODAL_HAS_BEEN_SHOWN');
 
@@ -18,10 +20,16 @@ export function enableAlertsModalProvider($http, $window) {
     return false;
   }
 
-  function enableAlerts() {
-    // TODO: handle errors
-    $http.post('../api/monitoring/v1/alerts/enable', {});
-    $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
+  async function enableAlerts() {
+    try {
+      const { data } = await $http.post('../api/monitoring/v1/alerts/enable', {});
+      $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
+      showAlertsToast(data);
+    } catch (err) {
+      const Private = $injector.get('Private');
+      const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+      return ajaxErrorHandlers(err);
+    }
   }
 
   function notAskAgain() {
