@@ -12130,7 +12130,6 @@
     "xpack.ingestPipelines.deleteModal.successDeleteMultipleNotificationMessageText": "已删除 {numSuccesses, plural, other {# 个管道}}",
     "xpack.ingestPipelines.deleteModal.successDeleteSingleNotificationMessageText": "已删除管道“{pipelineName}”",
     "xpack.ingestPipelines.edit.docsButtonLabel": "编辑管道文档",
-    "xpack.ingestPipelines.edit.fetchPipelineError": "加载管道时出错",
     "xpack.ingestPipelines.edit.loadingPipelinesDescription": "正在加载管道……",
     "xpack.ingestPipelines.edit.pageTitle": "编辑管道“{name}”",
     "xpack.ingestPipelines.form.cancelButtonLabel": "取消",

@@ -36,8 +36,7 @@ export const EmptyList: FunctionComponent = () => {
             <FormattedMessage
               id="xpack.ingestPipelines.list.table.emptyPromptDescription"
               defaultMessage="For example, you might create a pipeline with one processor that removes a field and another processor that renames a field."
-            />
-            {' '}
+            />{' '}
             <EuiLink href={services.documentation.getIngestNodeUrl()} target="_blank" external>
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
                 defaultMessage: 'Learn more',

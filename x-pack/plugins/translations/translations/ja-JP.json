@@ -11968,7 +11968,6 @@
     "xpack.ingestPipelines.deleteModal.multipleErrorsNotificationMessageText": "{count}件のパイプラインの削除エラー",
     "xpack.ingestPipelines.deleteModal.successDeleteSingleNotificationMessageText": "パイプライン'{pipelineName}'を削除しました",
     "xpack.ingestPipelines.edit.docsButtonLabel": "パイプラインドキュメントを編集",
-    "xpack.ingestPipelines.edit.fetchPipelineError": "パイプラインの読み込みエラー",
     "xpack.ingestPipelines.edit.loadingPipelinesDescription": "パイプラインを読み込んでいます…",
     "xpack.ingestPipelines.edit.pageTitle": "パイプライン'{name}'を編集",
     "xpack.ingestPipelines.form.cancelButtonLabel": "キャンセル",
