@@ -49,11 +49,15 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
 
         return {
           hosts: Array.from({ length: 10 }, () => {
-            return {
+            const endpoint = {
               metadata: generator.generateHostMetadata(),
               host_status: HostStatus.UNHEALTHY,
               query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
             };
+
+            generator.updateCommonInfo();
+
+            return endpoint;
           }),
           total: 10,
           request_page_size: 10,
