@@ -107,7 +107,6 @@ describe('extractExportDetails', () => {
       }
     );
     const result = await extractExportDetails(exportData);
-    expect(result).not.toBeUndefined();
     expect(result).toEqual({
       exportedCount: 1,
       missingRefCount: 0,

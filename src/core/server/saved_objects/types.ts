@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
  *
  * @public
  */
-export interface SavedObjectsType<Attributes = unknown> {
+export interface SavedObjectsType<Attributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -345,7 +345,7 @@ export interface SavedObjectsType<Attributes = unknown> {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
+export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
@@ -387,6 +387,11 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * It can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.
    *
    * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
    *
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
@@ -436,11 +441,11 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
   onImport?: SavedObjectsImportHook<Attributes>;
 
   /**
-   * Allow to specify exportability with an object granularity.
+   * Optional hook to specify whether an object should be exportable.
    *
    * If specified, `isExportable` will be called during export for each
-   * of this type's objects, and the ones not matching the predicate will
-   * be evicted from the export.
+   * of this type's objects in the export, and the ones not matching the
+   * predicate will be excluded from the export.
    *
    * When implementing both `isExportable` and `onExport`, it is mandatory that
    * `isExportable` returns the same value for an object before and after going
@@ -448,7 +453,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
    *
    * @example
-   * Registering a type with per-object exportability
+   * Registering a type with a per-object exportability predicate
    * ```ts
    * // src/plugins/my_plugin/server/plugin.ts
    * import { myType } from './saved_objects';
@@ -471,7 +476,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = unknown> {
    * }
    * ```
    *
-   * @remarks this is only used when `importableAndExportable` is true
+   * @remarks `importableAndExportable` must be `true` to specify this property.
    */
   isExportable?: SavedObjectsExportablePredicate<Attributes>;
 }
