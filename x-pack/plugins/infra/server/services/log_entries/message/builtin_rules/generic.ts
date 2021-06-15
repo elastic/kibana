@@ -7,42 +7,12 @@
 
 import { LogMessageFormattingRule } from '../rule_types';
 
-const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message'];
+const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message', 'log.original', 'event.original'];
 
-export const getGenericRules = (genericMessageFields: string[]) => [
-  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).reduce<
+export const getGenericRules = (genericMessageFields: string[]) =>
+  Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).reduce<
     LogMessageFormattingRule[]
-  >((genericRules, fieldName) => [...genericRules, ...createGenericRulesForField(fieldName)], []),
-  {
-    when: {
-      exists: ['event.dataset', 'log.original'],
-    },
-    format: [
-      {
-        constant: '[',
-      },
-      {
-        field: 'event.dataset',
-      },
-      {
-        constant: '] ',
-      },
-      {
-        field: 'log.original',
-      },
-    ],
-  },
-  {
-    when: {
-      exists: ['log.original'],
-    },
-    format: [
-      {
-        field: 'log.original',
-      },
-    ],
-  },
-];
+  >((genericRules, fieldName) => [...genericRules, ...createGenericRulesForField(fieldName)], []);
 
 const createGenericRulesForField = (fieldName: string) => [
   {
@@ -92,6 +62,50 @@ const createGenericRulesForField = (fieldName: string) => [
       },
       {
         field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+    ],
+  },
+  {
+    when: {
+      exists: ['event.dataset', fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
+      exists: ['event.dataset', fieldName],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
       },
       {
         constant: '] ',

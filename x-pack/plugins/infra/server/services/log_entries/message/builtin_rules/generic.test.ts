@@ -134,6 +134,50 @@ describe('Generic Rules', () => {
   });
 
   describe('log.original fallback', () => {
+    test('includes the event.dataset and log.level if present', () => {
+      const flattenedDocument = {
+        '@timestamp': ['2016-12-26T16:22:13.000Z'],
+        'event.dataset': ['generic.test'],
+        'log.level': ['TEST_LEVEL'],
+        'log.original': ['TEST_MESSAGE'],
+      };
+
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "constant": "[",
+          },
+          Object {
+            "field": "event.dataset",
+            "highlights": Array [],
+            "value": Array [
+              "generic.test",
+            ],
+          },
+          Object {
+            "constant": "][",
+          },
+          Object {
+            "field": "log.level",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_LEVEL",
+            ],
+          },
+          Object {
+            "constant": "] ",
+          },
+          Object {
+            "field": "log.original",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_MESSAGE",
+            ],
+          },
+        ]
+      `);
+    });
+
     test('includes the event.dataset if present', () => {
       const flattenedDocument = {
         '@timestamp': ['2016-12-26T16:22:13.000Z'],
@@ -177,6 +221,104 @@ describe('Generic Rules', () => {
         Array [
           Object {
             "field": "log.original",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_MESSAGE",
+            ],
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('event.original fallback', () => {
+    test('includes the event.dataset and log.level if present', () => {
+      const flattenedDocument = {
+        '@timestamp': ['2016-12-26T16:22:13.000Z'],
+        'event.dataset': ['generic.test'],
+        'log.level': ['TEST_LEVEL'],
+        'event.original': ['TEST_MESSAGE'],
+      };
+
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "constant": "[",
+          },
+          Object {
+            "field": "event.dataset",
+            "highlights": Array [],
+            "value": Array [
+              "generic.test",
+            ],
+          },
+          Object {
+            "constant": "][",
+          },
+          Object {
+            "field": "log.level",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_LEVEL",
+            ],
+          },
+          Object {
+            "constant": "] ",
+          },
+          Object {
+            "field": "event.original",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_MESSAGE",
+            ],
+          },
+        ]
+      `);
+    });
+
+    test('includes the event.dataset if present', () => {
+      const flattenedDocument = {
+        '@timestamp': ['2016-12-26T16:22:13.000Z'],
+        'event.dataset': ['generic.test'],
+        'event.original': ['TEST_MESSAGE'],
+      };
+
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "constant": "[",
+          },
+          Object {
+            "field": "event.dataset",
+            "highlights": Array [],
+            "value": Array [
+              "generic.test",
+            ],
+          },
+          Object {
+            "constant": "] ",
+          },
+          Object {
+            "field": "event.original",
+            "highlights": Array [],
+            "value": Array [
+              "TEST_MESSAGE",
+            ],
+          },
+        ]
+      `);
+    });
+
+    test('includes the original message', () => {
+      const flattenedDocument = {
+        '@timestamp': ['2016-12-26T16:22:13.000Z'],
+        'event.original': ['TEST_MESSAGE'],
+      };
+
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "field": "event.original",
             "highlights": Array [],
             "value": Array [
               "TEST_MESSAGE",
