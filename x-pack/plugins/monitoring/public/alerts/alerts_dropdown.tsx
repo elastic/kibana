@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Legacy } from '../legacy_shims';
 
-export const AlertsDropdown = () => {
+export const AlertsDropdown: React.FC<{}> = () => {
+  const $injector = Legacy.shims.getAngularInjector();
+  const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => {
+    alertsEnableModalProvider.enableAlerts();
     setIsPopoverOpen(false);
   };
 
@@ -20,11 +31,37 @@ export const AlertsDropdown = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
 
+  const createDefaultRules = () => {
+    closePopover();
+  };
+
   const button = (
     <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={togglePopoverVisibility}>
-      <FormattedMessage id="xpack.monitoring.alerts.dropdown.button" defaultMessage="Alerts" />
+      <FormattedMessage
+        id="xpack.monitoring.alerts.dropdown.button"
+        defaultMessage="Alerts and rules"
+      />
     </EuiButtonEmpty>
   );
+
+  const items = [
+    {
+      name: i18n.translate('xpack.monitoring.alerts.dropdown.createAlerts', {
+        defaultMessage: 'Create default rules',
+      }),
+      onClick: createDefaultRules,
+    },
+  ];
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: i18n.translate('xpack.monitoring.alerts.dropdown.title', {
+        defaultMessage: 'Alerts and rules',
+      }),
+      items,
+    },
+  ];
 
   return (
     <EuiPopover
@@ -34,7 +71,7 @@ export const AlertsDropdown = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <EuiContextMenuPanel>Alerts dropdown content</EuiContextMenuPanel>
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
