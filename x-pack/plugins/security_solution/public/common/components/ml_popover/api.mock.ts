@@ -48,6 +48,7 @@ export const mockOpenedJob: MlSummaryJob = {
   nodeName: 'siem-es',
   processed_record_count: 3425264,
   awaitingNodeAssignment: false,
+  jobTags: {},
 };
 
 export const mockJobsSummaryResponse: MlSummaryJob[] = [
@@ -67,6 +68,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     earliestTimestampMs: 1554327458406,
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
   {
     id: 'siem-api-rare_process_linux_ecs',
@@ -83,6 +85,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     earliestTimestampMs: 1557353420495,
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
   {
     id: 'siem-api-rare_process_windows_ecs',
@@ -97,6 +100,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
   {
     id: 'siem-api-suspicious_login_activity_ecs',
@@ -111,6 +115,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
 ];
 
@@ -520,6 +525,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     isInstalled: true,
     isElasticJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
   {
     id: 'rare_process_by_host_linux_ecs',
@@ -539,6 +545,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     isInstalled: true,
     isElasticJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
   {
     datafeedId: '',
@@ -558,5 +565,6 @@ export const mockSecurityJobs: SecurityJob[] = [
     isInstalled: false,
     isElasticJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   },
 ];
