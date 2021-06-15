@@ -96,6 +96,27 @@ describe('logHealthMetrics', () => {
     );
     expect(logMessage).toMatchObject(health);
   });
+
+  it('should log as debug if there are no stats', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_warn_drift_in_seconds: 60,
+    });
+    const health = {
+      id: '1',
+      status: HealthStatus.OK,
+      timestamp: new Date().toISOString(),
+      last_update: new Date().toISOString(),
+      stats: {},
+    };
+
+    logHealthMetrics(health, logger, config);
+
+    const firstDebug = JSON.parse(
+      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+    );
+    expect(firstDebug).toMatchObject(health);
+  });
 });
 
 function getMockMonitoredHealth(overrides = {}): MonitoredHealth {

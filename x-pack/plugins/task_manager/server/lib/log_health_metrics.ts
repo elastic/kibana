@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Logger } from '../../../../../src/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
@@ -18,7 +19,8 @@ export function logHealthMetrics(
   let contextMessage;
 
   let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
-  const logAsError = monitoredHealth.status === HealthStatus.Error;
+  const logAsError =
+    monitoredHealth.status === HealthStatus.Error && !isEmpty(monitoredHealth.stats);
   const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
 
   if (driftInSeconds >= config.monitored_stats_warn_drift_in_seconds) {
