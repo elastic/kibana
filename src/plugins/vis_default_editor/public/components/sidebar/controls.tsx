@@ -95,7 +95,7 @@ function DefaultEditorControls({
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
-                      defaultMessage: 'Use CTRL + Enter as a shortcut',
+                      defaultMessage: 'CTRL + Enter is a shortcut for Update.',
                     })}
                     type="keyboardShortcut"
                     color="subdued"
