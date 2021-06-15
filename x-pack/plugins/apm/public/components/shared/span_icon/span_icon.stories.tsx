@@ -6,68 +6,102 @@
  */
 
 import {
-  EuiFlexGrid,
+  EuiImage,
+  EuiCard,
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiCopy,
-  EuiPanel,
   EuiSpacer,
   EuiCodeBlock,
+  EuiToolTip,
 } from '@elastic/eui';
-import React from 'react';
-import { storiesOf } from '@storybook/react';
+import React, { ComponentType } from 'react';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { SpanIcon } from './index';
-import { typeIcons } from './get_span_icon';
+import { getSpanIcon } from './get_span_icon';
+import { spanTypeIcons } from './get_span_icon';
 
-const types = Object.keys(typeIcons);
+const spanTypes = Object.keys(spanTypeIcons);
 
-storiesOf('shared/span_icon/span_icon', module)
-  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
-  .add(
-    'Span icon',
-    () => {
-      return (
-        <>
-          <EuiCodeBlock language="html" isCopyable paddingSize="m">
-            {'<SpanIcon type="db" subtype="cassandra" />'}
-          </EuiCodeBlock>
+export default {
+  title: 'shared/icons',
+  component: SpanIcon,
+  decorators: [
+    (Story: ComponentType) => (
+      <EuiThemeProvider>
+        <Story />
+      </EuiThemeProvider>
+    ),
+  ],
+};
 
-          <EuiSpacer />
-          <EuiFlexGrid direction="column" columns={3}>
-            {types.map((type) => {
-              const subTypes = Object.keys(typeIcons[type]);
-              return (
-                <>
-                  {subTypes.map((subType) => {
-                    const id = `${type}.${subType}`;
-                    return (
-                      <EuiFlexItem key={id}>
-                        <EuiCopy
-                          display="block"
-                          textToCopy={id}
-                          afterMessage={`${id} copied`}
-                        >
-                          {(copy) => (
-                            <EuiPanel
-                              hasShadow={false}
-                              hasBorder={false}
-                              onClick={copy}
-                              paddingSize="s"
+export function SpanIcons() {
+  return (
+    <>
+      <EuiCodeBlock language="html" isCopyable paddingSize="m">
+        {'<SpanIcon type="db" subtype="cassandra" />'}
+      </EuiCodeBlock>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup gutterSize="l" wrap={true}>
+        {spanTypes.map((type) => {
+          const subTypes = Object.keys(spanTypeIcons[type]);
+          return (
+            <>
+              {subTypes.map((subType) => {
+                const id = `${type}.${subType}`;
+
+                return (
+                  <EuiFlexItem key={id}>
+                    <EuiCard
+                      icon={
+                        <>
+                          <p>
+                            <EuiToolTip
+                              position="top"
+                              content="Icon rendered with `EuiImage`"
                             >
-                              <SpanIcon type={type} subType={subType} /> &emsp;{' '}
-                              <small>{id}</small>
-                            </EuiPanel>
-                          )}
-                        </EuiCopy>
-                      </EuiFlexItem>
-                    );
-                  })}
-                </>
-              );
-            })}
-          </EuiFlexGrid>
-        </>
-      );
-    },
-    {}
+                              <EuiImage
+                                size="s"
+                                hasShadow
+                                alt={id}
+                                src={getSpanIcon(type, subType)}
+                              />
+                            </EuiToolTip>
+                          </p>
+                        </>
+                      }
+                      title={id}
+                      description={
+                        <>
+                          <div>
+                            <EuiToolTip
+                              position="bottom"
+                              content="Icon rendered with `SpanIcon`"
+                            >
+                              <SpanIcon type={type} subType={subType} />
+                            </EuiToolTip>
+                          </div>
+
+                          <code
+                            style={{
+                              textAlign: 'left',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <div>span.type: {type}</div>
+                            <div>span.subtype: {subType}</div>
+                          </code>
+                        </>
+                      }
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+            </>
+          );
+        })}
+      </EuiFlexGroup>
+    </>
   );
+}
