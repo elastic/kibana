@@ -79,7 +79,7 @@ distributed storage, search, and analytics engine. {es} excels at indexing
 streams of semi-structured data, such as logs or metrics.
 * https://www.elastic.co/products/kibana[{kib}]: An open-source analytics and
 visualization platform designed to work with {es}. You use {kib} to search,
-view, and interact with data stored in {es} indices. You can easily perform
+view, and interact with data stored in {es} indices. You can easily compile
 advanced data analysis and visualize your data in a variety of charts, tables,
 and maps.
 
@@ -124,7 +124,7 @@ For {stack} version >= 7.11.0, self-protection defines the following permissions
 
 * Users -- even Administrator/root -- *cannot* delete {elastic-endpoint} files (located at `c:\Program Files\Elastic\Endpoint` on Windows, and `/Library/Elastic/Endpoint` on macOS).
 * Users *cannot* terminate the {elastic-endpoint} program or service.
-* Administrator/root users *can* read the Endpoint's files. On Windows, the easiest way to read Endpoint files is to start an Administrator `cmd.exe` prompt. On macOS, an Administrator can use the `sudo` command.
+* Administrator/root users *can* read the endpoint's files. On Windows, the easiest way to read Endpoint files is to start an Administrator `cmd.exe` prompt. On macOS, an Administrator can use the `sudo` command.
 * Administrator/root users *can* stop the {elastic-agent}'s service. On Windows, run the `sc stop "Elastic Agent"` command. On macOS, run the `sudo launchctl stop elastic-agent` command.
 
 
