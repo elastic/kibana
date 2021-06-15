@@ -13,6 +13,22 @@ import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
+jest.mock('../../../kibana_services', () => ({
+  getServices: jest.fn(),
+}));
+
+import { getServices } from '../../../kibana_services';
+
+(getServices as jest.Mock).mockImplementation(() => ({
+  uiSettings: {
+    get: (key: string) => {
+      if (key === 'discover:showMultiFields') {
+        return false;
+      }
+    },
+  },
+}));
+
 const indexPattern = ({
   fields: {
     getAll: () => [
@@ -246,6 +262,9 @@ describe('DocViewTable at Discover Doc', () => {
 });
 
 describe('DocViewTable at Discover Doc with Fields API', () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+  });
   const indexPatterneCommerce = ({
     fields: {
       getAll: () => [
@@ -366,8 +385,14 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onRemoveColumn: jest.fn(),
   };
   it('renders multifield rows if showMultiFields flag is set', () => {
-    const propsWithFlag = { ...props, showMultiFields: true };
-    const component = mount(<DocViewTable {...propsWithFlag} />);
+    (getServices as jest.Mock).mockImplementationOnce(() => ({
+      uiSettings: {
+        get: (key: string) => {
+          return key === 'discover:showMultiFields';
+        },
+      },
+    }));
+    const component = mount(<DocViewTable {...props} />);
     const categoryMultifieldRow = findTestSubject(
       component,
       'tableDocViewRow-multifieldsTitle-category'
