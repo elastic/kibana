@@ -359,7 +359,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "^89.0.0",
+    "chromedriver": "^91.0.1",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",
