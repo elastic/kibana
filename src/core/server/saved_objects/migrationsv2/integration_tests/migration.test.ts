@@ -244,13 +244,11 @@ describe('migration v2', () => {
       );
       const response = body[migratedIndex];
 
-      if (response && response !== null) {
-        expect(response).toBeDefined();
-        expect(Object.keys(response.aliases!).sort()).toEqual([
-          '.kibana',
-          `.kibana_${kibanaVersion}`,
-        ]);
-      }
+      expect(response).toBeDefined();
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
     });
 
     it('copies the documents from the previous index to the new one', async () => {
