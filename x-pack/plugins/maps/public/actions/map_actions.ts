@@ -64,6 +64,7 @@ import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
+import { expandToTileBoundaries } from '../../common/geo_tile_utils';
 
 export interface MapExtentState {
   zoom: number;
@@ -166,7 +167,9 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       }
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        dataFilters.buffer = scaleBounds(extent, 0.5);
+        const expandedExtent = scaleBounds(extent, 0.5);
+        // snap to the smallest tile-bounds, to avoid jitter in the bounds
+        dataFilters.buffer = expandToTileBoundaries(expandedExtent, Math.ceil(newZoom));
       }
     }
 
