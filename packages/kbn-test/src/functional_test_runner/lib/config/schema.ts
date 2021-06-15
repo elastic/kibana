@@ -187,6 +187,15 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        /** Options for how FTR should execute and interact with Kibana */
+        runOptions: Joi.object()
+          .keys({
+            /** Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available` */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+          })
+          .default(),
       })
       .default(),
 
