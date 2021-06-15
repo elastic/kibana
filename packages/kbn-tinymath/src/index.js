@@ -12,8 +12,6 @@ const memoizeOne = require('memoize-one');
 const { parse: parseFn } = require('../grammar');
 const { functions: includedFunctions } = require('./functions');
 
-module.exports = { parse, evaluate, interpret };
-
 function parse(input, options) {
   if (input == null) {
     throw new Error('Missing expression');
@@ -24,15 +22,17 @@ function parse(input, options) {
   }
 
   try {
-    return memoizeOne(parseFn)(input, options);
+    return parseFn(input, options);
   } catch (e) {
     throw new Error(`Failed to parse expression. ${e.message}`);
   }
 }
 
+const memoizedParse = memoizeOne(parse);
+
 function evaluate(expression, scope = {}, injectedFunctions = {}) {
   scope = scope || {};
-  return interpret(parse(expression), scope, injectedFunctions);
+  return interpret(memoizedParse(expression), scope, injectedFunctions);
 }
 
 function interpret(node, scope, injectedFunctions) {
@@ -80,3 +80,5 @@ function isOperable(args) {
     return typeof arg === 'number' && !isNaN(arg);
   });
 }
+
+module.exports = { parse: memoizedParse, evaluate, interpret };
