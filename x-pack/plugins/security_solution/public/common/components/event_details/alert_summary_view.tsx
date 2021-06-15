@@ -37,7 +37,6 @@ import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 import { LineClamp } from '../line_clamp';
-import { useHostIsolationStatus } from '../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
@@ -54,7 +53,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
-  { id: 'host.status', label: 'a label' },
+  { id: 'host.status' },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -184,16 +183,13 @@ const AlertSummaryViewComponent: React.FC<{
     return findAgentId ? findAgentId[0] : '';
   }, [data]);
 
-  const { isIsolated = 'no' } = useHostIsolationStatus({ agentId });
-
   const agentStatusRow = {
-    title: 'Agent Status',
+    title: 'Agent status',
     description: {
       contextId: timelineId,
       eventId,
       fieldName: 'host.status',
-      value: isIsolated,
-      fieldType: 'agentStatus',
+      value: agentId,
       linkValue: undefined,
     },
   };

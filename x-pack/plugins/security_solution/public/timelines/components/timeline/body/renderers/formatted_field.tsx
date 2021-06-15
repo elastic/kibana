@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -120,7 +122,12 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === HOST_STATUS_FIELD_NAME) {
     return (
-      <AgentStatuses contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+      <AgentStatuses
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        value={value as string}
+      />
     );
   } else if (
     [

@@ -6,7 +6,11 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
+import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
+import { useHostIsolationStatus } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
+import { AgentStatus } from '../../../../../common/components/endpoint/agent_status';
 
 export const AgentStatuses = React.memo(
   ({
@@ -18,16 +22,33 @@ export const AgentStatuses = React.memo(
     fieldName: string;
     contextId: string;
     eventId: string;
-    value: string | number | undefined | null;
+    value: string;
   }) => {
-    const agentStatuses = `${value}`;
+    const { isIsolated, agentStatus } = useHostIsolationStatus({ agentId: value });
+    const isolationFieldName = 'host.isolation';
     return (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        tooltipContent={fieldName}
-        value={agentStatuses}
-      />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <DefaultDraggable
+            field={fieldName}
+            id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+            tooltipContent={fieldName}
+            value={`${agentStatus}`}
+          >
+            <AgentStatus hostStatus={agentStatus} />
+          </DefaultDraggable>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DefaultDraggable
+            field={isolationFieldName}
+            id={`event-details-value-default-draggable-${contextId}-${eventId}-${isolationFieldName}-${value}`}
+            tooltipContent={isolationFieldName}
+            value={`${isIsolated}`}
+          >
+            <EndpointHostIsolationStatus isIsolated={true} />
+          </DefaultDraggable>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
