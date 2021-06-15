@@ -15,8 +15,8 @@ import { FieldValueSelectionProps } from './types';
 const formatOptions = (values?: string[]) => {
   const uniqueValues = Array.from(new Set(values));
 
-  return (uniqueValues ?? []).map((val) => ({
-    label: val,
+  return (uniqueValues ?? []).map((label) => ({
+    label,
   }));
 };
 
@@ -32,11 +32,11 @@ export function FieldValueCombobox({
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<ValueOption[]>(
-    formatOptions(union(values ?? [], selectedValue ?? []))
+    formatOptions(union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []))
   );
 
   useEffect(() => {
-    setOptions(formatOptions(union(values ?? [], selectedValue ?? [])));
+    setOptions(formatOptions(union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? [])));
   }, [selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {

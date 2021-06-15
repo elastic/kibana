@@ -8,9 +8,10 @@
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
-  filtersByName,
-  LocalUIFilterName,
-} from '../../../../../common/ui_filter';
+  uxFiltersByName,
+  UxLocalUIFilter,
+  UxLocalUIFilterName,
+} from '../../../../../common/ux_ui_filter';
 import {
   fromQuery,
   toQuery,
@@ -23,12 +24,12 @@ export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 export function useLocalUIFilters({
   filterNames,
 }: {
-  filterNames: LocalUIFilterName[];
+  filterNames: UxLocalUIFilterName[];
 }) {
   const history = useHistory();
-  const { uiFilters } = useUrlParams();
+  const { uxUiFilters } = useUrlParams();
 
-  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
+  const setFilterValue = (name: UxLocalUIFilterName, value: string[]) => {
     const search = omit(toQuery(history.location.search), name);
 
     history.push({
@@ -40,6 +41,40 @@ export function useLocalUIFilters({
         })
       ),
     });
+  };
+
+  const invertFilter = (
+    name: UxLocalUIFilterName,
+    value: string,
+    negate: boolean
+  ) => {
+    if (!negate) {
+      setFilterValue(
+        name,
+        (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
+      );
+
+      const excludedName = `${name}Excluded`;
+      setFilterValue(excludedName, [
+        ...(uxUiFilters?.[excludedName] ?? []),
+        value,
+      ]);
+    } else {
+      const includeName = name.split('Excluded')[0];
+      const excludedName = name;
+
+      setFilterValue(
+        excludedName,
+        (uxUiFilters?.[excludedName] as string[]).filter(
+          (valT) => valT !== value
+        )
+      );
+
+      setFilterValue(includeName, [
+        ...(uxUiFilters?.[includeName] ?? []),
+        value,
+      ]);
+    }
   };
 
   const clearValues = () => {
@@ -54,9 +89,9 @@ export function useLocalUIFilters({
     });
   };
 
-  const filters = filterNames.map((name) => ({
-    value: (uiFilters[name] as string[]) ?? [],
-    ...filtersByName[name],
+  const filters: UxLocalUIFilter[] = filterNames.map((name) => ({
+    value: (uxUiFilters[name] as string[]) ?? [],
+    ...uxFiltersByName[name],
     name,
   }));
 
@@ -64,5 +99,6 @@ export function useLocalUIFilters({
     filters,
     setFilterValue,
     clearValues,
+    invertFilter,
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiTitle,
   EuiSpacer,
@@ -15,26 +15,36 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ESFilter } from 'typings/elasticsearch';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import {
-  filtersByName,
-  LocalUIFilterName,
-} from '../../../../../common/ui_filter';
+  uxFiltersByName,
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../../../common/ux_ui_filter';
 import { useBreakPoints } from '../../../../hooks/use_break_points';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../URLFilter';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SelectedFilters } from './SelectedFilters';
-import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useIndexPattern } from './use_index_pattern';
+import { environmentQuery } from './queries';
 
-const filterNames: LocalUIFilterName[] = [
+const filterNames: UxLocalUIFilterName[] = [
   'location',
   'device',
   'os',
   'browser',
 ];
+
+const getExcludedName = (filterName: string) => {
+  return `${filterName}Excluded` as UxLocalUIFilterName;
+};
 
 const RUM_DATA_FILTERS = [
   { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
@@ -43,13 +53,35 @@ const RUM_DATA_FILTERS = [
 function LocalUIFilters() {
   const { indexPatternTitle, indexPattern } = useIndexPattern();
 
-  const { filters = [], setFilterValue, clearValues } = useLocalUIFilters({
-    filterNames,
+  const {
+    filters = [],
+    setFilterValue,
+    invertFilter,
+    clearValues,
+  } = useLocalUIFilters({
+    filterNames: uxLocalUIFilterNames.filter(
+      (name) => !['serviceName'].includes(name)
+    ),
   });
 
   const {
-    urlParams: { start, end },
+    urlParams: { start, end, serviceName, environment },
   } = useUrlParams();
+
+  const getFilters = useMemo(() => {
+    const dataFilters: ESFilter[] = [
+      ...RUM_DATA_FILTERS,
+      ...environmentQuery(environment),
+    ];
+    if (serviceName) {
+      dataFilters.push({
+        term: {
+          [SERVICE_NAME]: serviceName,
+        },
+      });
+    }
+    return dataFilters;
+  }, [environment, serviceName]);
 
   const { isSmall } = useBreakPoints();
 
@@ -74,18 +106,29 @@ function LocalUIFilters() {
             {filterNames.map((filterName) => (
               <FieldValueSuggestions
                 key={filterName}
-                sourceField={filtersByName[filterName].fieldName}
+                sourceField={uxFiltersByName[filterName].fieldName}
                 indexPatternTitle={indexPatternTitle}
-                label={filtersByName[filterName].title}
+                label={uxFiltersByName[filterName].title}
                 asCombobox={false}
                 selectedValue={
-                  filters.find((ft) => ft.name === filterName)?.value
+                  filters.find((ft) => ft.name === filterName && !ft.excluded)
+                    ?.value
+                }
+                excludedValue={
+                  filters.find(
+                    (ft) =>
+                      ft.name === getExcludedName(filterName) && ft.excluded
+                  )?.value
                 }
                 asFilterButton={true}
-                onChange={(values) => {
+                onChange={(values, excludedValues) => {
                   setFilterValue(filterName, values || []);
+                  setFilterValue(
+                    getExcludedName(filterName),
+                    excludedValues || []
+                  );
                 }}
-                filters={RUM_DATA_FILTERS}
+                filters={getFilters}
                 time={{ from: start!, to: end! }}
               />
             ))}
@@ -99,6 +142,7 @@ function LocalUIFilters() {
           setFilterValue(name, values);
         }}
         clearValues={clearValues}
+        invertFilter={invertFilter}
         indexPattern={indexPattern}
       />
     </>

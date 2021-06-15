@@ -7,6 +7,7 @@
 
 import React, { FormEvent, useEffect, useState } from 'react';
 import {
+  EuiText,
   EuiButton,
   EuiFilterButton,
   EuiPopover,
@@ -17,13 +18,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { isEqual } from 'lodash';
-import { FieldValueSelectionProps } from './types';
+import { isEqual, map } from 'lodash';
+import { FieldValueSelectionProps, ListItem } from './types';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
-const formatOptions = (values?: string[], selectedValue?: string[]): EuiSelectableOption[] => {
-  return (values ?? []).map((val) => ({
-    label: val,
-    ...(selectedValue?.includes(val) ? { checked: 'on' } : {}),
+const Counter = euiStyled.div`
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+`;
+
+const formatOptions = (
+  values?: ListItem[],
+  selectedValue?: string[],
+  excludedValues?: string[],
+  showCount?: boolean
+): EuiSelectableOption[] => {
+  return (values ?? []).map(({ label, count }) => ({
+    label,
+    append: showCount ? (
+      <Counter>
+        <EuiText size="xs">{count}</EuiText>
+      </Counter>
+    ) : null,
+    ...(selectedValue?.includes(label) ? { checked: 'on' } : {}),
+    ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
   }));
 };
 
@@ -39,20 +58,22 @@ export function FieldValueSelection({
   anchorPosition,
   singleSelection,
   asFilterButton,
+  showCount = true,
   values = [],
-  selectedValue = [],
+  selectedValue,
+  excludedValue,
   compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
-  const [options, setOptions] = useState<EuiSelectableOption[]>(
-    formatOptions(values, selectedValue ?? [])
+  const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
+    formatOptions(values, selectedValue, excludedValue, showCount)
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
-    setOptions(formatOptions(values, selectedValue));
-  }, [values, selectedValue]);
+    setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
+  }, [values, selectedValue, showCount, excludedValue]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -86,15 +107,17 @@ export function FieldValueSelection({
     </EuiButton>
   );
 
+  const numOfFilters = (selectedValue || []).length + (excludedValue || []).length;
+
   const filterButton = (
     <EuiFilterButton
       aria-label={i18n.translate('xpack.observability.filterButton.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
       })}
-      hasActiveFilters={selectedValue.length !== 0}
+      hasActiveFilters={numOfFilters > 0}
       iconType="arrowDown"
-      numActiveFilters={selectedValue.length}
+      numActiveFilters={numOfFilters}
       numFilters={values.length}
       onClick={onButtonClick}
     >
@@ -107,7 +130,11 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'on')
       .map(({ label: labelN }) => labelN);
 
-    return isEqual(selectedValue ?? [], currSelected);
+    const currExcluded = (options ?? [])
+      .filter((opt) => opt?.checked === 'off')
+      .map(({ label: labelN }) => labelN);
+
+    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue, currExcluded);
   };
 
   return (
@@ -132,9 +159,13 @@ export function FieldValueSelection({
             compressed,
             onInput: onValueChange,
           }}
+          listProps={{
+            onFocusBadge: false,
+          }}
           options={options}
           onChange={onChange}
           isLoading={loading}
+          allowExclusions={true}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
@@ -147,7 +178,9 @@ export function FieldValueSelection({
                   isDisabled={applyDisabled()}
                   onClick={() => {
                     const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
-                    onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
+                    const excludedValuesN = options.filter((opt) => opt?.checked === 'off');
+
+                    onSelectionChange(map(selectedValuesN, 'label'), map(excludedValuesN, 'label'));
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
                   }}

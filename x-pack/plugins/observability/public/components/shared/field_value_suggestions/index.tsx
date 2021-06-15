@@ -19,6 +19,7 @@ export function FieldValueSuggestions({
   label,
   indexPatternTitle,
   selectedValue,
+  excludedValue,
   filters,
   button,
   time,
@@ -58,12 +59,13 @@ export function FieldValueSuggestions({
     <SelectionComponent
       fullWidth={fullWidth}
       singleSelection={singleSelection}
-      values={values as string[]}
+      values={values}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
       loading={loading}
       selectedValue={selectedValue}
+      excludedValue={excludedValue}
       button={button}
       forceOpen={forceOpen}
       setForceOpen={setForceOpen}

@@ -10,6 +10,7 @@ import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup } from '@elas
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { UrlFilter } from '../../types';
@@ -49,7 +50,9 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
 
   const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
-  const displayValues = values.filter((opt) => opt.toLowerCase().includes(value.toLowerCase()));
+  const displayValues = map(values, 'label').filter((opt) =>
+    opt.toLowerCase().includes(value.toLowerCase())
+  );
 
   return (
     <Wrapper>

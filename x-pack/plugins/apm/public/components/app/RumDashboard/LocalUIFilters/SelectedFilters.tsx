@@ -8,28 +8,34 @@
 import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/useLocalUIFilters';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { UrlList } from '../URLFilter/UrlList';
 
 interface Props {
-  IndexPattern?: IndexPattern;
+  indexPattern?: IndexPattern;
   filters: FiltersUIHook['filters'];
-  onChange: (name: LocalUIFilterName, values: string[]) => void;
+  invertFilter: FiltersUIHook['invertFilter'];
+  onChange: (name: UxLocalUIFilterName, values: string[]) => void;
   clearValues: () => void;
 }
+
+const FilterItem = styled(EuiFlexItem)`
+  max-width: 300px;
+`;
 
 export function SelectedFilters({
   indexPattern,
   onChange,
   filters,
+  invertFilter,
   clearValues,
 }: Props) {
-  const { uiFilters } = useUrlParams();
-  const { transactionUrl } = uiFilters;
+  const { uxUiFilters } = useUrlParams();
+  const { transactionUrl } = uxUiFilters;
 
   const urlValues = transactionUrl ?? [];
 
@@ -37,34 +43,31 @@ export function SelectedFilters({
 
   return indexPattern && (hasValues || urlValues.length > 0) ? (
     <EuiFlexGroup alignItems="center" gutterSize="xs" wrap>
-      <UrlList
-        indexPattern={indexPattern}
-        onChange={onChange}
-        values={urlValues}
-      />
-
-      {(filters ?? []).map(({ name, title, fieldName }) => (
+      {(filters ?? []).map(({ name, title, fieldName, excluded }) => (
         <Fragment key={name}>
-          {((uiFilters?.[name] ?? []) as string[]).map((value) => (
-            <EuiFlexItem key={name + value} grow={false}>
+          {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (
+            <FilterItem key={name + value} grow={false}>
               <FilterValueLabel
                 indexPattern={indexPattern}
                 removeFilter={() => {
                   onChange(
                     name,
-                    (uiFilters?.[name] as string[]).filter(
+                    (uxUiFilters?.[name] as string[]).filter(
                       (valT) => valT !== value
                     )
                   );
                 }}
-                invertFilter={(val) => {}}
+                invertFilter={({ negate }) => {
+                  invertFilter(name, value, negate);
+                }}
                 field={fieldName}
-                value={value}
-                negate={false}
+                value={
+                  name === 'transactionUrl' ? formatUrlValue(value) : value
+                }
+                negate={!!excluded}
                 label={title}
-                allowExclusion={false}
               />
-            </EuiFlexItem>
+            </FilterItem>
           ))}
         </Fragment>
       ))}
@@ -73,7 +76,6 @@ export function SelectedFilters({
         <EuiButtonEmpty
           size="xs"
           iconType="cross"
-          flush="left"
           onClick={clearValues}
           data-cy="clearFilters"
         >
@@ -84,4 +86,25 @@ export function SelectedFilters({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
+}
+
+function formatUrlValue(val: string) {
+  const maxUrlToDisplay = 30;
+  const urlLength = val.length;
+  if (urlLength < maxUrlToDisplay) {
+    return val;
+  }
+  const urlObj = new URL(val);
+  if (urlObj.pathname === '/') {
+    return val;
+  }
+  const domainVal = urlObj.hostname;
+  const extraLength = urlLength - maxUrlToDisplay;
+  const extraDomain = domainVal.substring(0, extraLength);
+
+  if (urlObj.pathname.length + 7 > maxUrlToDisplay) {
+    return val.replace(domainVal, '..');
+  }
+
+  return val.replace(extraDomain, '..');
 }

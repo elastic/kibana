@@ -20,6 +20,11 @@ export interface Props {
   keepHistory?: boolean;
 }
 
+interface ListItem {
+  label: string;
+  count: number;
+}
+
 export const useValuesList = ({
   sourceField,
   indexPatternTitle,
@@ -27,9 +32,9 @@ export const useValuesList = ({
   filters,
   time,
   keepHistory,
-}: Props): { values: string[]; loading?: boolean } => {
+}: Props): { values: ListItem[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
-  const [values, setValues] = useState<string[]>([]);
+  const [values, setValues] = useState<ListItem[]>([]);
 
   const { from, to } = time ?? {};
 
@@ -93,7 +98,10 @@ export const useValuesList = ({
 
   useEffect(() => {
     const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value }) => String(value)) ?? [];
+      data?.aggregations?.values.buckets.map(({ key: value, doc_count: count }) => ({
+        count,
+        label: String(value),
+      })) ?? [];
 
     if (keepHistory && query) {
       setValues((prevState) => {

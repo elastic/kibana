@@ -11,6 +11,7 @@ import { ESFilter } from 'typings/elasticsearch';
 
 interface CommonProps {
   selectedValue?: string[];
+  excludedValue?: string[];
   label: string;
   button?: JSX.Element;
   width?: number;
@@ -21,20 +22,26 @@ interface CommonProps {
   fullWidth?: boolean;
   compressed?: boolean;
   asFilterButton?: boolean;
+  showCount?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
   indexPatternTitle?: string;
   sourceField: string;
   asCombobox?: boolean;
-  onChange: (val?: string[]) => void;
+  onChange: (val?: string[], excludedValue?: string[]) => void;
   filters: ESFilter[];
   time?: { from: string; to: string };
 };
 
 export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
-  onChange: (val?: string[]) => void;
-  values?: string[];
+  onChange: (val?: string[], excludedValue?: string[]) => void;
+  values?: ListItem[];
   setQuery: Dispatch<SetStateAction<string>>;
 };
+
+export interface ListItem {
+  label: string;
+  count: number;
+}

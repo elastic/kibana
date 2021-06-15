@@ -16,8 +16,10 @@ export function URLFilter() {
   const history = useHistory();
 
   const setFilterValue = useCallback(
-    (value: string[]) => {
+    (value?: string[], excludedValue?: string[]) => {
       const name = 'transactionUrl';
+      const nameExcluded = 'transactionUrlExcluded';
+
       const search = omit(toQuery(history.location.search), name);
 
       history.push({
@@ -25,7 +27,10 @@ export function URLFilter() {
         search: fromQuery(
           removeUndefinedProps({
             ...search,
-            [name]: value.length ? value.join(',') : undefined,
+            [name]: value?.length ? value.join(',') : undefined,
+            [nameExcluded]: excludedValue?.length
+              ? excludedValue.join(',')
+              : undefined,
           })
         ),
       });
@@ -33,9 +38,30 @@ export function URLFilter() {
     [history]
   );
 
+  const updateSearchTerm = useCallback(
+    (searchTermN: string) => {
+      const newQuery = {
+        ...toQuery(history.location.search),
+        searchTerm: searchTermN || undefined,
+      };
+      if (!searchTermN) {
+        delete newQuery.searchTerm;
+      }
+      const newLocation = {
+        ...history.location,
+        search: fromQuery(newQuery),
+      };
+      history.push(newLocation);
+    },
+    [history]
+  );
+
   return (
     <span data-cy="csmUrlFilter">
-      <URLSearch onChange={setFilterValue} />
+      <URLSearch
+        onChange={setFilterValue}
+        updateSearchTerm={updateSearchTerm}
+      />
     </span>
   );
 }

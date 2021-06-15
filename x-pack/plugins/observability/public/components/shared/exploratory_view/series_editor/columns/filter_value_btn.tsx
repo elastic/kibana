@@ -103,6 +103,7 @@ export function FilterValueButton({
       forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}
+      asCombobox={false}
     />
   ) : (
     button

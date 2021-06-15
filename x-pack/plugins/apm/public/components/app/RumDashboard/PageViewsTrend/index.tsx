@@ -28,8 +28,8 @@ export function PageViewsTrend() {
     services: { http },
   } = useKibana();
 
-  const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName } = uiFilters;
+  const { urlParams, uxUiFilters } = useUrlParams();
+  const { serviceName } = uxUiFilters;
 
   const { start, end, searchTerm, rangeTo, rangeFrom } = urlParams;
 
@@ -44,7 +44,7 @@ export function PageViewsTrend() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               urlQuery: searchTerm,
               ...(breakdown
                 ? {
@@ -57,7 +57,7 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [start, end, serviceName, uiFilters, searchTerm, breakdown]
+    [start, end, serviceName, uxUiFilters, searchTerm, breakdown]
   );
 
   const exploratoryViewLink = createExploratoryViewUrl(
