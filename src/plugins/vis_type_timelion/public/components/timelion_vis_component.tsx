@@ -13,7 +13,6 @@ import {
   Settings,
   Position,
   Axis,
-  AxisSpec,
   TooltipType,
   PointerEvent,
   LegendPositionConfig,
@@ -25,9 +24,11 @@ import { useKibana } from '../../../kibana_react/public';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
-  extractYAxis,
+  extractAllYAxis,
+  withStaticPadding,
   createTickFormat,
   validateLegendPositionValue,
+  MAIN_GROUP_ID,
 } from '../helpers/panel_utils';
 
 import { colors } from '../helpers/chart_constants';
@@ -48,18 +49,6 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
-interface AxisOptions {
-  groupId: number;
-  key: number;
-  id: string;
-  title?: string;
-  position?: Position;
-  tickFormat?: (val: number) => string;
-  domain?: AxisSpec['domain'];
-}
-
-const MAIN_GROUP_ID = 1;
-
 const DefaultYAxis = () => (
   <Axis
     id="left"
@@ -72,49 +61,13 @@ const DefaultYAxis = () => (
 );
 
 const renderYAxis = (series: Series[]) => {
-  const yAxisOptions = series.reduce((acc, data, index) => {
-    const yaxis = extractYAxis(data);
-    const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
-
-    let extraAxisOptions = {};
-
-    if (yaxis) {
-      extraAxisOptions = {
-        id: yaxis.position + yaxis.axisLabel,
-        title: yaxis.axisLabel,
-        position: yaxis.position,
-        tickFormat: yaxis.tickFormatter,
-        domain: withStaticPadding({
-          fit: yaxis.min === undefined && yaxis.max === undefined,
-          min: yaxis.min,
-          max: yaxis.max,
-        }),
-      };
-    }
-
-    if (acc.every((axis) => axis.groupId !== groupId)) {
-      acc.push({
-        groupId,
-        key: index,
-        domain: withStaticPadding({
-          fit: false,
-        }),
-        id: 'left' + index,
-        ...extraAxisOptions,
-      });
-    } else if (yaxis) {
-      const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
-      acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...extraAxisOptions };
-    }
-
-    return acc;
-  }, [] as AxisOptions[]);
+  const yAxisOptions = extractAllYAxis(series);
 
   const yAxis = yAxisOptions.map((option, index) => (
     <Axis
-      groupId={`${option.groupId}`}
-      key={option.key}
-      id={option.id}
+      groupId={option.groupId}
+      key={index}
+      id={option.id!}
       title={option.title}
       position={option.position}
       tickFormat={option.tickFormat}
@@ -127,13 +80,6 @@ const renderYAxis = (series: Series[]) => {
 
   return yAxis.length ? yAxis : <DefaultYAxis />;
 };
-
-const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
-  (({
-    ...domain,
-    padding: 50,
-    paddingUnit: 'pixel',
-  } as unknown) as AxisSpec['domain']);
 
 const TimelionVisComponent = ({
   interval,

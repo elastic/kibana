@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Position } from '@elastic/charts';
+import { Position, AxisSpec } from '@elastic/charts';
 import type { TimefilterContract } from 'src/plugins/data/public';
 import type { IUiSettingsClient } from 'kibana/public';
 
@@ -38,7 +38,7 @@ export interface IAxis {
     max?: number;
   };
   position?: Position;
-  axisLabel: string;
+  axisLabel?: string;
 }
 
 export const validateLegendPositionValue = (position: string) => /^(n|s)(e|w)$/s.test(position);
@@ -63,6 +63,15 @@ export const createTickFormat = (
 };
 
 /** While we support 2 versions of the timeline, we need this adapter. **/
+export const MAIN_GROUP_ID = 1;
+
+export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
+  (({
+    ...domain,
+    padding: 50,
+    paddingUnit: 'pixel',
+  } as unknown) as AxisSpec['domain']);
+
 const adaptYaxisParams = (yaxis: IAxis) => {
   const y = { ...yaxis };
 
@@ -73,10 +82,19 @@ const adaptYaxisParams = (yaxis: IAxis) => {
     y.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
   }
 
-  return y;
+  return {
+    title: y.axisLabel,
+    position: y.position,
+    tickFormat: y.tickFormatter,
+    domain: withStaticPadding({
+      fit: y.min === undefined && y.max === undefined,
+      min: y.min,
+      max: y.max,
+    }),
+  };
 };
 
-export const extractYAxis = (series: Series) => {
+const extractYAxisForSeries = (series: Series) => {
   const yaxis = (series._global?.yaxes ?? []).reduce(
     (acc: IAxis, item: IAxis) => ({
       ...acc,
@@ -88,4 +106,28 @@ export const extractYAxis = (series: Series) => {
   if (Object.keys(yaxis).length) {
     return adaptYaxisParams(yaxis);
   }
+};
+
+export const extractAllYAxis = (series: Series[]) => {
+  return series.reduce((acc, data, index) => {
+    const yaxis = extractYAxisForSeries(data);
+    const groupId = `${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`;
+
+    if (acc.every((axis) => axis.groupId !== groupId)) {
+      acc.push({
+        groupId,
+        domain: withStaticPadding({
+          fit: false,
+        }),
+        id: (yaxis?.position || Position.Left) + index,
+        position: Position.Left,
+        ...yaxis,
+      });
+    } else if (yaxis) {
+      const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
+      acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...yaxis };
+    }
+
+    return acc;
+  }, [] as Array<Partial<AxisSpec>>);
 };
