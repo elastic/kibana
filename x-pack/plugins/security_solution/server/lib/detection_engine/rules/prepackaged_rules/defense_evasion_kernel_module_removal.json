@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Kernel Module Removal",
-  "query": "event.category:process and event.type:(start or process_started) and process.args:((rmmod and sudo) or (modprobe and sudo and (\"--remove\" or \"-r\")))",
+  "query": "event.category:process and event.type:(start or process_started) and\n  process.args:((rmmod and sudo) or (modprobe and sudo and (\"--remove\" or \"-r\")))\n",
   "references": [
     "http://man7.org/linux/man-pages/man8/modprobe.8.html"
   ],

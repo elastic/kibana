@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Unusual Process Execution - Temp",
-  "query": "event.category:process and event.type:(start or process_started) and process.working_directory:/tmp",
+  "query": "event.category:process and event.type:(start or process_started) and process.working_directory:/tmp\n",
   "risk_score": 47,
   "rule_id": "df959768-b0c9-4d45-988c-5606a2be8e5a",
   "severity": "medium",

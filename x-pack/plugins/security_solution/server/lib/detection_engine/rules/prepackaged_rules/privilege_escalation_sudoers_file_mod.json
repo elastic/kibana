@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Sudoers File Modification",
-  "query": "event.category:file and event.type:change and file.path:(/etc/sudoers* or /private/etc/sudoers*)",
+  "query": "event.category:file and event.type:change and file.path:(/etc/sudoers* or /private/etc/sudoers*)\n",
   "risk_score": 47,
   "rule_id": "931e25a5-0f5e-4ae0-ba0d-9e94eff7e3a4",
   "severity": "medium",

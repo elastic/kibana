@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Azure Active Directory PowerShell Sign-in",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.signinlogs and azure.signinlogs.properties.app_display_name:\"Azure Active Directory PowerShell\" and azure.signinlogs.properties.token_issuer_type:AzureAD and event.outcome:(success or Success)",
+  "query": "event.dataset:azure.signinlogs and\n  azure.signinlogs.properties.app_display_name:\"Azure Active Directory PowerShell\" and\n  azure.signinlogs.properties.token_issuer_type:AzureAD and event.outcome:(success or Success)\n",
   "references": [
     "https://msrc-blog.microsoft.com/2020/12/13/customer-guidance-on-recent-nation-state-cyber-attacks/",
     "https://docs.microsoft.com/en-us/microsoft-365/enterprise/connect-to-microsoft-365-powershell?view=o365-worldwide"

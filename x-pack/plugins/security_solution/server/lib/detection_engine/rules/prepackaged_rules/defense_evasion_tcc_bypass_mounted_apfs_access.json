@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "TCC Bypass via Mounted APFS Snapshot Access",
-  "query": "event.category : process and event.type : (start or process_started) and process.name : mount_apfs and process.args : (/System/Volumes/Data and noowners)",
+  "query": "event.category : process and event.type : (start or process_started) and process.name : mount_apfs and\n  process.args : (/System/Volumes/Data and noowners)\n",
   "references": [
     "https://theevilbit.github.io/posts/cve_2020_9771/"
   ],
