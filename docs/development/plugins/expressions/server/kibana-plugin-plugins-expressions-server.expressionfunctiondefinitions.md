@@ -21,6 +21,7 @@ export interface ExpressionFunctionDefinitions
 |  [derivative](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.derivative.md) | <code>ExpressionFunctionDerivative</code> |  |
 |  [font](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.font.md) | <code>ExpressionFunctionFont</code> |  |
 |  [moving\_average](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.moving_average.md) | <code>ExpressionFunctionMovingAverage</code> |  |
+|  [overall\_metric](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.overall_metric.md) | <code>ExpressionFunctionOverallMetric</code> |  |
 |  [theme](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.theme.md) | <code>ExpressionFunctionTheme</code> |  |
 |  [var\_set](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.var_set.md) | <code>ExpressionFunctionVarSet</code> |  |
 |  [var](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.var.md) | <code>ExpressionFunctionVar</code> |  |
