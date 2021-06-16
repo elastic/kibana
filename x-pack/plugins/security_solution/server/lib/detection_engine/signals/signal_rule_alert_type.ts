@@ -309,18 +309,20 @@ export const signalRulesAlertType = ({
           }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
-          result = await eqlExecutor({
-            rule: eqlRuleSO,
-            tuple,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            bulkCreate,
-            logger,
-            wrapHits,
-            wrapSequences,
-          });
+          for (const tuple of tuples) {
+            result = await eqlExecutor({
+              rule: eqlRuleSO,
+              tuple,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              bulkCreate,
+              logger,
+              wrapHits,
+              wrapSequences,
+            });
+          }
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
