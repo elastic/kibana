@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
-import { EVENT_KIND } from '../../../../../packages/kbn-rule-data-utils/src/technical_field_names';
+import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
