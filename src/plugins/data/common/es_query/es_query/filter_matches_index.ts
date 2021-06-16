@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
 import { Filter } from '../filters';
+import { MinimalIndexPattern } from './types';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
  */
-export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern | null) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: MinimalIndexPattern | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }

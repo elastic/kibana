@@ -7,9 +7,9 @@
  */
 
 import { getFilterField, cleanFilter, Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { MinimalIndexPattern } from './types';
 
-export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern) => {
+export const handleNestedFilter = (filter: Filter, indexPattern?: MinimalIndexPattern) => {
   if (!indexPattern) return filter;
 
   const fieldName = getFilterField(filter);

@@ -9,7 +9,7 @@
 import { get, omit } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { MinimalIndexPattern } from './types';
 
 export interface DeprecatedMatchPhraseFilter extends Filter {
   query: {
@@ -28,7 +28,7 @@ function isDeprecatedMatchPhraseFilter(filter: any): filter is DeprecatedMatchPh
   return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
 }
 
-export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
+export function migrateFilter(filter: Filter, indexPattern?: MinimalIndexPattern) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
     const fieldName = Object.keys(filter.query.match)[0];
     const params: Record<string, any> = get(filter, ['query', 'match', fieldName]);

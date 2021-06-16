@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import type { MinimalIndexPattern } from '@kbn/utils';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
@@ -29,10 +30,8 @@ export interface RuntimeField {
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
  * Use IndexPattern or IndexPatternSpec instead
  */
-export interface IIndexPattern {
-  fields: IFieldType[];
+export interface IIndexPattern extends MinimalIndexPattern {
   title: string;
-  id?: string;
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */

@@ -7,11 +7,11 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
-import { IIndexPattern } from '../../index_patterns';
+import { MinimalIndexPattern } from './types';
 import { Query } from '../../query/types';
 
 export function buildQueryFromKuery(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: MinimalIndexPattern | undefined,
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string
@@ -24,7 +24,7 @@ export function buildQueryFromKuery(
 }
 
 function buildQuery(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: MinimalIndexPattern | undefined,
   queryASTs: KueryNode[],
   config: Record<string, any> = {}
 ) {
