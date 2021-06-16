@@ -100,7 +100,8 @@ multiple instances to find the same job in these searches. Only the instance tha
 "processing" will actually execute the report job. The other instances that unsuccessfully tried to make the same update will log
 something similar to this:
 
-```
+[source]
+--------------------------------------------------------------------------------
 StatusCodeError: [version_conflict_engine_exception] [...]: version conflict, required seqNo [6124], primary term [1]. current document has seqNo [6125] and primary term [1], with { ... }
   status: 409,
   displayName: 'Conflict',
@@ -113,8 +114,8 @@ StatusCodeError: [version_conflict_engine_exception] [...]: version conflict, re
   },
   statusCode: 409
 }
+--------------------------------------------------------------------------------
 
-```
 These messages alone don't indicate a problem. They show normal events that happen in a healthy system.
 
 [float]
