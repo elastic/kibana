@@ -21,7 +21,6 @@ interface Props {
   dataType: AppDataType;
 }
 
-
 export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
   switch (dataType) {
     case 'ux':

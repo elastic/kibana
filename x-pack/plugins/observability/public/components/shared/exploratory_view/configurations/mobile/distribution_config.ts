@@ -11,6 +11,7 @@ import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
@@ -57,6 +58,10 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
     reportDefinitions: [
       {
         field: SERVICE_NAME,
+        required: true,
+      },
+      {
+        field: SERVICE_ENVIRONMENT,
         required: true,
       },
       {

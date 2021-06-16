@@ -11,6 +11,7 @@ import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
@@ -63,6 +64,10 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
         required: true,
       },
       {
+        field: SERVICE_ENVIRONMENT,
+        required: true,
+      },
+      {
         field: 'business.kpi',
         custom: true,
         options: [
@@ -84,15 +89,15 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
             id: METRIC_SYSTEM_CPU_USAGE,
             columnType: OPERATION_COLUMN,
           },
-          { 
-            field: RECORDS_FIELD, 
-            id: RECORDS_FIELD, 
-            label: "Transactions per minute",
+          {
+            field: RECORDS_FIELD,
+            id: RECORDS_FIELD,
+            label: 'Transactions per minute',
             columnFilters: [
               {
                 language: 'kuery',
                 query: `processor.event: transaction`,
-              }
+              },
             ],
             timeScale: 'm',
           },
