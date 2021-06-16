@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
   eventIDSafeVersion,

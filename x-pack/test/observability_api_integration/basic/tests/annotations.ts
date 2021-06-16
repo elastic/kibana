@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utils';
+import { JsonObject } from '@kbn/common-utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
