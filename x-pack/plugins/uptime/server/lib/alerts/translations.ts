@@ -191,7 +191,7 @@ export const tlsTranslations = {
   ],
   validAfterExpiredString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validAfterExpiredString', {
-      defaultMessage: `Expired on {date} {relativeDate} days ago.`,
+      defaultMessage: `expired on {date} {relativeDate} days ago.`,
       values: {
         date,
         relativeDate,
@@ -199,7 +199,7 @@ export const tlsTranslations = {
     }),
   validAfterExpiringString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validAfterExpiringString', {
-      defaultMessage: `Expires on {date} in {relativeDate} days.`,
+      defaultMessage: `expires on {date} in {relativeDate} days.`,
       values: {
         date,
         relativeDate,
@@ -207,7 +207,7 @@ export const tlsTranslations = {
     }),
   validBeforeExpiredString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiredString', {
-      defaultMessage: 'Valid since {date}, {relativeDate} days ago.',
+      defaultMessage: 'valid since {date}, {relativeDate} days ago.',
       values: {
         date,
         relativeDate,
@@ -215,7 +215,7 @@ export const tlsTranslations = {
     }),
   validBeforeExpiringString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiringString', {
-      defaultMessage: 'Invalid until {date}, {relativeDate} days from now.',
+      defaultMessage: 'invalid until {date}, {relativeDate} days from now.',
       values: {
         date,
         relativeDate,
