@@ -9011,7 +9011,6 @@
     "xpack.fleet.breadcrumbs.editPackagePolicyPageTitle": "编辑集成",
     "xpack.fleet.breadcrumbs.enrollmentTokensPageTitle": "注册令牌",
     "xpack.fleet.breadcrumbs.installedIntegrationsPageTitle": "已安装",
-    "xpack.fleet.breadcrumbs.integrationsPageTitle": "集成",
     "xpack.fleet.breadcrumbs.policiesPageTitle": "策略",
     "xpack.fleet.config.invalidPackageVersionError": "必须是有效的 semver 或关键字 `latest`",
     "xpack.fleet.copyAgentPolicy.confirmModal.cancelButtonLabel": "取消",
