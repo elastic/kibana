@@ -14,13 +14,16 @@ export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
+// Required packages are installed by default, and _cannot_ be removed. They
+// also auto-update.
 export const requiredPackages = [
   FLEET_SYSTEM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
 ];
 
-// these are currently identical. we can separate if they later diverge
+// Default packages are installed by default, but can be removed. They also
+// auto-update.
 export const defaultPackages = requiredPackages;
 
 export const agentAssetTypes = {
