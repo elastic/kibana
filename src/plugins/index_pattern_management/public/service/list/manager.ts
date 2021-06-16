@@ -25,7 +25,7 @@ export class IndexPatternListManager {
       const configs: IndexPatternListConfig[] = [];
       configs.push(new IndexPatternListConfig());
 
-      if (uiSettings.get(CONFIG_ROLLUPS, false)) {
+      if (uiSettings.isDeclared(CONFIG_ROLLUPS) && uiSettings.get(CONFIG_ROLLUPS)) {
         configs.push(new RollupIndexPatternListConfig());
       }
 

@@ -24,7 +24,7 @@ export class IndexPatternCreationManager {
       const configs: IndexPatternCreationConfig[] = [];
       configs.push(new IndexPatternCreationConfig({ httpClient }));
 
-      if (uiSettings.get(CONFIG_ROLLUPS, false)) {
+      if (uiSettings.isDeclared(CONFIG_ROLLUPS) && uiSettings.get(CONFIG_ROLLUPS)) {
         configs.push(new RollupIndexPatternCreationConfig({ httpClient }));
       }
 
