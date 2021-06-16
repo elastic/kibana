@@ -191,13 +191,14 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit(6)' },
       };
 
-      const TestComponent = () => {
-        const dummyError = {
-          reason: 'Awwww! Painless syntax error',
-          message: '',
-          position: { offset: 0, start: 0, end: 0 },
-          scriptStack: [''],
-        };
+      const dummyError = {
+        reason: 'Awwww! Painless syntax error',
+        message: '',
+        position: { offset: 0, start: 0, end: 0 },
+        scriptStack: [''],
+      };
+
+      const ComponentToProvidePainlessSyntaxErrors = () => {
         const [error, setError] = useState<RuntimeFieldPainlessError | null>(null);
         const clearError = useMemo(() => () => setError(null), []);
         const syntaxError = useMemo(() => ({ error, clear: clearError }), [error, clearError]);
@@ -214,19 +215,22 @@ describe('<FieldEditor />', () => {
         );
       };
 
-      let customTestbed: TestBed<string>;
+      let testBedToCapturePainlessErrors: TestBed<string>;
 
       await act(async () => {
-        customTestbed = await registerTestBed(WithFieldEditorDependencies(TestComponent), {
-          memoryRouter: {
-            wrapComponent: false,
-          },
-        })();
+        testBedToCapturePainlessErrors = await registerTestBed(
+          WithFieldEditorDependencies(ComponentToProvidePainlessSyntaxErrors),
+          {
+            memoryRouter: {
+              wrapComponent: false,
+            },
+          }
+        )();
       });
 
       testBed = {
-        ...customTestbed!,
-        actions: getCommonActions(customTestbed!),
+        ...testBedToCapturePainlessErrors!,
+        actions: getCommonActions(testBedToCapturePainlessErrors!),
       };
 
       const {
