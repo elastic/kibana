@@ -14,12 +14,11 @@ export const wrapSequencesFactory = ({
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
-}): WrapSequences => (sequences) => {
-  const wrappedDocs = sequences.reduce(
-    (acc: WrappedSignalHit[], sequence) =>
-      acc.concat(buildSignalGroupFromSequence(sequence, ruleSO, signalsIndex)),
+}): WrapSequences => (sequences) =>
+  sequences.reduce(
+    (acc: WrappedSignalHit[], sequence) => [
+      ...acc,
+      ...buildSignalGroupFromSequence(sequence, ruleSO, signalsIndex),
+    ],
     []
   );
-
-  return wrappedDocs;
-};

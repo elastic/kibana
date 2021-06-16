@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  SearchAfterAndBulkCreateParams,
-  SignalSourceHit,
-  WrapHits,
-  WrappedSignalHit,
-} from './types';
+import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from './types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
@@ -28,10 +23,10 @@ export const wrapHitsFactory = ({
       _id: generateId(
         doc._index,
         doc._id,
-        doc._version ? doc._version.toString() : '',
+        String(doc._version),
         ruleSO.attributes.params.ruleId ?? ''
       ),
-      _source: buildBulkBody(ruleSO, doc as SignalSourceHit),
+      _source: buildBulkBody(ruleSO, doc),
     },
   ]);
 
