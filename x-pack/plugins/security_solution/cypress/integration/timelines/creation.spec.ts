@@ -8,12 +8,10 @@
 import { timeline } from '../../objects/timeline';
 
 import {
-  FAVORITE_TIMELINE,
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
   SERVER_SIDE_EVENT_COUNT,
-  STAR_ICON,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_PANEL,
@@ -35,7 +33,6 @@ import {
   createNewTimeline,
   expandEventAction,
   goToQueryTab,
-  markAsFavorite,
   pinFirstEvent,
   populateTimeline,
 } from '../../tasks/timeline';
@@ -107,13 +104,6 @@ describe('Timelines', (): void => {
         .invoke('text')
         .then(parseInt)
         .should('be.gt', 0);
-    });
-
-    it('can be marked as favorite', () => {
-      markAsFavorite();
-
-      cy.get(STAR_ICON).should('not.exist');
-      cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
     });
   });
 });

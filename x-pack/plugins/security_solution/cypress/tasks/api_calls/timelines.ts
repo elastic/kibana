@@ -119,3 +119,26 @@ export const loadPrepackagedTimelineTemplates = () =>
     url: 'api/timeline/_prepackaged',
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
+
+export const favoriteTimeline = ({
+  templateTimelineId,
+  templateTimelineVersion,
+  timelineId,
+  timelineType,
+}: {
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
+  timelineId: string;
+  timelineType: string;
+}) =>
+  cy.request({
+    method: 'PATCH',
+    url: 'api/timeline/_favorite',
+    body: {
+      templateTimelineId,
+      templateTimelineVersion,
+      timelineId,
+      timelineType,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
