@@ -13,6 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const fleetPackages = ['apache-0.5.0', 'nginx-0.5.0'];
 
   // Failing: See https://github.com/elastic/kibana/issues/102282
+  // Failing: See https://github.com/elastic/kibana/issues/102283
   describe.skip('modules', function () {
     before(async () => {
       for (const fleetPackage of fleetPackages) {
