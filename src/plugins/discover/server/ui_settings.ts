@@ -202,7 +202,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [SHOW_MULTIFIELDS]: {
     name: i18n.translate('discover.advancedSettings.discover.showMultifields', {
-      defaultMessage: 'Show multi fields',
+      defaultMessage: 'Show multi-fields',
     }),
     description: i18n.translate('discover.advancedSettings.discover.showMultifieldsDescription', {
       defaultMessage: `When enabled will show multi fields in document viewer. In majority of cases, multi-fields are the same as regular fields. This option is only available when searchFieldsFromSource is off. `,
