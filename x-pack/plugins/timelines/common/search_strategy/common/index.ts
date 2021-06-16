@@ -5,11 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 
 export type Maybe<T> = T | null;
-
-export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
 export interface TotalValue {
   value: number;
@@ -18,17 +15,6 @@ export interface TotalValue {
 
 export interface Inspect {
   dsl: string[];
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
-}
-
-export interface CursorType {
-  value?: Maybe<string>;
-  tiebreaker?: Maybe<string>;
 }
 
 export enum Direction {
@@ -50,15 +36,6 @@ export interface TimerangeInput {
   from: string;
 }
 
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
 export interface PaginationInputPaginated {
   /** The activePage parameter defines the page of results you want to fetch */
   activePage: number;
@@ -71,14 +48,6 @@ export interface PaginationInputPaginated {
 }
 
 export type DocValueFields = estypes.SearchDocValueField;
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
-}
-
-export type StringOrNumber = string | number;
 
 export interface TimerangeFilter {
   range: {
