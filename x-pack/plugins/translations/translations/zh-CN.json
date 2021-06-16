@@ -14207,7 +14207,6 @@
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat": "平均召回率",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat": "总体准确率",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip": "正确类预测数目与预测总数的比率。",
-    "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip": "接受者操作特性 (ROC) 曲线是表示在不同预测概率阈值下分类过程的性能绘图。",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle": "接受者操作特性 (ROC) 曲线",
     "xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionTitle": "模型评估",
     "xpack.ml.dataframe.analytics.classificationExploration.generalizationDocsCount": "{docsCount, plural, other {个文档}}已评估",
