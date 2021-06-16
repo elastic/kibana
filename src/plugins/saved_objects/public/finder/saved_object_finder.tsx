@@ -46,6 +46,7 @@ export interface SavedObjectMetaData<T = unknown> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+  getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
 }
 
