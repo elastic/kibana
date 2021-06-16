@@ -70,8 +70,6 @@ export {
   EmbeddableRenderer,
   EmbeddableRendererProps,
   useEmbeddableFactory,
-  ACTION_INSPECT_PANEL,
-  ACTION_EXPORT_CSV,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

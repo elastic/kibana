@@ -177,11 +177,8 @@ export const App = (props: {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <LensComponent
-                  actions={{
-                    // Partially enable specific features OR set it to true to enable all of them
-                    download: true,
-                  }}
                   id=""
+                  withActions
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}

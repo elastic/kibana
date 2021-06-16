@@ -5,9 +5,7 @@
   "ui": true,
   "requiredPlugins": [
     "inspector",
-    "uiActions",
-    "share",
-    "data"
+    "uiActions"
   ],
   "extraPublicDirs": [
     "public/lib/test_samples"

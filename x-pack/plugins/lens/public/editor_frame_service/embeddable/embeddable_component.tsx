@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { CoreStart } from 'kibana/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import {
-  ACTION_EXPORT_CSV,
-  ACTION_INSPECT_PANEL,
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddablePanel,
@@ -41,27 +39,6 @@ type LensAttributes<TVisType, TVisState> = Omit<
   };
 };
 
-const actionToTrigger = {
-  inspector: ACTION_INSPECT_PANEL,
-  download: ACTION_EXPORT_CSV,
-} as const;
-
-export type FilterableActions = keyof typeof actionToTrigger;
-type ActionsOriginalId = typeof actionToTrigger[FilterableActions];
-
-function getActionsIdFromNames(actions: Partial<Record<FilterableActions, boolean>>) {
-  return Object.keys(actions).reduce(
-    (lookup, action) => ({
-      ...lookup,
-      [actionToTrigger[action as FilterableActions]]: (actions as Record<
-        FilterableActions,
-        boolean
-      >)[action as FilterableActions],
-    }),
-    {} as Record<ActionsOriginalId, boolean>
-  );
-}
-
 /**
  * Type-safe variant of by value embeddable input for Lens.
  * This can be used to hardcode certain Lens chart configurations within another app.
@@ -75,7 +52,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
-  actions?: boolean | Partial<Record<FilterableActions, boolean>>;
+  withActions?: boolean;
 };
 
 interface PluginsStartDependencies {
@@ -89,17 +66,8 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const { embeddable: embeddableStart, uiActions, inspector } = plugins;
     const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input: props });
-    const hasActions = !props.actions || Object.keys(props.actions || {}).length > 0;
-    const filterActions = useCallback(
-      (actionId: string) => {
-        if (props.actions == null || typeof props.actions === 'boolean') {
-          return Boolean(props.actions);
-        }
-        const actionsToId = getActionsIdFromNames(props.actions);
-        return actionId in actionsToId && actionsToId[actionId as ActionsOriginalId];
-      },
-      [props.actions]
-    );
+    const hasActions = props.withActions === true;
+
     if (!hasActions || loading || error || !embeddable) {
       return (
         <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={props} />
@@ -111,7 +79,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
         embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
         getActions={uiActions.getTriggerCompatibleActions}
         inspector={inspector}
-        filterActions={filterActions}
+        filterActions={() => hasActions}
       />
     );
   };
