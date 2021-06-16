@@ -86,7 +86,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
       </EuiModalHeader>
 
       <EuiModalBody data-test-subj="eventFilterDeleteModalBody">
-        <EuiText className="eui-textBreakWord">
+        <EuiText>
           <p>
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.deletionDialog.mainMessage"
