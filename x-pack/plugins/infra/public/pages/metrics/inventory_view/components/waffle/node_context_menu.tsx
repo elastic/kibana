@@ -25,6 +25,7 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
+  ActionMenuDivider,
 } from '../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 
@@ -174,6 +175,9 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} />
               <SectionLink {...createAlertMenuItem} />
+            </SectionLinks>
+            <ActionMenuDivider />
+            <SectionLinks>
             </SectionLinks>
           </Section>
         </div>
