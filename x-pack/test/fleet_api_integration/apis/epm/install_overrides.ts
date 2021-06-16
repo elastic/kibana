@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
   const dockerServers = getService('dockerServers');
-  const log = getService('log');
 
   const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
@@ -30,88 +30,107 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should install the overrides package correctly', async function () {
-      if (server.enabled) {
-        let { body } = await supertest
-          .post(`/api/fleet/epm/packages/${mappingsPackage}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+      let { body } = await supertest
+        .post(`/api/fleet/epm/packages/${mappingsPackage}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
 
-        const templateName = body.response[0].id;
+      const templateName = body.response[0].id;
 
-        ({ body } = await es.transport.request({
-          method: 'GET',
-          path: `/_index_template/${templateName}`,
-        }));
+      const { body: indexTemplateResponse } = await es.transport.request({
+        method: 'GET',
+        path: `/_index_template/${templateName}`,
+      });
 
-        // make sure composed_of array has the correct component templates in the correct order
-        expect(body.index_templates[0].index_template.composed_of).to.eql([
-          `${templateName}-mappings`,
-          `${templateName}-settings`,
-          `${templateName}-user_settings`,
-        ]);
+      // the index template composed_of has the correct component templates in the correct order
+      const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
+      expect(indexTemplate.composed_of).to.eql([
+        `${templateName}-mappings`,
+        `${templateName}-settings`,
+        `${templateName}-user_settings`,
+      ]);
 
-        ({ body } = await es.transport.request({
-          method: 'GET',
-          path: `/_component_template/${templateName}-mappings`,
-        }));
+      ({ body } = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${templateName}-mappings`,
+      }));
 
-        // Make sure that the `dynamic` field exists and is set to false (as it is in the package)
-        expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(
-          false
-        );
+      // The mappings override provided in the package is set in the mappings component template
+      expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(false);
 
-        ({ body } = await es.transport.request({
-          method: 'GET',
-          path: `/_component_template/${templateName}-settings`,
-        }));
+      ({ body } = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${templateName}-settings`,
+      }));
 
-        // Make sure that the lifecycle name gets set correct in the settings
-        expect(
-          body.component_templates[0].component_template.template.settings.index.lifecycle.name
-        ).to.be('reference');
+      // The settings override provided in the package is set in the settings component template
+      expect(
+        body.component_templates[0].component_template.template.settings.index.lifecycle.name
+      ).to.be('reference');
 
-        ({ body } = await es.transport.request({
-          method: 'GET',
-          path: `/_component_template/${templateName}-user_settings`,
-        }));
+      ({ body } = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${templateName}-user_settings`,
+      }));
 
-        // Make sure that the lifecycle name gets set correct in the settings
-        let storedTemplate = body.component_templates[0].component_template.template.settings;
-        const stubTemplate = {};
-        expect(storedTemplate).to.eql(stubTemplate);
+      // The user_settings component template is an empty/stub template at first
+      const storedTemplate = body.component_templates[0].component_template.template.settings;
+      expect(storedTemplate).to.eql({});
 
-        const userSettingsOverrides = {
-          number_of_shards: 3,
-          index: {
-            lifecycle: { name: 'overridden by user' },
+      // Update the user_settings component template
+      ({ body } = await es.transport.request({
+        method: 'PUT',
+        path: `/_component_template/${templateName}-user_settings`,
+        body: {
+          template: {
+            settings: {
+              number_of_shards: 3,
+              index: {
+                lifecycle: { name: 'overridden by user' },
+                number_of_shards: 123,
+              },
+            },
           },
-        };
+        },
+      }));
 
-        ({ body } = await es.transport.request({
-          method: 'PUT',
-          path: `/_component_template/${templateName}-user_settings`,
-          body: {
-            template: { settings: userSettingsOverrides },
-          },
-        }));
+      // simulate the result
+      ({ body } = await es.transport.request({
+        method: 'POST',
+        path: `/_index_template/_simulate/${templateName}`,
+        // body: indexTemplate, // I *think* this should work, but it doesn't
+        body: {
+          index_patterns: [`${templateName}-*`],
+          composed_of: [
+            `${templateName}-mappings`,
+            `${templateName}-settings`,
+            `${templateName}-user_settings`,
+          ],
+        },
+      }));
 
-        ({ body } = await es.transport.request({
-          method: 'GET',
-          path: `/_component_template/${templateName}-user_settings`,
-        }));
-        // templateName = 'logs-overrides.test';
-        // console.log({ GET: JSON.stringify(body) });
-        // Make sure that the lifecycle name gets set correct in the settings
-        storedTemplate = body.component_templates[0].component_template.template.settings;
-        expect(storedTemplate).to.eql({
-          index: {
-            number_of_shards: 3,
-            lifecycle: { name: 'overridden by user' },
+      expect(body).to.eql({
+        template: {
+          settings: {
+            index: {
+              lifecycle: {
+                name: 'overridden by user',
+              },
+              number_of_shards: '3',
+            },
           },
-        });
-      } else {
-        warnAndSkipTest(this, log);
-      }
+          mappings: {
+            dynamic: 'false',
+          },
+          aliases: {},
+        },
+        overlapping: [
+          {
+            name: 'logs',
+            index_patterns: ['logs-*-*'],
+          },
+        ],
+      });
     });
   });
 }
