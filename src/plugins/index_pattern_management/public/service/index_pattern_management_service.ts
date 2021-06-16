@@ -45,7 +45,7 @@ export class IndexPatternManagementService {
     const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
     indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
 
-    if (uiSettings.get(CONFIG_ROLLUPS)) {
+    if (uiSettings.get(CONFIG_ROLLUPS, false)) {
       creationManagerSetup.addCreationConfig(RollupIndexPatternCreationConfig);
       indexPatternListConfigSetup.addListConfig(RollupIndexPatternListConfig);
     }
