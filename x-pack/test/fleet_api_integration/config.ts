@@ -15,7 +15,7 @@ import { defineDockerServersConfig } from '@kbn/test';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:9bb38015f3e7250a216e381b7902e47da8c5341637a830f854b477947e28867d';
+  'docker.elastic.co/package-registry/distribution@sha256:35cedaaa6adac547947321fa0c3b60a63eba153ba09524b9c1a21f1247a09bd2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
