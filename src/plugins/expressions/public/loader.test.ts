@@ -111,8 +111,8 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const response = await expressionLoader.data$.pipe(first()).toPromise();
-    expect(response).toBe(123);
+    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    expect(result).toBe(123);
   });
 
   it('emits on loading$ on initial load and on updates', async () => {
