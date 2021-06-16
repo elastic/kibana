@@ -37,12 +37,11 @@ import type { AuditServiceSetup } from './audit';
 import { AuditService, SecurityAuditLogger } from './audit';
 import type {
   AuthenticationServiceStart,
-  AuthenticationServiceStartInternal,
+  InternalAuthenticationServiceStart,
 } from './authentication';
 import { AuthenticationService } from './authentication';
-import type { AuthorizationServiceSetup } from './authorization';
+import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
-import type { AuthorizationServiceSetupInternal } from './authorization/authorization_service';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { ElasticsearchService } from './elasticsearch';
@@ -156,7 +155,7 @@ export class SecurityPlugin
   private readonly authenticationService = new AuthenticationService(
     this.initializerContext.logger.get('authentication')
   );
-  private authenticationStart?: AuthenticationServiceStartInternal;
+  private authenticationStart?: InternalAuthenticationServiceStart;
   private readonly getAuthentication = () => {
     if (!this.authenticationStart) {
       throw new Error(`authenticationStart is not registered!`);
