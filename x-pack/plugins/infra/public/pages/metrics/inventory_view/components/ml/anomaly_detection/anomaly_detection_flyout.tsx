@@ -51,6 +51,8 @@ export const AnomalyDetectionFlyout = () => {
   return (
     <>
       <EuiButtonEmpty
+        size="xs"
+        color="text"
         iconSide={'left'}
         iconType={'inspect'}
         onClick={openFlyout}
