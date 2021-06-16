@@ -31,7 +31,12 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
         />
       )}
       {showMappingWarning && (
-        <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="danger" iconType="alert">
+        <EuiCallOut
+          title={i18n.EMPTY_MAPPING_WARNING_TITLE}
+          color="danger"
+          iconType="alert"
+          data-test-subj="mapping-warning-callout"
+        >
           {i18n.EMPTY_MAPPING_WARNING_DESC}
         </EuiCallOut>
       )}
