@@ -60,45 +60,45 @@ export const useEndpointActionItems = (
         selected_endpoint: endpointId,
       });
 
-      const isolationActions = isIsolated // Un-isolate is always available to users regardless of license level
-        ? [
-            {
-              'data-test-subj': 'unIsolateLink',
-              icon: 'logoSecurity',
-              key: 'unIsolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointUnIsolatePath,
-              },
-              href: formatUrl(endpointUnIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.unIsolateHost"
-                  defaultMessage="Unisolate host"
-                />
-              ),
-            },
-          ]
-        : isPlatinumPlus // For Platinum++ licenses, users also have ability to isolate
-        ? [
-            {
-              'data-test-subj': 'isolateLink',
-              icon: 'logoSecurity',
-              key: 'isolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointIsolatePath,
-              },
-              href: formatUrl(endpointIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.isolateHost"
-                  defaultMessage="Isolate host"
-                />
-              ),
-            },
-          ]
-        : [];
+      const isolationActions = [];
+
+      if (isIsolated) {
+        // Un-isolate is always available to users regardless of license level
+        isolationActions.push({
+          'data-test-subj': 'unIsolateLink',
+          icon: 'logoSecurity',
+          key: 'unIsolateHost',
+          navigateAppId: MANAGEMENT_APP_ID,
+          navigateOptions: {
+            path: endpointUnIsolatePath,
+          },
+          href: formatUrl(endpointUnIsolatePath),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.unIsolateHost"
+              defaultMessage="Unisolate host"
+            />
+          ),
+        });
+      } else if (isPlatinumPlus) {
+        // For Platinum++ licenses, users also have ability to isolate
+        isolationActions.push({
+          'data-test-subj': 'isolateLink',
+          icon: 'logoSecurity',
+          key: 'isolateHost',
+          navigateAppId: MANAGEMENT_APP_ID,
+          navigateOptions: {
+            path: endpointIsolatePath,
+          },
+          href: formatUrl(endpointIsolatePath),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.isolateHost"
+              defaultMessage="Isolate host"
+            />
+          ),
+        });
+      }
 
       return [
         ...isolationActions,
