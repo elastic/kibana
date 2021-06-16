@@ -12,6 +12,7 @@ import {
   requiredPackages,
   FLEET_SYSTEM_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  autoUpdatePackages,
 } from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
@@ -67,6 +68,11 @@ export const REQUIRED_PACKAGES = requiredPackages.map((name) => ({
 }));
 
 export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
+  name,
+  version: PRECONFIGURATION_LATEST_KEYWORD,
+}));
+
+export const AUTO_UPDATE_PACKAGES = autoUpdatePackages.map((name) => ({
   name,
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));

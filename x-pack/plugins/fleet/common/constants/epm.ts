@@ -26,6 +26,10 @@ export const requiredPackages = [
 // auto-update.
 export const defaultPackages = requiredPackages;
 
+// Auto-update packages are not installed by default and can be removed. If they
+// are installed by any other means they will auto-update.
+export const autoUpdatePackages = [FLEET_ENDPOINT_PACKAGE];
+
 export const agentAssetTypes = {
   Input: 'input',
 } as const;

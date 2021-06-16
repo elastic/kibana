@@ -39,6 +39,14 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<boolean> {
+  const installedPackage = await getInstallation(options);
+  return installedPackage !== undefined;
+}
+
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
