@@ -38,14 +38,14 @@ export class ExpressionService {
     }
   };
 
-  public setup(...args: unknown[]): ExpressionServiceSetup {
+  public setup(): ExpressionServiceSetup {
     const { registerExpression } = this;
     return Object.freeze({
       registerExpression,
     });
   }
 
-  public start(...args: unknown[]): ExpressionServiceStart {}
+  public start(): ExpressionServiceStart {}
 
   public stop() {}
 }
