@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getRouter, setHttp } from '../../crud_app/services';
+import { getRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('../../crud_app/services', () => {
   const services = jest.requireActual('../../crud_app/services');
@@ -38,6 +38,7 @@ describe('<JobList />', () => {
     beforeAll(() => {
       startMock = coreMock.createStart();
       setHttp(startMock.http);
+      initDocumentation(docLinksServiceMock.createStartContract());
     });
 
     beforeEach(async () => {

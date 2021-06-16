@@ -18,7 +18,6 @@ import {
   EuiLoadingSpinner,
   EuiPageContent,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -89,21 +88,21 @@ export class JobListUi extends Component {
       defaultMessage: 'Permission error',
     });
     return (
-      <Fragment>
-        {this.getHeaderSection()}
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          data-test-subj="jobListNoPermission"
-          title={title}
-          color="warning"
-          iconType="help"
-        >
-          <FormattedMessage
-            id="xpack.rollupJobs.jobList.noPermissionText"
-            defaultMessage="You do not have permission to view or add rollup jobs."
-          />
-        </EuiCallOut>
-      </Fragment>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          data-test-subj="jobListError"
+          iconType="alert"
+          title={<h1>{title}</h1>}
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.noPermissionText"
+                defaultMessage="You do not have permission to view or add rollup jobs."
+              />
+            </p>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
@@ -120,7 +119,8 @@ export class JobListUi extends Component {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListError"
-          title={<h2>{title}</h2>}
+          iconType="alert"
+          title={<h1>{title}</h1>}
           body={
             <p>
               {statusCode} {errorString}
