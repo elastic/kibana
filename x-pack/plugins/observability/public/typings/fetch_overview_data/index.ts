@@ -39,8 +39,8 @@ export interface HasDataResponse {
 }
 
 export interface UXHasDataResponse extends HasDataResponse {
-  serviceName: string | number | undefined;
-  indices: string;
+  serviceName?: string | number;
+  indices?: string;
 }
 
 export interface SyntheticsHasDataResponse extends HasDataResponse {

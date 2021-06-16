@@ -12,7 +12,6 @@ import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { UXHasDataResponse } from '../../../../typings';
 import CoreVitals from '../../../shared/core_web_vitals';
 
 interface Props {
@@ -22,8 +21,8 @@ interface Props {
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
-  const uxHasDataResponse = (hasDataMap.ux?.hasData as UXHasDataResponse) || {};
-  const serviceName = uxHasDataResponse.serviceName as string;
+  const uxHasDataResponse = hasDataMap.ux;
+  const serviceName = uxHasDataResponse?.serviceName as string;
 
   const { data, status } = useFetcher(
     () => {

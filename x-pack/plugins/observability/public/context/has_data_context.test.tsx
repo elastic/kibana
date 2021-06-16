@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { act, getByText } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
@@ -20,6 +19,7 @@ import { PluginContextValue } from './plugin_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
+import { act } from '@testing-library/react';
 
 const relativeStart = '2020-10-08T06:00:00.000Z';
 const relativeEnd = '2020-10-08T07:00:00.000Z';
@@ -82,17 +82,18 @@ describe('HasDataContextProvider', () => {
     it('hasAnyData returns false and all apps return undefined', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toMatchObject({
-        hasData: {},
+        hasDataMap: {},
         hasAnyData: false,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
       });
-
-      await waitForNextUpdate();
+      await act(async () => {
+        await waitForNextUpdate();
+      });
 
       expect(result.current).toEqual({
-        hasData: {
+        hasDataMap: {
           apm: { hasData: undefined, status: 'success' },
           synthetics: { hasData: undefined, status: 'success' },
           infra_logs: { hasData: undefined, status: 'success' },
@@ -111,16 +112,16 @@ describe('HasDataContextProvider', () => {
     describe('all apps return false', () => {
       beforeAll(() => {
         registerApps([
-          { appName: 'apm', hasData: async () => false },
+          { appName: 'apm', hasData: async () => ({ hasData: false }) },
           { appName: 'infra_logs', hasData: async () => false },
           { appName: 'infra_metrics', hasData: async () => false },
           {
             appName: 'synthetics',
-            hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
+            hasData: async () => ({ hasData: false }),
           },
           {
             appName: 'ux',
-            hasData: async () => ({ hasData: false, serviceName: undefined, indices: 'apm-*' }),
+            hasData: async () => ({ hasData: false }),
           },
         ]);
       });
@@ -130,29 +131,28 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns false and all apps return false', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasData: {},
+          hasDataMap: {},
           hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitForNextUpdate();
+        await act(async () => {
+          await waitForNextUpdate();
+        });
 
         expect(result.current).toEqual({
-          hasData: {
+          hasDataMap: {
             apm: { hasData: false, status: 'success' },
             synthetics: {
-              hasData: {
-                hasData: false,
-                indices: 'heartbeat-*, synthetics-*',
-              },
+              hasData: false,
               status: 'success',
             },
             infra_logs: { hasData: false, status: 'success' },
             infra_metrics: { hasData: false, status: 'success' },
             ux: {
-              hasData: { hasData: false, serviceName: undefined, indices: 'apm-*' },
+              hasData: false,
               status: 'success',
             },
             alert: { hasData: [], status: 'success' },
@@ -168,7 +168,7 @@ describe('HasDataContextProvider', () => {
     describe('at least one app returns true', () => {
       beforeAll(() => {
         registerApps([
-          { appName: 'apm', hasData: async () => true },
+          { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => false },
           { appName: 'infra_metrics', hasData: async () => false },
           {
@@ -187,29 +187,30 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true apm returns true and all other apps return false', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasData: {},
+          hasDataMap: {},
           hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitForNextUpdate();
+        await act(async () => {
+          await waitForNextUpdate();
+        });
 
         expect(result.current).toEqual({
-          hasData: {
+          hasDataMap: {
             apm: { hasData: true, status: 'success' },
             synthetics: {
-              hasData: {
-                hasData: false,
-                indices: 'heartbeat-*, synthetics-*',
-              },
+              hasData: false,
+              indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
             infra_logs: { hasData: false, status: 'success' },
             infra_metrics: { hasData: false, status: 'success' },
             ux: {
-              hasData: { hasData: false, serviceName: undefined, indices: 'apm-*' },
+              hasData: false,
+              indices: 'apm-*',
               status: 'success',
             },
             alert: { hasData: [], status: 'success' },
@@ -225,7 +226,7 @@ describe('HasDataContextProvider', () => {
     describe('all apps return true', () => {
       beforeAll(() => {
         registerApps([
-          { appName: 'apm', hasData: async () => true },
+          { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => true },
           { appName: 'infra_metrics', hasData: async () => true },
           {
@@ -244,32 +245,34 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true and all apps return true', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasData: {},
+          hasDataMap: {},
           hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitForNextUpdate();
+        await act(async () => {
+          await waitForNextUpdate();
+        });
 
         expect(result.current).toEqual({
-          hasData: {
+          hasDataMap: {
             apm: {
               hasData: true,
               status: 'success',
             },
             synthetics: {
-              hasData: {
-                hasData: true,
-                indices: 'heartbeat-*, synthetics-*',
-              },
+              hasData: true,
+              indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
             infra_metrics: { hasData: true, status: 'success' },
             ux: {
-              hasData: { hasData: true, serviceName: 'ux', indices: 'apm-*' },
+              hasData: true,
+              serviceName: 'ux',
+              indices: 'apm-*',
               status: 'success',
             },
             alert: { hasData: [], status: 'success' },
@@ -297,18 +300,20 @@ describe('HasDataContextProvider', () => {
             wrapper,
           });
           expect(result.current).toEqual({
-            hasData: {},
+            hasDataMap: {},
             hasAnyData: false,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitForNextUpdate();
+          await act(async () => {
+            await waitForNextUpdate();
+          });
 
           expect(result.current).toEqual({
-            hasData: {
-              apm: { hasData: { hasData: true, indices: 'apm-*' }, status: 'success' },
+            hasDataMap: {
+              apm: { hasData: true, indices: sampleAPMIndices, status: 'success' },
               synthetics: { hasData: undefined, status: 'success' },
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
@@ -340,22 +345,22 @@ describe('HasDataContextProvider', () => {
             wrapper,
           });
           expect(result.current).toEqual({
-            hasData: {},
+            hasDataMap: {},
             hasAnyData: false,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitForNextUpdate();
+          await act(async () => {
+            await waitForNextUpdate();
+          });
 
           expect(result.current).toEqual({
-            hasData: {
+            hasDataMap: {
               apm: {
-                hasData: {
-                  hasData: false,
-                  indices: 'apm-*',
-                },
+                hasData: false,
+                indices: sampleAPMIndices,
                 status: 'success',
               },
               synthetics: { hasData: undefined, status: 'success' },
@@ -400,29 +405,31 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true, apm is undefined and all other apps return true', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasData: {},
+          hasDataMap: {},
           hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitForNextUpdate();
+        await act(async () => {
+          await waitForNextUpdate();
+        });
 
         expect(result.current).toEqual({
-          hasData: {
+          hasDataMap: {
             apm: { hasData: undefined, status: 'failure' },
             synthetics: {
-              hasData: {
-                hasData: true,
-                indices: 'heartbeat-*, synthetics-*',
-              },
+              hasData: true,
+              indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
             infra_metrics: { hasData: true, status: 'success' },
             ux: {
-              hasData: { hasData: true, serviceName: 'ux', indices: 'apm-*' },
+              hasData: true,
+              serviceName: 'ux',
+              indices: 'apm-*',
               status: 'success',
             },
             alert: { hasData: [], status: 'success' },
@@ -476,17 +483,19 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns false and all apps return undefined', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasData: {},
+          hasDataMap: {},
           hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitForNextUpdate();
+        await act(async () => {
+          await waitForNextUpdate();
+        });
 
         expect(result.current).toEqual({
-          hasData: {
+          hasDataMap: {
             apm: { hasData: undefined, status: 'failure' },
             synthetics: { hasData: undefined, status: 'failure' },
             infra_logs: { hasData: undefined, status: 'failure' },
@@ -524,17 +533,19 @@ describe('HasDataContextProvider', () => {
     it('returns all alerts available', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
-        hasData: {},
+        hasDataMap: {},
         hasAnyData: false,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await waitForNextUpdate();
+      await act(async () => {
+        await waitForNextUpdate();
+      });
 
       expect(result.current).toEqual({
-        hasData: {
+        hasDataMap: {
           apm: { hasData: undefined, status: 'success' },
           synthetics: { hasData: undefined, status: 'success' },
           infra_logs: { hasData: undefined, status: 'success' },

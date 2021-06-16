@@ -25,6 +25,7 @@ export type HasDataMap = Record<
     status: FETCH_STATUS;
     hasData?: boolean | Alert[];
     indices?: string | ApmIndicesConfig;
+    serviceName?: string;
   }
 >;
 
@@ -54,11 +55,21 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
       if (!isExploratoryView)
         apps.forEach(async (app) => {
           try {
-            const updateState = (hasData?: boolean) => {
+            const updateState = ({
+              hasData,
+              indices,
+              serviceName,
+            }: {
+              hasData?: boolean;
+              serviceName?: string;
+              indices?: string | ApmIndicesConfig;
+            }) => {
               setHasDataMap((prevState) => ({
                 ...prevState,
                 [app]: {
                   hasData,
+                  ...(serviceName ? { serviceName } : {}),
+                  ...(indices ? { indices } : {}),
                   status: FETCH_STATUS.SUCCESS,
                 },
               }));
@@ -67,22 +78,26 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
               case 'ux':
                 const params = { absoluteTime: { start: absoluteStart, end: absoluteEnd } };
                 const resultUx = await getDataHandler(app)?.hasData(params);
-                updateState(resultUx?.hasData);
+                updateState({
+                  hasData: resultUx?.hasData,
+                  indices: resultUx?.indices,
+                  serviceName: resultUx?.serviceName as string,
+                });
                 break;
               case 'synthetics':
                 const resultSy = await getDataHandler(app)?.hasData();
-                updateState(resultSy?.hasData);
+                updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
 
                 break;
               case 'apm':
                 const resultApm = await getDataHandler(app)?.hasData();
-                updateState(resultApm?.hasData);
+                updateState({ hasData: resultApm?.hasData, indices: resultApm?.indices });
 
                 break;
               case 'infra_logs':
               case 'infra_metrics':
                 const resultInfra = await getDataHandler(app)?.hasData();
-                updateState(resultInfra);
+                updateState({ hasData: resultInfra });
                 break;
             }
           } catch (e) {
