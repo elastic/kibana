@@ -20,7 +20,6 @@ import {
   rangeQuery,
   kqlQuery,
 } from '../../../../server/utils/queries';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getDistributionMax({
   environment,
@@ -39,44 +38,45 @@ export async function getDistributionMax({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_latency_distribution_max', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
 
-    const params = {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
-              { term: { [TRANSACTION_NAME]: transactionName } },
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            { term: { [TRANSACTION_NAME]: transactionName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          stats: {
-            max: {
-              field: getTransactionDurationFieldForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-            },
+      },
+      aggs: {
+        stats: {
+          max: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
           },
         },
       },
-    };
+    },
+  };
 
-    const resp = await apmEventClient.search(params);
-    return resp.aggregations?.stats.value ?? null;
-  });
+  const resp = await apmEventClient.search(
+    'get_latency_distribution_max',
+    params
+  );
+  return resp.aggregations?.stats.value ?? null;
 }
