@@ -14,20 +14,29 @@ export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
-// Required packages are installed by default, and _cannot_ be removed. They
-// also auto-update.
+/*
+ Package rules:
+|               | requiredPackages | defaultPackages | autoUpdatePackages |
+|---------------|:----------------:|:---------------:|:------------------:|
+| Removable     |         ❌        |        ✔️        |          ✔️         |
+| Auto-installs |         ❌        |        ✔️        |          ❌         |
+| Auto-updates  |         ❌        |        ✔️        |          ✔️         |
+
+`endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
+removable, but it doesn't install by default. Following the table, it needs to
+be in `requiredPackages` and in `autoUpdatePackages`, but not in
+`defaultPackages`.
+*/
+
 export const requiredPackages = [
   FLEET_SYSTEM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  FLEET_ENDPOINT_PACKAGE,
 ];
 
-// Default packages are installed by default, but can be removed. They also
-// auto-update.
-export const defaultPackages = requiredPackages;
+export const defaultPackages = requiredPackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
 
-// Auto-update packages are not installed by default and can be removed. If they
-// are installed by any other means they will auto-update.
 export const autoUpdatePackages = [FLEET_ENDPOINT_PACKAGE];
 
 export const agentAssetTypes = {
