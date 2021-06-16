@@ -101,12 +101,11 @@ const renderYAxis = (series: Series[]) => {
 };
 
 const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
-  ({
+  (({
     ...domain,
     padding: 50,
-    // @ts-expect-error
     paddingUnit: 'pixel',
-  } as AxisSpec['domain']);
+  } as unknown) as AxisSpec['domain']);
 
 const TimelionVisComponent = ({
   interval,
