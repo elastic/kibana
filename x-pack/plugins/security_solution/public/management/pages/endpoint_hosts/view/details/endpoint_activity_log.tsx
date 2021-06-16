@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiEmptyPrompt,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
 import * as i18 from '../translations';
@@ -31,26 +38,48 @@ export const EndpointActivityLog = memo(
     const activityLogLoaded = useEndpointSelector(getActivityLogRequestLoaded);
     const activityLastLogData = useEndpointSelector(getLastLoadedActivityLogData);
     const activityLogData = useEndpointSelector(getActivityLogIterableData);
+    const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
     const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
+
     // TODO
     const onSearch = useCallback(() => {}, []);
 
-    const getActivityLog = useCallback(() => {
-      dispatch({
-        type: 'appRequestedEndpointActivityLog',
-        payload: {
-          page: page + 1,
-          pageSize,
-        },
+    const fetchMoreCallOut = useRef<HTMLInputElement | null>(null);
+    const calloutTitle = i18.ACTIVITY_LOG.callOutTitle;
+    const getActivityLog = useCallback(
+      (entries: IntersectionObserverEntry[]) => {
+        if (activityLogLoaded && entries.some((entry) => entry.intersectionRatio > 0)) {
+          dispatch({
+            type: 'appRequestedEndpointActivityLog',
+            payload: {
+              page: page + 1,
+              pageSize,
+            },
+          });
+        }
+      },
+      [activityLogLoaded, dispatch, page, pageSize]
+    );
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(getActivityLog, {
+        rootMargin: '-50px',
       });
-    }, [dispatch, page, pageSize]);
+      const element = fetchMoreCallOut.current;
+      if (element) {
+        observer.observe(element);
+      }
+      return () => {
+        observer.disconnect();
+      };
+    }, [getActivityLog]);
 
     return (
       <>
         <EuiSpacer size="l" />
-        {(activityLogLoaded && !activityLogData.length) || activityLogError ? (
+        {(activityLogLoaded && !activityLogSize) || activityLogError ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
             titleSize="s"
@@ -58,22 +87,28 @@ export const EndpointActivityLog = memo(
             body={<p>{'No actions have been logged for this endpoint.'}</p>}
           />
         ) : (
-          <>
+          <div>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-            {activityLogLoaded &&
-              activityLogData.map((logEntry) => (
-                <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
-              ))}
-            {activityLogLoading &&
-              activityLastLogData?.data.map((logEntry) => (
-                <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
-              ))}
-            {activityLogLoading && <EuiLoadingContent lines={3} />}
-            <EuiButton size="s" fill onClick={getActivityLog}>
-              {'show more'}
-            </EuiButton>
-          </>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                {activityLogLoaded &&
+                  activityLogData.map((logEntry) => (
+                    <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
+                  ))}
+                {activityLogLoading &&
+                  activityLastLogData?.data.map((logEntry) => (
+                    <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
+                  ))}
+              </EuiFlexItem>
+              {activityLogLoading && <EuiLoadingContent lines={2} />}
+              {!activityLogLoading && (
+                <EuiFlexItem>
+                  <EuiCallOut ref={fetchMoreCallOut} size="s" title={calloutTitle} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
         )}
       </>
     );
