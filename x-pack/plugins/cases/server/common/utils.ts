@@ -271,17 +271,12 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined): AlertInfo[] => {
-  if (comments === undefined) {
-    return [];
-  }
-
-  return comments.reduce((acc: AlertInfo[], comment) => {
+export const getAlertInfoFromComments = (comments: CommentRequest[] = []): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
     const alertInfo = getAndValidateAlertInfoFromComment(comment);
     acc.push(...alertInfo);
     return acc;
   }, []);
-};
 
 type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;

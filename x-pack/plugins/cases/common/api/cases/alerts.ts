@@ -8,8 +8,9 @@
 import * as rt from 'io-ts';
 
 const AlertRt = rt.type({
-  alertId: rt.array(rt.string),
-  index: rt.array(rt.string),
+  id: rt.string,
+  index: rt.string,
+  attached_at: rt.string,
 });
 
 export const AlertResponseRt = rt.array(AlertRt);

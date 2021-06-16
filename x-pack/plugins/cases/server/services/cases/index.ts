@@ -57,10 +57,7 @@ import {
 } from '../../../common/constants';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
-import {
-  combineFilterWithAuthorizationFilter,
-  includeFieldsRequiredForAuthentication,
-} from '../../authorization/utils';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
 
 interface GetAllAlertsAttachToCaseArgs extends ClientArgs {

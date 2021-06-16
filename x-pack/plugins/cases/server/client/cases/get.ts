@@ -25,14 +25,33 @@ import {
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
   AlertResponse,
+  AttributesTypeAlerts,
 } from '../../../common/api';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common';
+import { countAlertsForID, flattenCaseSavedObject, getIDsAndIndicesAsArrays } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+
+const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
+  alerts.reduce((acc: AlertResponse, alert) => {
+    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
+
+    if (ids.length !== indices.length) {
+      return acc;
+    }
+
+    return [
+      ...acc,
+      ...ids.map((id, index) => ({
+        id,
+        index: indices[index],
+        attached_at: alert.attributes.created_at,
+      })),
+    ];
+  }, []);
 
 export interface GetAllAlertsAttachToCase {
   caseId: string;
@@ -73,14 +92,7 @@ export const getAllAlertsAttachToCase = async (
     }))
   );
 
-  return alerts.map((alert) => ({
-    alertId: Array.isArray(alert.attributes.alertId)
-      ? alert.attributes.alertId
-      : [alert.attributes.alertId],
-    index: Array.isArray(alert.attributes.index)
-      ? alert.attributes.index
-      : [alert.attributes.index],
-  }));
+  return normalizeAlertResponse(alerts);
 };
 
 /**
