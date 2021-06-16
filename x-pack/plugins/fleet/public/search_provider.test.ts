@@ -87,7 +87,7 @@ describe('Package search provider', () => {
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test',
+              id: 'test-test',
               score: 80,
               title: 'test',
               type: 'package',
@@ -97,7 +97,7 @@ describe('Package search provider', () => {
               },
             },
             {
-              id: 'test1',
+              id: 'test1-test1',
               score: 80,
               title: 'test1',
               type: 'package',
@@ -170,7 +170,7 @@ describe('Package search provider', () => {
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test',
+              id: 'test-test',
               score: 80,
               title: 'test',
               type: 'package',
