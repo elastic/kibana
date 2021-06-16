@@ -6,6 +6,7 @@
  */
 import type { CoreSetup, CoreStart } from 'src/core/public';
 
+import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
@@ -23,9 +24,28 @@ import { pagePathGetters } from './constants';
 const packageType = 'package';
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
-  const coreStart$ = from(core.getStartServices().then(([coreStart]) => coreStart)).pipe(
+  const coreStart$ = from(core.getStartServices()).pipe(
+    map(([coreStart]) => coreStart),
     shareReplay(1)
   );
+
+  let packages$: undefined | Observable<GetPackagesResponse['response']>;
+
+  const getPackages$ = () => {
+    if (!packages$) {
+      packages$ = from(sendGetPackages()).pipe(
+        map(({ error, data }) => {
+          if (error) {
+            throw error;
+          }
+          return data?.response ?? [];
+        }),
+        shareReplay(1)
+      );
+    }
+    return packages$;
+  };
+
   return {
     id: 'packages',
     getSearchableTypes: () => [packageType],
@@ -38,9 +58,9 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
 
       const toSearchResults = (
         coreStart: CoreStart,
-        packagesResponse: GetPackagesResponse
+        packagesResponse: GetPackagesResponse['response']
       ): GlobalSearchProviderResult[] => {
-        const packages = packagesResponse.response.slice(0, maxResults);
+        const packages = packagesResponse.slice(0, maxResults);
 
         return packages.flatMap((pkg) => {
           if (!term || !pkg.title.toLowerCase().includes(term)) {
@@ -61,9 +81,9 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
         });
       };
 
-      return combineLatest([coreStart$, from(sendGetPackages())]).pipe(
+      return combineLatest([coreStart$, getPackages$()]).pipe(
         takeUntil(aborted$),
-        map(([coreStart, { data }]) => (data ? toSearchResults(coreStart, data) : []))
+        map(([coreStart, data]) => (data ? toSearchResults(coreStart, data) : []))
       );
     },
   };
