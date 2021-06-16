@@ -14,9 +14,15 @@ export interface CodeSignature {
   subject_name: string[];
   trusted: string[];
 }
+
+export interface Token {
+  integrity_level_name: string;
+}
+
 export interface Ext {
   code_signature?: CodeSignature[] | CodeSignature;
   original?: Original;
+  token?: Token;
 }
 export interface Hash {
   md5?: string[];
