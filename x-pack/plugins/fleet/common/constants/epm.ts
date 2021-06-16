@@ -10,6 +10,7 @@ export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
 
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
+export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
 export const requiredPackages = {
   System: 'system',

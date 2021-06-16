@@ -7,11 +7,8 @@
 
 import { SavedObjectsFindResponse } from 'src/core/server';
 
-import { Agent } from '../../../../fleet/common';
-import {
-  FLEET_ENDPOINT_PACKAGE_CONSTANT,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from './fleet_saved_objects';
+import { Agent, FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
 const testAgentPolicyId = 'testAgentPolicyId';
@@ -65,7 +62,7 @@ export const mockFleetObjectsResponse = (
           full: MockOSFullName,
         },
       },
-      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      packages: [FLEET_ENDPOINT_PACKAGE, 'system'],
       last_checkin: lastCheckIn,
     },
     {
@@ -93,7 +90,7 @@ export const mockFleetObjectsResponse = (
           full: MockOSFullName,
         },
       },
-      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      packages: [FLEET_ENDPOINT_PACKAGE, 'system'],
       last_checkin: lastCheckIn,
     },
   ],
