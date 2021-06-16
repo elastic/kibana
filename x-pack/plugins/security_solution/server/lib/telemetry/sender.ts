@@ -9,12 +9,9 @@ import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { LegacyAPICaller } from 'kibana/server';
 import { URL } from 'url';
-import { Logger, CoreStart } from '../../../../../../src/core/server';
+import { ElasticsearchClient, ElasticsearchServiceStart, Logger, CoreStart } from 'src/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
-import {
-  TelemetryPluginStart,
-  TelemetryPluginSetup,
-} from '../../../../../../src/plugins/telemetry/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -22,6 +19,8 @@ import {
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { EndpointAppContext } from '../../../server/endpoint/types';
+import { AgentService } from '../../../../fleet/server';
+import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -58,6 +57,8 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
+  private agentService?: AgentService;
+  private esClient?: ElasticsearchClient;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -66,18 +67,14 @@ export class TelemetryEventsSender {
   public setup(
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    endpointContext: EndpointAppContext
+    endpointContext?: EndpointAppContext
   ) {
     this.telemetrySetup = telemetrySetup;
+    this.agentService = endpointContext?.service.getAgentService();
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
-      this.epMetricsTask = new TelemetryEndpointTask(
-        this.logger,
-        taskManager,
-        this,
-        endpointContext
-      );
+      this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
     }
   }
 
@@ -88,6 +85,7 @@ export class TelemetryEventsSender {
   ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
+    this.esClient = core?.elasticsearch.client.asInternalUser;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
@@ -138,6 +136,21 @@ export class TelemetryEventsSender {
     }
     const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
     return callCluster('search', query);
+  }
+
+  public async fetchEndpointAgents() {
+    if (this.esClient === undefined) {
+      this.logger.debug(`ES client is undefined`);
+      return [];
+    }
+
+    return this.agentService?.listAgents(this.esClient, {
+      kuery: `(packages : ${FleetDefaultPackages.Endpoint})`,
+      perPage: 10_000,
+      showInactive: false,
+      sortField: 'enrolled_at',
+      sortOrder: 'desc',
+    });
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {

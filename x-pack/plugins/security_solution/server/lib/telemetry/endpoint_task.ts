@@ -14,7 +14,6 @@ import {
 } from '../../../../task_manager/server';
 import { getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
-import { EndpointAppContext } from '../../../server/endpoint/types';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '1m',
@@ -26,17 +25,14 @@ export const TelemetryEndpointTaskConstants = {
 export class TelemetryEndpointTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
-  private readonly endpointContext: EndpointAppContext;
 
   constructor(
     logger: Logger,
     taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender,
-    endpointContext: EndpointAppContext
+    sender: TelemetryEventsSender
   ) {
     this.logger = logger;
     this.sender = sender;
-    this.endpointContext = endpointContext;
 
     taskManager.registerTaskDefinitions({
       [TelemetryEndpointTaskConstants.TYPE]: {
@@ -104,9 +100,10 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const agentService = this.endpointContext.service.getAgentService();
-
     // 1. [PH] Get the fleet agents
+    const agents = this.sender.fetchEndpointAgents();
+    // console.log(agents)
+
     // 2. [PH/] Get the fleet index (policies)
     // 3. [PH] Get the endpoint policy failure responses
     // 4. [CD] Get the EP metrics
