@@ -190,8 +190,8 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 | Metrics with filters
 |
-^| X
 |
+^| X
 |
 
 | Average
