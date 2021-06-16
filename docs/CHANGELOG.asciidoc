@@ -82,6 +82,15 @@ Maps::
 Sharing::
 * Fixes the embeddables migrate function {kibana-pull}101470[#101470]
 
+[discrete]
+[[known-issue-7.13.12]]
+=== Known issue
+
+*TSVB visualizations with annotations* can't be created as the index pattern dropdown on the *Annotations* tab is missing. 
+The existing *TSVB* visualizations with annotations work fine. 
+If you want to create *TSVB* visualizations with annotations, we recommend that you wait for the {kib} 7.13.3 release, then upgrade. 
+For more information, refer to {kibana-issue}102180[#102180].
+
 [[release-notes-7.13.1]]
 == {kib} 7.13.1
 
