@@ -18,13 +18,13 @@ import { useHostUnisolation } from '../../containers/detection_engine/alerts/use
 
 export const UnisolateHost = React.memo(
   ({
-    agentId,
+    endpointId,
     hostName,
     cases,
     caseIds,
     cancelCallback,
   }: {
-    agentId: string;
+    endpointId: string;
     hostName: string;
     cases: ReactNode;
     caseIds: string[];
@@ -33,7 +33,7 @@ export const UnisolateHost = React.memo(
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
 
-    const { loading, unIsolateHost } = useHostUnisolation({ agentId, comment, caseIds });
+    const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
     const confirmHostUnIsolation = useCallback(async () => {
       const hostIsolated = await unIsolateHost();
