@@ -174,10 +174,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
               <SectionLink {...nodeDetailMenuItem} />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} />
-              <SectionLink {...createAlertMenuItem} />
             </SectionLinks>
             <ActionMenuDivider />
             <SectionLinks>
+              <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
             </SectionLinks>
           </Section>
         </div>
