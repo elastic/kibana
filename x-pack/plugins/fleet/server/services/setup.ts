@@ -47,7 +47,9 @@ async function createSetupSideEffects(
   ]);
 
   await awaitIfFleetServerSetupPending();
-  await ensureFleetGlobalEsAssets(soClient, esClient);
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    await ensureFleetGlobalEsAssets(soClient, esClient);
+  }
 
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};

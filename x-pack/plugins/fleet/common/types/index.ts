@@ -25,6 +25,7 @@ export interface FleetConfigType {
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
+  agentIdVerificationEnabled: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

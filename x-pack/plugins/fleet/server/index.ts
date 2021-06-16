@@ -77,6 +77,7 @@ export const config: PluginConfigDescriptor = {
     }),
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,
+    agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
   }),
 };
 

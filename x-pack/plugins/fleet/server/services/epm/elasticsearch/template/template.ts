@@ -90,8 +90,10 @@ export function getTemplate({
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
-  // Add fleet global assets
-  template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    // Add fleet global assets
+    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+  }
 
   return template;
 }

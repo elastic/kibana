@@ -33,6 +33,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
+      agentIdVerificationEnabled: true,
     },
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',

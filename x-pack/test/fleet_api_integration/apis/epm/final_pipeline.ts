@@ -43,7 +43,6 @@ export default function (providerContext: FtrProviderContext) {
       const { body: getPackagesRes } = await supertest.get(
         `/api/fleet/epm/packages?experimental=true`
       );
-
       const logPackage = getPackagesRes.response.find((p: any) => p.name === 'log');
       if (!logPackage) {
         throw new Error('No log package');
@@ -85,12 +84,11 @@ export default function (providerContext: FtrProviderContext) {
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
-
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.body.index_templates.length).to.be(1);
-      expect(
-        res.body.index_templates[0]?.index_template?.template?.settings?.index?.final_pipeline
-      ).to.be(FINAL_PIPELINE_ID);
+      expect(res.body.index_templates[0]?.index_template?.composed_of[0]).to.be(
+        '.fleet_component_template-1'
+      );
     });
 
     it('For a doc written without api key should write the correct api key status', async () => {
