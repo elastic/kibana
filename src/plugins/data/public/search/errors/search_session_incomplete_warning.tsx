@@ -9,7 +9,7 @@
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) => (
   <>
