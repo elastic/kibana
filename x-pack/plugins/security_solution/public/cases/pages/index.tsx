@@ -36,6 +36,11 @@ const CaseContainerComponent: React.FC = () => {
         iconType: 'glasses',
       });
     }
+
+    // remove the icon after the component unmounts
+    return () => {
+      chrome.setBadge();
+    };
   }, [userPermissions, chrome]);
 
   return (

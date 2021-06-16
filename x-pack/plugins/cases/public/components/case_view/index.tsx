@@ -230,7 +230,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors(false);
+    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors({
+      toastPermissionsErrors: false,
+    });
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);

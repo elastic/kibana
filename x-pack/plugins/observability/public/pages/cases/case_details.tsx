@@ -12,7 +12,7 @@ import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
-import { HeaderBadge } from './header_badge';
+import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -23,6 +23,7 @@ export const CaseDetailsPage = React.memo(() => {
     detailName?: string;
     subCaseId?: string;
   }>();
+  useReadonlyHeader();
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
@@ -31,14 +32,7 @@ export const CaseDetailsPage = React.memo(() => {
   }, [navigateToApp, userPermissions]);
 
   return caseId != null ? (
-    <>
-      <HeaderBadge />
-      <CaseView
-        caseId={caseId}
-        subCaseId={subCaseId}
-        userCanCrud={userPermissions?.crud ?? false}
-      />
-    </>
+    <CaseView caseId={caseId} subCaseId={subCaseId} userCanCrud={userPermissions?.crud ?? false} />
   ) : null;
 });
 

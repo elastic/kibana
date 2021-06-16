@@ -30,7 +30,11 @@ export interface UseConnectorsResponse {
  *
  * @param toastPermissionsErrors boolean controlling whether 403 and 401 errors should be displayed in a toast error
  */
-export const useConnectors = (toastPermissionsErrors: boolean = true): UseConnectorsResponse => {
+export const useConnectors = ({
+  toastPermissionsErrors = true,
+}: {
+  toastPermissionsErrors?: boolean;
+} = {}): UseConnectorsResponse => {
   const toasts = useToasts();
   const [state, setState] = useState<ConnectorsState>({
     loading: true,

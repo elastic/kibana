@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
-import * as i18n from '../../components/app/cases/translations';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { useKibana } from '../../utils/kibana_react';
+import * as i18n from '../components/app/cases/translations';
+import { useGetUserCasesPermissions } from '../hooks/use_get_user_cases_permissions';
+import { useKibana } from '../utils/kibana_react';
 
 /**
  * This component places a read-only icon badge in the header if user only has read permissions
  */
-export const HeaderBadge = React.memo(() => {
+export function useReadonlyHeader() {
   const userPermissions = useGetUserCasesPermissions();
   const chrome = useKibana().services.chrome;
 
@@ -31,7 +31,10 @@ export const HeaderBadge = React.memo(() => {
 
   useEffect(() => {
     setBadge();
-  }, [setBadge]);
 
-  return null;
-});
+    // remove the icon after the component unmounts
+    return () => {
+      chrome.setBadge();
+    };
+  }, [setBadge, chrome]);
+}

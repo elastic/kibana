@@ -165,17 +165,15 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(
         wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
-      ).toBeTruthy()
-    );
+      ).toBeTruthy();
 
-    await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
-      ).toBeFalsy()
-    );
+      ).toBeFalsy();
+    });
   });
 
   it('displays the default none connector message', async () => {
@@ -186,16 +184,13 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(
         wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
-      ).toBeFalsy()
-    );
-
-    await waitFor(() =>
+      ).toBeFalsy();
       expect(
         wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
-      ).toBeTruthy()
-    );
+      ).toBeTruthy();
+    });
   });
 });

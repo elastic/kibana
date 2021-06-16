@@ -104,7 +104,7 @@ describe('AddComment ', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps }} />
+          <AddComment {...addCommentProps} />
         </Router>
       </TestProviders>
     );
@@ -124,7 +124,7 @@ describe('AddComment ', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="sadd-comment"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeFalsy();
   });
 
   it('should insert a quote', async () => {
@@ -133,7 +133,7 @@ describe('AddComment ', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps }} ref={ref} />
+          <AddComment {...addCommentProps} ref={ref} />
         </Router>
       </TestProviders>
     );
@@ -166,7 +166,7 @@ describe('AddComment ', () => {
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
           <Router history={mockHistory}>
-            <AddComment {...{ ...addCommentProps }} />
+            <AddComment {...addCommentProps} />
           </Router>
         </CasesTimelineIntegrationProvider>
       </TestProviders>

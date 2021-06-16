@@ -205,6 +205,18 @@ export const EditConnector = React.memo(
       });
     }, [dispatch]);
 
+    /**
+     * if this evaluates to true it means that the connector was likely deleted because the case connector was set to something
+     * other than none but we don't find it in the list of connectors returned from the actions plugin
+     */
+    const connectorFromCaseMissing = currentConnector == null && selectedConnector !== 'none';
+
+    /**
+     * True if the chosen connector from the form was the "none" connector or no connector was in the case. The
+     * currentConnector will be null initially and after the form initializes if the case connector is "none"
+     */
+    const connectorUndefinedOrNone = currentConnector == null || currentConnector?.id === 'none';
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -254,10 +266,11 @@ export const EditConnector = React.memo(
                 <span>{permissionsError}</span>
               </EuiText>
             ) : (
+              // if we're not editing the connectors and the connector specified in the case was found and the connector
+              // is undefined or explicitly set to none
               !editConnector &&
-              (currentConnector == null ||
-                currentConnector?.id === 'none' ||
-                selectedConnector === 'none') && ( // Connector is none or not defined, or the selected connector is none
+              !connectorFromCaseMissing &&
+              connectorUndefinedOrNone && (
                 <EuiText data-test-subj="edit-connector-no-connectors-msg" size="s">
                   <span>{i18n.NO_CONNECTOR}</span>
                 </EuiText>

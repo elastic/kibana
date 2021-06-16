@@ -11,25 +11,23 @@ import { AllCases } from '../../components/app/cases/all_cases';
 import * as i18n from '../../components/app/cases/translations';
 
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
-import { HeaderBadge } from './header_badge';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 
 export const AllCasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
+  useReadonlyHeader();
 
   return userPermissions == null || userPermissions?.read ? (
-    <>
-      <HeaderBadge />
-      <ObservabilityPageTemplate
-        pageHeader={{
-          pageTitle: <>{i18n.PAGE_TITLE}</>,
-        }}
-      >
-        <AllCases userCanCrud={userPermissions?.crud ?? false} />
-      </ObservabilityPageTemplate>
-    </>
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: <>{i18n.PAGE_TITLE}</>,
+      }}
+    >
+      <AllCases userCanCrud={userPermissions?.crud ?? false} />
+    </ObservabilityPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />
   );

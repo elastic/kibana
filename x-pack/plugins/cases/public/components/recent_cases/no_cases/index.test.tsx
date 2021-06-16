@@ -16,7 +16,7 @@ describe('RecentCases', () => {
     const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>
-        <NoCases createCaseHref={createCaseHref} hasWritePermissions={true} />
+        <NoCases createCaseHref={createCaseHref} hasWritePermissions />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(

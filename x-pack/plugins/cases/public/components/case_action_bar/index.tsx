@@ -40,7 +40,7 @@ interface CaseActionBarProps {
   allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  userCanCrud?: boolean;
+  userCanCrud: boolean;
   disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
@@ -51,7 +51,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   currentExternalIncident,
   disableAlerting,
-  userCanCrud = true,
+  userCanCrud,
   isLoading,
   onRefresh,
   onUpdateField,
