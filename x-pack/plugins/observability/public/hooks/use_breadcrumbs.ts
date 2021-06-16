@@ -45,26 +45,22 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   } = useKibana();
   const setTitle = docTitle.change;
   const appPath = getUrlForApp('observability-overview') ?? '';
-  const navigate = navigateToUrl;
 
   useEffect(() => {
-    const breadcrumbs = addClickHandlers(
-      [
-        {
-          text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
-            defaultMessage: 'Observability',
-          }),
-          href: appPath + '/overview',
-        },
-        ...extraCrumbs,
-      ],
-      navigate
-    );
+    const breadcrumbs = [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
+          defaultMessage: 'Observability',
+        }),
+        href: appPath + '/overview',
+      },
+      ...extraCrumbs,
+    ];
     if (setBreadcrumbs) {
-      setBreadcrumbs(addClickHandlers(breadcrumbs, navigate));
+      setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
     }
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [appPath, extraCrumbs, navigate, params, setBreadcrumbs, setTitle]);
+  }, [appPath, extraCrumbs, navigateToUrl, params, setBreadcrumbs, setTitle]);
 };
