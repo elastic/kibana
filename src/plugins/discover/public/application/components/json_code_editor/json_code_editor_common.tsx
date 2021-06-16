@@ -52,7 +52,7 @@ export const JsonCodeEditorCommon = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           width={width}
-          value={jsonValue}
+          value={jsonValue || ''}
           onChange={() => {}}
           editorDidMount={onEditorDidMount}
           aria-label={codeEditorAriaLabel}
