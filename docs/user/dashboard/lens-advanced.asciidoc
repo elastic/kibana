@@ -299,7 +299,14 @@ image::images/lens_advanced_5_2.png[Line chart with cumulative sum of orders mad
 [[compare-time-ranges]]
 === Compare time ranges
 
-*Lens* allows you to shift individual dimensions in time to compare the currently selected time range with historical data. 
+*Lens* allows you to compare the currently selected time range with historical data using the *Time shift* option.
+
+Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one, spanning the same duration.
+For example, if *Last 7 days* is selected in the time filter, *previous* will show data from 14 days ago to 7 days ago.
+
+If multiple time shifts are used in a single chart, a multiple of the date histogram interval should be chosen - otherwise data points might not line up in the chart and empty spots can occur.
+For example, if a daily interval is used, shifting one series by *36h*, and another one by *1d*, is not recommended. In this scenario, either reduce the interval to *12h*, or create two separate charts.
+
 To compare current sales numbers with sales from a week ago, follow these steps: 
 
 . Open *Lens*.
@@ -318,14 +325,10 @@ To compare current sales numbers with sales from a week ago, follow these steps:
 
 .. Click *Time shift*
 
+.. Click the *1 week* option. You can also define custom shifts by typing amount followed by time unit (like *1w* for a one week shift), then hit enter.
+
 [role="screenshot"]
 image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
-
-Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one, spanning the same duration.
-For example if *Last 7 days* is selected in the time picker in the top right, *previous* will show data from 14 days ago to 7 days ago.
-
-If multiple time shifts are used in a single chart, a multiple of the date histogram interval should be chosen - otherwise data points might not line up in the chart and empty spots can occur.
-For example if a daily interval is used, shifting one series by *36h* and another one by *1d* is not recommended. In this scenario either reduce the interval to *12h* or create two separate charts.  
 
 [discrete]
 [[view-customers-over-time-by-continents]]
