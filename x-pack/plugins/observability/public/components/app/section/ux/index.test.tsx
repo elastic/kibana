@@ -31,7 +31,8 @@ describe('UXSection', () => {
       hasDataMap: {
         ux: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: { hasData: true, serviceName: 'elastic-co-frontend' },
+          hasData: true,
+          serviceName: 'elastic-co-frontend',
         },
       },
     } as HasDataContextValue);
