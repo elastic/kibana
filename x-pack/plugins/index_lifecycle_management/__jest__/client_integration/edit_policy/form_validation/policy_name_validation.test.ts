@@ -8,12 +8,12 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import { getGeneratedPolicies } from '../constants';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> policy name validation', () => {
-  let testBed: EditPolicyTestBed;
-  let actions: EditPolicyTestBed['actions'];
+  let testBed: ValidationTestBed;
+  let actions: ValidationTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -29,7 +29,7 @@ describe('<EditPolicy /> policy name validation', () => {
     httpRequestsMockHelpers.setLoadPolicies(getGeneratedPolicies());
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component } = testBed;
@@ -56,7 +56,7 @@ describe('<EditPolicy /> policy name validation', () => {
 
   test(`doesn't allow to save as new policy but using the same name`, async () => {
     await act(async () => {
-      testBed = await setup({
+      testBed = await setupValidationTestBed({
         testBedConfig: {
           memoryRouter: {
             initialEntries: [`/policies/edit/testy0`],
