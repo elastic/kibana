@@ -218,3 +218,72 @@ export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.
 export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.downPings', {
   defaultMessage: 'Down Pings',
 });
+
+export const CARRIER_NAME = i18n.translate('xpack.observability.expView.fieldLabels.carrierName', {
+  defaultMessage: 'Carrier Name',
+});
+
+export const REQUEST_METHOD = i18n.translate(
+  'xpack.observability.expView.fieldLabels.requestMethod',
+  {
+    defaultMessage: 'Request Method',
+  }
+);
+
+export const CONNECTION_TYPE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.connectionType',
+  {
+    defaultMessage: 'Connection Type',
+  }
+);
+export const HOST_OS = i18n.translate('xpack.observability.expView.fieldLabels.hostOS', {
+  defaultMessage: 'Host OS',
+});
+
+export const SERVICE_VERSION = i18n.translate(
+  'xpack.observability.expView.fieldLabels.serviceVersion',
+  {
+    defaultMessage: 'Service Version',
+  }
+);
+
+export const OS_PLATFORM = i18n.translate('xpack.observability.expView.fieldLabels.osPlatform', {
+  defaultMessage: 'OS Platform',
+});
+
+export const DEVICE_MODEL = i18n.translate('xpack.observability.expView.fieldLabels.deviceModel', {
+  defaultMessage: 'Device Model',
+});
+
+export const CARRIER_LOCATION = i18n.translate(
+  'xpack.observability.expView.fieldLabels.carrierLocation',
+  {
+    defaultMessage: 'Carrier Location',
+  }
+);
+
+export const RESPONSE_LATENCY = i18n.translate(
+  'xpack.observability.expView.fieldLabels.responseLatency',
+  {
+    defaultMessage: 'Response latency',
+  }
+);
+
+export const MOBILE_APP = i18n.translate('xpack.observability.expView.fieldLabels.mobileApp', {
+  defaultMessage: 'Mobile App',
+});
+
+export const MEMORY_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.memoryUsage', {
+  defaultMessage: 'Memory Usage',
+});
+
+export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
+  defaultMessage: 'CPU Usage',
+});
+
+export const TRANSACTION_PER_MINUTE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.transactionPerMinute',
+  {
+    defaultMessage: 'Transactions per minute',
+  }
+);

@@ -15,6 +15,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
+import {
+  CPU_USAGE,
+  MEMORY_USAGE,
+  MOBILE_APP,
+  RESPONSE_LATENCY,
+  TRANSACTION_PER_MINUTE,
+} from '../constants/labels';
 
 export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
@@ -53,10 +60,10 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
     ],
     labels: {
       ...FieldLabels,
-      [TRANSACTION_DURATION]: 'Response latency',
-      [SERVICE_NAME]: 'Mobile app',
-      [METRIC_SYSTEM_MEMORY_USAGE]: 'Memory usage',
-      [METRIC_SYSTEM_CPU_USAGE]: 'CPU usage',
+      [TRANSACTION_DURATION]: RESPONSE_LATENCY,
+      [SERVICE_NAME]: MOBILE_APP,
+      [METRIC_SYSTEM_MEMORY_USAGE]: MEMORY_USAGE,
+      [METRIC_SYSTEM_CPU_USAGE]: CPU_USAGE,
     },
     reportDefinitions: [
       {
@@ -72,19 +79,19 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
         custom: true,
         options: [
           {
-            label: 'Response latency',
+            label: RESPONSE_LATENCY,
             field: TRANSACTION_DURATION,
             id: TRANSACTION_DURATION,
             columnType: OPERATION_COLUMN,
           },
           {
-            label: 'Memory Usage',
+            label: MEMORY_USAGE,
             field: METRIC_SYSTEM_MEMORY_USAGE,
             id: METRIC_SYSTEM_MEMORY_USAGE,
             columnType: OPERATION_COLUMN,
           },
           {
-            label: 'CPU Usage',
+            label: CPU_USAGE,
             field: METRIC_SYSTEM_CPU_USAGE,
             id: METRIC_SYSTEM_CPU_USAGE,
             columnType: OPERATION_COLUMN,
@@ -92,7 +99,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
           {
             field: RECORDS_FIELD,
             id: RECORDS_FIELD,
-            label: 'Transactions per minute',
+            label: TRANSACTION_PER_MINUTE,
             columnFilters: [
               {
                 language: 'kuery',

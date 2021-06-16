@@ -15,6 +15,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
+import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
@@ -53,7 +54,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
     ],
     labels: {
       ...FieldLabels,
-      [SERVICE_NAME]: 'Mobile app',
+      [SERVICE_NAME]: MOBILE_APP,
     },
     reportDefinitions: [
       {
@@ -69,19 +70,19 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
         custom: true,
         options: [
           {
-            label: 'Response latency',
+            label: RESPONSE_LATENCY,
             field: TRANSACTION_DURATION,
             id: TRANSACTION_DURATION,
             columnType: OPERATION_COLUMN,
           },
           {
-            label: 'Memory Usage',
+            label: MEMORY_USAGE,
             field: METRIC_SYSTEM_MEMORY_USAGE,
             id: METRIC_SYSTEM_MEMORY_USAGE,
             columnType: OPERATION_COLUMN,
           },
           {
-            label: 'CPU Usage',
+            label: CPU_USAGE,
             field: METRIC_SYSTEM_CPU_USAGE,
             id: METRIC_SYSTEM_CPU_USAGE,
             columnType: OPERATION_COLUMN,
