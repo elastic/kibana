@@ -20,8 +20,8 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
 
   cy.get(`.euiPopover__panel-isOpen`, DEFAULT_TIMEOUT).within(() => {
     if (filterName === 'OS') {
-      const osItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(0);
-      osItem.should('have.text', 'Mac OS X ');
+      const osItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(2);
+      osItem.should('have.text', 'Mac OS X24 ');
       osItem.click();
 
       // sometimes click doesn't work as expected so we need to retry here
@@ -32,7 +32,7 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
       });
     } else {
       const deItem = cy.get('li.euiSelectableListItem', DEFAULT_TIMEOUT).eq(0);
-      deItem.should('have.text', 'DE ');
+      deItem.should('have.text', 'DE84 ');
       deItem.click();
 
       // sometimes click doesn't work as expected so we need to retry here
