@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
-  describe('lens formula', () => {
+  describe.only('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
