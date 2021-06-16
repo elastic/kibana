@@ -20,6 +20,9 @@ import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
 import './timechart_header.scss';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { SavedSearchDataSubject } from '../../services/use_saved_search';
+import { FetchStatus } from '../../../../types';
+import { Chart } from '../chart/point_series';
 
 export interface TimechartBucketInterval {
   scaled?: boolean;
@@ -49,17 +52,38 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval: string;
+
+  savedSearchData$: SavedSearchDataSubject;
+}
+
+interface ChartDataState {
+  fetchStatus: FetchStatus;
+  result?: Chart;
+  error?: Error;
+  bucketInterval?: TimechartBucketInterval;
 }
 
 export function TimechartHeader({
-  bucketInterval,
   dateFormat,
-  data,
+  data: dataPluginStart,
   options,
   onChangeInterval,
   stateInterval,
+  savedSearchData$,
 }: TimechartHeaderProps) {
-  const { timefilter } = data.query.timefilter;
+  const { timefilter } = dataPluginStart.query.timefilter;
+  const [data, setData] = useState<ChartDataState>({
+    fetchStatus: FetchStatus.LOADING,
+  });
+  useEffect(() => {
+    const subscription = savedSearchData$.subscribe((res) => {
+      if (res.chart && res.chart.fetchStatus !== data.fetchStatus) {
+        setData({ ...data, ...res.chart });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [data, savedSearchData$]);
+  const { bucketInterval } = data;
   const { from, to } = timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from),

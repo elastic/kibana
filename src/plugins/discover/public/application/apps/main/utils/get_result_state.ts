@@ -27,5 +27,6 @@ export function getResultState(fetchStatus: FetchStatus, rows: ElasticSearchHit[
   const rowsEmpty = !Array.isArray(rows) || rows.length === 0;
   if (rowsEmpty && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
   else if (!rowsEmpty) return resultStatuses.READY;
+  else if (fetchStatus === FetchStatus.PARTIAL) return resultStatuses.READY;
   else return resultStatuses.NO_RESULTS;
 }

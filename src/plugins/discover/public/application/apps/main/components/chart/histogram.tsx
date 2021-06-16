@@ -5,28 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   Axis,
+  BrushEndListener,
   Chart,
+  ElementClickListener,
   HistogramBarSeries,
   Position,
   ScaleType,
   Settings,
-  TooltipType,
-  ElementClickListener,
-  XYChartElementEvent,
-  BrushEndListener,
   Theme,
+  TooltipType,
+  XYChartElementEvent,
 } from '@elastic/charts';
 
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
-import { Subscription, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { getServices } from '../../../../../kibana_services';
 import { Chart as IChart } from './point_series';
 import {
@@ -35,15 +36,22 @@ import {
   getAdjustedInterval,
   renderEndzoneTooltip,
 } from '../../../../../../../charts/public';
+import { SavedSearchDataSubject } from '../../services/use_saved_search';
+import { FetchStatus } from '../../../../types';
+import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 
 export interface DiscoverHistogramProps {
-  chartData: IChart;
+  savedSearchData$: SavedSearchDataSubject;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
 interface DiscoverHistogramState {
   chartsTheme: EuiChartThemeType['theme'];
   chartsBaseTheme: Theme;
+  chartData?: IChart;
+  fetchStatus: FetchStatus;
+  error?: Error;
+  bucketInterval?: TimechartBucketInterval;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -56,154 +64,184 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
-export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
-  public static propTypes = {
-    chartData: PropTypes.object,
-    timefilterUpdateHandler: PropTypes.func,
-  };
-
-  private subscription?: Subscription;
-  public state = {
+export function DiscoverHistogram({
+  savedSearchData$,
+  timefilterUpdateHandler,
+}: DiscoverHistogramProps) {
+  const [theme, setTheme] = useState({
     chartsTheme: getServices().theme.chartsDefaultTheme,
     chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
-  };
+  });
+  const [state, setState] = useState<DiscoverHistogramState>({
+    chartsTheme: getServices().theme.chartsDefaultTheme,
+    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
+    chartData: undefined,
+    fetchStatus: FetchStatus.LOADING,
+  });
 
-  componentDidMount() {
-    this.subscription = combineLatest([
+  useEffect(() => {
+    const themeSubscription = combineLatest([
       getServices().theme.chartsTheme$,
       getServices().theme.chartsBaseTheme$,
-    ]).subscribe(([chartsTheme, chartsBaseTheme]) =>
-      this.setState({ chartsTheme, chartsBaseTheme })
+    ]).subscribe(([chartsTheme, chartsBaseTheme]) => {
+      if (chartsTheme !== theme.chartsTheme || chartsBaseTheme !== theme.chartsBaseTheme)
+        setTheme({ chartsTheme, chartsBaseTheme });
+    });
+    return () => {
+      return themeSubscription.unsubscribe();
+    };
+  }, [theme.chartsBaseTheme, theme.chartsTheme]);
+
+  useEffect(() => {
+    const dataSubscription = savedSearchData$.subscribe((res) => {
+      if (res.chart && res.chart.fetchStatus !== state.fetchStatus) {
+        const nextState = {
+          ...state,
+          chartData: res.chart.chartData,
+          fetchStatus: res.chart.fetchStatus,
+        };
+        setState(nextState);
+      }
+    });
+
+    return () => {
+      dataSubscription.unsubscribe();
+    };
+  }, [savedSearchData$, state]);
+
+  const uiSettings = getServices().uiSettings;
+  const timeZone = getTimezone(uiSettings);
+  const { chartData, fetchStatus } = state;
+
+  const onBrushEnd: BrushEndListener = useCallback(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [from, to] = x;
+      timefilterUpdateHandler({ from, to });
+    },
+    [timefilterUpdateHandler]
+  );
+
+  const onElementClick = useCallback(
+    (xInterval: number): ElementClickListener => ([elementData]) => {
+      const startRange = (elementData as XYChartElementEvent)[0].x;
+
+      const range = {
+        from: startRange,
+        to: startRange + xInterval,
+      };
+
+      timefilterUpdateHandler(range);
+    },
+    [timefilterUpdateHandler]
+  );
+
+  if (!chartData && fetchStatus === FetchStatus.LOADING) {
+    return (
+      <div className="dscChart__loading">
+        <EuiText size="xs" color="subdued">
+          <EuiLoadingSpinner />
+          <EuiSpacer size="s" />
+          <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading results" />
+        </EuiText>
+      </div>
     );
   }
 
-  componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+  if (!chartData) {
+    return null;
   }
 
-  public onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [from, to] = x;
-    this.props.timefilterUpdateHandler({ from, to });
-  };
-
-  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
-    const startRange = (elementData as XYChartElementEvent)[0].x;
-
-    const range = {
-      from: startRange,
-      to: startRange + xInterval,
-    };
-
-    this.props.timefilterUpdateHandler(range);
-  };
-
-  public formatXValue = (val: string) => {
-    const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
-
+  const formatXValue = (val: string) => {
+    const xAxisFormat = chartData!.xAxisFormat.params!.pattern;
     return moment(val).format(xAxisFormat);
   };
 
-  public render() {
-    const uiSettings = getServices().uiSettings;
-    const timeZone = getTimezone(uiSettings);
-    const { chartData } = this.props;
-    const { chartsTheme, chartsBaseTheme } = this.state;
+  const data = chartData!.values;
+  const isDarkMode = uiSettings.get('theme:darkMode');
 
-    if (!chartData) {
-      return null;
-    }
+  /*
+   * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
+   * see https://github.com/elastic/kibana/issues/27410
+   * TODO: Once the Discover query has been update, we should change the below to use the new field
+   */
+  const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
+  const xInterval = interval.asMilliseconds();
 
-    const data = chartData.values;
-    const isDarkMode = uiSettings.get('theme:darkMode');
+  const xValues = chartData!.xAxisOrderedValues;
+  const lastXValue = xValues[xValues.length - 1];
 
-    /*
-     * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
-     * see https://github.com/elastic/kibana/issues/27410
-     * TODO: Once the Discover query has been update, we should change the below to use the new field
-     */
-    const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
-    const xInterval = interval.asMilliseconds();
+  const domain = chartData!.ordered;
+  const domainStart = domain.min.valueOf();
+  const domainEnd = domain.max.valueOf();
 
-    const xValues = chartData.xAxisOrderedValues;
-    const lastXValue = xValues[xValues.length - 1];
+  const domainMin = Math.min(data[0]?.x, domainStart);
+  const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
-    const domain = chartData.ordered;
-    const domainStart = domain.min.valueOf();
-    const domainEnd = domain.max.valueOf();
+  const xDomain = {
+    min: domainMin,
+    max: domainMax,
+    minInterval: getAdjustedInterval(
+      xValues,
+      intervalESValue,
+      intervalESUnit as unitOfTime.Base,
+      timeZone
+    ),
+  };
+  const tooltipProps = {
+    headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, formatXValue),
+    type: TooltipType.VerticalCursor,
+  };
 
-    const domainMin = Math.min(data[0]?.x, domainStart);
-    const domainMax = Math.max(domainEnd - xInterval, lastXValue);
+  const xAxisFormatter = getServices().data.fieldFormats.deserialize(chartData!.yAxisFormat);
 
-    const xDomain = {
-      min: domainMin,
-      max: domainMax,
-      minInterval: getAdjustedInterval(
-        xValues,
-        intervalESValue,
-        intervalESUnit as unitOfTime.Base,
-        timeZone
-      ),
-    };
-    const tooltipProps = {
-      headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, this.formatXValue),
-      type: TooltipType.VerticalCursor,
-    };
-
-    const xAxisFormatter = getServices().data.fieldFormats.deserialize(
-      this.props.chartData.yAxisFormat
-    );
-
-    return (
-      <Chart size="100%">
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={this.onBrushEnd}
-          onElementClick={this.onElementClick(xInterval)}
-          tooltip={tooltipProps}
-          theme={chartsTheme}
-          baseTheme={chartsBaseTheme}
-        />
-        <Axis
-          id="discover-histogram-left-axis"
-          position={Position.Left}
-          ticks={5}
-          title={chartData.yAxisLabel}
-          integersOnly
-          tickFormat={(value) => xAxisFormatter.convert(value)}
-        />
-        <Axis
-          id="discover-histogram-bottom-axis"
-          position={Position.Bottom}
-          title={chartData.xAxisLabel}
-          tickFormat={this.formatXValue}
-          ticks={10}
-        />
-        <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
-        <Endzones
-          isDarkMode={isDarkMode}
-          domainStart={domainStart}
-          domainEnd={domainEnd}
-          interval={xDomain.minInterval}
-          domainMin={xDomain.min}
-          domainMax={xDomain.max}
-        />
-        <HistogramBarSeries
-          id="discover-histogram"
-          minBarHeight={2}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data}
-          timeZone={timeZone}
-          name={chartData.yAxisLabel}
-        />
-      </Chart>
-    );
-  }
+  return (
+    <Chart size="100%">
+      <Settings
+        xDomain={xDomain}
+        onBrushEnd={onBrushEnd}
+        onElementClick={onElementClick(xInterval)}
+        tooltip={tooltipProps}
+        theme={theme.chartsTheme}
+        baseTheme={theme.chartsBaseTheme}
+      />
+      <Axis
+        id="discover-histogram-left-axis"
+        position={Position.Left}
+        ticks={5}
+        title={chartData!.yAxisLabel}
+        integersOnly
+        tickFormat={(value) => xAxisFormatter.convert(value)}
+      />
+      <Axis
+        id="discover-histogram-bottom-axis"
+        position={Position.Bottom}
+        title={chartData!.xAxisLabel}
+        tickFormat={formatXValue}
+        ticks={10}
+      />
+      <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
+      <Endzones
+        isDarkMode={isDarkMode}
+        domainStart={domainStart}
+        domainEnd={domainEnd}
+        interval={xDomain.minInterval}
+        domainMin={xDomain.min}
+        domainMax={xDomain.max}
+      />
+      <HistogramBarSeries
+        id="discover-histogram"
+        minBarHeight={2}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={data}
+        timeZone={timeZone}
+        name={chartData!.yAxisLabel}
+      />
+    </Chart>
+  );
 }

@@ -7,6 +7,9 @@
  */
 import './discover_layout.scss';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
 import {
   EuiSpacer,
   EuiButtonIcon,
@@ -59,10 +62,14 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 
 interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
-  state: FetchStatus;
+  fetchStatus: FetchStatus;
   fetchCounter: number;
   fieldCounts: Record<string, number>;
-  rows: ElasticSearchHit[];
+  documents: {
+    fetchStatus: FetchStatus;
+    result?: ElasticSearchHit[];
+    error?: Error;
+  };
 }
 
 export function DiscoverLayout({
@@ -89,28 +96,57 @@ export function DiscoverLayout({
   const collapseIcon = useRef<HTMLButtonElement>(null);
 
   const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
-    state: savedSearchData$.getValue().state,
+    fetchStatus: savedSearchData$.getValue().fetchStatus,
     fetchCounter: 0,
     fieldCounts: {},
-    rows: [],
+    documents: {
+      fetchStatus: savedSearchData$.getValue().fetchStatus,
+    },
   });
-  const { state: fetchStatus, fetchCounter, inspectorAdapters, rows } = fetchState;
+  const { fetchStatus, fetchCounter, inspectorAdapters } = fetchState;
+  const rows = useMemo(() => fetchState.documents?.result || [], [fetchState.documents?.result]);
 
   useEffect(() => {
     const subscription = savedSearchData$.subscribe((next) => {
       if (
-        (next.state && next.state !== fetchState.state) ||
-        (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
-        (next.rows && next.rows !== fetchState.rows) ||
-        (next.chartData && next.chartData !== fetchState.chartData)
+        (next.documents || (next.fetchStatus && next.fetchStatus !== fetchState.fetchStatus)) &&
+        ((next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
+          (next.documents?.fetchStatus &&
+            next.documents.fetchStatus !== fetchState.documents?.fetchStatus))
       ) {
-        setFetchState({ ...fetchState, ...next });
+        const nextState = {
+          ...fetchState,
+          ...next,
+        };
+        if (next.documents && next.documents.result) {
+          nextState.documents = {
+            fetchStatus: next.documents?.fetchStatus || fetchState.documents?.fetchStatus,
+            result: next.documents?.result,
+          };
+        } else if (fetchState.documents.result) {
+          nextState.documents.result = fetchState.documents.result;
+        }
+        setFetchState(nextState);
       }
     });
     return () => {
       subscription.unsubscribe();
     };
   }, [savedSearchData$, fetchState]);
+
+  const savedSearchDataChart$ = useMemo(() => new BehaviorSubject(savedSearchData$.getValue()), [
+    savedSearchData$,
+  ]);
+  const savedSearchDataTotalHits$ = useMemo(
+    () => new BehaviorSubject(savedSearchData$.getValue()),
+    [savedSearchData$]
+  );
+  useEffect(() => {
+    savedSearchData$.pipe(filter((res) => Boolean(res.chart))).subscribe(savedSearchDataChart$);
+    savedSearchData$
+      .pipe(filter((res) => Boolean(res.totalHits)))
+      .subscribe(savedSearchDataTotalHits$);
+  }, [savedSearchData$, savedSearchDataChart$, savedSearchDataTotalHits$]);
 
   // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
   const isMobile = () => collapseIcon && !collapseIcon.current;
@@ -291,7 +327,7 @@ export function DiscoverLayout({
                     timeFieldName={timeField}
                     queryLanguage={state.query?.language ?? ''}
                     data={data}
-                    error={fetchState.fetchError}
+                    error={fetchState.error}
                   />
                 )}
                 {resultState === 'uninitialized' && (
@@ -309,15 +345,14 @@ export function DiscoverLayout({
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
                         config={uiSettings}
-                        chartData={fetchState.chartData}
-                        bucketInterval={fetchState.bucketInterval}
                         data={data}
-                        hits={fetchState.hits}
                         indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
                         resetQuery={resetQuery}
                         savedSearch={savedSearch}
+                        savedSearchDataChart$={savedSearchDataChart$}
+                        savedSearchDataTotalHits$={savedSearchDataTotalHits$}
                         stateContainer={stateContainer}
                         timefield={timeField}
                       />
@@ -355,14 +390,17 @@ export function DiscoverLayout({
                             useNewFieldsApi={useNewFieldsApi}
                           />
                         )}
-                        {!isLegacy && rows && rows.length && (
+                        {!isLegacy && (
                           <div className="dscDiscoverGrid">
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
-                              isLoading={fetchStatus === 'loading'}
+                              isLoading={
+                                fetchStatus === FetchStatus.LOADING ||
+                                fetchStatus === FetchStatus.PARTIAL
+                              }
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={sampleSize}

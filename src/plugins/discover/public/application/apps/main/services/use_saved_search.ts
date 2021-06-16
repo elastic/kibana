@@ -5,31 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { merge, Subject, BehaviorSubject } from 'rxjs';
-import { debounceTime, tap, filter } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, merge, of, Subject } from 'rxjs';
+import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import {
-  IndexPattern,
-  isCompleteResponse,
-  SearchSource,
-  tabifyAggResponse,
-} from '../../../../../../data/common';
+import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../../../data/common';
 import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
-import { AutoRefreshDoneFn, search } from '../../../../../../data/public';
+import { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { updateSearchSource } from '../utils/update_search_source';
 import { SortOrder } from '../../../../saved_searches/types';
-import { getDimensions, getChartAggConfigs } from '../utils';
-import { buildPointSeriesData, Chart } from '../components/chart/point_series';
+import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
+import { fetchTotalHits } from './fetch_total_hits';
+import { fetchChart } from './fetch_chart';
 
 export type SavedSearchDataSubject = BehaviorSubject<SavedSearchDataMessage>;
 export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
@@ -43,15 +39,27 @@ export interface UseSavedSearch {
 export type SavedSearchRefetchMsg = 'reset' | undefined;
 
 export interface SavedSearchDataMessage {
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: Chart;
+  error?: Error;
   fetchCounter?: number;
-  fetchError?: Error;
   fieldCounts?: Record<string, number>;
-  hits?: number;
   inspectorAdapters?: { requests: RequestAdapter };
-  rows?: ElasticSearchHit[];
-  state: FetchStatus;
+  fetchStatus: FetchStatus;
+  totalHits?: {
+    fetchStatus: FetchStatus;
+    result?: number;
+    error?: Error;
+  };
+  documents?: {
+    fetchStatus: FetchStatus;
+    result?: ElasticSearchHit[];
+    error?: Error;
+  };
+  chart?: {
+    fetchStatus: FetchStatus;
+    chartData?: Chart;
+    error?: Error;
+    bucketInterval?: TimechartBucketInterval;
+  };
 }
 
 /**
@@ -85,7 +93,7 @@ export const useSavedSearch = ({
   const data$: SavedSearchDataSubject = useSingleton(
     () =>
       new BehaviorSubject<SavedSearchDataMessage>({
-        state: initialFetchStatus,
+        fetchStatus: initialFetchStatus,
       })
   );
   /**
@@ -135,12 +143,9 @@ export const useSavedSearch = ({
       refs.current.fieldCounts = {};
       refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
       data$.next({
-        state: initialFetchStatus,
+        fetchStatus: initialFetchStatus,
         fetchCounter: 0,
-        rows: [],
         fieldCounts: {},
-        chartData: undefined,
-        bucketInterval: undefined,
       });
     },
     [data$, initialFetchStatus]
@@ -164,29 +169,83 @@ export const useSavedSearch = ({
       } else {
         // Let the UI know, data fetching started
         data$.next({
-          state: FetchStatus.LOADING,
+          fetchStatus: FetchStatus.LOADING,
           fetchCounter: ++refs.current.fetchCounter,
+          documents: {
+            fetchStatus: FetchStatus.LOADING,
+          },
         });
+
+        data$.next({
+          fetchStatus: FetchStatus.LOADING,
+          fetchCounter: ++refs.current.fetchCounter,
+          totalHits: {
+            fetchStatus: FetchStatus.LOADING,
+          },
+        });
+
+        data$.next({
+          fetchStatus: FetchStatus.LOADING,
+          fetchCounter: ++refs.current.fetchCounter,
+          chart: {
+            fetchStatus: FetchStatus.LOADING,
+          },
+        });
+
         refs.current.fetchStatus = FetchStatus.LOADING;
       }
 
       const { sort, hideChart, interval } = stateContainer.appStateContainer.getState();
+
+      const fetchAndSubscribeChart = () => {
+        const chartDataFetch$ = fetchChart({
+          searchSource: searchSource.getParent()!,
+          data,
+          abortController: refs.current.abortController!,
+          searchSessionId: sessionId,
+          inspectorAdapters,
+          interval: interval ?? 'auto',
+        });
+
+        chartDataFetch$.subscribe((res) => {
+          if (res) {
+            data$.next({
+              fetchStatus: FetchStatus.PARTIAL,
+              chart: {
+                fetchStatus: FetchStatus.COMPLETE,
+                chartData: res.chartData,
+                bucketInterval: res.bucketInterval,
+              },
+            });
+          }
+        });
+        return chartDataFetch$;
+      };
+
+      const totalHitsFetch$ = fetchTotalHits({
+        searchSource: searchSource.getParent()!,
+        data,
+        abortController: refs.current.abortController,
+        searchSessionId: sessionId,
+        inspectorAdapters,
+      });
+      totalHitsFetch$.pipe(filter((res) => isCompleteResponse(res))).subscribe((res) => {
+        const totalHitsNr = res.rawResponse.hits.total as number;
+        data$.next({
+          fetchStatus: totalHitsNr > 0 ? FetchStatus.PARTIAL : FetchStatus.COMPLETE,
+          totalHits: {
+            fetchStatus: FetchStatus.COMPLETE,
+            result: totalHitsNr,
+          },
+        });
+      });
+
       updateSearchSource(searchSource, false, {
         indexPattern,
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
       });
-      const chartAggConfigs =
-        indexPattern.timeFieldName && !hideChart && interval
-          ? getChartAggConfigs(searchSource, interval, data)
-          : undefined;
-
-      if (!chartAggConfigs) {
-        searchSource.removeField('aggs');
-      } else {
-        searchSource.setField('aggs', chartAggConfigs.toDsl());
-      }
 
       const searchSourceFetch$ = searchSource.fetch$({
         abortSignal: refs.current.abortController.signal,
@@ -202,41 +261,40 @@ export const useSavedSearch = ({
         },
       });
 
-      searchSourceFetch$.pipe(filter((res) => isCompleteResponse(res))).subscribe(
-        (res) => {
-          const documents = res.rawResponse.hits.hits;
+      searchSourceFetch$.subscribe((res) => {
+        const documents = res.rawResponse.hits.hits;
 
-          const message: SavedSearchDataMessage = {
-            state: FetchStatus.COMPLETE,
-            rows: documents,
-            inspectorAdapters,
-            fieldCounts: calcFieldCounts(refs.current.fieldCounts, documents, indexPattern),
-            hits: res.rawResponse.hits.total as number,
-          };
+        const message: SavedSearchDataMessage = {
+          fetchStatus: FetchStatus.PARTIAL,
+          documents: {
+            fetchStatus: FetchStatus.COMPLETE,
+            result: documents,
+          },
+          inspectorAdapters,
+          fieldCounts: calcFieldCounts(refs.current.fieldCounts, documents, indexPattern),
+        };
 
-          if (chartAggConfigs) {
-            const bucketAggConfig = chartAggConfigs.aggs[1];
-            const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
-            const dimensions = getDimensions(chartAggConfigs, data);
-            if (dimensions) {
-              if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
-                message.bucketInterval = bucketAggConfig.buckets?.getInterval();
-              }
-              message.chartData = buildPointSeriesData(tabifiedData, dimensions);
-            }
-          }
-          refs.current.fieldCounts = message.fieldCounts!;
-          refs.current.fetchStatus = message.state;
-          data$.next(message);
+        refs.current.fieldCounts = message.fieldCounts!;
+        refs.current.fetchStatus = message.fetchStatus;
+        data$.next(message);
+      });
+
+      forkJoin({
+        totalHits: totalHitsFetch$,
+        documents: searchSourceFetch$,
+        chart: !hideChart && indexPattern.timeFieldName ? fetchAndSubscribeChart() : of(null),
+      }).subscribe(
+        () => {
+          data$.next({ fetchStatus: FetchStatus.COMPLETE });
         },
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
           data.search.showError(error);
           refs.current.fetchStatus = FetchStatus.ERROR;
           data$.next({
-            state: FetchStatus.ERROR,
+            fetchStatus: FetchStatus.ERROR,
             inspectorAdapters,
-            fetchError: error,
+            error,
           });
         },
         () => {

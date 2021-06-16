@@ -18,6 +18,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
+import { SavedSearchDataSubject } from '../../services/use_saved_search';
 
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
@@ -25,11 +26,11 @@ export function DiscoverChart({
   config,
   data,
   bucketInterval,
-  chartData,
-  hits,
   isLegacy,
   resetQuery,
   savedSearch,
+  savedSearchDataChart$,
+  savedSearchDataTotalHits$,
   state,
   stateContainer,
   timefield,
@@ -38,11 +39,12 @@ export function DiscoverChart({
   data: DataPublicPluginStart;
   bucketInterval?: TimechartBucketInterval;
   chartData?: IChart;
-  hits?: number;
   indexPattern: IndexPattern;
   isLegacy: boolean;
   resetQuery: () => void;
   savedSearch: SavedSearch;
+  savedSearchDataChart$: SavedSearchDataSubject;
+  savedSearchDataTotalHits$: SavedSearchDataSubject;
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
@@ -80,7 +82,7 @@ export function DiscoverChart({
             className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
-              hits={hits}
+              savedSearchData$={savedSearchDataTotalHits$}
               showResetButton={!!(savedSearch && savedSearch.id)}
               onResetQuery={resetQuery}
             />
@@ -93,6 +95,7 @@ export function DiscoverChart({
                 options={search.aggs.intervalOptions}
                 onChangeInterval={onChangeInterval}
                 stateInterval={state.interval || ''}
+                savedSearchData$={savedSearchDataChart$}
                 bucketInterval={bucketInterval}
               />
             </EuiFlexItem>
@@ -119,7 +122,7 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!state.hideChart && chartData && (
+      {!state.hideChart && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
@@ -132,7 +135,7 @@ export function DiscoverChart({
               data-test-subj="discoverChart"
             >
               <DiscoverHistogramMemoized
-                chartData={chartData}
+                savedSearchData$={savedSearchDataChart$}
                 timefilterUpdateHandler={timefilterUpdateHandler}
               />
             </div>
