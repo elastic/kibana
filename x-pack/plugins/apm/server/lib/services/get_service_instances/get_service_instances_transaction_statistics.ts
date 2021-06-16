@@ -26,7 +26,6 @@ import {
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
 import { Setup } from '../../helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -77,126 +76,124 @@ export async function getServiceInstancesTransactionStatistics<
   size?: number;
   numBuckets?: number;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
-  return withApmSpan(
-    'get_service_instances_transaction_statistics',
-    async () => {
-      const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-      const { intervalString, bucketSize } = getBucketSize({
-        start,
-        end,
-        numBuckets,
-      });
+  const { intervalString, bucketSize } = getBucketSize({
+    start,
+    end,
+    numBuckets,
+  });
 
-      const field = getTransactionDurationFieldForAggregatedTransactions(
-        searchAggregatedTransactions
-      );
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
-      const subAggs = {
-        ...getLatencyAggregation(latencyAggregationType, field),
-        failures: {
-          filter: {
-            term: {
-              [EVENT_OUTCOME]: EventOutcome.failure,
+  const subAggs = {
+    ...getLatencyAggregation(latencyAggregationType, field),
+    failures: {
+      filter: {
+        term: {
+          [EVENT_OUTCOME]: EventOutcome.failure,
+        },
+      },
+    },
+  };
+
+  const query = {
+    bool: {
+      filter: [
+        { term: { [SERVICE_NAME]: serviceName } },
+        { term: { [TRANSACTION_TYPE]: transactionType } },
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...kqlQuery(kuery),
+        ...(isComparisonSearch && serviceNodeIds
+          ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
+          : []),
+      ],
+    },
+  };
+
+  const aggs = {
+    [SERVICE_NODE_NAME]: {
+      terms: {
+        field: SERVICE_NODE_NAME,
+        missing: SERVICE_NODE_NAME_MISSING,
+        ...(size ? { size } : {}),
+        ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+      },
+      aggs: isComparisonSearch
+        ? {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: { min: start, max: end },
+              },
+              aggs: subAggs,
             },
-          },
-        },
-      };
-
-      const query = {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...(isComparisonSearch && serviceNodeIds
-              ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
-              : []),
-          ],
-        },
-      };
-
-      const aggs = {
-        [SERVICE_NODE_NAME]: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            missing: SERVICE_NODE_NAME_MISSING,
-            ...(size ? { size } : {}),
-            ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
-          },
-          aggs: isComparisonSearch
-            ? {
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: { min: start, max: end },
-                  },
-                  aggs: subAggs,
-                },
-              }
-            : subAggs,
-        },
-      };
-
-      const response = await apmEventClient.search({
-        apm: {
-          events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          ],
-        },
-        body: { size: 0, query, aggs },
-      });
-
-      const bucketSizeInMinutes = bucketSize / 60;
-
-      return (
-        (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-          (serviceNodeBucket) => {
-            const { doc_count: count, key } = serviceNodeBucket;
-            const serviceNodeName = String(key);
-
-            // Timeseries is returned when isComparisonSearch is true
-            if ('timeseries' in serviceNodeBucket) {
-              const { timeseries } = serviceNodeBucket;
-              return {
-                serviceNodeName,
-                errorRate: timeseries.buckets.map((dateBucket) => ({
-                  x: dateBucket.key,
-                  y: dateBucket.failures.doc_count / dateBucket.doc_count,
-                })),
-                throughput: timeseries.buckets.map((dateBucket) => ({
-                  x: dateBucket.key,
-                  y: dateBucket.doc_count / bucketSizeInMinutes,
-                })),
-                latency: timeseries.buckets.map((dateBucket) => ({
-                  x: dateBucket.key,
-                  y: getLatencyValue({
-                    aggregation: dateBucket.latency,
-                    latencyAggregationType,
-                  }),
-                })),
-              };
-            } else {
-              const { failures, latency } = serviceNodeBucket;
-              return {
-                serviceNodeName,
-                errorRate: failures.doc_count / count,
-                latency: getLatencyValue({
-                  aggregation: latency,
-                  latencyAggregationType,
-                }),
-                throughput: calculateThroughput({ start, end, value: count }),
-              };
-            }
           }
-        ) as Array<ServiceInstanceTransactionStatistics<T>>) || []
-      );
+        : subAggs,
+    },
+  };
+
+  const response = await apmEventClient.search(
+    'get_service_instances_transaction_statistics',
+    {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
+      body: { size: 0, query, aggs },
     }
+  );
+
+  const bucketSizeInMinutes = bucketSize / 60;
+
+  return (
+    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
+      (serviceNodeBucket) => {
+        const { doc_count: count, key } = serviceNodeBucket;
+        const serviceNodeName = String(key);
+
+        // Timeseries is returned when isComparisonSearch is true
+        if ('timeseries' in serviceNodeBucket) {
+          const { timeseries } = serviceNodeBucket;
+          return {
+            serviceNodeName,
+            errorRate: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.failures.doc_count / dateBucket.doc_count,
+            })),
+            throughput: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
+            })),
+            latency: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: getLatencyValue({
+                aggregation: dateBucket.latency,
+                latencyAggregationType,
+              }),
+            })),
+          };
+        } else {
+          const { failures, latency } = serviceNodeBucket;
+          return {
+            serviceNodeName,
+            errorRate: failures.doc_count / count,
+            latency: getLatencyValue({
+              aggregation: latency,
+              latencyAggregationType,
+            }),
+            throughput: calculateThroughput({ start, end, value: count }),
+          };
+        }
+      }
+    ) as Array<ServiceInstanceTransactionStatistics<T>>) || []
   );
 }
