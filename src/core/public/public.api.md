@@ -595,6 +595,7 @@ export interface DocLinksStart {
         readonly addData: string;
         readonly kibana: string;
         readonly upgradeAssistant: string;
+        readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
