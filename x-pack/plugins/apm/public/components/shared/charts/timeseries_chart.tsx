@@ -24,9 +24,12 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../observability/public';
+import {
+  LazyAlertsFlyout,
+  useChartTheme,
+} from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import {
   Coordinate,
@@ -88,6 +91,9 @@ export function TimeseriesChart({
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
+    undefined
+  );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
@@ -208,8 +214,21 @@ export function TimeseriesChart({
           alerts,
           chartStartTime: xValues[0],
           getFormatter,
+          selectedAlertId,
+          setSelectedAlertId,
           theme,
         })}
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alerts={alerts}
+            isInApp={true}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={() => {
+              setSelectedAlertId(undefined);
+            }}
+            selectedAlertId={selectedAlertId}
+          />
+        </Suspense>
       </Chart>
     </ChartContainer>
   );
