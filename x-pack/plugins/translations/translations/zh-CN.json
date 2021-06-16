@@ -18334,7 +18334,6 @@
     "xpack.rollupJobs.jobTable.selectRow": "选择行 {id}",
     "xpack.rollupJobs.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.rollupJobs.listBreadcrumbTitle": "汇总/打包作业",
-    "xpack.rollupJobs.loadAction.errorTitle": "加载汇总/打包作业时出错",
     "xpack.rollupJobs.refreshAction.errorTitle": "刷新汇总/打包作业时出错",
     "xpack.rollupJobs.rollupIndexPatternsDescription": "启用用于捕获汇总/打包索引的索引模式的创建，\n              汇总/打包索引反过来基于汇总/打包数据启用可视化。",
     "xpack.rollupJobs.rollupIndexPatternsTitle": "启用汇总索引模式",

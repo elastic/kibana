@@ -18090,7 +18090,6 @@
     "xpack.rollupJobs.jobTable.selectRow": "この行 {id} を選択",
     "xpack.rollupJobs.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.rollupJobs.listBreadcrumbTitle": "ロールアップジョブ",
-    "xpack.rollupJobs.loadAction.errorTitle": "ロールアップジョブを読み込み中にエラーが発生",
     "xpack.rollupJobs.refreshAction.errorTitle": "ロールアップジョブの更新中にエラーが発生",
     "xpack.rollupJobs.rollupIndexPatternsDescription": "ロールアップインデックスを捕捉するインデックスパターンの作成を有効にします。\n              それによりロールアップデータに基づくビジュアライゼーションが可能になります。",
     "xpack.rollupJobs.rollupIndexPatternsTitle": "ロールアップインデックスパターンを有効にする",
