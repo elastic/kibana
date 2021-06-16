@@ -9,27 +9,16 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, SwimlaneFieldsType, SwimlaneConnectorType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
-import { isAnyRequiredFieldNotSet } from './validator';
+import { connectorValidator } from './validator';
 
 const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
   connector,
   isEdit = true,
 }) => {
-  const {
-    config: { mappings, connectorType },
-  } = connector;
-  const showMappingWarning = useMemo(
-    /**
-     * If the type of the connector is not cases
-     * or there any of the required fields is not set
-     * a warning message is being shown to the user
-     */
-    () => connectorType !== SwimlaneConnectorType.Cases || isAnyRequiredFieldNotSet(mappings),
-    [mappings, connectorType]
-  );
+  const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (
     <>

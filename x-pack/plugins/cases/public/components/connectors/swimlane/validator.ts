@@ -19,13 +19,19 @@ const casesRequiredFields = [
 export const isAnyRequiredFieldNotSet = (mapping: Record<string, unknown> | undefined) =>
   !casesRequiredFields.some((field) => mapping != null && mapping[field] != null);
 
+/**
+ * The user can use either a connector of type cases or all.
+ * If the connector is of type all we should check if all
+ * required field have been configured.
+ */
+
 export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
   const {
     config: { mappings, connectorType },
   } = connector;
-  if (connectorType !== SwimlaneConnectorType.Cases || isAnyRequiredFieldNotSet(mappings)) {
+  if (connectorType === SwimlaneConnectorType.Alerts || isAnyRequiredFieldNotSet(mappings)) {
     return {
       message: '',
     };

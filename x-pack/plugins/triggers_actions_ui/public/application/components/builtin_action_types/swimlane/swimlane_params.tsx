@@ -71,9 +71,9 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   );
 
   /**
-   * If the type of the connector is cases
-   * or there is no rule name or rule id or alert source
-   * a warning message is being shown to the user
+   * The user can use either a connector of type alerts or all.
+   * If the connector is of type all we should check if all
+   * required field have been configured.
    */
   const showMappingWarning =
     connectorType === SwimlaneConnectorType.Cases || !hasRuleName || !hasAlertId || !hasAlertSource;
