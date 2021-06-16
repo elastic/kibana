@@ -83,6 +83,7 @@ export class SearchInterceptor {
    * @internal
    */
   private application!: CoreStart['application'];
+  private docLinks!: CoreStart['docLinks'];
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
@@ -96,6 +97,7 @@ export class SearchInterceptor {
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
+      this.docLinks = coreStart.docLinks;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -381,10 +383,10 @@ export class SearchInterceptor {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning()),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks)),
       },
       {
-        toastLifeTimeMs: 30000,
+        toastLifeTimeMs: 60000,
       }
     );
   };

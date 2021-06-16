@@ -6,22 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { CoreStart } from 'kibana/public';
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
-export const SearchSessionIncompleteWarning = () => (
+export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) => (
   <>
     <EuiSpacer size="s" />
     It needs more time to fully render. You can wait here or come back to it later.
+    <EuiSpacer size="m" />
     <EuiText textAlign="right">
-      <EuiButton
+      <EuiLink
+        href={docLinks.links.search.sessionLimits}
         color="warning"
-        onClick={() => {}}
-        size="s"
+        target="_blank"
         data-test-subj="searchSessionIncompleteWarning"
+        external
       >
-        Read More
-      </EuiButton>
+        <FormattedMessage id="searchSession.warning.readDocs" defaultMessage="Read More" />
+      </EuiLink>
     </EuiText>
   </>
 );
