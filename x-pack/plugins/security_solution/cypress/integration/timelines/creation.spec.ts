@@ -42,7 +42,6 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
-import { OVERVIEW_REVENT_TIMELINES } from '../../screens/overview';
 
 describe('Timelines', (): void => {
   before(() => {
@@ -115,8 +114,6 @@ describe('Timelines', (): void => {
 
       cy.get(STAR_ICON).should('not.exist');
       cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
-      cy.visit(OVERVIEW_URL);
-      cy.get(OVERVIEW_REVENT_TIMELINES).should('contain', timeline.title);
     });
   });
 });
