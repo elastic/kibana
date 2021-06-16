@@ -432,7 +432,7 @@ export interface IndexTemplate {
   _meta: object;
 }
 
-export interface TemplateRef {
+export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }

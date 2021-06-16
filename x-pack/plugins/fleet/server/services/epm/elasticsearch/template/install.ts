@@ -11,7 +11,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
   RegistryDataStream,
-  TemplateRef,
+  IndexTemplateEntry,
   RegistryElasticsearch,
   InstallablePackage,
 } from '../../../../types';
@@ -19,7 +19,7 @@ import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
-import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
+import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
 
 import {
   generateMappings,
@@ -34,7 +34,7 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
-): Promise<TemplateRef[]> => {
+): Promise<IndexTemplateEntry[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
@@ -42,16 +42,15 @@ export const installTemplates = async (
   await installPreBuiltTemplates(paths, esClient);
 
   // remove package installation's references to index templates
-  await removeAssetsFromInstalledEsByType(
-    savedObjectsClient,
-    installablePackage.name,
-    ElasticsearchAssetType.indexTemplate
-  );
+  await removeAssetTypesFromInstalledEs(savedObjectsClient, installablePackage.name, [
+    ElasticsearchAssetType.indexTemplate,
+    ElasticsearchAssetType.componentTemplate,
+  ]);
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
 
-  const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
+  const installTemplatePromises = dataStreams.reduce<Array<Promise<IndexTemplateEntry>>>(
     (acc, dataStream) => {
       acc.push(
         installTemplateForDataStream({
@@ -69,25 +68,14 @@ export const installTemplates = async (
   const installedTemplates = res.flat();
 
   // get template refs to save
-  const templateRefs = installedTemplates.flatMap((installedTemplate) => {
-    const indexTemplates = [
-      {
-        id: installedTemplate.templateName,
-        type: ElasticsearchAssetType.indexTemplate,
-      },
-    ];
-    const componentTemplates = installedTemplate.indexTemplate.composed_of.map(
-      (componentTemplateId) => ({
-        id: componentTemplateId,
-        type: ElasticsearchAssetType.componentTemplate,
-      })
-    );
-    return indexTemplates.concat(componentTemplates);
-  });
+  const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
 
   // add package installation's references to index templates
-  // await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
-  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, templateRefs);
+  await saveInstalledEsRefs(
+    savedObjectsClient,
+    installablePackage.name,
+    installedIndexTemplateRefs
+  );
 
   return installedTemplates;
 };
@@ -170,7 +158,7 @@ export async function installTemplateForDataStream({
   pkg: InstallablePackage;
   esClient: ElasticsearchClient;
   dataStream: RegistryDataStream;
-}): Promise<TemplateRef> {
+}): Promise<IndexTemplateEntry> {
   const fields = await loadFieldsFromYaml(pkg, dataStream.path);
   return installTemplate({
     esClient,
@@ -298,7 +286,7 @@ export async function installTemplate({
   dataStream: RegistryDataStream;
   packageVersion: string;
   packageName: string;
-}): Promise<TemplateRef> {
+}): Promise<IndexTemplateEntry> {
   const validFields = processFields(fields);
   const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
@@ -376,4 +364,22 @@ export async function installTemplate({
     templateName,
     indexTemplate: template,
   };
+}
+
+export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
+  return installedTemplates.flatMap((installedTemplate) => {
+    const indexTemplates = [
+      {
+        id: installedTemplate.templateName,
+        type: ElasticsearchAssetType.indexTemplate,
+      },
+    ];
+    const componentTemplates = installedTemplate.indexTemplate.composed_of.map(
+      (componentTemplateId) => ({
+        id: componentTemplateId,
+        type: ElasticsearchAssetType.componentTemplate,
+      })
+    );
+    return indexTemplates.concat(componentTemplates);
+  });
 }

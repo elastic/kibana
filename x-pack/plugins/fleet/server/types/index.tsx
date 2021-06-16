@@ -64,7 +64,7 @@ export {
   RegistrySearchResults,
   RegistrySearchResult,
   DefaultPackages,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,

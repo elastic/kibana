@@ -249,8 +249,7 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     // try installing the package, if there was an error, call error handler and rethrow
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -326,8 +325,7 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -476,17 +474,17 @@ export const saveInstalledEsRefs = async (
   return installedAssets;
 };
 
-export const removeAssetsFromInstalledEsByType = async (
+export const removeAssetTypesFromInstalledEs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetType: AssetType
+  assetTypes: AssetType[]
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssets = installedPkg?.attributes.installed_es;
   if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(({ id, type }) => {
-    return type !== assetType;
-  });
+  const installedAssetsToSave = installedAssets?.filter(
+    (asset) => !assetTypes.includes(asset.type)
+  );
 
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: installedAssetsToSave,

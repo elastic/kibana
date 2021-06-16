@@ -87,6 +87,40 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resMetricsTemplate.statusCode).equal(404);
       });
+      it('should have uninstalled the component templates', async function () {
+        const resMappings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}-mappings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resMappings.statusCode).equal(404);
+
+        const resSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}-settings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resSettings.statusCode).equal(404);
+
+        const resUserSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}-user_settings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resUserSettings.statusCode).equal(404);
+      });
       it('should have uninstalled the pipelines', async function () {
         const res = await es.transport.request(
           {
@@ -328,17 +362,22 @@ const expectAssetsInstalled = ({
     });
     expect(resPipeline2.statusCode).equal(200);
   });
-  it('should have installed the template components', async function () {
-    const res = await es.transport.request({
+  it('should have installed the component templates', async function () {
+    const resMappings = await es.transport.request({
       method: 'GET',
       path: `/_component_template/${logsTemplateName}-mappings`,
     });
-    expect(res.statusCode).equal(200);
+    expect(resMappings.statusCode).equal(200);
     const resSettings = await es.transport.request({
       method: 'GET',
       path: `/_component_template/${logsTemplateName}-settings`,
     });
     expect(resSettings.statusCode).equal(200);
+    const resUserSettings = await es.transport.request({
+      method: 'GET',
+      path: `/_component_template/${logsTemplateName}-user_settings`,
+    });
+    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the transform components', async function () {
     const res = await es.transport.request({

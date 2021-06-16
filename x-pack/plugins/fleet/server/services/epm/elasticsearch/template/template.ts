@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from 'kibana/server';
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
@@ -456,7 +456,7 @@ function getBaseTemplate(
 
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<void> => {
   if (!templates.length) return;
 
@@ -471,7 +471,7 @@ function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is Cur
 
 const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
   const dataStreamPromises = templates.map((template) => {
     return getDataStreams(esClient, template);
@@ -482,7 +482,7 @@ const queryDataStreamsFromTemplates = async (
 
 const getDataStreams = async (
   esClient: ElasticsearchClient,
-  template: TemplateRef
+  template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
   const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
