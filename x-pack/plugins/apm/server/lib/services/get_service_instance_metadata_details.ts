@@ -11,7 +11,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -37,18 +36,19 @@ export async function getServiceInstanceMetadataDetails({
   environment?: string;
   kuery?: string;
 }) {
-  return withApmSpan('get_service_instance_metadata_details', async () => {
-    const { start, end, apmEventClient } = setup;
-    const filter = [
-      { term: { [SERVICE_NAME]: serviceName } },
-      { term: { [SERVICE_NODE_NAME]: serviceNodeName } },
-      { term: { [TRANSACTION_TYPE]: transactionType } },
-      ...rangeQuery(start, end),
-      ...environmentQuery(environment),
-      ...kqlQuery(kuery),
-    ];
+  const { start, end, apmEventClient } = setup;
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [SERVICE_NODE_NAME]: serviceNodeName } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
+  ];
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_instance_metadata_details',
+    {
       apm: {
         events: [
           getProcessorEventForAggregatedTransactions(
@@ -61,24 +61,24 @@ export async function getServiceInstanceMetadataDetails({
         size: 1,
         query: { bool: { filter } },
       },
-    });
-
-    const sample = response.hits.hits[0]?._source;
-
-    if (!sample) {
-      return {};
     }
+  );
 
-    const { agent, service, container, kubernetes, host, cloud } = sample;
+  const sample = response.hits.hits[0]?._source;
 
-    return {
-      '@timestamp': sample['@timestamp'],
-      agent,
-      service,
-      container,
-      kubernetes,
-      host,
-      cloud,
-    };
-  });
+  if (!sample) {
+    return {};
+  }
+
+  const { agent, service, container, kubernetes, host, cloud } = sample;
+
+  return {
+    '@timestamp': sample['@timestamp'],
+    agent,
+    service,
+    container,
+    kubernetes,
+    host,
+    cloud,
+  };
 }
