@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './reveal_image_function';
+import { revealImageFunction } from './reveal_image_function';
+
+export const functions = [revealImageFunction];
+
+export { revealImageFunction };

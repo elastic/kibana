@@ -9,8 +9,8 @@ import { ExpressionRenderDefinition } from '../../../../src/plugins/expressions/
 
 import { RendererFactory } from '../types';
 
-export const renderFunctions: RendererFactory[];
 export const renderFunctionNames: string[];
 export const addSupportedRenderFunctions: (
   renderers: RendererFactory[] | Array<() => ExpressionRenderDefinition<any>>
 ) => void;
+export const getSupportedRenderFunctions: () => RendererFactory[];
