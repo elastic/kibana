@@ -20,7 +20,6 @@
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"
-  
   },
   "description": "This plugin contains the Discover application and the saved search embeddable."
 }
