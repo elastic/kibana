@@ -18,9 +18,6 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiText,
-  EuiConfirmModal,
-  EuiFieldText,
-  EuiFormRow,
 } from '@elastic/eui';
 
 import type { Field, EsRuntimeField } from '../types';
@@ -30,54 +27,18 @@ import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview, useFieldPreviewContext } from './preview';
-import { ModifiedFieldModal } from './confirm_modals';
+import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
-const geti18nTexts = (field?: Field) => {
-  return {
-    cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
-      defaultMessage: 'Cancel',
-    }),
-    saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
-      defaultMessage: 'Save',
-    }),
-    formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
-      defaultMessage: 'Fix errors in form before continuing.',
-    }),
-    cancelButtonText: i18n.translate(
-      'indexPatternFieldEditor.saveRuntimeField.confirmationModal.cancelButtonLabel',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-    confirmButtonText: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.saveButtonLabel',
-      {
-        defaultMessage: 'Save changes',
-      }
-    ),
-    warningChangingFields: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningChangingFields',
-      {
-        defaultMessage:
-          'Changing name or type can break searches and visualizations that rely on this field.',
-      }
-    ),
-    typeConfirm: i18n.translate(
-      'indexPatternFieldEditor.saveRuntimeField.confirmModal.typeConfirm',
-      {
-        defaultMessage: 'Enter CHANGE to continue',
-      }
-    ),
-    titleConfirmChanges: i18n.translate(
-      'indexPatternFieldEditor.saveRuntimeField.confirmModal.title',
-      {
-        defaultMessage: `Save changes to '{name}'`,
-        values: {
-          name: field?.name,
-        },
-      }
-    ),
-  };
+const i18nTexts = {
+  cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
+    defaultMessage: 'Cancel',
+  }),
+  saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
+    defaultMessage: 'Save',
+  }),
+  formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
+    defaultMessage: 'Fix errors in form before continuing.',
+  }),
 };
 
 const defaultModalVisibility = {
@@ -109,7 +70,6 @@ const FieldEditorFlyoutContentComponent = ({
   isSavingField,
 }: Props) => {
   const isEditingExistingField = !!field;
-  const i18nTexts = geti18nTexts(field);
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
@@ -129,7 +89,6 @@ const FieldEditorFlyoutContentComponent = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
-  const [confirmContent, setConfirmContent] = useState<string>('');
   const [isFormModified, setIsFormModified] = useState(false);
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
@@ -193,36 +152,16 @@ const FieldEditorFlyoutContentComponent = ({
   const renderModal = () => {
     if (modalVisibility.confirmChangeNameOrType) {
       return (
-        <EuiConfirmModal
-          title={i18nTexts.titleConfirmChanges}
-          data-test-subj="runtimeFieldSaveConfirmModal"
-          cancelButtonText={i18nTexts.cancelButtonText}
-          confirmButtonText={i18nTexts.confirmButtonText}
-          confirmButtonDisabled={confirmContent?.toUpperCase() !== 'CHANGE'}
-          onCancel={() => {
-            setModalVisibility(defaultModalVisibility);
-            setConfirmContent('');
-          }}
+        <SaveFieldTypeOrNameChangedModal
+          fieldName={field?.name!}
           onConfirm={async () => {
             const { data } = await submit();
             onSave(data);
           }}
-        >
-          <EuiCallOut
-            color="warning"
-            title={i18nTexts.warningChangingFields}
-            iconType="alert"
-            size="s"
-          />
-          <EuiSpacer />
-          <EuiFormRow label={i18nTexts.typeConfirm}>
-            <EuiFieldText
-              value={confirmContent}
-              onChange={(e) => setConfirmContent(e.target.value)}
-              data-test-subj="saveModalConfirmText"
-            />
-          </EuiFormRow>
-        </EuiConfirmModal>
+          onCancel={() => {
+            setModalVisibility(defaultModalVisibility);
+          }}
+        />
       );
     }
 
