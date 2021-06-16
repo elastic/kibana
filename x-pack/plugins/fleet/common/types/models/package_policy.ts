@@ -78,3 +78,13 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
 }
 
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
+
+export type DryRunPackagePolicyInput =
+  | (Omit<PackagePolicyInput, 'streams'> & {
+      streams: Array<PackagePolicyInputStream | string>;
+    })
+  | string;
+
+export type DryRunPackagePolicy = Omit<PackagePolicy, 'inputs'> & {
+  inputs: DryRunPackagePolicyInput[];
+};

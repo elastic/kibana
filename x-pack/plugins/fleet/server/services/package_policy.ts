@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -22,6 +23,8 @@ import {
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
   PackagePolicyConfigRecordEntry,
@@ -30,7 +33,7 @@ import type {
   ListWithKuery,
   ListResult,
 } from '../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, LATEST_PACKAGE_KEYWORD } from '../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
   HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
@@ -43,6 +46,7 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
+  DryRunPackagePolicyInput,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -428,10 +432,7 @@ class PackagePolicyService {
     return result;
   }
 
-  public async performUpgradeDryRun(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<any> {
+  private async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new Error(
@@ -451,29 +452,127 @@ class PackagePolicyService {
       );
     }
 
-    const pkgInfo = await getPackageInfo({
+    const installedPackage = await getInstallation({
       savedObjectsClient: soClient,
       pkgName: packagePolicy.package.name,
-      pkgVersion: LATEST_PACKAGE_KEYWORD,
+    });
+    if (!installedPackage) {
+      throw new Error(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+          defaultMessage: 'Cannot upgrade package policy {id} because {pkgName} is not installed',
+          values: { id, pkgName: packagePolicy.package.name },
+        })
+      );
+    }
+
+    return { packagePolicy: packagePolicy as Required<PackagePolicy>, installedPackage };
+  }
+
+  public async upgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser }
+  ): Promise<UpgradePackagePolicyResponse> {
+    const result: UpgradePackagePolicyResponse = [];
+
+    for (const id of ids) {
+      try {
+        const { packagePolicy, installedPackage } = await this.getUpgradePackagePolicyInfo(
+          soClient,
+          id
+        );
+
+        const updatePackagePolicy = {
+          ...omit(packagePolicy, 'id'),
+          package: {
+            ...packagePolicy.package,
+            version: installedPackage.version,
+          },
+        };
+
+        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        result.push({
+          id,
+          name: packagePolicy.name,
+          success: true,
+        });
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...ingestErrorToResponseOptions(error),
+        });
+      }
+    }
+
+    return result;
+  }
+
+  public async getUpgradeDryRunDiff(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<UpgradePackagePolicyDryRunResponse> {
+    const { packagePolicy, installedPackage } = await this.getUpgradePackagePolicyInfo(
+      soClient,
+      id
+    );
+
+    const latestPkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: installedPackage.version,
     });
 
-    try {
-      let inputs = packagePolicy.inputs.map((input) =>
-        assignStreamIdToInput(packagePolicy.id, input)
+    let hasErrors = false;
+
+    let inputs: DryRunPackagePolicyInput[] = packagePolicy.inputs.map((input) =>
+      assignStreamIdToInput(packagePolicy.id, input)
+    );
+    const registryPkgInfo = await Registry.fetchInfo(latestPkgInfo.name, latestPkgInfo.version);
+    const inputsPromises = (inputs as PackagePolicyInput[]).map(async (input) => {
+      const vars = packagePolicy.vars || {};
+      try {
+        await _compilePackagePolicyInput(registryPkgInfo, latestPkgInfo, vars, input);
+      } catch (e) {
+        hasErrors = true;
+        return String(e);
+      }
+      const compiledStreamsResults = await _compilePackageStreamsDryRun(
+        registryPkgInfo,
+        latestPkgInfo,
+        vars,
+        input
       );
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const streamsOrErrors = compiledStreamsResults.map((result) => {
+        if (result.status === 'fulfilled') return result.value;
+        else {
+          hasErrors = true;
+          return String(result.reason);
+        }
+      });
 
       return {
-        ...packagePolicy,
-        inputs,
-        package: {
-          ...packagePolicy.package,
-          version: pkgInfo.version,
-        },
+        ...input,
+        streams: streamsOrErrors,
       };
-    } catch (e) {
-      return `Error: ${e.message}`;
-    }
+    });
+    inputs = await Promise.all(inputsPromises);
+
+    return {
+      diff: [
+        packagePolicy,
+        {
+          ...packagePolicy,
+          inputs,
+          package: {
+            ...packagePolicy.package,
+            version: latestPkgInfo.version,
+          },
+        },
+      ],
+      hasErrors,
+    };
   }
 
   public async buildPackagePolicyFromPackage(
@@ -606,6 +705,19 @@ async function _compilePackageStreams(
   );
 
   return await Promise.all(streamsPromises);
+}
+
+async function _compilePackageStreamsDryRun(
+  registryPkgInfo: RegistryPackage,
+  pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
+  input: PackagePolicyInput
+) {
+  const streamsPromises = input.streams.map((stream) =>
+    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
+  );
+
+  return await Promise.allSettled(streamsPromises);
 }
 
 async function _compilePackageStream(

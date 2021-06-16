@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import {
-  LATEST_PACKAGE_KEYWORD,
+  PRECONFIGURATION_LATEST_KEYWORD,
   DEFAULT_AGENT_POLICY,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
   DEFAULT_PACKAGES,
@@ -34,7 +34,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     name: schema.string(),
     version: schema.string({
       validate: (value) => {
-        if (value !== LATEST_PACKAGE_KEYWORD && !semverValid(value)) {
+        if (value !== PRECONFIGURATION_LATEST_KEYWORD && !semverValid(value)) {
           return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
             defaultMessage: 'must be a valid semver, or the keyword `latest`',
           });
