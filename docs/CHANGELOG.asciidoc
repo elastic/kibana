@@ -86,7 +86,7 @@ Sharing::
 [[known-issue-7.13.12]]
 === Known issue
 
-*TSVB visualizations with annotations* can't be created as the index pattern dropdown on the annotations tab is missing. 
+*TSVB visualizations with annotations* can't be created as the index pattern dropdown on the *Annotations* tab is missing. 
 The existing TSVB visualizations with annotations work fine. 
 We recommend the users who would like to create new TSVB charts with annotations to wait for 7.13.3 to upgrade.
 For more information, refer to {kibana-issue}102180[#102180].
