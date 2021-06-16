@@ -15,6 +15,7 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingChart,
   EuiModal,
   EuiModalHeader,
@@ -27,10 +28,13 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import {
+  AnnotationDomainType,
   Axis,
   Chart,
   CurveType,
+  LineAnnotation,
   LineSeries,
+  LineAnnotationDatum,
   Position,
   RectAnnotation,
   RectAnnotationDatum,
@@ -75,7 +79,10 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
-  const [annotationData, setAnnotationData] = useState<RectAnnotationDatum[]>([]);
+  const [annotationData, setAnnotationData] = useState<{
+    rect: RectAnnotationDatum[];
+    line: LineAnnotationDatum[];
+  }>({ rect: [], line: [] });
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
 
@@ -138,7 +145,10 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
 
       setSourceData(chartData.datafeedResults);
       setBucketData(chartData.bucketResults);
-      setAnnotationData(chartData.annotationResults);
+      setAnnotationData({
+        rect: chartData.annotationResultsRect,
+        line: chartData.annotationResultsLine,
+      });
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -303,14 +313,39 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         position={Position.Left}
                       />
                       {showAnnotations ? (
-                        <RectAnnotation
-                          key="annotation-results"
-                          dataValues={annotationData}
-                          id={i18n.translate('xpack.ml.jobsList.datafeedModal.annotationSeriesId', {
-                            defaultMessage: 'Annotations',
-                          })}
-                          style={{ fill: euiTheme.euiColorDangerText }}
-                        />
+                        <>
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedModal.annotationLineSeriesId',
+                              {
+                                defaultMessage: 'Annotations line result',
+                              }
+                            )}
+                            key="annotation-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={annotationData.line}
+                            marker={<EuiIcon type="annotation" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.euiColorDangerText,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
+                          <RectAnnotation
+                            key="annotation-results-rect"
+                            dataValues={annotationData.rect}
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedModal.annotationRectSeriesId',
+                              {
+                                defaultMessage: 'Annotations rect result',
+                              }
+                            )}
+                            style={{ fill: euiTheme.euiColorDangerText }}
+                          />
+                        </>
                       ) : null}
                       <LineSeries
                         key={'source-results'}

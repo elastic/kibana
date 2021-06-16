@@ -622,7 +622,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const finalResults: GetDatafeedResultsChartDataResult = {
       bucketResults: [],
       datafeedResults: [],
-      annotationResults: [],
+      annotationResultsRect: [],
+      annotationResultsLine: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
@@ -730,13 +731,20 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     annotationResults.forEach((annotation) => {
       const timestamp = Number(annotation?.timestamp);
       const endTimestamp = Number(annotation?.end_timestamp);
-      finalResults.annotationResults.push({
-        coordinates: {
-          x0: timestamp,
-          x1: endTimestamp,
-        },
-        details: annotation.annotation,
-      });
+      if (timestamp === endTimestamp) {
+        finalResults.annotationResultsLine.push({
+          dataValue: timestamp,
+          details: annotation.annotation,
+        });
+      } else {
+        finalResults.annotationResultsRect.push({
+          coordinates: {
+            x0: timestamp,
+            x1: endTimestamp,
+          },
+          details: annotation.annotation,
+        });
+      }
     });
 
     return finalResults;
