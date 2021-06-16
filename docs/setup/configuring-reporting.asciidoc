@@ -16,9 +16,10 @@ When security is enabled, access to the {report-features} is controlled by roles
 
 [[reporting-app-users]]
 In 7.12.0 and earlier, you grant access to the {report-features} by assigning users the `reporting_user` role in {es}. 
+
 In 7.14.0 and later, you configure *Reporting* to use <<kibana-privileges, {kib} privileges>>. By using {kib} privileges, you can define custom roles that grant *Reporting* privileges as sub-features of {kib} applications.
 
-To grant users access to the reporting features, create and assign the reporting role. When you grant users access to the reporting features, you also grant access to *Reporting*, where users can view and manage reports. 
+To grant users permission to generate reports and view their reports in *Reporting*, create and assign the reporting role.
 
 . Create the reporting role. 
 
@@ -39,6 +40,8 @@ For more information, refer to {ref}/security-privileges.html[Security privilege
 [role="screenshot"]
 image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
 
+. Add the {kib} privileges.
+
 .. Click *Add Kibana privilege*.
 
 .. Select one or more *Spaces* that you want to grant reporting privileges to.
@@ -50,7 +53,9 @@ image::user/security/images/reporting-privileges-example.png["Reporting privileg
 [role="screenshot"]
 image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 
-.. Click *Add {kib} privilege*, then click *Create role*.
+.. Click *Add {kib} privilege*.
+
+. Click *Create role*.
 
 . Assign the reporting role to a user.
 
@@ -167,7 +172,7 @@ elasticsearch.username: 'custom_kibana_system'
 [[securing-reporting]]
 === Secure the reporting endpoints
 
-Configure {watcher} to trust the {kib} server certificate.
+To automatically generate reports with {watcher}, you must configure {watcher} to trust the {kib} server certificate.
 
 . Enable {stack-security-features} on your {es} cluster. For more information, see {ref}/security-getting-started.html[Getting started with security].
 

@@ -1,15 +1,14 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Sharing
+= Reporting and sharing
 
 [partintro]
 
 --
-**_Share your *Discover* saved searches, dashboards, visualizations, and *Canvas* workpads._**
 
-{kib} provides you with several options to share your *Discover* saved searches, dashboards, visualizations, and *Canvas* workpads. 
+{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website. 
 
-The share options are available from the *Share* menu, and include the following:
+You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
 * *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad.
 
@@ -29,14 +28,14 @@ The share options are available from the *Share* menu, and include the following
 [[manually-generate-reports]]
 == Create reports
 
-Create and download reports of your *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
+Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads.
 
 [[reporting-layout-sizing]]
-The layout and size of the report depends on the *Discover* saved searches, dashboards, visualizations, and *Canvas* workpads. 
-For *Discover* saved searches, dashboards, and visualizations, the layout depends on the size of the panels.
-For *Canvas* workpads, the layout depends on the size of the worksheet dimensions. 
+The layout and size of the report depends on what you are sharing. 
+For saved searches, dashboards, and visualizations, the layout depends on the size of the panels.
+For workpads, the layout depends on the size of the worksheet dimensions. 
 
-To make the report output larger or smaller, change the size of the browser, which resizes the shareable container before the report generates. It might take some trial and error before you're satisfied with the layout and dimensions.
+To change the output size, change the size of the browser, which resizes the shareable container before the report generates. It might take some trial and error before you're satisfied.
 
 In the following dashboard, the shareable container is highlighted:
 
@@ -69,7 +68,7 @@ NOTE: When you create a dashboard report that includes a data table or saved sea
 [[share-a-direct-link]]
 == Share a direct link
 
-Share a direct link to a *Discover* saved search, dashboard, or *Visualize Library* visualization. User authentication is required.
+Share a direct link to a saved search, dashboard, or visualization. To access the shared object, authentication is required.
 
 . Open the main menu, then open the saved search, dashboard, or visualization you want to share.
 
@@ -77,7 +76,7 @@ Share a direct link to a *Discover* saved search, dashboard, or *Visualize Libra
 
 . Specify how you want to generate the link:
 
-* To display only the current state, select *Snapshot*.
+* To display only the current state of the object, select *Snapshot*.
 
 * To display up-to-date changes, select *Saved object*.
 
@@ -89,7 +88,7 @@ Share a direct link to a *Discover* saved search, dashboard, or *Visualize Libra
 [[download-as-json]]
 == Create a JSON file
 
-Create a JSON file of a *Canvas* workpad.
+Create a JSON file for a workpad.
 
 . Open the main menu, then click *Canvas*.
 
@@ -101,7 +100,7 @@ Create a JSON file of a *Canvas* workpad.
 [[add-workpad-website]]
 == Share workpads on a website
 
-beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on any website. 
+beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on a website. 
 To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
 . Open the main menu, then click *Canvas*.
@@ -116,9 +115,6 @@ To customize the behavior of the workpad on your website, you can choose to auto
 +
 To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. *Canvas* does not display elements that manipulate the data on the workpad.
 +
-[role="screenshot"]
-image::canvas/images/canvas-embed_workpad.gif[Image showing how to share the workpad on a website]
-+
 NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
 
 . To change the settings, click the settings icon, then choose the settings you want to use.
@@ -127,11 +123,11 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 [[embedding]]
 == Embed code
 
-Display your dashboard or *Visualize Library* visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
+Display your dashboard or visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
 
 Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>>.
 
-. Open the main menu, then Open the dashboard or visualization you want to share.
+. Open the main menu, then open the dashboard or visualization you want to share.
 
 . Click *Share > Embed code*. 
 

@@ -20,6 +20,8 @@ include::{kib-repo-dir}/maps/index.asciidoc[]
 
 include::ml/index.asciidoc[]
 
+include::reporting/index.asciidoc[]
+
 include::graph/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
@@ -37,8 +39,6 @@ include::monitoring/index.asciidoc[]
 include::management.asciidoc[]
 
 include::{kib-repo-dir}/fleet/fleet.asciidoc[]
-
-include::reporting/index.asciidoc[]
 
 include::api.asciidoc[]
 
