@@ -273,9 +273,12 @@ export const MOBILE_APP = i18n.translate('xpack.observability.expView.fieldLabel
   defaultMessage: 'Mobile App',
 });
 
-export const MEMORY_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.memoryUsage', {
-  defaultMessage: 'Memory Usage',
-});
+export const MEMORY_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.mobile.memoryUsage',
+  {
+    defaultMessage: 'Memory Usage',
+  }
+);
 
 export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
   defaultMessage: 'CPU Usage',
