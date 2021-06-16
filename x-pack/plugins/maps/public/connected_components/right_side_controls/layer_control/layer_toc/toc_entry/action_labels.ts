@@ -24,7 +24,7 @@ export function getVisibilityToggleLabel(isVisible: boolean) {
 export const EDIT_LAYER_SETTINGS_LABEL = i18n.translate(
   'xpack.maps.layerControl.layerTocActions.layerSettingsButtonLabel',
   {
-    defaultMessage: 'Layer settings',
+    defaultMessage: 'Edit layer settings',
   }
 );
 

@@ -66,9 +66,7 @@ const mockMBMap = ({
 const defaultProps = {
   mbMap: mockMBMap,
   closeTooltip: () => {},
-  layerList: [],
   addFilters: async () => {},
-  geoFields: [{}],
   location: [-120, 30] as [number, number],
   features: [
     {

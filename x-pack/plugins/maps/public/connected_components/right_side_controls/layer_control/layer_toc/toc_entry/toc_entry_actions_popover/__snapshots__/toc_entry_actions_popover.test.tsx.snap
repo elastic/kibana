@@ -81,7 +81,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 size="m"
                 type="pencil"
               />,
-              "name": "Layer settings",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -196,7 +196,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 size="m"
                 type="pencil"
               />,
-              "name": "Layer settings",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -312,7 +312,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
                 size="m"
                 type="pencil"
               />,
-              "name": "Layer settings",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
