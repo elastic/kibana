@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
+import { Feature } from 'geojson';
 import {
   HeatmapStyleDescriptor,
   StyleDescriptor,
@@ -33,7 +34,7 @@ export type LayerDescriptor = {
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
-  __metaFromTiles?: any;
+  __metaFromTiles?: Feature[];
   alpha?: number;
   attribution?: Attribution;
   id: string;

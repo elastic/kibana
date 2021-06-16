@@ -587,10 +587,6 @@ export function updateCounts(layerId: string, mbMetaFeatures: Feature[]) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    if (!mbMetaFeatures) {
-      return;
-    }
-
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;

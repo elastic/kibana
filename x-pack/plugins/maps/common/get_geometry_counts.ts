@@ -8,14 +8,14 @@
 import { Feature } from 'geojson';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from './constants';
 
-export interface IVectorShapeTypeCounts {
+export interface VectorShapeTypeCounts {
   [VECTOR_SHAPE_TYPE.POINT]: number;
   [VECTOR_SHAPE_TYPE.LINE]: number;
   [VECTOR_SHAPE_TYPE.POLYGON]: number;
 }
 
-export function countVectorShapeTypes(features: Feature[]): IVectorShapeTypeCounts {
-  const vectorShapeTypeCounts: IVectorShapeTypeCounts = {
+export function countVectorShapeTypes(features: Feature[]): VectorShapeTypeCounts {
+  const vectorShapeTypeCounts: VectorShapeTypeCounts = {
     [VECTOR_SHAPE_TYPE.POINT]: 0,
     [VECTOR_SHAPE_TYPE.LINE]: 0,
     [VECTOR_SHAPE_TYPE.POLYGON]: 0,

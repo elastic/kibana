@@ -38,7 +38,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { IVectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
+import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
 
 export class TiledVectorLayer extends VectorLayer {
@@ -66,6 +66,10 @@ export class TiledVectorLayer extends VectorLayer {
     this._source = source as ITiledSingleLayerVectorSource;
   }
 
+  getMetaFromTiles(): Feature[] {
+    return this._descriptor.__metaFromTiles || [];
+  }
+
   getCustomIconAndTooltipContent() {
     const tileMetas = this.getMetaFromTiles();
     if (!tileMetas) {
@@ -85,8 +89,8 @@ export class TiledVectorLayer extends VectorLayer {
       return tileMeta && tileMeta.properties && tileMeta.properties[KBN_IS_TILE_COMPLETE];
     });
 
-    const shapeTypeCountMeta: IVectorShapeTypeCounts = tileMetas.reduce(
-      (accumulator: IVectorShapeTypeCounts, tileMeta: Feature) => {
+    const shapeTypeCountMeta: VectorShapeTypeCounts = tileMetas.reduce(
+      (accumulator: VectorShapeTypeCounts, tileMeta: Feature) => {
         if (!tileMeta || !tileMeta.properties) {
           return accumulator;
         }
