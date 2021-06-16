@@ -16,5 +16,11 @@
     "indexPatternFieldEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  
+  },
+  "description": "This plugin contains the Discover application and the saved search embeddable."
 }
