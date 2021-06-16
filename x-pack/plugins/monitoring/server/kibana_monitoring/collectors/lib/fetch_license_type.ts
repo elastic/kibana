@@ -12,7 +12,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
-  callCluster: ElasticsearchClient,
+  client: ElasticsearchClient,
   availableCcs: string[],
   clusterUuid: string
 ) {
@@ -55,6 +55,6 @@ export async function fetchLicenseType(
       },
     },
   };
-  const { body: response } = await callCluster.search(params);
+  const { body: response } = await client.search(params);
   return get(response, 'hits.hits[0]._source.license.type', null);
 }

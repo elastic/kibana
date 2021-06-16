@@ -7,18 +7,15 @@
 
 import {
   CoreSetup,
-  CoreStart,
   ElasticsearchClient,
   Logger,
   SharedGlobalConfig,
   PluginInitializerContext,
-  ICustomClusterClient,
 } from 'kibana/server';
 import url from 'url';
 import { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from './config';
 import { PluginsSetup } from './types';
-import { instantiateClient } from './es_client/instantiate_client';
 import { mbSafeQuery } from './lib/mb_safe_query';
 type GetLogger = (...scopes: string[]) => Logger;
 
@@ -30,7 +27,6 @@ interface InitSetupOptions {
   log: Logger;
   legacyConfig: SharedGlobalConfig;
   setupPlugins: PluginsSetup;
-  coreStart: CoreStart;
 }
 
 export type EndpointTypes =
@@ -38,13 +34,13 @@ export type EndpointTypes =
   | 'msearch'
   | 'transport.request'
   | 'cluster.putSettings'
+  | 'cluster.getSettigns'
   | string;
 type ClientParams = estypes.SearchRequest | undefined;
 
 interface IAppGlobals {
   url: string;
   isCloud: boolean;
-  monitoringCluster: ICustomClusterClient;
   config: MonitoringConfig;
   getLogger: GetLogger;
   getKeyStoreValue: (key: string, storeValueMethod?: () => unknown) => unknown;
@@ -72,29 +68,23 @@ export class Globals {
   private static _app: IAppGlobals;
 
   public static init(options: InitSetupOptions) {
-    const { coreSetup, setupPlugins, coreStart, config, log, getLogger } = options;
-    const monitoringCluster = instantiateClient(
-      config.ui.elasticsearch,
-      log,
-      coreStart.elasticsearch.createClient
-    );
+    const { coreSetup, setupPlugins, config, log, getLogger } = options;
     const getLegacyClusterShim = async (
       client: ElasticsearchClient,
       endpoint: EndpointTypes,
       params: ClientParams
-    ) => {
+    ): Promise<estypes.SearchResponse> =>
       await mbSafeQuery(async () => {
-        // implicit 'any' unavoidable since TransportRequestPromise is a metamorph type
         const endpointMap: { [key: string]: (params: any) => any } = {
-          search: client.search,
-          msearch: client.msearch,
-          'transport.request': client.transport.request,
-          'cluster.putSettings': client.cluster.putSettings,
+          search: (p) => client.search(p),
+          msearch: (p) => client.msearch(p),
+          'transport.request': (p) => client.transport.request(p),
+          'cluster.getSettings': (p) => client.cluster.getSettings(p),
+          'cluster.putSettings': (p) => client.cluster.putSettings(p),
         };
-        const { body: result } = await endpointMap[endpoint](params);
-        return result;
+        const { body } = await endpointMap[endpoint](params);
+        return body;
       });
-    };
 
     const { protocol, hostname, port } = coreSetup.http.getServerInfo();
     const pathname = coreSetup.http.basePath.serverBasePath;
@@ -102,7 +92,6 @@ export class Globals {
     Globals._app = {
       url: url.format({ protocol, hostname, port, pathname }),
       isCloud: setupPlugins.cloud?.isCloudEnabled || false,
-      monitoringCluster,
       config,
       getLogger,
       getKeyStoreValue,
@@ -119,9 +108,5 @@ export class Globals {
     return Globals._app;
   }
 
-  public static stop() {
-    if (Globals._app?.monitoringCluster) {
-      Globals._app.monitoringCluster.close();
-    }
-  }
+  public static stop() {}
 }

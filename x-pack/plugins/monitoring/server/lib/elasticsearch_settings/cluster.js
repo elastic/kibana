@@ -34,15 +34,6 @@ export async function checkClusterSettings(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const { cloud } = req.server.newPlatform.setup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'GET',
-    path: '/_cluster/settings?include_defaults',
-    filter_path: [
-      'persistent.xpack.monitoring',
-      'transient.xpack.monitoring',
-      'defaults.xpack.monitoring',
-    ],
-  });
-
+  const response = await callWithRequest(req, 'cluster.getSettings', { include_defaults: true });
   return handleResponse(response, isCloudEnabled);
 }

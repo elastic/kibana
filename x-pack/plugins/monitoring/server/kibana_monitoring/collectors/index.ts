@@ -16,10 +16,10 @@ export { KibanaSettingsCollector, getKibanaSettings } from './get_settings_colle
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  legacyEsClient: IClusterClient
+  getClient: () => IClusterClient
 ) {
   usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
   usageCollection.registerCollector(
-    getMonitoringUsageCollector(usageCollection, config, legacyEsClient)
+    getMonitoringUsageCollector(usageCollection, config, getClient)
   );
 }

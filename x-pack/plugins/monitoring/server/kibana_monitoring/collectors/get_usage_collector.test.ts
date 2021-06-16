@@ -72,7 +72,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, esClient);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
