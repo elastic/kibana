@@ -12,91 +12,168 @@ This reference can help simplify the comparison if you need a specific feature.
 [options="header"]
 |===
 
-| Type | Aggregation-based | Lens | TSVB | Timelion | Vega
+| Type | Lens | TSVB | Agg-based | Vega | Timelion
 
 | Table
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 |
 |
 
-| Table with summary row
-^| X
-^| X
+| Bar, line, and area
+^| &check;
+^| &check;
+^| &check;
+^| &check;
+^| &check;
+
+| Split chart/small multiples
 |
+^| &check;
+^| &check;
+^| &check;
+|
+
+| Pie and donut
+^| &check;
+|
+^| &check;
+^| &check;
+|
+
+| Sunburst
+^| &check;
+|
+^| &check;
 |
 |
 
-| Bar, line, and area charts
-^| X
-^| X
-^| X
-^| X
-^| X
-
-| Percentage bar or area chart
+| Treemap
+^| &check;
 |
-^| X
-^| X
-|
-^| X
-
-| Split bar, line, and area charts
-^| X
-|
-|
-|
-^| X
-
-| Pie and donut charts
-^| X
-^| X
-|
-|
-^| X
-
-| Sunburst chart
-^| X
-^| X
 |
 |
 |
 
 | Heat map
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
+^| &check;
 |
-|
-^| X
 
 | Gauge and Goal
-^| X
 |
-^| X
+^| &check;
+^| &check;
 |
 |
 
 | Markdown
 |
+^| &check;
 |
-^| X
 |
 |
 
 | Metric
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
+^| &check;
 |
-^| X
 
 | Tag cloud
-^| X
+|
+|
+^| &check;
+^| &check;
+|
+
+|===
+
+[float]
+[[table-features]]
+=== Table features
+
+[options="header"]
+|===
+
+| Type | Lens | TSVB | Agg-based
+
+| Summary row
+^| &check;
+^|
+^| &check;
+
+| Pivot table
+^| &check;
+|
+|
+
+| Calculated column
+^| Formula
+^| &check;
+^| Percent only
+
+| Color by value
+^| &check;
+|
+|
+
+|===
+
+[float]
+[[xy-features]]
+=== Bar, line, area features
+
+[options="header"]
+|===
+
+| Type | Lens | TSVB | Agg-based | Vega | Timelion
+
+| Dense time series
+^| Customizable
+^| &check;
+^| Customizable
+^| &check;
+^| &check;
+
+| Percentage mode
+^| &check;
+^| &check;
+|
+^| &check;
+|
+
+| Break downs
+^| 1
+^| 1
+^| 3
+^| &infin;
+^| 1
+
+| Custom color with break downs
+|
+^| Only for Filters
+^| &check;
+^| &check;
+|
+
+| Fit missing values
+^| &check;
+|
+^| &check;
+^| &check;
+^| &check;
+
+| Synchronized tooltips
+|
+^| &check;
 |
 |
 |
-^| X
 
 |===
 
@@ -111,67 +188,57 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 [options="header"]
 |===
 
-| Type | Agg-based | Markdown | Lens | TSVB
+| Type | Lens | TSVB | Agg-based
 
 | Histogram
-^| X
-^| X
-^| X 
+^| &check;
 | 
+^| &check;
 
 | Date histogram
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Date range
-^| X
-^| X
 | 
 | 
+^| &check;
 
 | Filter
-^| X
-^| X
 |
-^| X
+^| &check;
+^| &check;
 
 | Filters
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | GeoHash grid
-^| X
-^| X
 | 
 | 
+^| &check;
 
 | IP range
-^| X
-^| X
-| 
-| 
+^| Use filters
+^| Use filters
+^| &check;
 
 | Range
-^| X
-^| X
-^| X
-| 
+^| &check;
+^| Use filters
+^| &check;
 
 | Terms
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Significant terms
-^| X
-^| X
+^| &check;
 |
-^| X
+^| &check;
 
 |===
 
@@ -186,67 +253,57 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 [options="header"]
 |===
 
-| Type | Agg-based | Markdown | Lens | TSVB
+| Type | Lens | TSVB | Agg-based
 
 | Metrics with filters
+^| &check;
 |
-|
-^| X
 |
 
-| Average
-^| X
-^| X
-^| X
-^| X
-
-| Sum 
-^| X
-^| X
-^| X
-^| X
+| Average, Sum, Max, Min
+^| &check;
+^| &check;
+^| &check;
 
 | Unique count (Cardinality)
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
-| Max
-^| X
-^| X
-^| X
-^| X
-
-| Min
-^| X
-^| X
-^| X
-^| X
-
-| Percentiles
-^| X
-^| X
-^| X
-^| X
+| Percentiles and Median
+^| &check;
+^| &check;
+^| &check;
 
 | Percentiles Rank
-^| X
-^| X
-| 
-^| X
+|
+^| &check;
+^| &check;
+
+| Standard deviation
+|
+^| &check;
+^| &check;
+
+| Sum of squares
+|
+^| &check;
+|
 
 | Top hit (Last value)
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Value count 
 | 
 | 
+^| &check;
+
+| Variance
 | 
-^| X
+^| &check;
+| 
 
 |===
 
@@ -261,61 +318,94 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 [options="header"]
 |===
 
-| Type | Agg-based | Markdown | Lens | TSVB
+| Type | Lens | TSVB | Agg-based
 
 | Avg bucket  
-^| X
-^| X
-| 
-^| X
+^| <<lens-formulas, `overall_average` formula>>
+^| &check;
+^| &check;
 
 | Derivative  
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Max bucket   
-^| X
-^| X
-| 
-^| X
+^| <<lens-formulas, `overall_max` formula>>
+^| &check;
+^| &check;
 
 | Min bucket   
-^| X
-^| X
-| 
-^| X
+^| <<lens-formulas, `overall_min` formula>>
+^| &check;
+^| &check;
 
 | Sum bucket  
-^| X
-^| X
-| 
-^| X
+^| <<lens-formulas, `overall_sum` formula>>
+^| &check;
+^| &check;
  
 | Moving average  
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Cumulative sum 
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
+^| &check;
 
 | Bucket script 
 | 
 | 
+^| &check;
+
+| Bucket selector
 | 
-^| X
+| 
+|
 
 | Serial differencing 
-^| X
-^| X
 | 
-^| X
+^| &check;
+^| &check;
+
+|===
+
+[float]
+[[custom-functions]]
+=== Additional functions
+
+[options="header"]
+|===
+
+| Type | Lens | TSVB | Agg-based
+
+| Counter rate
+^| &check;
+^| &check;
+^|
+
+| <<tsvb-function-reference, Filter ratio>>
+^| Use <<lens-formulas, formula>>
+^| &check;
+|
+
+| <<tsvb-function-reference, Positive only>>
+|
+^| &check;
+|
+
+| <<tsvb-function-reference, Series agg>>
+|
+^| &check;
+|
+
+| Static value
+|
+^| &check;
+|
+
 
 |===
 
@@ -329,41 +419,49 @@ build their advanced visualization.
 [options="header"]
 |===
 
-| Type | Agg-based | Lens | TSVB | Timelion | Vega
+| Type | Lens | TSVB | Agg-based | Vega | Timelion
 
-| Math on aggregated data
+| Math
+^| &check;
+^| &check;
 |
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
 
 | Visualize two indices
+^| &check;
+^| &check;
 |
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
 
 | Math across indices
 |
 |
 |
-^| X
-^| X
+^| &check;
+^| &check;
 
 | Time shifts
+^| &check;
+^| &check;
 |
-^| X
-^| X
-^| X
-^| X
+^| &check;
+^| &check;
 
 | Fully custom {es} queries
 |
 |
 |
+^| &check;
 |
-^| X
+
+| Normalize by time
+^| &check;
+^| &check;
+|
+|
+|
+
 
 |===

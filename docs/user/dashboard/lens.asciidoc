@@ -140,6 +140,42 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 . Press Space bar to confirm, or to cancel, press Esc.
 
 [float]
+[[lens-formulas]]
+==== Formulas
+
+Formulas let you perform math on aggregated data in Lens by typing
+math and quick functions. To access formulas,
+click the *Formula* tab in the dimension editor. Access the complete
+reference for formulas from the help menu.
+
+The most common formulas are dividing two values to produce a percent.
+To display accurately, set *Value format* to *Percent*.
+
+Filter ratio::
+
+Use `kql=''` to filter one set of documents and compare it to other documents within the same grouping.
+For example, to see how the error rate changes over time:
++
+```
+count(kql='response.status_code > 400') / count()
+```
+
+Week over week:: Use `shift='1w'` to get the value of each grouping from
+the previous week. Time shift should not be used with the *Top values* function.
++
+```
+percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')
+```
+
+Percent of total:: Formulas can calculate `overall_sum` for all the groupings,
+which lets you convert each grouping into a percent of total:
++
+```
+sum(products.base_price) / overall_sum(sum(products.base_price))
+```
+
+[float]
 [[lens-faq]]
 ==== Frequently asked questions
 
