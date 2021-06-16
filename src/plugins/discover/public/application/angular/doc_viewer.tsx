@@ -22,7 +22,6 @@ export function createDocViewerDirective(reactDirective: any) {
       ['columns', { watchDepth: 'collection' }],
       ['onAddColumn', { watchDepth: 'reference' }],
       ['onRemoveColumn', { watchDepth: 'reference' }],
-      ['showMultiFields', { watchDepth: 'reference' }],
     ],
     {
       restrict: 'E',
@@ -33,7 +32,6 @@ export function createDocViewerDirective(reactDirective: any) {
         columns: '=?',
         onAddColumn: '=?',
         onRemoveColumn: '=?',
-        showMultiFields: '=?',
       },
     }
   );

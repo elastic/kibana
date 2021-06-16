@@ -92,8 +92,6 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         calculateItemsOnPage();
       };
 
-      $scope.showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
-
       $scope.shouldShowLimitedResultsWarning = () =>
         !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount;
     },
