@@ -57,7 +57,7 @@ describe('<UseField />', () => {
   describe('state', () => {
     describe('isPristine, isDirty, isModified', () => {
       // Dummy component to handle object type data
-      const ObjectField: React.FC<{ field: FieldHook }> = ({ field: { value, setValue } }) => {
+      const ObjectField: React.FC<{ field: FieldHook }> = ({ field: { setValue } }) => {
         const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           // Make sure to set the field value to an **object**
           setValue(JSON.parse(e.target.value));
@@ -66,29 +66,33 @@ describe('<UseField />', () => {
         return <input onChange={onFieldChange} data-test-subj="testField" />;
       };
 
-      const objectInitialValue = { initial: 'value' };
-
-      interface PristineDirtyModifiedState {
+      interface FieldState {
         isModified: boolean;
         isDirty: boolean;
         isPristine: boolean;
+        value: unknown;
       }
 
       const getChildrenFunc = (
-        cb: (state: PristineDirtyModifiedState) => void,
+        onStateChange: (state: FieldState) => void,
         Component?: React.ComponentType<{ field: FieldHook }>
-      ) => (field: FieldHook) => {
-        const { onChange, isModified, isPristine, isDirty } = field;
+      ) => {
+        // This is the children passed down to the <UseField path="name" /> of our form
+        const childrenFunc = (field: FieldHook) => {
+          const { onChange, isModified, isPristine, isDirty, value } = field;
 
-        // Forward the field state to our jest.fn() spy
-        cb({ isModified, isPristine, isDirty });
+          // Forward the field state to our jest.fn() spy
+          onStateChange({ isModified, isPristine, isDirty, value });
 
-        // Render the child component if any (useful to test the Object field type)
-        return Component ? (
-          <Component field={field} />
-        ) : (
-          <input onChange={onChange} data-test-subj="testField" />
-        );
+          // Render the child component if any (useful to test the Object field type)
+          return Component ? (
+            <Component field={field} />
+          ) : (
+            <input onChange={onChange} data-test-subj="testField" />
+          );
+        };
+
+        return childrenFunc;
       };
 
       interface Props {
@@ -104,12 +108,14 @@ describe('<UseField />', () => {
         );
       };
 
-      const onIsModifiedChange = jest.fn();
-      const lastValue = (): PristineDirtyModifiedState =>
-        onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
+      const onStateChangeSpy = jest.fn<void, [FieldState]>();
+      const lastFieldState = (): FieldState =>
+        onStateChangeSpy.mock.calls[onStateChangeSpy.mock.calls.length - 1][0];
+      const toString = (value: unknown): string =>
+        typeof value === 'string' ? value : JSON.stringify(value);
 
       const setup = registerTestBed(TestComp, {
-        defaultProps: { onIsModifiedChange },
+        defaultProps: { onStateChangeSpy },
         memoryRouter: { wrapComponent: false },
       });
 
@@ -118,14 +124,14 @@ describe('<UseField />', () => {
           description: 'should update the state for field without default values',
           initialValue: '',
           changedValue: 'changed',
-          fieldProps: { children: getChildrenFunc(onIsModifiedChange) },
+          fieldProps: { children: getChildrenFunc(onStateChangeSpy) },
         },
         {
           description: 'should update the state for field with default value in their config',
           initialValue: 'initialValue',
           changedValue: 'changed',
           fieldProps: {
-            children: getChildrenFunc(onIsModifiedChange),
+            children: getChildrenFunc(onStateChangeSpy),
             config: { defaultValue: 'initialValue' },
           },
         },
@@ -134,7 +140,7 @@ describe('<UseField />', () => {
           initialValue: 'initialValue',
           changedValue: 'changed',
           fieldProps: {
-            children: getChildrenFunc(onIsModifiedChange),
+            children: getChildrenFunc(onStateChangeSpy),
             defaultValue: 'initialValue',
           },
         },
@@ -143,30 +149,45 @@ describe('<UseField />', () => {
         // putting back the original object
         {
           description: 'should update the state for field with object field type',
-          initialValue: JSON.stringify(objectInitialValue),
-          changedValue: JSON.stringify({ foo: 'bar' }),
+          initialValue: { initial: 'value' },
+          changedValue: { foo: 'bar' },
           fieldProps: {
-            children: getChildrenFunc(onIsModifiedChange, ObjectField),
-            defaultValue: objectInitialValue,
+            children: getChildrenFunc(onStateChangeSpy, ObjectField),
+            defaultValue: { initial: 'value' },
           },
         },
       ].forEach(({ description, fieldProps, initialValue, changedValue }) => {
         test(description, async () => {
           const { form } = await setup({ fieldProps });
 
-          expect(lastValue()).toEqual({ isPristine: true, isDirty: false, isModified: false });
-
-          await act(async () => {
-            form.setInputValue('testField', changedValue);
+          expect(lastFieldState()).toEqual({
+            isPristine: true,
+            isDirty: false,
+            isModified: false,
+            value: initialValue,
           });
 
-          expect(lastValue()).toEqual({ isPristine: false, isDirty: true, isModified: true });
+          await act(async () => {
+            form.setInputValue('testField', toString(changedValue));
+          });
+
+          expect(lastFieldState()).toEqual({
+            isPristine: false,
+            isDirty: true,
+            isModified: true,
+            value: changedValue,
+          });
 
           // Put back to the initial value --> isModified should be false
           await act(async () => {
-            form.setInputValue('testField', initialValue);
+            form.setInputValue('testField', toString(initialValue));
           });
-          expect(lastValue()).toEqual({ isPristine: false, isDirty: true, isModified: false });
+          expect(lastFieldState()).toEqual({
+            isPristine: false,
+            isDirty: true,
+            isModified: false,
+            value: initialValue,
+          });
         });
       });
     });
