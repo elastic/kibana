@@ -24665,8 +24665,6 @@
     "xpack.watcher.sections.watchEdit.json.titlePanel.editWatchTitle": "编辑 {watchName}",
     "xpack.watcher.sections.watchEdit.loadingWatchDescription": "正在加载监视……",
     "xpack.watcher.sections.watchEdit.loadingWatchVisualizationDescription": "正在加载监视可视化……",
-    "xpack.watcher.sections.watchEdit.monitoring.edit.calloutDescriptionText": "监视“{watchName}”为系统监视，无法编辑。{watchStatusLink}",
-    "xpack.watcher.sections.watchEdit.monitoring.edit.calloutTitleText": "此监视无法编辑。",
     "xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle": "查看监视状态。",
     "xpack.watcher.sections.watchEdit.simulate.form.actionModesFieldLabel": "操作模式",
     "xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription": "允许监视执行或跳过操作。{actionsLink}",
