@@ -48,6 +48,16 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
+interface AxisOptions {
+  groupId: number;
+  key: number;
+  id: string;
+  title?: string;
+  position?: Position;
+  tickFormat?: (val: number) => string;
+  domain?: AxisSpec['domain'];
+}
+
 const MAIN_GROUP_ID = 1;
 
 const DefaultYAxis = () => (
@@ -62,40 +72,58 @@ const DefaultYAxis = () => (
 );
 
 const renderYAxis = (series: Series[]) => {
-  let isShowYAxisGridLines = true;
+  const yAxisOptions = series.reduce((acc, data, index) => {
+    const yaxis = extractYAxis(data);
+    const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
 
-  const yAxis = series
-    .map((data, index) => {
-      const yaxis = extractYAxis(data);
+    let extraAxisOptions = {};
 
-      if (yaxis) {
-        const groupId = data.yaxis ? data.yaxis : MAIN_GROUP_ID;
-        const gridLine = {
-          visible: isShowYAxisGridLines,
-        };
+    if (yaxis) {
+      extraAxisOptions = {
+        id: yaxis.position + yaxis.axisLabel,
+        title: yaxis.axisLabel,
+        position: yaxis.position,
+        tickFormat: yaxis.tickFormatter,
+        domain: withStaticPadding({
+          fit: yaxis.min === undefined && yaxis.max === undefined,
+          min: yaxis.min,
+          max: yaxis.max,
+        }),
+      };
+    }
 
-        isShowYAxisGridLines = false;
+    if (acc.every((axis) => axis.groupId !== groupId)) {
+      acc.push({
+        groupId,
+        key: index,
+        domain: withStaticPadding({
+          fit: false,
+        }),
+        id: 'left' + index,
+        ...extraAxisOptions,
+      });
+    } else if (yaxis) {
+      const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
+      acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...extraAxisOptions };
+    }
 
-        return (
-          <Axis
-            groupId={`${groupId}`}
-            key={index}
-            id={yaxis.position + yaxis.axisLabel}
-            title={yaxis.axisLabel}
-            position={yaxis.position}
-            tickFormat={yaxis.tickFormatter}
-            gridLine={gridLine}
-            domain={withStaticPadding({
-              fit: yaxis.min === undefined && yaxis.max === undefined,
-              min: yaxis.min,
-              max: yaxis.max,
-            })}
-          />
-        );
-      }
-      return null;
-    })
-    .filter(Boolean);
+    return acc;
+  }, [] as AxisOptions[]);
+
+  const yAxis = yAxisOptions.map((option, index) => (
+    <Axis
+      groupId={`${option.groupId}`}
+      key={option.key}
+      id={option.id}
+      title={option.title}
+      position={option.position}
+      tickFormat={option.tickFormat}
+      gridLine={{
+        visible: !index,
+      }}
+      domain={option.domain}
+    />
+  ));
 
   return yAxis.length ? yAxis : <DefaultYAxis />;
 };
