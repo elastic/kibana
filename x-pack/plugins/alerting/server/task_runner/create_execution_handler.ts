@@ -157,22 +157,7 @@ export function createExecutionHandler<
         continue;
       }
 
-      // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
-      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      await actionsClient.enqueueExecution({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey: apiKey ?? null,
-        source: asSavedObjectExecutionSource({
-          id: alertId,
-          type: 'alert',
-        }),
-      });
-
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
       const event: IEvent = {
         event: {
           action: EVENT_LOG_ACTIONS.executeAction,
@@ -206,11 +191,36 @@ export function createExecutionHandler<
         },
       };
 
+      // TODO would be nice  to add the action name here, but it's not available
+      const actionLabel = `${action.actionTypeId}:${action.id}`;
       event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
         actionSubgroup
           ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
           : `actionGroup: '${actionGroup}'`
       } action: ${actionLabel}`;
+      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+      eventLogger.logEvent({
+        ...event,
+        event: {
+          ...event.event,
+          action: EVENT_LOG_ACTIONS.executeActionStart,
+        },
+        message: `alert: ${alertLabel} instanceId: '${alertInstanceId}' start schedule ${
+          actionSubgroup
+            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+            : `actionGroup: '${actionGroup}'`
+        } action: ${actionLabel}`,
+      });
+      await actionsClient.enqueueExecution({
+        id: action.id,
+        params: action.params,
+        spaceId,
+        apiKey: apiKey ?? null,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
+      });
       eventLogger.logEvent(event);
     }
   };

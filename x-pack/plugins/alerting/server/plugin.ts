@@ -75,6 +75,7 @@ export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
+  executeActionStart: 'execute-action-start',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',

@@ -147,9 +147,51 @@ test('enqueues execution per selected action', async () => {
     ]
   `);
 
-  expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(2);
   expect(mockEventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-action-start",
+            "category": Array [
+              "alerts",
+            ],
+            "kind": "alert",
+          },
+          "kibana": Object {
+            "alerting": Object {
+              "action_group_id": "default",
+              "action_subgroup": undefined,
+              "instance_id": "2",
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "rel": "primary",
+                "type": "alert",
+                "type_id": "test",
+              },
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+          },
+          "message": "alert: test:1: 'name-of-alert' instanceId: '2' start schedule actionGroup: 'default' action: test:1",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "name-of-alert",
+            "namespace": "test1",
+            "ruleset": "alerts",
+          },
+        },
+      ],
       Array [
         Object {
           "event": Object {
