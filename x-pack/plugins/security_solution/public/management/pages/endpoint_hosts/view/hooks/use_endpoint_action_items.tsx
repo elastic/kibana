@@ -148,13 +148,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }`,
           },
           href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }`,
@@ -172,13 +172,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }/activity?openReassignFlyout=true`,
           },
           href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }/activity?openReassignFlyout=true`,

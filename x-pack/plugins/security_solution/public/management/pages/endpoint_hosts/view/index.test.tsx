@@ -1108,13 +1108,13 @@ describe('when on the endpoint list page', () => {
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/agents/${agentId}`);
     });
 
     it('navigates to the Ingest Agent Details page with policy reassign', async () => {
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
       expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
-        `/app/fleet#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+        `/app/fleet#/agents/${agentId}/activity?openReassignFlyout=true`
       );
     });
   });
