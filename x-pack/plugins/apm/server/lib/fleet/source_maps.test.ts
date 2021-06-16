@@ -148,26 +148,4 @@ describe('Source maps', () => {
       });
     });
   });
-  describe('updateSourceMapsOnFleetPolicies', () => {
-    it('saves source maps into the package policy', () => {});
-    it.only('removes source maps from the package policy', () => {
-      const update = jest.fn();
-
-      updateSourceMapsOnFleetPolicies({
-        fleetPluginStart: ({
-          createArtifactsClient: jest.fn().mockReturnValue({
-            listArtifacts: jest.fn().mockReturnValue({ items: [] }),
-          }),
-          packagePolicyService: {
-            update,
-            list: jest.fn().mockReturnValue({ items: [packagePolicy] }),
-          },
-        } as unknown) as FleetPluginStart,
-        savedObjectsClient: ({} as unknown) as SavedObjectsClientContract,
-        elasticsearchClient: ({} as unknown) as ElasticsearchClient,
-      });
-
-      expect(update).toHaveBeenCalled();
-    });
-  });
 });
