@@ -45,15 +45,15 @@ describe('CspDirectives', () => {
       const directives = new CspDirectives();
       directives.addDirectiveValue('style-src', 'foo');
       directives.addDirectiveValue('style-src', 'bar');
-      directives.addDirectiveValue('worker-src', 'self');
+      directives.addDirectiveValue('worker-src', 'dolly');
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src foo bar; worker-src self"`
+        `"style-src foo bar; worker-src dolly"`
       );
       expect(directives.getRules()).toMatchInlineSnapshot(`
         Array [
           "style-src foo bar",
-          "worker-src self",
+          "worker-src dolly",
         ]
       `);
     });
@@ -70,6 +70,38 @@ describe('CspDirectives', () => {
           "style-src foo bar",
         ]
       `);
+    });
+
+    it('automatically adds single quotes for keywords', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', 'none');
+      directives.addDirectiveValue('style-src', 'self');
+      directives.addDirectiveValue('style-src', 'strict-dynamic');
+      directives.addDirectiveValue('style-src', 'report-sample');
+      directives.addDirectiveValue('style-src', 'unsafe-inline');
+      directives.addDirectiveValue('style-src', 'unsafe-eval');
+      directives.addDirectiveValue('style-src', 'unsafe-hashes');
+      directives.addDirectiveValue('style-src', 'unsafe-allow-redirects');
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+      );
+    });
+
+    it('does not add single quotes for keywords when already present', () => {
+      const directives = new CspDirectives();
+      directives.addDirectiveValue('style-src', `'none'`);
+      directives.addDirectiveValue('style-src', `'self'`);
+      directives.addDirectiveValue('style-src', `'strict-dynamic'`);
+      directives.addDirectiveValue('style-src', `'report-sample'`);
+      directives.addDirectiveValue('style-src', `'unsafe-inline'`);
+      directives.addDirectiveValue('style-src', `'unsafe-eval'`);
+      directives.addDirectiveValue('style-src', `'unsafe-hashes'`);
+      directives.addDirectiveValue('style-src', `'unsafe-allow-redirects'`);
+
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+      );
     });
   });
 
@@ -97,6 +129,23 @@ describe('CspDirectives', () => {
     it('handles config with rules', () => {
       const config = cspConfig.schema.validate({
         rules: [`script-src 'self' http://foo.com`, `worker-src 'self'`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'self' http://foo.com",
+          "worker-src 'self'",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'self' http://foo.com; worker-src 'self'"`
+      );
+    });
+
+    it('adds single quotes for keyword for rules', () => {
+      const config = cspConfig.schema.validate({
+        rules: [`script-src self http://foo.com`, `worker-src self`],
       });
       const directives = CspDirectives.fromConfig(config);
 
@@ -163,6 +212,24 @@ describe('CspDirectives', () => {
       `);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
         `"script-src 'unsafe-eval' 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
+      );
+    });
+
+    it('adds single quotes for keywords in added directives', () => {
+      const config = cspConfig.schema.validate({
+        script_src: [`unsafe-hashes`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'unsafe-eval' 'self' 'unsafe-hashes'",
+          "worker-src blob: 'self'",
+          "style-src 'unsafe-inline' 'self'",
+        ]
+      `);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'unsafe-eval' 'self' 'unsafe-hashes'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
       );
     });
   });

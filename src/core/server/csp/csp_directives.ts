@@ -23,7 +23,7 @@ export class CspDirectives {
     if (!this.directives.has(directiveName)) {
       this.directives.set(directiveName, new Set());
     }
-    this.directives.get(directiveName)!.add(directiveValue);
+    this.directives.get(directiveName)!.add(normalizeDirectiveValue(directiveValue));
   }
 
   getCspHeader() {
@@ -65,3 +65,21 @@ const parseRules = (rules: string[]): Partial<Record<CspDirectiveName, string[]>
   });
   return directives;
 };
+
+const keywordTokens = [
+  'none',
+  'self',
+  'strict-dynamic',
+  'report-sample',
+  'unsafe-inline',
+  'unsafe-eval',
+  'unsafe-hashes',
+  'unsafe-allow-redirects',
+];
+
+function normalizeDirectiveValue(value: string) {
+  if (keywordTokens.includes(value)) {
+    return `'${value}'`;
+  }
+  return value;
+}
