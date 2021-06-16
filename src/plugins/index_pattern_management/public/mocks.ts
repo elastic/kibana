@@ -19,7 +19,14 @@ import {
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
 
-const createSetupContract = (): IndexPatternManagementSetup => {};
+const createSetupContract = (): IndexPatternManagementSetup => ({
+  creation: {
+    addCreationConfig: jest.fn(),
+  } as any,
+  list: {
+    addListConfig: jest.fn(),
+  } as any,
+});
 
 const createStartContract = (): IndexPatternManagementStart => ({
   creation: {
