@@ -563,11 +563,8 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const formatRow = await this.testSubjects.find('valueRow');
-    const formatRowToggle = (await formatRow.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
-
-    await formatRowToggle.click();
-    const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+    const valueRow = await this.toggleRow('valueRow');
+    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
     this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
     const monacoTextArea = await getMonacoTextArea();
     await monacoTextArea.focus();
@@ -576,8 +573,8 @@ export class SettingsPageObject extends FtrService {
 
   async changeFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const formatRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+    const valueRow = await this.testSubjects.find('valueRow');
+    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
     this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
     const monacoTextArea = await getMonacoTextArea();
     await monacoTextArea.focus();
@@ -620,6 +617,24 @@ export class SettingsPageObject extends FtrService {
     await this.find.clickByCssSelector(
       'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
     );
+  }
+
+  async toggleRow(rowTestSubj: string) {
+    this.log.debug('toggling tow = ' + rowTestSubj);
+    const row = await this.testSubjects.find(rowTestSubj);
+    const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.click();
+    return row;
+  }
+
+  async setCustomLabel(label: string) {
+    this.log.debug('set custom label = ' + label);
+    await (
+      await this.testSubjects.findDescendant(
+        'input',
+        await this.testSubjects.find('customLabelRow')
+      )
+    ).type(label);
   }
 
   async setScriptedFieldUrlType(type: string) {

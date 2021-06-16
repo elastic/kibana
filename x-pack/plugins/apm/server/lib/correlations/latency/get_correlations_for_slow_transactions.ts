@@ -41,60 +41,63 @@ export async function getCorrelationsForSlowTransactions(options: Options) {
       return { significantTerms: [] };
     }
 
-    const response = await withApmSpan('get_significant_terms', () => {
-      const params = {
-        apm: { events: [ProcessorEvent.transaction] },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              // foreground filters
-              filter: filters,
-              must: {
-                function_score: {
-                  query: {
-                    range: {
-                      [TRANSACTION_DURATION]: { gte: durationForPercentile },
-                    },
+    const params = {
+      apm: { events: [ProcessorEvent.transaction] },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            // foreground filters
+            filter: filters,
+            must: {
+              function_score: {
+                query: {
+                  range: {
+                    [TRANSACTION_DURATION]: { gte: durationForPercentile },
                   },
-                  script_score: {
-                    script: {
-                      source: `Math.log(2 + doc['${TRANSACTION_DURATION}'].value)`,
-                    },
+                },
+                script_score: {
+                  script: {
+                    source: `Math.log(2 + doc['${TRANSACTION_DURATION}'].value)`,
                   },
                 },
               },
             },
           },
-          aggs: fieldNames.reduce((acc, fieldName) => {
-            return {
-              ...acc,
-              [fieldName]: {
-                significant_terms: {
-                  size: 10,
-                  field: fieldName,
-                  background_filter: {
-                    bool: {
-                      filter: [
-                        ...filters,
-                        {
-                          range: {
-                            [TRANSACTION_DURATION]: {
-                              lt: durationForPercentile,
-                            },
+        },
+        aggs: fieldNames.reduce((acc, fieldName) => {
+          return {
+            ...acc,
+            [fieldName]: {
+              significant_terms: {
+                size: 10,
+                field: fieldName,
+                background_filter: {
+                  bool: {
+                    filter: [
+                      ...filters,
+                      {
+                        range: {
+                          [TRANSACTION_DURATION]: {
+                            lt: durationForPercentile,
                           },
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
-            };
-          }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
-        },
-      };
-      return apmEventClient.search(params);
-    });
+            },
+          };
+        }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
+      },
+    };
+
+    const response = await apmEventClient.search(
+      'get_significant_terms',
+      params
+    );
+
     if (!response.aggregations) {
       return { significantTerms: [] };
     }

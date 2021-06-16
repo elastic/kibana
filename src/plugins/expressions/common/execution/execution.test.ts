@@ -834,8 +834,8 @@ describe('Execution', () => {
 
         expect((chain[0].arguments.val[0] as ExpressionAstExpression).chain[0].debug!.args).toEqual(
           {
-            name: 'foo',
-            value: 5,
+            name: ['foo'],
+            value: [5],
           }
         );
       });

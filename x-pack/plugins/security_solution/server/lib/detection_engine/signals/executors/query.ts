@@ -14,11 +14,10 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { AlertAttributes, RuleRangeTuple } from '../types';
+import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
@@ -32,9 +31,10 @@ export const queryExecutor = async ({
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -44,9 +44,10 @@ export const queryExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -74,7 +75,8 @@ export const queryExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
     pageSize: searchAfterSize,
-    refresh,
     buildRuleMessage,
+    bulkCreate,
+    wrapHits,
   });
 };

@@ -8,6 +8,7 @@
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { localUIFilters, localUIFilterNames } from './local_ui_filters/config';
+import { environmentQuery } from '../../../utils/queries';
 
 export function getEsFilter(uiFilters: UIFilters) {
   const localFilterValues = uiFilters;
@@ -23,5 +24,5 @@ export function getEsFilter(uiFilters: UIFilters) {
       };
     }) as ESFilter[];
 
-  return mappedFilters;
+  return [...mappedFilters, ...environmentQuery(uiFilters.environment)];
 }
