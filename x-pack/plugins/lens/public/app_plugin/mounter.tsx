@@ -329,7 +329,7 @@ export function loadDocument(
         const datasourceStates: LensAppState['datasourceStates'] = {};
         Object.entries(doc.state.datasourceStates).forEach(([datasourceId, state]) => {
           datasourceStates[datasourceId] = { isLoading: true, state };
-        })
+        });
         lensStore.dispatch(
           setLoadedDocument({
             query: doc.state.query,
@@ -345,12 +345,12 @@ export function loadDocument(
                 : data.search.session.start(),
             ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
             activeDatasourceId:
-                getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null,
-              datasourceStates,
-              visualization: {
-                state: null,
-                activeId: doc?.visualizationType || Object.keys(visualizationMap)[0] || null,
-              },
+              getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null,
+            datasourceStates,
+            visualization: {
+              state: null,
+              activeId: doc?.visualizationType || Object.keys(visualizationMap)[0] || null,
+            },
           })
         );
       } else {
