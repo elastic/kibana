@@ -15971,6 +15971,7 @@
     "xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage": "このクラスターでElasticsearchノード「{restarted}」が再起動しました。",
     "xpack.monitoring.alerts.panel.disableAlert.errorTitle": "アラートを無効にできません",
     "xpack.monitoring.alerts.panel.disableTitle": "無効にする",
+    "xpack.monitoring.alerts.panel.editAlert": "アラートを編集",
     "xpack.monitoring.alerts.panel.enableAlert.errorTitle": "アラートを有効にできません",
     "xpack.monitoring.alerts.panel.muteAlert.errorTitle": "アラートをミュートできません",
     "xpack.monitoring.alerts.panel.muteTitle": "ミュート",

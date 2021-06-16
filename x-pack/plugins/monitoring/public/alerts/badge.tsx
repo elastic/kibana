@@ -23,7 +23,7 @@ export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1
 const MAX_TO_SHOW_BY_CATEGORY = 8;
 
 const PANEL_TITLE = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Alerts',
 });
 
 const GROUP_BY_NODE = i18n.translate('xpack.monitoring.alerts.badge.groupByNode', {
@@ -31,7 +31,7 @@ const GROUP_BY_NODE = i18n.translate('xpack.monitoring.alerts.badge.groupByNode'
 });
 
 const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType', {
-  defaultMessage: 'Group by rule type',
+  defaultMessage: 'Group by alert type',
 });
 
 interface Props {
