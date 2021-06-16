@@ -14,9 +14,10 @@ import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
 } from '../../../../components/context_app/utils/constants';
+import { SurrDocType } from '../../api/context';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
-  ['successors', 'predecessors'].forEach((type) => {
+  [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {
     const onChangeCount = jest.fn();
     const props = {
       defaultStepSize: 5,
@@ -71,7 +72,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
     });
 
     test(`${type}: Warning about limitation of additional records`, () => {
-      if (type === 'predecessors') {
+      if (type === SurrDocType.PREDECESSORS) {
         expect(findTestSubject(wrapper, 'predecessorsWarningMsg').text()).toBe(
           'No documents newer than the anchor could be found.'
         );

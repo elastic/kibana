@@ -189,7 +189,7 @@ export function getState({
       const mergedState = { ...oldState, ...newState };
 
       if (!isEqualState(oldState, mergedState)) {
-        appStateContainer.set(mergedState);
+        stateStorage.set(APP_STATE_URL_KEY, mergedState, { replace: true });
       }
     },
     getFilters: () => [

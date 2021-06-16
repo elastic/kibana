@@ -122,7 +122,8 @@ export function useContextAppFetch({
       const { sort } = appState;
       const [[sortField, sortDir]] = sort;
 
-      const count = type === 'predecessors' ? appState.predecessorCount : appState.successorCount;
+      const count =
+        type === SurrDocType.PREDECESSORS ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
       const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
@@ -165,8 +166,8 @@ export function useContextAppFetch({
   const fetchContextRows = useCallback(
     (anchor?: EsHitRecord) =>
       Promise.allSettled([
-        fetchSurroundingRows('predecessors', anchor),
-        fetchSurroundingRows('successors', anchor),
+        fetchSurroundingRows(SurrDocType.PREDECESSORS, anchor),
+        fetchSurroundingRows(SurrDocType.SUCCESSORS, anchor),
       ]),
     [fetchSurroundingRows]
   );

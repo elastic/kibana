@@ -24,16 +24,20 @@ import {
 
 const mockFilterManager = createFilterManagerMock();
 
-jest.mock('../../angular/context/api/context', () => ({
-  fetchContextProvider: () => ({
-    fetchSurroundingDocs: (type: string, indexPatternId: string) => {
-      if (!indexPatternId) {
-        throw new Error();
-      }
-      return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
-    },
-  }),
-}));
+jest.mock('../../angular/context/api/context', () => {
+  const originalModule = jest.requireActual('../../angular/context/api/context');
+  return {
+    ...originalModule,
+    fetchContextProvider: () => ({
+      fetchSurroundingDocs: (type: string, indexPatternId: string) => {
+        if (!indexPatternId) {
+          throw new Error();
+        }
+        return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
+      },
+    }),
+  };
+});
 
 jest.mock('../../angular/context/api/anchor', () => ({
   fetchAnchorProvider: () => (indexPatternId: string) => {

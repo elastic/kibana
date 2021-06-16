@@ -16,12 +16,9 @@ import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { ContextApp } from './context_app';
 import { setServices } from '../../../kibana_services';
 import { DiscoverServices } from '../../../build_services';
-import {
-  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from 'src/plugins/discover/common';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
+import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -64,15 +61,7 @@ describe('ContextApp test', () => {
       core: { notifications: { toasts: [] } },
       history: () => {},
       filterManager: mockFilterManager,
-      uiSettings: {
-        get: (key: string) => {
-          if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
-            return ['_doc'];
-          } else if (key === SEARCH_FIELDS_FROM_SOURCE) {
-            return true;
-          }
-        },
-      },
+      uiSettings: uiSettingsMock,
     } as unknown) as DiscoverServices);
   });
 

@@ -48,9 +48,10 @@ export interface ActionBarProps {
   isLoading: boolean;
   /**
    * is triggered when the input containing count is changed
+   * @param type
    * @param count
    */
-  onChangeCount: (type: string, count: number) => void;
+  onChangeCount: (type: SurrDocType, count: number) => void;
   /**
    * can be `predecessors` or `successors`, usage in context:
    * predecessors action bar + records (these are newer records)
@@ -70,7 +71,7 @@ export function ActionBar({
   type,
 }: ActionBarProps) {
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
-  const isSuccessor = type === 'successors';
+  const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
   const isValid = (value: number) => value >= MIN_CONTEXT_SIZE && value <= MAX_CONTEXT_SIZE;
   const onSubmit = (ev: React.FormEvent<HTMLFormElement>) => {

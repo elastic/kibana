@@ -21,7 +21,7 @@ import { ActionBar } from '../../angular/context/components/action_bar/action_ba
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/context_state';
-import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
+import { EsHitRecord, EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
 
@@ -154,8 +154,8 @@ export function ContextAppContent({
   };
 
   const onChangeCount = useCallback(
-    (type, count) => {
-      const countKey = type === 'successors' ? 'successorCount' : 'predecessorCount';
+    (type: SurrDocType, count: number) => {
+      const countKey = type === SurrDocType.SUCCESSORS ? 'successorCount' : 'predecessorCount';
       setAppState({ [countKey]: clamp(count) });
     },
     [setAppState]
@@ -164,7 +164,7 @@ export function ContextAppContent({
   return (
     <Fragment>
       <ActionBarMemoized
-        type="predecessors"
+        type={SurrDocType.PREDECESSORS}
         defaultStepSize={defaultStepSize}
         docCount={predecessorCount}
         docCountAvailable={predecessors.length}
@@ -186,7 +186,7 @@ export function ContextAppContent({
       )}
       <EuiHorizontalRule margin="xs" />
       <ActionBarMemoized
-        type="successors"
+        type={SurrDocType.SUCCESSORS}
         defaultStepSize={defaultStepSize}
         docCount={successorCount}
         docCountAvailable={successors.length}

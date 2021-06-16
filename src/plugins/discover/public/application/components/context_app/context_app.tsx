@@ -24,6 +24,7 @@ import { useContextAppState } from './use_context_app_state';
 import { useContextAppFetch } from './use_context_app_fetch';
 import { popularizeField } from '../../helpers/popularize_field';
 import { ContextAppContent } from './context_app_content';
+import { SurrDocType } from '../../angular/context/api/context';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -67,9 +68,9 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     if (!prevAppState.current) {
       fetchAllRows();
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
-      fetchSurroundingRows('predecessors');
+      fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {
-      fetchSurroundingRows('successors');
+      fetchSurroundingRows(SurrDocType.SUCCESSORS);
     } else if (!isEqualFilters(prevAppState.current.filters, appState.filters)) {
       fetchContextRows();
     }
@@ -148,25 +149,25 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
+                services={services}
+                indexPattern={indexPattern}
+                useNewFieldsApi={useNewFieldsApi}
+                isLegacy={isLegacy}
                 columns={columns}
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}
-                services={services}
-                indexPattern={indexPattern}
+                sort={appState.sort as [[string, SortDirection]]}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
+                setAppState={setAppState}
+                addFilter={addFilter}
                 rows={rows}
-                sort={appState.sort as [[string, SortDirection]]}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                useNewFieldsApi={useNewFieldsApi}
-                isLegacy={isLegacy}
-                setAppState={setAppState}
-                addFilter={addFilter}
               />
             </EuiPageContent>
           </EuiPage>
