@@ -36,7 +36,7 @@ export type EndpointTypes =
   | 'cluster.putSettings'
   | 'cluster.getSettigns'
   | string;
-type ClientParams = estypes.SearchRequest | undefined;
+export type ClientParams = estypes.SearchRequest | undefined;
 
 interface IAppGlobals {
   url: string;

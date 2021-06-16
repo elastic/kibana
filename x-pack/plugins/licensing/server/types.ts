@@ -6,7 +6,12 @@
  */
 
 import { Observable } from 'rxjs';
-import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type {
+  IClusterClient,
+  ILegacyClusterClient,
+  IRouter,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -107,7 +112,7 @@ export interface LicensingPluginStart {
    * given polling frequency.
    */
   createLicensePoller: (
-    clusterClient: IClusterClient,
+    clusterClient: ILegacyClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
   /**
