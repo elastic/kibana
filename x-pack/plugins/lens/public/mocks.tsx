@@ -66,6 +66,9 @@ export const defaultDoc = ({
   state: {
     query: 'kuery',
     filters: [{ query: { match_phrase: { src: 'test' } } }],
+    datasourceStates: {
+      testDatasource: 'datasource',
+    },
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
 } as unknown) as Document;
@@ -259,18 +262,32 @@ export function makeDefaultServices(
 
 export function mockLensStore({
   data,
-  storePreloadedState,
+  preloadedState,
+  dispatch,
 }: {
-  data: DataPublicPluginStart;
-  storePreloadedState?: Partial<LensAppState>;
+  data?: DataPublicPluginStart;
+  preloadedState?: Partial<LensAppState>;
+  dispatch?: jest.Mock;
 }) {
+  if (!data) {
+    data = mockDataPlugin();
+  }
   const lensStore = makeConfigureStore(
     getPreloadedState({
+      activeDatasourceId: 'testDatasource',
+      visualization: { activeId: 'testVis', state: null },
+      datasourceStates: {
+        testDatasource: {
+          isLoading: true,
+          state: '',
+        },
+      },
+
       query: data.query.queryString.getQuery(),
       filters: data.query.filterManager.getGlobalFilters(),
       searchSessionId: data.search.session.start(),
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-      ...storePreloadedState,
+      ...preloadedState,
     }),
     {
       data,
@@ -278,36 +295,52 @@ export function mockLensStore({
   );
 
   const origDispatch = lensStore.dispatch;
-  lensStore.dispatch = jest.fn(origDispatch);
+  lensStore.dispatch = jest.fn(dispatch || origDispatch);
   return lensStore;
 }
 
 export const mountWithProvider = async (
   component: React.ReactElement,
-  data: DataPublicPluginStart,
-  storePreloadedState?: Partial<LensAppState>,
-  extraWrappingComponent?: React.FC<{
-    children: React.ReactNode;
-  }>
+  store?: {
+    data?: DataPublicPluginStart;
+    preloadedState?: Partial<LensAppState>;
+    dispatch?: jest.Mock;
+  },
+  options?: {
+    wrappingComponent?: React.FC<{
+      children: React.ReactNode;
+    }>;
+    attachTo?: HTMLElement;
+  }
 ) => {
-  const lensStore = mockLensStore({ data, storePreloadedState });
+  const lensStore = mockLensStore(store || {});
 
-  const wrappingComponent: React.FC<{
+  let wrappingComponent: React.FC<{
     children: React.ReactNode;
-  }> = ({ children }) => {
-    if (extraWrappingComponent) {
-      return extraWrappingComponent({
-        children: <Provider store={lensStore}>{children}</Provider>,
-      });
-    }
-    return <Provider store={lensStore}>{children}</Provider>;
+  }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
+
+  let restOptions: {
+    attachTo?: HTMLElement | undefined;
   };
+  if (options) {
+    const { wrappingComponent: _wrappingComponent, ...rest } = options;
+    restOptions = rest;
+
+    if (_wrappingComponent) {
+      wrappingComponent = ({ children }) => {
+        return _wrappingComponent({
+          children: <Provider store={lensStore}>{children}</Provider>,
+        });
+      };
+    }
+  }
 
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
     instance = mount(component, ({
       wrappingComponent,
+      ...restOptions,
     } as unknown) as ReactWrapper);
   });
   return { instance, lensStore };

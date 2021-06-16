@@ -6,12 +6,13 @@
  */
 
 import { mapValues } from 'lodash';
-import { EditorFrameState } from '../state_management';
+import { LensAppState } from '../../../state_management';
+
 import { Datasource, Visualization } from '../../../types';
 
 interface RemoveLayerOptions {
   trackUiEvent: (name: string) => void;
-  state: EditorFrameState;
+  state: LensAppState;
   layerId: string;
   activeVisualization: Pick<Visualization, 'getLayerIds' | 'clearLayer' | 'removeLayer'>;
   datasourceMap: Record<string, Pick<Datasource, 'clearLayer' | 'removeLayer'>>;
@@ -19,13 +20,13 @@ interface RemoveLayerOptions {
 
 interface AppendLayerOptions {
   trackUiEvent: (name: string) => void;
-  state: EditorFrameState;
+  state: LensAppState;
   generateId: () => string;
   activeDatasource: Pick<Datasource, 'insertLayer' | 'id'>;
   activeVisualization: Pick<Visualization, 'appendLayer'>;
 }
 
-export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
+export function removeLayer(opts: RemoveLayerOptions): LensAppState {
   const { state, trackUiEvent: trackUiEvent, activeVisualization, layerId, datasourceMap } = opts;
   const isOnlyLayer = activeVisualization
     .getLayerIds(state.visualization.state)
@@ -61,7 +62,7 @@ export function appendLayer({
   state,
   generateId,
   activeDatasource,
-}: AppendLayerOptions): EditorFrameState {
+}: AppendLayerOptions): LensAppState {
   trackUiEvent('layer_added');
 
   if (!activeVisualization.appendLayer) {

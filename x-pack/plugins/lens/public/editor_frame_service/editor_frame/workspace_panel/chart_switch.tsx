@@ -21,10 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Visualization, FramePublicAPI, Datasource, VisualizationType } from '../../../types';
-import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLensDispatch } from '../../../state_management';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -38,7 +38,6 @@ interface VisualizationSelection {
 }
 
 interface Props {
-  dispatch: (action: Action) => void;
   visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
   visualizationState: unknown;
@@ -99,6 +98,7 @@ function getCurrentVisualizationId(
 
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
+  const dispatchLens = useLensDispatch();
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
@@ -106,7 +106,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
-      props.dispatch,
+      dispatchLens,
       {
         ...selection,
         visualizationState: selection.getVisualizationState(),

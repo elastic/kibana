@@ -26,15 +26,15 @@ describe('save editor frame state', () => {
       indexpattern: mockDatasource,
     },
     visualization: mockVisualization,
+    title: 'aaa',
+    description: 'desc',
     state: {
-      title: 'aaa',
       datasourceStates: {
         indexpattern: {
           state: 'hello',
           isLoading: false,
         },
       },
-      activeDatasourceId: 'indexpattern',
       visualization: { activeId: '2', state: {} },
     },
     framePublicAPI: {
@@ -69,14 +69,12 @@ describe('save editor frame state', () => {
         indexpattern: datasource,
       },
       state: {
-        title: 'bbb',
         datasourceStates: {
           indexpattern: {
             state: '2',
             isLoading: false,
           },
         },
-        activeDatasourceId: 'indexpattern',
         visualization: { activeId: '3', state: '4' },
       },
       visualization,
@@ -86,6 +84,8 @@ describe('save editor frame state', () => {
     expect(isSaveable).toEqual(true);
     expect(doc).toEqual({
       id: undefined,
+      description: 'desc',
+      title: 'aaa',
       state: {
         datasourceStates: {
           indexpattern: {
@@ -108,7 +108,6 @@ describe('save editor frame state', () => {
           type: 'index-pattern',
         },
       ],
-      title: 'bbb',
       type: 'lens',
       visualizationType: '3',
     });

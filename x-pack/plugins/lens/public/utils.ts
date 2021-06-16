@@ -10,6 +10,7 @@ import { IndexPattern, IndexPatternsContract, TimefilterContract } from 'src/plu
 import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { LensFilterEvent } from './types';
+import { Document } from './persistence/saved_object_store';
 
 /** replaces the value `(empty) to empty string for proper filtering` */
 export const desanitizeFilterContext = (
@@ -90,4 +91,12 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
   }
 
   return configuredTimeZone;
+}
+export function getActiveDatasourceIdFromDoc(doc?: Document) {
+  if (!doc) {
+    return null;
+  }
+
+  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
+  return firstDatasourceFromDoc || null;
 }

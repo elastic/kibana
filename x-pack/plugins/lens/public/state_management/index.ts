@@ -25,6 +25,19 @@ export const {
   navigateAway,
   onChangeFromEditorFrame,
   onActiveDataChange,
+  setLoadedDocument,
+
+  updateState,
+  updateDatasourceState,
+  updateVisualizationState,
+  updateLayer,
+  visualizationLoaded,
+  switchVisualization,
+  selectSuggestion,
+  rollbackSuggestion,
+  submitSuggestion,
+  switchDatasource,
+  setToggleFullscreen,
 } = appSlice.actions;
 
 export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
@@ -45,14 +58,16 @@ export const makeConfigureStore = (
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [
-          'app/setState',
-          'app/onChangeFromEditorFrame',
-          'app/onActiveDataChange',
-          'app/navigateAway',
-        ],
-      },
+      // serializableCheck: {
+      //   ignoredActions: [
+      //     'app/setState',
+      //     'app/onChangeFromEditorFrame',
+      //     'app/onActiveDataChange',
+      //     'app/navigateAway',
+      //     'app/*'
+      //   ],
+      // },
+      serializableCheck: false,
     }),
     timeRangeMiddleware(data),
     externalContextMiddleware(data),

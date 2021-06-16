@@ -136,18 +136,20 @@ export class EditorFrameService {
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 onError={onError}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 core={core}
                 plugins={plugins}
-                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 palettes={palettes}
-                showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
+                showNoDataPopover={showNoDataPopover}
+                datasourceMap={resolvedDatasources}
+                visualizationMap={resolvedVisualizations}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>
           );
         },
+        datasourceMap: resolvedDatasources, // todo: check if only first is needed
+        visualizationMap: resolvedVisualizations,
       };
     };
 

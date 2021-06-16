@@ -330,7 +330,14 @@ export const runSaveLensVisualization = async (
       ...newInput,
     };
 
-    return { persistedDoc: newDoc, lastKnownDoc: newDoc, isLinkedToOriginatingApp: false };
+    return {
+      persistedDoc: newDoc,
+      lastKnownDoc: newDoc,
+      isLinkedToOriginatingApp: false,
+      title: newDoc.title,
+      description: newDoc.description,
+      persistedId: newDoc.savedObjectId,
+    };
   } catch (e) {
     // eslint-disable-next-line no-console
     console.dir(e);

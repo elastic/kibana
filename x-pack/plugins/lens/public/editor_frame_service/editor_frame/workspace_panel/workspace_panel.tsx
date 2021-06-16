@@ -33,7 +33,6 @@ import {
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
-import { Action } from '../state_management';
 import {
   Datasource,
   Visualization,
@@ -56,7 +55,12 @@ import { DropIllustration } from '../../../assets/drop_illustration';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
-import { onActiveDataChange, useLensDispatch } from '../../../state_management';
+import {
+  onActiveDataChange,
+  useLensDispatch,
+  updateVisualizationState,
+  updateDatasourceState,
+} from '../../../state_management';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -72,7 +76,6 @@ export interface WorkspacePanelProps {
     }
   >;
   framePublicAPI: FramePublicAPI;
-  dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
@@ -128,7 +131,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   datasourceMap,
   datasourceStates,
   framePublicAPI,
-  dispatch,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
@@ -139,6 +141,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
+  const dispatchLens = useLensDispatch();
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -232,6 +235,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ]
   );
 
+  // todo: isSaveable change here
   const expressionExists = Boolean(expression);
 
   const onEvent = useCallback(
@@ -251,14 +255,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          visualizationId: activeVisualization.id,
-          updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
-        });
+        dispatchLens(
+          updateVisualizationState({
+            visualizationId: activeVisualization.id,
+            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+          })
+        );
       }
     },
-    [plugins.uiActions, dispatch, activeVisualization]
+    [plugins.uiActions, activeVisualization, dispatchLens]
   );
 
   useEffect(() => {
@@ -275,9 +280,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
-  }, [suggestionForDraggedField, expressionExists, dispatch]);
+  }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
   const renderEmptyWorkspace = () => {
     return (
@@ -337,7 +342,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         expression={expression}
         framePublicAPI={framePublicAPI}
         timefilter={plugins.data.query.timefilter.timefilter}
-        dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
@@ -389,7 +393,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     <WorkspacePanelWrapper
       title={title}
       framePublicAPI={framePublicAPI}
-      dispatch={dispatch}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
       datasourceStates={datasourceStates}
@@ -410,7 +413,6 @@ export const VisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
-  dispatch,
   application,
   activeDatasourceId,
 }: {
@@ -418,7 +420,6 @@ export const VisualizationWrapper = ({
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
-  dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
@@ -480,11 +481,12 @@ export const VisualizationWrapper = ({
             data-test-subj="errorFixAction"
             onClick={async () => {
               const newState = await validationError.fixAction?.newState(framePublicAPI);
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                datasourceId: activeDatasourceId,
-                updater: newState,
-              });
+              dispatchLens(
+                updateDatasourceState({
+                  updater: newState,
+                  datasourceId: activeDatasourceId,
+                })
+              );
             }}
           >
             {validationError.fixAction.label}

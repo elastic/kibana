@@ -23,7 +23,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
-import { EditorFrameStart } from '../types';
+import { Datasource, EditorFrameStart, Visualization } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
@@ -43,9 +43,12 @@ import {
   getPreloadedState,
   LensRootStore,
   setState,
+  setLoadedDocument,
+  LensAppState,
 } from '../state_management';
-import { getResolvedDateRange } from '../utils';
 import { getLastKnownDoc } from './save_modal_container';
+import { getAllIndexPatterns, getResolvedDateRange, getActiveDatasourceIdFromDoc } from '../utils';
+import { injectFilterReferences } from '../persistence';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -166,6 +169,19 @@ export async function mountApp(
   if (!initialContext) {
     data.query.filterManager.setAppFilters([]);
   }
+  const { datasourceMap, visualizationMap } = instance;
+
+  // getInitialState
+  const datasourceStates: LensAppState['datasourceStates'] = {};
+  const initialDatasourceId = Object.keys(datasourceMap)[0] || null;
+  const initialVisualizationId = Object.keys(visualizationMap)[0] || null;
+  if (initialDatasourceId) {
+    datasourceStates[initialDatasourceId] = {
+      state: null,
+      isLoading: true,
+    };
+  }
+
   const preloadedState = getPreloadedState({
     query: data.query.queryString.getQuery(),
     // Do not use app-specific filters from previous app,
@@ -176,10 +192,15 @@ export async function mountApp(
     searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+    activeDatasourceId: initialDatasourceId,
+    datasourceStates,
+    visualization: {
+      state: null,
+      activeId: initialVisualizationId,
+    },
   });
 
   const lensStore: LensRootStore = makeConfigureStore(preloadedState, { data });
-
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
       const redirectCallback = useCallback(
@@ -196,8 +217,11 @@ export async function mountApp(
         lensServices,
         lensStore,
         embeddableEditorIncomingState,
-        dashboardFeatureFlag
+        dashboardFeatureFlag,
+        datasourceMap,
+        visualizationMap
       );
+
       return (
         <Provider store={lensStore}>
           <App
@@ -276,7 +300,9 @@ export function loadDocument(
   lensServices: LensAppServices,
   lensStore: LensRootStore,
   embeddableEditorIncomingState: EmbeddableEditorState | undefined,
-  dashboardFeatureFlag: DashboardFeatureFlagConfig
+  dashboardFeatureFlag: DashboardFeatureFlagConfig,
+  datasourceMap: Record<string, Datasource>,
+  visualizationMap: Record<string, Visualization>
 ) {
   const { attributeService, chrome, notifications, data } = lensServices;
   const { persistedDoc } = lensStore.getState().app;
@@ -300,8 +326,12 @@ export function loadDocument(
       if (newState) {
         const { doc, indexPatterns } = newState;
         const currentSessionId = data.search.session.getSessionId();
+        const datasourceStates: LensAppState['datasourceStates'] = {};
+        Object.entries(doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+          datasourceStates[datasourceId] = { isLoading: true, state };
+        })
         lensStore.dispatch(
-          setState({
+          setLoadedDocument({
             query: doc.state.query,
             isAppLoading: false,
             indexPatternsForTopNav: indexPatterns,
@@ -314,6 +344,13 @@ export function loadDocument(
                 ? currentSessionId
                 : data.search.session.start(),
             ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+            activeDatasourceId:
+                getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null,
+              datasourceStates,
+              visualization: {
+                state: null,
+                activeId: doc?.visualizationType || Object.keys(visualizationMap)[0] || null,
+              },
           })
         );
       } else {

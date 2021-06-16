@@ -10,13 +10,21 @@ import './config_panel.scss';
 import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { removeLayer, appendLayer } from './layer_actions';
+import { appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
+import {
+  useLensDispatch,
+  updateState,
+  updateDatasourceState,
+  updateVisualizationState,
+  setToggleFullscreen,
+} from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
@@ -33,13 +41,8 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const {
-    activeVisualization,
-    visualizationState,
-    dispatch,
-    activeDatasourceId,
-    datasourceMap,
-  } = props;
+  const { activeVisualization, visualizationState, activeDatasourceId, datasourceMap } = props;
+  const dispatchLens = useLensDispatch();
 
   const layerIds = activeVisualization.getLayerIds(visualizationState);
   const {
@@ -50,26 +53,28 @@ export function LayerPanels(
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
-      dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        visualizationId: activeVisualization.id,
-        updater: newState,
-        clearStagedPreview: false,
-      });
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: activeVisualization.id,
+          updater: newState,
+          clearStagedPreview: false,
+        })
+      );
     },
-    [dispatch, activeVisualization]
+    [activeVisualization, dispatchLens]
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater: (prevState: unknown) =>
-          typeof newState === 'function' ? newState(prevState) : newState,
-        datasourceId,
-        clearStagedPreview: false,
-      });
+      dispatchLens(
+        updateDatasourceState({
+          updater: (prevState: unknown) =>
+            typeof newState === 'function' ? newState(prevState) : newState,
+          datasourceId,
+          clearStagedPreview: false,
+        })
+      );
     },
-    [dispatch]
+    [dispatchLens]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string, newState: unknown) => {
@@ -86,42 +91,42 @@ export function LayerPanels(
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
       setTimeout(() => {
-        dispatch({
-          type: 'UPDATE_STATE',
-          subType: 'UPDATE_ALL_STATES',
-          updater: (prevState) => {
-            const updatedDatasourceState =
-              typeof newDatasourceState === 'function'
-                ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
-                : newDatasourceState;
-            return {
-              ...prevState,
-              datasourceStates: {
-                ...prevState.datasourceStates,
-                [datasourceId]: {
-                  state: updatedDatasourceState,
-                  isLoading: false,
+        dispatchLens(
+          updateState({
+            subType: 'UPDATE_ALL_STATES',
+            updater: (prevState) => {
+              const updatedDatasourceState =
+                typeof newDatasourceState === 'function'
+                  ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+                  : newDatasourceState;
+              return {
+                ...prevState,
+                datasourceStates: {
+                  ...prevState.datasourceStates,
+                  [datasourceId]: {
+                    state: updatedDatasourceState,
+                    isLoading: false,
+                  },
                 },
-              },
-              visualization: {
-                ...prevState.visualization,
-                state: newVisualizationState,
-              },
-              stagedPreview: undefined,
-            };
-          },
-        });
+                visualization: {
+                  ...prevState.visualization,
+                  state: newVisualizationState,
+                },
+                stagedPreview: undefined,
+              };
+            },
+          })
+        );
       }, 0);
     },
-    [dispatch]
+    [dispatchLens]
   );
+
   const toggleFullscreen = useMemo(
     () => () => {
-      dispatch({
-        type: 'TOGGLE_FULLSCREEN',
-      });
+      dispatchLens(setToggleFullscreen());
     },
-    [dispatch]
+    [dispatchLens]
   );
 
   const datasourcePublicAPIs = props.framePublicAPI.datasourceLayers;
@@ -144,18 +149,41 @@ export function LayerPanels(
             updateAll={updateAll}
             isOnlyLayer={layerIds.length === 1}
             onRemoveLayer={() => {
-              dispatch({
-                type: 'UPDATE_STATE',
-                subType: 'REMOVE_OR_CLEAR_LAYER',
-                updater: (state) =>
-                  removeLayer({
-                    activeVisualization,
-                    layerId,
-                    trackUiEvent,
-                    datasourceMap,
-                    state,
-                  }),
-              });
+              dispatchLens(
+                updateState({
+                  subType: 'REMOVE_OR_CLEAR_LAYER',
+                  updater: (state) => {
+                    const isOnlyLayer = activeVisualization
+                      .getLayerIds(state.visualization.state)
+                      .every((id) => id === layerId);
+
+                    return {
+                      ...state,
+                      datasourceStates: mapValues(
+                        state.datasourceStates,
+                        (datasourceState, datasourceId) => {
+                          const datasource = datasourceMap[datasourceId!];
+                          return {
+                            ...datasourceState,
+                            state: isOnlyLayer
+                              ? datasource.clearLayer(datasourceState.state, layerId)
+                              : datasource.removeLayer(datasourceState.state, layerId),
+                          };
+                        }
+                      ),
+                      visualization: {
+                        ...state.visualization,
+                        state:
+                          isOnlyLayer || !activeVisualization.removeLayer
+                            ? activeVisualization.clearLayer(state.visualization.state, layerId)
+                            : activeVisualization.removeLayer(state.visualization.state, layerId),
+                      },
+                      stagedPreview: undefined,
+                    };
+                  },
+                })
+              );
+
               removeLayerRef(layerId);
             }}
             toggleFullscreen={toggleFullscreen}
@@ -187,18 +215,19 @@ export function LayerPanels(
               color="text"
               onClick={() => {
                 const id = generateId();
-                dispatch({
-                  type: 'UPDATE_STATE',
-                  subType: 'ADD_LAYER',
-                  updater: (state) =>
-                    appendLayer({
-                      activeVisualization,
-                      generateId: () => id,
-                      trackUiEvent,
-                      activeDatasource: datasourceMap[activeDatasourceId],
-                      state,
-                    }),
-                });
+                dispatchLens(
+                  updateState({
+                    subType: 'ADD_LAYER',
+                    updater: (state) =>
+                      appendLayer({
+                        activeVisualization,
+                        generateId: () => id,
+                        trackUiEvent,
+                        activeDatasource: datasourceMap[activeDatasourceId],
+                        state,
+                      }),
+                  })
+                );
                 setNextFocusedLayerId(id);
               }}
               iconType="plusInCircleFilled"

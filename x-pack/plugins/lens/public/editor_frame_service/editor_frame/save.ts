@@ -7,17 +7,20 @@
 
 import { uniq } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
-import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { extractFilterReferences } from '../../persistence';
 import { buildExpression } from './expression_helpers';
+import { PreviewState } from '../../state_management';
 
 export interface Props {
   activeDatasources: Record<string, Datasource>;
-  state: EditorFrameState;
+  state: PreviewState;
   visualization: Visualization;
   framePublicAPI: FramePublicAPI;
+  title: string;
+  description?: string;
+  persistedId?: string;
 }
 
 export function getSavedObjectFormat({
@@ -25,6 +28,9 @@ export function getSavedObjectFormat({
   state,
   visualization,
   framePublicAPI,
+  title,
+  description,
+  persistedId,
 }: Props): {
   doc: Document;
   filterableIndexPatterns: string[];
@@ -49,7 +55,6 @@ export function getSavedObjectFormat({
   );
 
   references.push(...filterReferences);
-
   const expression = buildExpression({
     visualization,
     visualizationState: state.visualization.state,
@@ -60,9 +65,9 @@ export function getSavedObjectFormat({
 
   return {
     doc: {
-      savedObjectId: state.persistedId,
-      title: state.title,
-      description: state.description,
+      savedObjectId: persistedId,
+      title,
+      description,
       type: 'lens',
       visualizationType: state.visualization.activeId,
       state: {

@@ -63,6 +63,8 @@ jest.mock('lodash', () => {
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
     EditorFrameContainer: jest.fn((props: EditorFrameProps) => <div />),
+    datasourceMap: {},
+    visualizationMap: {},
   };
 }
 
@@ -92,11 +94,11 @@ describe('Lens App', () => {
   async function mountWith({
     props = makeDefaultProps(),
     services = makeDefaultServices(sessionIdSubject),
-    storePreloadedState,
+    preloadedState,
   }: {
     props?: jest.Mocked<LensAppProps>;
     services?: jest.Mocked<LensAppServices>;
-    storePreloadedState?: Partial<LensAppState>;
+    preloadedState?: Partial<LensAppState>;
   }) {
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
@@ -110,9 +112,11 @@ describe('Lens App', () => {
 
     const { instance, lensStore } = await mountWithProvider(
       <App {...props} />,
-      services.data,
-      storePreloadedState,
-      wrappingComponent
+      {
+        data: services.data,
+        preloadedState,
+      },
+      { wrappingComponent }
     );
 
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
@@ -237,7 +241,7 @@ describe('Lens App', () => {
       const { instance, lensStore } = await mountWith({
         props,
         services,
-        storePreloadedState: {
+        preloadedState: {
           isLinkedToOriginatingApp: true,
         },
       });
@@ -455,7 +459,7 @@ describe('Lens App', () => {
         const { instance } = await mountWith({
           props,
           services,
-          storePreloadedState: {
+          preloadedState: {
             isLinkedToOriginatingApp: true,
           },
         });
@@ -483,7 +487,7 @@ describe('Lens App', () => {
 
         const { instance, services } = await mountWith({
           props,
-          storePreloadedState: {
+          preloadedState: {
             isLinkedToOriginatingApp: true,
           },
         });
@@ -588,6 +592,8 @@ describe('Lens App', () => {
               title: 'hello there',
             }),
             isLinkedToOriginatingApp: false,
+            title: 'hello there',
+            persistedId: '1234',
           },
           type: 'app/setState',
         });

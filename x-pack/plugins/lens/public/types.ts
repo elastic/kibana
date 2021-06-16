@@ -52,6 +52,8 @@ export interface EditorFrameProps {
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
 }
 
 export interface EditorFrameSetup {

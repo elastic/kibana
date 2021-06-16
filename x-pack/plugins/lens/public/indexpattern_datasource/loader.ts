@@ -446,10 +446,13 @@ export async function syncExistingFields({
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
       existenceFetchTimeout: false,
-      existingFields: emptinessInfo.reduce((acc, info) => {
-        acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-        return acc;
-      }, state.existingFields),
+      existingFields: emptinessInfo.reduce(
+        (acc, info) => {
+          acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   } catch (e) {
     // show all fields as available if fetch failed or timed out
@@ -457,10 +460,13 @@ export async function syncExistingFields({
       ...state,
       existenceFetchFailed: e.res?.status !== 408,
       existenceFetchTimeout: e.res?.status === 408,
-      existingFields: indexPatterns.reduce((acc, pattern) => {
-        acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
-        return acc;
-      }, state.existingFields),
+      existingFields: indexPatterns.reduce(
+        (acc, pattern) => {
+          acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   }
 }

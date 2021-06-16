@@ -13,7 +13,6 @@ import { IndexPattern } from '../../../../../../src/plugins/data/public';
 import { getAllIndexPatterns } from '../../utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
-import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
@@ -27,7 +26,7 @@ import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
 import {
-  applyVisualizeFieldSuggestions,
+  getVisualizeFieldSuggestions,
   getTopSuggestionForField,
   switchToSuggestion,
   Suggestion,
@@ -39,6 +38,10 @@ import {
   LensAppState,
   DispatchSetState,
   onChangeFromEditorFrame,
+  updateLayer,
+  visualizationLoaded,
+  updateVisualizationState,
+  updateDatasourceState,
 } from '../../state_management';
 
 export interface EditorFrameProps {
@@ -54,6 +57,7 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
+  const lensState = useLensSelector((state) => state.app);
   const {
     filters,
     searchSessionId,
@@ -65,8 +69,16 @@ export function EditorFrame(props: EditorFrameProps) {
     activeData,
     isSaveable,
     resolvedDateRange: dateRange,
-  } = useLensSelector((state) => state.app);
-  const [state, dispatch] = useReducer(reducer, { ...props, doc: persistedDoc }, getInitialState);
+    title,
+    description,
+    persistedId,
+    activeDatasourceId,
+    isFullscreenDatasource,
+    visualization,
+    datasourceStates,
+    stagedPreview,
+  } = lensState;
+
   const dispatchLens = useLensDispatch();
   const dispatchChange: DispatchSetState = useCallback(
     (s: Partial<LensAppState>) => dispatchLens(onChangeFromEditorFrame(s)),
@@ -77,9 +89,9 @@ export function EditorFrame(props: EditorFrameProps) {
   );
   const { onError } = props;
   const activeVisualization =
-    state.visualization.activeId && props.visualizationMap[state.visualization.activeId];
+    visualization.activeId && props.visualizationMap[visualization.activeId];
 
-  const allLoaded = Object.values(state.datasourceStates).every(
+  const allLoaded = Object.values(datasourceStates).every(
     ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
   );
 
@@ -91,7 +103,7 @@ export function EditorFrame(props: EditorFrameProps) {
       if (!allLoaded) {
         initializeDatasources(
           props.datasourceMap,
-          state.datasourceStates,
+          datasourceStates,
           persistedDoc?.references,
           visualizeTriggerFieldContext,
           { isFullEditor: true }
@@ -99,11 +111,12 @@ export function EditorFrame(props: EditorFrameProps) {
           .then((result) => {
             if (!isUnmounted) {
               Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
-                dispatch({
-                  type: 'UPDATE_DATASOURCE_STATE',
-                  updater: datasourceState,
-                  datasourceId,
-                });
+                dispatchLens(
+                  updateDatasourceState({
+                    updater: datasourceState,
+                    datasourceId,
+                  })
+                );
               });
             }
           })
@@ -116,7 +129,7 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [allLoaded, onError]
   );
-  const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
+  const datasourceLayers = createDatasourceLayers(props.datasourceMap, datasourceStates);
 
   const framePublicAPI: FramePublicAPI = useMemo(
     () => ({
@@ -126,90 +139,29 @@ export function EditorFrame(props: EditorFrameProps) {
       query,
       filters,
       searchSessionId,
-      availablePalettes: props.palettes,
-
-      addNewLayer() {
-        const newLayerId = generateId();
-
-        dispatch({
-          type: 'UPDATE_LAYER',
-          datasourceId: state.activeDatasourceId!,
-          layerId: newLayerId,
-          updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
-        });
-
-        return newLayerId;
-      },
-
-      removeLayers(layerIds: string[]) {
-        if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
-          dispatch({
-            type: 'UPDATE_VISUALIZATION_STATE',
-            visualizationId: activeVisualization.id,
-            updater: layerIds.reduce(
-              (acc, layerId) =>
-                activeVisualization.removeLayer
-                  ? activeVisualization.removeLayer(acc, layerId)
-                  : acc,
-              state.visualization.state
-            ),
-          });
-        }
-
-        layerIds.forEach((layerId) => {
-          const layerDatasourceId = Object.entries(props.datasourceMap).find(
-            ([datasourceId, datasource]) =>
-              state.datasourceStates[datasourceId] &&
-              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-          )![0];
-          dispatch({
-            type: 'UPDATE_LAYER',
-            layerId,
-            datasourceId: layerDatasourceId,
-            updater: props.datasourceMap[layerDatasourceId].removeLayer,
-          });
-        });
-      },
     }),
-    [
-      activeData,
-      activeVisualization,
-      datasourceLayers,
-      dateRange,
-      query,
-      filters,
-      searchSessionId,
-      props.palettes,
-      props.datasourceMap,
-      state.activeDatasourceId,
-      state.datasourceStates,
-      state.visualization.state,
-    ]
+    [activeData, datasourceLayers, dateRange, query, filters, searchSessionId]
   );
 
   useEffect(
     () => {
       if (persistedDoc) {
-        dispatch({
-          type: 'VISUALIZATION_LOADED',
-          doc: {
-            ...persistedDoc,
-            state: {
-              ...persistedDoc.state,
-              visualization: persistedDoc.visualizationType
-                ? props.visualizationMap[persistedDoc.visualizationType].initialize(
-                    framePublicAPI,
-                    persistedDoc.state.visualization
-                  )
-                : persistedDoc.state.visualization,
+        dispatchLens(
+          visualizationLoaded({
+            doc: {
+              ...persistedDoc,
+              state: {
+                ...persistedDoc.state,
+                visualization: persistedDoc.visualizationType
+                  ? props.visualizationMap[persistedDoc.visualizationType].initialize(
+                      framePublicAPI,
+                      persistedDoc.state.visualization
+                    )
+                  : persistedDoc.state.visualization,
+              },
             },
-          },
-        });
-      } else {
-        dispatch({
-          type: 'RESET',
-          state: getInitialState(props),
-        });
+          })
+        );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -219,31 +171,34 @@ export function EditorFrame(props: EditorFrameProps) {
   // Initialize visualization as soon as all datasources are ready
   useEffect(
     () => {
-      if (allLoaded && state.visualization.state === null && activeVisualization) {
+      if (allLoaded && visualization.state === null && activeVisualization) {
         const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          visualizationId: activeVisualization.id,
-          updater: initialVisualizationState,
-        });
+        dispatchLens(
+          updateVisualizationState({
+            visualizationId: activeVisualization.id,
+            updater: initialVisualizationState,
+          })
+        );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allLoaded, activeVisualization, state.visualization.state]
+    [allLoaded, activeVisualization, visualization.state]
   );
 
   // Get suggestions for visualize field when all datasources are ready
   useEffect(() => {
     if (allLoaded && visualizeTriggerFieldContext && !persistedDoc) {
-      applyVisualizeFieldSuggestions({
+      const selectedSuggestion = getVisualizeFieldSuggestions({
         datasourceMap: props.datasourceMap,
-        datasourceStates: state.datasourceStates,
+        datasourceStates,
         visualizationMap: props.visualizationMap,
-        activeVisualizationId: state.visualization.activeId,
-        visualizationState: state.visualization.state,
+        activeVisualizationId: visualization.activeId,
+        visualizationState: visualization.state,
         visualizeTriggerFieldContext,
-        dispatch,
       });
+      if (selectedSuggestion) {
+        switchToSuggestion(dispatchLens, selectedSuggestion, 'SWITCH_VISUALIZATION');
+      }
       setVisualizeTriggerFieldContext(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -298,8 +253,8 @@ export function EditorFrame(props: EditorFrameProps) {
   useEffect(
     () => {
       const activeDatasource =
-        state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-          ? props.datasourceMap[state.activeDatasourceId]
+        activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
+          ? props.datasourceMap[activeDatasourceId]
           : undefined;
 
       if (!activeDatasource || !activeVisualization) {
@@ -307,7 +262,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
 
       const savedObjectFormat = getSavedObjectFormat({
-        activeDatasources: Object.keys(state.datasourceStates).reduce(
+        activeDatasources: Object.keys(datasourceStates).reduce(
           (datasourceMap, datasourceId) => ({
             ...datasourceMap,
             [datasourceId]: props.datasourceMap[datasourceId],
@@ -315,8 +270,11 @@ export function EditorFrame(props: EditorFrameProps) {
           {}
         ),
         visualization: activeVisualization,
-        state,
+        state: { datasourceStates, visualization },
         framePublicAPI,
+        title,
+        description,
+        persistedId,
       });
 
       // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -335,13 +293,13 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       activeVisualization,
-      state.datasourceStates,
-      state.visualization,
+      datasourceStates,
+      visualization,
+      title,
       activeData,
       query,
       filters,
       savedQuery,
-      state.title,
       dispatchChange,
     ]
   );
@@ -349,9 +307,8 @@ export function EditorFrame(props: EditorFrameProps) {
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
-    const { activeDatasourceId, datasourceStates } = state;
-    const activeVisualizationId = state.visualization.activeId;
-    const visualizationState = state.visualization.state;
+    const activeVisualizationId = visualization.activeId;
+    const visualizationState = visualization.state;
     const { visualizationMap, datasourceMap } = props;
 
     if (!field || !activeDatasourceId) {
@@ -379,31 +336,24 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
-        switchToSuggestion(dispatch, suggestion, 'SWITCH_VISUALIZATION');
+        switchToSuggestion(dispatchLens, suggestion, 'SWITCH_VISUALIZATION');
       }
     },
-    [getSuggestionForField]
+    [getSuggestionForField, dispatchLens]
   );
 
   return (
     <RootDragDropProvider>
       <FrameLayout
-        isFullscreen={Boolean(state.isFullscreenDatasource)}
+        isFullscreen={Boolean(isFullscreenDatasource)}
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
-            activeDatasource={state.activeDatasourceId}
-            datasourceState={
-              state.activeDatasourceId
-                ? state.datasourceStates[state.activeDatasourceId].state
-                : null
-            }
+            activeDatasource={activeDatasourceId}
+            datasourceState={activeDatasourceId ? datasourceStates[activeDatasourceId].state : null}
             datasourceIsLoading={
-              state.activeDatasourceId
-                ? state.datasourceStates[state.activeDatasourceId].isLoading
-                : true
+              activeDatasourceId ? datasourceStates[activeDatasourceId].isLoading : true
             }
-            dispatch={dispatch}
             core={props.core}
             query={query}
             dateRange={dateRange}
@@ -417,32 +367,30 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           allLoaded && (
             <ConfigPanelWrapper
-              activeDatasourceId={state.activeDatasourceId!}
+              activeDatasourceId={activeDatasourceId!}
               datasourceMap={props.datasourceMap}
-              datasourceStates={state.datasourceStates}
+              datasourceStates={datasourceStates}
               visualizationMap={props.visualizationMap}
-              activeVisualizationId={state.visualization.activeId}
-              dispatch={dispatch}
-              visualizationState={state.visualization.state}
+              activeVisualizationId={visualization.activeId}
+              visualizationState={visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
-              isFullscreen={Boolean(state.isFullscreenDatasource)}
+              isFullscreen={Boolean(isFullscreenDatasource)}
             />
           )
         }
         workspacePanel={
           allLoaded && (
             <WorkspacePanel
-              title={state.title}
-              activeDatasourceId={state.activeDatasourceId}
-              activeVisualizationId={state.visualization.activeId}
+              title={title}
+              activeDatasourceId={activeDatasourceId}
+              activeVisualizationId={visualization.activeId}
               datasourceMap={props.datasourceMap}
-              datasourceStates={state.datasourceStates}
+              datasourceStates={datasourceStates}
               framePublicAPI={framePublicAPI}
-              visualizationState={state.visualization.state}
+              visualizationState={visualization.state}
               visualizationMap={props.visualizationMap}
-              dispatch={dispatch}
-              isFullscreen={Boolean(state.isFullscreenDatasource)}
+              isFullscreen={Boolean(isFullscreenDatasource)}
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
@@ -456,15 +404,14 @@ export function EditorFrame(props: EditorFrameProps) {
           !state.isFullscreenDatasource && (
             <SuggestionPanel
               frame={framePublicAPI}
-              activeDatasourceId={state.activeDatasourceId}
-              activeVisualizationId={state.visualization.activeId}
+              activeDatasourceId={activeDatasourceId}
+              activeVisualizationId={visualization.activeId}
               datasourceMap={props.datasourceMap}
-              datasourceStates={state.datasourceStates}
-              visualizationState={state.visualization.state}
+              datasourceStates={datasourceStates}
+              visualizationState={visualization.state}
               visualizationMap={props.visualizationMap}
-              dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
-              stagedPreview={state.stagedPreview}
+              stagedPreview={stagedPreview}
               plugins={props.plugins}
             />
           )

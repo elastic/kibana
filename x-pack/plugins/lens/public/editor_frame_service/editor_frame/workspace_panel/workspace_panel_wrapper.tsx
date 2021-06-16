@@ -13,15 +13,14 @@ import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly } from '
 import classNames from 'classnames';
 import { Datasource, FramePublicAPI, Visualization } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
-import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
+import { useLensDispatch, updateVisualizationState } from '../../../state_management';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
-  dispatch: (action: Action) => void;
   title?: string;
   visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
@@ -40,7 +39,6 @@ export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
   visualizationState,
-  dispatch,
   title,
   visualizationId,
   visualizationMap,
@@ -48,20 +46,23 @@ export function WorkspacePanelWrapper({
   datasourceStates,
   isFullscreen,
 }: WorkspacePanelWrapperProps) {
+  const dispatchLens = useLensDispatch();
+
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
         return;
       }
-      dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        visualizationId: activeVisualization.id,
-        updater: newState,
-        clearStagedPreview: false,
-      });
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: activeVisualization.id,
+          updater: newState,
+          clearStagedPreview: false,
+        })
+      );
     },
-    [dispatch, activeVisualization]
+    [dispatchLens, activeVisualization]
   );
   const warningMessages: React.ReactNode[] = [];
   if (activeVisualization?.getWarningMessages) {
@@ -105,7 +106,6 @@ export function WorkspacePanelWrapper({
                     visualizationState={visualizationState}
                     datasourceMap={datasourceMap}
                     datasourceStates={datasourceStates}
-                    dispatch={dispatch}
                     framePublicAPI={framePublicAPI}
                   />
                 </EuiFlexItem>

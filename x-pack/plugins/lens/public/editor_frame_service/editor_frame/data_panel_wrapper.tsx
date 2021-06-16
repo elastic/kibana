@@ -11,18 +11,17 @@ import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { switchDatasource, useLensDispatch, updateDatasourceState } from '../../state_management';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
   datasourceMap: Record<string, Datasource>;
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
-  dispatch: (action: Action) => void;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   query: Query;
@@ -34,18 +33,20 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const { dispatch, activeDatasource } = props;
-  const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => (updater) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater,
-        datasourceId: activeDatasource!,
-        clearStagedPreview: true,
-      });
-    },
-    [dispatch, activeDatasource]
-  );
+  const { activeDatasource } = props;
+
+  const dispatchLens = useLensDispatch();
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasource!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasource, dispatchLens]);
 
   const datasourceProps: DatasourceDataPanelProps = {
     dragDropContext: useContext(DragContext),
@@ -98,10 +99,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
                 icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
                 onClick={() => {
                   setDatasourceSwitcher(false);
-                  props.dispatch({
-                    type: 'SWITCH_DATASOURCE',
-                    newDatasourceId: datasourceId,
-                  });
+                  dispatchLens(switchDatasource({ newDatasourceId: datasourceId }));
                 }}
               >
                 {datasourceId}

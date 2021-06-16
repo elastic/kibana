@@ -11,7 +11,19 @@ import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 
-export interface LensAppState {
+export interface PreviewState {
+  visualization: {
+    activeId: string | null;
+    state: unknown;
+  };
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+}
+export interface EditorFrameState extends PreviewState {
+  activeDatasourceId: string | null;
+  stagedPreview?: PreviewState;
+  isFullscreenDatasource?: boolean;
+}
+export interface LensAppState extends EditorFrameState {
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -28,6 +40,9 @@ export interface LensAppState {
   savedQuery?: SavedQuery;
   searchSessionId: string;
   resolvedDateRange: DateRange;
+  title: string;
+  description?: string;
+  persistedId?: string;
 }
 
 export type DispatchSetState = (

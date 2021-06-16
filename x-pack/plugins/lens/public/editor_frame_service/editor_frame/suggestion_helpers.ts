@@ -19,8 +19,8 @@ import {
   DatasourceSuggestion,
   DatasourcePublicAPI,
 } from '../../types';
-import { Action } from './state_management';
 import { DragDropIdentifier } from '../../drag_drop';
+import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -132,14 +132,13 @@ export function getSuggestions({
   ).sort((a, b) => b.score - a.score);
 }
 
-export function applyVisualizeFieldSuggestions({
+export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
   activeVisualizationId,
   visualizationState,
   visualizeTriggerFieldContext,
-  dispatch,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -154,8 +153,7 @@ export function applyVisualizeFieldSuggestions({
   subVisualizationId?: string;
   visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
-  dispatch: (action: Action) => void;
-}): void {
+}): Suggestion | undefined {
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
@@ -165,9 +163,7 @@ export function applyVisualizeFieldSuggestions({
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {
-    const selectedSuggestion =
-      suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }
 }
 
@@ -207,22 +203,25 @@ function getVisualizationSuggestions(
 }
 
 export function switchToSuggestion(
-  dispatch: (action: Action) => void,
+  dispatchLens: LensDispatch,
   suggestion: Pick<
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
   type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
 ) {
-  const action: Action = {
-    type,
+  const pickedSuggestion = {
     newVisualizationId: suggestion.visualizationId,
     initialState: suggestion.visualizationState,
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
 
-  dispatch(action);
+  dispatchLens(
+    type === 'SELECT_SUGGESTION'
+      ? selectSuggestion(pickedSuggestion)
+      : switchVisualization(pickedSuggestion)
+  );
 }
 
 export function getTopSuggestionForField(

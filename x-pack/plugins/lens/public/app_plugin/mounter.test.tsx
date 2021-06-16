@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { makeDefaultServices, mockLensStore } from '../mocks';
+import { makeDefaultServices, mockLensStore, defaultDoc } from '../mocks';
+import { createMockDatasource, DatasourceMock } from '../editor_frame_service/mocks';
 import { act } from 'react-dom/test-utils';
 import { loadDocument } from './mounter';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
@@ -13,26 +14,36 @@ const defaultSavedObjectId = '1234';
 
 describe('Mounter', () => {
   const byValueFlag = { allowByValueEmbeddables: true };
+  const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
+  const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
+  const datasourceMap = {
+    testDatasource2: mockDatasource2,
+    testDatasource: mockDatasource,
+  };
+  const visualizationMap = {};
+
   describe('loadDocument', () => {
     it('does not load a document if there is no initial input', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
       const lensStore = mockLensStore({ data: services.data });
-      await loadDocument(redirectCallback, undefined, services, lensStore, undefined, byValueFlag);
+      await loadDocument(
+        redirectCallback,
+        undefined,
+        services,
+        lensStore,
+        undefined,
+        byValueFlag,
+        datasourceMap,
+        visualizationMap
+      );
       expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
     });
 
     it('loads a document and uses query and filters if initial input is provided', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
-      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-        savedObjectId: defaultSavedObjectId,
-        state: {
-          query: 'fake query',
-          filters: [{ query: { match_phrase: { src: 'test' } } }],
-        },
-        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      });
+      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
       const lensStore = await mockLensStore({ data: services.data });
       await act(async () => {
@@ -42,7 +53,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -58,13 +71,13 @@ describe('Mounter', () => {
 
       expect(lensStore.getState()).toEqual({
         app: expect.objectContaining({
-          persistedDoc: expect.objectContaining({
-            savedObjectId: defaultSavedObjectId,
-            state: expect.objectContaining({
-              query: 'fake query',
-              filters: [{ query: { match_phrase: { src: 'test' } } }],
-            }),
-          }),
+          persistedDoc: { ...defaultDoc, type: 'lens' },
+          query: 'kuery',
+          isAppLoading: false,
+          indexPatternsForTopNav: [{ id: '1' }],
+          lastKnownDoc: { ...defaultDoc, type: 'lens' },
+          activeDatasourceId: 'testDatasource',
+          persistedId: '1234',
         }),
       });
     });
@@ -81,7 +94,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -92,7 +107,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -105,7 +122,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
@@ -127,7 +146,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -149,7 +170,9 @@ describe('Mounter', () => {
           services,
           lensStore,
           undefined,
-          byValueFlag
+          byValueFlag,
+          datasourceMap,
+          visualizationMap
         );
       });
 
