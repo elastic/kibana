@@ -29,6 +29,7 @@ import {
   derivative,
   movingAverage,
   mapColumn,
+  overallMetric,
   math,
 } from '../expression_functions';
 
@@ -340,6 +341,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
       cumulativeSum,
       derivative,
       movingAverage,
+      overallMetric,
       mapColumn,
       math,
     ]) {
