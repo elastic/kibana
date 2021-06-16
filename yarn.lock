@@ -2620,6 +2620,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/common-utils@link:bazel-bin/packages/kbn-common-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/config-schema@link:bazel-bin/packages/kbn-config-schema":
   version "0.0.0"
   uid ""
