@@ -21,6 +21,7 @@ import { useKibana } from '../common/lib/kibana';
 import { useAgentStatus } from '../agents/use_agent_status';
 import { useAgentPolicy } from '../agent_policies/use_agent_policy';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
@@ -36,6 +37,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
   const [confirmationModal, setConfirmationModal] = useState(false);
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
@@ -75,7 +77,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       },
       onError: (error) => {
         // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
     }
   );

@@ -18,6 +18,7 @@ import {
 
 import { generateTablePaginationOptions, processAggregations } from './helpers';
 import { Overlap, Group } from './types';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseAgentGroups {
   osqueryPolicies: string[];
@@ -29,6 +30,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
 
   const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);
@@ -101,7 +103,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
     {
       enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_groups.fetchError', {
             defaultMessage: 'Error while fetching agent groups',
           }),

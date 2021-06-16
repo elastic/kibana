@@ -21,6 +21,7 @@ import {
 import { ESTermQuery } from '../../common/typed_json';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -54,6 +55,7 @@ export const useAllResults = ({
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
 
   return useQuery(
     ['allActionResults', { actionId, activePage, limit, sort }],
@@ -82,7 +84,7 @@ export const useAllResults = ({
       refetchInterval: isLive ? 1000 : false,
       enabled: !skip,
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.results.fetchError', {
             defaultMessage: 'Error while fetching results',
           }),

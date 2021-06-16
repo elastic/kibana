@@ -21,6 +21,7 @@ import {
 import { ESTermQuery } from '../../common/typed_json';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionsArgs {
   actions: ActionEdges;
@@ -52,6 +53,7 @@ export const useAllActions = ({
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
 
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
@@ -83,7 +85,7 @@ export const useAllActions = ({
       keepPreviousData: true,
       enabled: !skip,
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.all_actions.fetchError', {
             defaultMessage: 'Error while fetching actions',
           }),

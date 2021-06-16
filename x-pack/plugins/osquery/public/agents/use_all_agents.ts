@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAllAgents {
@@ -32,6 +33,7 @@ export const useAllAgents = (
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
@@ -52,7 +54,7 @@ export const useAllAgents = (
     {
       enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),

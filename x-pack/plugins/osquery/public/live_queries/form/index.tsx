@@ -19,6 +19,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
 import { fieldValidators } from '../../shared_imports';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -40,6 +41,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const setErrorToast = useErrorToast(toasts);
+
   const {
     data,
     isLoading,
@@ -53,10 +56,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         body: JSON.stringify(payload),
       }),
     {
-      onSuccess,
+      onSuccess: () => {
+        setErrorToast();
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
       onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error);
       },
     }
   );

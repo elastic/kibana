@@ -18,6 +18,7 @@ import {
 import { ESTermQuery } from '../../common/typed_json';
 
 import { getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionDetailsArgs {
   actionDetails: Record<string, string>;
@@ -37,6 +38,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
 
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
@@ -62,7 +64,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
     {
       enabled: !skip,
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_details.fetchError', {
             defaultMessage: 'Error while fetching action details',
           }),

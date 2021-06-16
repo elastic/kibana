@@ -23,6 +23,7 @@ import { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -60,6 +61,7 @@ export const useActionResults = ({
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast(toasts);
 
   return useQuery(
     ['actionResults', { actionId }],
@@ -125,7 +127,7 @@ export const useActionResults = ({
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_results.fetchError', {
             defaultMessage: 'Error while fetching action results',
           }),
