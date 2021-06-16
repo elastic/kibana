@@ -309,6 +309,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       };
     }
     if (
+      // Add basic validation for other actions
+      !this.props.embeddable.parent ||
       !this.props.getEmbeddableFactory ||
       !this.props.getAllEmbeddableFactories ||
       !this.props.overlays ||
