@@ -48,12 +48,14 @@ export const useFormatUrl = (page: SecurityPageName) => {
           ? ''
           : `?${pathArr[1]}`
       }`;
-      return getUrlForApp(`${APP_ID}:${page}`, {
+
+      // FIX ME
+      return getUrlForApp(`security`, {
         path: formattedPath,
         absolute,
       });
     },
-    [getUrlForApp, page, search]
+    [getUrlForApp, search]
   );
   return { formatUrl, search };
 };
