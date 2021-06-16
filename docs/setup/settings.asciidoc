@@ -37,19 +37,19 @@ Set to `false` to disable Console. *Default: `true`*
 
 | `csp.rules:`
  | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."] 
-A https://w3c.github.io/webappsec-csp/[content-security-policy] template
+A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
 that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
 that ship with {kib}.
 
 | `csp.script_src:`
-| Add values for the `script-src` https://w3c.github.io/webappsec-csp/[content-security-policy] directive.
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
 | `csp.worker_src:`
-| Add values for the `worker-src` https://w3c.github.io/webappsec-csp/[content-security-policy] directive.
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
 
 | `csp.style_src:`
-| Add values for the `style-src` https://w3c.github.io/webappsec-csp/[content-security-policy] directive.
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
 
 |[[csp-strict]] `csp.strict:`
  | Blocks {kib} access to any browser that
