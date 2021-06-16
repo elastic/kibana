@@ -32,6 +32,30 @@ interface TestEsClusterNodesOptions {
   dataArchive?: string;
 }
 
+interface Node {
+  installSource: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
+  installSnapshot: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
+  extractDataDirectory: (
+    installPath: string,
+    archivePath: string,
+    extractDirName?: string
+  ) => Promise<{ insallPath: string }>;
+  start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
+  stop: () => Promise<void>;
+}
+
+export interface EsTestCluster {
+  ports: number[];
+  nodes: Node[];
+  getStartTimeout: () => number;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  cleanup: () => Promise<void>;
+  getClient: () => KibanaClient;
+  getUrl: () => string;
+  getHostUrls: () => string[];
+}
+
 export interface CreateTestEsClusterOptions {
   /**
    * Port to run Elasticsearch on. If you configure a
@@ -68,7 +92,7 @@ export interface CreateTestEsClusterOptions {
   ssl?: boolean;
 }
 
-export function createTestEsCluster(options: CreateTestEsClusterOptions) {
+export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTestCluster {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -107,9 +131,9 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions) {
     esArgs,
   };
 
-  return new (class EsTestCluster {
+  return new (class TestCluster implements EsTestCluster {
     ports: number[] = [];
-    nodes: Cluster[] = [];
+    nodes: Node[] = [];
 
     constructor() {
       for (let i = 0; i < nodes.length; i++) {
@@ -150,11 +174,7 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions) {
         const archive = node.dataArchive || dataArchive;
         if (archive) {
           const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
-          await this.nodes[i].extractDataDirectory(
-            installPath,
-            node.dataArchive || dataArchive,
-            nodeDataDirectory
-          );
+          await this.nodes[i].extractDataDirectory(installPath, archive, nodeDataDirectory);
           overriddenArgs.push(`path.data=${Path.resolve(installPath, nodeDataDirectory)}`);
         }
 
@@ -168,9 +188,9 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions) {
     }
 
     async stop() {
-      for (const node of this.nodes) {
-        log.info(`[es] stopping node ${node.name}`);
-        await node.stop();
+      for (let i = 0; i < this.nodes.length; i++) {
+        log.info(`[es] stopping node ${nodes[i].name}`);
+        await this.nodes[i].stop();
       }
       log.info('[es] stopped');
     }

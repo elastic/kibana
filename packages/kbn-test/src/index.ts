@@ -25,7 +25,7 @@ export { runTests, startServers } from './functional_tests/tasks';
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
-export { esTestConfig, createTestEsCluster, CreateTestEsClusterOptions } from './es';
+export { esTestConfig, createTestEsCluster, CreateTestEsClusterOptions, EsTestCluster } from './es';
 
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 
