@@ -7,9 +7,9 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
-import { ElasticsearchClient, ElasticsearchServiceStart, Logger, CoreStart } from 'src/core/server';
+import { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
@@ -19,7 +19,7 @@ import {
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { EndpointAppContext } from '../../../server/endpoint/types';
-import { AgentService } from '../../../../fleet/server';
+import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
 type BaseSearchTypes = string | number | boolean | object;
@@ -46,6 +46,7 @@ export interface TelemetryEvent {
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
+  private readonly max_records = 10_000;
   private readonly logger: Logger;
   private core?: CoreStart;
   private maxQueueSize = 100;
@@ -58,7 +59,9 @@ export class TelemetryEventsSender {
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
   private agentService?: AgentService;
+  private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
+  private savedObjectClient?: SavedObjectsClientContract;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -71,6 +74,9 @@ export class TelemetryEventsSender {
   ) {
     this.telemetrySetup = telemetrySetup;
     this.agentService = endpointContext?.service.getAgentService();
+    this.agentPolicyService = endpointContext?.service.getAgentPolicyService();
+    const fakeRequest = { headers: {} } as KibanaRequest;
+    this.savedObjectClient = endpointContext?.service.getScopedSavedObjectsClient(fakeRequest);
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
@@ -140,16 +146,27 @@ export class TelemetryEventsSender {
 
   public async fetchEndpointAgents() {
     if (this.esClient === undefined) {
-      this.logger.debug(`ES client is undefined`);
+      this.logger.debug(`es client is not available`);
       return [];
     }
 
     return this.agentService?.listAgents(this.esClient, {
       kuery: `(packages : ${FleetDefaultPackages.Endpoint})`,
-      perPage: 10_000,
+      perPage: this.max_records,
       showInactive: false,
       sortField: 'enrolled_at',
       sortOrder: 'desc',
+    });
+  }
+
+  public async fetchEndpointPolicyConfigs() {
+    if (this.savedObjectClient === undefined) {
+      this.logger.debug(`saved object client is not available`);
+      return [];
+    }
+
+    return this.agentPolicyService?.list(this.savedObjectClient, {
+      perPage: this.max_records,
     });
   }
 

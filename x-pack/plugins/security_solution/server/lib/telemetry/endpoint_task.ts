@@ -105,6 +105,8 @@ export class TelemetryEndpointTask {
     // console.log(agents)
 
     // 2. [PH/] Get the fleet index (policies)
+    const policies = this.sender.fetchEndpointPolicyConfigs();
+
     // 3. [PH] Get the endpoint policy failure responses
     // 4. [CD] Get the EP metrics
     // 5. [PH/CD] Document restructuring / Join on agent / host id
