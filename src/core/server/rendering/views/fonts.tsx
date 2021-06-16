@@ -28,11 +28,11 @@ interface FontFace {
   }>;
 }
 
-export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
-  /**
-   * `Inter` is the latest version of `Inter UI` and used specifically in v8 of Kibana from EUI Amsterdam
-   */
-  const inter: FontFace = {
+/**
+ * `Inter` is the latest version of `Inter UI` and used specifically in v8 of Kibana from EUI Amsterdam
+ */
+const getInter = (url: string): FontFace => {
+  return {
     family: 'Inter',
     variants: [
       {
@@ -163,7 +163,10 @@ export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
       },
     ],
   };
-  const interUi: FontFace = {
+};
+
+const getInterUi = (url: string): FontFace => {
+  return {
     family: 'Inter UI',
     variants: [
       {
@@ -312,7 +315,10 @@ export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
       },
     ],
   };
-  const roboto: FontFace = {
+};
+
+const getRoboto = (url: string): FontFace => {
+  return {
     family: 'Roboto Mono',
     variants: [
       {
@@ -364,17 +370,20 @@ export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
       },
     ],
   };
+};
 
+export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
   /**
    * If `themeVersion` is not provided, we want to fallback to the newest font family `Inter`
    */
-  const interFont = themeVersion === 'v7' ? interUi : inter;
+  const sansFont = themeVersion === 'v7' ? getInterUi(url) : getInter(url);
+  const codeFont = getRoboto(url);
 
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: `
-        ${[interFont, roboto]
+        ${[sansFont, codeFont]
           .flatMap(({ family, variants }) =>
             variants.map(({ style, weight, format, sources, unicodeRange }) => {
               const src = sources
