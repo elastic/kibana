@@ -169,6 +169,9 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         importableAndExportable: true,
         getTitle: (obj) => obj.attributes.title,
         isExportable: (obj) => {
+          if (obj.id === 'error') {
+            throw new Error('something went wrong');
+          }
           return obj.attributes.enabled === true;
         },
       },

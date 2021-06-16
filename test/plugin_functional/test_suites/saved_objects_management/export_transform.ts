@@ -251,10 +251,50 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               {
                 type: 'test-is-exportable',
                 id: '2',
+                reason: 'excluded',
               },
               {
                 type: 'test-is-exportable',
                 id: '4',
+                reason: 'excluded',
+              },
+            ]);
+          });
+      });
+
+      it('exclude objects if `isExportable` throws', async () => {
+        await supertest
+          .post('/api/saved_objects/_export')
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [
+              {
+                type: 'test-is-exportable',
+                id: '5',
+              },
+              {
+                type: 'test-is-exportable',
+                id: 'error',
+              },
+            ],
+            includeReferencesDeep: true,
+            excludeExportDetails: false,
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = parseNdJson(resp.text);
+            expect(objects.length).to.eql(2);
+            expect([objects[0]].map((obj) => `${obj.type}:${obj.id}`)).to.eql([
+              'test-is-exportable:5',
+            ]);
+            const exportDetails = (objects[
+              objects.length - 1
+            ] as unknown) as SavedObjectsExportResultDetails;
+            expect(exportDetails.excludedObjects).to.eql([
+              {
+                type: 'test-is-exportable',
+                id: 'error',
+                reason: 'predicate_error',
               },
             ]);
           });

@@ -114,3 +114,22 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "test-is-exportable:error",
+    "source": {
+      "test-is-exportable": {
+        "title": "obj error",
+        "enabled": true
+      },
+      "type": "test-is-exportable",
+      "migrationVersion": {},
+      "updated_at": "2018-12-21T00:43:07.096Z",
+      "references": []
+    }
+  }
+}
