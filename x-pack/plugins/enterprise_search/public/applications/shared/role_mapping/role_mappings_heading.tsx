@@ -17,6 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { ProductName } from '../types';
+
 import {
   ROLE_MAPPINGS_HEADING_TITLE,
   ROLE_MAPPINGS_HEADING_DESCRIPTION,
@@ -25,7 +27,7 @@ import {
 } from './constants';
 
 interface Props {
-  productName: string;
+  productName: ProductName;
   onClick(): void;
 }
 

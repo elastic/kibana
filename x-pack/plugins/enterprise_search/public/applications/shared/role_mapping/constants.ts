@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductName } from '../types';
+
 export const ANY_AUTH_PROVIDER = '*';
 
 export const ANY_AUTH_PROVIDER_OPTION_LABEL = i18n.translate(
@@ -182,7 +184,7 @@ export const ROLE_MAPPINGS_HEADING_TITLE = i18n.translate(
   { defaultMessage: 'Role mappings' }
 );
 
-export const ROLE_MAPPINGS_HEADING_DESCRIPTION = (productName: string) =>
+export const ROLE_MAPPINGS_HEADING_DESCRIPTION = (productName: ProductName) =>
   i18n.translate('xpack.enterpriseSearch.roleMapping.roleMappingsHeadingDescription', {
     defaultMessage:
       'Role mappings provide an interface to associate native or SAML-governed role attributes with {productName} permissions.',
