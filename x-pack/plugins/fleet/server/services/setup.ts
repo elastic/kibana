@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
-import { SO_SEARCH_LIMIT, REQUIRED_PACKAGES } from '../constants';
+import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -57,7 +57,7 @@ async function createSetupSideEffects(
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
   packages = [
     ...packages,
-    ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+    ...DEFAULT_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
   const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
