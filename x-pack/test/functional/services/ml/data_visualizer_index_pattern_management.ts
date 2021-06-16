@@ -76,12 +76,9 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 
       await retry.tryForTime(5000, async () => {
         await this.assertIndexPatternFieldEditorExists();
-
         await fieldEditor.setName(name);
-
         await fieldEditor.enableValue();
         await fieldEditor.typeScript(script);
-
         await this.setIndexPatternFieldEditorFieldType(fieldType);
 
         await fieldEditor.save();

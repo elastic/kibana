@@ -243,11 +243,6 @@ export default function ({ getService }: FtrProviderContext) {
       await checkPageDetails(addDeleteFieldTestData);
     });
 
-    it(`navigates to index pattern management page`, async () => {
-      await ml.dataVisualizerIndexPatternManagement.clickIndexPatternManagementButton();
-      await ml.dataVisualizerIndexPatternManagement.clickManageIndexPatternAction();
-    });
-
     it(`sets custom label for existing field`, async () => {
       for (const field of customLabelTestData.fieldsToRename!) {
         await ml.dataVisualizerIndexPatternManagement.renameField(
@@ -261,8 +256,6 @@ export default function ({ getService }: FtrProviderContext) {
     it(`deletes existing field`, async () => {
       await ml.testExecution.logTestStep('adds new runtime fields');
       for (const newField of addDeleteFieldTestData.newFields!) {
-        await ml.dataVisualizerIndexPatternManagement.clickIndexPatternManagementButton();
-        await ml.dataVisualizerIndexPatternManagement.clickAddIndexPatternFieldAction();
         await ml.dataVisualizerIndexPatternManagement.addRuntimeField(
           newField.fieldName,
           newField.script,

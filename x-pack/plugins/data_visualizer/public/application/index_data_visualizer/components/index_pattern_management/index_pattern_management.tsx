@@ -78,7 +78,7 @@ export function DataVisualizerIndexPatternManagement(
           iconType="boxesHorizontal"
           data-test-subj="dataVisualizerIndexPatternManagementButton"
           aria-label={i18n.translate(
-            'xpack.dataVisualizer.fieldChooser.indexPatterns.actionsPopoverLabel',
+            'xpack.dataVisualizer.index.indexPatternManagement.actionsPopoverLabel',
             {
               defaultMessage: 'Index pattern settings',
             }
@@ -102,7 +102,7 @@ export function DataVisualizerIndexPatternManagement(
               addField();
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.fieldChooser.indexPatterns.addFieldButton', {
+            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.addFieldButton', {
               defaultMessage: 'Add field to index pattern',
             })}
           </EuiContextMenuItem>,
@@ -117,7 +117,7 @@ export function DataVisualizerIndexPatternManagement(
               });
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.fieldChooser.indexPatterns.manageFieldButton', {
+            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.manageFieldButton', {
               defaultMessage: 'Manage index pattern fields',
             })}
           </EuiContextMenuItem>,
