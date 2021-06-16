@@ -581,6 +581,7 @@ describe('EPM template', () => {
           properties: {
             b: {
               enabled: false,
+              properties: {},
               type: 'nested',
             },
           },
@@ -591,6 +592,103 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
+  });
+
+  describe('top level nested field', () => {
+    it('constructs a mapping with dot separated names', () => {
+      const nestedYaml = `
+    - name: a
+      type: nested
+    - name: a.b
+      type: long
+      `;
+      const expectedMapping = {
+        properties: {
+          a: {
+            type: 'nested',
+            properties: {
+              b: {
+                type: 'long',
+              },
+            },
+          },
+        },
+      };
+      const fields: Field[] = safeLoad(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
+
+    it('constructs a mapping with fields array', () => {
+      const nestedYaml = `
+    - name: top_nested
+      type: nested
+      fields:
+        - name: long_val
+          type: long
+        - name: keyword_val
+          type: keyword
+      `;
+      const expectedMapping = {
+        properties: {
+          top_nested: {
+            type: 'nested',
+            properties: {
+              long_val: {
+                type: 'long',
+              },
+              keyword_val: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      };
+      const fields: Field[] = safeLoad(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
+
+    it('constructs a mapping with multiple nested fields and dot notation', () => {
+      const nestedYaml = `
+    - name: top_nested
+      type: nested
+      fields:
+        - name: level1.nested_val
+          type: nested
+        - name: level1.nested_val.keyword_val
+          type: keyword
+      `;
+      const expectedMapping = {
+        properties: {
+          top_nested: {
+            type: 'nested',
+            properties: {
+              level1: {
+                properties: {
+                  nested_val: {
+                    type: 'nested',
+                    properties: {
+                      keyword_val: {
+                        ignore_above: 1024,
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      const fields: Field[] = safeLoad(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
   });
 
   it('tests constant_keyword field type handling', () => {

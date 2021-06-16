@@ -1,0 +1,38 @@
+- name: data_stream.type
+  type: constant_keyword
+  description: >
+    Data stream type.
+- name: data_stream.dataset
+  type: constant_keyword
+  description: >
+    Data stream dataset.
+- name: data_stream.namespace
+  type: constant_keyword
+  description: >
+    Data stream namespace.
+- name: '@timestamp'
+  type: date
+  description: >
+    Event timestamp.
+
+- name: MultiProcessRansomware
+  title: MultiProcessRansomware
+  group: 2
+  description: These fields contain information specific to multi process ransomware alerts.
+  type: nested
+  fields:
+    - name: Ransomware.files
+      level: custom
+      type: nested
+      description: Information about each file event attributed to the ransomware. Expected to be an array.
+      default_field: false
+    - name: Ransomware.files.data
+      level: custom
+      type: binary
+      description: File header or MBR bytes.
+      default_field: false
+    - name: Ransomware.empty_nested
+      level: custom
+      type: nested
+      description: Nested field with no properties.
+      default_field: false

@@ -16,6 +16,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./ilm'));
     loadTestFile(require.resolve('./install_by_upload'));
     loadTestFile(require.resolve('./install_overrides'));
+    loadTestFile(require.resolve('./install_top_level_nested'));
     loadTestFile(require.resolve('./install_prerelease'));
     loadTestFile(require.resolve('./install_remove_assets'));
     loadTestFile(require.resolve('./install_remove_multiple'));

@@ -116,11 +116,11 @@ export function generateMappings(fields?: Field[]): IndexTemplateMappings {
 
       switch (type) {
         case 'group':
-          fieldProps = { ...generateMappings(field.fields!), ...generateDynamicAndEnabled(field) };
+          fieldProps = { ...generateMappings(field.fields), ...generateDynamicAndEnabled(field) };
           break;
         case 'group-nested':
           fieldProps = {
-            ...generateMappings(field.fields!),
+            ...generateMappings(field.fields),
             ...generateNestedProps(field),
             type: 'nested',
           };
