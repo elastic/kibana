@@ -56,6 +56,8 @@ import {
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
 import { HeatmapVisualization } from './heatmap_visualization';
+import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -93,6 +95,15 @@ export interface LensPublicStart {
    * @experimental
    */
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  /**
+   * React component which can be used to embed a Lens Visualization Save Modal Component.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -187,11 +198,6 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    const getByValueFeatureFlag = async () => {
-      const [, deps] = await core.getStartServices();
-      return deps.dashboard.dashboardFeatureFlagConfig;
-    };
-
     const getPresentationUtilContext = async () => {
       const [, deps] = await core.getStartServices();
       const { ContextProvider } = deps.presentationUtil;
@@ -216,7 +222,6 @@ export class LensPlugin {
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
-          getByValueFeatureFlag,
           getPresentationUtilContext,
         });
       },
@@ -252,7 +257,8 @@ export class LensPlugin {
     );
 
     return {
-      EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
+      EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
+      SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService!),
       navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input.timeRange && !openInNewTab) {

@@ -70,6 +70,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
       ['View host details', 'hostLink'],
       ['View agent policy', 'agentPolicyLink'],
       ['View agent details', 'agentDetailsLink'],
+      ['Reassign agent policy', 'agentPolicyReassignLink'],
     ])('should display %s action', async (_, dataTestSubj) => {
       await render();
       expect(renderResult.getByTestId(dataTestSubj)).not.toBeNull();
@@ -80,6 +81,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
       ['View host details', 'hostLink'],
       ['View agent policy', 'agentPolicyLink'],
       ['View agent details', 'agentDetailsLink'],
+      ['Reassign agent policy', 'agentPolicyReassignLink'],
     ])(
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
