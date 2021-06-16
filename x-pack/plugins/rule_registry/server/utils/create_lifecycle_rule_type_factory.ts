@@ -32,7 +32,7 @@ import { AlertTypeWithExecutor } from '../types';
 import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
-type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
+export type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
   id: string;
   fields: Record<string, unknown>;
 }) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
@@ -259,7 +259,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
       );
 
       return {
-        wrapped: nextWrappedState,
+        wrapped: nextWrappedState ?? {},
         trackedAlerts: nextTrackedAlerts,
       };
     },
