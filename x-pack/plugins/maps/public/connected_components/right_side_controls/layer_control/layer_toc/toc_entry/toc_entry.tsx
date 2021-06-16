@@ -15,7 +15,7 @@ import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  LAYER_SETTINGS_LABEL,
+  EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { ILayer } from '../../../../../classes/layers/layer';
@@ -200,8 +200,8 @@ export class TOCEntry extends Component<Props, State> {
           key="settings"
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
-          aria-label={LAYER_SETTINGS_LABEL}
-          title={LAYER_SETTINGS_LABEL}
+          aria-label={EDIT_LAYER_SETTINGS_LABEL}
+          title={EDIT_LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}
         />
       );

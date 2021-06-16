@@ -21,7 +21,7 @@ export function getVisibilityToggleLabel(isVisible: boolean) {
       });
 }
 
-export const LAYER_SETTINGS_LABEL = i18n.translate(
+export const EDIT_LAYER_SETTINGS_LABEL = i18n.translate(
   'xpack.maps.layerControl.layerTocActions.layerSettingsButtonLabel',
   {
     defaultMessage: 'Layer settings',

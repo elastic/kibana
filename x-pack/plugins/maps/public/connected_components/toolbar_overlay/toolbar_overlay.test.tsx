@@ -27,7 +27,6 @@ test('Should only show set view control', async () => {
       pointDrawModeActive={false}
       showFitToBoundsButton={false}
       showTimesliderButton={false}
-      disableToolsControl={false}
     />
   );
   expect(component).toMatchSnapshot();
@@ -42,7 +41,32 @@ test('Should show all controls', async () => {
       showTimesliderButton={true}
       shapeDrawModeActive={false}
       pointDrawModeActive={false}
-      disableToolsControl={false}
+    />
+  );
+  expect(component).toMatchSnapshot();
+});
+
+test('Should show point layer edit tools', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={true}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+    />
+  );
+  expect(component).toMatchSnapshot();
+});
+
+test('Should show shape layer edit tools', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      shapeDrawModeActive={true}
+      pointDrawModeActive={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
     />
   );
   expect(component).toMatchSnapshot();
