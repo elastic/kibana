@@ -93,7 +93,7 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
+  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -225,7 +225,6 @@ const RulesPageComponent: React.FC = () => {
               <LinkButton
                 data-test-subj="create-new-rule"
                 fill
-                onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
                 isDisabled={!userHasPermissions(canUserCRUD) || loading}
