@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { LocatorDefinition } from '../../../../src/plugins/share/public/';
 import {
@@ -13,8 +12,7 @@ import {
   getPolicyCreatePath,
   getPolicyEditPath,
 } from './application/services/navigation';
-import { MANAGEMENT_APP_ID } from '../../../../src/plugins/management/public';
-import { SetupDependencies } from './types';
+import { ManagementAppLocator } from '../../../../src/plugins/management/common';
 import { PLUGIN } from '../common/constants';
 
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
@@ -24,53 +22,40 @@ export interface IlmLocatorParams extends SerializableState {
   policyName?: string;
 }
 
-export interface IlmLocatorDependencies {
-  getAppBasePath: (absolute?: boolean) => Promise<string>;
+export interface IlmLocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
 }
 
-export class IlmLocator implements LocatorDefinition<IlmLocatorParams> {
-  constructor(protected readonly deps: IlmLocatorDependencies) {}
+export class IlmLocatorDefinition implements LocatorDefinition<IlmLocatorParams> {
+  constructor(protected readonly deps: IlmLocatorDefinitionDependencies) {}
 
   public readonly id = ILM_LOCATOR_ID;
 
   public readonly getLocation = async (params: IlmLocatorParams) => {
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'data',
+      appId: PLUGIN.ID,
+    });
+
     switch (params.page) {
       case 'policy_create': {
         return {
-          app: MANAGEMENT_APP_ID, // await this.deps.getAppBasePath(false),
-          route: getPolicyCreatePath(),
-          state: {},
+          ...location,
+          path: location.path + getPolicyCreatePath(),
         };
       }
       case 'policy_edit': {
         return {
-          app: await this.deps.getAppBasePath(false),
-          route: getPolicyEditPath(params.policyName!),
-          state: {},
+          ...location,
+          path: location.path + getPolicyEditPath(params.policyName!),
         };
       }
       case 'policies_list': {
         return {
-          app: await this.deps.getAppBasePath(false),
-          route: getPoliciesListPath(),
-          state: {},
+          ...location,
+          path: location.path + getPoliciesListPath(),
         };
       }
     }
   };
 }
-
-export const registerLocator = (
-  coreSetup: CoreSetup,
-  management: SetupDependencies['management'],
-  share: SetupDependencies['share']
-) => {
-  const getAppBasePath = async (absolute = false) => {
-    const [coreStart] = await coreSetup.getStartServices();
-    return coreStart.application.getUrlForApp(MANAGEMENT_APP_ID, {
-      path: management.sections.section.data.getApp(PLUGIN.ID)!.basePath,
-      absolute,
-    });
-  };
-  share.url.locators.create(new IlmLocator({ getAppBasePath }));
-};

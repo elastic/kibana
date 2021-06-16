@@ -29,11 +29,11 @@ import { SectionLoading, SectionError, Error, DataHealth } from '../../../../com
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
-import { useUrlGenerator } from '../../../../services/use_url_generator';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
-import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
+import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
+import { useIlmLocator } from '../../../../services/use_ilm_locator';
 
 interface DetailsListProps {
   details: Array<{
@@ -89,13 +89,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const ilmPolicyLink = useUrlGenerator({
-    urlGeneratorId: ILM_URL_GENERATOR_ID,
-    urlGeneratorState: {
-      page: ILM_PAGES_POLICY_EDIT,
-      policyName: dataStream?.ilmPolicyName,
-    },
-  });
+  const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
   const { history } = useAppContext();
 
   let content;
