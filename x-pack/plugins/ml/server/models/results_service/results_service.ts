@@ -7,6 +7,7 @@
 
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import { estypes, ApiResponse } from '@elastic/elasticsearch';
+import { timeFormatter } from '@elastic/charts';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -34,6 +35,7 @@ import { annotationServiceProvider } from '../annotation_service';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
+const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 
 export interface CriteriaField {
   fieldType?: string;
@@ -735,6 +737,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         finalResults.annotationResultsLine.push({
           dataValue: timestamp,
           details: annotation.annotation,
+          header: dateFormatter(timestamp),
         });
       } else {
         finalResults.annotationResultsRect.push({
