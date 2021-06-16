@@ -24,7 +24,7 @@ export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) 
         data-test-subj="searchSessionIncompleteWarning"
         external
       >
-        <FormattedMessage id="searchSession.warning.readDocs" defaultMessage="Read More" />
+        <FormattedMessage id="data.searchSession.warning.readDocs" defaultMessage="Read More" />
       </EuiLink>
     </EuiText>
   </>
