@@ -45,6 +45,8 @@ let renderFunctions = [
 export const addSupportedRenderFunctions = (renderers = []) =>
   (renderFunctions = [...renderFunctions, ...renderers]);
 
-export const getSupportedRenderFunctions = () => renderFunctions;
+export function getSupportedRenderFunctions() {
+  return renderFunctions;
+}
 
 export const renderFunctionNames = renderFunctions.map((fn) => fn.name);

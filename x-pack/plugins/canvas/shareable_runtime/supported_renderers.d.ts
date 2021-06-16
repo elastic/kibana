@@ -13,4 +13,4 @@ export const renderFunctionNames: string[];
 export const addSupportedRenderFunctions: (
   renderers: RendererFactory[] | Array<() => ExpressionRenderDefinition<any>>
 ) => void;
-export const getSupportedRenderFunctions: () => RendererFactory[];
+export function getSupportedRenderFunctions(): RendererFactory[];
