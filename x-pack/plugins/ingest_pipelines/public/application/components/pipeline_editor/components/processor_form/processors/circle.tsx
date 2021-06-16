@@ -104,14 +104,14 @@ export const Circle: FunctionComponent = () => {
             options: [
               {
                 value: 'shape',
-                label: i18n.translate(
+                text: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeShape',
                   { defaultMessage: 'Shape' }
                 ),
               },
               {
                 value: 'geo_shape',
-                label: i18n.translate(
+                text: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeGeoShape',
                   { defaultMessage: 'Geo-shape' }
                 ),
