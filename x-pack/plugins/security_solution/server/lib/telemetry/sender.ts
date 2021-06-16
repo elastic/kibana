@@ -170,6 +170,16 @@ export class TelemetryEventsSender {
     });
   }
 
+  public async fetchEndpointPolicyResponses() {
+    if (this.esClient === undefined) {
+      this.logger.debug(`es client is not available`);
+      return [];
+    }
+
+    // TODO:@pjhampton - write the query for the `.ds-metrics-endpoint.policy*` ds
+    return [];
+  }
+
   public queueTelemetryEvents(events: TelemetryEvent[]) {
     const qlength = this.queue.length;
 

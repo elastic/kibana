@@ -108,6 +108,8 @@ export class TelemetryEndpointTask {
     const policies = this.sender.fetchEndpointPolicyConfigs();
 
     // 3. [PH] Get the endpoint policy failure responses
+    const policyResponses = this.sender.fetchEndpointPolicyResponses();
+
     // 4. [CD] Get the EP metrics
     // 5. [PH/CD] Document restructuring / Join on agent / host id
     // 6. [PH/CD] Send to dedicated infra web channel
