@@ -17,7 +17,9 @@ export class UrlService {
   /**
    * Client to work with locators.
    */
-  locators: LocatorClient = new LocatorClient(this.deps);
+  public readonly locators: LocatorClient;
 
-  constructor(protected readonly deps: UrlServiceDependencies) {}
+  constructor(protected readonly deps: UrlServiceDependencies) {
+    this.locators = new LocatorClient(deps);
+  }
 }
