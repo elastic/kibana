@@ -37,7 +37,7 @@ export const ENGINE_SCHEMA_PATH = `${ENGINE_PATH}/schema`;
 export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_SCHEMA_PATH}/reindex_job/:reindexJobId`;
 
 export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
-// TODO: Crawler sub-pages
+export const ENGINE_CRAWLER_DOMAIN_PATH = `${ENGINE_CRAWLER_PATH}/domains/:domainId`;
 
 export const META_ENGINE_CREATION_PATH = '/meta_engine_creation';
 export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;

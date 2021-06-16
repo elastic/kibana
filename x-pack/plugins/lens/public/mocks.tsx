@@ -21,6 +21,7 @@ import { navigationPluginMock } from '../../../../src/plugins/navigation/public/
 import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
+import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
 import {
   LensByValueInput,
   LensSavedObjectAttributes,
@@ -35,6 +36,7 @@ import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/publ
 
 import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
+import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
 
 export type Start = jest.Mocked<LensPublicStart>;
 
@@ -42,6 +44,9 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     EmbeddableComponent: jest.fn(() => {
       return <span>Lens Embeddable Component</span>;
+    }),
+    SaveModalComponent: jest.fn(() => {
+      return <span>Lens Save Modal Component</span>;
     }),
     canUseEditor: jest.fn(() => true),
     navigateToPrefilledEditor: jest.fn(),
@@ -166,6 +171,9 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     nowProvider: {
       get: jest.fn(),
     },
+    fieldFormats: {
+      deserialize: jest.fn(),
+    },
   } as unknown) as DataPublicPluginStart;
 }
 
@@ -225,6 +233,8 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
+    dashboard: dashboardPluginMock.createStartContract(),
+    presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,

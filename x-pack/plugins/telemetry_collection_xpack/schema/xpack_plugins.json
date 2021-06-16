@@ -2168,6 +2168,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2376,6 +2382,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2391,6 +2403,12 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2599,6 +2617,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2672,6 +2696,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2715,6 +2745,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2758,6 +2794,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
