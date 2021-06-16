@@ -45,10 +45,15 @@ import {
   setState,
   setLoadedDocument,
   LensAppState,
+  updateDatasourceState,
+  visualizationLoaded,
+  updateLayer,
+  updateVisualizationState,
 } from '../state_management';
 import { getLastKnownDoc } from './save_modal_container';
-import { getAllIndexPatterns, getResolvedDateRange, getActiveDatasourceIdFromDoc } from '../utils';
-import { injectFilterReferences } from '../persistence';
+import { getResolvedDateRange, getActiveDatasourceIdFromDoc } from '../utils';
+import { initializeDatasources } from '../editor_frame_service/editor_frame';
+import { generateId } from '../id_generator';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -219,7 +224,8 @@ export async function mountApp(
         embeddableEditorIncomingState,
         dashboardFeatureFlag,
         datasourceMap,
-        visualizationMap
+        visualizationMap,
+        initialContext
       );
 
       return (
@@ -302,7 +308,8 @@ export function loadDocument(
   embeddableEditorIncomingState: EmbeddableEditorState | undefined,
   dashboardFeatureFlag: DashboardFeatureFlagConfig,
   datasourceMap: Record<string, Datasource>,
-  visualizationMap: Record<string, Visualization>
+  visualizationMap: Record<string, Visualization>,
+  initialContext
 ) {
   const { attributeService, chrome, notifications, data } = lensServices;
   const { persistedDoc } = lensStore.getState().app;
@@ -311,6 +318,56 @@ export function loadDocument(
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === persistedDoc?.savedObjectId)
   ) {
+    initializeDatasources(
+      datasourceMap,
+      lensStore.getState().app.datasourceStates,
+      undefined,
+      initialContext,
+      { isFullEditor: true }
+    )
+      .then((result) => {
+        Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
+          lensStore.dispatch(
+            updateDatasourceState({
+              updater: datasourceState,
+              datasourceId,
+            })
+          );
+
+          {
+            const activeDatasourceId = Object.keys(datasourceMap)[0] || null;
+
+            const visualization = lensStore.getState().app.visualization;
+            const activeVisualization =
+              visualization.activeId && visualizationMap[visualization.activeId];
+            if (visualization.state === null && activeVisualization) {
+              const initialVisualizationState = activeVisualization.initialize({
+                addNewLayer: () => {
+                  const newLayerId = generateId();
+                  lensStore.dispatch(
+                    updateLayer({
+                      datasourceId: activeDatasourceId!,
+                      layerId: newLayerId,
+                      updater: datasourceMap[activeDatasourceId!].insertLayer,
+                    })
+                  );
+
+                  return newLayerId;
+                },
+              });
+              lensStore.dispatch(
+                updateVisualizationState({
+                  visualizationId: activeVisualization.id,
+                  updater: initialVisualizationState,
+                })
+              );
+            }
+          }
+        });
+      })
+      .catch((e) => {
+        // console.error('error ', e);
+      });
     return;
   }
   lensStore.dispatch(setState({ isAppLoading: true }));
@@ -330,10 +387,12 @@ export function loadDocument(
         Object.entries(doc.state.datasourceStates).forEach(([datasourceId, state]) => {
           datasourceStates[datasourceId] = { isLoading: true, state };
         });
+        const activeDatasourceId =
+          getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null;
+
         lensStore.dispatch(
           setLoadedDocument({
             query: doc.state.query,
-            isAppLoading: false,
             indexPatternsForTopNav: indexPatterns,
             lastKnownDoc: doc,
             searchSessionId:
@@ -344,8 +403,7 @@ export function loadDocument(
                 ? currentSessionId
                 : data.search.session.start(),
             ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-            activeDatasourceId:
-              getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null,
+            activeDatasourceId,
             datasourceStates,
             visualization: {
               state: null,
@@ -353,6 +411,97 @@ export function loadDocument(
             },
           })
         );
+        lensStore.dispatch(
+          visualizationLoaded({
+            doc: {
+              ...doc,
+              state: {
+                ...doc.state,
+                visualization: doc.visualizationType
+                  ? visualizationMap[doc.visualizationType].initialize(
+                      {
+                        addNewLayer: () => {
+                          const newLayerId = generateId();
+                          lensStore.dispatch(
+                            updateLayer({
+                              datasourceId: activeDatasourceId!,
+                              layerId: newLayerId,
+                              updater: datasourceMap[activeDatasourceId!].insertLayer,
+                            })
+                          );
+
+                          return newLayerId;
+                        },
+                      },
+                      doc.state.visualization
+                    )
+                  : doc.state.visualization,
+              },
+            },
+          })
+        );
+
+        initializeDatasources(
+          datasourceMap,
+          lensStore.getState().app.datasourceStates,
+          lensStore.getState().app.persistedDoc?.references,
+          initialContext,
+          { isFullEditor: true }
+        )
+          .then((result) => {
+            Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
+              lensStore.dispatch(
+                updateDatasourceState({
+                  updater: datasourceState,
+                  datasourceId,
+                })
+              );
+
+              const visualization = lensStore.getState().app.visualization;
+              const activeVisualization =
+                visualization.activeId && visualizationMap[visualization.activeId];
+
+              // console.log(
+              //   'can this even happen - I think not',
+              //   visualization.state === null && activeVisualization,
+              //   visualization.state,
+              //   activeVisualization
+              // );
+              if (visualization.state === null && activeVisualization) {
+                const initialVisualizationState = activeVisualization.initialize({
+                  addNewLayer: () => {
+                    const newLayerId = generateId();
+                    lensStore.dispatch(
+                      updateLayer({
+                        datasourceId: activeDatasourceId!,
+                        layerId: newLayerId,
+                        updater: datasourceMap[activeDatasourceId!].insertLayer,
+                      })
+                    );
+
+                    return newLayerId;
+                  },
+                });
+                lensStore.dispatch(
+                  updateVisualizationState({
+                    visualizationId: activeVisualization.id,
+                    updater: initialVisualizationState,
+                  })
+                );
+              }
+
+              lensStore.dispatch(
+                setState({
+                  isAppLoading: false,
+                })
+              );
+            });
+          })
+          .catch((e: { message: string }) =>
+            notifications.toasts.addDanger({
+              title: e.message,
+            })
+          );
       } else {
         redirectCallback();
       }

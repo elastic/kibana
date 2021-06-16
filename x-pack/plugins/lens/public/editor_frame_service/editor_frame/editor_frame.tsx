@@ -39,9 +39,7 @@ import {
   DispatchSetState,
   onChangeFromEditorFrame,
   updateLayer,
-  visualizationLoaded,
   updateVisualizationState,
-  updateDatasourceState,
 } from '../../state_management';
 
 export interface EditorFrameProps {
@@ -49,7 +47,6 @@ export interface EditorFrameProps {
   visualizationMap: Record<string, Visualization>;
   ExpressionRenderer: ReactExpressionRendererType;
   palettes: PaletteRegistry;
-  onError: (e: { message: string }) => void;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
@@ -87,7 +84,6 @@ export function EditorFrame(props: EditorFrameProps) {
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
   );
-  const { onError } = props;
   const activeVisualization =
     visualization.activeId && props.visualizationMap[visualization.activeId];
 
@@ -95,40 +91,6 @@ export function EditorFrame(props: EditorFrameProps) {
     ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
   );
 
-  // Initialize current datasource and all active datasources
-  useEffect(
-    () => {
-      // prevents executing dispatch on unmounted component
-      let isUnmounted = false;
-      if (!allLoaded) {
-        initializeDatasources(
-          props.datasourceMap,
-          datasourceStates,
-          persistedDoc?.references,
-          visualizeTriggerFieldContext,
-          { isFullEditor: true }
-        )
-          .then((result) => {
-            if (!isUnmounted) {
-              Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
-                dispatchLens(
-                  updateDatasourceState({
-                    updater: datasourceState,
-                    datasourceId,
-                  })
-                );
-              });
-            }
-          })
-          .catch(onError);
-      }
-      return () => {
-        isUnmounted = true;
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allLoaded, onError]
-  );
   const datasourceLayers = createDatasourceLayers(props.datasourceMap, datasourceStates);
 
   const framePublicAPI: FramePublicAPI = useMemo(
@@ -141,48 +103,6 @@ export function EditorFrame(props: EditorFrameProps) {
       searchSessionId,
     }),
     [activeData, datasourceLayers, dateRange, query, filters, searchSessionId]
-  );
-
-  useEffect(
-    () => {
-      if (persistedDoc) {
-        dispatchLens(
-          visualizationLoaded({
-            doc: {
-              ...persistedDoc,
-              state: {
-                ...persistedDoc.state,
-                visualization: persistedDoc.visualizationType
-                  ? props.visualizationMap[persistedDoc.visualizationType].initialize(
-                      framePublicAPI,
-                      persistedDoc.state.visualization
-                    )
-                  : persistedDoc.state.visualization,
-              },
-            },
-          })
-        );
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [persistedDoc]
-  );
-
-  // Initialize visualization as soon as all datasources are ready
-  useEffect(
-    () => {
-      if (allLoaded && visualization.state === null && activeVisualization) {
-        const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
-        dispatchLens(
-          updateVisualizationState({
-            visualizationId: activeVisualization.id,
-            updater: initialVisualizationState,
-          })
-        );
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allLoaded, activeVisualization, visualization.state]
   );
 
   // Get suggestions for visualize field when all datasources are ready
@@ -249,7 +169,7 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   };
 
-  // The frame needs to call onChange every time its internal state changes
+  // The frame needs to call onChange every time its internal state changes - should happen in the middleware
   useEffect(
     () => {
       const activeDatasource =

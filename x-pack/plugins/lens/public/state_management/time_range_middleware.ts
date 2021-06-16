@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 
@@ -16,13 +15,8 @@ import { getResolvedDateRange, containsDynamicMath, TIME_LAG_PERCENTAGE_LIMIT } 
 
 export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    // if document was modified or sessionId check if too much time passed to update searchSessionId
-    if (
-      action.payload?.lastKnownDoc &&
-      !isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
-    ) {
-      updateTimeRange(data, store.dispatch);
-    }
+    //  check if too much time passed to update searchSessionId
+    updateTimeRange(data, store.dispatch);
     next(action);
   };
 };
