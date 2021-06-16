@@ -50,17 +50,17 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     setGlobalFullScreen(false); // exit full screen mode on page load
   }, [setGlobalFullScreen]);
 
-  // const classes = classNames(className, {
-  //   securitySolutionWrapper: true,
-  //   'securitySolutionWrapper--noPadding': noPadding,
-  //   'securitySolutionWrapper--withTimeline': !noTimeline,
-  //   'securitySolutionWrapper--fullHeight': globalFullScreen,
-  // });
+  const classes = classNames(className, {
+    securitySolutionWrapper: true,
+    'securitySolutionWrapper--noPadding': noPadding,
+    'securitySolutionWrapper--withTimeline': !noTimeline,
+    'securitySolutionWrapper--fullHeight': globalFullScreen,
+  });
 
   return (
-    <Wrapper style={style} {...otherProps}>
+    <Wrapper className={classes} style={style} {...otherProps}>
       {children}
-      {/* <AppGlobalStyle /> */}
+      <AppGlobalStyle />
     </Wrapper>
   );
 };

@@ -4,7 +4,7 @@ exports[`rendering renders correctly 1`] = `
 <InPortal
   node={<div />}
 >
-  <Styled(EuiPanel)
+  <EuiPanel
     borderRadius="none"
     color="subdued"
     paddingSize="s"
@@ -17,6 +17,6 @@ exports[`rendering renders correctly 1`] = `
         Additional filters here.
       </p>
     </FiltersGlobalContainer>
-  </Styled(EuiPanel)>
+  </EuiPanel>
 </InPortal>
 `;

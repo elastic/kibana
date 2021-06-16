@@ -25,10 +25,8 @@ import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 
-const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
-
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
-  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
   flex: 1 1 auto;
   display: flex;
   width: 100%;
