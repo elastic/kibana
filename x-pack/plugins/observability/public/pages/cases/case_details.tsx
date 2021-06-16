@@ -16,7 +16,7 @@ import { CaseCallOut, permissionsReadOnlyErrorMessage } from '../../components/a
 
 export const CaseDetailsPage = React.memo(() => {
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
@@ -24,8 +24,9 @@ export const CaseDetailsPage = React.memo(() => {
     subCaseId?: string;
   }>();
 
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
+    navigateToUrl(casesUrl);
     return null;
   }
 

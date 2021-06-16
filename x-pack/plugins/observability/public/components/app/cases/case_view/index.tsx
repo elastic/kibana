@@ -41,8 +41,10 @@ export interface CaseProps extends Props {
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
   const [caseTitle, setCaseTitle] = useState<string | null>(null);
 
-  const { cases: casesUi, application } = useKibana().services;
-  const { navigateToApp } = application;
+  const {
+    cases: casesUi,
+    application: { getUrlForApp, navigateToUrl },
+  } = useKibana().services;
   const allCasesLink = getCaseUrl();
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
   const href = formatUrl(allCasesLink);
@@ -78,6 +80,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [caseId, formatUrl, subCaseId]
   );
 
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: allCasesHref,
@@ -85,9 +88,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: allCasesLink,
-        });
+        return navigateToUrl(casesUrl);
       },
     },
     caseDetailsNavigation: {
@@ -96,9 +97,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: getCaseDetailsUrl({ id: caseId }),
-        });
+        return navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id: caseId })}`);
       },
     },
     caseId,
@@ -108,9 +107,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: configureCasesLink,
-        });
+        return navigateToUrl(`${casesUrl}${configureCasesLink}`);
       },
     },
     getCaseDetailHrefWithCommentId,
