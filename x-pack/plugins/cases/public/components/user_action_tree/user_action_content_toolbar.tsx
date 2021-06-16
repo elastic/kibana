@@ -16,10 +16,10 @@ interface UserActionContentToolbarProps {
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   editLabel: string;
   quoteLabel: string;
-  disabled: boolean;
   isLoading: boolean;
   onEdit: (id: string) => void;
   onQuote: (id: string) => void;
+  userCanCrud: boolean;
 }
 
 const UserActionContentToolbarComponent = ({
@@ -27,10 +27,10 @@ const UserActionContentToolbarComponent = ({
   getCaseDetailHrefWithCommentId,
   editLabel,
   quoteLabel,
-  disabled,
   isLoading,
   onEdit,
   onQuote,
+  userCanCrud,
 }: UserActionContentToolbarProps) => {
   return (
     <EuiFlexGroup>
@@ -40,17 +40,18 @@ const UserActionContentToolbarComponent = ({
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <UserActionPropertyActions
-          id={id}
-          editLabel={editLabel}
-          quoteLabel={quoteLabel}
-          disabled={disabled}
-          isLoading={isLoading}
-          onEdit={onEdit}
-          onQuote={onQuote}
-        />
-      </EuiFlexItem>
+      {userCanCrud && (
+        <EuiFlexItem>
+          <UserActionPropertyActions
+            id={id}
+            editLabel={editLabel}
+            quoteLabel={quoteLabel}
+            isLoading={isLoading}
+            onEdit={onEdit}
+            onQuote={onQuote}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

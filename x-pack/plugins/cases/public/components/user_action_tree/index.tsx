@@ -285,10 +285,10 @@ export const UserActionTree = React.memo(
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
-            disabled={!userCanCrud}
             isLoading={isLoadingDescription}
             onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
             onQuote={handleManageQuote.bind(null, caseData.description)}
+            userCanCrud={userCanCrud}
           />
         ),
       }),
@@ -360,10 +360,10 @@ export const UserActionTree = React.memo(
                         id={comment.id}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
-                        disabled={!userCanCrud}
                         isLoading={isLoadingIds.includes(comment.id)}
                         onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                         onQuote={handleManageQuote.bind(null, comment.comment)}
+                        userCanCrud={userCanCrud}
                       />
                     ),
                   },
