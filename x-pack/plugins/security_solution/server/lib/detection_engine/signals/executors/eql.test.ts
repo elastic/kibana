@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
 import { eqlExecutor } from './eql';
@@ -23,6 +24,7 @@ describe('eql_executor', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
+  const params = getEqlRuleParams();
   const eqlSO = {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -40,9 +42,14 @@ describe('eql_executor', () => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: getEqlRuleParams(),
+      params,
     },
     references: [],
+  };
+  const tuple = {
+    from: dateMath.parse(params.from)!,
+    to: dateMath.parse(params.to)!,
+    maxSignals: params.maxSignals,
   };
   const searchAfterSize = 7;
 
@@ -64,6 +71,7 @@ describe('eql_executor', () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await eqlExecutor({
         rule: eqlSO,
+        tuple,
         exceptionItems,
         services: alertServices,
         version,

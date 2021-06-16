@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+export * from './json';

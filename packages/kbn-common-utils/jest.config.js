@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { RollupPrompt } from './rollup_prompt';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-common-utils'],
+};

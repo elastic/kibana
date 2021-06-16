@@ -241,67 +241,77 @@ export const signalRulesAlertType = ({
 
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
-          result = await mlExecutor({
-            rule: mlRuleSO,
-            ml,
-            listClient,
-            exceptionItems,
-            services,
-            logger,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await mlExecutor({
+              rule: mlRuleSO,
+              tuple,
+              ml,
+              listClient,
+              exceptionItems,
+              services,
+              logger,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
-          result = await thresholdExecutor({
-            rule: thresholdRuleSO,
-            tuples,
-            exceptionItems,
-            services,
-            version,
-            logger,
-            buildRuleMessage,
-            startedAt,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await thresholdExecutor({
+              rule: thresholdRuleSO,
+              tuple,
+              exceptionItems,
+              services,
+              version,
+              logger,
+              buildRuleMessage,
+              startedAt,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
-          result = await threatMatchExecutor({
-            rule: threatRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await threatMatchExecutor({
+              rule: threatRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
-          result = await queryExecutor({
-            rule: queryRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            eventsTelemetry,
-            buildRuleMessage,
-            bulkCreate,
-            wrapHits,
-          });
+          for (const tuple of tuples) {
+            result = await queryExecutor({
+              rule: queryRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
           result = await eqlExecutor({
             rule: eqlRuleSO,
+            tuple,
             exceptionItems,
             services,
             version,

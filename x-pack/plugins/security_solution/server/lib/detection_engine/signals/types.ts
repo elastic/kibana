@@ -265,11 +265,11 @@ export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleH
 export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
+  };
   ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;

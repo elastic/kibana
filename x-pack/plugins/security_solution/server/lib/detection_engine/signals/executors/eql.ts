@@ -29,6 +29,7 @@ import {
   WrapHits,
   WrapSequences,
   EqlSignalSearchResponse,
+  RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SimpleHit,
 } from '../types';
@@ -36,6 +37,7 @@ import { createSearchAfterReturnType, makeFloatString } from '../utils';
 
 export const eqlExecutor = async ({
   rule,
+  tuple,
   exceptionItems,
   services,
   version,
@@ -46,6 +48,7 @@ export const eqlExecutor = async ({
   wrapSequences,
 }: {
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
+  tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
@@ -86,8 +89,8 @@ export const eqlExecutor = async ({
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,
-    ruleParams.from,
-    ruleParams.to,
+    tuple.from.toISOString(),
+    tuple.to.toISOString(),
     searchAfterSize,
     ruleParams.timestampOverride,
     exceptionItems,
