@@ -61,7 +61,7 @@ export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
 
 export const contentTypes: Record<Mode, ContentType> = {
   [Mode.JSON]: ContentType.JSON,
-  [Mode.TEXT]: ContentType.TEXT,
+  [Mode.PLAINTEXT]: ContentType.TEXT,
   [Mode.XML]: ContentType.XML,
   [Mode.FORM]: ContentType.FORM,
 };
