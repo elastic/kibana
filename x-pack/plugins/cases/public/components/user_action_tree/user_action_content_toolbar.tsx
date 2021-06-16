@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionPropertyActions } from './user_action_property_actions';
 
-interface UserActionContentToolbarProps {
+export interface UserActionContentToolbarProps {
   id: string;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   editLabel: string;
