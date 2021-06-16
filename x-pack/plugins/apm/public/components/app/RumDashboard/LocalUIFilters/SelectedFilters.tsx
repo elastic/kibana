@@ -42,7 +42,7 @@ export function SelectedFilters({
   const hasValues = filters.some((filter) => filter.value?.length > 0);
 
   return indexPattern && (hasValues || urlValues.length > 0) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       {(filters ?? []).map(({ name, title, fieldName, excluded }) => (
         <Fragment key={name}>
           {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (
