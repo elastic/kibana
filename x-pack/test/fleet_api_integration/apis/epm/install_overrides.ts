@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
 
   describe('installs packages that include settings and mappings overrides', async () => {
+    skipIfNoDockerRegistry(providerContext);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
