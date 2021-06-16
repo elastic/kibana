@@ -414,11 +414,21 @@ export function replaceColumn({
             indexPattern,
           });
 
+          const column = copyCustomLabel({ ...referenceColumn }, previousColumn);
+          // do not forget to move over also any filter/shift/anything (if compatible)
+          // from the reference definition to the new operation.
+          if (referencedOperation.filterable) {
+            column.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
+          }
+          if (referencedOperation.shiftable) {
+            column.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
+          }
+
           tempLayer = {
             ...tempLayer,
             columns: {
               ...tempLayer.columns,
-              [columnId]: copyCustomLabel({ ...referenceColumn }, previousColumn),
+              [columnId]: column,
             },
           };
           return updateDefaultLabels(
