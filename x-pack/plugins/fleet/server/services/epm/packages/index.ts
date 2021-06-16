@@ -8,7 +8,6 @@
 import type { SavedObject } from 'src/core/server';
 
 import { requiredPackages, installationStatuses } from '../../../../common';
-import type { RequiredPackage, ValueOf } from '../../../../common';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
@@ -33,7 +32,7 @@ export {
 } from './install';
 export { removeInstallation } from './remove';
 
-export function isRequiredPackage(value: string): value is ValueOf<RequiredPackage> {
+export function isRequiredPackage(value: string): boolean {
   return Object.values(requiredPackages).some((required) => value === required);
 }
 
