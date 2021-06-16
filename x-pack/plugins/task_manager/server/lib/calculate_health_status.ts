@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 
