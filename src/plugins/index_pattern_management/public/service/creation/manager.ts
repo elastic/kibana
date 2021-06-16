@@ -6,31 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '../../../../../core/public';
+import { memoize } from 'lodash';
+import { HttpStart, CoreStart } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
+import { CONFIG_ROLLUPS } from '../../constants';
+// @ts-ignore
+import { RollupIndexPatternCreationConfig } from './rollup_creation_config';
+
+interface IndexPatternCreationManagerStart {
+  httpClient: HttpStart;
+  uiSettings: CoreStart['uiSettings'];
+}
 
 export class IndexPatternCreationManager {
-  private configs: IndexPatternCreationConfig[] = [];
+  start({ httpClient, uiSettings }: IndexPatternCreationManagerStart) {
+    const getConfigs = memoize(() => {
+      const configs: IndexPatternCreationConfig[] = [];
+      configs.push(new IndexPatternCreationConfig({ httpClient }));
 
-  setup(httpClient: HttpSetup) {
-    return {
-      addCreationConfig: (Config: typeof IndexPatternCreationConfig) => {
-        const config = new Config({ httpClient });
+      if (uiSettings.get(CONFIG_ROLLUPS, false)) {
+        configs.push(new RollupIndexPatternCreationConfig({ httpClient }));
+      }
 
-        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
-          throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
-        }
+      return configs;
+    });
 
-        this.configs.push(config);
-      },
-    };
-  }
-
-  start() {
     const getType = (key: string | undefined): IndexPatternCreationConfig => {
+      const configs = getConfigs();
       if (key) {
-        const index = this.configs.findIndex((config) => config.key === key);
-        const config = this.configs[index];
+        const index = configs.findIndex((config) => config.key === key);
+        const config = configs[index];
 
         if (config) {
           return config;
@@ -48,7 +53,7 @@ export class IndexPatternCreationManager {
         const options: IndexPatternCreationOption[] = [];
 
         await Promise.all(
-          this.configs.map(async (config) => {
+          getConfigs().map(async (config) => {
             const option = config.getIndexPatternCreationOption
               ? await config.getIndexPatternCreationOption(urlHandler)
               : null;
