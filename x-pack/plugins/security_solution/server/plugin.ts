@@ -465,7 +465,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager, endpointContext);
 
     return {};
   }

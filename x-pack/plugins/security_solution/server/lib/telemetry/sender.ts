@@ -21,6 +21,7 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
+import { EndpointAppContext } from '../../../server/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -49,7 +50,6 @@ export class TelemetryEventsSender {
   private readonly logger: Logger;
   private core?: CoreStart;
   private maxQueueSize = 100;
-  private maxQuerySize = 10_000;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
@@ -63,12 +63,21 @@ export class TelemetryEventsSender {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
+  public setup(
+    telemetrySetup?: TelemetryPluginSetup,
+    taskManager?: TaskManagerSetupContract,
+    endpointContext: EndpointAppContext
+  ) {
     this.telemetrySetup = telemetrySetup;
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
-      this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
+      this.epMetricsTask = new TelemetryEndpointTask(
+        this.logger,
+        taskManager,
+        this,
+        endpointContext
+      );
     }
   }
 
@@ -128,34 +137,6 @@ export class TelemetryEventsSender {
       throw Error('could not fetch diagnostic alerts. core is not available');
     }
     const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return callCluster('search', query);
-  }
-
-  public fetchFleetPolicyConfigs() {
-    const query = {
-      expand_wildcards: 'open,hidden',
-      index: '.fleet-policies*',
-      ignore_unavailable: true,
-      size: this.maxQuerySize,
-      body: {
-        query: {
-          match_all: {},
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-      },
-    };
-
-    if (!this.core) {
-      throw Error('could not fetch diagnostic alerts. core is not available');
-    }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    // TODO: return list of policy config types
     return callCluster('search', query);
   }
 

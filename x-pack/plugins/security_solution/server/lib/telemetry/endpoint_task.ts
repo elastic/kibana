@@ -14,6 +14,7 @@ import {
 } from '../../../../task_manager/server';
 import { getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
+import { EndpointAppContext } from '../../../server/endpoint/types';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '1m',
@@ -25,14 +26,17 @@ export const TelemetryEndpointTaskConstants = {
 export class TelemetryEndpointTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
+  private readonly endpointContext: EndpointAppContext;
 
   constructor(
     logger: Logger,
     taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender
+    sender: TelemetryEventsSender,
+    endpointContext: EndpointAppContext
   ) {
     this.logger = logger;
     this.sender = sender;
+    this.endpointContext = endpointContext;
 
     taskManager.registerTaskDefinitions({
       [TelemetryEndpointTaskConstants.TYPE]: {
@@ -100,9 +104,10 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    // 1. [PH] Get the fleet agents - TODO ~ local fleet agent DNS issues
-    // 2. [PH/CD] Get the fleet index (policies) ~~> List<PolicyConfig>
-    const policyConfigs = this.sender.fetchFleetPolicyConfigs();
+    const agentService = this.endpointContext.service.getAgentService();
+
+    // 1. [PH] Get the fleet agents
+    // 2. [PH/] Get the fleet index (policies)
     // 3. [PH] Get the endpoint policy failure responses
     // 4. [CD] Get the EP metrics
     // 5. [PH/CD] Document restructuring / Join on agent / host id
