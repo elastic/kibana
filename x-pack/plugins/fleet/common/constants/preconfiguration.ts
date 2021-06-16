@@ -7,7 +7,7 @@
 
 import type { PreconfiguredAgentPolicy } from '../types';
 
-import { defaultPackages } from './epm';
+import { defaultPackages, FLEET_SYSTEM_PACKAGE, FLEET_SERVER_PACKAGE } from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
@@ -27,9 +27,9 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   description: 'Default agent policy created by Kibana',
   package_policies: [
     {
-      name: `${defaultPackages.System}-1`,
+      name: `${FLEET_SYSTEM_PACKAGE}-1`,
       package: {
-        name: defaultPackages.System,
+        name: FLEET_SYSTEM_PACKAGE,
       },
     },
   ],
@@ -44,9 +44,9 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   description: 'Default Fleet Server agent policy created by Kibana',
   package_policies: [
     {
-      name: `${defaultPackages.FleetServer}-1`,
+      name: `${FLEET_SERVER_PACKAGE}-1`,
       package: {
-        name: defaultPackages.FleetServer,
+        name: FLEET_SERVER_PACKAGE,
       },
     },
   ],

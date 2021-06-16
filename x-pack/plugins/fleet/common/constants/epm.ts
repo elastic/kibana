@@ -9,12 +9,14 @@ export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
 
+export const FLEET_SYSTEM_PACKAGE = 'system';
+export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
 export const requiredPackages = {
-  System: 'system',
-  ElasticAgent: 'elastic_agent',
+  System: FLEET_SYSTEM_PACKAGE,
+  ElasticAgent: FLEET_ELASTIC_AGENT_PACKAGE,
   FleetServer: FLEET_SERVER_PACKAGE,
 } as const;
 
