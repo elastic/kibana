@@ -94,9 +94,9 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
     }
   }, [apiToken, editActionSecrets]);
 
-  const isApiUrlInvalid = errors.apiUrl.length > 0 && apiToken !== undefined;
-  const isAppIdInvalid = errors.appId.length > 0 && apiToken !== undefined;
-  const isApiTokenInvalid = errors.apiToken.length > 0 && apiToken !== undefined;
+  const isApiUrlInvalid = errors.apiUrl?.length > 0 && apiToken !== undefined;
+  const isAppIdInvalid = errors.appId?.length > 0 && apiToken !== undefined;
+  const isApiTokenInvalid = errors.apiToken?.length > 0 && apiToken !== undefined;
 
   return (
     <>
