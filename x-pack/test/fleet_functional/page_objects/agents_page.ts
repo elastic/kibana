@@ -11,31 +11,32 @@ import { PLUGIN_ID } from '../../../plugins/fleet/common';
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pagePathGetters } from '../../../plugins/fleet/public/constants/page_paths';
 
-export function OverviewPage({ getService, getPageObjects }: FtrProviderContext) {
+export function AgentsPage({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToOverview() {
+    async navigateToAgentsPage() {
       await pageObjects.common.navigateToApp(PLUGIN_ID, {
-        hash: pagePathGetters.overview()[1],
+        // Fleet's "/" route should redirect to "/agents"
+        hash: pagePathGetters.base()[1],
       });
     },
 
-    async integrationsSectionExistsOrFail() {
-      await testSubjects.existOrFail('fleet-integrations-section');
+    async agentsTabExistsOrFail() {
+      await testSubjects.existOrFail('fleet-agents-tab');
     },
 
-    async agentPolicySectionExistsOrFail() {
-      await testSubjects.existOrFail('fleet-agent-policy-section');
+    async agentPoliciesTabExistsOrFail() {
+      await testSubjects.existOrFail('fleet-agent-policies-tab');
     },
 
-    async agentSectionExistsOrFail() {
-      await testSubjects.existOrFail('fleet-agent-section');
+    async enrollmentTokensTabExistsOrFail() {
+      await testSubjects.existOrFail('fleet-enrollment-tokens-tab');
     },
 
-    async datastreamSectionExistsOrFail() {
-      await testSubjects.existOrFail('fleet-datastream-section');
+    async dataStreamsTabExistsOrFail() {
+      await testSubjects.existOrFail('fleet-datastreams-tab');
     },
   };
 }
