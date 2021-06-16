@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         probability: 0.007820139656036713,
         record_score: 33.36147565024334,
         result_type: 'record',
-        timestamp: 1605567488000,
+        timestamp: '2020-11-16T22:58:08.000Z',
         typical: [0.007820139656036711],
         user: { name: ['root'] },
         process: { name: ['store'] },
@@ -191,6 +191,13 @@ export default ({ getService }: FtrProviderContext) => {
           },
           original_time: '2020-11-16T22:58:08.000Z',
         },
+        all_field_values: [
+          'store',
+          'linux_anomalous_network_activity_ecs',
+          'root',
+          'store',
+          'mothra',
+        ],
       });
     });
 

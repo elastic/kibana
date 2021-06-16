@@ -6,14 +6,17 @@
  */
 
 import {
+  arrayInPathExists,
   FieldsType,
   filterFieldEntries,
   matchesExistingSubObject,
   matchesInvalidKey,
   mergeFieldsWithSource,
+  recursiveUnboxingNestedFields,
 } from './merge_fields_with_source';
 import { SignalSourceHit } from './types';
 import { emptyEsResult } from './__mocks__/empty_signal_source_hit';
+import { SearchTypes } from '../../../../common/detection_engine/types';
 
 describe('merge_fields_with_source', () => {
   beforeAll(() => {
@@ -141,7 +144,7 @@ describe('merge_fields_with_source', () => {
    * f_p1          | f_[{}2, ...2] | f_[{}2, ...2]
    *
    * When source key is a primitive key or a flattened object key and the source value is any
-   * type of array (p_[], p_p[p1], or p_p[p1, ...1]) of primitivies then we always copy the
+   * type of array (p_[], p_p[p1], or p_p[p1, ...1]) of primitives then we always copy the
    * fields value as is and keep the source key as it was originally (primitive or flattened)
    *
    * source        | fields        | value after merge
@@ -1450,20 +1453,504 @@ describe('merge_fields_with_source', () => {
 
     /**
      * These tests show the behaviors around overriding fields with other fields such as objects overriding
-     * values and values overriding objects.
+     * values and values overriding objects. This occurs with multi fields where you can have "foo" and "foo.keyword"
+     * in the fields
      */
     describe('Fields overriding fields', () => {
-      test('fields with two values can override an object into a keyword"', () => {
+      describe('primitive keys for the _source', () => {
+        test('removes multi-field values such "foo.keyword" mixed with "foo" and prefers just "foo" for 1st level', () => {
+          const _source: SignalSourceHit['_source'] = {
+            foo: 'foo_value_1',
+            bar: 'bar_value_1',
+          };
+          const fields: SignalSourceHit['fields'] = {
+            foo: ['foo_other_value_1'],
+            'foo.keyword': ['foo_other_value_keyword_1'],
+            bar: ['bar_other_value_1'],
+            'bar.keyword': ['bar_other_value_keyword_1'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            foo: 'foo_other_value_1',
+            bar: 'bar_other_value_1',
+          });
+        });
+
+        test('removes multi-field values such "host.name.keyword" mixed with "host.name" and prefers just "host.name" for 2nd level', () => {
+          const _source: SignalSourceHit['_source'] = {
+            host: {
+              name: 'host_value_1',
+              hostname: 'host_name_value_1',
+            },
+          };
+          const fields: SignalSourceHit['fields'] = {
+            'host.name': ['host_name_other_value_1'],
+            'host.name.keyword': ['host_name_other_value_keyword_1'],
+            'host.hostname': ['hostname_other_value_1'],
+            'host.hostname.keyword': ['hostname_other_value_keyword_1'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            host: {
+              hostname: 'hostname_other_value_1',
+              name: 'host_name_other_value_1',
+            },
+          });
+        });
+
+        test('removes multi-field values such "foo.host.name.keyword" mixed with "foo.host.name" and prefers just "foo.host.name" for 3rd level', () => {
+          const _source: SignalSourceHit['_source'] = {
+            foo: {
+              host: {
+                name: 'host_value_1',
+                hostname: 'host_name_value_1',
+              },
+            },
+          };
+          const fields: SignalSourceHit['fields'] = {
+            'foo.host.name': ['host_name_other_value_1'],
+            'foo.host.name.keyword': ['host_name_other_value_keyword_1'],
+            'foo.host.hostname': ['hostname_other_value_1'],
+            'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            foo: {
+              host: {
+                hostname: 'hostname_other_value_1',
+                name: 'host_name_other_value_1',
+              },
+            },
+          });
+        });
+
+        test('multi-field values mixed with regular values will not be merged accidentally"', () => {
+          const _source: SignalSourceHit['_source'] = {};
+          const fields: SignalSourceHit['fields'] = {
+            foo: ['other_value_1'],
+            'foo.bar': ['other_value_2'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            foo: 'other_value_1',
+          });
+        });
+      });
+
+      describe('flattened keys for the _source', () => {
+        test('removes multi-field values such "host.name.keyword" mixed with "host.name" and prefers just "host.name" for 2nd level', () => {
+          const _source: SignalSourceHit['_source'] = {
+            'host.name': 'host_value_1',
+            'host.hostname': 'host_name_value_1',
+          };
+          const fields: SignalSourceHit['fields'] = {
+            'host.name': ['host_name_other_value_1'],
+            'host.name.keyword': ['host_name_other_value_keyword_1'],
+            'host.hostname': ['hostname_other_value_1'],
+            'host.hostname.keyword': ['hostname_other_value_keyword_1'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            'host.name': 'host_name_other_value_1',
+            'host.hostname': 'hostname_other_value_1',
+          });
+        });
+
+        test('removes multi-field values such "foo.host.name.keyword" mixed with "foo.host.name" and prefers just "foo.host.name" for 3rd level', () => {
+          const _source: SignalSourceHit['_source'] = {
+            'foo.host.name': 'host_value_1',
+            'foo.host.hostname': 'host_name_value_1',
+          };
+          const fields: SignalSourceHit['fields'] = {
+            'foo.host.name': ['host_name_other_value_1'],
+            'foo.host.name.keyword': ['host_name_other_value_keyword_1'],
+            'foo.host.hostname': ['hostname_other_value_1'],
+            'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            'foo.host.name': 'host_name_other_value_1',
+            'foo.host.hostname': 'hostname_other_value_1',
+          });
+        });
+
+        test('invalid fields of several levels mixed with regular values will not be merged accidentally due to runtime fields being liberal"', () => {
+          const _source: SignalSourceHit['_source'] = {};
+          const fields: SignalSourceHit['fields'] = {
+            foo: ['other_value_1'],
+            'foo.bar': ['other_value_2'],
+            'foo.bar.zed': ['zed_other_value_2'],
+          };
+          const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+          const merged = mergeFieldsWithSource({ doc });
+          expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+            foo: 'other_value_1',
+          });
+        });
+      });
+    });
+
+    /**
+     * These tests are around parent objects that are not nested but are array types. We do not try to merge
+     * into these as this causes ambiguities between array types and object types.
+     */
+    describe('parent array objects', () => {
+      test('parent array objects will not be overridden since that is an ambiguous use case for a top level value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          foo: [
+            {
+              bar: 'value_1',
+              mars: ['value_1'],
+            },
+          ],
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'foo.bar': ['other_value_1'],
+          'foo.mars': ['other_value_2'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeFieldsWithSource({ doc });
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('parent array objects will not be overridden since that is an ambiguous use case for a deeply nested value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          foo: {
+            zed: [
+              {
+                bar: 'value_1',
+                mars: ['value_1'],
+              },
+            ],
+          },
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'foo.zed.bar': ['other_value_1'],
+          'foo.zed.mars': ['other_value_2'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeFieldsWithSource({ doc });
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+    });
+
+    /**
+     * Specific tests around nested field types such as ensuring we are unboxing when we can
+     */
+    describe('nested fields', () => {
+      test('unboxes deeply nested fields from a single array items when source is non-existent', () => {
         const _source: SignalSourceHit['_source'] = {};
         const fields: SignalSourceHit['fields'] = {
-          foo: ['other_value_1'],
-          'foo.bar': ['other_value_2'],
+          foo: [{ bar: ['single_value'], zed: ['single_value'] }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
         const merged = mergeFieldsWithSource({ doc });
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
-          foo: { bar: 'other_value_2' },
+          foo: { bar: 'single_value', zed: 'single_value' },
         });
+      });
+
+      test('does not unbox when source is exists and has arrays for the same values with primitive keys', () => {
+        const _source: SignalSourceHit['_source'] = {
+          foo: [
+            {
+              bar: [],
+              zed: [],
+            },
+          ],
+        };
+        const fields: SignalSourceHit['fields'] = {
+          foo: [{ bar: ['single_value'], zed: ['single_value'] }],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeFieldsWithSource({ doc });
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+          foo: [{ bar: ['single_value'], zed: ['single_value'] }],
+        });
+      });
+    });
+  });
+
+  describe('recursiveUnboxingNestedFields', () => {
+    describe('valueInMergedDocument is "undefined"', () => {
+      const valueInMergedDocument: SearchTypes = undefined;
+      test('it will return an empty array as is', () => {
+        const nested: FieldsType = [];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([]);
+      });
+
+      test('it will return an empty object as is', () => {
+        const nested: FieldsType[0] = {};
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual({});
+      });
+
+      test('it will unbox a single array field', () => {
+        const nested: FieldsType = ['foo_value_1'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual('foo_value_1');
+      });
+
+      test('it will not unbox an array with two fields', () => {
+        const nested: FieldsType = ['foo_value_1', 'foo_value_2'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([
+          'foo_value_1',
+          'foo_value_2',
+        ]);
+      });
+
+      test('it will unbox a nested structure of 3 single arrays', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual({ bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' });
+      });
+
+      test('it will not unbox a nested structure of 2 array values at the top most level', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([
+          { bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' },
+          { bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' },
+        ]);
+      });
+
+      test('it will not unbox a nested structure of mixed values at different levels', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+              fred: {
+                yolo: ['deep_1', 'deep_2'],
+              },
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual({
+          bar: { fred: { yolo: ['deep_1', 'deep_2'] }, zed: 'zed_value_1' },
+          foo: 'foo_value_1',
+        });
+      });
+    });
+
+    describe('valueInMergedDocument is an empty object', () => {
+      const valueInMergedDocument: SearchTypes = {};
+      test('it will return an empty array as is', () => {
+        const nested: FieldsType = [];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([]);
+      });
+
+      test('it will return an empty object as is', () => {
+        const nested: FieldsType[0] = {};
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual({});
+      });
+
+      test('it will unbox a single array field', () => {
+        const nested: FieldsType = ['foo_value_1'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual('foo_value_1');
+      });
+
+      test('it will not unbox an array with two fields', () => {
+        const nested: FieldsType = ['foo_value_1', 'foo_value_2'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([
+          'foo_value_1',
+          'foo_value_2',
+        ]);
+      });
+
+      test('it will unbox a nested structure of 3 single arrays', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual({ bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' });
+      });
+
+      test('it will not unbox a nested structure of 2 array values at the top most level', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([
+          { bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' },
+          { bar: { zed: 'zed_value_1' }, foo: 'foo_value_1' },
+        ]);
+      });
+
+      test('it will not unbox a nested structure of mixed values at different levels', () => {
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+              fred: {
+                yolo: ['deep_1', 'deep_2'],
+              },
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual({
+          bar: { fred: { yolo: ['deep_1', 'deep_2'] }, zed: 'zed_value_1' },
+          foo: 'foo_value_1',
+        });
+      });
+    });
+
+    describe('valueInMergedDocument mirrors the nested field in different ways', () => {
+      test('it will not unbox when the valueInMergedDocument is an array value', () => {
+        const valueInMergedDocument: SearchTypes = ['foo_value_1'];
+        const nested: FieldsType = ['foo_value_1'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([
+          'foo_value_1',
+        ]);
+      });
+
+      test('it will not unbox when the valueInMergedDocument is an empty array value', () => {
+        const valueInMergedDocument: SearchTypes = [];
+        const nested: FieldsType = ['foo_value_1'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([
+          'foo_value_1',
+        ]);
+      });
+
+      test('it will not unbox an array with two fields', () => {
+        const valueInMergedDocument: SearchTypes = ['foo_value_1', 'foo_value_2'];
+        const nested: FieldsType = ['foo_value_1', 'foo_value_2'];
+        expect(recursiveUnboxingNestedFields(nested, valueInMergedDocument)).toEqual([
+          'foo_value_1',
+          'foo_value_2',
+        ]);
+      });
+
+      test('it will not unbox a nested structure of 3 single arrays when valueInMergedDocument has empty array values', () => {
+        const valueInMergedDocument: SearchTypes = [
+          {
+            foo: [],
+            bar: {
+              zed: [],
+            },
+          },
+        ];
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([{ bar: { zed: ['zed_value_1'] }, foo: ['foo_value_1'] }]);
+      });
+
+      test('it will not unbox a nested structure of 3 single arrays when valueInMergedDocument has array values', () => {
+        const valueInMergedDocument: SearchTypes = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([{ bar: { zed: ['zed_value_1'] }, foo: ['foo_value_1'] }]);
+      });
+
+      test('it will not overwrite a nested structure of 3 single arrays when valueInMergedDocument has array values that are different', () => {
+        const valueInMergedDocument: SearchTypes = [
+          {
+            foo: ['other_value_1'],
+            bar: {
+              zed: ['other_value_2'],
+            },
+          },
+        ];
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([{ bar: { zed: ['zed_value_1'] }, foo: ['foo_value_1'] }]);
+      });
+
+      test('it will work with mixed array values between "nested" and  "valueInMergedDocument"', () => {
+        const valueInMergedDocument: SearchTypes = [
+          {
+            foo: ['foo_value_1'],
+            bar: {
+              zed: ['zed_value_1'],
+            },
+          },
+        ];
+        const nested: FieldsType = [
+          {
+            foo: ['foo_value_1', 'foo_value_2', 'foo_value_3'],
+            bar: {
+              zed: ['zed_value_1', 'zed_value_1', 'zed_value_2'],
+            },
+          },
+        ];
+        const recursed = recursiveUnboxingNestedFields(nested, valueInMergedDocument);
+        expect(recursed).toEqual([
+          {
+            bar: { zed: ['zed_value_1', 'zed_value_1', 'zed_value_2'] },
+            foo: ['foo_value_1', 'foo_value_2', 'foo_value_3'],
+          },
+        ]);
       });
     });
   });
@@ -1472,7 +1959,7 @@ describe('merge_fields_with_source', () => {
     const dummyValue = ['value'];
 
     test('it returns true if a subObject is sent in', () => {
-      expect(matchesExistingSubObject('foo', [['foo.bar', dummyValue]])).toEqual(true);
+      expect(matchesExistingSubObject('foo.bar', [['foo', dummyValue]])).toEqual(true);
     });
 
     test('it returns false if the fieldsKey matches the string sent in', () => {
@@ -1481,6 +1968,14 @@ describe('merge_fields_with_source', () => {
 
     test('it returns false if a sibling object is sent in', () => {
       expect(matchesExistingSubObject('foo.bar', [['foo.mar', dummyValue]])).toEqual(false);
+    });
+
+    test('it returns true for a 3rd level match', () => {
+      expect(matchesExistingSubObject('foo.mars.bar', [['foo', dummyValue]])).toEqual(true);
+    });
+
+    test('it returns true for a 3rd level match against a 2nd level object', () => {
+      expect(matchesExistingSubObject('foo.mars.bar', [['foo.mars', dummyValue]])).toEqual(true);
     });
   });
 
@@ -1543,19 +2038,69 @@ describe('merge_fields_with_source', () => {
       ]);
     });
 
-    test('removes invalid subObjects mixed with longer values', () => {
+    test('removes multi-field values such "foo.keyword" mixed with "foo" and prefers just "foo" for 1st level', () => {
       const fieldEntries: Array<[string, FieldsType]> = [
-        ['moo', dummyValue], // <-- Invalid subObject since we have 'moo.cow.long'
-        ['foo.mars', dummyValue],
-        ['foo.bar', dummyValue],
-        ['moo.cow.long', dummyValue],
-        ['foo', dummyValue], // <-- Invalid subObject we remove
+        ['foo', dummyValue],
+        ['foo.keyword', dummyValue], // <-- "foo.keyword" multi-field should be removed
+        ['bar.keyword', dummyValue], // <-- "bar.keyword" multi-field should be removed
+        ['bar', dummyValue],
       ];
       expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
-        ['foo.mars', dummyValue],
-        ['foo.bar', dummyValue],
-        ['moo.cow.long', dummyValue],
+        ['foo', dummyValue],
+        ['bar', dummyValue],
       ]);
+    });
+
+    test('removes multi-field values such "host.name.keyword" mixed with "host.name" and prefers just "host.name" for 2nd level', () => {
+      const fieldEntries: Array<[string, FieldsType]> = [
+        ['host.name', dummyValue],
+        ['host.name.keyword', dummyValue], // <-- multi-field should be removed
+        ['host.hostname', dummyValue],
+        ['host.hostname.keyword', dummyValue], // <-- multi-field should be removed
+      ];
+      expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+        ['host.name', dummyValue],
+        ['host.hostname', dummyValue],
+      ]);
+    });
+
+    test('removes multi-field values such "foo.host.name.keyword" mixed with "foo.host.name" and prefers just "foo.host.name" for 3rd level', () => {
+      const fieldEntries: Array<[string, FieldsType]> = [
+        ['foo.host.name', dummyValue],
+        ['foo.host.name.keyword', dummyValue], // <-- multi-field should be removed
+        ['foo.host.hostname', dummyValue],
+        ['foo.host.hostname.keyword', dummyValue], // <-- multi-field should be removed
+      ];
+      expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+        ['foo.host.name', dummyValue],
+        ['foo.host.hostname', dummyValue],
+      ]);
+    });
+  });
+
+  describe('arrayInPathExists', () => {
+    test('returns false when empty string and empty object', () => {
+      expect(arrayInPathExists('', {})).toEqual(false);
+    });
+
+    test('returns false when a path and empty object', () => {
+      expect(arrayInPathExists('a.b.c', {})).toEqual(false);
+    });
+
+    test('returns true when a path and an array exists', () => {
+      expect(arrayInPathExists('a', { a: [] })).toEqual(true);
+    });
+
+    test('returns true when a path and an array exists within the parent path at level 1', () => {
+      expect(arrayInPathExists('a.b', { a: [] })).toEqual(true);
+    });
+
+    test('returns true when a path and an array exists within the parent path at level 3', () => {
+      expect(arrayInPathExists('a.b.c', { a: [] })).toEqual(true);
+    });
+
+    test('returns true when a path and an array exists within the parent path at level 2', () => {
+      expect(arrayInPathExists('a.b.c', { a: { b: [] } })).toEqual(true);
     });
   });
 });

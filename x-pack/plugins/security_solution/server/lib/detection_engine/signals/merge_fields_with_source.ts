@@ -94,43 +94,105 @@ export const mergeFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): Signal
   return filteredEntries.reduce(
     (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
       const valueInMergedDocument = get(fieldsKey, merged);
+
+      // All early conditions we detect that we do not want to attempt a merge
+      // such as ambiguities involving arrays or empty field values. We try to fail
+      // fast first and not merge first.
       if (fieldsValue.length === 0) {
         return merged;
-      } else if (valueInMergedDocument === undefined) {
-        const valueToMerge = unBoxValueIfSingleArrayElement(fieldsValue);
-        return set(fieldsKey, valueToMerge, merged);
-      } else if (isPrimitive(valueInMergedDocument)) {
-        const valueToMerge = unBoxValueIfSingleArrayElement(fieldsValue);
-        return set(fieldsKey, valueToMerge, merged);
-      } else if (isArrayOfPrimitives(valueInMergedDocument)) {
-        // don't attempt any unboxing
-        return set(fieldsKey, fieldsValue, merged);
+      } else if (valueInMergedDocument === undefined && arrayInPathExists(fieldsKey, merged)) {
+        return merged;
       } else if (
         isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
         !isNestedObject(fieldsValue)
       ) {
         return merged;
+      }
+
+      // All conditions in which we merge and do boxing of single array types. If we miss
+      // a condition we will not merge.
+      if (valueInMergedDocument === undefined) {
+        const valueToMerge = recursiveUnboxingNestedFields(fieldsValue, valueInMergedDocument);
+        return set(fieldsKey, valueToMerge, merged);
+      } else if (isPrimitive(valueInMergedDocument)) {
+        const valueToMerge = recursiveUnboxingNestedFields(fieldsValue, valueInMergedDocument);
+        return set(fieldsKey, valueToMerge, merged);
+      } else if (isArrayOfPrimitives(valueInMergedDocument)) {
+        const valueToMerge = recursiveUnboxingNestedFields(fieldsValue, valueInMergedDocument);
+        return set(fieldsKey, valueToMerge, merged);
       } else if (
         isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
         isNestedObject(fieldsValue) &&
         !Array.isArray(valueInMergedDocument)
       ) {
-        const valueToMerge = unBoxValueIfSingleArrayElement(fieldsValue);
+        const valueToMerge = recursiveUnboxingNestedFields(fieldsValue, valueInMergedDocument);
         return set(fieldsKey, valueToMerge, merged);
       } else if (
         isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
         isNestedObject(fieldsValue) &&
         Array.isArray(valueInMergedDocument)
       ) {
-        // don't attempt any unboxing
-        return set(fieldsKey, fieldsValue, merged);
+        const valueToMerge = recursiveUnboxingNestedFields(fieldsValue, valueInMergedDocument);
+        return set(fieldsKey, valueToMerge, merged);
       } else {
-        // fail safe catch all condition for production, but we shouldn't try to reach here and instead write tests if we encounter this situation.
+        // fail safe catch all condition for production, but we shouldn't try to reach here and
+        // instead write tests if we encounter this situation.
         return merged;
       }
     },
     { ...source }
   );
+};
+
+export const recursiveUnboxingNestedFields = (
+  fieldsValue: FieldsType | FieldsType[0],
+  valueInMergedDocument: SearchTypes
+): FieldsType | FieldsType[0] => {
+  if (Array.isArray(fieldsValue)) {
+    const fieldsValueMapped = (fieldsValue as Array<string | number | boolean | object | null>).map(
+      (value, index) => {
+        if (Array.isArray(valueInMergedDocument)) {
+          return recursiveUnboxingNestedFields(value, valueInMergedDocument[index]);
+        } else {
+          return recursiveUnboxingNestedFields(value, undefined);
+        }
+      }
+    );
+    if (fieldsValueMapped.length === 1) {
+      if (Array.isArray(valueInMergedDocument)) {
+        return fieldsValueMapped;
+      } else {
+        return fieldsValueMapped[0];
+      }
+    } else {
+      return fieldsValueMapped;
+    }
+  } else if (typeof fieldsValue === 'object' && fieldsValue != null) {
+    const reducedFromKeys = Object.keys(fieldsValue).reduce((accum, key) => {
+      const recursed = recursiveUnboxingNestedFields(
+        get(key, fieldsValue),
+        get(key, valueInMergedDocument)
+      );
+      return set(key, recursed, accum);
+    }, {});
+    return reducedFromKeys;
+  } else {
+    return fieldsValue;
+  }
+};
+
+/**
+ * Returns true if an array within the path exists anywhere.
+ * @param fieldsKey The fields key to check if an array exists along the path
+ * @param source The source document to check for an array anywhere along the path
+ * @returns true if we detect an array along the path, otherwise false
+ */
+export const arrayInPathExists = (fieldsKey: string, source: SignalSource): boolean => {
+  const splitPath = fieldsKey.split('.');
+  return splitPath.some((_, index, array) => {
+    const newPath = [...array].splice(0, index + 1).join('.');
+    return Array.isArray(get(newPath, source));
+  });
 };
 
 /**
@@ -154,8 +216,16 @@ export const matchesExistingSubObject = (
   fieldsKey: string,
   fieldEntries: Array<[string, FieldsType]>
 ): boolean => {
-  return fieldEntries.some(([fieldKeyToCheck]) => {
-    return fieldKeyToCheck.startsWith(`${fieldsKey}.`);
+  const splitPath = fieldsKey.split('.');
+  return splitPath.some((_, index, array) => {
+    if (index + 1 === array.length) {
+      return false;
+    } else {
+      const newPath = [...array].splice(0, index + 1).join('.');
+      return fieldEntries.some(([fieldKeyToCheck]) => {
+        return fieldKeyToCheck === newPath;
+      });
+    }
   });
 };
 
@@ -163,8 +233,8 @@ export const matchesExistingSubObject = (
  * Filters field entries by removing invalid field entries such as any invalid characters
  * in the keys or if there are sub-objects that are trying to override regular objects and
  * are invalid runtime field names.
- * @param fieldEntries
- * @returns
+ * @param fieldEntries The field entries to filter
+ * @returns The field entries filtered
  */
 export const filterFieldEntries = (
   fieldEntries: Array<[string, FieldsType]>
@@ -217,20 +287,4 @@ export const isObjectLikeOrArrayOfObjectLikes = (
  */
 export const isPrimitive = (valueInMergedDocument: SearchTypes | null): boolean => {
   return !isObjectLike(valueInMergedDocument);
-};
-
-/**
- * Unboxes a single array element if there is a single array element otherwise
- * returns the whole array
- * @param fieldsValue The value to see if it has 1 element to unbox
- * @returns Either the single element or the whole array
- */
-export const unBoxValueIfSingleArrayElement = (
-  fieldsValue: FieldsType
-): FieldsType | FieldsType[0] => {
-  if (fieldsValue.length === 1) {
-    return fieldsValue[0];
-  } else {
-    return fieldsValue;
-  }
 };
