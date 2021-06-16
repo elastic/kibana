@@ -9,8 +9,8 @@ import * as t from 'io-ts';
 import {
   createApmArtifact,
   deleteApmArtifact,
-  getArtifacts,
-  updateSourceMapsToFleetPolicies,
+  listArtifacts,
+  updateSourceMapsOnFleetPolicies,
 } from '../lib/fleet/source_maps';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -36,7 +36,8 @@ const listSourceMapRoute = createApmServerRoute({
     try {
       const fleetPluginStart = await plugins.fleet?.start();
       if (fleetPluginStart) {
-        return { artifacts: await getArtifacts({ fleetPluginStart }) };
+        const artifacts = await listArtifacts({ fleetPluginStart });
+        return { artifacts };
       }
     } catch (e) {
       throw Boom.internal(
@@ -75,7 +76,7 @@ const uploadSourceMapRoute = createApmServerRoute({
             sourceMap,
           },
         });
-        await updateSourceMapsToFleetPolicies({
+        await updateSourceMapsOnFleetPolicies({
           fleetPluginStart,
           savedObjectsClient: context.core.savedObjects.client,
           elasticsearchClient: context.core.elasticsearch.client.asInternalUser,
@@ -106,7 +107,7 @@ const deleteSourceMapRoute = createApmServerRoute({
     try {
       if (fleetPluginStart) {
         await deleteApmArtifact({ id, fleetPluginStart });
-        await updateSourceMapsToFleetPolicies({
+        await updateSourceMapsOnFleetPolicies({
           fleetPluginStart,
           savedObjectsClient: context.core.savedObjects.client,
           elasticsearchClient: context.core.elasticsearch.client.asInternalUser,
