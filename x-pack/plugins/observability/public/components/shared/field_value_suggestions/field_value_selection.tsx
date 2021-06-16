@@ -173,8 +173,9 @@ export function FieldValueSelection({
               {list}
               <EuiPopoverFooter paddingSize="s">
                 <EuiButton
-                  size="s"
+                  fill
                   fullWidth
+                  size="s"
                   isDisabled={applyDisabled()}
                   onClick={() => {
                     const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
