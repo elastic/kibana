@@ -6,8 +6,8 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -83,6 +83,7 @@ export interface LensPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface LensPublicStart {
