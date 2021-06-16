@@ -73,9 +73,9 @@ export function ToolbarOverlay(props: Props) {
 
       {toolsButton}
 
-      {featureDrawControl}
-
       {timesliderToogleButon}
+
+      {featureDrawControl}
     </EuiFlexGroup>
   );
 }

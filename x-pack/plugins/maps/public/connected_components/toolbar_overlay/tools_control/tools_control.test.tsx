@@ -20,7 +20,7 @@ const defaultProps = {
       indexPatternId: '1',
     },
   ],
-  filterModeActive: true,
+  filterModeActive: false,
   activateDrawFilterMode: () => {},
   deactivateDrawMode: () => {},
   disableToolsControl: false,
@@ -33,7 +33,7 @@ test('renders', async () => {
 });
 
 test('Should render cancel button when drawing', async () => {
-  const component = shallow(<ToolsControl {...defaultProps} disableToolsControl={true} />);
+  const component = shallow(<ToolsControl {...defaultProps} filterModeActive={true} />);
 
   expect(component).toMatchSnapshot();
 });

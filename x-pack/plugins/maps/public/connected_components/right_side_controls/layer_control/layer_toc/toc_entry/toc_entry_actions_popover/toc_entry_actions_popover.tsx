@@ -6,27 +6,27 @@
  */
 
 import React, { Component } from 'react';
-import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
 import {
-  getVisibilityToggleIcon,
-  getVisibilityToggleLabel,
+  EDIT_FEATURES_LABEL,
   EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
-  EDIT_FEATURES_LABEL,
+  getVisibilityToggleIcon,
+  getVisibilityToggleLabel,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
-import { SCALING_TYPES } from '../../../../../../../common';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
   enableShapeEditing: (layerId: string) => void;
   enablePointEditing: (layerId: string) => void;
   displayName: string;
-  layerSettings: () => void;
+  openLayerSettings: () => void;
   escapedDisplayName: string;
   fitToBounds: (layerId: string) => void;
   isEditButtonDisabled: boolean;
@@ -39,12 +39,12 @@ export interface Props {
 
 interface State {
   isPopoverOpen: boolean;
-  isLayerEditable: boolean;
+  supportsFeatureEditing: boolean;
   editModeEnabled: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false, isLayerEditable: false, editModeEnabled: false };
+  state: State = { isPopoverOpen: false, supportsFeatureEditing: false, editModeEnabled: false };
   private _isMounted = false;
 
   componentDidMount() {
@@ -63,16 +63,16 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     if (!(this.props.layer instanceof VectorLayer)) {
       return;
     }
-    const isLayerEditable = this.props.layer.supportsFeatureEditing();
+    const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
     const editModeEnabled = await this._getEditModeEnabled();
     if (
       !this._isMounted ||
-      (isLayerEditable === this.state.isLayerEditable &&
+      (supportsFeatureEditing === this.state.supportsFeatureEditing &&
         editModeEnabled === this.state.editModeEnabled)
     ) {
       return;
     }
-    this.setState({ isLayerEditable, editModeEnabled });
+    this.setState({ supportsFeatureEditing, editModeEnabled });
   }
 
   async _getEditModeEnabled(): Promise<boolean> {
@@ -153,7 +153,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     ];
 
     if (!this.props.isReadOnly) {
-      if (this.state.isLayerEditable) {
+      if (this.state.supportsFeatureEditing) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
           icon: <EuiIcon type="vector" size="m" />,
@@ -168,10 +168,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
-            if (supportedShapeTypes.length === 1) {
-              this.props.enablePointEditing(this.props.layer.getId());
-            } else {
+            const supportsShapes =
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON) &&
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE);
+            if (supportsShapes) {
               this.props.enableShapeEditing(this.props.layer.getId());
+            } else {
+              this.props.enablePointEditing(this.props.layer.getId());
             }
           },
         });
@@ -184,7 +187,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this.props.layerSettings();
+          this.props.openLayerSettings();
         },
       });
       actionItems.push({

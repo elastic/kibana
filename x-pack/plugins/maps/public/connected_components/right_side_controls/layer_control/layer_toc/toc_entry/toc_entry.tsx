@@ -278,7 +278,7 @@ export class TOCEntry extends Component<Props, State> {
           layer={layer}
           displayName={this.state.displayName}
           escapedDisplayName={escapeLayerName(this.state.displayName)}
-          layerSettings={this._openLayerPanelWithCheck}
+          openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
         />

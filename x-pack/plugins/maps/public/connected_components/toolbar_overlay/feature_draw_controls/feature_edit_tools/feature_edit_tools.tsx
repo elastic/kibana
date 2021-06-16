@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DRAW_SHAPE } from '../../../../../common/constants';
 import { VectorCircleIcon } from '../../icons/vector_circle_icon';
