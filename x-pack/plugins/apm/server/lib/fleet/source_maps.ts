@@ -118,15 +118,17 @@ export async function updateSourceMapsToFleetPolicies({
             config: {
               ...firstInput.config,
               [APM_SERVER]: {
-                ...firstInput?.config?.[APM_SERVER],
-                rum: {
-                  source_mapping: {
-                    metadata: artifacts.map((artifact) => ({
-                      'service.name': artifact.body.serviceName,
-                      'service.version': artifact.body.serviceVersion,
-                      'bundle.filepath': artifact.body.bundleFilepath,
-                      'sourcemap.url': artifact.relative_url,
-                    })),
+                value: {
+                  ...firstInput?.config?.[APM_SERVER].value,
+                  rum: {
+                    source_mapping: {
+                      metadata: artifacts.map((artifact) => ({
+                        'service.name': artifact.body.serviceName,
+                        'service.version': artifact.body.serviceVersion,
+                        'bundle.filepath': artifact.body.bundleFilepath,
+                        'sourcemap.url': artifact.relative_url,
+                      })),
+                    },
                   },
                 },
               },
