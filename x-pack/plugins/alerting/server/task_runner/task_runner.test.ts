@@ -266,6 +266,10 @@ describe('Task Runner', () => {
         "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute",
+          "category": Array [
+            "alerts",
+          ],
+          "kind": "alert",
           "outcome": "success",
         },
         "kibana": Object {
@@ -283,6 +287,14 @@ describe('Task Runner', () => {
           ],
         },
         "message": "alert executed: test:1: 'alert-name'",
+        "rule": Object {
+          "category": "test",
+          "id": "1",
+          "license": "basic",
+          "name": "alert-name",
+          "namespace": undefined,
+          "ruleset": "alerts",
+        },
       }
     `);
 
@@ -373,6 +385,8 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
         duration: 0,
         start: '1970-01-01T00:00:00.000Z',
       },
@@ -393,35 +407,45 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'active-instance',
+        category: ['alerts'],
         duration: 0,
+        kind: 'alert',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
-        alerting: {
-          instance_id: '1',
-          action_group_id: 'default',
-          action_subgroup: 'subDefault',
-        },
+        alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
         saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
-            type_id: 'test',
-          },
+          { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
         ],
       },
       message:
         "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
         action: 'execute-action',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -447,13 +471,18 @@ describe('Task Runner', () => {
       },
       message:
         "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
-      event: {
-        action: 'execute',
-        outcome: 'success',
-      },
+      event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
         alerting: {
           status: 'active',
@@ -469,6 +498,14 @@ describe('Task Runner', () => {
         ],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
   });
 
@@ -529,6 +566,8 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
         duration: 0,
         start: '1970-01-01T00:00:00.000Z',
       },
@@ -548,10 +587,20 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'active-instance',
+        category: ['alerts'],
+        kind: 'alert',
         duration: 0,
         start: '1970-01-01T00:00:00.000Z',
       },
@@ -571,11 +620,21 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
+        category: ['alerts'],
+        kind: 'alert',
         outcome: 'success',
       },
       kibana: {
@@ -593,6 +652,14 @@ describe('Task Runner', () => {
         ],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
   });
 
@@ -711,7 +778,11 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 86400000000000,
+              "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -730,6 +801,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -737,6 +816,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -754,6 +837,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -944,7 +1035,11 @@ describe('Task Runner', () => {
         Object {
           "event": Object {
             "action": "new-instance",
+            "category": Array [
+              "alerts",
+            ],
             "duration": 0,
+            "kind": "alert",
             "start": "1970-01-01T00:00:00.000Z",
           },
           "kibana": Object {
@@ -963,13 +1058,25 @@ describe('Task Runner', () => {
             ],
           },
           "message": "test:1: 'alert-name' created new instance: '1'",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "alert-name",
+            "namespace": undefined,
+            "ruleset": "alerts",
+          },
         },
       ],
       Array [
         Object {
           "event": Object {
             "action": "active-instance",
+            "category": Array [
+              "alerts",
+            ],
             "duration": 0,
+            "kind": "alert",
             "start": "1970-01-01T00:00:00.000Z",
           },
           "kibana": Object {
@@ -988,12 +1095,24 @@ describe('Task Runner', () => {
             ],
           },
           "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "alert-name",
+            "namespace": undefined,
+            "ruleset": "alerts",
+          },
         },
       ],
       Array [
         Object {
           "event": Object {
             "action": "execute-action",
+            "category": Array [
+              "alerts",
+            ],
+            "kind": "alert",
           },
           "kibana": Object {
             "alerting": Object {
@@ -1018,6 +1137,14 @@ describe('Task Runner', () => {
             ],
           },
           "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "alert-name",
+            "namespace": undefined,
+            "ruleset": "alerts",
+          },
         },
       ],
       Array [
@@ -1025,6 +1152,10 @@ describe('Task Runner', () => {
           "@timestamp": "1970-01-01T00:00:00.000Z",
           "event": Object {
             "action": "execute",
+            "category": Array [
+              "alerts",
+            ],
+            "kind": "alert",
             "outcome": "success",
           },
           "kibana": Object {
@@ -1042,6 +1173,14 @@ describe('Task Runner', () => {
             ],
           },
           "message": "alert executed: test:1: 'alert-name'",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "alert-name",
+            "namespace": undefined,
+            "ruleset": "alerts",
+          },
         },
       ],
     ]
@@ -1146,8 +1285,12 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -1165,13 +1308,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 86400000000000,
+              "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -1190,12 +1345,24 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1220,12 +1387,24 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1250,6 +1429,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -1257,6 +1444,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1274,6 +1465,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1573,8 +1772,12 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -1593,13 +1796,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 86400000000000,
+              "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -1618,6 +1833,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -1625,6 +1848,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1642,6 +1869,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1835,6 +2070,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "execute",
             },
@@ -1853,6 +2092,13 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert execution failure: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1895,6 +2141,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "decrypt",
             },
@@ -1913,6 +2163,13 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1963,6 +2220,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "license",
             },
@@ -1981,6 +2242,13 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2031,6 +2299,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "unknown",
             },
@@ -2049,6 +2321,13 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2098,6 +2377,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "read",
             },
@@ -2116,6 +2399,13 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2329,7 +2619,11 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 0,
+              "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2348,13 +2642,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 0,
+              "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2373,13 +2679,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '2'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 0,
+              "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2398,13 +2716,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 0,
+              "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2423,6 +2753,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -2430,6 +2768,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -2447,6 +2789,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2521,7 +2871,11 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 86400000000000,
+              "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2540,13 +2894,25 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 64800000000000,
+              "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -2565,6 +2931,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -2572,6 +2946,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -2589,6 +2967,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2655,6 +3041,10 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -2672,12 +3062,24 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -2695,6 +3097,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -2702,6 +3112,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -2719,6 +3133,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2780,8 +3202,12 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 86400000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
@@ -2799,14 +3225,26 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
               "duration": 64800000000000,
               "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
@@ -2824,6 +3262,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -2831,6 +3277,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -2848,6 +3298,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2911,6 +3369,10 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -2927,12 +3389,24 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -2949,6 +3423,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -2956,6 +3438,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -2973,6 +3459,14 @@ describe('Task Runner', () => {
               ],
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
           },
         ],
       ]

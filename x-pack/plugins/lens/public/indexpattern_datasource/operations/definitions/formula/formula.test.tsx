@@ -14,8 +14,10 @@ import { tinymathFunctions } from './util';
 
 jest.mock('../../layer_helpers', () => {
   return {
-    getColumnOrder: ({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
-      Object.keys(columns),
+    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
+      Object.keys(columns)
+    ),
+    getManagedColumnsFrom: jest.fn().mockReturnValue([]),
   };
 });
 
@@ -142,7 +144,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: 'average(bytes)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -170,7 +172,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: 'average(bytes)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -204,7 +206,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: `average(bytes, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -233,7 +235,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: `count(lucene='*')`,
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -291,7 +293,7 @@ describe('formula', () => {
           operationDefinitionMap
         )
       ).toEqual({
-        label: 'Formula',
+        label: 'moving_average(average(bytes), window=3)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -375,6 +377,7 @@ describe('formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
+            label: formula,
             params: {
               ...currentColumn.params,
               formula,
@@ -415,6 +418,7 @@ describe('formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
+            label: 'average(bytes)',
             references: ['col1X1'],
             params: {
               ...currentColumn.params,
@@ -565,7 +569,7 @@ describe('formula', () => {
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X2: { min: 0, max: 41 },
-        col1X3: { min: 43, max: 50 },
+        col1X3: { min: 42, max: 50 },
       });
     });
   });
@@ -787,6 +791,34 @@ invalid: "
       }
     });
 
+    it('returns an error if formula or math operations are used', () => {
+      const formulaFormulas = ['formula()', 'formula(bytes)', 'formula(formula())'];
+
+      for (const formula of formulaFormulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operation formula not found']);
+      }
+
+      const mathFormulas = ['math()', 'math(bytes)', 'math(math())'];
+
+      for (const formula of mathFormulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operation math not found']);
+      }
+    });
+
     it('returns an error if field operation in formula have the wrong first argument', () => {
       const formulas = [
         'average(7)',
@@ -895,6 +927,150 @@ invalid: "
           operationDefinitionMap
         )
       ).toEqual(undefined);
+    });
+
+    it('returns no error for a query edge case', () => {
+      const formulas = [
+        `count(kql='')`,
+        `count(lucene='')`,
+        `moving_average(count(kql=''), window=7)`,
+        `count(kql='bytes >= 4000')`,
+        `count(kql='bytes <= 4000')`,
+        `count(kql='bytes = 4000')`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
+    it('returns an error for a query not wrapped in single quotes', () => {
+      const formulas = [
+        `count(kql="")`,
+        `count(kql='")`,
+        `count(kql="')`,
+        `count(kql="category.keyword: *")`,
+        `count(kql='category.keyword: *")`,
+        `count(kql="category.keyword: *')`,
+        `count(kql='category.keyword: *)`,
+        `count(kql=category.keyword: *')`,
+        `count(kql=category.keyword: *)`,
+        `count(kql="category.keyword: "Men's Clothing" or category.keyword: "Men's Shoes"")`,
+        `count(lucene="category.keyword: *")`,
+        `count(lucene=category.keyword: *)`,
+        `count(lucene=category.keyword: *) + average(bytes)`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *)`,
+        `count(lucene='category.keyword: *") + count(kql='category.keyword: *")`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *, kql='category.keyword: *')`,
+        `count(lucene='category.keyword: *') + count(kql="category.keyword: *")`,
+        `moving_average(count(kql=category.keyword: *), window=7, kql=category.keywork: *)`,
+        `moving_average(
+          cumulative_sum(
+             7 * clamp(sum(bytes), 0, last_value(memory) + max(memory))
+          ), window=10, kql=category.keywork: *
+        )`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(expect.arrayContaining([expect.stringMatching(`Single quotes are required`)]));
+      }
+    });
+
+    it('it returns parse fail error rather than query message if the formula is only a query condition (false positive cases for query checks)', () => {
+      const formulas = [
+        `kql="category.keyword: *"`,
+        `kql=category.keyword: *`,
+        `kql='category.keyword: *'`,
+        `(kql="category.keyword: *")`,
+        `(kql=category.keyword: *)`,
+        `(lucene="category.keyword: *")`,
+        `(lucene=category.keyword: *)`,
+        `(lucene='category.keyword: *') + (kql=category.keyword: *)`,
+        `(lucene='category.keyword: *') + (kql=category.keyword: *, kql='category.keyword: *')`,
+        `(lucene='category.keyword: *') + (kql="category.keyword: *")`,
+        `((kql=category.keyword: *), window=7, kql=category.keywork: *)`,
+        `(, window=10, kql=category.keywork: *)`,
+        `(
+          , window=10, kql=category.keywork: *
+        )`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The Formula ${formula} cannot be parsed`]);
+      }
+    });
+
+    it('returns no error for a query wrapped in single quotes but with some whitespaces', () => {
+      const formulas = [
+        `count(kql ='category.keyword: *')`,
+        `count(kql = 'category.keyword: *')`,
+        `count(kql =    'category.keyword: *')`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
+    it('returns an error for multiple queries submitted for the same function', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`count(kql='category.keyword: *', lucene='category.keyword: *')`),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(['Use only one of kql= or lucene=, not both']);
+    });
+
+    it("returns a clear error when there's a missing field for a function", () => {
+      for (const fn of ['average', 'terms', 'max', 'sum']) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(`${fn}()`),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
+      }
+    });
+
+    it("returns a clear error when there's a missing function for a fullReference operation", () => {
+      for (const fn of ['cumulative_sum', 'derivative']) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(`${fn}()`),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The first argument for ${fn} should be a operation name. Found no operation`]);
+      }
     });
 
     it('returns no error if a math operation is passed to fullReference operations', () => {
