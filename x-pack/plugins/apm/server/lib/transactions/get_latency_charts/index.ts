@@ -26,7 +26,6 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -112,10 +111,10 @@ function searchLatency({
     },
   };
 
-  return apmEventClient.search(params);
+  return apmEventClient.search('get_latency_charts', params);
 }
 
-export function getLatencyTimeseries({
+export async function getLatencyTimeseries({
   environment,
   kuery,
   serviceName,
@@ -138,40 +137,38 @@ export function getLatencyTimeseries({
   start: number;
   end: number;
 }) {
-  return withApmSpan('get_latency_charts', async () => {
-    const response = await searchLatency({
-      environment,
-      kuery,
-      serviceName,
-      transactionType,
-      transactionName,
-      setup,
-      searchAggregatedTransactions,
-      latencyAggregationType,
-      start,
-      end,
-    });
-
-    if (!response.aggregations) {
-      return { latencyTimeseries: [], overallAvgDuration: null };
-    }
-
-    return {
-      overallAvgDuration:
-        response.aggregations.overall_avg_duration.value || null,
-      latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
-        (bucket) => {
-          return {
-            x: bucket.key,
-            y: getLatencyValue({
-              latencyAggregationType,
-              aggregation: bucket.latency,
-            }),
-          };
-        }
-      ),
-    };
+  const response = await searchLatency({
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+    latencyAggregationType,
+    start,
+    end,
   });
+
+  if (!response.aggregations) {
+    return { latencyTimeseries: [], overallAvgDuration: null };
+  }
+
+  return {
+    overallAvgDuration:
+      response.aggregations.overall_avg_duration.value || null,
+    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
+      (bucket) => {
+        return {
+          x: bucket.key,
+          y: getLatencyValue({
+            latencyAggregationType,
+            aggregation: bucket.latency,
+          }),
+        };
+      }
+    ),
+  };
 }
 
 export async function getLatencyPeriods({

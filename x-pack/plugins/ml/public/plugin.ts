@@ -52,6 +52,7 @@ import {
 import { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -78,6 +79,7 @@ export interface MlSetupDependencies {
   share: SharePluginSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -121,6 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
+            usageCollection: pluginsSetup.usageCollection,
           },
           params
         );

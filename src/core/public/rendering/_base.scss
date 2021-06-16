@@ -35,26 +35,11 @@
   position: relative; // This is temporary for apps that relied on this being present on `.application`
 }
 
-// TODO: This is problematic because it doesn't stay in line with EUI:
-// adapted from euiHeaderAffordForFixed as we need to handle the top banner
 @mixin kbnAffordForHeader($headerHeight) {
-  padding-top: $headerHeight;
+  @include euiHeaderAffordForFixed($headerHeight);
 
   #app-fixed-viewport {
     top: $headerHeight;
-  }
-
-  .euiFlyout,
-  .euiCollapsibleNav {
-    top: $headerHeight;
-    height: calc(100% - #{$headerHeight});
-  }
-
-  @include euiBreakpoint('m', 'l', 'xl') {
-    .euiPageSideBar--sticky {
-      max-height: calc(100vh - #{$headerHeight});
-      top: #{$headerHeight};
-    }
   }
 }
 

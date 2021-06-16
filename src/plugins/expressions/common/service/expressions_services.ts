@@ -19,6 +19,19 @@ import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
+import {
+  clog,
+  font,
+  variableSet,
+  variable,
+  theme,
+  cumulativeSum,
+  derivative,
+  movingAverage,
+  mapColumn,
+  overallMetric,
+  math,
+} from '../expression_functions';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -269,7 +282,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public readonly fork = () => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
 
     return fork;
   };
@@ -318,7 +331,23 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public setup(): ExpressionsServiceSetup {
+  public setup(...args: unknown[]): ExpressionsServiceSetup {
+    for (const fn of [
+      clog,
+      font,
+      variableSet,
+      variable,
+      theme,
+      cumulativeSum,
+      derivative,
+      movingAverage,
+      overallMetric,
+      mapColumn,
+      math,
+    ]) {
+      this.registerFunction(fn);
+    }
+
     return this;
   }
 
@@ -326,7 +355,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * Returns Kibana Platform *start* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public start(): ExpressionsServiceStart {
+  public start(...args: unknown[]): ExpressionsServiceStart {
     return this;
   }
 
