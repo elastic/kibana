@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue } from '@kbn/common-util';
+import { JsonValue } from '@kbn/common-utils';
 import { jsonValueRT } from '../../common/typed_json';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { ShardFailure } from './elasticsearch_runtime_types';
