@@ -8939,7 +8939,6 @@
     "xpack.fleet.breadcrumbs.editPackagePolicyPageTitle": "統合の編集",
     "xpack.fleet.breadcrumbs.enrollmentTokensPageTitle": "登録トークン",
     "xpack.fleet.breadcrumbs.installedIntegrationsPageTitle": "インストール済み",
-    "xpack.fleet.breadcrumbs.integrationsPageTitle": "統合",
     "xpack.fleet.breadcrumbs.overviewPageTitle": "概要",
     "xpack.fleet.breadcrumbs.policiesPageTitle": "ポリシー",
     "xpack.fleet.config.invalidPackageVersionError": "有効なサーバーまたはキーワード「latest」でなければなりません",
