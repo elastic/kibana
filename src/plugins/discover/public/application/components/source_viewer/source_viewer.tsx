@@ -44,7 +44,7 @@ export const SourceViewer = ({
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found) {
-      setJsonValue(JSON.stringify(hit, null, 2));
+      setJsonValue(JSON.stringify(hit, '', 2));
     }
   }, [reqState, hit]);
 
@@ -62,7 +62,11 @@ export const SourceViewer = ({
     const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
     const lineCount = editor.getModel()?.getLineCount() || 1;
     const height = editor.getTopForLineNumber(lineCount + 1) + lineHeight;
-    editorElement.style.height = `${height}px`;
+    if (!jsonValue || jsonValue === '') {
+      editorElement.style.height = '0px';
+    } else {
+      editorElement.style.height = `${height}px`;
+    }
     editor.layout();
   }, [editor, jsonValue]);
 
