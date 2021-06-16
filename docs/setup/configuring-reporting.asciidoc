@@ -1,5 +1,5 @@
 [role="xpack"]
-[[configuring-reporting]]
+[[secure-reporting]]
 == Configure reporting in {kib}
 
 ++++
