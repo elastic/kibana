@@ -156,9 +156,7 @@ export const isolationRequestHandler = function (
     commentLines.push(`${isolate ? 'I' : 'Uni'}solate action was sent to the following Agents:`);
     // lines of markdown links, inside a code block
 
-    commentLines.push(
-      `${agentIDs.map((a) => `- [${a}](/app/fleet#/fleet/agents/${a})`).join('\n')}`
-    );
+    commentLines.push(`${agentIDs.map((a) => `- [${a}](/app/fleet#/agents/${a})`).join('\n')}`);
     if (req.body.comment) {
       commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
     }

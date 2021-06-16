@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { render } from '../../lib/helper/rtl_helpers';
-import { TCPAdvancedFields } from './tcp_advanced_fields';
+import { render } from '../../../lib/helper/rtl_helpers';
+import { TCPAdvancedFields } from './advanced_fields';
 import {
   TCPAdvancedFieldsContextProvider,
   defaultTCPAdvancedFields as defaultConfig,
-} from './contexts';
-import { ConfigKeys, ITCPAdvancedFields } from './types';
+} from '../contexts';
+import { ConfigKeys, ITCPAdvancedFields } from '../types';
 
 // ensures fields and labels map appropriately
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
