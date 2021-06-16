@@ -8,7 +8,9 @@
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { ElementFactory, StartInitializer } from '../../common/types';
-import { elements, renderers, uiViews } from '../';
+import { elements } from '../elements';
+import { renderers } from '../expression_renderers';
+import { uiViews } from '../ui_views';
 import { RevealImageRendererConfig } from '../expression_renderers/types';
 
 export interface ExpressionServiceSetup {
