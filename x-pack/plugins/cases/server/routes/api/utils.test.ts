@@ -67,6 +67,10 @@ describe('Utils', () => {
     const overviewObsUrl = `${baseObsUrl}/overview`;
     const caseObsUrl = `${baseObsUrl}/cases/12345`;
     describe('security urls', () => {
+      it('gets case details url from base url', () => {
+        const result = getCaseUrl(`${baseUrl}${mockUrlState}`, caseId);
+        expect(result).toEqual(caseUrl);
+      });
       it('gets case details url from case details link', () => {
         const result = getCaseUrl(`${caseUrl}${mockUrlState}`, caseId);
         expect(result).toEqual(caseUrl);
@@ -81,6 +85,10 @@ describe('Utils', () => {
       });
     });
     describe('observability urls', () => {
+      it('gets case details url from base url', () => {
+        const result = getCaseUrl(`${baseObsUrl}${mockUrlState}`, caseId);
+        expect(result).toEqual(caseObsUrl);
+      });
       it('gets case details url from case details link', () => {
         const result = getCaseUrl(`${caseObsUrl}${mockUrlState}`, caseId);
         expect(result).toEqual(caseObsUrl);

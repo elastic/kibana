@@ -119,6 +119,7 @@ export const routes = {
     },
     params: {
       path: t.partial({
+        commentId: t.string,
         detailName: t.string,
       }),
     },
