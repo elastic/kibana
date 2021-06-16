@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiButton,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -24,8 +25,40 @@ interface HeaderProps {
 
 export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
   return (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+    <EuiPageHeader
+      pageTitle={
+        <FormattedMessage
+          id="xpack.savedObjectsTagging.management.header.title"
+          defaultMessage="Tags"
+        />
+      }
+      bottomBorder
+      description={
+        <FormattedMessage
+          id="xpack.savedObjectsTagging.management.header.description"
+          defaultMessage="Use tags to categorize and easily find your objects."
+        />
+      }
+      rightSideItems={[
+        canCreate && (
+          <EuiButton
+            key="createTag"
+            iconType="tag"
+            color="primary"
+            fill
+            data-test-subj="createTagButton"
+            onClick={onCreate}
+            isDisabled={false}
+          >
+            <FormattedMessage
+              id="xpack.savedObjectsTagging.management.actions.createTag"
+              defaultMessage="Create tag"
+            />
+          </EuiButton>
+        ),
+      ]}
+    >
+      {/* <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiTitle>
             <h1>
@@ -66,7 +99,7 @@ export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
           </EuiTextColor>
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
-    </>
+      <EuiSpacer size="m" /> */}
+    </EuiPageHeader>
   );
 };
