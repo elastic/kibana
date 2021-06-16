@@ -5,7 +5,7 @@
 <titleabbrev>Swimlane</titleabbrev>
 ++++
 
-The Swimlane connector uses the https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/[REST API] to create Swimlane records.
+The Swimlane connector uses the https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/[Swimlane REST API] to create Swimlane records.
 
 [float]
 [[swimlane-connector-configuration]]
@@ -31,11 +31,11 @@ API token::  Swimlane API authentication token for HTTP Basic authentication.
      apiUrl: https://elastic.swimlaneurl.us
      appId: app-id
      mappings:
-       alertNameConfig:
+       alertIdConfig:
          fieldType: text
-         id: a6fst
-         key: alert-name
-         name: Alert Name
+         id: agp4s
+         key: alert-id
+         name: Alert ID 
        alertSourceConfig:
          fieldType: text
          id: adnls
@@ -56,6 +56,16 @@ API token::  Swimlane API authentication token for HTTP Basic authentication.
          id: au18d
          key: comments
          name: Comments
+       descriptionConfig:
+         fieldType: text 
+         id: ae1gd
+         key: description 
+         name: Description 
+       ruleNameConfig:
+         fieldType: text
+         id: avfsl
+         key: rule-name
+         name: Rule Name
        severityConfig:
          fieldType: text
          id: a71ik
@@ -94,9 +104,8 @@ image::management/connectors/images/swimlane-params-test.png[Swimlane params tes
 
 Swimlane actions have the following configuration properties.
 
-Alert Name:: The alert name of the incident.
 Alert Source:: The alert source of the incident.
-Case ID:: The Case ID of the incident.
-Case Name:: The Case name of the incident.
-Comments:: The comments of the incident.
+Comments:: Additional information for the client, such as how to troubleshoot the issue.
 Severity:: The severity of the incident.
+
+NOTE:   Alert ID and Rule Name are filled automatically. Specifically, Alert ID is set to `{{alert.id}}` and Rule Name to `{{rule.name}}`.
