@@ -12,7 +12,7 @@ import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
   const config = getService('config');

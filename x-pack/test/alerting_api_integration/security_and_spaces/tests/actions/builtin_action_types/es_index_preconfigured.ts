@@ -15,7 +15,7 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index-preconfigured';
 
 // eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 

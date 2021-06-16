@@ -17,7 +17,7 @@ const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
 export default function preconfiguredAlertHistoryConnectorTests({
   getService,
 }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');

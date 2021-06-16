@@ -18,7 +18,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('disable', () => {
