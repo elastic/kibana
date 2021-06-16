@@ -22,37 +22,43 @@ describe('useWorkplaceSearchNav', () => {
   it('returns an array of top-level Workplace Search nav items', () => {
     expect(useWorkplaceSearchNav()).toEqual([
       {
-        id: 'root',
-        name: 'Overview',
-        href: '/',
-      },
-      {
-        id: 'sources',
-        name: 'Sources',
-        href: '/sources',
-        items: [],
-      },
-      {
-        id: 'groups',
-        name: 'Groups',
-        href: '/groups',
-        items: [],
-      },
-      {
-        id: 'usersRoles',
-        name: 'Users & roles',
-        href: '/role_mappings',
-      },
-      {
-        id: 'security',
-        name: 'Security',
-        href: '/security',
-      },
-      {
-        id: 'settings',
-        name: 'Settings',
-        href: '/settings',
-        items: [],
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'root',
+            name: 'Overview',
+            href: '/',
+          },
+          {
+            id: 'sources',
+            name: 'Sources',
+            href: '/sources',
+            items: [],
+          },
+          {
+            id: 'groups',
+            name: 'Groups',
+            href: '/groups',
+            items: [],
+          },
+          {
+            id: 'usersRoles',
+            name: 'Users & roles',
+            href: '/role_mappings',
+          },
+          {
+            id: 'security',
+            name: 'Security',
+            href: '/security',
+          },
+          {
+            id: 'settings',
+            name: 'Settings',
+            href: '/settings',
+            items: [],
+          },
+        ],
       },
     ]);
   });

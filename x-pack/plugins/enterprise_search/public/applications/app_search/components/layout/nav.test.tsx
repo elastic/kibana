@@ -14,30 +14,45 @@ jest.mock('../../../shared/layout', () => ({
 import { useAppSearchNav } from './nav';
 
 describe('useAppSearchNav', () => {
-  const MOCK_DEFAULT_NAV = [
-    {
-      id: 'engines',
-      name: 'Engines',
-      href: '/engines',
-      items: [],
-    },
-  ];
-
   it('always generates a default engines nav item', () => {
     setMockValues({ myRole: {} });
 
-    expect(useAppSearchNav()).toEqual(MOCK_DEFAULT_NAV);
+    expect(useAppSearchNav()).toEqual([
+      {
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'engines',
+            name: 'Engines',
+            href: '/engines',
+            items: [],
+          },
+        ],
+      },
+    ]);
   });
 
   it('generates a settings nav item if the user can view settings', () => {
     setMockValues({ myRole: { canViewSettings: true } });
 
     expect(useAppSearchNav()).toEqual([
-      ...MOCK_DEFAULT_NAV,
       {
-        id: 'settings',
-        name: 'Settings',
-        href: '/settings',
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'engines',
+            name: 'Engines',
+            href: '/engines',
+            items: [],
+          },
+          {
+            id: 'settings',
+            name: 'Settings',
+            href: '/settings',
+          },
+        ],
       },
     ]);
   });
@@ -46,11 +61,22 @@ describe('useAppSearchNav', () => {
     setMockValues({ myRole: { canViewAccountCredentials: true } });
 
     expect(useAppSearchNav()).toEqual([
-      ...MOCK_DEFAULT_NAV,
       {
-        id: 'credentials',
-        name: 'Credentials',
-        href: '/credentials',
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'engines',
+            name: 'Engines',
+            href: '/engines',
+            items: [],
+          },
+          {
+            id: 'credentials',
+            name: 'Credentials',
+            href: '/credentials',
+          },
+        ],
       },
     ]);
   });
@@ -59,11 +85,22 @@ describe('useAppSearchNav', () => {
     setMockValues({ myRole: { canViewRoleMappings: true } });
 
     expect(useAppSearchNav()).toEqual([
-      ...MOCK_DEFAULT_NAV,
       {
-        id: 'usersRoles',
-        name: 'Users & roles',
-        href: '/role_mappings',
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'engines',
+            name: 'Engines',
+            href: '/engines',
+            items: [],
+          },
+          {
+            id: 'usersRoles',
+            name: 'Users & roles',
+            href: '/role_mappings',
+          },
+        ],
       },
     ]);
   });

@@ -56,7 +56,11 @@ export const useWorkplaceSearchNav = () => {
       items: [], // TODO: Settings subnav
     },
   ];
-  return navItems;
+
+  // Root level items are meant to be section headers, but the WS nav (currently)
+  // isn't organized this way. So we crate a fake empty parent item here
+  // to cause all our navItems to properly render as nav links.
+  return [{ id: '', name: '', items: navItems }];
 };
 
 // TODO: Delete below once fully migrated to KibanaPageTemplate
