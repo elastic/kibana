@@ -37,6 +37,7 @@ import {
   isUninitialisedResourceState,
 } from '../../../state';
 import { getCurrentIsolationRequestState } from '../store/selectors';
+import { licenseService } from '../../../../common/hooks/use_license';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -59,6 +60,7 @@ jest.mock('../../policy/store/services/ingest', () => {
 });
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -70,6 +72,9 @@ describe('when on the endpoint list page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let abortSpy: jest.SpyInstance;
+
+  (licenseService as jest.Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
+
   beforeAll(() => {
     const mockAbort = new AbortController();
     mockAbort.abort();
