@@ -147,13 +147,23 @@ For the answers to common *Lens* questions, review the following.
 
 [float]
 [[kql-]]
-===== When should I use the Filter function instead of KQL filters?
+===== When should I use the top filter bar, filters function, or "Filter by"?
 
-The easiest way to apply KQL filters is to use <<semi-structured-search>>, but you can also use the *Filters* function in the following scenarios:
+Using the top <<semi-structured-search>> bar is best when you want to focus on a known set of
+data for all the visualization results. These top level filters are combined with other filters
+using AND logic.
+
+Use the *Filters* function in the following scenarios:
 
 * When you want to apply more than one KQL filter to the visualization.
 
 * When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+
+Use the *Filter by* advanced option in the following scenarios:
+
+* When you want to assign a custom color to each filter in a bar, line or area chart.
+
+* When you want to build a complex table, such as showing both failure rate and overall.
 
 [float]
 [[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
@@ -290,7 +300,9 @@ image::images/lens_missing_values_strategy.png[Lens Missing values strategies me
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
 ===== Is it possible to statically define the scale of the y-axis in a visualization?
 
-The ability to start the y-axis from another value than 0, or use a logarithmic scale, is unsupported in *Lens*.
+Yes, you can set the bounds on bar, line and area chart types in Lens, unless using percentage mode. Bar
+and area charts must have 0 in the bounds. Logarithmic scales are unsupported in *Lens*.
+To set the y-axis bounds, click the icon representing the axis you want to customize.
 
 [float]
 [[is-it-possible-to-have-pagination-for-datatable]]

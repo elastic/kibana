@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+} from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -97,6 +102,10 @@ export function ServiceMap({
 
   const { ref, height } = useRefDimensions();
 
+  // Temporary hack to work around bottom padding introduced by EuiPage
+  const PADDING_BOTTOM = 24;
+  const heightWithPadding = height - PADDING_BOTTOM;
+
   useTrackPageview({ app: 'apm', path: 'service_map' });
   useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
 
@@ -137,20 +146,25 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showKueryBar={false} />
-
-      <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
-        <Cytoscape
-          elements={data.elements}
-          height={height}
-          serviceName={serviceName}
-          style={getCytoscapeDivStyle(theme, status)}
+      <EuiPanel hasBorder={true} paddingSize="none">
+        <div
+          data-test-subj="ServiceMap"
+          style={{ height: heightWithPadding }}
+          ref={ref}
         >
-          <Controls />
-          {serviceName && <EmptyBanner />}
-          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <Popover focusedServiceName={serviceName} />
-        </Cytoscape>
-      </div>
+          <Cytoscape
+            elements={data.elements}
+            height={heightWithPadding}
+            serviceName={serviceName}
+            style={getCytoscapeDivStyle(theme, status)}
+          >
+            <Controls />
+            {serviceName && <EmptyBanner />}
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <Popover focusedServiceName={serviceName} />
+          </Cytoscape>
+        </div>
+      </EuiPanel>
     </>
   );
 }

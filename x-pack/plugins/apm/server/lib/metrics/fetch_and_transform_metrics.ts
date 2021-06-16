@@ -56,6 +56,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   chartBase,
   aggs,
   additionalFilters = [],
+  operationName,
 }: {
   environment?: string;
   kuery?: string;
@@ -65,6 +66,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
+  operationName: string;
 }) {
   const { start, end, apmEventClient, config } = setup;
 
@@ -98,7 +100,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

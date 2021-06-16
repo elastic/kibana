@@ -23,7 +23,7 @@ This reference can help simplify the comparison if you need a specific feature.
 
 | Table with summary row
 ^| X
-|
+^| X
 |
 |
 |
@@ -65,7 +65,7 @@ This reference can help simplify the comparison if you need a specific feature.
 
 | Heat map
 ^| X
-|
+^| X
 |
 |
 ^| X
@@ -188,6 +188,12 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 | Type | Agg-based | Markdown | Lens | TSVB
 
+| Metrics with filters
+|
+^| X
+|
+|
+
 | Average
 ^| X
 ^| X
@@ -221,7 +227,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 | Percentiles
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Percentiles Rank
@@ -230,10 +236,10 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 | 
 ^| X
 
-| Top hit 
+| Top hit (Last value)
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Value count 
@@ -266,7 +272,7 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 | Derivative  
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Max bucket   
@@ -290,13 +296,13 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 | Moving average  
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Cumulative sum 
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Bucket script 
@@ -327,7 +333,7 @@ build their advanced visualization.
 
 | Math on aggregated data
 |
-|
+^| X
 ^| X
 ^| X
 ^| X
@@ -343,6 +349,13 @@ build their advanced visualization.
 |
 |
 |
+^| X
+^| X
+
+| Time shifts
+|
+^| X
+^| X
 ^| X
 ^| X
 

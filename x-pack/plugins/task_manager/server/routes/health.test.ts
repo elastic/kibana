@@ -15,7 +15,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../src/core/server';
-import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
+import { MonitoringStats, RawMonitoringStats, summarizeMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 
@@ -72,7 +72,7 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(mockStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
     });
 
     const secondDebug = JSON.parse(
@@ -82,13 +82,15 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({}))
+      ),
     });
     expect(secondDebug).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({})),
+      ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -127,27 +129,29 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll: expect.any(String),
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig({})
+            }),
+            getTaskManagerConfig({})
+          )
         ),
       },
     });
@@ -196,27 +200,29 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll: expect.any(String),
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig()
+            }),
+            getTaskManagerConfig()
+          )
         ),
       },
     });
@@ -262,98 +268,113 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchObject({
       body: {
         status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll,
+        ...ignoreCapacityEstimation(
+          summarizeMonitoringStats(
+            mockHealthStats({
+              last_update: expect.any(String),
+              stats: {
+                configuration: {
+                  timestamp: expect.any(String),
+                },
+                workload: {
+                  timestamp: expect.any(String),
+                },
+                runtime: {
+                  timestamp: expect.any(String),
+                  value: {
+                    polling: {
+                      last_successful_poll,
+                    },
                   },
                 },
               },
-            },
-          }),
-          getTaskManagerConfig()
+            }),
+            getTaskManagerConfig()
+          )
         ),
       },
     });
   });
 });
 
+function ignoreCapacityEstimation(stats: RawMonitoringStats) {
+  stats.stats.capacity_estimation = expect.any(Object);
+  return stats;
+}
+
 function mockHealthStats(overrides = {}) {
-  return (merge(
-    {
-      last_update: new Date().toISOString(),
-      stats: {
-        configuration: {
-          timestamp: new Date().toISOString(),
-          value: {
-            value: {
-              max_workers: 10,
-              poll_interval: 6000000,
-              max_poll_inactivity_cycles: 10,
-              request_capacity: 1000,
-              monitored_aggregated_stats_refresh_rate: 5000,
-              monitored_stats_running_average_window: 50,
-              monitored_task_execution_thresholds: {
-                default: {
-                  error_threshold: 90,
-                  warn_threshold: 80,
-                },
-                custom: {},
-              },
+  const stub: MonitoringStats = {
+    last_update: new Date().toISOString(),
+    stats: {
+      configuration: {
+        timestamp: new Date().toISOString(),
+        value: {
+          max_workers: 10,
+          poll_interval: 3000,
+          max_poll_inactivity_cycles: 10,
+          request_capacity: 1000,
+          monitored_aggregated_stats_refresh_rate: 5000,
+          monitored_stats_running_average_window: 50,
+          monitored_task_execution_thresholds: {
+            default: {
+              error_threshold: 90,
+              warn_threshold: 80,
             },
+            custom: {},
           },
         },
-        workload: {
-          timestamp: new Date().toISOString(),
-          value: {
-            count: 4,
-            taskTypes: {
-              actions_telemetry: { count: 2, status: { idle: 2 } },
-              alerting_telemetry: { count: 1, status: { idle: 1 } },
-              session_cleanup: { count: 1, status: { idle: 1 } },
-            },
-            schedule: {},
-            overdue: 0,
-            estimatedScheduleDensity: [],
+      },
+      workload: {
+        timestamp: new Date().toISOString(),
+        value: {
+          count: 4,
+          task_types: {
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, status: { idle: 1 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
+          },
+          schedule: [],
+          overdue: 0,
+          overdue_non_recurring: 0,
+          estimatedScheduleDensity: [],
+          non_recurring: 20,
+          owner_ids: [0, 0, 0, 1, 2, 0, 0, 2, 2, 2, 1, 2, 1, 1],
+          estimated_schedule_density: [],
+          capacity_requirments: {
+            per_minute: 150,
+            per_hour: 360,
+            per_day: 820,
           },
         },
-        runtime: {
-          timestamp: new Date().toISOString(),
-          value: {
-            drift: [1000, 60000],
-            load: [0, 100, 75],
-            execution: {
-              duration: [],
-              result_frequency_percent_as_number: [],
-            },
-            polling: {
-              last_successful_poll: new Date().toISOString(),
-              duration: [500, 400, 3000],
-              claim_conflicts: [0, 100, 75],
-              claim_mismatches: [0, 100, 75],
-              result_frequency_percent_as_number: [
-                'NoTasksClaimed',
-                'NoTasksClaimed',
-                'NoTasksClaimed',
-              ],
-            },
+      },
+      runtime: {
+        timestamp: new Date().toISOString(),
+        value: {
+          drift: [1000, 60000],
+          drift_by_type: {},
+          load: [0, 100, 75],
+          execution: {
+            duration: {},
+            duration_by_persistence: {},
+            persistence: [],
+            result_frequency_percent_as_number: {},
+          },
+          polling: {
+            last_successful_poll: new Date().toISOString(),
+            duration: [500, 400, 3000],
+            claim_conflicts: [0, 100, 75],
+            claim_mismatches: [0, 100, 75],
+            result_frequency_percent_as_number: [
+              'NoTasksClaimed',
+              'NoTasksClaimed',
+              'NoTasksClaimed',
+            ],
           },
         },
       },
     },
-    overrides
-  ) as unknown) as MonitoringStats;
+  };
+  return (merge(stub, overrides) as unknown) as MonitoringStats;
 }
 
 async function getLatest<T>(stream$: Observable<T>) {
