@@ -39,7 +39,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

@@ -5,55 +5,34 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
-import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
-
+import {
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
+} from '../../../../common/endpoint/schema/actions';
+import { getAuditLogResponse } from './service';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
 export const actionsLogRequestHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
-  TypeOf<typeof EndpointActionLogRequestSchema.params>,
-  unknown,
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointContext.logFactory.get('audit_log');
-  return async (context, req, res) => {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    let result;
-    try {
-      result = await esClient.search({
-        index: AGENT_ACTIONS_INDEX,
-        body: {
-          query: {
-            match: {
-              agents: req.params.agent_id,
-            },
-          },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
-      });
-    } catch (error) {
-      logger.error(error);
-      throw error;
-    }
-    if (result?.statusCode !== 200) {
-      logger.error(`Error fetching actions log for agent_id ${req.params.agent_id}`);
-      throw new Error(`Error fetching actions log for agent_id ${req.params.agent_id}`);
-    }
 
+  return async (context, req, res) => {
+    const {
+      params: { agent_id: elasticAgentId },
+      query: { page, page_size: pageSize },
+    } = req;
+
+    const body = await getAuditLogResponse({ elasticAgentId, page, pageSize, context, logger });
     return res.ok({
-      body: result.body.hits.hits.map((e) => e._source),
+      body,
     });
   };
 };

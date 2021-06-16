@@ -33,7 +33,6 @@ import {
   detailsLoading,
   getActivityLogData,
   getActivityLogError,
-  getActivityLogRequestLoading,
   showView,
   policyResponseConfigurations,
   policyResponseActions,
@@ -87,7 +86,6 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
 
   const activityLog = useEndpointSelector(getActivityLogData);
-  const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
   const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
@@ -121,12 +119,8 @@ export const EndpointDetailsFlyout = memo(() => {
     },
     {
       id: EndpointDetailsTabsTypes.activityLog,
-      name: i18.ACTIVITY_LOG,
-      content: activityLoading ? (
-        ContentLoadingMarkup
-      ) : (
-        <EndpointActivityLog endpointActions={activityLog} />
-      ),
+      name: i18.ACTIVITY_LOG.tabTitle,
+      content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];
 
@@ -172,14 +166,14 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
-      paddingSize="m"
+      paddingSize="l"
     >
-      <EuiFlyoutHeader hasBorder>
-        {hostDetailsLoading || activityLoading ? (
+      <EuiFlyoutHeader>
+        {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">
-            <EuiTitle size="s">
+            <EuiTitle>
               <h2
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
