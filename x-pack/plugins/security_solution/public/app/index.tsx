@@ -59,11 +59,11 @@ export const renderApp = ({
         {[
           ...(subPlugins.overview.routes ?? []),
           ...(subPlugins.hosts.routes ?? []),
+          ...(subPlugins.network.routes ?? []),
           /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
         ].map((route) => (
           <Route {...route} />
         ))}
-
         <Route>
           <NotFoundPage />
         </Route>

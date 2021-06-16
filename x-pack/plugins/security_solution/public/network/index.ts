@@ -7,7 +7,7 @@
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { NetworkRoutes } from './routes';
+import { routes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';
 import { TimelineId } from '../../common/types/timeline';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
@@ -17,7 +17,8 @@ export class Network {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
-      SubPluginRoutes: NetworkRoutes,
+      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
+      routes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),
       },

@@ -30,7 +30,6 @@ export const usePrimaryNavigationItems = ({
         useSideNavItem({ ...props, tab: navTabs.overview }),
         // TODO: [1101] Move the following nav items to its group
         useSideNavItem({ ...props, tab: navTabs.detections }),
-        useSideNavItem({ ...props, tab: navTabs.network }),
         useSideNavItem({ ...props, tab: navTabs.timelines }),
         useSideNavItem({ ...props, tab: navTabs.case }),
         useSideNavItem({ ...props, tab: navTabs.administration }),
@@ -46,7 +45,10 @@ export const usePrimaryNavigationItems = ({
     },
     {
       ...navTabGroups.explore,
-      items: [useSideNavItem({ ...props, tab: navTabs.hosts })],
+      items: [
+        useSideNavItem({ ...props, tab: navTabs.hosts }),
+        useSideNavItem({ ...props, tab: navTabs.network }),
+      ],
     },
     {
       ...navTabGroups.investigate,
@@ -92,7 +94,7 @@ const useSideNavItem = ({
     ev.preventDefault();
     if (id in SecurityPageName && pageId == null) {
       // TODO: [1101] remove condition and use deepLinkId for all sections when all migrated
-      if (id === 'overview' || id === 'hosts') {
+      if (id === 'overview' || id === 'hosts' || id === 'network') {
         navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
       } else {
         navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
