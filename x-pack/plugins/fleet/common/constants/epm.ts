@@ -14,11 +14,11 @@ export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
-export const requiredPackages = {
-  System: FLEET_SYSTEM_PACKAGE,
-  ElasticAgent: FLEET_ELASTIC_AGENT_PACKAGE,
-  FleetServer: FLEET_SERVER_PACKAGE,
-} as const;
+export const requiredPackages = [
+  FLEET_SYSTEM_PACKAGE,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+];
 
 // these are currently identical. we can separate if they later diverge
 export const defaultPackages = requiredPackages;

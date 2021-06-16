@@ -56,7 +56,7 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 
-export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({
+export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
   name,
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));

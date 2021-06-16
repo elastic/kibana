@@ -33,7 +33,7 @@ export {
 export { removeInstallation } from './remove';
 
 export function isRequiredPackage(value: string): boolean {
-  return Object.values(requiredPackages).some((required) => value === required);
+  return requiredPackages.includes(value);
 }
 
 export class PackageNotInstalledError extends Error {
