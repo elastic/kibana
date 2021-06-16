@@ -82,7 +82,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   );
 
   return (
-    <MyPanel>
+    <MyPanel hasBorder>
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />

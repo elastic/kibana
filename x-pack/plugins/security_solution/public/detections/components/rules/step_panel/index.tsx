@@ -24,7 +24,7 @@ const MyPanel = styled(EuiPanel)`
 MyPanel.displayName = 'MyPanel';
 
 const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
-  <MyPanel>
+  <MyPanel hasBorder>
     {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
     <HeaderSection title={title} />
     {children}

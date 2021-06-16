@@ -296,11 +296,10 @@ const CreateRulePageComponent: React.FC = () => {
                 text: i18n.BACK_TO_RULES,
                 pageId: SecurityPageName.detections,
               }}
-              border
               isLoading={isLoading || loading}
               title={i18n.PAGE_TITLE}
             />
-            <MyEuiPanel zindex={4}>
+            <MyEuiPanel zindex={4} hasBorder>
               <StepDefineRuleAccordion
                 initialIsOpen={true}
                 id={RuleStep.defineRule}
@@ -334,7 +333,7 @@ const CreateRulePageComponent: React.FC = () => {
               </StepDefineRuleAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={3}>
+            <MyEuiPanel hasBorder zindex={3}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.aboutRule}
@@ -369,7 +368,7 @@ const CreateRulePageComponent: React.FC = () => {
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={2}>
+            <MyEuiPanel hasBorder zindex={2}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.scheduleRule}
@@ -402,7 +401,7 @@ const CreateRulePageComponent: React.FC = () => {
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={1}>
+            <MyEuiPanel hasBorder zindex={1}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.ruleActions}
