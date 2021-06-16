@@ -522,7 +522,7 @@
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
             ],
             "signature": [
-              "Record<string, any>"
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -740,7 +740,7 @@
               "\nA task-specific set of parameters, used by the task's run function to tailor\nits work. This is generally user-input, such as { sms: '333-444-2222' }."
             ],
             "signature": [
-              "Record<string, any>"
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -758,7 +758,7 @@
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
             ],
             "signature": [
-              "Record<string, any>"
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -895,7 +895,11 @@
       "label": "TaskManagerSetupContract",
       "description": [],
       "signature": [
-        "{ index: string; addMiddleware: (middleware: Middleware) => void; } & Pick<TaskTypeDictionary, \"registerTaskDefinitions\">"
+        "{ index: string; addMiddleware: (middleware: ",
+        "Middleware",
+        ") => void; } & Pick<",
+        "TaskTypeDictionary",
+        ", \"registerTaskDefinitions\">"
       ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
@@ -913,7 +917,11 @@
       "label": "TaskManagerStartContract",
       "description": [],
       "signature": [
-        "Pick<TaskScheduling, \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<TaskStore, \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: TaskStore['remove']; }"
+        "Pick<",
+        "TaskScheduling",
+        ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+        "TaskStore",
+        ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
       ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",

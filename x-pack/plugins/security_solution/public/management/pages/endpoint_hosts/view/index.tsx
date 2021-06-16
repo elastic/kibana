@@ -31,11 +31,7 @@ import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
-import {
-  HOST_STATUS_TO_BADGE_COLOR,
-  POLICY_STATUS_TO_BADGE_COLOR,
-  POLICY_STATUS_TO_TEXT,
-} from './host_constants';
+import { POLICY_STATUS_TO_BADGE_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -59,6 +55,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
+import { EndpointAgentStatus } from './components/endpoint_agent_status';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -97,6 +94,7 @@ const EndpointListNavLink = memo<{
 });
 EndpointListNavLink.displayName = 'EndpointListNavLink';
 
+// FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   const history = useHistory();
@@ -157,9 +155,9 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/policies/add-integration${
+      path: `#/integrations/${
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
-      }`,
+      }/add-integration`,
       state: {
         onCancelNavigateTo: [
           'securitySolution:administration',
@@ -279,19 +277,9 @@ export const EndpointList = () => {
           defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (hostStatus: HostInfo['host_status']) => {
+        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EuiBadge
-              color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
-              data-test-subj="rowHostStatus"
-              className="eui-textTruncate"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
-                values={{ hostStatus }}
-              />
-            </EuiBadge>
+            <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
           );
         },
       },

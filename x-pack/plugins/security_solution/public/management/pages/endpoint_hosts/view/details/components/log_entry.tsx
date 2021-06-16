@@ -5,53 +5,161 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import styled from 'styled-components';
 
-import { EuiAvatar, EuiComment, EuiText } from '@elastic/eui';
-import { Immutable, EndpointAction } from '../../../../../../../common/endpoint/types';
-import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
-import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
+import { EuiComment, EuiText, EuiAvatarProps, EuiCommentProps, IconType } from '@elastic/eui';
+import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
+import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
+import { LogEntryTimelineIcon } from './log_entry_timeline_icon';
 
-export const LogEntry = memo(
-  ({ endpointAction }: { endpointAction: Immutable<EndpointAction> }) => {
-    const euiTheme = useEuiTheme();
-    const isIsolated = endpointAction?.data.command === 'isolate';
+import * as i18 from '../../translations';
 
-    // do this better when we can distinguish between endpoint events vs user events
-    const iconType = endpointAction.user_id === 'sys' ? 'dot' : isIsolated ? 'lock' : 'lockOpen';
-    const commentType = endpointAction.user_id === 'sys' ? 'update' : 'regular';
-    const timelineIcon = (
-      <EuiAvatar
-        name="Timeline Icon"
-        size={endpointAction.user_id === 'sys' ? 's' : 'm'}
-        color={euiTheme.euiColorLightestShade}
-        iconColor="subdued"
-        iconType={iconType}
-      />
-    );
-    const event = `${isIsolated ? 'isolated' : 'unisolated'} host`;
-    const hasComment = !!endpointAction.data.comment;
+const useLogEntryUIProps = (
+  logEntry: Immutable<ActivityLogEntry>
+): {
+  actionEventTitle: string;
+  avatarSize: EuiAvatarProps['size'];
+  commentText: string;
+  commentType: EuiCommentProps['type'];
+  displayComment: boolean;
+  displayResponseEvent: boolean;
+  iconType: IconType;
+  isResponseEvent: boolean;
+  isSuccessful: boolean;
+  responseEventTitle: string;
+  username: string | React.ReactNode;
+} => {
+  return useMemo(() => {
+    let iconType: IconType = 'dot';
+    let commentType: EuiCommentProps['type'] = 'update';
+    let commentText: string = '';
+    let avatarSize: EuiAvatarProps['size'] = 's';
+    let isIsolateAction: boolean = false;
+    let isResponseEvent: boolean = false;
+    let isSuccessful: boolean = false;
+    let displayComment: boolean = false;
+    let displayResponseEvent: boolean = true;
+    let username: EuiCommentProps['username'] = '';
 
-    return (
-      <EuiComment
-        type={commentType}
-        username={endpointAction.user_id}
-        timestamp={FormattedDateAndTime({
-          date: new Date(endpointAction['@timestamp']),
-          showRelativeTime: true,
-        })}
-        event={event}
-        timelineIcon={timelineIcon}
-        data-test-subj="timelineEntry"
-      >
-        {hasComment ? (
-          <EuiText size="s">
-            <p>{endpointAction.data.comment}</p>
-          </EuiText>
-        ) : undefined}
-      </EuiComment>
-    );
+    if (logEntry.type === 'action') {
+      avatarSize = 'm';
+      commentType = 'regular';
+      commentText = logEntry.item.data.data.comment ?? '';
+      displayResponseEvent = false;
+      iconType = 'lockOpen';
+      username = logEntry.item.data.user_id;
+      if (logEntry.item.data.data) {
+        const data = logEntry.item.data.data;
+        if (data.command === 'isolate') {
+          iconType = 'lock';
+          isIsolateAction = true;
+        }
+        if (data.comment) {
+          displayComment = true;
+        }
+      }
+    } else if (logEntry.type === 'response') {
+      isResponseEvent = true;
+      if (logEntry.item.data.action_data.command === 'isolate') {
+        isIsolateAction = true;
+      }
+      if (!!logEntry.item.data.completed_at && !logEntry.item.data.error) {
+        isSuccessful = true;
+      }
+    }
+
+    const actionEventTitle = isIsolateAction
+      ? i18.ACTIVITY_LOG.LogEntry.action.isolatedAction
+      : i18.ACTIVITY_LOG.LogEntry.action.unisolatedAction;
+
+    const getResponseEventTitle = () => {
+      if (isIsolateAction) {
+        if (isSuccessful) {
+          return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
+        } else {
+          return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
+        }
+      } else {
+        if (isSuccessful) {
+          return i18.ACTIVITY_LOG.LogEntry.response.unisolationSuccessful;
+        } else {
+          return i18.ACTIVITY_LOG.LogEntry.response.unisolationFailed;
+        }
+      }
+    };
+
+    return {
+      actionEventTitle,
+      avatarSize,
+      commentText,
+      commentType,
+      displayComment,
+      displayResponseEvent,
+      iconType,
+      isResponseEvent,
+      isSuccessful,
+      responseEventTitle: getResponseEventTitle(),
+      username,
+    };
+  }, [logEntry]);
+};
+
+const StyledEuiComment = styled(EuiComment)`
+  .euiCommentEvent__headerTimestamp {
+    display: flex;
+    :before {
+      content: '';
+      background-color: ${(props) => props.theme.eui.euiColorInk};
+      display: block;
+      width: ${(props) => props.theme.eui.euiBorderWidthThick};
+      height: ${(props) => props.theme.eui.euiBorderWidthThick};
+      margin: 0 ${(props) => props.theme.eui.euiSizeXS} 0 ${(props) => props.theme.eui.euiSizeS};
+      border-radius: 50%;
+      content: '';
+      margin: 0 8px 0 4px;
+      border-radius: 50%;
+      position: relative;
+      top: 10px;
+    }
   }
-);
+`;
+
+export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEntry> }) => {
+  const {
+    actionEventTitle,
+    avatarSize,
+    commentText,
+    commentType,
+    displayComment,
+    displayResponseEvent,
+    iconType,
+    isResponseEvent,
+    isSuccessful,
+    responseEventTitle,
+    username,
+  } = useLogEntryUIProps(logEntry);
+
+  return (
+    <StyledEuiComment
+      type={(commentType ?? 'regular') as EuiCommentProps['type']}
+      username={username}
+      timestamp={FormattedRelativePreferenceDate({
+        value: logEntry.item.data['@timestamp'],
+      })}
+      event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
+      timelineIcon={
+        <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, isSuccessful }} />
+      }
+      data-test-subj="timelineEntry"
+    >
+      {displayComment ? (
+        <EuiText size="s">
+          <p>{commentText}</p>
+        </EuiText>
+      ) : undefined}
+    </StyledEuiComment>
+  );
+});
 
 LogEntry.displayName = 'LogEntry';

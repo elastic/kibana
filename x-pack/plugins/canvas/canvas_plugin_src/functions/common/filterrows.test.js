@@ -6,6 +6,7 @@
  */
 
 import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { testTable } from './__fixtures__/test_tables';
 import { filterrows } from './filterrows';
@@ -15,31 +16,46 @@ const returnFalse = () => of(false);
 
 describe('filterrows', () => {
   const fn = functionWrapper(filterrows);
+  let testScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
 
   it('returns a datable', () => {
-    expect(fn(testTable, { fn: inStock })).resolves.toHaveProperty('type', 'datatable');
+    testScheduler.run(({ expectObservable }) =>
+      expectObservable(fn(testTable, { fn: inStock })).toBe('(0|)', [
+        expect.objectContaining({ type: 'datatable' }),
+      ])
+    );
   });
 
   it('keeps rows that evaluate to true and removes rows that evaluate to false', () => {
     const inStockRows = testTable.rows.filter((row) => row.in_stock);
 
-    expect(fn(testTable, { fn: inStock })).resolves.toEqual(
-      expect.objectContaining({
-        columns: testTable.columns,
-        rows: inStockRows,
-      })
+    testScheduler.run(({ expectObservable }) =>
+      expectObservable(fn(testTable, { fn: inStock })).toBe('(0|)', [
+        expect.objectContaining({
+          columns: testTable.columns,
+          rows: inStockRows,
+        }),
+      ])
     );
   });
 
   it('returns datatable with no rows when no rows meet function condition', () => {
-    expect(fn(testTable, { fn: returnFalse })).resolves.toEqual(
-      expect.objectContaining({
-        rows: [],
-      })
+    testScheduler.run(({ expectObservable }) =>
+      expectObservable(fn(testTable, { fn: returnFalse })).toBe('(0|)', [
+        expect.objectContaining({
+          rows: [],
+        }),
+      ])
     );
   });
 
   it('throws when no function is provided', () => {
-    expect(() => fn(testTable)).toThrow('fn is not a function');
+    testScheduler.run(({ expectObservable }) =>
+      expectObservable(fn(testTable)).toBe('#', {}, new TypeError('fn is not a function'))
+    );
   });
 });

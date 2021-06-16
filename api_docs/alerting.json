@@ -5,7 +5,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-public.AlertNavigationHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertNavigationHandler",
+        "description": [
+          "\nReturns information that can be used to navigate to a specific page to view the given rule.\n"
+        ],
+        "signature": [
+          "(alert: Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.JsonObject",
+            "text": "JsonObject"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "alerting",
@@ -24,19 +59,95 @@
           "parentPluginId": "alerting",
           "id": "def-public.PluginSetupContract.registerNavigation",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "throws"
+          ],
           "label": "registerNavigation",
-          "description": [],
+          "description": [
+            "\nRegister a customized view of the particular rule type. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.\n"
+          ],
           "signature": [
-            "(consumer: string, alertType: string, handler: ",
-            "AlertNavigationHandler",
+            "(applicationId: string, ruleType: string, handler: ",
+            {
+              "pluginId": "alerting",
+              "scope": "public",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-public.AlertNavigationHandler",
+              "text": "AlertNavigationHandler"
+            },
             ") => void"
           ],
           "source": {
             "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 15
+            "lineNumber": 30
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.applicationId",
+              "type": "string",
+              "tags": [],
+              "label": "applicationId",
+              "description": [
+                "The application id that the user should be navigated to, to view a particular alert in a custom way."
+              ],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 31
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.ruleType",
+              "type": "string",
+              "tags": [],
+              "label": "ruleType",
+              "description": [
+                "The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If\nno such rule with that id exists, a warning is output to the console log. It used to throw an error, but that was temporarily moved\nbecause it was causing flaky test failures with https://github.com/elastic/kibana/issues/59229 and needs to be\ninvestigated more."
+              ],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 32
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.handler",
+              "type": "Function",
+              "tags": [],
+              "label": "handler",
+              "description": [
+                "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
+              ],
+              "signature": [
+                "(alert: Pick<",
+                {
+                  "pluginId": "alerting",
+                  "scope": "common",
+                  "docId": "kibAlertingPluginApi",
+                  "section": "def-common.Alert",
+                  "text": "Alert"
+                },
+                "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+                {
+                  "pluginId": "kibanaUtils",
+                  "scope": "common",
+                  "docId": "kibKibanaUtilsPluginApi",
+                  "section": "def-common.JsonObject",
+                  "text": "JsonObject"
+                }
+              ],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 33
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "alerting",
@@ -44,17 +155,76 @@
           "type": "Function",
           "tags": [],
           "label": "registerDefaultNavigation",
-          "description": [],
+          "description": [
+            "\nRegister a customized view for all rule types. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.\n"
+          ],
           "signature": [
-            "(consumer: string, handler: ",
-            "AlertNavigationHandler",
+            "(applicationId: string, handler: ",
+            {
+              "pluginId": "alerting",
+              "scope": "public",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-public.AlertNavigationHandler",
+              "text": "AlertNavigationHandler"
+            },
             ") => void"
           ],
           "source": {
             "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 20
+            "lineNumber": 46
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.applicationId",
+              "type": "string",
+              "tags": [],
+              "label": "applicationId",
+              "description": [
+                "The application id that the user should be navigated to, to view a particular alert in a custom way."
+              ],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 46
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.handler",
+              "type": "Function",
+              "tags": [],
+              "label": "handler",
+              "description": [
+                "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
+              ],
+              "signature": [
+                "(alert: Pick<",
+                {
+                  "pluginId": "alerting",
+                  "scope": "common",
+                  "docId": "kibAlertingPluginApi",
+                  "section": "def-common.Alert",
+                  "text": "Alert"
+                },
+                "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+                {
+                  "pluginId": "kibanaUtils",
+                  "scope": "common",
+                  "docId": "kibKibanaUtilsPluginApi",
+                  "section": "def-common.JsonObject",
+                  "text": "JsonObject"
+                }
+              ],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 46
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "setup",
@@ -69,7 +239,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/alerting/public/plugin.ts",
-        "lineNumber": 22
+        "lineNumber": 48
       },
       "deprecated": false,
       "children": [
@@ -101,9 +271,25 @@
           ],
           "source": {
             "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 23
+            "lineNumber": 49
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "alerting",
+              "id": "def-public.alertId",
+              "type": "string",
+              "tags": [],
+              "label": "alertId",
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/alerting/public/plugin.ts",
+                "lineNumber": 49
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -377,13 +563,15 @@
             "label": "rule",
             "description": [],
             "signature": [
+              "Pick<Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.SanitizedRuleConfig",
-                "text": "SanitizedRuleConfig"
-              }
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
@@ -518,7 +706,9 @@
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 47
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -536,7 +726,9 @@
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 48
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -560,7 +752,9 @@
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 49
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -576,7 +770,9 @@
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 50
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -681,7 +877,23 @@
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 75
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/alerting/server/types.ts",
+                  "lineNumber": 76
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -823,7 +1035,14 @@
             "label": "executor",
             "description": [],
             "signature": [
-              "ExecutorType",
+              "(options: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertExecutorOptions",
+                "text": "AlertExecutorOptions"
+              },
               "<Params, State, InstanceState, InstanceContext, ",
               {
                 "pluginId": "alerting",
@@ -832,13 +1051,39 @@
                 "section": "def-common.WithoutReservedActionGroups",
                 "text": "WithoutReservedActionGroups"
               },
-              "<ActionGroupIds, RecoveryActionGroupId>>"
+              "<ActionGroupIds, RecoveryActionGroupId>>) => Promise<void | State>"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 131
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.AlertExecutorOptions",
+                    "text": "AlertExecutorOptions"
+                  },
+                  "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/alerting/server/types.ts",
+                  "lineNumber": 109
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "alerting",
@@ -990,7 +1235,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
@@ -1097,7 +1342,9 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 106
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -1123,7 +1370,7 @@
                 "section": "def-server.AlertsClient",
                 "text": "AlertsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"muteAll\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\">"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -1233,7 +1480,9 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 111
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -1249,7 +1498,23 @@
         "label": "ActionGroupIdsOf",
         "description": [],
         "signature": [
-          "T extends ActionGroup<infer groups> ? groups : T extends Readonly<ActionGroup<infer groups>> ? groups : never"
+          "T extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<infer groups> ? groups : T extends Readonly<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<infer groups>> ? groups : never"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
@@ -1317,7 +1582,7 @@
         "label": "AlertsClient",
         "description": [],
         "signature": [
-          "{ get: <Params>({ id, }: { id: string; }) => Promise<Pick<",
+          "{ get: <Params extends Record<string, unknown> = never>({ id, }: { id: string; }) => Promise<Pick<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1325,7 +1590,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: <Params extends Record<string, unknown> = never>({ data, options, }: ",
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: <Params extends Record<string, unknown> = never>({ data, options, }: ",
           "CreateOptions",
           "<Params>) => Promise<Pick<",
           {
@@ -1335,7 +1600,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; find: <Params>({ options: { fields, ...options }, }?: { options?: ",
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>; find: <Params extends Record<string, unknown> = never>({ options: { fields, ...options }, }?: { options?: ",
           "FindOptions",
           " | undefined; }) => Promise<",
           {
@@ -1344,7 +1609,38 @@
             "docId": "kibAlertingPluginApi",
             "section": "def-server.FindResult",
             "text": "FindResult"
-          }
+          },
+          "<Params>>; update: <Params extends Record<string, unknown> = never>({ id, data, }: ",
+          "UpdateOptions",
+          "<Params>) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.PartialAlert",
+            "text": "PartialAlert"
+          },
+          "<Params>>; aggregate: ({ options: { fields, ...options }, }?: { options?: ",
+          "AggregateOptions",
+          " | undefined; }) => Promise<",
+          "AggregateResult",
+          ">; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertInstanceSummary: ({ id, dateStart, }: ",
+          "GetAlertInstanceSummaryParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AlertInstanceSummary",
+            "text": "AlertInstanceSummary"
+          },
+          ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          "MuteOptions",
+          ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
+          "MuteOptions",
+          ") => Promise<void>; listAlertTypes: () => Promise<Set<",
+          "RegistryAlertTypeWithAuth",
+          ">>; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/index.ts",
@@ -1395,7 +1691,23 @@
         "label": "PartialAlert",
         "description": [],
         "signature": [
-          "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"apiKey\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
+          "Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<Params>, \"id\"> & Partial<Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"apiKey\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
@@ -1412,7 +1724,13 @@
         "label": "PublicAlertInstance",
         "description": [],
         "signature": [
-          "{ getState: () => State; replaceState: (state: State) => AlertInstance<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => AlertInstance<State, Context, ActionGroupIds>; scheduleActionsWithSubGroup: (actionGroup: ActionGroupIds, subgroup: string, context?: Context) => AlertInstance<State, Context, ActionGroupIds>; }"
+          "{ getState: () => State; replaceState: (state: State) => ",
+          "AlertInstance",
+          "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
+          "AlertInstance",
+          "<State, Context, ActionGroupIds>; scheduleActionsWithSubGroup: (actionGroup: ActionGroupIds, subgroup: string, context?: Context) => ",
+          "AlertInstance",
+          "<State, Context, ActionGroupIds>; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/alert_instance/alert_instance.ts",
@@ -2488,13 +2806,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertInstanceStatusValues",
-                "text": "AlertInstanceStatusValues"
-              }
+              "\"OK\" | \"Active\""
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
@@ -2723,13 +3035,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertStatusValues",
-                "text": "AlertStatusValues"
-              }
+              "\"OK\" | \"Active\" | \"Error\""
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
@@ -2777,7 +3083,7 @@
             "label": "instances",
             "description": [],
             "signature": [
-              "Record<string, ",
+              "{ [x: string]: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -2785,7 +3091,7 @@
                 "section": "def-common.AlertInstanceStatus",
                 "text": "AlertInstanceStatus"
               },
-              ">"
+              "; }"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
@@ -3190,7 +3496,23 @@
         "label": "ActionGroupIdsOf",
         "description": [],
         "signature": [
-          "T extends ActionGroup<infer groups> ? groups : T extends Readonly<ActionGroup<infer groups>> ? groups : never"
+          "T extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<infer groups> ? groups : T extends Readonly<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<infer groups>> ? groups : never"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
@@ -3207,11 +3529,11 @@
         "label": "AlertActionParam",
         "description": [],
         "signature": [
-          "undefined | null | string | number | false | true | ",
+          "string | number | boolean | ",
           "SavedObjectAttributes",
           " | ",
           "SavedObjectAttributeSingle",
-          "[]"
+          "[] | null | undefined"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
@@ -3599,7 +3921,31 @@
         "label": "SanitizedAlert",
         "description": [],
         "signature": [
-          "{ enabled: boolean; id: string; name: string; params: Params; actions: AlertAction[]; tags: string[]; muteAll: boolean; alertTypeId: string; consumer: string; schedule: IntervalSchedule; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: AlertExecutionStatus; }"
+          "{ enabled: boolean; id: string; name: string; params: Params; actions: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AlertAction",
+            "text": "AlertAction"
+          },
+          "[]; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AlertExecutionStatus",
+            "text": "AlertExecutionStatus"
+          },
+          "; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
@@ -3616,7 +3962,15 @@
         "label": "SanitizedRuleConfig",
         "description": [],
         "signature": [
-          "Pick<Pick<Alert<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "Pick<Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
@@ -3633,7 +3987,15 @@
         "label": "WithoutReservedActionGroups",
         "description": [],
         "signature": [
-          "ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds"
+          "ActionGroupIds extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ReservedActionGroups",
+            "text": "ReservedActionGroups"
+          },
+          "<RecoveryActionGroupId> ? never : ActionGroupIds"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
@@ -3677,7 +4039,8 @@
           "; }>, ",
           "PartialC",
           "<{ spaceId: ",
-          "StringC"
+          "StringC",
+          "; }>]>"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
@@ -3702,7 +4065,38 @@
           ", ",
           "UnknownC",
           ">; alertInstances: ",
-          "RecordC"
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ state: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "UnknownC",
+          ">; meta: ",
+          "PartialC",
+          "<{ lastScheduledActions: ",
+          "IntersectionC",
+          "<[",
+          "PartialC",
+          "<{ subgroup: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ group: ",
+          "StringC",
+          "; date: ",
+          "Type",
+          "<Date, string, unknown>; }>]>; }>; }>>; previousStartedAt: ",
+          "UnionC",
+          "<[",
+          "NullC",
+          ", ",
+          "Type",
+          "<Date, string, unknown>]>; }>"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
@@ -3744,7 +4138,20 @@
           ", ",
           "UnknownC",
           ">; meta: ",
-          "PartialC"
+          "PartialC",
+          "<{ lastScheduledActions: ",
+          "IntersectionC",
+          "<[",
+          "PartialC",
+          "<{ subgroup: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ group: ",
+          "StringC",
+          "; date: ",
+          "Type",
+          "<Date, string, unknown>; }>]>; }>; }>"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_instance.ts",
@@ -3761,15 +4168,7 @@
         "label": "RecoveredActionGroup",
         "description": [],
         "signature": [
-          "Readonly<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.ActionGroup",
-            "text": "ActionGroup"
-          },
-          "<\"recovered\">>"
+          "{ readonly id: \"recovered\"; readonly name: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",

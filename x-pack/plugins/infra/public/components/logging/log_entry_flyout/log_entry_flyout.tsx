@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect } from 'react';
+import type { Query } from '../../../../../../../src/plugins/data/public';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
@@ -29,7 +30,7 @@ import { LogEntryFieldsTable } from './log_entry_fields_table';
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
   onCloseFlyout: () => void;
-  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
   sourceId: string | null | undefined;
 }
 
