@@ -7,7 +7,12 @@
 
 import type { PreconfiguredAgentPolicy } from '../types';
 
-import { defaultPackages, FLEET_SYSTEM_PACKAGE, FLEET_SERVER_PACKAGE } from './epm';
+import {
+  defaultPackages,
+  requiredPackages,
+  FLEET_SYSTEM_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+} from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
@@ -56,13 +61,15 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 
-export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
+export const REQUIRED_PACKAGES = requiredPackages.map((name) => ({
   name,
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));
 
-// these are currently identical. we can separate if they later diverge
-export const REQUIRED_PACKAGES = DEFAULT_PACKAGES;
+export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
+  name,
+  version: PRECONFIGURATION_LATEST_KEYWORD,
+}));
 
 export interface PreconfigurationError {
   package?: { name: string; version: string };
