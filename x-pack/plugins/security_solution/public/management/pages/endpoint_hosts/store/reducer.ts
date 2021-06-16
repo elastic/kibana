@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointDetailsActivityLogChanged } from './action';
+import { EndpointDetailsActivityLogChanged, EndpointPendingActionsStateChanged } from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -39,6 +39,19 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
       },
     },
   };
+};
+
+const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActionsStateChanged> = (
+  state,
+  action
+) => {
+  if (isOnEndpointPage(state)) {
+    return {
+      ...state,
+      endpointPendingActions: action.payload,
+    };
+  }
+  return state;
 };
 
 /* eslint-disable-next-line complexity */
@@ -141,6 +154,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     };
   } else if (action.type === 'endpointDetailsActivityLogChanged') {
     return handleEndpointDetailsActivityLogChanged(state, action);
+  } else if (action.type === 'endpointPendingActionsStateChanged') {
+    return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
