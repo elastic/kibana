@@ -20,6 +20,7 @@ import {
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
 import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
+import { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -81,8 +82,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     if (!(layerSource instanceof ESSearchSource)) {
       return false;
     }
-    // @ts-ignore
-    const isClustered = layerSource?.getSyncMeta()?.scalingType === SCALING_TYPES.CLUSTERS;
+    const isClustered =
+      (layerSource?.getSyncMeta() as ESSearchSourceSyncMeta)?.scalingType ===
+      SCALING_TYPES.CLUSTERS;
     if (
       isClustered ||
       (await vectorLayer.isFilteredByGlobalTime()) ||

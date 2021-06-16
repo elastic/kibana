@@ -32,7 +32,7 @@ export type MapFilters = {
   isReadOnly: boolean;
 };
 
-type ESSearchSourceSyncMeta = {
+export type ESSearchSourceSyncMeta = {
   filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
