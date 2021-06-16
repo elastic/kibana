@@ -8,7 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
+import { MinimalIndexPattern } from '..';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -93,7 +94,7 @@ const format = (field: IFieldType, value: any) =>
 export const buildRangeFilter = (
   field: IFieldType,
   params: RangeFilterParams,
-  indexPattern: IIndexPattern,
+  indexPattern: MinimalIndexPattern,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };

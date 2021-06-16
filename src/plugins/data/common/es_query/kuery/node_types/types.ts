@@ -11,8 +11,8 @@
  */
 
 import { JsonValue } from '@kbn/common-utils';
-import { IIndexPattern } from '../../../index_patterns';
 import { KueryNode } from '..';
+import { MinimalIndexPattern } from '../..';
 
 export type FunctionName =
   | 'is'
@@ -30,7 +30,7 @@ interface FunctionType {
   buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
-    indexPattern?: IIndexPattern,
+    indexPattern?: MinimalIndexPattern,
     config?: Record<string, any>,
     context?: Record<string, any>
   ) => JsonValue;

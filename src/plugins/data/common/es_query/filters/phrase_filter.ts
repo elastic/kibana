@@ -8,7 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
+import { MinimalIndexPattern } from '..';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
@@ -60,7 +61,7 @@ export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue =>
 export const buildPhraseFilter = (
   field: IFieldType,
   value: any,
-  indexPattern: IIndexPattern
+  indexPattern: MinimalIndexPattern
 ): PhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 

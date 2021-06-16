@@ -8,7 +8,7 @@
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
-import { IIndexPattern, KueryNode } from '../../..';
+import { MinimalIndexPattern, KueryNode } from '../../..';
 
 export function buildNodeParams(path: any, child: any) {
   const pathNode =
@@ -20,7 +20,7 @@ export function buildNodeParams(path: any, child: any) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: MinimalIndexPattern,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

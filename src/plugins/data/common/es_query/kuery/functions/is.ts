@@ -11,7 +11,7 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { MinimalIndexPattern, KueryNode, IFieldType } from '../../..';
 
 import * as ast from '../ast';
 
@@ -39,7 +39,7 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: MinimalIndexPattern,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

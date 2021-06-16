@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../filters';
-import { IIndexPattern } from '../..';
+import { Filter, IIndexPattern } from '../../../../common';
 
 export function getIndexPatternFromFilter(
   filter: Filter,

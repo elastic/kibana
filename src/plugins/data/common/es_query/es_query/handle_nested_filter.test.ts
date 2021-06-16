@@ -9,13 +9,14 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IFieldType, IIndexPattern } from '../../index_patterns';
+import { MinimalIndexPattern } from './types';
+import { IFieldType } from '../../index_patterns';
 
 describe('handleNestedFilter', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: MinimalIndexPattern = {
     id: 'logstash-*',
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
     const field = getField('nestedField.child');
