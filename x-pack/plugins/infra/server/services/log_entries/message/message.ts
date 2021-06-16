@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { JsonArray, JsonValue } from '@kbn/common-utils';
 import { LogMessagePart } from '../../../../common/log_entry';
-import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   LogMessageFormattingCondition,
   LogMessageFormattingFieldValueConditionValue,
