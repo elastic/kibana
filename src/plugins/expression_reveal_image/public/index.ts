@@ -8,15 +8,7 @@
 
 import { ExpressionRevealImagePlugin } from './plugin';
 
-import { revealImageRenderer } from './expression_renderers';
-import { revealImageElement } from './elements';
-import { revealImageUIView } from './ui_views';
-import { translateElements } from '../common/lib/translate_elements';
-
 export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart } from './plugin';
-export const elements = translateElements([revealImageElement]);
-export const renderers = [revealImageRenderer];
-export const uiViews = [revealImageUIView];
 
 export function plugin() {
   return new ExpressionRevealImagePlugin();

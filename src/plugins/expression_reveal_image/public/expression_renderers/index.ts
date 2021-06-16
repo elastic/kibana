@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './reveal_image_renderer';
+import { revealImageRenderer } from './reveal_image_renderer';
+
+export const renderers = [revealImageRenderer];
+
+export { revealImageRenderer };
