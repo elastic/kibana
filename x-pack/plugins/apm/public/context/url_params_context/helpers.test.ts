@@ -25,8 +25,8 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2021-01-28T05:47:00.000Z',
-            exactStart: '2021-01-28T05:47:00.000Z',
             end: '2021-01-28T05:48:55.304Z',
+            exactStart: '2021-01-28T05:47:52.134Z',
             exactEnd: '2021-01-28T05:48:55.304Z',
           });
         });
@@ -41,8 +41,8 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2021-01-27T05:46:00.000Z',
-            exactStart: '2021-01-27T05:46:00.000Z',
             end: '2021-01-28T05:46:13.367Z',
+            exactStart: '2021-01-27T05:46:07.377Z',
             exactEnd: '2021-01-28T05:46:13.367Z',
           });
         });
@@ -58,8 +58,8 @@ describe('url_params_context helpers', () => {
             })
           ).toEqual({
             start: '2020-01-28T05:52:00.000Z',
-            exactStart: '2020-01-28T05:52:00.000Z',
             end: '2021-01-28T05:52:39.741Z',
+            exactStart: '2020-01-28T05:52:36.290Z',
             exactEnd: '2021-01-28T05:52:39.741Z',
           });
         });
@@ -83,8 +83,8 @@ describe('url_params_context helpers', () => {
           })
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
-          exactStart: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
+          exactStart: '1970-01-01T00:00:00.000Z',
           exactEnd: '1971-01-01T00:00:00.000Z',
         });
       });
@@ -106,19 +106,22 @@ describe('url_params_context helpers', () => {
           })
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
-          exactStart: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
-          exactEnd: '1973-01-01T00:00:00.000Z',
+          exactStart: undefined,
+          exactEnd: undefined,
         });
       });
     });
 
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
+        const endDate = moment('2021-06-04T18:03:24.211Z');
         jest
           .spyOn(datemath, 'parse')
           .mockReturnValueOnce(undefined)
-          .mockReturnValueOnce(moment('2021-06-04T18:03:24.211Z'));
+          .mockReturnValueOnce(endDate)
+          .mockReturnValueOnce(undefined)
+          .mockReturnValueOnce(endDate);
         expect(
           helpers.getDateRange({
             state: {
@@ -165,11 +168,10 @@ describe('url_params_context helpers', () => {
   });
 
   describe('getExactDate', () => {
-    it('returns undefined when date in not provided', () => {
-      expect(helpers.getExactDate()).toBeUndefined();
-    });
-    it('returns undefined when date in not relative', () => {
-      expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toBeUndefined();
+    it('returns date when it is not not relative', () => {
+      expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toEqual(
+        new Date('2021-01-28T05:47:52.134Z')
+      );
     });
 
     ['s', 'm', 'h', 'd', 'w'].map((roundingOption) =>

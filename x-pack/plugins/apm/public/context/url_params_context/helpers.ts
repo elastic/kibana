@@ -19,15 +19,14 @@ function getParsedDate(rawDate?: string, options = {}) {
   }
 }
 
-export function getExactDate(rawDate?: string, options = {}) {
-  if (rawDate) {
-    const isRelativeDate = rawDate.substring(0, 3) === 'now';
-    if (isRelativeDate) {
-      // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
-      const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
-      return getParsedDate(rawDateWithouRounding, options);
-    }
+export function getExactDate(rawDate: string) {
+  const isRelativeDate = rawDate.startsWith('now');
+  if (isRelativeDate) {
+    // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
+    const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
+    return getParsedDate(rawDateWithouRounding);
   }
+  return getParsedDate(rawDate);
 }
 
 export function getDateRange({
@@ -51,27 +50,28 @@ export function getDateRange({
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
 
+  const exactStart = rangeFrom ? getExactDate(rangeFrom) : undefined;
+  const exactEnd = rangeTo ? getExactDate(rangeTo) : undefined;
+
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
   if (!start || !end) {
     return {
       start: state.start,
-      exactStart: state.start,
       end: state.end,
-      exactEnd: state.end,
+      exactStart: state.exactStart,
+      exactEnd: state.exactEnd,
     };
   }
 
   // rounds down start to minute
   const roundedStart = moment(start).startOf('minute');
-  const exactStart = getExactDate(rangeFrom) || roundedStart;
-  const exactEnd = getExactDate(rangeTo) || end;
 
   return {
     start: roundedStart.toISOString(),
-    exactStart: exactStart.toISOString(),
     end: end.toISOString(),
-    exactEnd: exactEnd.toISOString(),
+    exactStart: exactStart?.toISOString(),
+    exactEnd: exactEnd?.toISOString(),
   };
 }
 
