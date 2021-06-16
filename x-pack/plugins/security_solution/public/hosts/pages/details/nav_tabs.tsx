@@ -10,10 +10,10 @@ import * as i18n from '../translations';
 import { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { SecurityPageName } from '../../../app/types';
-import { hostsPagePath } from '../types';
+import { HOSTS_PATH } from '../../../../common/constants';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `${hostsPagePath}/${hostName}/${tabName}`;
+  `${HOSTS_PATH}/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = (
   hostName: string,

@@ -15,8 +15,7 @@ import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { hostsPagePath } from '../../../../hosts/pages/types';
-
+import { HOSTS_PATH } from '../../../../../common/constants';
 interface QueryStringType {
   '?_g': string;
   query: string | null;
@@ -43,7 +42,7 @@ export const MlHostConditionalContainer = React.memo(() => {
             sort: false,
             encode: false,
           });
-          return <Redirect to={`${hostsPagePath}?${reEncoded}`} />;
+          return <Redirect to={`${HOSTS_PATH}?${reEncoded}`} />;
         }}
       />
       <Route
@@ -67,7 +66,7 @@ export const MlHostConditionalContainer = React.memo(() => {
               encode: false,
             });
 
-            return <Redirect to={`${hostsPagePath}/${HostsTableType.anomalies}?${reEncoded}`} />;
+            return <Redirect to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
           } else if (multipleEntities(hostName)) {
             const hosts: string[] = getMultipleEntities(hostName);
             queryStringDecoded.query = addEntitiesToKql(
@@ -80,7 +79,7 @@ export const MlHostConditionalContainer = React.memo(() => {
               encode: false,
             });
 
-            return <Redirect to={`${hostsPagePath}/${HostsTableType.anomalies}?${reEncoded}`} />;
+            return <Redirect to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
           } else {
             const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
@@ -88,17 +87,15 @@ export const MlHostConditionalContainer = React.memo(() => {
             });
 
             return (
-              <Redirect
-                to={`${hostsPagePath}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
-              />
+              <Redirect to={`${HOSTS_PATH}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`} />
             );
           }
         }}
       />
       <Route
-        path={`${hostsPagePath}/ml-hosts/`}
+        path={`${HOSTS_PATH}/ml-hosts/`}
         render={({ location: { search = '' } }) => (
-          <Redirect from={`${hostsPagePath}/ml-hosts/`} to={`${hostsPagePath}/ml-hosts${search}`} />
+          <Redirect from={`${HOSTS_PATH}/ml-hosts/`} to={`${HOSTS_PATH}/ml-hosts${search}`} />
         )}
       />
     </Switch>

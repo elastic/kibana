@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { HostsContainer } from './pages';
-import { hostsPagePath } from './pages/types';
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { HOSTS_PATH } from '../../common/constants';
 
 export const HostsRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.hosts}>
@@ -19,7 +19,7 @@ export const HostsRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: hostsPagePath,
+    path: HOSTS_PATH,
     render: HostsRoutes,
   },
 ];

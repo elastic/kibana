@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
-
+import { Route, Switch, Redirect } from 'react-router-dom';
+import { HOSTS_PATH } from '../../../common/constants';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
-import { hostsPagePath, hostDetailsPagePath } from './types';
+import { hostDetailsPagePath } from './types';
 
 const getHostsTabPath = () =>
-  `${hostsPagePath}/:tabName(` +
+  `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -32,21 +32,19 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-type Props = Partial<RouteComponentProps<{}>>;
-
-export const HostsContainer = React.memo<Props>(() => {
+export const HostsContainer = React.memo(() => {
   return (
     <Switch>
       <Route
         exact
         strict
-        path={hostsPagePath}
+        path={HOSTS_PATH}
         render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${hostsPagePath}/${HostsTableType.hosts}`, search }} />
+          <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
         )}
       />
 
-      <Route path={`${hostsPagePath}/ml-hosts`}>
+      <Route path={`${HOSTS_PATH}/ml-hosts`}>
         <MlHostConditionalContainer />
       </Route>
       <Route path={getHostsTabPath()}>
@@ -70,7 +68,7 @@ export const HostsContainer = React.memo<Props>(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${hostsPagePath}/${detailName}/${HostsTableType.authentications}`,
+              pathname: `${HOSTS_PATH}/${detailName}/${HostsTableType.authentications}`,
               search,
             }}
           />

@@ -47,6 +47,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
   OVERVIEW_PATH,
+  HOSTS_PATH,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -281,7 +282,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           id: SecurityPageName.hosts,
           title: HOSTS,
-          path: '/hosts',
+          path: HOSTS_PATH,
           navLinkStatus: AppNavLinkStatus.visible,
           order: 9002,
           euiIconType: APP_ICON_SOLUTION,

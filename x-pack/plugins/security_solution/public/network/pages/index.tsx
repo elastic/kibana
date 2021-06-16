@@ -18,12 +18,10 @@ import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { FlowTarget } from '../../../common/search_strategy';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
 const networkPagePath = '';
 const ipDetailsPageBasePath = `/ip/:detailName`;
 
-const NetworkContainerComponent: React.FC<Props> = () => {
+const NetworkContainerComponent = () => {
   const history = useHistory();
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;

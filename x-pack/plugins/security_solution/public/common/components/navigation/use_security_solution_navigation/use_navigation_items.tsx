@@ -30,7 +30,6 @@ export const usePrimaryNavigationItems = ({
         useSideNavItem({ ...props, tab: navTabs.overview }),
         // TODO: [1101] Move the following nav items to its group
         useSideNavItem({ ...props, tab: navTabs.detections }),
-        useSideNavItem({ ...props, tab: navTabs.hosts }),
         useSideNavItem({ ...props, tab: navTabs.network }),
         useSideNavItem({ ...props, tab: navTabs.timelines }),
         useSideNavItem({ ...props, tab: navTabs.case }),
@@ -47,7 +46,7 @@ export const usePrimaryNavigationItems = ({
     },
     {
       ...navTabGroups.explore,
-      items: [],
+      items: [useSideNavItem({ ...props, tab: navTabs.hosts })],
     },
     {
       ...navTabGroups.investigate,

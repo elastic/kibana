@@ -8,14 +8,14 @@
 import React, { memo, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { hostsPagePath, HostsTabsProps } from './types';
+import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../common/components/ml/types';
 import { HostsTableType } from '../store/model';
 import { AnomaliesQueryTabBody } from '../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesHostTable } from '../../common/components/ml/tables/anomalies_host_table';
 import { UpdateDateRange } from '../../common/components/charts/common';
-
+import { HOSTS_PATH } from '../../../common/constants';
 import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
@@ -79,22 +79,22 @@ export const HostsTabs = memo<HostsTabsProps>(
 
     return (
       <Switch>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

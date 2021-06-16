@@ -60,7 +60,7 @@ export const renderApp = ({
           ...(subPlugins.overview.routes ?? []),
           ...(subPlugins.hosts.routes ?? []),
           /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
-        ]!.map((route) => (
+        ].map((route) => (
           <Route {...route} />
         ))}
 
