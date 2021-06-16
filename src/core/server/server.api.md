@@ -765,6 +765,16 @@ export interface CoreUsageStats {
     'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsUpdate.total'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.conflict'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.notFound'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
 
 // @public (undocumented)

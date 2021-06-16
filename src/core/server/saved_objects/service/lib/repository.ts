@@ -8,6 +8,11 @@
 
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
+  REPOSITORY_RESOLVE_OUTCOME_STATS,
+} from '../../../core_usage_data';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -1070,7 +1075,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update<{ 'legacy-url-alias': LegacyUrlAlias }>(
+    const aliasResponse = await this.client.update<{ [LEGACY_URL_ALIAS_TYPE]: LegacyUrlAlias }>(
       {
         id: rawAliasId,
         index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
@@ -1141,21 +1146,25 @@ export class SavedObjectsRepository {
       // @ts-expect-error MultiGetHit._source is optional
       aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
 
+    let result: SavedObjectsResolveResponse<T> | null = null;
+    let outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND;
     if (foundExactMatch && foundAliasMatch) {
-      return {
+      result = {
         // @ts-expect-error MultiGetHit._source is optional
         saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'conflict',
         aliasTargetId: legacyUrlAlias.targetId,
       };
+      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT;
     } else if (foundExactMatch) {
-      return {
+      result = {
         // @ts-expect-error MultiGetHit._source is optional
         saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'exactMatch',
       };
+      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH;
     } else if (foundAliasMatch) {
-      return {
+      result = {
         saved_object: getSavedObjectFromSource(
           this._registry,
           type,
@@ -1166,6 +1175,13 @@ export class SavedObjectsRepository {
         outcome: 'aliasMatch',
         aliasTargetId: legacyUrlAlias.targetId,
       };
+      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH;
+    }
+
+    await this.incrementResolveOutcomeStats(outcomeStatString);
+
+    if (result !== null) {
+      return result;
     }
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
@@ -1662,8 +1678,8 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
-    options: SavedObjectsIncrementCounterOptions<T> = {}
-  ): Promise<SavedObject<T>> {
+    options?: SavedObjectsIncrementCounterOptions<T>
+  ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
@@ -1684,6 +1700,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
+    return this.incrementCounterInternal<T>(type, id, counterFields, options);
+  }
+
+  /** @internal incrementCounter function that is used interally and bypasses validation checks. */
+  private async incrementCounterInternal<T = unknown>(
+    type: string,
+    id: string,
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
+    options: SavedObjectsIncrementCounterOptions<T> = {}
+  ): Promise<SavedObject<T>> {
     const {
       migrationVersion,
       refresh = DEFAULT_REFRESH_SETTING,
@@ -2077,8 +2103,25 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions
   ): Promise<SavedObjectsResolveResponse<T>> {
-    const object = await this.get<T>(type, id, options);
-    return { saved_object: object, outcome: 'exactMatch' };
+    try {
+      const object = await this.get<T>(type, id, options);
+      await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
+      return { saved_object: object, outcome: 'exactMatch' };
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
+      }
+      throw err;
+    }
+  }
+
+  private async incrementResolveOutcomeStats(outcomeStatString: string) {
+    await this.incrementCounterInternal(
+      CORE_USAGE_STATS_TYPE,
+      CORE_USAGE_STATS_ID,
+      [outcomeStatString, REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL],
+      { refresh: false }
+    ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
   }
 }
 

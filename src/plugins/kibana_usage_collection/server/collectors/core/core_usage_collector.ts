@@ -914,6 +914,38 @@ export function getCoreUsageCollector(
           description: 'How many times this API has been called without all types selected.',
         },
       },
+      // Saved Objects Repository counters
+      'savedObjectsRepository.resolvedOutcome.exactMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an exact match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.aliasMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an alias match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.conflict': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a conflict outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.notFound': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a not found outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.total': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times a saved object has resolved with any of the four possible outcomes.',
+        },
+      },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();

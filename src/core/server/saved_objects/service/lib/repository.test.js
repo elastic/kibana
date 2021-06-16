@@ -13,6 +13,7 @@ import {
   mockUpdateObjectsSpaces,
 } from './repository.test.mock';
 
+import { CORE_USAGE_STATS_TYPE, REPOSITORY_RESOLVE_OUTCOME_STATS } from '../../../core_usage_data';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -3205,6 +3206,24 @@ describe('SavedObjectsRepository', () => {
       },
     });
 
+    /** Each time resolve is called, usage stats are incremented depending upon the outcome. */
+    const expectIncrementCounter = (n, outcomeStatString) => {
+      expect(client.update).toHaveBeenNthCalledWith(
+        n,
+        expect.objectContaining({
+          body: expect.objectContaining({
+            upsert: expect.objectContaining({
+              [CORE_USAGE_STATS_TYPE]: {
+                [outcomeStatString]: 1,
+                [REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL]: 1,
+              },
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    };
+
     describe('outcomes', () => {
       describe('error', () => {
         const expectNotFoundError = async (type, id, options) => {
@@ -3235,9 +3254,10 @@ describe('SavedObjectsRepository', () => {
           );
 
           await expectNotFoundError(type, id, options);
-          expect(client.update).not.toHaveBeenCalled();
+          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
           expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
           expect(client.mget).not.toHaveBeenCalled();
+          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
         });
 
         it('because actual object and alias object are both not found', async () => {
@@ -3253,9 +3273,10 @@ describe('SavedObjectsRepository', () => {
           );
 
           await expectNotFoundError(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
           expect(client.get).not.toHaveBeenCalled();
           expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
         });
       });
 
@@ -3268,9 +3289,10 @@ describe('SavedObjectsRepository', () => {
           );
 
           const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).not.toHaveBeenCalled();
+          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
           expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
           expect(client.mget).not.toHaveBeenCalled();
+          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
           expect(result).toEqual({
             saved_object: expect.objectContaining({ type, id }),
             outcome: 'exactMatch',
@@ -3287,9 +3309,10 @@ describe('SavedObjectsRepository', () => {
             );
 
             const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
             expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
             expect(client.mget).not.toHaveBeenCalled();
+            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
             expect(result).toEqual({
               saved_object: expect.objectContaining({ type, id }),
               outcome: 'exactMatch',
@@ -3321,9 +3344,10 @@ describe('SavedObjectsRepository', () => {
             );
 
             const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
             expect(client.get).not.toHaveBeenCalled();
             expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
             expect(result).toEqual({
               saved_object: expect.objectContaining({ type, id }),
               outcome: 'exactMatch',
@@ -3362,9 +3386,10 @@ describe('SavedObjectsRepository', () => {
           );
 
           const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
           expect(client.get).not.toHaveBeenCalled();
           expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
           expect(result).toEqual({
             saved_object: expect.objectContaining({ type, id: aliasTargetId }),
             outcome: 'aliasMatch',
@@ -3403,9 +3428,10 @@ describe('SavedObjectsRepository', () => {
           );
 
           const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
           expect(client.get).not.toHaveBeenCalled();
           expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
           expect(result).toEqual({
             saved_object: expect.objectContaining({ type, id }),
             outcome: 'conflict',
