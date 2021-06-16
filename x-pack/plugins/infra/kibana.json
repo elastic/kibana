@@ -12,9 +12,10 @@
     "visTypeTimeseries",
     "alerting",
     "triggersActionsUi",
+    "observability",
     "ruleRegistry"
   ],
-  "optionalPlugins": ["ml", "observability", "home", "embeddable"],
+  "optionalPlugins": ["ml", "home", "embeddable"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
