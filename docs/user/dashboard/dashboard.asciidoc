@@ -132,6 +132,38 @@ If you change your mind and want to add the panel to the *Visualize Library*:
 . Enter the panel title, then click *Save*.
 
 [float]
+[[add-text]]
+== Add context to panels
+
+To provide context to your dashboard panels, add text panels with *Markdown* that display important information, instructions, images, and more.
+
+*Markdown* is a text entry field that accepts GitHub-flavored Markdown text. For information about GitHub-flavored Markdown text, click *Help*.
+
+. From the dashboard, click *All types*, then select *Text*.
+
+. In the *Markdown* field, enter the text, then click *Update*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]
+
+[float]
 [[edit-panels]]
 == Edit panels
 

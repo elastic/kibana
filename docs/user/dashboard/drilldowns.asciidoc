@@ -1,21 +1,15 @@
 [role="xpack"]
 [[drilldowns]]
-== Create custom dashboard actions
+== Create drilldowns
 
-Custom dashboard actions, or _drilldowns_, allow you to create workflows for analyzing and troubleshooting your data. 
-Drilldowns apply only to the panel that you created the drilldown from, and are not shared across all panels. Each panel can have multiple drilldowns.
+Drilldows are shortcuts that allow you to quickly navigate between your most used dashboards, or navigate to external websites from your dashboards. You can create multiple drilldowns for a single panel. 
+Drilldowns apply only to the panel that you created the drilldown on, and are not shared across panels.
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 [float]
-[[supported-drilldowns]]
-=== Supported drilldowns
-
-{kib} supports dashboard and URL drilldowns.
-
-[float]
 [[dashboard-drilldowns]]
-==== Dashboard drilldowns
+=== Dashboard drilldowns
 
 Dashboard drilldowns enable you to open a dashboard from another dashboard,
 taking the time range, filters, and other parameters with you
@@ -30,7 +24,7 @@ image:images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to 
 
 [float]
 [[url-drilldowns]]
-==== URL drilldowns
+=== URL drilldowns
 
 URL drilldowns enable you to navigate from a dashboard to internal or external URLs.
 Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel.
