@@ -13,7 +13,10 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
-import type { SearchServiceValue } from '../../../../common/search_strategies/correlations/types';
+import type {
+  HistogramItem,
+  SearchServiceValue,
+} from '../../../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 
@@ -32,6 +35,7 @@ interface RawResponse {
   percentileThresholdValue?: number;
   took: number;
   values: SearchServiceValue[];
+  overallHistogram: HistogramItem[];
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
@@ -104,6 +108,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
     histograms: rawResponse?.values ?? [],
     percentileThresholdValue:
       rawResponse?.percentileThresholdValue ?? undefined,
+    overallHistogram: rawResponse?.overallHistogram,
     isComplete,
     isRunning,
     progress: loaded / total,

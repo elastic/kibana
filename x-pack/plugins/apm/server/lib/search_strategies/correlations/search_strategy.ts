@@ -55,6 +55,7 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         total,
         values,
         percentileThresholdValue,
+        overallHistogram,
       } = getAsyncSearchServiceState();
 
       if (error instanceof Error) {
@@ -74,7 +75,12 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         total,
         isRunning,
         isPartial: isRunning,
-        rawResponse: { took, values, percentileThresholdValue },
+        rawResponse: {
+          took,
+          values,
+          percentileThresholdValue,
+          overallHistogram,
+        },
       });
     },
     cancel: async (id, options, deps) => {

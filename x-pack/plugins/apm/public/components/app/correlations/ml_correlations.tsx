@@ -97,6 +97,7 @@ export function MlCorrelations({ onClose }: Props) {
     progress,
     startFetch,
     cancelFetch,
+    overallHistogram,
   } = useCorrelations({
     index: 'apm-*',
     ...{
@@ -141,6 +142,12 @@ export function MlCorrelations({ onClose }: Props) {
 
   let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
 
+  // console.log(
+  //   'selectedHistogram',
+  //   selectedHistogram,
+  //   'selectedHistogram',
+  //   overallHistogram
+  // );
   if (histograms.length > 0 && selectedSignificantTerm !== null) {
     selectedHistogram = histograms.find(
       (h) =>
@@ -347,8 +354,7 @@ export function MlCorrelations({ onClose }: Props) {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-
-      {histograms.length > 0 && selectedHistogram !== undefined && (
+      {overallHistogram !== undefined ? (
         <>
           <EuiTitle size="xxs">
             <h4>
@@ -362,10 +368,15 @@ export function MlCorrelations({ onClose }: Props) {
             markerPercentile={percentileThreshold}
             markerValue={percentileThresholdValue ?? 0}
             {...selectedHistogram}
+            overallHistogram={overallHistogram}
           />
 
           <EuiSpacer size="s" />
+        </>
+      ) : null}
 
+      {histograms.length > 0 && selectedHistogram !== undefined && (
+        <>
           <CorrelationsTable
             columns={mlCorrelationcolumns}
             percentageColumnName={i18n.translate(

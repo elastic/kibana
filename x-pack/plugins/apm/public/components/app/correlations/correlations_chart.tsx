@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 
 import { useTheme } from '../../../hooks/use_theme';
+import { HistogramItem } from '../../../../common/search_strategies/correlations/types';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -75,9 +76,10 @@ const chartTheme: PartialTheme = {
 interface CorrelationsChartProps {
   field: string;
   value: string;
-  histogram: Array<{ key: number; doc_count: number; doc_count_full: number }>;
+  histogram: HistogramItem[];
   markerValue: number;
   markerPercentile: number;
+  overallHistogram: HistogramItem[];
 }
 
 const annotationsStyle = {
@@ -101,13 +103,16 @@ export function CorrelationsChart({
   histogram,
   markerValue,
   markerPercentile,
+  overallHistogram,
 }: CorrelationsChartProps) {
+  const euiTheme = useTheme();
+
+  if (!Array.isArray(overallHistogram)) return;
   const annotationsDataValues: LineAnnotationDatum[] = [
     { dataValue: markerValue, details: `${markerPercentile}th percentile` },
   ];
 
-  const euiTheme = useTheme();
-  const xMax = max(histogram.map((d) => d.key)) ?? 0;
+  const xMax = max(overallHistogram.map((d) => d.key)) ?? 0;
   const durationFormatter = getDurationFormatter(xMax);
 
   return (
@@ -147,31 +152,47 @@ export function CorrelationsChart({
           )}
           xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
-          data={histogram}
-          curve={CurveType.CURVE_STEP_AFTER}
-          xAccessor="key"
-          yAccessors={['doc_count_full']}
-          color={euiTheme.eui.euiColorVis1}
-        />
-        <AreaSeries
-          id={i18n.translate(
-            'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
-            {
-              defaultMessage: '{fieldName}:{fieldValue}',
-              values: {
-                fieldName: field,
-                fieldValue: value,
-              },
-            }
-          )}
-          xScaleType={ScaleType.Log}
-          yScaleType={ScaleType.Log}
-          data={histogram}
+          data={overallHistogram}
           curve={CurveType.CURVE_STEP_AFTER}
           xAccessor="key"
           yAccessors={['doc_count']}
-          color={euiTheme.eui.euiColorVis2}
+          color={euiTheme.eui.euiColorVis1}
         />
+
+        <AreaSeries
+          id={i18n.translate(
+            'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+            { defaultMessage: 'Overall latency distribution' }
+          )}
+          xScaleType={ScaleType.Log}
+          yScaleType={ScaleType.Log}
+          data={overallHistogram}
+          curve={CurveType.CURVE_STEP_AFTER}
+          xAccessor="key"
+          yAccessors={['doc_count']}
+          color={euiTheme.eui.euiColorVis1}
+        />
+        {histogram ? (
+          <AreaSeries
+            id={i18n.translate(
+              'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+              {
+                defaultMessage: '{fieldName}:{fieldValue}',
+                values: {
+                  fieldName: field,
+                  fieldValue: value,
+                },
+              }
+            )}
+            xScaleType={ScaleType.Log}
+            yScaleType={ScaleType.Log}
+            data={histogram}
+            curve={CurveType.CURVE_STEP_AFTER}
+            xAccessor="key"
+            yAccessors={['doc_count']}
+            color={euiTheme.eui.euiColorVis2}
+          />
+        ) : null}
       </Chart>
       <EuiSpacer size="s" />
     </div>

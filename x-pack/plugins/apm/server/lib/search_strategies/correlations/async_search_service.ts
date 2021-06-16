@@ -68,6 +68,8 @@ export const asyncSearchServiceProvider = (
   };
 
   const values: SearchServiceValue[] = [];
+  let overallHistogram: HistogramItem[] | undefined;
+
   let percentileThresholdValue: number;
 
   const cancel = () => {
@@ -102,6 +104,7 @@ export const asyncSearchServiceProvider = (
         histogramRangeSteps
       );
       progress.loadedOverallHistogram = 1;
+      overallHistogram = overallLogHistogramChartData;
 
       if (isCancelled) {
         isRunning = false;
@@ -178,24 +181,25 @@ export const asyncSearchServiceProvider = (
               item.value
             );
 
-            const fullHistogram = overallLogHistogramChartData.map((h) => {
-              const histogramItem = logHistogram.find((di) => di.key === h.key);
-              const docCount =
-                item !== undefined && histogramItem !== undefined
-                  ? histogramItem.doc_count
-                  : 0;
-              return {
-                key: h.key,
-                doc_count_full: h.doc_count,
-                doc_count: docCount,
-              };
-            });
+            // @todo: double check if this is neccessary
+            // const fullHistogram = overallLogHistogramChartData.map((h) => {
+            //   const histogramItem = logHistogram.find((di) => di.key === h.key);
+            //   const docCount =
+            //     item !== undefined && histogramItem !== undefined
+            //       ? histogramItem.doc_count
+            //       : 0;
+            //   return {
+            //     key: h.key,
+            //     // doc_count_full: h.doc_count,
+            //     doc_count: docCount,
+            //   };
+            // });
 
             yield {
               ...item,
               correlation,
               ksTest,
-              histogram: fullHistogram,
+              histogram: logHistogram,
             };
           } else {
             yield undefined;
@@ -309,6 +313,7 @@ export const asyncSearchServiceProvider = (
       error,
       isRunning,
       loaded: Math.round(progress.getOverallProgress() * 100),
+      overallHistogram,
       started: progress.started,
       total: 100,
       values: uniqueValues,
