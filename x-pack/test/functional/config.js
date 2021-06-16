@@ -514,6 +514,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
           },
+          kibana: [
+            {
+              feature: {
+                fleet: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         license_management_user: {
