@@ -29,6 +29,8 @@ export {
   UrlGeneratorsService,
 } from './url_generators';
 
+export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
+
 import { SharePlugin } from './plugin';
 
 export { KibanaURL } from './kibana_url';
