@@ -7,34 +7,45 @@
  */
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { ElementFactory, StartInitializer } from '../../common/types';
+import {
+  ElementFactory,
+  StartInitializer,
+  ExpressionRevealImageFunction,
+} from '../../common/types';
 import { elements } from '../elements';
 import { renderers } from '../expression_renderers';
+import { functions } from '../expression_functions';
 import { uiViews } from '../ui_views';
 import { RevealImageRendererConfig } from '../expression_renderers/types';
 
-export interface ExpressionServiceSetup {
-  getViews: () => Array<StartInitializer<unknown>>;
-  getRenderers: () => Array<() => ExpressionRenderDefinition<RevealImageRendererConfig>>;
-  getElements: () => ElementFactory[];
+export type ExpressionServiceSetup = Pick<ExpressionService, 'registerExpression'>;
+
+export interface ExpressionSetup {
+  elements: ElementFactory[];
+  renderers: Array<() => ExpressionRenderDefinition<RevealImageRendererConfig>>;
+  uiViews: Array<StartInitializer<unknown>>;
+  functions: ExpressionRevealImageFunction[];
 }
 
-export type ExpressionServiceStart = ExpressionServiceSetup;
+export type ExpressionServiceStart = void;
 
 export class ExpressionService {
-  public readonly getElements = (): ElementFactory[] => elements;
-  public readonly getRenderers = (): Array<
-    () => ExpressionRenderDefinition<RevealImageRendererConfig>
-  > => renderers;
-  public readonly getViews = (): Array<StartInitializer<unknown>> => uiViews;
+  public readonly registerExpression: (fn?: (expressions: ExpressionSetup) => void) => void = (
+    fn
+  ) => {
+    if (fn && typeof fn === 'function') {
+      fn({ elements, renderers, uiViews, functions });
+    }
+  };
 
   public setup(...args: unknown[]): ExpressionServiceSetup {
-    return this;
+    const { registerExpression } = this;
+    return Object.freeze({
+      registerExpression,
+    });
   }
 
-  public start(...args: unknown[]): ExpressionServiceStart {
-    return this;
-  }
+  public start(...args: unknown[]): ExpressionServiceStart {}
 
   public stop() {}
 }

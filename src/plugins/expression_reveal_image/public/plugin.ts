@@ -42,11 +42,7 @@ export class ExpressionRevealImagePlugin
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart): ExpressionRevealImagePluginStart {
-    const start = { ...this.expressionService.start() };
-
-    return Object.freeze(start);
-  }
+  public start(core: CoreStart): ExpressionRevealImagePluginStart {}
 
   public stop() {
     this.expressionService.stop();

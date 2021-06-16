@@ -65,7 +65,7 @@ export interface CanvasStartDeps {
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
 
-  expressionRevealImage?: ExpressionRevealImagePluginStart;
+  freee?: ExpressionRevealImagePluginStart;
 }
 
 /**
@@ -136,12 +136,12 @@ export class CanvasPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    if (plugins.expressionRevealImage) {
-      canvasApi.addElements(plugins.expressionRevealImage.getElements());
-      canvasApi.addViewUIs(plugins.expressionRevealImage.getViews());
-      canvasApi.addRenderers(plugins.expressionRevealImage.getRenderers());
-      addSupportedRenderFunctions(plugins.expressionRevealImage.getRenderers());
-    }
+    plugins.expressionRevealImage?.registerExpression(({ elements, renderers, uiViews }) => {
+      canvasApi.addElements(elements);
+      canvasApi.addRenderers(renderers);
+      canvasApi.addViewUIs(uiViews);
+      addSupportedRenderFunctions(renderers);
+    });
 
     canvasApi.addArgumentUIs(async () => {
       // @ts-expect-error

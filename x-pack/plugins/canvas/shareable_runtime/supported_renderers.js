@@ -23,7 +23,7 @@ import { text } from '../canvas_plugin_src/renderers/text';
  * a renderer is not listed here, but is used by the Shared Workpad, it will
  * not render.  This includes any plugins.
  */
-export let renderFunctions = [
+let renderFunctions = [
   debug,
   error,
   image,
@@ -38,7 +38,10 @@ export let renderFunctions = [
   text,
 ];
 
+// this method is for usage on setup step of plugin only
 export const addSupportedRenderFunctions = (renderers = []) =>
   (renderFunctions = [...renderFunctions, ...renderers]);
+
+export const getSupportedRenderFunctions = () => renderFunctions;
 
 export const renderFunctionNames = renderFunctions.map((fn) => fn.name);
