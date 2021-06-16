@@ -42,6 +42,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
           icon: 'lensApp',
           stage: 'production',
           savedObjectType: type,
+          type: 'lens',
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };
       },

@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
-
-import {
-  LogAnalysisSetupPage,
-  LogAnalysisSetupPageContent,
-  LogAnalysisSetupPageHeader,
-} from '../../../components/logging/log_analysis_setup';
+import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
 
 interface LogEntryRateSetupContentProps {
@@ -27,14 +21,17 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   return (
-    <LogAnalysisSetupPage data-test-subj="logEntryRateSetupPage">
-      <LogAnalysisSetupPageHeader>
-        <FormattedMessage
-          id="xpack.infra.logs.logEntryRate.setupTitle"
-          defaultMessage="Set up log anomaly analysis"
-        />
-      </LogAnalysisSetupPageHeader>
-      <LogAnalysisSetupPageContent>
+    <EuiEmptyPrompt
+      data-test-subj="logEntryRateSetupPage"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryRate.setupTitle"
+            defaultMessage="Set up log anomaly analysis"
+          />
+        </h2>
+      }
+      body={
         <EuiText size="s">
           <p>
             <FormattedMessage
@@ -43,14 +40,15 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
             />
           </p>
         </EuiText>
-        <EuiSpacer />
+      }
+      actions={
         <EuiButton fill onClick={onOpenSetup}>
           <FormattedMessage
             id="xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel"
             defaultMessage="ML Setup"
           />
         </EuiButton>
-      </LogAnalysisSetupPageContent>
-    </LogAnalysisSetupPage>
+      }
+    />
   );
 };
