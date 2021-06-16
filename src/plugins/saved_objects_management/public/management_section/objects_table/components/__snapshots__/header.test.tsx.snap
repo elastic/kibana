@@ -19,57 +19,45 @@ exports[`Header should render normally 1`] = `
   }
   rightSideItems={
     Array [
-      <EuiFlexItem
-        grow={false}
+      <EuiButtonEmpty
+        data-test-subj="exportAllObjects"
+        iconType="exportAction"
+        onClick={[Function]}
+        size="s"
       >
-        <EuiButtonEmpty
-          data-test-subj="exportAllObjects"
-          iconType="exportAction"
-          onClick={[Function]}
-          size="s"
-        >
-          <FormattedMessage
-            defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-            id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-            values={
-              Object {
-                "filteredCount": 2,
-              }
+        <FormattedMessage
+          defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+          id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+          values={
+            Object {
+              "filteredCount": 2,
             }
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
-      <EuiFlexItem
-        grow={false}
+          }
+        />
+      </EuiButtonEmpty>,
+      <EuiButtonEmpty
+        data-test-subj="importObjects"
+        iconType="importAction"
+        onClick={[Function]}
+        size="s"
       >
-        <EuiButtonEmpty
-          data-test-subj="importObjects"
-          iconType="importAction"
-          onClick={[Function]}
-          size="s"
-        >
-          <FormattedMessage
-            defaultMessage="Import"
-            id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
-      <EuiFlexItem
-        grow={false}
+        <FormattedMessage
+          defaultMessage="Import"
+          id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>,
+      <EuiButtonEmpty
+        iconType="refresh"
+        onClick={[Function]}
+        size="s"
       >
-        <EuiButtonEmpty
-          iconType="refresh"
-          onClick={[Function]}
-          size="s"
-        >
-          <FormattedMessage
-            defaultMessage="Refresh"
-            id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
+        <FormattedMessage
+          defaultMessage="Refresh"
+          id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>,
     ]
   }
 />

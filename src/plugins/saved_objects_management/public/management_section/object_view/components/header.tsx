@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPageHeader } from '@elastic/eui';
+import { EuiButton, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface HeaderProps {
@@ -47,41 +47,35 @@ export const Header = ({
       bottomBorder
       pageTitle={renderConditionalTitle(canEdit, type)}
       rightSideItems={[
-        <EuiFlexGroup responsive={false}>
-          {canViewInApp && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                href={viewUrl}
-                iconType="eye"
-                data-test-subj="savedObjectEditViewInApp"
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.view.viewItemButtonLabel"
-                  defaultMessage="View {title}"
-                  values={{ title: type }}
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          {canDelete && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="danger"
-                size="s"
-                iconType="trash"
-                onClick={() => onDeleteClick()}
-                data-test-subj="savedObjectEditDelete"
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.view.deleteItemButtonLabel"
-                  defaultMessage="Delete {title}"
-                  values={{ title: type }}
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>,
+        canViewInApp && (
+          <EuiButton
+            size="s"
+            href={viewUrl}
+            iconType="eye"
+            data-test-subj="savedObjectEditViewInApp"
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.view.viewItemButtonLabel"
+              defaultMessage="View {title}"
+              values={{ title: type }}
+            />
+          </EuiButton>
+        ),
+        canDelete && (
+          <EuiButton
+            color="danger"
+            size="s"
+            iconType="trash"
+            onClick={() => onDeleteClick()}
+            data-test-subj="savedObjectEditDelete"
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.view.deleteItemButtonLabel"
+              defaultMessage="Delete {title}"
+              values={{ title: type }}
+            />
+          </EuiButton>
+        ),
       ]}
     />
   );

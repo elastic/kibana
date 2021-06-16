@@ -36,43 +36,37 @@ export const Header = ({
     }
     bottomBorder
     rightSideItems={[
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="exportAction"
-          data-test-subj="exportAllObjects"
-          onClick={onExportAll}
-        >
-          <FormattedMessage
-            id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-            defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-            values={{
-              filteredCount,
-            }}
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="importAction"
-          data-test-subj="importObjects"
-          onClick={onImport}
-        >
-          <FormattedMessage
-            id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-            defaultMessage="Import"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
-          <FormattedMessage
-            id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-            defaultMessage="Refresh"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>,
+      <EuiButtonEmpty
+        size="s"
+        iconType="exportAction"
+        data-test-subj="exportAllObjects"
+        onClick={onExportAll}
+      >
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+          defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+          values={{
+            filteredCount,
+          }}
+        />
+      </EuiButtonEmpty>,
+      <EuiButtonEmpty
+        size="s"
+        iconType="importAction"
+        data-test-subj="importObjects"
+        onClick={onImport}
+      >
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+          defaultMessage="Import"
+        />
+      </EuiButtonEmpty>,
+      <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
+          defaultMessage="Refresh"
+        />
+      </EuiButtonEmpty>,
     ]}
   />
 );
