@@ -251,15 +251,14 @@ Application Security Project (OWASP) references to learn more about these types 
 [_OWASP reference for XSS_](https://owasp.org/www-community/attacks/xss)
 
 XSS is a class of attacks where malicious scripts are injected into vulnerable websites. Kibana defends against this by using the React
-framework to safely encode data that is rendered in pages, the EUI framework to
-https://elastic.github.io/eui/#/navigation/link#link-validation[automatically sanitize links], and a restrictive `Content-Security-Policy`
-header.
+framework to safely encode data that is rendered in pages, the EUI framework to [automatically sanitize
+links](https://elastic.github.io/eui/#/navigation/link#link-validation), and a restrictive `Content-Security-Policy` header.
 
 **Best practices**
 
 * Check for dangerous functions or assignments that can result in unescaped user input in the browser DOM. Avoid using:
-  * *React:* [`dangerouslySetInnerHtml`](https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml).
-  * *Browser DOM:* `Element.innerHTML` and `Element.outerHTML`.
+  * **React:** [`dangerouslySetInnerHtml`](https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml).
+  * **Browser DOM:** `Element.innerHTML` and `Element.outerHTML`.
 * If using the aforementioned unsafe functions or assignments is absolutely necessary, follow [these XSS prevention
 rules](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#xss-prevention-rules) to ensure that
 user input is not inserted into unsafe locations and that it is escaped properly.
@@ -283,7 +282,7 @@ Headers](https://www.elastic.co/guide/en/kibana/master/api.html#api-request-head
 
 * Ensure all HTTP routes are registered with the [Kibana HTTP service](https://www.elastic.co/guide/en/kibana/master/http-service.html) to
 take advantage of the custom request header security control.
-  * Note that HTTP GET requests do *not* require the custom request header; any routes that change data should [adhere to the HTTP
+  * Note that HTTP GET requests do **not** require the custom request header; any routes that change data should [adhere to the HTTP
 specification and use a different method (PUT, POST, etc.)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)
 
 ### Remote Code Execution (RCE)
@@ -343,7 +342,7 @@ a vector for information disclosure or injection attacks.
 * Ensure that all outbound requests from the Kibana server use hard-coded URLs.
 * If user input is used to construct a URL for an outbound request, ensure that an allow-list is used to validate the endpoints and that
 user input is escaped properly. Ideally, the allow-list should be set in `kibana.yml`, so only server administrators can change it.
-  * This is particularly relevant when using `transport.request` with the {es} client, as no automatic escaping is performed.
+  * This is particularly relevant when using `transport.request` with the Elasticsearch client, as no automatic escaping is performed.
   * Note that URLs are very hard to validate properly; exact match validation for user input is most preferable, while URL parsing or RegEx
 validation should only be used if absolutely necessary.
 
