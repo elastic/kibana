@@ -199,22 +199,39 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the template components', async function () {
-      const res = await es.transport.request({
+    it('should have updated the component templates', async function () {
+      const resMappings = await es.transport.request({
         method: 'GET',
         path: `/_component_template/${logsTemplateName}-mappings`,
       });
-      expect(res.statusCode).equal(200);
-      expect(res.body.component_templates[0].component_template.template.mappings).eql({
+      expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
       });
       const resSettings = await es.transport.request({
         method: 'GET',
         path: `/_component_template/${logsTemplateName}-settings`,
       });
-      expect(res.statusCode).equal(200);
+      expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
         index: { lifecycle: { name: 'reference2' } },
+      });
+      const resUserSettings = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}-user_settings`,
+      });
+      expect(resUserSettings.statusCode).equal(200);
+      expect(resUserSettings.body).eql({
+        component_templates: [
+          {
+            name: 'logs-all_assets.test_logs-user_settings',
+            component_template: {
+              template: {
+                settings: {},
+              },
+            },
+          },
+        ],
       });
     });
     it('should have updated the index patterns', async function () {
@@ -320,6 +337,18 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'logs-all_assets.test_logs',
             type: 'index_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs-mappings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs-settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs-user_settings',
+            type: 'component_template',
           },
           {
             id: 'logs-all_assets.test_logs2',
