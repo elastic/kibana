@@ -24311,8 +24311,6 @@
     "xpack.watcher.sections.watchEdit.json.titlePanel.editWatchTitle": "{watchName}を編集",
     "xpack.watcher.sections.watchEdit.loadingWatchDescription": "ウォッチの読み込み中…",
     "xpack.watcher.sections.watchEdit.loadingWatchVisualizationDescription": "ウォッチビジュアライゼーションを読み込み中…",
-    "xpack.watcher.sections.watchEdit.monitoring.edit.calloutDescriptionText": "ウォッチ'{watchName}'はシステムウォッチであるため、編集できません。{watchStatusLink}",
-    "xpack.watcher.sections.watchEdit.monitoring.edit.calloutTitleText": "このウォッチは編集できません。",
     "xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle": "ウォッチステータスを表示します。",
     "xpack.watcher.sections.watchEdit.simulate.form.actionModesFieldLabel": "アクションモード",
     "xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription": "ウォッチでアクションを実行またはスキップすることができるようにします。{actionsLink}",
