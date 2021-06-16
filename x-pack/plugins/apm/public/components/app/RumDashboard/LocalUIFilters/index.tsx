@@ -135,7 +135,7 @@ function LocalUIFilters() {
           </EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <SelectedFilters
         filters={filters}
         onChange={(name, values) => {
