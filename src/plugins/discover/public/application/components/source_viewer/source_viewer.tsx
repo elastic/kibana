@@ -44,7 +44,7 @@ export const SourceViewer = ({
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found) {
-      setJsonValue(JSON.stringify(hit, '', 2));
+      setJsonValue(JSON.stringify(hit, undefined, 2));
     }
   }, [reqState, hit]);
 
