@@ -1,40 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderPage it renders 1`] = `
-<EuiPageHeader
-  alignItems="center"
-  bottomBorder={true}
-  paddingSize="l"
->
-  <EuiPageHeaderSection>
-    <Memo(TitleComponent)
-      badgeOptions={
-        Object {
-          "beta": true,
-          "text": "Beta",
-          "tooltip": "Test tooltip",
-        }
-      }
-      title="Test title"
-    />
-    <Subtitle
-      data-test-subj="header-page-subtitle"
-      items="Test subtitle"
-    />
-    <Subtitle
-      data-test-subj="header-page-subtitle-2"
-      items="Test subtitle 2"
-    />
-  </EuiPageHeaderSection>
-  <EuiPageHeaderSection
-    data-test-subj="header-page-supplements"
+<Fragment>
+  <EuiPageHeader
+    alignItems="center"
+    bottomBorder={true}
   >
-    <p>
-      Test supplement
-    </p>
-  </EuiPageHeaderSection>
-  <Sourcerer
-    scope="default"
+    <EuiPageHeaderSection>
+      <Memo(TitleComponent)
+        badgeOptions={
+          Object {
+            "beta": true,
+            "text": "Beta",
+            "tooltip": "Test tooltip",
+          }
+        }
+        title="Test title"
+      />
+      <Subtitle
+        data-test-subj="header-page-subtitle"
+        items="Test subtitle"
+      />
+      <Subtitle
+        data-test-subj="header-page-subtitle-2"
+        items="Test subtitle 2"
+      />
+    </EuiPageHeaderSection>
+    <EuiPageHeaderSection
+      data-test-subj="header-page-supplements"
+    >
+      <p>
+        Test supplement
+      </p>
+    </EuiPageHeaderSection>
+    <Sourcerer
+      scope="default"
+    />
+  </EuiPageHeader>
+  <EuiSpacer
+    size="l"
   />
-</EuiPageHeader>
+</Fragment>
 `;

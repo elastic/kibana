@@ -4,13 +4,19 @@ exports[`rendering renders correctly 1`] = `
 <InPortal
   node={<div />}
 >
-  <FiltersGlobalContainer
-    data-test-subj="filters-global-container"
-    show={true}
+  <Styled(EuiPanel)
+    borderRadius="none"
+    color="subdued"
+    paddingSize="s"
   >
-    <p>
-      Additional filters here.
-    </p>
-  </FiltersGlobalContainer>
+    <FiltersGlobalContainer
+      data-test-subj="filters-global-container"
+      show={true}
+    >
+      <p>
+        Additional filters here.
+      </p>
+    </FiltersGlobalContainer>
+  </Styled(EuiPanel)>
 </InPortal>
 `;
