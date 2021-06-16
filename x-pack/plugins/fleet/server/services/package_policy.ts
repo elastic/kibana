@@ -511,11 +511,17 @@ async function _compilePackagePolicyInput(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
-  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
+  const packagePolicyTemplate = input.policy_template
+    ? pkgInfo.policy_templates?.find(
+        (policyTemplate) => policyTemplate.name === input.policy_template
+      )
+    : pkgInfo.policy_templates?.[0];
+
+  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
     return undefined;
   }
 
-  const packageInputs = pkgInfo.policy_templates[0].inputs;
+  const packageInputs = packagePolicyTemplate.inputs;
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
@@ -643,11 +649,16 @@ function _enforceFrozenVars(
   newVars: Record<string, PackagePolicyConfigRecordEntry>
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
-  for (const [key, val] of Object.entries(oldVars)) {
-    if (val.frozen) {
-      resultVars[key] = val;
+  for (const [key, val] of Object.entries(newVars)) {
+    if (oldVars[key]?.frozen) {
+      resultVars[key] = oldVars[key];
     } else {
-      resultVars[key] = newVars[key];
+      resultVars[key] = val;
+    }
+  }
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (!newVars[key] && val.frozen) {
+      resultVars[key] = val;
     }
   }
   return resultVars;

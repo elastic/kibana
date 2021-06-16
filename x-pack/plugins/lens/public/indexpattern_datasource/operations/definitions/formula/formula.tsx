@@ -10,8 +10,11 @@ import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
+import { MemoizedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
+import { filterByVisibleOperation } from './util';
+import { getManagedColumnsFrom } from '../../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -38,7 +41,7 @@ export const formulaOperation: OperationDefinition<
 > = {
   type: 'formula',
   displayName: defaultLabel,
-  getDefaultLabel: (column, indexPattern) => defaultLabel,
+  getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
   input: 'managedReference',
   hidden: true,
   getDisabledStatus(indexPattern: IndexPattern) {
@@ -49,13 +52,32 @@ export const formulaOperation: OperationDefinition<
     if (!column.params.formula || !operationDefinitionMap) {
       return;
     }
-    const { root, error } = tryToParse(column.params.formula);
+
+    const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
+    const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
     if (error || !root) {
       return [error!.message];
     }
 
-    const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
-    return errors.length ? errors.map(({ message }) => message) : undefined;
+    const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+
+    if (errors.length) {
+      return errors.map(({ message }) => message);
+    }
+
+    const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
+    const innerErrors = managedColumns
+      .flatMap(([id, col]) => {
+        const def = visibleOperationsMap[col.operationType];
+        if (def?.getErrorMessage) {
+          const messages = def.getErrorMessage(layer, id, indexPattern, visibleOperationsMap);
+          return messages ? { message: messages.join(', ') } : [];
+        }
+        return [];
+      })
+      .filter((marker) => marker);
+
+    return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
   },
   getPossibleOperation() {
     return {
@@ -72,8 +94,8 @@ export const formulaOperation: OperationDefinition<
     const label = !params?.isFormulaBroken
       ? useDisplayLabel
         ? currentColumn.label
-        : params?.formula
-      : '';
+        : params?.formula ?? defaultLabel
+      : defaultLabel;
 
     return [
       {
@@ -81,21 +103,23 @@ export const formulaOperation: OperationDefinition<
         function: 'mapColumn',
         arguments: {
           id: [columnId],
-          name: [label || ''],
+          name: [label || defaultLabel],
           exp: [
             {
               type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'math',
-                  arguments: {
-                    expression: [
-                      currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
-                    ],
-                  },
-                },
-              ],
+              chain: currentColumn.references.length
+                ? [
+                    {
+                      type: 'function',
+                      function: 'math',
+                      arguments: {
+                        expression: [
+                          currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
+                        ],
+                      },
+                    },
+                  ]
+                : [],
             },
           ],
         },
@@ -119,7 +143,7 @@ export const formulaOperation: OperationDefinition<
       prevFormat = { format: previousColumn.params.format };
     }
     return {
-      label: 'Formula',
+      label: previousFormula || defaultLabel,
       dataType: 'number',
       operationType: 'formula',
       isBucketed: false,
@@ -152,4 +176,6 @@ export const formulaOperation: OperationDefinition<
     );
     return newLayer;
   },
+
+  paramEditor: MemoizedFormulaEditor,
 };
