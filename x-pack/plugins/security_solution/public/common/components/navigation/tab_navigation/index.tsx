@@ -37,7 +37,7 @@ const TabNavigationItemComponent = ({
       ev.preventDefault();
       if (id in SecurityPageName && pageId == null) {
         // TODO: [1101] remove condition and use deepLinkId for all sections when all migrated
-        if (id === 'overview') {
+        if (id === 'overview' || id === 'network') {
           navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         } else {
           navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });

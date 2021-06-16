@@ -70,13 +70,15 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     case 'ml-network':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path: `/ml-network${path}`,
       });
       break;
     case SecurityPageName.network:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path,
       });

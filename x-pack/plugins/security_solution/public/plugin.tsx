@@ -38,7 +38,7 @@ import {
   APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
-  APP_NETWORK_PATH,
+  NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
@@ -200,27 +200,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.network}`,
-      title: NETWORK,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_NETWORK_PATH,
-      updater$: this.networkUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { network: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
       title: TIMELINES,
       order: 9002,
@@ -297,6 +276,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           path: OVERVIEW_PATH,
           navLinkStatus: AppNavLinkStatus.visible,
           order: 9000,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.network,
+          title: NETWORK,
+          path: NETWORK_PATH,
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9002,
           euiIconType: APP_ICON_SOLUTION,
         },
       ],

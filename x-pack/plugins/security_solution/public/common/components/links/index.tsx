@@ -142,7 +142,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   const goToNetworkDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
       });
     },

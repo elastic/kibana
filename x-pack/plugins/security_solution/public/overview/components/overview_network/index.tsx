@@ -58,7 +58,8 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   const goToNetwork = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: getNetworkUrl(urlSearch),
       });
     },

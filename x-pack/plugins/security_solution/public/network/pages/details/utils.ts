@@ -36,7 +36,8 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },
@@ -46,7 +47,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.network,
           path: getNetworkDetailsUrl(
             params.detailName,
             params.flowTarget,

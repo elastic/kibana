@@ -62,7 +62,7 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ networkPagePath, hasMlUserPermissions, capabilitiesFetched }) => {
+  ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -210,7 +210,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
-                    networkPagePath={networkPagePath}
                   />
                 </>
               ) : (

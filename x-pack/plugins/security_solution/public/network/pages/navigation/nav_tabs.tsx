@@ -9,8 +9,9 @@ import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
 import { NetworkNavTab, NetworkRouteType } from './types';
 import { SecurityPageName } from '../../../app/types';
+import { NETWORK_PATH } from '../../../../common/constants';
 
-const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `/${tabName}`;
+const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `${NETWORK_PATH}/${tabName}`;
 
 export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => {
   const networkNavTabs = {
