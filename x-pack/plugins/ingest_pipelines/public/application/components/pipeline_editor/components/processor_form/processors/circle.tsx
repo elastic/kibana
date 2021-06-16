@@ -91,6 +91,7 @@ export const Circle: FunctionComponent = () => {
       />
 
       <UseField
+        data-test-subj="errorDistanceField"
         config={fieldsConfig.error_distance}
         component={NumericField}
         path="fields.error_distance"
@@ -99,6 +100,7 @@ export const Circle: FunctionComponent = () => {
       <UseField
         componentProps={{
           euiFieldProps: {
+            'data-test-subj': 'shapeSelectorField',
             options: [
               {
                 value: 'shape',
