@@ -7,31 +7,27 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Intro = () => {
   return (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="warning">
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            <FormattedMessage
-              id="savedObjectsManagement.view.howToModifyObjectTitle"
-              defaultMessage="Proceed with caution!"
-            />
-          </h2>
-        }
-        iconType="alert"
-        body={
-          <div>
-            <FormattedMessage
-              id="savedObjectsManagement.view.howToModifyObjectDescription"
-              defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
-            />
-          </div>
-        }
-      />
-    </EuiPageContent>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="savedObjectsManagement.view.howToModifyObjectTitle"
+          defaultMessage="Proceed with caution!"
+        />
+      }
+      iconType="alert"
+      color="warning"
+    >
+      <div>
+        <FormattedMessage
+          id="savedObjectsManagement.view.howToModifyObjectDescription"
+          defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
+        />
+      </div>
+    </EuiCallOut>
   );
 };

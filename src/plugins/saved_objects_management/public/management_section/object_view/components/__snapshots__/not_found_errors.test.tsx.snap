@@ -4,131 +4,78 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
 <NotFoundErrors
   type="index-pattern"
 >
-  <EuiPageContent
+  <EuiCallOut
     color="danger"
-    horizontalPosition="center"
-    verticalPosition="center"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="There is a problem with this saved object"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+        values={Object {}}
+      />
+    }
   >
-    <EuiPanel
-      className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-      color="danger"
-      paddingSize="l"
-      role="main"
+    <div
+      className="euiCallOut euiCallOut--danger"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-        role="main"
+        className="euiCallOutHeader"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <div>
-                <FormattedMessage
-                  defaultMessage="The index pattern associated with this object no longer exists."
-                  id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
-                  values={Object {}}
-                />
-              </div>
-              <p>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="alert"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="There is a problem with this saved object"
-                id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                values={Object {}}
-              />
-            </h2>
-          }
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          color="inherit"
+          size="m"
+          type="alert"
         >
-          <div
-            className="euiEmptyPrompt"
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="There is a problem with this saved object"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+            values={Object {}}
           >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="alert"
-            >
-              <span
-                color="subdued"
-                data-euiicon-type="alert"
-                size="xxl"
-              />
-            </EuiIcon>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiTitle
-                  size="m"
-                >
-                  <h2
-                    className="euiTitle euiTitle--medium"
-                  >
-                    <FormattedMessage
-                      defaultMessage="There is a problem with this saved object"
-                      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                      values={Object {}}
-                    >
-                      There is a problem with this saved object
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <div>
-                      <FormattedMessage
-                        defaultMessage="The index pattern associated with this object no longer exists."
-                        id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
-                        values={Object {}}
-                      >
-                        The index pattern associated with this object no longer exists.
-                      </FormattedMessage>
-                    </div>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                        id="savedObjectsManagement.view.howToFixErrorDescription"
-                        values={Object {}}
-                      >
-                        If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+            There is a problem with this saved object
+          </FormattedMessage>
+        </span>
       </div>
-    </EuiPanel>
-  </EuiPageContent>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <div>
+            <FormattedMessage
+              defaultMessage="The index pattern associated with this object no longer exists."
+              id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
+              values={Object {}}
+            >
+              The index pattern associated with this object no longer exists.
+            </FormattedMessage>
+          </div>
+          <div>
+            <FormattedMessage
+              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+              id="savedObjectsManagement.view.howToFixErrorDescription"
+              values={Object {}}
+            >
+              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+            </FormattedMessage>
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
 </NotFoundErrors>
 `;
 
@@ -136,131 +83,78 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
 <NotFoundErrors
   type="index-pattern-field"
 >
-  <EuiPageContent
+  <EuiCallOut
     color="danger"
-    horizontalPosition="center"
-    verticalPosition="center"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="There is a problem with this saved object"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+        values={Object {}}
+      />
+    }
   >
-    <EuiPanel
-      className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-      color="danger"
-      paddingSize="l"
-      role="main"
+    <div
+      className="euiCallOut euiCallOut--danger"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-        role="main"
+        className="euiCallOutHeader"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <div>
-                <FormattedMessage
-                  defaultMessage="A field associated with this object no longer exists in the index pattern."
-                  id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
-                  values={Object {}}
-                />
-              </div>
-              <p>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="alert"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="There is a problem with this saved object"
-                id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                values={Object {}}
-              />
-            </h2>
-          }
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          color="inherit"
+          size="m"
+          type="alert"
         >
-          <div
-            className="euiEmptyPrompt"
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="There is a problem with this saved object"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+            values={Object {}}
           >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="alert"
-            >
-              <span
-                color="subdued"
-                data-euiicon-type="alert"
-                size="xxl"
-              />
-            </EuiIcon>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiTitle
-                  size="m"
-                >
-                  <h2
-                    className="euiTitle euiTitle--medium"
-                  >
-                    <FormattedMessage
-                      defaultMessage="There is a problem with this saved object"
-                      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                      values={Object {}}
-                    >
-                      There is a problem with this saved object
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <div>
-                      <FormattedMessage
-                        defaultMessage="A field associated with this object no longer exists in the index pattern."
-                        id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
-                        values={Object {}}
-                      >
-                        A field associated with this object no longer exists in the index pattern.
-                      </FormattedMessage>
-                    </div>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                        id="savedObjectsManagement.view.howToFixErrorDescription"
-                        values={Object {}}
-                      >
-                        If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+            There is a problem with this saved object
+          </FormattedMessage>
+        </span>
       </div>
-    </EuiPanel>
-  </EuiPageContent>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <div>
+            <FormattedMessage
+              defaultMessage="A field associated with this object no longer exists in the index pattern."
+              id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
+              values={Object {}}
+            >
+              A field associated with this object no longer exists in the index pattern.
+            </FormattedMessage>
+          </div>
+          <div>
+            <FormattedMessage
+              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+              id="savedObjectsManagement.view.howToFixErrorDescription"
+              values={Object {}}
+            >
+              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+            </FormattedMessage>
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
 </NotFoundErrors>
 `;
 
@@ -268,131 +162,78 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
 <NotFoundErrors
   type="search"
 >
-  <EuiPageContent
+  <EuiCallOut
     color="danger"
-    horizontalPosition="center"
-    verticalPosition="center"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="There is a problem with this saved object"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+        values={Object {}}
+      />
+    }
   >
-    <EuiPanel
-      className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-      color="danger"
-      paddingSize="l"
-      role="main"
+    <div
+      className="euiCallOut euiCallOut--danger"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-        role="main"
+        className="euiCallOutHeader"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <div>
-                <FormattedMessage
-                  defaultMessage="The saved search associated with this object no longer exists."
-                  id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
-                  values={Object {}}
-                />
-              </div>
-              <p>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="alert"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="There is a problem with this saved object"
-                id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                values={Object {}}
-              />
-            </h2>
-          }
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          color="inherit"
+          size="m"
+          type="alert"
         >
-          <div
-            className="euiEmptyPrompt"
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="There is a problem with this saved object"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+            values={Object {}}
           >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="alert"
-            >
-              <span
-                color="subdued"
-                data-euiicon-type="alert"
-                size="xxl"
-              />
-            </EuiIcon>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiTitle
-                  size="m"
-                >
-                  <h2
-                    className="euiTitle euiTitle--medium"
-                  >
-                    <FormattedMessage
-                      defaultMessage="There is a problem with this saved object"
-                      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                      values={Object {}}
-                    >
-                      There is a problem with this saved object
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <div>
-                      <FormattedMessage
-                        defaultMessage="The saved search associated with this object no longer exists."
-                        id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
-                        values={Object {}}
-                      >
-                        The saved search associated with this object no longer exists.
-                      </FormattedMessage>
-                    </div>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                        id="savedObjectsManagement.view.howToFixErrorDescription"
-                        values={Object {}}
-                      >
-                        If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+            There is a problem with this saved object
+          </FormattedMessage>
+        </span>
       </div>
-    </EuiPanel>
-  </EuiPageContent>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <div>
+            <FormattedMessage
+              defaultMessage="The saved search associated with this object no longer exists."
+              id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
+              values={Object {}}
+            >
+              The saved search associated with this object no longer exists.
+            </FormattedMessage>
+          </div>
+          <div>
+            <FormattedMessage
+              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+              id="savedObjectsManagement.view.howToFixErrorDescription"
+              values={Object {}}
+            >
+              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+            </FormattedMessage>
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
 </NotFoundErrors>
 `;
 
@@ -400,116 +241,69 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
 <NotFoundErrors
   type="unknown"
 >
-  <EuiPageContent
+  <EuiCallOut
     color="danger"
-    horizontalPosition="center"
-    verticalPosition="center"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="There is a problem with this saved object"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+        values={Object {}}
+      />
+    }
   >
-    <EuiPanel
-      className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-      color="danger"
-      paddingSize="l"
-      role="main"
+    <div
+      className="euiCallOut euiCallOut--danger"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-        role="main"
+        className="euiCallOutHeader"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <div />
-              <p>
-                <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                  id="savedObjectsManagement.view.howToFixErrorDescription"
-                  values={Object {}}
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="alert"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="There is a problem with this saved object"
-                id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                values={Object {}}
-              />
-            </h2>
-          }
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          color="inherit"
+          size="m"
+          type="alert"
         >
-          <div
-            className="euiEmptyPrompt"
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="There is a problem with this saved object"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
+            values={Object {}}
           >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="alert"
-            >
-              <span
-                color="subdued"
-                data-euiicon-type="alert"
-                size="xxl"
-              />
-            </EuiIcon>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiTitle
-                  size="m"
-                >
-                  <h2
-                    className="euiTitle euiTitle--medium"
-                  >
-                    <FormattedMessage
-                      defaultMessage="There is a problem with this saved object"
-                      id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
-                      values={Object {}}
-                    >
-                      There is a problem with this saved object
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <div />
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-                        id="savedObjectsManagement.view.howToFixErrorDescription"
-                        values={Object {}}
-                      >
-                        If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+            There is a problem with this saved object
+          </FormattedMessage>
+        </span>
       </div>
-    </EuiPanel>
-  </EuiPageContent>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <div />
+          <div>
+            <FormattedMessage
+              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+              id="savedObjectsManagement.view.howToFixErrorDescription"
+              values={Object {}}
+            >
+              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+            </FormattedMessage>
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
 </NotFoundErrors>
 `;
