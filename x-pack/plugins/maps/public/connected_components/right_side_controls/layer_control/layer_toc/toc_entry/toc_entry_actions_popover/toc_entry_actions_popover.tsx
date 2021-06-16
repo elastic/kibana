@@ -13,12 +13,13 @@ import { TOCEntryButton } from '../toc_entry_button';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  LAYER_SETTINGS_LABEL,
+  EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
   EDIT_FEATURES_LABEL,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { SCALING_TYPES } from '../../../../../../../common';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -62,7 +63,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     if (!(this.props.layer instanceof VectorLayer)) {
       return;
     }
-    const isLayerEditable = await this.props.layer.isEditable();
+    const isLayerEditable = this.props.layer.supportsFeatureEditing();
     const editModeEnabled = await this._getEditModeEnabled();
     if (
       !this._isMounted ||
@@ -76,8 +77,14 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _getEditModeEnabled(): Promise<boolean> {
     const vectorLayer = this.props.layer as VectorLayer;
+    const layerSource = await this.props.layer.getSource();
+    if (!(layerSource instanceof ESSearchSource)) {
+      return false;
+    }
+    // @ts-ignore
+    const isClustered = layerSource?.getSyncMeta()?.scalingType === SCALING_TYPES.CLUSTERS;
     if (
-      !(await vectorLayer.isEditable()) ||
+      isClustered ||
       (await vectorLayer.isFilteredByGlobalTime()) ||
       vectorLayer.isPreviewLayer() ||
       !vectorLayer.isVisible() ||
@@ -155,7 +162,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
                 defaultMessage:
-                  'Only fully added document layers without clustering, joins or time filtering enabled can be modified',
+                  'Edit features only supported for document layers without clustering, joins, or time filtering',
               }),
           disabled: !this.state.editModeEnabled,
           onClick: async () => {
@@ -171,7 +178,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       }
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
-        name: LAYER_SETTINGS_LABEL,
+        name: EDIT_LAYER_SETTINGS_LABEL,
         icon: <EuiIcon type="gear" size="m" />,
         'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,

@@ -33,7 +33,7 @@ test('renders', async () => {
 });
 
 test('Should render cancel button when drawing', async () => {
-  const component = shallow(<ToolsControl {...defaultProps} />);
+  const component = shallow(<ToolsControl {...defaultProps} disableToolsControl={true} />);
 
   expect(component).toMatchSnapshot();
 });

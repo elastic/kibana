@@ -18,7 +18,6 @@ import { TimesliderToggleButton } from './timeslider_toggle_button';
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   showToolsControl: boolean;
-  disableToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   shapeDrawModeActive: boolean;
@@ -34,7 +33,7 @@ export function ToolbarOverlay(props: Props) {
         <ToolsControl
           getFilterActions={props.getFilterActions}
           getActionContext={props.getActionContext}
-          disableToolsControl={props.disableToolsControl}
+          disableToolsControl={props.pointDrawModeActive || props.shapeDrawModeActive}
         />
       </EuiFlexItem>
     ) : null;
