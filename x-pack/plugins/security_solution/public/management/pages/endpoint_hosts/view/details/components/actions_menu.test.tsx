@@ -116,7 +116,11 @@ describe('When using the Endpoint Details Actions Menu', () => {
   });
 
   describe('and license is NOT PlatinumPlus', () => {
-    (licenseService as jest.Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(false);
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    beforeEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(false));
+
+    afterEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(true));
 
     it('should not show the `isoalte` action', async () => {
       setEndpointMetadataResponse();
