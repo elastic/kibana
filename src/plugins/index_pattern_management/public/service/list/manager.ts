@@ -8,7 +8,7 @@
 
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
-import { memoize } from 'lodash';
+import { once } from 'lodash';
 import { CoreStart } from '../../../../../core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
 import { CONFIG_ROLLUPS } from '../../constants';
@@ -21,7 +21,7 @@ interface IndexPatternListManagerStart {
 
 export class IndexPatternListManager {
   start({ uiSettings }: IndexPatternListManagerStart) {
-    const getConfigs = memoize(() => {
+    const getConfigs = once(() => {
       const configs: IndexPatternListConfig[] = [];
       configs.push(new IndexPatternListConfig());
 

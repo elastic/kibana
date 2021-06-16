@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { memoize } from 'lodash';
+import { once } from 'lodash';
 import { HttpStart, CoreStart } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 import { CONFIG_ROLLUPS } from '../../constants';
@@ -20,7 +20,7 @@ interface IndexPatternCreationManagerStart {
 
 export class IndexPatternCreationManager {
   start({ httpClient, uiSettings }: IndexPatternCreationManagerStart) {
-    const getConfigs = memoize(() => {
+    const getConfigs = once(() => {
       const configs: IndexPatternCreationConfig[] = [];
       configs.push(new IndexPatternCreationConfig({ httpClient }));
 
