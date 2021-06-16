@@ -77,6 +77,9 @@ describe('buildBulkBody', () => {
         rule: expectedRule(),
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -160,6 +163,9 @@ describe('buildBulkBody', () => {
         },
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -222,6 +228,9 @@ describe('buildBulkBody', () => {
         rule: expectedRule(),
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -282,6 +291,9 @@ describe('buildBulkBody', () => {
         rule: expectedRule(),
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -334,6 +346,9 @@ describe('buildBulkBody', () => {
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -388,6 +403,9 @@ describe('buildBulkBody', () => {
         rule: expectedRule(),
         depth: 1,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
   });
@@ -440,6 +458,9 @@ describe('buildBulkBody', () => {
         status: 'open',
         rule: expectedRule(),
         depth: 1,
+      },
+      source: {
+        ip: '127.0.0.1',
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);

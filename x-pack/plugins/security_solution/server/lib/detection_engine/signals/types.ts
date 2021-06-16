@@ -82,14 +82,25 @@ export interface RuleRangeTuple {
   maxSignals: number;
 }
 
+/**
+ * SignalSource is being used as both a type for documents that match detection engine queries as well as
+ * for queries that could be on top of signals. In cases where it is matched against detection engine queries,
+ * '@timestamp' might not be there since it is not required and we have timestamp override capabilities. Also
+ * the signal addition object, "signal?: {" will not be there unless it's a conflicting field when we are running
+ * queries on events.
+ *
+ * For cases where we are running queries against signals (signals on signals) "@timestamp" should always be there
+ * and the "signal?: {" sub-object should always be there.
+ */
 export interface SignalSource {
   [key: string]: SearchTypes;
-  // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
-  // actually have @timestamp if a timestamp override is used
-  '@timestamp': string;
+  '@timestamp'?: string;
   signal?: {
-    // parent is deprecated: new signals should populate parents instead
-    // both are optional until all signals with parent are gone and we can safely remove it
+    /**
+     * "parent" is deprecated: new signals should populate "parents" instead. Both are optional
+     * until all signals with parent are gone and we can safely remove it.
+     * @deprecated Use parents instead
+     */
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
@@ -100,7 +111,7 @@ export interface SignalSource {
     rule: {
       id: string;
     };
-    // signal.depth doesn't exist on pre-7.10 signals
+    /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
     threshold_result?: ThresholdResult;
@@ -201,7 +212,9 @@ export interface Signal {
     version: number;
   };
   rule: RulesSchema;
-  // DEPRECATED: use parents instead of parent
+  /**
+   * @deprecated Use "parents" instead of "parent"
+   */
   parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];

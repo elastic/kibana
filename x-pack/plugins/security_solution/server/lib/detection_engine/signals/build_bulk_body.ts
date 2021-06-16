@@ -20,23 +20,31 @@ import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
+import { mergeFieldsWithSource } from './merge_fields_with_source';
 
-// format search_after result for signals index.
+/**
+ * Formats the search_after result for insertion into the signals index. We first create a
+ * "best effort" merged "fields" with the "_source" object, then build the signal object,
+ * then the event object, and finally we strip away any additional temporary data that was added
+ * such as the "threshold_result".
+ * @param ruleSO The rule saved object to build overrides
+ * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
+ * @returns The body that can be added to a bulk call for inserting the signal.
+ */
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit
 ): SignalHit => {
-  const rule = buildRuleWithOverrides(ruleSO, doc._source!);
+  const mergedSource = mergeFieldsWithSource({ doc });
+  const rule = buildRuleWithOverrides(ruleSO, mergedSource);
   const signal: Signal = {
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
   const event = buildEventTypeSignal(doc);
-  const { threshold_result: thresholdResult, ...filteredSource } = doc._source || {
-    threshold_result: null,
-  };
+  const { threshold_result: thresholdResult, ...omitThresholdResult } = mergedSource;
   const signalHit: SignalHit = {
-    ...filteredSource,
+    ...omitThresholdResult,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
