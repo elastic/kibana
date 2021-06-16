@@ -757,7 +757,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
-  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
     }

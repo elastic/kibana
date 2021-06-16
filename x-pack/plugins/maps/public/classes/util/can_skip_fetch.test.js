@@ -82,6 +82,9 @@ describe('updateDueToExtent', () => {
 
 describe('canSkipSourceUpdate', () => {
   const SOURCE_DATA_REQUEST_ID = 'foo';
+  const getUpdateDueToTimeslice = () => {
+    return true;
+  };
 
   describe('isQueryAware', () => {
     const queryAwareSourceMock = {
@@ -136,6 +139,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -156,6 +160,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -176,6 +181,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -193,6 +199,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -224,6 +231,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -244,6 +252,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -264,6 +273,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -281,6 +291,7 @@ describe('canSkipSourceUpdate', () => {
           prevDataRequest,
           nextMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -309,9 +320,6 @@ describe('canSkipSourceUpdate', () => {
         isGeoGridPrecisionAware: () => {
           return false;
         },
-        updateDueToTimeslice: () => {
-          return true;
-        },
       };
     }
 
@@ -330,6 +338,7 @@ describe('canSkipSourceUpdate', () => {
             applyGlobalTime: false,
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -349,6 +358,7 @@ describe('canSkipSourceUpdate', () => {
             applyGlobalTime: true,
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -378,6 +388,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -405,6 +416,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -432,6 +444,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -466,6 +479,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -501,6 +515,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -532,6 +547,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -567,6 +583,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -602,6 +619,7 @@ describe('canSkipSourceUpdate', () => {
             },
           },
           extentAware: false,
+          getUpdateDueToTimeslice,
         });
 
         expect(canSkipUpdate).toBe(true);

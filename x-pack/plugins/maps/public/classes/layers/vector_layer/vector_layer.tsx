@@ -55,6 +55,7 @@ import {
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
+import { ISource } from '../../sources/source';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
@@ -96,6 +97,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   canShowTooltip(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
+  getUpdateDueToTimeslice(source: ISource, timeslice?: Timeslice): boolean;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -341,6 +343,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       prevDataRequest,
       nextMeta: searchFilters,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
+      getUpdateDueToTimeslice: this.getUpdateDueToTimeslice,
     });
     if (canSkipFetch) {
       return {
@@ -676,6 +679,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
         syncContext,
         source,
+        getUpdateDueToTimeslice: this.getUpdateDueToTimeslice,
       });
       if (
         !sourceResult.featureCollection ||
@@ -1098,5 +1102,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async getLicensedFeatures() {
     return await this._source.getLicensedFeatures();
+  }
+
+  getUpdateDueToTimeslice(source: ISource, timeslice?: Timeslice): boolean {
+    const prevDataRequest = this.getSourceDataRequest();
+    const prevMeta = prevDataRequest?.getMeta();
+    if (!prevMeta) {
+      return true;
+    }
+    return source.getUpdateDueToTimeslice(prevMeta, timeslice);
   }
 }

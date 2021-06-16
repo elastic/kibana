@@ -17,10 +17,12 @@ import {
   DataMeta,
   MapExtent,
   MapQuery,
+  Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../actions';
 import { IVectorSource } from '../../sources/vector_source';
+import { ISource } from '../../sources/source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { DataRequest } from '../../util/data_request';
 import { getCentroidFeatures } from '../../../../common/get_centroid_features';
@@ -57,6 +59,7 @@ export async function syncVectorSource({
   requestMeta,
   syncContext,
   source,
+  getUpdateDueToTimeslice,
 }: {
   layerId: string;
   layerName: string;
@@ -64,6 +67,7 @@ export async function syncVectorSource({
   requestMeta: VectorSourceRequestMeta;
   syncContext: DataRequestContext;
   source: IVectorSource;
+  getUpdateDueToTimeslice: (source: ISource, timeslice?: Timeslice) => boolean;
 }): Promise<{ refreshed: boolean; featureCollection: FeatureCollection }> {
   const {
     startLoading,
@@ -79,6 +83,7 @@ export async function syncVectorSource({
     prevDataRequest,
     nextMeta: requestMeta,
     extentAware: source.isFilterByMapBounds(),
+    getUpdateDueToTimeslice,
   });
   if (canSkipFetch) {
     return {

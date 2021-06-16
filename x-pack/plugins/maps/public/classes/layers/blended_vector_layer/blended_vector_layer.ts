@@ -300,6 +300,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
       extentAware: source.isFilterByMapBounds(),
+      getUpdateDueToTimeslice: this.getUpdateDueToTimeslice,
     });
 
     let activeSource;

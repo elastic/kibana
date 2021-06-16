@@ -71,7 +71,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
+  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -203,7 +203,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  updateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
     return true;
   }
 }
