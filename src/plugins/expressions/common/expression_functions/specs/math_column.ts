@@ -73,21 +73,27 @@ export const mathColumn: ExpressionFunctionDefinition<
     }
 
     const newRows = input.rows.map((row) => {
-      return {
-        ...row,
-        [args.id]: math.fn(
-          {
-            type: 'datatable',
-            columns: input.columns,
-            rows: [row],
-          },
-          {
-            expression: args.expression,
-            onError: args.onError,
-          },
-          context
-        ),
-      };
+      const result = math.fn(
+        {
+          type: 'datatable',
+          columns: input.columns,
+          rows: [row],
+        },
+        {
+          expression: args.expression,
+          onError: args.onError,
+        },
+        context
+      );
+
+      if (Array.isArray(result)) {
+        if (result.length === 1) {
+          return { ...row, [args.id]: result[0] };
+        }
+        throw new Error(`Cannot perform math on array values at ${args.name}`);
+      }
+
+      return { ...row, [args.id]: result };
     });
     const type = newRows.length ? getType(newRows[0][args.id]) : 'null';
     const newColumn: DatatableColumn = {
