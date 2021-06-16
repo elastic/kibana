@@ -56,7 +56,6 @@ export const getAuditLogResponse = async ({
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
 }): Promise<{
-  total: number;
   page: number;
   pageSize: number;
   data: Array<{
@@ -96,10 +95,6 @@ export const getAuditLogResponse = async ({
   }
 
   return {
-    total:
-      typeof result.body.hits.total === 'number'
-        ? result.body.hits.total
-        : result.body.hits.total.value,
     page,
     pageSize,
     data: result.body.hits.hits.map((e) => ({

@@ -402,7 +402,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           ] as ActivityLog['data'];
 
           const updatedLogData = {
-            total: activityLog.total,
             page: activityLog.page,
             pageSize: activityLog.pageSize,
             data: updatedLogDataItems,

@@ -20,7 +20,6 @@ export const dummyEndpointActivityLog = (
 ): AsyncResourceState<Immutable<ActivityLog>> => ({
   type: 'LoadedResourceState',
   data: {
-    total: 20,
     page: 1,
     pageSize: 50,
     data: [

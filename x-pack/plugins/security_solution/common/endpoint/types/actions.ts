@@ -58,7 +58,6 @@ export interface ActivityLogActionResponse {
 }
 export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
 export interface ActivityLog {
-  total: number;
   page: number;
   pageSize: number;
   data: ActivityLogEntry[];
