@@ -34,6 +34,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelect } from './lib/index_pattern_select';
+import { getDataStart } from '../../services';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 function newAnnotation() {
   return {
@@ -48,11 +50,13 @@ function newAnnotation() {
 }
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+const INDEX_PATTERN_NAME = 'index_pattern';
 
 export class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
+    this.state = { fetchedIndex: null };
   }
 
   handleChange(item, name) {
@@ -71,6 +75,15 @@ export class AnnotationsEditor extends Component {
       ...part,
     });
   };
+
+  setFetchedIndex = async (indexPatternValue = '') => {
+    const { indexPatterns } = getDataStart();
+    const fetchedIndex = await fetchIndexPattern(indexPatternValue, indexPatterns);
+    this.setState({ fetchedIndex });
+  };
+
+  componentDidMount = async () => await this.setFetchedIndex(this.props.model.index_pattern);
+
   renderRow(row) {
     const defaults = {
       fields: '',
@@ -82,6 +95,10 @@ export class AnnotationsEditor extends Component {
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
+    };
+    const changeFetchedIndex = async (index) => {
+      handleChange(index);
+      await this.setFetchedIndex(index[INDEX_PATTERN_NAME]);
     };
     const togglePanelActivation = () => {
       handleChange({
@@ -109,8 +126,9 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <IndexPatternSelect
                   value={model.index_pattern}
-                  indexPatternName={'index_pattern'}
-                  onChange={handleChange}
+                  indexPatternName={INDEX_PATTERN_NAME}
+                  onChange={changeFetchedIndex}
+                  fetchedIndex={this.state.fetchedIndex}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
