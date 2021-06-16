@@ -5,6 +5,7 @@ Object {
   "as": "tagloud_vis",
   "type": "render",
   "value": Object {
+    "syncColors": false,
     "visData": Object {
       "columns": Array [
         Object {
@@ -20,6 +21,12 @@ Object {
       "type": "datatable",
     },
     "visParams": Object {
+      "bucket": Object {
+        "accessor": 1,
+        "format": Object {
+          "id": "number",
+        },
+      },
       "maxFontSize": 72,
       "metric": Object {
         "accessor": 0,
@@ -29,6 +36,10 @@ Object {
       },
       "minFontSize": 18,
       "orientation": "single",
+      "palette": Object {
+        "name": "default",
+        "type": "palette",
+      },
       "scale": "linear",
       "showLabel": true,
     },

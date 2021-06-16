@@ -138,13 +138,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }`,
           },
           href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }`,
@@ -152,6 +152,30 @@ export const useEndpointActionItems = (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.agentDetails"
               defaultMessage="View agent details"
+            />
+          ),
+        },
+        {
+          icon: 'gear',
+          key: 'agentPolicyReassignLink',
+          'data-test-subj': 'agentPolicyReassignLink',
+          navigateAppId: 'fleet',
+          navigateOptions: {
+            path: `#${
+              pagePathGetters.agent_details({
+                agentId: fleetAgentId,
+              })[1]
+            }/activity?openReassignFlyout=true`,
+          },
+          href: `${getUrlForApp('fleet')}#${
+            pagePathGetters.agent_details({
+              agentId: fleetAgentId,
+            })[1]
+          }/activity?openReassignFlyout=true`,
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.agentPolicyReassign"
+              defaultMessage="Reassign agent policy"
             />
           ),
         },
