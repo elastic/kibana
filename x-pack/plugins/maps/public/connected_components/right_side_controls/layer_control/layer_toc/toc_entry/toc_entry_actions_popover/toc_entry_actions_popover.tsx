@@ -41,11 +41,11 @@ export interface Props {
 interface State {
   isPopoverOpen: boolean;
   supportsFeatureEditing: boolean;
-  editModeEnabled: boolean;
+  canEditFeatures: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false, supportsFeatureEditing: false, editModeEnabled: false };
+  state: State = { isPopoverOpen: false, supportsFeatureEditing: false, canEditFeatures: false };
   private _isMounted = false;
 
   componentDidMount() {
@@ -65,18 +65,18 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       return;
     }
     const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
-    const editModeEnabled = await this._getEditModeEnabled();
+    const canEditFeatures = await this._getCanEditFeatures();
     if (
       !this._isMounted ||
       (supportsFeatureEditing === this.state.supportsFeatureEditing &&
-        editModeEnabled === this.state.editModeEnabled)
+        canEditFeatures === this.state.canEditFeatures)
     ) {
       return;
     }
-    this.setState({ supportsFeatureEditing, editModeEnabled });
+    this.setState({ supportsFeatureEditing, canEditFeatures });
   }
 
-  async _getEditModeEnabled(): Promise<boolean> {
+  async _getCanEditFeatures(): Promise<boolean> {
     const vectorLayer = this.props.layer as VectorLayer;
     const layerSource = await this.props.layer.getSource();
     if (!(layerSource instanceof ESSearchSource)) {
@@ -160,13 +160,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           name: EDIT_FEATURES_LABEL,
           icon: <EuiIcon type="vector" size="m" />,
           'data-test-subj': 'editLayerButton',
-          toolTipContent: this.state.editModeEnabled
+          toolTipContent: this.state.canEditFeatures
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
                 defaultMessage:
                   'Edit features only supported for document layers without clustering, joins, or time filtering',
               }),
-          disabled: !this.state.editModeEnabled,
+          disabled: !this.state.canEditFeatures,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
