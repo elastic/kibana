@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { groupBy, flatten, pick, map } from 'lodash';
+import { combineLatest, defer, of, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { groupBy, flatten, pick, map as _map, uniqWith } from 'lodash';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
-  by: string[];
+  by?: string[];
   expression: Array<(datatable: Datatable) => Observable<Datatable>>;
 }
 
-type Output = Datatable | Promise<Datatable>;
+type Output = Datatable | Observable<Datatable>;
 
 export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().ply;
@@ -30,7 +30,7 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
     args: {
       by: {
         types: ['string'],
-        help: argHelp.by,
+        help: argHelp.by!,
         multi: true,
       },
       expression: {
@@ -41,86 +41,62 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
         help: argHelp.expression,
       },
     },
-    fn: (input, args) => {
+    fn(input, args) {
       if (!args) {
         return input;
       }
 
-      let byColumns: DatatableColumn[];
-      let originalDatatables: Datatable[];
-
-      if (args.by) {
-        byColumns = args.by.map((by) => {
-          const column = input.columns.find((col) => col.name === by);
+      const byColumns =
+        args.by?.map((by) => {
+          const column = input.columns.find(({ name }) => name === by);
 
           if (!column) {
             throw errors.columnNotFound(by);
           }
 
           return column;
-        });
+        }) ?? [];
 
-        const keyedDatatables = groupBy(input.rows, (row) => JSON.stringify(pick(row, args.by)));
+      const originalDatatables = args.by
+        ? Object.values(
+            groupBy(input.rows, (row) => JSON.stringify(pick(row, args.by!)))
+          ).map((rows) => ({ ...input, rows }))
+        : [input];
 
-        originalDatatables = Object.values(keyedDatatables).map((rows) => ({
-          ...input,
-          rows,
-        }));
-      } else {
-        originalDatatables = [input];
-      }
+      const datatables$ = originalDatatables.map((originalDatatable) =>
+        combineLatest(
+          args.expression?.map((expression) => defer(() => expression(originalDatatable))) ?? [
+            of(originalDatatable),
+          ]
+        ).pipe(map(combineAcross))
+      );
 
-      const datatablePromises = originalDatatables.map((originalDatatable) => {
-        let expressionResultPromises = [];
-
-        if (args.expression) {
-          expressionResultPromises = args.expression.map((expression) =>
-            expression(originalDatatable).pipe(take(1)).toPromise()
+      return (datatables$.length ? combineLatest(datatables$) : of([])).pipe(
+        map((newDatatables) => {
+          // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
+          const columns = combineColumns([byColumns].concat(_map(newDatatables, 'columns')));
+          const rows = flatten(
+            newDatatables.map((datatable, index) =>
+              datatable.rows.map((row) => ({
+                ...pick(originalDatatables[index].rows[0], args.by!),
+                ...row,
+              }))
+            )
           );
-        } else {
-          expressionResultPromises.push(Promise.resolve(originalDatatable));
-        }
 
-        return Promise.all(expressionResultPromises).then(combineAcross);
-      });
-
-      return Promise.all(datatablePromises).then((newDatatables) => {
-        // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
-        const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
-        const rows = flatten(
-          newDatatables.map((dt, i) => {
-            const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
-            return dt.rows.map((row) => ({
-              ...byColumnValues,
-              ...row,
-            }));
-          })
-        );
-
-        return {
-          type: 'datatable',
-          rows,
-          columns,
-        } as Datatable;
-      });
+          return {
+            type: 'datatable',
+            rows,
+            columns,
+          } as Datatable;
+        })
+      );
     },
   };
 }
 
 function combineColumns(arrayOfColumnsArrays: DatatableColumn[][]) {
-  return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
-    if (columns) {
-      columns.forEach((column) => {
-        if (resultingColumns.find((resultingColumn) => resultingColumn.name === column.name)) {
-          return;
-        } else {
-          resultingColumns.push(column);
-        }
-      });
-    }
-
-    return resultingColumns;
-  }, []);
+  return uniqWith(arrayOfColumnsArrays.flat(), ({ name: a }, { name: b }) => a === b);
 }
 
 // This handles merging the tables produced by multiple expressions run on a single member of the `by` split.
@@ -138,17 +114,17 @@ function combineAcross(datatableArray: Datatable[]) {
   });
 
   // Merge columns and rows.
-  const arrayOfRowsArrays = map(datatableArray, 'rows');
+  const arrayOfRowsArrays = _map(datatableArray, 'rows');
   const rows = [];
   for (let i = 0; i < targetRowLength; i++) {
-    const rowsAcross = map(arrayOfRowsArrays, i);
+    const rowsAcross = _map(arrayOfRowsArrays, i);
 
     // The reason for the Object.assign is that rowsAcross is an array
     // and those rows need to be applied as arguments to Object.assign
     rows.push(Object.assign({}, ...rowsAcross));
   }
 
-  const columns = combineColumns(map(datatableArray, 'columns'));
+  const columns = combineColumns(_map(datatableArray, 'columns'));
 
   return {
     type: 'datatable',

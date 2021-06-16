@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
     it('should request documents when zoomed to smaller regions showing less data', async () => {
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       // Allow a range of hits to account for variances in browser window size.
-      expect(response.hits.hits.length).to.be.within(30, 40);
+      expect(response.hits.hits.length).to.be.within(35, 45);
     });
 
     it('should request clusters when zoomed to larger regions showing lots of data', async () => {
