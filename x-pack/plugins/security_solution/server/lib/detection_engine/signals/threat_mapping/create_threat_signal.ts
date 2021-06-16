@@ -13,7 +13,7 @@ import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
-  tuples,
+  tuple,
   threatMapping,
   threatEnrichment,
   query,
@@ -70,7 +70,7 @@ export const createThreatSignal = async ({
     );
 
     const result = await searchAfterAndBulkCreate({
-      tuples,
+      tuple,
       listClient,
       exceptionsList: exceptionItems,
       ruleSO,
