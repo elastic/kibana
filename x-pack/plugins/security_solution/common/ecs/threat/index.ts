@@ -10,6 +10,8 @@ import { EventEcs } from '../event';
 interface ThreatMatchEcs {
   atomic?: string[];
   field?: string[];
+  id?: string[];
+  index?: string[];
   type?: string[];
 }
 
