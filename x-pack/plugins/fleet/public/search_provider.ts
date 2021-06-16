@@ -23,6 +23,17 @@ import { pagePathGetters } from './constants';
 
 const packageType = 'package';
 
+const createPackages$ = () =>
+  from(sendGetPackages()).pipe(
+    map(({ error, data }) => {
+      if (error) {
+        throw error;
+      }
+      return data?.response ?? [];
+    }),
+    shareReplay(1)
+  );
+
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
   const coreStart$ = from(core.getStartServices()).pipe(
     map(([coreStart]) => coreStart),
@@ -33,15 +44,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
 
   const getPackages$ = () => {
     if (!packages$) {
-      packages$ = from(sendGetPackages()).pipe(
-        map(({ error, data }) => {
-          if (error) {
-            throw error;
-          }
-          return data?.response ?? [];
-        }),
-        shareReplay(1)
-      );
+      packages$ = createPackages$();
     }
     return packages$;
   };
