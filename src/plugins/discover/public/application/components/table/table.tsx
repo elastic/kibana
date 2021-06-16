@@ -7,14 +7,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import './table.scss';
-import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { FieldName } from '../field_name/field_name';
-import { TableActions } from './table_actions_cell';
-import { TableFieldValue } from './table_value_cell';
+import { DOC_VIEW_COLUMNS } from './table_columns';
 
 interface DocViewerTableProps {
   columns?: string[];
@@ -43,67 +40,8 @@ export interface FieldRecord {
   };
 }
 
-const TABLE_ROW_PROPS = { className: 'docView__TableRow' };
-
-const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
-  {
-    field: 'action',
-    name: 'Action',
-    width: '100px',
-    sortable: false,
-    render: (
-      { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-      { field: { fieldName, fieldMapping }, value: { formattedField } }: FieldRecord
-    ) => {
-      return (
-        onFilter && (
-          <TableActions
-            isActive={isActive}
-            fieldName={fieldName}
-            fieldMapping={fieldMapping}
-            formattedField={formattedField}
-            flattenedField={flattenedField}
-            onFilter={onFilter}
-            onToggleColumn={onToggleColumn}
-          />
-        )
-      );
-    },
-  },
-  {
-    field: 'field',
-    name: 'Field',
-    sortable: true,
-    render: ({ fieldName, fieldType, fieldMapping, scripted }: FieldRecord['field']) => {
-      return (
-        <FieldName
-          fieldName={fieldName}
-          fieldType={fieldType}
-          fieldMapping={fieldMapping}
-          scripted={scripted}
-          className="docView__fieldNameCell"
-        />
-      );
-    },
-  },
-  {
-    field: 'value',
-    name: 'Value',
-    truncateText: false,
-    render: (
-      { formattedField }: FieldRecord['value'],
-      { field: { fieldName, fieldMapping } }: FieldRecord
-    ) => {
-      return (
-        <TableFieldValue
-          formattedField={formattedField}
-          fieldName={fieldName}
-          fieldMapping={fieldMapping}
-        />
-      );
-    },
-  },
-];
+const TABLE_ROW_PROPS = { className: 'kbnDocViewer_TableRow' };
+const PAGINATION = { pageSize: 50 };
 
 export const DocViewerTable = ({
   columns,
@@ -170,10 +108,10 @@ export const DocViewerTable = ({
 
   return (
     <EuiInMemoryTable
-      className="docViewTable"
+      className="kbnDocViewer"
       items={items}
       columns={DOC_VIEW_COLUMNS}
-      pagination={true}
+      pagination={PAGINATION}
       rowProps={TABLE_ROW_PROPS}
     />
   );

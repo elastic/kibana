@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
@@ -17,7 +17,6 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 interface TableActionsProps {
   isActive: boolean;
   fieldName: string;
-  formattedField: unknown;
   flattenedField: unknown;
   fieldMapping: IndexPatternField | undefined;
   onFilter: DocViewFilterFn;
@@ -28,7 +27,6 @@ export const TableActions = ({
   isActive,
   fieldName,
   fieldMapping,
-  formattedField,
   flattenedField,
   onToggleColumn,
   onFilter,
@@ -38,7 +36,7 @@ export const TableActions = ({
   };
 
   return (
-    <Fragment>
+    <div className="kbnDocViewer__buttons">
       <DocViewTableRowBtnFilterAdd
         disabled={!fieldMapping || !fieldMapping.filterable}
         onClick={() => onFilter(fieldMapping, flattenedField, '+')}
@@ -57,6 +55,6 @@ export const TableActions = ({
         onClick={() => onFilter('_exists_', fieldName, '+')}
         scripted={fieldMapping && fieldMapping.scripted}
       />
-    </Fragment>
+    </div>
   );
 };

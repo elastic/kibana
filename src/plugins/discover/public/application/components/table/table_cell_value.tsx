@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { IndexPatternField } from '../../../../../data/public';
-import { FieldRecord } from './newTable';
+import { FieldRecord } from './table';
 import { trimAngularSpan } from './table_helper';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';

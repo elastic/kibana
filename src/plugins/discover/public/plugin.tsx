@@ -36,7 +36,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
-import { DocViewerTable } from './application/components/table/newTable';
+import { DocViewerTable } from './application/components/table/table';
 import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
 import {
   setDocViewsRegistry,
