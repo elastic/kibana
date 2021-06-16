@@ -81,10 +81,7 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    return this.indexPatternManagementService.setup({
-      httpClient: core.http,
-      uiSettings: core.uiSettings,
-    });
+    return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
