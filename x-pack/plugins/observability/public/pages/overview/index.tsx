@@ -42,7 +42,7 @@ export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
   useBreadcrumbs([
     {
-      text: i18n.translate('xpack.observability.breadcrumbs.observabilityOverviewLinkText', {
+      text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
         defaultMessage: 'Overview',
       }),
     },

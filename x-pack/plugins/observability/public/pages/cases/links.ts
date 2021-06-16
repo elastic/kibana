@@ -12,17 +12,17 @@ import { useKibana } from '../../utils/kibana_react';
 
 export const casesBreadcrumbs = {
   cases: {
-    text: i18n.translate('xpack.observability.breadcrumbs.observability.casesLinkText', {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesLinkText', {
       defaultMessage: 'Cases',
     }),
   },
   create: {
-    text: i18n.translate('xpack.observability.breadcrumbs.observability.casesCreateLinkText', {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesCreateLinkText', {
       defaultMessage: 'Create',
     }),
   },
   configure: {
-    text: i18n.translate('xpack.observability.breadcrumbs.observability.casesConfigureLinkText', {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesConfigureLinkText', {
       defaultMessage: 'Configure',
     }),
   },
