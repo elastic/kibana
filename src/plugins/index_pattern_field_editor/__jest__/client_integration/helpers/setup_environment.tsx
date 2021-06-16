@@ -13,7 +13,7 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
@@ -68,7 +68,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
       title: 'testIndexPattern',
       fields: { getAll: () => indexPatternFields },
     } as any,
-    uiSettings: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     fieldTypeToProcess: 'runtime',
     existingConcreteFields: [],
     namesNotAllowed: [],

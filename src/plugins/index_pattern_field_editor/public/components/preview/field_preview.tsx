@@ -49,12 +49,14 @@ export const FieldPreview = () => {
     }
 
     return (
-      <div>
-        <PreviewListItem
-          field={{ key: fields[0].key, value: JSON.stringify(fields[0].value) }}
-          highlighted
-        />
-      </div>
+      <ul>
+        <li>
+          <PreviewListItem
+            field={{ key: fields[0].key, value: JSON.stringify(fields[0].value) }}
+            highlighted
+          />
+        </li>
+      </ul>
     );
   };
 

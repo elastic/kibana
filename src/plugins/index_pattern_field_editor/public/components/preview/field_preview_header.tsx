@@ -21,6 +21,9 @@ import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from './field_preview_context';
 
 const i18nTexts = {
+  title: i18n.translate('indexPatternFieldEditor.fieldPreview.title', {
+    defaultMessage: 'Preview',
+  }),
   customData: i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle.customData', {
     defaultMessage: 'Custom data',
   }),
@@ -44,11 +47,7 @@ export const FieldPreviewHeader = () => {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h2>
-              {i18n.translate('indexPatternFieldEditor.fieldPreview.title', {
-                defaultMessage: 'Preview',
-              })}
-            </h2>
+            <h2>{i18nTexts.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
 

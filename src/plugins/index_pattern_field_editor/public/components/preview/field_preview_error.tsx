@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
@@ -19,7 +20,9 @@ export const FieldPreviewError = () => {
 
   return (
     <EuiCallOut
-      title="Preview error"
+      title={i18n.translate('indexPatternFieldEditor.fieldPreview.errorCallout.title', {
+        defaultMessage: 'Preview error',
+      })}
       color="danger"
       iconType="cross"
       data-test-subj="formFormatError"

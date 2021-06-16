@@ -28,7 +28,7 @@ export const DocumentsNavPreview = () => {
 
   const lastDocumentLoaded = useRef<string | null>(null);
   const [documentId, setDocumentId] = useState('');
-  const [isCustomID, setIsCustomID] = useState(false);
+  const [isCustomId, setIsCustomId] = useState(false);
 
   const errorMessage =
     error !== null && error.code === 'DOC_NOT_FOUND'
@@ -43,29 +43,29 @@ export const DocumentsNavPreview = () => {
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
-  const showNavButtons = isCustomID === false;
+  const showNavButtons = isCustomId === false;
 
   const onDocumentIdChange = useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    setIsCustomID(true);
+    setIsCustomId(true);
     const nextId = e.currentTarget.value;
     setDocumentId(nextId);
   }, []);
 
   const loadDocFromCluster = useCallback(() => {
     lastDocumentLoaded.current = null;
-    setIsCustomID(false);
+    setIsCustomId(false);
     loadFromCluster();
   }, [loadFromCluster]);
 
   useEffect(() => {
-    if (currentDocument && !isCustomID) {
+    if (currentDocument && !isCustomId) {
       setDocumentId(currentDocument._id);
     }
-  }, [currentDocument, isCustomID]);
+  }, [currentDocument, isCustomId]);
 
   useDebounce(
     () => {
-      if (!isCustomID || !Boolean(documentId.trim())) {
+      if (!isCustomId || !Boolean(documentId.trim())) {
         return;
       }
 
@@ -78,7 +78,7 @@ export const DocumentsNavPreview = () => {
       loadSingle(documentId);
     },
     500,
-    [documentId, isCustomID]
+    [documentId, isCustomId]
   );
 
   return (
@@ -102,7 +102,7 @@ export const DocumentsNavPreview = () => {
               data-test-subj="documentIdField"
             />
           </EuiFormRow>
-          {isCustomID && (
+          {isCustomId && (
             <span>
               <EuiButtonEmpty color="primary" size="xs" flush="left" onClick={loadDocFromCluster}>
                 {i18n.translate(
