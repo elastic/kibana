@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = ({
