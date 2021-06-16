@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import { catchError, take } from 'rxjs/operators';
+import { catchError, pluck, take } from 'rxjs/operators';
 import { Execution } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
@@ -43,6 +43,7 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     return this.execution.result
       .pipe(
         take(1),
+        pluck('result'),
         catchError(({ name, message, stack }) =>
           of({
             type: 'error',

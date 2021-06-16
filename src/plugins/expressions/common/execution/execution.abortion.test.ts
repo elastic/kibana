@@ -41,7 +41,7 @@ describe('Execution abortion tests', () => {
 
     const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -59,7 +59,7 @@ describe('Execution abortion tests', () => {
 
     const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -75,7 +75,7 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const result = await execution.result.toPromise();
+    const { result } = await execution.result.toPromise();
 
     execution.cancel();
 
@@ -135,7 +135,7 @@ describe('Execution abortion tests', () => {
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const result = await execution.result.toPromise();
+    const { result } = await execution.result.toPromise();
     expect(result).toMatchObject({
       type: 'error',
       error: {

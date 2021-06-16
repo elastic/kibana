@@ -84,7 +84,7 @@ describe('Execution', () => {
     /* eslint-enable no-console */
 
     execution.start(123);
-    const result = await execution.result.toPromise();
+    const { result } = await execution.result.toPromise();
 
     expect(result).toBe(123);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('Execution', () => {
       value: -1,
     });
 
-    const result = await execution.result.toPromise();
+    const { result } = await execution.result.toPromise();
 
     expect(result).toEqual({
       type: 'num',
@@ -117,7 +117,7 @@ describe('Execution', () => {
       value: 0,
     });
 
-    const result = await execution.result.toPromise();
+    const { result } = await execution.result.toPromise();
 
     expect(result).toEqual({
       type: 'num',
@@ -131,7 +131,7 @@ describe('Execution', () => {
 
       // Below 1 is cast to { type: 'num', value: 1 }.
       execution.start(1);
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -143,7 +143,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(Promise.resolve(1));
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -155,7 +155,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(of(1));
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -172,9 +172,9 @@ describe('Execution', () => {
         const expected = '     ---ab-c|';
 
         expectObservable(execution.start(input), subscription).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 4 },
+          a: { partial: false, result: { type: 'num', value: 2 } },
+          b: { partial: false, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 4 } },
         });
       });
     });
@@ -187,7 +187,7 @@ describe('Execution', () => {
         const expected = '  -a-#';
 
         expectObservable(execution.start(input)).toBe(expected, {
-          a: { type: 'num', value: 2 },
+          a: { partial: false, result: { type: 'num', value: 2 } },
         });
       });
     });
@@ -200,8 +200,8 @@ describe('Execution', () => {
         const expected = '  -a-b|';
 
         expectObservable(execution.start(input)).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
+          a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
+          b: expect.objectContaining({ result: { type: 'num', value: 3 } }),
         });
       });
     });
@@ -216,9 +216,9 @@ describe('Execution', () => {
         const input = items.pipe(scan((result, value) => [...result, value], new Array<number>()));
 
         expectObservable(execution.start(input), subscription).toBe(expected, {
-          a: { type: 'num', value: 1 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 6 },
+          a: { partial: false, result: { type: 'num', value: 1 } },
+          b: { partial: false, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 6 } },
         });
       });
     });
@@ -263,44 +263,51 @@ describe('Execution', () => {
   describe('execution context', () => {
     test('context.variables is an object', async () => {
       const { result } = (await run('introspectContext key="variables"')) as any;
-      expect(typeof result).toBe('object');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.types is an object', async () => {
       const { result } = (await run('introspectContext key="types"')) as any;
-      expect(typeof result).toBe('object');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.abortSignal is an object', async () => {
       const { result } = (await run('introspectContext key="abortSignal"')) as any;
-      expect(typeof result).toBe('object');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.inspectorAdapters is an object', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
-      expect(typeof result).toBe('object');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.getKibanaRequest is a function if provided', async () => {
       const { result } = (await run('introspectContext key="getKibanaRequest"', {
         kibanaRequest: {},
       })) as any;
-      expect(typeof result).toBe('function');
+
+      expect(result).toHaveProperty('result', expect.any(Function));
     });
 
     test('context.getKibanaRequest is undefined if not provided', async () => {
       const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
-      expect(typeof result).toBe('undefined');
+
+      expect(result).toHaveProperty('result', undefined);
     });
 
     test('unknown context key is undefined', async () => {
       const { result } = (await run('introspectContext key="foo"')) as any;
-      expect(typeof result).toBe('undefined');
+
+      expect(result).toHaveProperty('result', undefined);
     });
 
     test('can set context variables', async () => {
       const variables = { foo: 'bar' };
-      const result = await run('var name="foo"', { variables });
+      const { result } = await run('var name="foo"', { variables });
       expect(result).toBe('bar');
     });
   });
@@ -308,10 +315,13 @@ describe('Execution', () => {
   describe('inspector adapters', () => {
     test('by default, "tables" and "requests" inspector adapters are available', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
-      expect(result).toMatchObject({
-        tables: expect.any(Object),
-        requests: expect.any(Object),
-      });
+      expect(result).toHaveProperty(
+        'result',
+        expect.objectContaining({
+          tables: expect.any(Object),
+          requests: expect.any(Object),
+        })
+      );
     });
 
     test('can set custom inspector adapters', async () => {
@@ -319,7 +329,7 @@ describe('Execution', () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"', {
         inspectorAdapters,
       })) as any;
-      expect(result).toBe(inspectorAdapters);
+      expect(result).toHaveProperty('result', inspectorAdapters);
     });
 
     test('can access custom inspector adapters on Execution object', async () => {
@@ -335,8 +345,7 @@ describe('Execution', () => {
     test('context has abortSignal object', async () => {
       const { result } = (await run('introspectContext key="abortSignal"')) as any;
 
-      expect(typeof result).toBe('object');
-      expect((result as AbortSignal).aborted).toBe(false);
+      expect(result).toHaveProperty('result.aborted', false);
     });
   });
 
@@ -348,7 +357,7 @@ describe('Execution', () => {
         value: 0,
       });
 
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -357,8 +366,8 @@ describe('Execution', () => {
     });
 
     test('can execute async functions', async () => {
-      const res = await run('sleep 10 | sleep 10');
-      expect(res).toBe(null);
+      const { result } = await run('sleep 10 | sleep 10');
+      expect(result).toBe(null);
     });
 
     test('result is undefined until execution completes', async () => {
@@ -374,7 +383,7 @@ describe('Execution', () => {
 
       jest.advanceTimersByTime(10);
       await new Promise(process.nextTick);
-      expect(execution.state.get().result).toBe(null);
+      expect(execution.state.get().result).toHaveProperty('result', null);
 
       jest.useRealTimers();
     });
@@ -394,14 +403,18 @@ describe('Execution', () => {
 
         const result = executor.run('observable', null, {});
 
-        expectObservable(result).toBe(expected, { a: 1, b: 2, c: 3 });
+        expectObservable(result).toBe(expected, {
+          a: { result: 1, partial: true },
+          b: { result: 2, partial: true },
+          c: { result: 3, partial: false },
+        });
       });
     });
   });
 
   describe('when function throws', () => {
     test('error is reported in output object', async () => {
-      const result = await run('error "foobar"');
+      const { result } = await run('error "foobar"');
 
       expect(result).toMatchObject({
         type: 'error',
@@ -409,7 +422,7 @@ describe('Execution', () => {
     });
 
     test('error message is prefixed with function name', async () => {
-      const result = await run('error "foobar"');
+      const { result } = await run('error "foobar"');
 
       expect(result).toMatchObject({
         error: {
@@ -419,7 +432,7 @@ describe('Execution', () => {
     });
 
     test('returns error of the first function that throws', async () => {
-      const result = await run('error "foo" | error "bar"');
+      const { result } = await run('error "foo" | error "bar"');
 
       expect(result).toMatchObject({
         error: {
@@ -432,15 +445,18 @@ describe('Execution', () => {
       const execution = await createExecution('error "foo"');
       execution.start(null);
 
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toMatchObject({
         type: 'error',
       });
       expect(execution.state.get().state).toBe('result');
-      expect(execution.state.get().result).toMatchObject({
-        type: 'error',
-      });
+      expect(execution.state.get().result).toHaveProperty(
+        'result',
+        expect.objectContaining({
+          type: 'error',
+        })
+      );
     });
 
     test('does not execute remaining functions in pipeline', async () => {
@@ -497,7 +513,7 @@ describe('Execution', () => {
 
   describe('sub-expressions', () => {
     test('executes sub-expressions', async () => {
-      const result = await run('add val={add 5 | access "value"}', {}, null);
+      const { result } = await run('add val={add 5 | access "value"}', {}, null);
 
       expect(result).toMatchObject({
         type: 'num',
@@ -506,7 +522,7 @@ describe('Execution', () => {
     });
 
     test('can use global variables', async () => {
-      const result = await run(
+      const { result } = await run(
         'add val={var foo}',
         {
           variables: {
@@ -523,7 +539,7 @@ describe('Execution', () => {
     });
 
     test('can modify global variables', async () => {
-      const result = await run(
+      const { result } = await run(
         'add val={var_set name=foo value=66 | var bar} | var foo',
         {
           variables: {
@@ -547,16 +563,20 @@ describe('Execution', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(observable);
 
-      expect(executor.run('add val={observable}', 1, {}).toPromise()).resolves.toEqual({
-        type: 'num',
-        value: 2,
-      });
+      expect(executor.run('add val={observable}', 1, {}).toPromise()).resolves.toEqual(
+        expect.objectContaining({
+          result: {
+            type: 'num',
+            value: 2,
+          },
+        })
+      );
     });
 
     test('supports observables in arguments emitting multiple values', () => {
       testScheduler.run(({ cold, expectObservable }) => {
-        const arg = cold('-a-b-c-', { a: 1, b: 2, c: 3 });
-        const expected = '-a-b-c-';
+        const arg = cold('-a-b-c|', { a: 1, b: 2, c: 3 });
+        const expected = '-a-b-c|';
         const observable = {
           name: 'observable',
           args: {},
@@ -569,18 +589,18 @@ describe('Execution', () => {
         const result = executor.run('add val={observable}', 1, {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 4 },
+          a: { partial: true, result: { type: 'num', value: 2 } },
+          b: { partial: true, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 4 } },
         });
       });
     });
 
     test('combines multiple observables in arguments', () => {
       testScheduler.run(({ cold, expectObservable }) => {
-        const arg1 = cold('--ab-c-', { a: 0, b: 2, c: 4 });
-        const arg2 = cold('-a--bc-', { a: 1, b: 3, c: 5 });
-        const expected = ' --abc(de)-';
+        const arg1 = cold('--ab-c---|', { a: 0, b: 2, c: 4 });
+        const arg2 = cold('-a--bc---|', { a: 1, b: 3, c: 5 });
+        const expected = ' --abc(de)|';
         const observable1 = {
           name: 'observable1',
           args: {},
@@ -610,11 +630,11 @@ describe('Execution', () => {
         const result = executor.run('max val1={observable1} val2={observable2}', {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 1 },
-          b: { type: 'num', value: 2 },
-          c: { type: 'num', value: 3 },
-          d: { type: 'num', value: 4 },
-          e: { type: 'num', value: 5 },
+          a: { partial: true, result: { type: 'num', value: 1 } },
+          b: { partial: true, result: { type: 'num', value: 2 } },
+          c: { partial: true, result: { type: 'num', value: 3 } },
+          d: { partial: true, result: { type: 'num', value: 4 } },
+          e: { partial: false, result: { type: 'num', value: 5 } },
         });
       });
     });
@@ -635,13 +655,15 @@ describe('Execution', () => {
         const result = executor.run('add val={observable}', 1, {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: {
-            error: expect.objectContaining({
-              message: '[add] > [observable] > some error',
-            }),
-            type: 'error',
-          },
+          a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
+          b: expect.objectContaining({
+            result: {
+              error: expect.objectContaining({
+                message: '[add] > [observable] > some error',
+              }),
+              type: 'error',
+            },
+          }),
         });
       });
     });
@@ -662,7 +684,7 @@ describe('Execution', () => {
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
-      const result = await executor.run('requiredArg', null, {}).toPromise();
+      const { result } = await executor.run('requiredArg', null, {}).toPromise();
 
       expect(result).toMatchObject({
         type: 'error',
@@ -673,7 +695,7 @@ describe('Execution', () => {
     });
 
     test('when required argument is missing and has alias, returns error', async () => {
-      const result = await run('var_set', {});
+      const { result } = await run('var_set', {});
 
       expect(result).toMatchObject({
         type: 'error',
@@ -688,7 +710,7 @@ describe('Execution', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
       execution.start(-1);
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -703,7 +725,7 @@ describe('Execution', () => {
         true
       );
       execution.start(0);
-      const result = await execution.result.toPromise();
+      const { result } = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
