@@ -21,7 +21,7 @@
     }
   }
 
-  .euiButtonIcon {
+  .euiButtonIcon:not(.euiButtonIcon--fill) {
     color: $euiTextColor !important;
   }
 
@@ -42,31 +42,18 @@
   }
 }
 
-.mapToolbarOverlay__button__exit {
+.mapToolbarOverlay__buttonGroup {
+  @include mapToolbarButtonGroupBorderRadius;
+  display: flex;
+  flex-direction: column;
+
   .euiButtonIcon {
-    color: $euiColorDangerText !important;
+    border-radius: 0;
   }
 }
 
-.mapToolbarOverlay__button__selected {
-  position: relative;
-  transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
-  // sass-lint:disable-block no-important
-  color: $euiTextColor !important;
-  background-color: $euiColorLightShade !important;
-
-  @include kbnThemeStyle($theme: 'v7') {
-    // Overrides the .euiPanel default border
-    // sass-lint:disable-block no-important
-    border: none !important;
-
-    // Overrides the .euiPanel--hasShadow
-    &.euiPanel.euiPanel--hasShadow {
-      @include euiBottomShadowLarge;
-    }
-  }
-
+.mapToolbarOverlay__button__exit {
   .euiButtonIcon {
-    color: $euiTextColor !important;
+    color: $euiColorDangerText !important;
   }
 }

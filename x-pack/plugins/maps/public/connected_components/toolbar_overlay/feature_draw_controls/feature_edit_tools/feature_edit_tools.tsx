@@ -36,143 +36,100 @@ export function FeatureEditTools(props: Props) {
   const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
 
   return (
-    <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
-      <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
-        {props.pointsOnly ? null : (
-          <>
-            <EuiFlexItem key={'line'} grow={false}>
-              <EuiPanel
-                paddingSize="none"
-                className={`mapToolbarOverlay__button${drawLineSelected ? '__selected' : ''}`}
-              >
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => props.setDrawShape(DRAW_SHAPE.LINE)}
-                  iconType={VectorLineIcon}
-                  aria-label={i18n.translate(
-                    'xpack.maps.toolbarOverlay.featureDraw.drawLineLabel',
-                    {
-                      defaultMessage: 'Draw line',
-                    }
-                  )}
-                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
-                    defaultMessage: 'Draw line',
-                  })}
-                  aria-pressed={drawLineSelected}
-                  isSelected={drawLineSelected}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem key={'polygon'} grow={false}>
-              <EuiPanel
-                paddingSize="none"
-                className={`mapToolbarOverlay__button${drawPolygonSelected ? '__selected' : ''}`}
-              >
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => props.setDrawShape(DRAW_SHAPE.POLYGON)}
-                  iconType="node"
-                  aria-label={i18n.translate(
-                    'xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel',
-                    {
-                      defaultMessage: 'Draw polygon',
-                    }
-                  )}
-                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonTitle', {
-                    defaultMessage: 'Draw polygon',
-                  })}
-                  aria-pressed={drawPolygonSelected}
-                  isSelected={drawPolygonSelected}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem key={'circle'} grow={false}>
-              <EuiPanel
-                paddingSize="none"
-                className={`mapToolbarOverlay__button${drawCircleSelected ? '__selected' : ''}`}
-              >
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => props.setDrawShape(DRAW_SHAPE.DISTANCE)}
-                  iconType={VectorCircleIcon}
-                  aria-label={i18n.translate(
-                    'xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel',
-                    {
-                      defaultMessage: 'Draw circle',
-                    }
-                  )}
-                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleTitle', {
-                    defaultMessage: 'Draw circle',
-                  })}
-                  aria-pressed={drawCircleSelected}
-                  isSelected={drawCircleSelected}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem key={'boundingBox'} grow={false}>
-              <EuiPanel
-                paddingSize="none"
-                className={`mapToolbarOverlay__button${drawBBoxSelected ? '__selected' : ''}`}
-              >
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => props.setDrawShape(DRAW_SHAPE.BOUNDS)}
-                  iconType={VectorSquareIcon}
-                  aria-label={i18n.translate(
-                    'xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel',
-                    {
-                      defaultMessage: 'Draw bounding box',
-                    }
-                  )}
-                  title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxTitle', {
-                    defaultMessage: 'Draw bounding box',
-                  })}
-                  aria-pressed={drawBBoxSelected}
-                  isSelected={drawBBoxSelected}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          </>
-        )}
-        <EuiFlexItem key={'point'} grow={false}>
-          <EuiPanel
-            paddingSize="none"
-            className={`mapToolbarOverlay__button${drawPointSelected ? '__selected' : ''}`}
-          >
-            <EuiButtonIcon
-              size="s"
-              onClick={() => props.setDrawShape(DRAW_SHAPE.POINT)}
-              iconType="dot"
-              aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
-                defaultMessage: 'Draw point',
-              })}
-              title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointTitle', {
-                defaultMessage: 'Draw point',
-              })}
-              aria-pressed={drawPointSelected}
-              isSelected={drawPointSelected}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem key={'exit'} grow={false}>
-          <EuiPanel
-            paddingSize="none"
-            className="mapToolbarOverlay__button mapToolbarOverlay__button__exit"
-          >
-            <EuiButtonIcon
-              size="s"
-              onClick={props.cancelEditing}
-              iconType="exit"
-              aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDraw', {
-                defaultMessage: 'Exit feature editing',
-              })}
-              title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDrawTitle', {
-                defaultMessage: 'Exit feature editing',
-              })}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPanel paddingSize="none" className="mapToolbarOverlay__buttonGroup">
+      {props.pointsOnly ? null : (
+        <>
+          <EuiButtonIcon
+            key="line"
+            size="s"
+            onClick={() => props.setDrawShape(DRAW_SHAPE.LINE)}
+            iconType={VectorLineIcon}
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineLabel', {
+              defaultMessage: 'Draw line',
+            })}
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
+              defaultMessage: 'Draw line',
+            })}
+            aria-pressed={drawLineSelected}
+            isSelected={drawLineSelected}
+            display={drawLineSelected ? 'fill' : 'empty'}
+          />
+
+          <EuiButtonIcon
+            key="polygon"
+            size="s"
+            onClick={() => props.setDrawShape(DRAW_SHAPE.POLYGON)}
+            iconType="node"
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
+              defaultMessage: 'Draw polygon',
+            })}
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonTitle', {
+              defaultMessage: 'Draw polygon',
+            })}
+            aria-pressed={drawPolygonSelected}
+            isSelected={drawPolygonSelected}
+            display={drawPolygonSelected ? 'fill' : 'empty'}
+          />
+          <EuiButtonIcon
+            key="circle"
+            size="s"
+            onClick={() => props.setDrawShape(DRAW_SHAPE.DISTANCE)}
+            iconType={VectorCircleIcon}
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel', {
+              defaultMessage: 'Draw circle',
+            })}
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleTitle', {
+              defaultMessage: 'Draw circle',
+            })}
+            aria-pressed={drawCircleSelected}
+            isSelected={drawCircleSelected}
+            display={drawCircleSelected ? 'fill' : 'empty'}
+          />
+          <EuiButtonIcon
+            key="boundingBox"
+            size="s"
+            onClick={() => props.setDrawShape(DRAW_SHAPE.BOUNDS)}
+            iconType={VectorSquareIcon}
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel', {
+              defaultMessage: 'Draw bounding box',
+            })}
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxTitle', {
+              defaultMessage: 'Draw bounding box',
+            })}
+            aria-pressed={drawBBoxSelected}
+            isSelected={drawBBoxSelected}
+            display={drawBBoxSelected ? 'fill' : 'empty'}
+          />
+        </>
+      )}
+      <EuiButtonIcon
+        key="point"
+        size="s"
+        onClick={() => props.setDrawShape(DRAW_SHAPE.POINT)}
+        iconType="dot"
+        aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
+          defaultMessage: 'Draw point',
+        })}
+        title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointTitle', {
+          defaultMessage: 'Draw point',
+        })}
+        aria-pressed={drawPointSelected}
+        isSelected={drawPointSelected}
+        display={drawPointSelected ? 'fill' : 'empty'}
+      />
+
+      <EuiButtonIcon
+        key="exit"
+        size="s"
+        onClick={props.cancelEditing}
+        iconType="exit"
+        aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDraw', {
+          defaultMessage: 'Exit feature editing',
+        })}
+        title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDrawTitle', {
+          defaultMessage: 'Exit feature editing',
+        })}
+      />
     </EuiPanel>
   );
 }

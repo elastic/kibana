@@ -199,7 +199,7 @@ export class TOCEntry extends Component<Props, State> {
         <EuiButtonIcon
           key="settings"
           isDisabled={this.props.isEditButtonDisabled}
-          iconType="gear"
+          iconType="pencil"
           aria-label={LAYER_SETTINGS_LABEL}
           title={LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}

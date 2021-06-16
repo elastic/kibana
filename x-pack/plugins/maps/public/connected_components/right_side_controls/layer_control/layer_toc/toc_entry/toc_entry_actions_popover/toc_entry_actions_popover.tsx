@@ -149,7 +149,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       if (this.state.isLayerEditable) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
-          icon: <EuiIcon type="pencil" size="m" />,
+          icon: <EuiIcon type="vector" size="m" />,
           'data-test-subj': 'editLayerButton',
           toolTipContent: this.state.editModeEnabled
             ? null
@@ -172,7 +172,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
         name: LAYER_SETTINGS_LABEL,
-        icon: <EuiIcon type="gear" size="m" />,
+        icon: <EuiIcon type="pencil" size="m" />,
         'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,
         onClick: () => {

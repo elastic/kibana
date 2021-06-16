@@ -31,8 +31,7 @@
 }
 
 .mapTocEntry-isInEditingMode {
-  background-color: $euiColorLightShade !important;
-  border: 2px dashed $euiColorDangerText !important;
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%) !important;
 }
 
 .mapTocEntry-isDragging {

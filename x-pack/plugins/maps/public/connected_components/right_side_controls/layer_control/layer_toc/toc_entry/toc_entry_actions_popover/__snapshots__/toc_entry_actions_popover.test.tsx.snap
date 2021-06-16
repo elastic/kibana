@@ -79,7 +79,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
-                type="gear"
+                type="pencil"
               />,
               "name": "Layer settings",
               "onClick": [Function],
@@ -194,7 +194,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
-                type="gear"
+                type="pencil"
               />,
               "name": "Layer settings",
               "onClick": [Function],
@@ -310,7 +310,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
-                type="gear"
+                type="pencil"
               />,
               "name": "Layer settings",
               "onClick": [Function],

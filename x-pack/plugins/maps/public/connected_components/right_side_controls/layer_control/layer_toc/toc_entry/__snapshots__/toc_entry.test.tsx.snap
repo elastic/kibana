@@ -40,7 +40,7 @@ exports[`TOCEntry is rendered 1`] = `
       />
       <EuiButtonIcon
         aria-label="Layer settings"
-        iconType="gear"
+        iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
@@ -114,7 +114,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       />
       <EuiButtonIcon
         aria-label="Layer settings"
-        iconType="gear"
+        iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
@@ -188,7 +188,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       />
       <EuiButtonIcon
         aria-label="Layer settings"
-        iconType="gear"
+        iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
@@ -321,7 +321,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       />
       <EuiButtonIcon
         aria-label="Layer settings"
-        iconType="gear"
+        iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
