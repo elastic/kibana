@@ -11,8 +11,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContentBody } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
+import { PageLoading, PageError, Error } from '../../../shared_imports';
 import { TemplateDeserialized } from '../../../../common';
-import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
+import { TemplateForm } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
@@ -62,24 +63,22 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     setSaveError(null);
   };
 
-  let content;
-
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('templateClone');
   }, []);
 
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.templateCreate.loadingTemplateToCloneDescription"
           defaultMessage="Loading template to clone…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (templateToCloneError) {
-    content = (
-      <SectionError
+    return (
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.templateCreate.loadingTemplateToCloneErrorMessage"
@@ -90,13 +89,15 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
         data-test-subj="sectionError"
       />
     );
-  } else if (templateToClone) {
-    const templateData = {
-      ...templateToClone,
-      name: `${decodedTemplateName}-copy`,
-    } as TemplateDeserialized;
+  }
 
-    content = (
+  const templateData = {
+    ...templateToClone,
+    name: `${decodedTemplateName}-copy`,
+  } as TemplateDeserialized;
+
+  return (
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
       <TemplateForm
         title={
           <FormattedMessage
@@ -113,12 +114,6 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    );
-  }
-
-  return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
-      {content}
     </EuiPageContentBody>
   );
 };

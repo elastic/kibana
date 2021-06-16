@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { ScopedHistory } from 'kibana/public';
@@ -55,21 +55,17 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
     <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
       <TemplateForm
         title={
-          <EuiTitle size="l">
-            <h1 data-test-subj="pageTitle">
-              {isLegacy ? (
-                <FormattedMessage
-                  id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
-                  defaultMessage="Create legacy template"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
-                  defaultMessage="Create template"
-                />
-              )}
-            </h1>
-          </EuiTitle>
+          isLegacy ? (
+            <FormattedMessage
+              id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
+              defaultMessage="Create legacy template"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
+              defaultMessage="Create template"
+            />
+          )
         }
         onSave={onSave}
         isSaving={isSaving}

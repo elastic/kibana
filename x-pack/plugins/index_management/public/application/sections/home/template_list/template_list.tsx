@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ import {
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
-import { attemptToURIDecode } from '../../../../shared_imports';
+import { attemptToURIDecode, reactRouterNavigate } from '../../../../shared_imports';
 import {
   SectionError,
   SectionLoading,
@@ -130,7 +130,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   const renderHeader = () => (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
       <EuiFlexItem grow={true}>
         <EuiText color="subdued">
           <FormattedMessage
@@ -218,77 +218,103 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     </>
   );
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
-            defaultMessage="Loading templates…"
-          />
-        </SectionLoading>
-      );
-    } else if (error) {
-      return (
-        <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
-              defaultMessage="Error loading templates"
-            />
-          }
-          error={error as Error}
-        />
-      );
-    } else if (!hasTemplates) {
-      return (
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1 data-test-subj="title">
-              <FormattedMessage
-                id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
-                defaultMessage="You don't have any templates yet"
-              />
-            </h1>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      );
-    } else {
-      return (
-        <Fragment>
-          {/* Header */}
-          {renderHeader()}
-
-          {/* Composable index templates table */}
-          {renderTemplatesTable()}
-
-          {/* Legacy index templates table. We discourage their adoption if the user isn't already using them. */}
-          {filteredTemplates.legacyTemplates.length > 0 && renderLegacyTemplatesTable()}
-        </Fragment>
-      );
-    }
-  };
-
   // Track component loaded
   useEffect(() => {
     uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
 
-  return (
-    <div data-test-subj="templateList">
-      {renderContent()}
+  let content;
 
-      {isTemplateDetailsVisible && (
-        <TemplateDetails
-          template={selectedTemplate!}
-          onClose={closeTemplateDetails}
-          editTemplate={editTemplate}
-          cloneTemplate={cloneTemplate}
-          reload={reload}
+  if (isLoading) {
+    content = (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
+          defaultMessage="Loading templates…"
         />
-      )}
+      </SectionLoading>
+    );
+  } else if (error) {
+    content = (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
+            defaultMessage="Error loading templates"
+          />
+        }
+        error={error as Error}
+      />
+    );
+  } else if (!hasTemplates) {
+    content = (
+      <EuiEmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1 data-test-subj="title">
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
+              defaultMessage="Create your first index template"
+            />
+          </h1>
+        }
+        body={
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesDescription"
+                defaultMessage="An index template automatically applies settings, mappings, and aliases to new indices."
+              />
+            </p>
+          </>
+        }
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(history, '/create_template')}
+            fill
+            iconType="plusInCircle"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.createTemplatesButtonLabel"
+              defaultMessage="Create template"
+            />
+          </EuiButton>
+        }
+        data-test-subj="emptyPrompt"
+      />
+    );
+  } else {
+    content = (
+      <>
+        {/* Header */}
+        {renderHeader()}
+
+        {/* Composable index templates table */}
+        {renderTemplatesTable()}
+
+        {/* Legacy index templates table. We discourage their adoption if the user isn't already using them. */}
+        {filteredTemplates.legacyTemplates.length > 0 && renderLegacyTemplatesTable()}
+
+        {isTemplateDetailsVisible && (
+          <TemplateDetails
+            template={selectedTemplate!}
+            onClose={closeTemplateDetails}
+            editTemplate={editTemplate}
+            cloneTemplate={cloneTemplate}
+            reload={reload}
+          />
+        )}
+      </>
+    );
+  }
+
+  // The inline styles below are required to center the loading and error states, above.
+  return (
+    <div
+      data-test-subj="templateList"
+      style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
+    >
+      {content}
     </div>
   );
 };

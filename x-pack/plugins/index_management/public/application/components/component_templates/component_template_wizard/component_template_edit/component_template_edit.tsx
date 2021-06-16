@@ -8,13 +8,15 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContentBody, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
   ComponentTemplateDeserialized,
-  SectionLoading,
+  PageLoading,
+  PageError,
   attemptToURIDecode,
+  Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 
@@ -65,45 +67,26 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     setSaveError(null);
   };
 
-  let content;
-
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateEdit.loadingDescription"
           defaultMessage="Loading component template…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
-    content = (
-      <>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
-              defaultMessage="Error loading component template"
-            />
-          }
-          color="danger"
-          iconType="alert"
-          data-test-subj="loadComponentTemplateError"
-        >
-          <div>{error.message}</div>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
-  } else if (componentTemplate) {
-    content = (
-      <ComponentTemplateForm
-        defaultValue={componentTemplate}
-        onSave={onSave}
-        isSaving={isSaving}
-        saveError={saveError}
-        clearSaveError={clearSaveError}
-        isEditing={true}
+    return (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
+            defaultMessage="Error loading component template"
+          />
+        }
+        error={error as Error}
+        data-test-subj="loadComponentTemplateError"
       />
     );
   }
@@ -125,7 +108,14 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
-      {content}
+      <ComponentTemplateForm
+        defaultValue={componentTemplate!}
+        onSave={onSave}
+        isSaving={isSaving}
+        saveError={saveError}
+        clearSaveError={clearSaveError}
+        isEditing={true}
+      />
     </EuiPageContentBody>
   );
 };

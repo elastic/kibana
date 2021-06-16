@@ -166,7 +166,7 @@ describe('<ComponentTemplateList />', () => {
 
       expect(exists('componentTemplatesLoadError')).toBe(true);
       expect(find('componentTemplatesLoadError').text()).toContain(
-        'Unable to load component templates. Try again.'
+        'Error loading component templatesInternal server error'
       );
     });
   });
