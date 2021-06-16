@@ -11,9 +11,7 @@ import React, { createContext, useContext } from 'react';
 
 import { useRequest } from '../../../public';
 
-import { Error as CustomError } from './section_error';
-
-import { Privileges } from '../types';
+import { Privileges, Error as CustomError } from '../types';
 
 interface Authorization {
   isLoading: boolean;
