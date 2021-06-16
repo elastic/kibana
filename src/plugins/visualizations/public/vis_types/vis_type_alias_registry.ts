@@ -7,6 +7,7 @@
  */
 
 import { SavedObject } from '../../../../core/types/saved_objects';
+import { BaseVisType } from './base_vis_type';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
@@ -23,6 +24,7 @@ export interface VisualizationListItem {
   getSupportedTriggers?: () => string[];
   typeTitle: string;
   image?: string;
+  type?: BaseVisType | string;
 }
 
 export interface VisualizationsAppExtension {

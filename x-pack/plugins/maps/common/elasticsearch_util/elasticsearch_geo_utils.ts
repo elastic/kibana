@@ -374,11 +374,19 @@ export function clamp(val: number, min: number, max: number): number {
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent {
   const width = bounds.maxLon - bounds.minLon;
   const height = bounds.maxLat - bounds.minLat;
+
+  const newMinLon = bounds.minLon - width * scaleFactor;
+  const nexMaxLon = bounds.maxLon + width * scaleFactor;
+
+  const lonDelta = nexMaxLon - newMinLon;
+  const left = lonDelta > 360 ? -180 : newMinLon;
+  const right = lonDelta > 360 ? 180 : nexMaxLon;
+
   return {
-    minLon: bounds.minLon - width * scaleFactor,
-    minLat: bounds.minLat - height * scaleFactor,
-    maxLon: bounds.maxLon + width * scaleFactor,
-    maxLat: bounds.maxLat + height * scaleFactor,
+    minLon: left,
+    minLat: clampToLatBounds(bounds.minLat - height * scaleFactor),
+    maxLon: right,
+    maxLat: clampToLonBounds(bounds.maxLat + height * scaleFactor),
   };
 }
 

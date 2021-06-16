@@ -40,16 +40,13 @@ export function ApmHeaderActionMenu() {
   }
 
   return (
-    <EuiHeaderLinks>
-      <EuiHeaderLink
-        color="primary"
-        href={apmHref('/settings')}
-        iconType="gear"
-      >
+    <EuiHeaderLinks gutterSize="xs">
+      <EuiHeaderLink size="xs" color="text" href={apmHref('/settings')}>
         {i18n.translate('xpack.apm.settingsLinkLabel', {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
+      {canAccessML && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           basePath={basePath}
@@ -59,7 +56,6 @@ export function ApmHeaderActionMenu() {
           includeTransactionDuration={serviceName !== undefined}
         />
       )}
-      {canAccessML && <AnomalyDetectionSetupLink />}
       <EuiHeaderLink
         color="primary"
         href={kibanaHref('/app/home#/tutorial/apm')}

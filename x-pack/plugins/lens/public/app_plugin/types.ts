@@ -18,6 +18,8 @@ import {
   SavedObjectsStart,
 } from '../../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { LensAttributeService } from '../lens_attribute_service';
@@ -33,6 +35,7 @@ import {
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameInstance } from '../types';
+import { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
   isCopied?: boolean;
@@ -45,7 +48,6 @@ export interface LensAppProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
-  redirectToDashboard?: (input: LensEmbeddableInput, dashboardId: string) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensEmbeddableInput;
@@ -91,16 +93,19 @@ export interface LensAppServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
+  presentationUtil: PresentationUtilPluginStart;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
