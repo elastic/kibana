@@ -15,8 +15,6 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { isString } from 'lodash';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   MonitoringStats,
@@ -26,6 +24,7 @@ import {
 } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
+import { calculateHealthStatus } from '../lib/calculate_health_status';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
@@ -59,26 +58,12 @@ export function healthRoute(
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
 
-  // if "cold" health stats are any more stale than the configured refresh (+ a buffer), consider the system unhealthy
-  const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
-
-  function calculateStatus(monitoredStats: MonitoringStats): MonitoredHealth {
+  function getHealthStatus(monitoredStats: MonitoringStats) {
+    const summarizedStats = summarizeMonitoringStats(monitoredStats, config);
+    const status = calculateHealthStatus(summarizedStats, config);
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    const summarizedStats = summarizeMonitoringStats(monitoredStats, config);
-
-    /**
-     * If the monitored stats aren't fresh, return a red status
-     */
-    const healthStatus =
-      hasStatus(summarizedStats.stats, HealthStatus.Error) ||
-      hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness) ||
-      hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)
-        ? HealthStatus.Error
-        : hasStatus(summarizedStats.stats, HealthStatus.Warning)
-        ? HealthStatus.Warning
-        : HealthStatus.OK;
-    return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, ...summarizedStats };
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
@@ -95,7 +80,7 @@ export function healthRoute(
       }),
       // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(calculateStatus(stats)))
+      map((stats) => withServiceStatus(getHealthStatus(stats)))
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
@@ -114,7 +99,7 @@ export function healthRoute(
     ): Promise<IKibanaResponse> {
       return res.ok({
         body: lastMonitoredStats
-          ? calculateStatus(lastMonitoredStats)
+          ? getHealthStatus(lastMonitoredStats)
           : { id: taskManagerId, timestamp: new Date().toISOString(), status: HealthStatus.Error },
       });
     }
@@ -138,45 +123,4 @@ export function withServiceStatus(
       summary: LEVEL_SUMMARY[level.toString()],
     },
   ];
-}
-
-/**
- * If certain "hot" stats are not fresh, then the _health api will should return a Red status
- * @param monitoringStats The monitored stats
- * @param now The time to compare against
- * @param requiredFreshness How fresh should these stats be
- */
-function hasExpiredHotTimestamps(
-  monitoringStats: RawMonitoringStats,
-  now: number,
-  requiredFreshness: number
-): boolean {
-  const diff =
-    now -
-    getOldestTimestamp(
-      monitoringStats.last_update,
-      monitoringStats.stats.runtime?.value.polling.last_successful_poll
-    );
-  return diff > requiredFreshness;
-}
-
-function hasExpiredColdTimestamps(
-  monitoringStats: RawMonitoringStats,
-  now: number,
-  requiredFreshness: number
-): boolean {
-  return now - getOldestTimestamp(monitoringStats.stats.workload?.timestamp) > requiredFreshness;
-}
-
-function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {
-  return Object.values(stats)
-    .map((stat) => stat?.status === status)
-    .includes(true);
-}
-
-function getOldestTimestamp(...timestamps: Array<JsonValue | undefined>): number {
-  const validTimestamps = timestamps
-    .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
-    .filter((timestamp) => !isNaN(timestamp));
-  return validTimestamps.length ? Math.min(...validTimestamps) : 0;
 }

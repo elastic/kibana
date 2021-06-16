@@ -10,11 +10,10 @@ import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
 import uuid from 'uuid';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { healthRoute, MonitoredHealth } from './health';
+import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { Logger } from '../../../../../src/core/server';
 import {
   HealthStatus,
   MonitoringStats,
@@ -23,6 +22,7 @@ import {
 } from '../monitoring';
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
+import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
 
 jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
@@ -47,7 +47,9 @@ describe('healthRoute', () => {
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    ignoreCapacityEstimationWarning();
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.OK);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
 
     const mockStat = mockHealthStats();
     await sleep(10);
@@ -76,41 +78,27 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
-    );
-    expect(firstDebug).toMatchObject({
+    expect(logHealthMetrics).toBeCalledTimes(2);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
     });
-
-    const secondDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[1][0].replace('Latest Monitored Stats: ', '')
-    );
-    expect(secondDebug).not.toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({}))
-      ),
-    });
-    expect(secondDebug).toMatchObject({
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
     });
-
-    expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    ignoreCapacityEstimationWarning(() => HealthStatus.Warning);
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.Warning);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
 
     const warnRuntimeStat = mockHealthStats();
     const warnConfigurationStat = mockHealthStats();
@@ -137,13 +125,8 @@ describe('healthRoute', () => {
     await sleep(1001);
     stats$.next(warnWorkloadStat);
 
-    const warnRuntimeLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (warning status): ',
-        ''
-      )
-    );
-    expect(warnRuntimeLog).toMatchObject({
+    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -151,14 +134,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({}))
       ),
     });
-
-    const warnConfigurationLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
-        'Latest Monitored Stats (warning status): ',
-        ''
-      )
-    );
-    expect(warnConfigurationLog).toMatchObject({
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -166,14 +142,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({}))
       ),
     });
-
-    const warnWorkloadLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[2][0] as string).replace(
-        'Latest Monitored Stats (warning status): ',
-        ''
-      )
-    );
-    expect(warnWorkloadLog).toMatchObject({
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -181,14 +150,14 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
-
-    expect(logger.warn).toHaveBeenCalledTimes(3);
   });
 
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    ignoreCapacityEstimationWarning(() => HealthStatus.Error);
+    const calculateHealthStatus = calculateHealthStatusMock.create();
+    calculateHealthStatus.mockImplementation(() => HealthStatus.Error);
+    const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
 
     const errorRuntimeStat = mockHealthStats();
     const errorConfigurationStat = mockHealthStats();
@@ -215,13 +184,8 @@ describe('healthRoute', () => {
     await sleep(1001);
     stats$.next(errorWorkloadStat);
 
-    const errorRuntimeLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).error.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (error status): ',
-        ''
-      )
-    );
-    expect(errorRuntimeLog).toMatchObject({
+    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -229,14 +193,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({}))
       ),
     });
-
-    const errorConfigurationLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).error.mock.calls[1][0] as string).replace(
-        'Latest Monitored Stats (error status): ',
-        ''
-      )
-    );
-    expect(errorConfigurationLog).toMatchObject({
+    expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -244,14 +201,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({}))
       ),
     });
-
-    const errorWorkloadLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).error.mock.calls[2][0] as string).replace(
-        'Latest Monitored Stats (error status): ',
-        ''
-      )
-    );
-    expect(errorWorkloadLog).toMatchObject({
+    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -259,85 +209,6 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
       ),
     });
-
-    expect(logger.error).toHaveBeenCalledTimes(3);
-  });
-
-  it(`logs at a warn level if the drift is over configured value`, async () => {
-    const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
-    ignoreCapacityEstimationWarning();
-
-    const stat = mockHealthStats({
-      stats: {
-        runtime: {
-          value: {
-            drift: [1, 2, 3, 10000],
-          },
-        },
-      },
-    });
-    const nonWarnStat = mockHealthStats({
-      last_update: new Date(Date.now() + 1000).toISOString(),
-      stats: {
-        runtime: {
-          value: {
-            drift: [1, 2, 3, 9999],
-            polling: {
-              last_successful_poll: new Date(Date.now() + 1000).toISOString(),
-            },
-          },
-        },
-      },
-    });
-
-    const stats$ = new Subject<MonitoringStats>();
-
-    const id = uuid.v4();
-    healthRoute(
-      router,
-      stats$,
-      logger,
-      id,
-      getTaskManagerConfig({
-        monitored_stats_required_freshness: 1000,
-        monitored_stats_warn_delayed_task_start_in_seconds: 10,
-        monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
-
-    stats$.next(stat);
-    await sleep(1001);
-    stats$.next(nonWarnStat);
-
-    const warnLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats (Detected drift of 10s): ',
-        ''
-      )
-    );
-    expect(warnLog).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(stat, getTaskManagerConfig({}))),
-    });
-
-    const debugLog = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
-        'Latest Monitored Stats: ',
-        ''
-      )
-    );
-    expect(debugLog).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(nonWarnStat, getTaskManagerConfig({}))),
-    });
-
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
@@ -544,28 +415,6 @@ describe('healthRoute', () => {
 function ignoreCapacityEstimation(stats: RawMonitoringStats) {
   stats.stats.capacity_estimation = expect.any(Object);
   return stats;
-}
-
-function ignoreCapacityEstimationWarning(manuallyControlHealthStatus?: () => HealthStatus) {
-  const { logHealthMetrics: logHealthMetricsMock } = jest.requireMock('../lib/log_health_metrics');
-  const { logHealthMetrics } = jest.requireActual('../lib/log_health_metrics');
-  logHealthMetricsMock.mockImplementation((health: MonitoredHealth, ...rest: object[]) => {
-    if (health.status !== HealthStatus.OK) {
-      if (
-        [
-          health.stats.configuration?.status,
-          health.stats.runtime?.status,
-          health.stats.workload?.status,
-        ].every((status) => status === HealthStatus.OK)
-      ) {
-        health.status = HealthStatus.OK;
-      }
-    }
-    if (manuallyControlHealthStatus) {
-      health.status = manuallyControlHealthStatus();
-    }
-    return logHealthMetrics(health, ...rest);
-  });
 }
 
 function mockHealthStats(overrides = {}) {

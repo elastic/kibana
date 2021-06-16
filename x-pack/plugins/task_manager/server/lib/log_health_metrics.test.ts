@@ -13,7 +13,15 @@ import { MonitoredHealth } from '../routes/health';
 import { logHealthMetrics } from './log_health_metrics';
 import { Logger } from '../../../../../src/core/server';
 
+jest.mock('./calculate_health_status', () => ({
+  calculateHealthStatus: jest.fn(),
+}));
+
 describe('logHealthMetrics', () => {
+  afterEach(() => {
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockReset();
+  });
   it('should log as debug if status is OK', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
@@ -34,9 +42,11 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
-    const health = getMockMonitoredHealth({
-      status: HealthStatus.Warning,
-    });
+    const health = getMockMonitoredHealth();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
+      () => HealthStatus.Warning
+    );
 
     logHealthMetrics(health, logger, config);
 
@@ -54,9 +64,9 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_warn_delayed_task_start_in_seconds: 60,
     });
-    const health = getMockMonitoredHealth({
-      status: HealthStatus.Error,
-    });
+    const health = getMockMonitoredHealth();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
 
     logHealthMetrics(health, logger, config);
 
@@ -120,6 +130,26 @@ describe('logHealthMetrics', () => {
       (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
     );
     expect(firstDebug).toMatchObject(health);
+  });
+
+  it('should ignore capacity estimation status', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+    });
+    const health = getMockMonitoredHealth({
+      stats: {
+        capacity_estimation: {
+          status: HealthStatus.Warning,
+        },
+      },
+    });
+
+    logHealthMetrics(health, logger, config);
+
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    expect(calculateHealthStatus).toBeCalledTimes(1);
+    expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
   });
 });
 

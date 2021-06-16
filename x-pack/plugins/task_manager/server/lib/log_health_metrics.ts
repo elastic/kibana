@@ -10,15 +10,24 @@ import { Logger } from '../../../../../src/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import { MonitoredHealth } from '../routes/health';
+import { calculateHealthStatus } from './calculate_health_status';
 
 export function logHealthMetrics(
   monitoredHealth: MonitoredHealth,
   logger: Logger,
   config: TaskManagerConfig
 ) {
-  let logAsWarn = monitoredHealth.status === HealthStatus.Warning;
+  const healthWithoutCapacity: MonitoredHealth = {
+    ...monitoredHealth,
+    stats: {
+      ...monitoredHealth.stats,
+      capacity_estimation: undefined,
+    },
+  };
+  const statusWithoutCapacity = calculateHealthStatus(healthWithoutCapacity, config);
+  let logAsWarn = statusWithoutCapacity === HealthStatus.Warning;
   const logAsError =
-    monitoredHealth.status === HealthStatus.Error && !isEmpty(monitoredHealth.stats);
+    statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats);
   const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
 
   if (driftInSeconds >= config.monitored_stats_warn_delayed_task_start_in_seconds) {
