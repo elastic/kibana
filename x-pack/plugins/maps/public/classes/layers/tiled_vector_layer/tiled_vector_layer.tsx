@@ -86,7 +86,7 @@ export class TiledVectorLayer extends VectorLayer {
           source: this.getSource(),
           prevDataRequest,
           nextMeta: searchFilters,
-          getUpdateDueToTimeslice: this.getUpdateDueToTimeslice,
+          getUpdateDueToTimeslice: this._getUpdateDueToTimesliceFromTileMeta,
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
         if (canSkip) {
@@ -251,7 +251,7 @@ export class TiledVectorLayer extends VectorLayer {
     return null;
   }
 
-  getUpdateDueToTimeslice(source: ISource, timeslice?: Timeslice): boolean {
+  _getUpdateDueToTimesliceFromTileMeta(source: ISource, timeslice?: Timeslice): boolean {
     // TODO use meta features to determine if tiles already contain features for timeslice.
     return true;
   }
