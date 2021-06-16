@@ -128,7 +128,7 @@ export const DocumentsNavPreview = () => {
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
                     {
-                      defaultMessage: 'Previous',
+                      defaultMessage: 'Previous document',
                     }
                   )}
                 />
@@ -142,7 +142,7 @@ export const DocumentsNavPreview = () => {
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
                     {
-                      defaultMessage: 'Next',
+                      defaultMessage: 'Next document',
                     }
                   )}
                 />
