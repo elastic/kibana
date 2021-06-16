@@ -45,7 +45,7 @@ export const AgentStatuses = React.memo(
             tooltipContent={isolationFieldName}
             value={`${isIsolated}`}
           >
-            <EndpointHostIsolationStatus isIsolated={true} />
+            <EndpointHostIsolationStatus isIsolated={isIsolated as boolean} />
           </DefaultDraggable>
         </EuiFlexItem>
       </EuiFlexGroup>

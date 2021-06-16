@@ -184,7 +184,7 @@ const AlertSummaryViewComponent: React.FC<{
   }, [data]);
 
   const agentStatusRow = {
-    title: 'Agent status',
+    title: i18n.AGENT_STATUS,
     description: {
       contextId: timelineId,
       eventId,
