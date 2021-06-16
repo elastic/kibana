@@ -20,15 +20,15 @@ import {
   EuiFieldPassword,
 } from '@elastic/eui';
 
-import { useHTTPAdvancedFieldsContext } from './contexts';
+import { useHTTPAdvancedFieldsContext } from '../contexts';
 
-import { ConfigKeys, HTTPMethod, Validation } from './types';
+import { ConfigKeys, HTTPMethod, Validation } from '../types';
 
-import { OptionalLabel } from './optional_label';
-import { HeaderField } from './header_field';
-import { RequestBodyField } from './request_body_field';
-import { ResponseBodyIndexField } from './index_response_body_field';
-import { ComboBox } from './combo_box';
+import { OptionalLabel } from '../optional_label';
+import { HeaderField } from '../header_field';
+import { RequestBodyField } from '../request_body_field';
+import { ResponseBodyIndexField } from '../index_response_body_field';
+import { ComboBox } from '../combo_box';
 
 interface Props {
   validate: Validation;

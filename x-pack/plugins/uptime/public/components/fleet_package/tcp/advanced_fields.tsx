@@ -16,11 +16,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useTCPAdvancedFieldsContext } from './contexts';
+import { useTCPAdvancedFieldsContext } from '../contexts';
 
-import { ConfigKeys } from './types';
+import { ConfigKeys } from '../types';
 
-import { OptionalLabel } from './optional_label';
+import { OptionalLabel } from '../optional_label';
 
 export const TCPAdvancedFields = () => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
