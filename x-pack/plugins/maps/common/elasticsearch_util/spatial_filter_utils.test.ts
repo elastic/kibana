@@ -23,11 +23,31 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -89,
     };
-    const filter = createExtentFilter(mapExtent, [geoFieldName]);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-89, 39],
-        bottom_right: [-83, 35],
+    expect(createExtentFilter(mapExtent, [geoFieldName])).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'location',
+        negate: false,
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'location',
+              },
+            },
+            {
+              geo_bounding_box: {
+                location: {
+                  top_left: [-89, 39],
+                  bottom_right: [-83, 35],
+                },
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -39,11 +59,31 @@ describe('createExtentFilter', () => {
       minLat: -100,
       minLon: -190,
     };
-    const filter = createExtentFilter(mapExtent, [geoFieldName]);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-180, 89],
-        bottom_right: [180, -89],
+    expect(createExtentFilter(mapExtent, [geoFieldName])).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'location',
+        negate: false,
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'location',
+              },
+            },
+            {
+              geo_bounding_box: {
+                location: {
+                  top_left: [-180, 89],
+                  bottom_right: [180, -89],
+                },
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -55,11 +95,31 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: 100,
     };
-    const filter = createExtentFilter(mapExtent, [geoFieldName]);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [100, 39],
-        bottom_right: [-160, 35],
+    expect(createExtentFilter(mapExtent, [geoFieldName])).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'location',
+        negate: false,
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'location',
+              },
+            },
+            {
+              geo_bounding_box: {
+                location: {
+                  top_left: [100, 39],
+                  bottom_right: [-160, 35],
+                },
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -71,11 +131,31 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -200,
     };
-    const filter = createExtentFilter(mapExtent, [geoFieldName]);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [160, 39],
-        bottom_right: [-100, 35],
+    expect(createExtentFilter(mapExtent, [geoFieldName])).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'location',
+        negate: false,
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'location',
+              },
+            },
+            {
+              geo_bounding_box: {
+                location: {
+                  top_left: [160, 39],
+                  bottom_right: [-100, 35],
+                },
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -87,11 +167,31 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -191,
     };
-    const filter = createExtentFilter(mapExtent, [geoFieldName]);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-180, 39],
-        bottom_right: [180, 35],
+    expect(createExtentFilter(mapExtent, [geoFieldName])).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'location',
+        negate: false,
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'location',
+              },
+            },
+            {
+              geo_bounding_box: {
+                location: {
+                  top_left: [-180, 39],
+                  bottom_right: [180, 35],
+                },
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -184,23 +284,36 @@ describe('createSpatialFilterWithGeometry', () => {
         negate: false,
         type: 'spatial_filter',
       },
-      geo_shape: {
-        'geo.coordinates': {
-          relation: 'INTERSECTS',
-          shape: {
-            coordinates: [
-              [
-                [-101.21639, 48.1413],
-                [-101.21639, 41.84905],
-                [-90.95149, 41.84905],
-                [-90.95149, 48.1413],
-                [-101.21639, 48.1413],
-              ],
-            ],
-            type: 'Polygon',
-          },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'geo.coordinates',
+              },
+            },
+            {
+              geo_shape: {
+                'geo.coordinates': {
+                  relation: 'INTERSECTS',
+                  shape: {
+                    coordinates: [
+                      [
+                        [-101.21639, 48.1413],
+                        [-101.21639, 41.84905],
+                        [-90.95149, 41.84905],
+                        [-90.95149, 48.1413],
+                        [-101.21639, 48.1413],
+                      ],
+                    ],
+                    type: 'Polygon',
+                  },
+                },
+                ignore_unmapped: true,
+              },
+            },
+          ],
         },
-        ignore_unmapped: true,
       },
     });
   });
@@ -318,9 +431,22 @@ describe('createDistanceFilterWithMeta', () => {
         negate: false,
         type: 'spatial_filter',
       },
-      geo_distance: {
-        distance: '1000km',
-        'geo.coordinates': [120, 30],
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'geo.coordinates',
+              },
+            },
+            {
+              geo_distance: {
+                distance: '1000km',
+                'geo.coordinates': [120, 30],
+              },
+            },
+          ],
+        },
       },
     });
   });
