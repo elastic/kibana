@@ -93,9 +93,9 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a connector.
 | `failure` | User is not authorized to create a connector.
 
-.2+| `alert_create`
-| `unknown` | User is creating an alert.
-| `failure` | User is not authorized to create an alert.
+.2+| `rule_create`
+| `unknown` | User is creating a rule.
+| `failure` | User is not authorized to create a rule.
 
 .2+| `space_create`
 | `unknown` | User is creating a space.
@@ -128,37 +128,37 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating a connector.
 | `failure` | User is not authorized to update a connector.
 
-.2+| `alert_update`
-| `unknown` | User is updating an alert.
-| `failure` | User is not authorized to update an alert.
+.2+| `rule_update`
+| `unknown` | User is updating a rule.
+| `failure` | User is not authorized to update a rule.
 
-.2+| `alert_update_api_key`
-| `unknown` | User is updating the API key of an alert.
-| `failure` | User is not authorized to update the API key of an alert.
+.2+| `rule_update_api_key`
+| `unknown` | User is updating the API key of a rule.
+| `failure` | User is not authorized to update the API key of a rule.
 
-.2+| `alert_enable`
-| `unknown` | User is enabling an alert.
-| `failure` | User is not authorized to enable an alert.
+.2+| `rule_enable`
+| `unknown` | User is enabling a rule.
+| `failure` | User is not authorized to enable a rule.
 
-.2+| `alert_disable`
-| `unknown` | User is disabling an alert.
-| `failure` | User is not authorized to disable an alert.
+.2+| `rule_disable`
+| `unknown` | User is disabling a rule.
+| `failure` | User is not authorized to disable a rule.
 
-.2+| `alert_mute`
+.2+| `rule_mute`
+| `unknown` | User is muting a rule.
+| `failure` | User is not authorized to mute a rule.
+
+.2+| `rule_unmute`
+| `unknown` | User is unmuting a rule.
+| `failure` | User is not authorized to unmute a rule.
+
+.2+| `rule_alert_mute`
 | `unknown` | User is muting an alert.
 | `failure` | User is not authorized to mute an alert.
 
-.2+| `alert_unmute`
+.2+| `rule_alert_unmute`
 | `unknown` | User is unmuting an alert.
 | `failure` | User is not authorized to unmute an alert.
-
-.2+| `alert_instance_mute`
-| `unknown` | User is muting an alert instance.
-| `failure` | User is not authorized to mute an alert instance.
-
-.2+| `alert_instance_unmute`
-| `unknown` | User is unmuting an alert instance.
-| `failure` | User is not authorized to unmute an alert instance.
 
 .2+| `space_update`
 | `unknown` | User is updating a space.
@@ -183,9 +183,9 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is deleting a connector.
 | `failure` | User is not authorized to delete a connector.
 
-.2+| `alert_delete`
-| `unknown` | User is deleting an alert.
-| `failure` | User is not authorized to delete an alert.
+.2+| `rule_delete`
+| `unknown` | User is deleting a rule.
+| `failure` | User is not authorized to delete a rule.
 
 .2+| `space_delete`
 | `unknown` | User is deleting a space.
@@ -218,13 +218,13 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a connector as part of a search operation.
 | `failure` | User is not authorized to search for connectors.
 
-.2+| `alert_get`
-| `success` | User has accessed an alert.
-| `failure` | User is not authorized to access an alert.
+.2+| `rule_get`
+| `success` | User has accessed a rule.
+| `failure` | User is not authorized to access a rule.
 
-.2+| `alert_find`
-| `success` | User has accessed an alert as part of a search operation.
-| `failure` | User is not authorized to search for alerts.
+.2+| `rule_find`
+| `success` | User has accessed a rule as part of a search operation.
+| `failure` | User is not authorized to search for rules.
 
 .2+| `space_get`
 | `success` | User has accessed a space.
