@@ -693,7 +693,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       event: {
         action: 'start',
         kind: 'alert',
-        category: 'memory',
+        category: 'malware',
         code: isShellcode ? 'malicious_thread' : 'memory_signature',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
