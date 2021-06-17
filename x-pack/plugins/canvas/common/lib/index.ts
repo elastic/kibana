@@ -17,6 +17,4 @@ export * from './get_legend_config';
 export * from './hex_to_rgb';
 export * from './palettes';
 export * from './pivot_object_array';
-export * from './resolve_dataurl';
 export * from './unquote_string';
-export * from './url';

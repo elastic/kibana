@@ -10,11 +10,11 @@ import PropTypes from 'prop-types';
 import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
-import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
 import {
   encode,
   elasticOutline,
   isValidHttpUrl,
+  resolveFromArgs,
 } from '../../../../../../../src/plugins/presentation_util/public';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';

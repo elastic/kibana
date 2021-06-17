@@ -8,7 +8,7 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
-import { isValidUrl } from '../../../common/lib/url';
+import { isValidUrl } from '../../../../../../src/plugins/presentation_util/common';
 
 interface Output extends ContainerStyle {
   type: 'containerStyle';

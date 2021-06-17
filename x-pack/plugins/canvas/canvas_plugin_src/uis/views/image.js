@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
-import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
+import {
+  elasticLogo,
+  resolveFromArgs,
+} from '../../../../../../src/plugins/presentation_util/common';
 import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;
