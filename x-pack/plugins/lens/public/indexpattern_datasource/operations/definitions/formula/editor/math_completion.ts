@@ -397,6 +397,10 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
+      // Look for unsafe characters
+      if (/[^0-9A-Za-z._@\[\]/]/.test(label)) {
+        insertText = `'${label.replaceAll(`'`, "\\'")}'`;
+      }
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
       insertText = `${label}($0)`;

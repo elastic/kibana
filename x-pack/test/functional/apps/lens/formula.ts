@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const fieldEditor = getService('fieldEditor');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -87,6 +88,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       element = await find.byCssSelector('.monaco-editor');
       expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing')`);
+    });
+
+    it('should insert single quotes and escape when needed to create valid field name', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await PageObjects.lens.clickAddField();
+      await fieldEditor.setName(`*' "'`);
+      await fieldEditor.enableValue();
+      await fieldEditor.typeScript("emit('abc')");
+      await fieldEditor.save();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `unique_count(`,
+        keepOpen: true,
+      });
+
+      const input = await find.activeElement();
+      await input.type('*');
+      await input.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.common.sleep(100);
+
+      const element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(`unique_count('*\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
