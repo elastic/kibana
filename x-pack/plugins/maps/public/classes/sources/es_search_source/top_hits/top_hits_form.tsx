@@ -13,7 +13,7 @@ import { getIndexPatternService } from '../../../../kibana_services';
 // @ts-expect-error
 import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
-import { loadIndexSettings } from '../load_index_settings';
+import { loadIndexSettings } from '../util/load_index_settings';
 import { OnSourceChangeArgs } from '../../source';
 import { IFieldType, SortDirection } from '../../../../../../../../src/plugins/data/public';
 

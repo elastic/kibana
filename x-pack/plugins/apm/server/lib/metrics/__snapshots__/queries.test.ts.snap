@@ -169,8 +169,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -415,8 +418,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -493,8 +499,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -686,8 +695,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -944,8 +956,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1028,8 +1043,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1199,8 +1217,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1435,8 +1456,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
@@ -1508,8 +1532,11 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "agent.name": "java",
+            "terms": Object {
+              "agent.name": Array [
+                "java",
+                "opentelemetry/java",
+              ],
             },
           },
         ],
