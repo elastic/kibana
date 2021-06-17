@@ -18,7 +18,7 @@ exports[`FieldName renders a geo field 1`] = `
     </span>
   </div>
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
   >
     <span
       class="euiToolTipAnchor eui-textTruncate"
@@ -49,7 +49,7 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
     </span>
   </div>
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
   >
     <span
       class="euiToolTipAnchor eui-textTruncate"
@@ -80,7 +80,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     </span>
   </div>
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
   >
     <span
       class="euiToolTipAnchor eui-textTruncate"
