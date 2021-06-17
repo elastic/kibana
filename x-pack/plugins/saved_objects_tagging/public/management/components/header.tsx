@@ -19,14 +19,14 @@ export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
     <EuiPageHeader
       pageTitle={
         <FormattedMessage
-          id="xpack.savedObjectsTagging.management.header.title"
+          id="xpack.savedObjectsTagging.management.headerTitle"
           defaultMessage="Tags"
         />
       }
       bottomBorder
       description={
         <FormattedMessage
-          id="xpack.savedObjectsTagging.management.header.description"
+          id="xpack.savedObjectsTagging.management.headerDescription"
           defaultMessage="Use tags to categorize and easily find your objects."
         />
       }
@@ -42,7 +42,7 @@ export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
             isDisabled={false}
           >
             <FormattedMessage
-              id="xpack.savedObjectsTagging.management.actions.createTag"
+              id="xpack.savedObjectsTagging.management.actions.createTagButton"
               defaultMessage="Create tag"
             />
           </EuiButton>
