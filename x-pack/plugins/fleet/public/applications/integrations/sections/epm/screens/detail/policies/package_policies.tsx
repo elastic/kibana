@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { stringify, parse } from 'query-string';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Redirect, useLocation, useHistory } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -15,6 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiText,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
@@ -67,6 +70,7 @@ interface PackagePoliciesPanelProps {
 }
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
+  const history = useHistory();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const agentPolicyIdFromParams = useMemo(() => queryParams.get('addAgentToPolicyId'), [
     queryParams,
@@ -74,7 +78,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
-  const { getPath } = useLink();
+  const { getPath, getHref } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -92,6 +96,36 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       });
     },
     [setPagination]
+  );
+
+  const renderViewDataStepContent = useCallback(
+    () => (
+      <>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.viewDataDescription"
+            defaultMessage="After your agent starts, you can view your data in Kibana by using the integration's installed assets. {pleaseNote}: it may take a few minutes for the initial data to arrive."
+            values={{
+              pleaseNote: (
+                <strong>
+                  {i18n.translate(
+                    'xpack.fleet.epm.agentEnrollment.viewDataDescription.pleaseNoteLabel',
+                    { defaultMessage: 'Please note' }
+                  )}
+                </strong>
+              ),
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
+          {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
+            defaultMessage: 'View assets',
+          })}
+        </EuiButton>
+      </>
+    ),
+    [name, version, getHref]
   );
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
@@ -193,12 +227,16 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         align: 'right',
         render({ agentPolicy, packagePolicy }) {
           return (
-            <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+            <PackagePolicyActionsMenu
+              agentPolicy={agentPolicy}
+              packagePolicy={packagePolicy}
+              viewDataStepContent={renderViewDataStepContent()}
+            />
           );
         },
       },
     ],
-    []
+    [renderViewDataStepContent]
   );
 
   const noItemsMessage = useMemo(() => {
@@ -243,14 +281,18 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {flyoutOpenForPolicyId && (
+      {flyoutOpenForPolicyId && !isLoading && (
         <AgentEnrollmentFlyout
-          onClose={() => setFlyoutOpenForPolicyId(null)}
-          agentPolicies={
-            data?.items
-              .filter(({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId)
-              .map(({ agentPolicy }) => agentPolicy) ?? []
+          onClose={() => {
+            setFlyoutOpenForPolicyId(null);
+            const { addAgentToPolicyId, ...rest } = parse(search);
+            history.replace({ search: stringify(rest) });
+          }}
+          agentPolicy={
+            data?.items.find(({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId)
+              ?.agentPolicy
           }
+          viewDataStepContent={renderViewDataStepContent()}
         />
       )}
     </AgentPolicyRefreshContext.Provider>

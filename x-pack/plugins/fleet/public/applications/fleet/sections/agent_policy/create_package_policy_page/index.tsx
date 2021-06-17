@@ -315,12 +315,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                 values={{
                   link: (
                     <EuiLink
-                      href={`#${
-                        pagePathGetters.integration_details_policies({
-                          pkgkey: `${packageInfo!.name}-${packageInfo!.version}`,
-                          addAgentToPolicyId: agentPolicy!.id,
-                        })[1]
-                      }`}
+                      href={getHref('integration_details_policies', {
+                        pkgkey: `${packageInfo!.name}-${packageInfo!.version}`,
+                        addAgentToPolicyId: agentPolicy!.id,
+                      })}
                     >
                       {i18n.translate(
                         'xpack.fleet.createPackagePolicy.integrationsContextAddAgentLinkMessage',
@@ -348,6 +346,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       setFormState('VALID');
     }
   }, [
+    getHref,
     from,
     packageInfo,
     agentCount,
