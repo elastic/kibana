@@ -139,6 +139,12 @@ const createStartContractMock = () => {
                 storeSizeBytes: 1,
               },
             ],
+            legacyUrlAliases: {
+              inactiveCount: 1,
+              activeCount: 1,
+              disabledCount: 1,
+              totalCount: 3,
+            },
           },
         },
       })
