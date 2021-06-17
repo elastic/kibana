@@ -377,7 +377,7 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
@@ -466,6 +466,45 @@ describe('Task Runner', () => {
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       event: {
+        action: 'execute-action-start',
+        category: ['alerts'],
+        kind: 'alert',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+          action_group_id: 'default',
+          action_subgroup: 'subDefault',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+            type_id: 'test',
+          },
+          {
+            id: '1',
+            namespace: undefined,
+            type: 'action',
+            type_id: 'action',
+          },
+        ],
+      },
+      message:
+        "alert: test:1: 'alert-name' instanceId: '1' start schedule actionGroup(subgroup): 'default(subDefault)' action: action:1",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
+      event: {
         action: 'execute-action',
         category: ['alerts'],
         kind: 'alert',
@@ -503,7 +542,7 @@ describe('Task Runner', () => {
         ruleset: 'alerts',
       },
     });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(6, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
@@ -1111,7 +1150,7 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -1210,6 +1249,48 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "action_subgroup": undefined,
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "action",
+                  "type_id": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '1' start schedule actionGroup: 'default' action: action:1",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1393,7 +1474,7 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(8);
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -1492,6 +1573,90 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "recovered",
+                "action_subgroup": undefined,
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+                Object {
+                  "id": "2",
+                  "namespace": undefined,
+                  "type": "action",
+                  "type_id": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '2' start schedule actionGroup: 'recovered' action: action:2",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "namespace": undefined,
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "action_subgroup": undefined,
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "action",
+                  "type_id": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '1' start schedule actionGroup: 'default' action: action:1",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1721,7 +1886,7 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(8);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
     expect(actionsClient.enqueueExecution.mock.calls[1][0].id).toEqual('1');
     expect(actionsClient.enqueueExecution.mock.calls[0][0].id).toEqual('2');
@@ -1816,7 +1981,7 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(8);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
