@@ -31,7 +31,8 @@ export const getAppResults = (
       .flatMap((app) =>
         term.length > 0
           ? flattenDeepLinks(app)
-          : [
+          : app.searchable
+          ? [
               {
                 id: app.id,
                 app,
@@ -40,6 +41,7 @@ export const getAppResults = (
                 keywords: app.keywords ?? [],
               },
             ]
+          : []
       )
       .map((appLink) => ({
         appLink,
