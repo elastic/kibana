@@ -16,19 +16,20 @@ import { SavedObjectsFindResponse } from 'kibana/server';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import {
+  AlertCommentRequestRt,
+  CASE_SAVED_OBJECT,
   CaseConnector,
-  ESCasesConfigureAttributes,
-  ConnectorTypes,
   CaseStatuses,
   CaseType,
   CommentRequest,
-  throwErrors,
-  excess,
+  ConnectorTypes,
   ContextTypeUserRt,
-  AlertCommentRequestRt,
+  ESCasesConfigureAttributes,
+  excess,
   OWNER_FIELD,
-} from '../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
+  SUB_CASE_SAVED_OBJECT,
+  throwErrors,
+} from '../../common';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,

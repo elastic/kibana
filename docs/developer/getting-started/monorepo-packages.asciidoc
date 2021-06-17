@@ -87,6 +87,7 @@ yarn kbn watch-bazel
 - @kbn/monaco
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
+- @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types
 - @kbn/securitysolution-io-ts-list-types
 - @kbn/securitysolution-io-ts-types
