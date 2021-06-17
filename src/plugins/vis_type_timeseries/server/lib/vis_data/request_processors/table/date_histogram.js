@@ -9,17 +9,24 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabilities, uiSettings) {
+export function dateHistogram(
+  req,
+  panel,
+  esQueryConfig,
+  seriesIndex,
+  capabilities,
+  uiSettings,
+  buildSeriesMetaParams
+) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { timeField, interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
+    const { timeField, interval } = await buildSeriesMetaParams();
     const { from, to } = getTimerange(req);
 
     const meta = {

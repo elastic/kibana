@@ -25,6 +25,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
 import type { Panel } from '../../../common/types';
+import { getIntervalAndTimefield } from './get_interval_and_timefield';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -66,6 +67,18 @@ export async function getTableData(
     return panel.pivot_id;
   };
 
+  const buildSeriesMetaParams = async () => {
+    let index = panelIndex;
+
+    /** This part of code is required to try to get the default timefield for string indices.
+     *  The rest of the functionality available for Kibana indexes should not be active **/
+    if (!panel.use_kibana_indexes && index.indexPatternString) {
+      index = await services.cachedIndexPatternFetcher(index.indexPatternString, true);
+    }
+
+    return getIntervalAndTimefield(panel, index);
+  };
+
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
@@ -78,7 +91,8 @@ export async function getTableData(
       services.esQueryConfig,
       panelIndex,
       capabilities,
-      services.uiSettings
+      services.uiSettings,
+      buildSeriesMetaParams
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
