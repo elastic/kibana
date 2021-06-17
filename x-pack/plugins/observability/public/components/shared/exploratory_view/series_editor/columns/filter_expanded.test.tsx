@@ -51,7 +51,10 @@ describe('FilterExpanded', function () {
   it('should call useValuesList on load', async function () {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    const { spy } = mockUseValuesList(['Chrome', 'Firefox']);
+    const { spy } = mockUseValuesList([
+      { label: 'Chrome', count: 10 },
+      { label: 'Firefox', count: 5 },
+    ]);
 
     const goBack = jest.fn();
 
@@ -76,7 +79,10 @@ describe('FilterExpanded', function () {
   it('should filter display values', async function () {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    mockUseValuesList(['Chrome', 'Firefox']);
+    mockUseValuesList([
+      { label: 'Chrome', count: 10 },
+      { label: 'Firefox', count: 5 },
+    ]);
 
     render(
       <FilterExpanded

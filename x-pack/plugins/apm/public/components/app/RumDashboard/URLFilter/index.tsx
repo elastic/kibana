@@ -5,62 +5,63 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 import { URLSearch } from './URLSearch';
-import { UrlList } from './UrlList';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 export function URLFilter() {
   const history = useHistory();
 
-  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
-    const search = omit(toQuery(history.location.search), name);
+  const setFilterValue = useCallback(
+    (value?: string[], excludedValue?: string[]) => {
+      const name = 'transactionUrl';
+      const nameExcluded = 'transactionUrlExcluded';
 
-    history.push({
-      ...history.location,
-      search: fromQuery(
-        removeUndefinedProps({
-          ...search,
-          [name]: value.length ? value.join(',') : undefined,
-        })
-      ),
-    });
-  };
+      const search = omit(toQuery(history.location.search), name);
 
-  const name = 'transactionUrl';
+      history.push({
+        ...history.location,
+        search: fromQuery(
+          removeUndefinedProps({
+            ...search,
+            [name]: value?.length ? value.join(',') : undefined,
+            [nameExcluded]: excludedValue?.length
+              ? excludedValue.join(',')
+              : undefined,
+          })
+        ),
+      });
+    },
+    [history]
+  );
 
-  const { uiFilters } = useUrlParams();
-  const { transactionUrl } = uiFilters;
-
-  const filterValue = transactionUrl ?? [];
+  const updateSearchTerm = useCallback(
+    (searchTermN: string) => {
+      const newQuery = {
+        ...toQuery(history.location.search),
+        searchTerm: searchTermN || undefined,
+      };
+      if (!searchTermN) {
+        delete newQuery.searchTerm;
+      }
+      const newLocation = {
+        ...history.location,
+        search: fromQuery(newQuery),
+      };
+      history.push(newLocation);
+    },
+    [history]
+  );
 
   return (
     <span data-cy="csmUrlFilter">
       <URLSearch
-        onChange={(value) => {
-          setFilterValue('transactionUrl', value);
-        }}
+        onChange={setFilterValue}
+        updateSearchTerm={updateSearchTerm}
       />
-      {filterValue.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <UrlList
-            onRemove={(val) => {
-              setFilterValue(
-                name,
-                filterValue.filter((v) => val !== v)
-              );
-            }}
-            value={filterValue}
-          />
-        </>
-      )}
     </span>
   );
 }

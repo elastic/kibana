@@ -6,13 +6,13 @@
  */
 
 import {
-  SUB_CASE_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-} from '../../../common/constants';
-import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
-import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common';
+  CASE_SAVED_OBJECT,
+  CaseUserActionsResponse,
+  CaseUserActionsResponseRt,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common';
+import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { UserActionGet } from './client';

@@ -88,7 +88,7 @@ describe('WorkplaceSearchConfigured', () => {
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(ErrorState)).toHaveLength(2);
+    expect(wrapper.find(ErrorState)).toHaveLength(1);
   });
 
   it('passes readOnlyMode state', () => {

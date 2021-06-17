@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import {
   getCaseDetailsUrl,
@@ -16,7 +15,7 @@ import {
 } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 
 export interface AllCasesNavProps {
   detailName: string;
@@ -32,13 +31,12 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     cases: casesUi,
     application: { navigateToApp },
   } = useKibana().services;
-  const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
 
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCreateCaseUrl(urlSearch),
       });
     },
@@ -46,11 +44,13 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   );
 
   const goToCaseConfigure = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      history.push(getConfigureCasesUrl(urlSearch));
+      return navigateToApp(CASES_APP_ID, {
+        path: getConfigureCasesUrl(urlSearch),
+      });
     },
-    [history, urlSearch]
+    [navigateToApp, urlSearch]
   );
 
   return casesUi.getAllCases({
@@ -58,8 +58,8 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
-      onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async ({ detailName, subCaseId, search }: AllCasesNavProps) => {
+        return navigateToApp(CASES_APP_ID, {
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },
