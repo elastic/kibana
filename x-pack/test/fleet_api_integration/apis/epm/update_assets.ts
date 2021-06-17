@@ -226,6 +226,11 @@ export default function (providerContext: FtrProviderContext) {
           {
             name: 'logs-all_assets.test_logs-user_settings',
             component_template: {
+              _meta: {
+                package: {
+                  name: 'all_assets',
+                },
+              },
               template: {
                 settings: {},
               },
@@ -355,8 +360,16 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2-user_settings',
+            type: 'component_template',
+          },
+          {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics-user_settings',
+            type: 'component_template',
           },
         ],
         es_index_patterns: {

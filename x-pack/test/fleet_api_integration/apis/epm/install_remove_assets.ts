@@ -539,6 +539,10 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
+          id: 'metrics-all_assets.test_metrics-user_settings',
+          type: 'component_template',
+        },
+        {
           id: 'logs-all_assets.test_logs-all_assets',
           type: 'data_stream_ilm_policy',
         },
