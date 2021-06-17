@@ -13,3 +13,6 @@ export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart
 export function plugin() {
   return new ExpressionRevealImagePlugin();
 }
+
+export * from './expression_functions';
+export * from './expression_renderers';

@@ -17,17 +17,19 @@ import { progress } from '../canvas_plugin_src/renderers/progress';
 import { shape } from '../canvas_plugin_src/renderers/shape';
 import { table } from '../canvas_plugin_src/renderers/table';
 import { text } from '../canvas_plugin_src/renderers/text';
+import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 
 /**
  * This is a collection of renderers which are bundled with the runtime.  If
  * a renderer is not listed here, but is used by the Shared Workpad, it will
  * not render.  This includes any plugins.
  */
-let renderFunctions = [
+export const renderFunctions = [
   debug,
   error,
   image,
   repeatImage,
+  revealImage,
   markdown,
   metric,
   pie,
@@ -37,13 +39,5 @@ let renderFunctions = [
   table,
   text,
 ];
-
-// this method is for usage on setup step of plugin only
-export const addSupportedRenderFunctions = (renderers = []) =>
-  (renderFunctions = [...renderFunctions, ...renderers]);
-
-export function getSupportedRenderFunctions() {
-  return renderFunctions;
-}
 
 export const renderFunctionNames = renderFunctions.map((fn) => fn.name);

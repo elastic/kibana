@@ -14,13 +14,13 @@
       "features",
       "inspector",
       "presentationUtil",
-      "uiActions"
+      "uiActions",
+      "expressionRevealImage"
     ],
     "optionalPlugins": [
       "home",
       "reporting",
-      "usageCollection",
-      "expressionRevealImage"
+      "usageCollection"
     ],
     "requiredBundles": [
       "discover",

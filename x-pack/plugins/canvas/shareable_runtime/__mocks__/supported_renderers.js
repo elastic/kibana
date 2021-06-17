@@ -37,7 +37,3 @@ export const renderFunctions = renderers.map((fn) => () => ({
     ReactDOM.render(<div>{fn} mock</div>, domNode);
   },
 }));
-
-export const getSupportedRenderFunctions = () => {
-  return renderFunctions;
-};

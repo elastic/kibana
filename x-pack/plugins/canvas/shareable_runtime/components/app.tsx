@@ -10,7 +10,7 @@ import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
 import { RendererSpec } from '../../types';
 import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
 import { Canvas } from './canvas';
-import { getSupportedRenderFunctions } from '../supported_renderers';
+import { renderFunctions } from '../supported_renderers';
 
 interface Props {
   /**
@@ -30,7 +30,7 @@ interface Props {
 export const App: FC<Props> = ({ workpad, stage }) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
-  getSupportedRenderFunctions().forEach((fn) => {
+  renderFunctions.forEach((fn) => {
     const func = fn();
     renderers[func.name] = func;
   });
