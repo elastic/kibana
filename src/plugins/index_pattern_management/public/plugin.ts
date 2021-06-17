@@ -82,12 +82,13 @@ export class IndexPatternManagementPlugin
         return mountManagementSection(core.getStartServices, params);
       },
     });
-
-    return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    return this.indexPatternManagementService.start();
+    return this.indexPatternManagementService.start({
+      httpClient: core.http,
+      uiSettings: core.uiSettings,
+    });
   }
 
   public stop() {

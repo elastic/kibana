@@ -69,8 +69,10 @@ export const EmptyState = ({
       <EuiPageContent
         className="inpEmptyState"
         grow={false}
-        horizontalPosition="center"
         data-test-subj="indexPatternEmptyState"
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="subdued"
       >
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>

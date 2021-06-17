@@ -34,7 +34,9 @@ export const EmptyIndexPatternPrompt = ({ goToCreate }: Props) => {
       data-test-subj="emptyIndexPatternPrompt"
       className="inpEmptyIndexPatternPrompt"
       grow={false}
+      verticalPosition="center"
       horizontalPosition="center"
+      color="subdued"
     >
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
         <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">

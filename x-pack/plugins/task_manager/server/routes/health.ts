@@ -16,7 +16,7 @@ import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   MonitoringStats,
