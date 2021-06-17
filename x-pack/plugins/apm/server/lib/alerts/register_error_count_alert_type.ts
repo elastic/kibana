@@ -114,19 +114,6 @@ export function registerErrorCountAlertType({
                   ],
                   size: 10000,
                 },
-                aggs: {
-                  latest: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: SERVICE_NAME },
-                        { field: SERVICE_ENVIRONMENT },
-                      ] as const),
-                      sort: {
-                        '@timestamp': 'desc' as const,
-                      },
-                    },
-                  },
-                },
               },
             },
           },
@@ -139,13 +126,8 @@ export function registerErrorCountAlertType({
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
-            const latest = bucket.latest.top[0].metrics;
-
-            return {
-              serviceName: latest['service.name'] as string,
-              environment: latest['service.environment'] as string,
-              errorCount: bucket.doc_count,
-            };
+            const [serviceName, environment] = bucket.key;
+            return { serviceName, environment, errorCount: bucket.doc_count };
           }) ?? [];
 
         errorCountResults
