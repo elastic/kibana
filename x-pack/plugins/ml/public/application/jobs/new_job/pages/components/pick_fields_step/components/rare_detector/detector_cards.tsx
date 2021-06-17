@@ -20,7 +20,7 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
       title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
+        'xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.rareCard.title',
         {
           defaultMessage: 'Rare',
         }
@@ -28,7 +28,7 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.rareCard.description"
             defaultMessage="Look for distinct rare values in data over time."
           />
         </>
@@ -43,7 +43,7 @@ export const RareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => 
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
       title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
+        'xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.rarePopulationCard.title',
         {
           defaultMessage: 'Rare in population',
         }
@@ -51,7 +51,7 @@ export const RareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => 
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.rarePopulationCard.description"
             defaultMessage="Look for rare values in a population."
           />
         </>
@@ -66,7 +66,7 @@ export const FrequentlyRareInPopulationCard: FC<CardProps> = ({ onClick, isSelec
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
       title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
+        'xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.freqRareCard.title',
         {
           defaultMessage: 'Frequently rare in population',
         }
@@ -74,7 +74,7 @@ export const FrequentlyRareInPopulationCard: FC<CardProps> = ({ onClick, isSelec
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.freqRareCard.description"
             defaultMessage="Look for frequently rare values in a population."
           />
         </>

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.splitField.title', {
+  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.splitRareField.title', {
     defaultMessage: 'Rare field',
   });
   return (
