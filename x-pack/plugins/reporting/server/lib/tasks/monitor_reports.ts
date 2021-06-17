@@ -16,10 +16,24 @@ import { Report } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
 
 /*
- * Task for finding the ReportingRecords left in the ReportingStore and stuck
- * in pending or processing. It could happen if the server crashed while running
- * a report and was cancelled. Normally a failure would mean scheduling a
- * retry or failing the report, but the retry is not guaranteed to be scheduled.
+ * Task for finding the ReportingRecords left in the ReportingStore (.reporting index) and stuck in
+ * a pending or processing status.
+ *
+ *  Stuck in pending:
+ *    - This can happen if the report was scheduled in an earlier version of Kibana that used ESQueue.
+ *    - Task Manager doesn't know about these types of reports because there was never a task
+ *      scheduled for them.
+ *  Stuck in processing:
+ *    - This can could happen if the server crashed while a report was executing.
+ *    - Task Manager doesn't know about these reports, because the task is completed in Task
+ *      Manager when Reporting starts executing the report. We are not using Task Manager's retry
+ *      mechanisms, which defer the retry for a few minutes.
+ *
+ * These events require us to reschedule the report with Task Manager, so that the jobs can be
+ * distributed and executed.
+ *
+ * The runner function reschedules a single report job per task run, to avoid flooding Task Manager
+ * in case many report jobs need to be recovered.
  */
 export class MonitorReportsTask implements ReportingTask {
   public TYPE = REPORTING_MONITOR_TYPE;
@@ -64,16 +78,6 @@ export class MonitorReportsTask implements ReportingTask {
     });
   }
 
-  /*
-   * This task finds report jobs that can get lost from the queue and must be recovered.
-   *
-   * The runner function reschedules a single report job per task run, to avoid
-   * flooding Task Manager in case many report jobs need to be recovered.
-   *
-   * Elasticsearch can send with a version conflict response when resetting the
-   * job status, in the event another instance of Kibana attempted to recover
-   * the same report job. That is normal.
-   */
   private getTaskRunner(): TaskRunCreatorFunction {
     return () => {
       return {
