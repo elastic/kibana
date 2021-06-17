@@ -11,7 +11,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-export function MainFilters() {
+export function WebApplicationSelect() {
   const {
     urlParams: { start, end },
   } = useUrlParams();

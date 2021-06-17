@@ -19,30 +19,31 @@ import {
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import { CasesService } from '../../services';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CaseStatuses,
+  CommentAttributes,
+  CommentType,
+  ESCaseAttributes,
+  excess,
+  SUB_CASE_SAVED_OBJECT,
+  SubCaseAttributes,
+  SubCasePatchRequest,
+  SubCaseResponse,
   SubCasesPatchRequest,
   SubCasesPatchRequestRt,
-  CommentType,
-  excess,
-  throwErrors,
   SubCasesResponse,
-  SubCasePatchRequest,
-  SubCaseAttributes,
-  ESCaseAttributes,
-  SubCaseResponse,
   SubCasesResponseRt,
+  throwErrors,
   User,
-  CommentAttributes,
-} from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+} from '../../../common';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {
   createAlertUpdateRequest,
+  createCaseError,
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
 } from '../../common';
-import { createCaseError } from '../../common/error';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 import { CasesClientArgs } from '../types';
 import { CasesClientInternal } from '../client_internal';

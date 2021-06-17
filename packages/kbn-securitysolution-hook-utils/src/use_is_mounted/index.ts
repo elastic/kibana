@@ -10,8 +10,6 @@ import { useCallback, useEffect, useRef } from 'react';
 
 type GetIsMounted = () => boolean;
 
-// TODO: This is probably better off in another package such as kbn-securitysolution-hook-utils
-
 /**
  *
  * @returns A {@link GetIsMounted} getter function returning whether the component is currently mounted

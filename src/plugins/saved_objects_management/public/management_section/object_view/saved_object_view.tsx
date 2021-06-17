@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -86,7 +86,7 @@ export class SavedObjectEdition extends Component<
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
-      <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
+      <div data-test-subj="savedObjectsEdit">
         <Header
           canEdit={canEdit}
           canDelete={canDelete && !object?.meta.hiddenType}
@@ -95,6 +95,7 @@ export class SavedObjectEdition extends Component<
           onDeleteClick={() => this.delete()}
           viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
         />
+        <EuiSpacer size="l" />
         {notFoundType && (
           <>
             <EuiSpacer size="s" />
@@ -119,7 +120,7 @@ export class SavedObjectEdition extends Component<
             />
           </>
         )}
-      </EuiPageContent>
+      </div>
     );
   }
 

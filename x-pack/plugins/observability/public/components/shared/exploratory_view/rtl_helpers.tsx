@@ -38,6 +38,7 @@ import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/s
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { ListItem } from '../../../hooks/use_values_list';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -240,7 +241,7 @@ export const mockAppIndexPattern = () => {
   return { spy, loadIndexPattern };
 };
 
-export const mockUseValuesList = (values?: string[]) => {
+export const mockUseValuesList = (values?: ListItem[]) => {
   const onRefreshTimeRange = jest.fn();
   const spy = jest.spyOn(useValuesListHook, 'useValuesList').mockReturnValue({
     values: values ?? [],
