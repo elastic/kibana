@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import {
   getCaseDetailsUrl,
@@ -14,7 +14,7 @@ import {
 } from '../../../common/components/link_to/redirect_to_case';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesNavProps } from '../../../cases/components/all_cases';
 
@@ -26,35 +26,38 @@ const RecentCasesComponent = () => {
     application: { navigateToApp },
   } = useKibana().services;
 
-  const goToCases = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`);
-    },
-    [navigateToApp]
-  );
-
   const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
 
   return casesUi.getRecentCases({
     allCasesNavigation: {
       href: formatUrl(getCaseUrl()),
-      onClick: goToCases,
+      onClick: async (e) => {
+        if (e) {
+          e.preventDefault();
+        }
+        return navigateToApp(CASES_APP_ID);
+      },
     },
     caseDetailsNavigation: {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
-      onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async ({ detailName, subCaseId, search }, e) => {
+        if (e) {
+          e.preventDefault();
+        }
+        return navigateToApp(CASES_APP_ID, {
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },
     },
     createCaseNavigation: {
       href: formatUrl(getCreateCaseUrl()),
-      onClick: () => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      onClick: async (e) => {
+        if (e) {
+          e.preventDefault();
+        }
+        return navigateToApp(CASES_APP_ID, {
           path: getCreateCaseUrl(),
         });
       },

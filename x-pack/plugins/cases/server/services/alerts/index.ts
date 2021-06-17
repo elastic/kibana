@@ -10,9 +10,8 @@ import { isEmpty } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
-import { AlertInfo } from '../../common';
-import { createCaseError } from '../../common/error';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
+import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;

@@ -16,22 +16,22 @@ import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { CASES_SUB_PLUGIN_ID } from '../../../common/constants';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
     subCaseId?: string;
   }>();
   const search = useGetUrlSearch(navTabs.case);
-  const {
-    application: { navigateToApp },
-  } = useKibana().services;
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(CASES_SUB_PLUGIN_ID, { path: getCaseUrl(search) });
+      navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
     }
   }, [navigateToApp, userPermissions, search]);
 

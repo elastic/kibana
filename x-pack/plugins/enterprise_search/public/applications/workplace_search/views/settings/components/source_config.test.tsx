@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiConfirmModal } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 
 import { SourceConfig } from './source_config';
@@ -39,16 +38,6 @@ describe('SourceConfig', () => {
     saveConfig.prop('onDeleteConfig')!();
 
     expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({
-      sourceConfigData,
-      dataLoading: true,
-    });
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('handles delete click', () => {

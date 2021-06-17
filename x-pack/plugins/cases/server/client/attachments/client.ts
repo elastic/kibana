@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentResponse } from '../../../common/api';
+import { CommentResponse } from '../../../common';
 
 import { CasesClientInternal } from '../client_internal';
 import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';

@@ -18,12 +18,12 @@ import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
-import { APP_ID, CASES_SUB_PLUGIN_ID } from '../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const {
-    cases,
     application: { navigateToApp },
+    cases,
   } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
@@ -39,7 +39,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(CASES_SUB_PLUGIN_ID, {
+      navigateToApp(CASES_APP_ID, {
         path: getCaseUrl(search),
       });
     }

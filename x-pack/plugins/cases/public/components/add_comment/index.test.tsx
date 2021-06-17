@@ -11,7 +11,6 @@ import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
 import { TestProviders } from '../../common/mock';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -50,15 +49,12 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     usePostCommentMock.mockImplementation(() => defaultPostComment);
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
   it('should post comment on submit click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...addCommentProps} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -87,9 +83,7 @@ describe('AddComment ', () => {
     usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, showLoading: true }} />
-        </Router>
+        <AddComment {...{ ...addCommentProps, showLoading: true }} />
       </TestProviders>
     );
 
@@ -103,9 +97,7 @@ describe('AddComment ', () => {
     usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...addCommentProps} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -118,9 +110,7 @@ describe('AddComment ', () => {
     usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, userCanCrud: false }} />
-        </Router>
+        <AddComment {...{ ...addCommentProps, userCanCrud: false }} />
       </TestProviders>
     );
 
@@ -132,9 +122,7 @@ describe('AddComment ', () => {
     const ref = React.createRef<AddCommentRefObject>();
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...addCommentProps} ref={ref} />
-        </Router>
+        <AddComment {...addCommentProps} ref={ref} />
       </TestProviders>
     );
 
@@ -165,9 +153,7 @@ describe('AddComment ', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
-          <Router history={mockHistory}>
-            <AddComment {...addCommentProps} />
-          </Router>
+          <AddComment {...addCommentProps} />
         </CasesTimelineIntegrationProvider>
       </TestProviders>
     );

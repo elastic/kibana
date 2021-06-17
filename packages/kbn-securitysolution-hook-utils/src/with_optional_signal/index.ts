@@ -12,8 +12,6 @@ interface SignalArgs {
 
 export type OptionalSignalArgs<Args> = Omit<Args, 'signal'> & Partial<SignalArgs>;
 
-// TODO: This is probably better off in another package such as kbn-securitysolution-hook-utils
-
 /**
  *
  * @param fn an async function receiving an AbortSignal argument

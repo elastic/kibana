@@ -17,7 +17,7 @@ import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { Create } from '../components/create';
 import * as i18n from './translations';
-import { CASES_SUB_PLUGIN_ID } from '../../../common/constants';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
@@ -37,7 +37,7 @@ export const CreateCasePage = React.memo(() => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.crud) {
-      navigateToApp(CASES_SUB_PLUGIN_ID, {
+      navigateToApp(CASES_APP_ID, {
         path: getCaseUrl(search),
       });
     }
