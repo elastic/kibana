@@ -238,9 +238,12 @@ exports.Cluster = class Cluster {
    * @param {Object} options
    * @property {string|Array} options.esArgs
    * @property {string} options.esJavaOpts
+   * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, options = {}) {
+  _exec(installPath, opts = {}) {
+    const { skipNativeRealmSetup = false, ...options } = opts;
+
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -304,6 +307,10 @@ exports.Cluster = class Cluster {
 
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async (port) => {
+      if (skipNativeRealmSetup) {
+        return;
+      }
+
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,

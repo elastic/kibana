@@ -130,7 +130,6 @@ describe('migration v2', () => {
           license: 'basic',
           port: 9220,
           clusterName: 'es-test-cluster',
-          esArgs: ['xpack.security.enabled=false'],
           nodes: [
             {
               name: 'node-01',
