@@ -61,6 +61,7 @@ describe('EphemeralTaskLifecycle', () => {
         },
         ephemeral_tasks: {
           enabled: true,
+          request_capacity: 10,
         },
         ...config,
       },
@@ -95,6 +96,7 @@ describe('EphemeralTaskLifecycle', () => {
         config: {
           ephemeral_tasks: {
             enabled: false,
+            request_capacity: 10,
           },
         },
       });
@@ -115,7 +117,9 @@ describe('EphemeralTaskLifecycle', () => {
     });
 
     test('rejects tasks when ephemeral tasks are enabled and queue is full', () => {
-      const { opts } = initTaskLifecycleParams({ config: { request_capacity: 2 } });
+      const { opts } = initTaskLifecycleParams({
+        config: { ephemeral_tasks: { enabled: true, request_capacity: 2 } },
+      });
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 

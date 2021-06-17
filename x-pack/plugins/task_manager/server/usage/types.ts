@@ -7,6 +7,7 @@
 
 export interface TaskManagerUsage {
   ephemeral_tasks_enabled: boolean;
+  ephemeral_request_capacity: number;
   ephemeral_stats: {
     status: string;
     queued_tasks: {

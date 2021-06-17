@@ -12,7 +12,8 @@ import { TaskManagerUsage } from './types';
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
-  ephemeralTasksEnabled: boolean
+  ephemeralTasksEnabled: boolean,
+  ephemeralRequestCapacity: number
 ) {
   let lastMonitoredHealth: MonitoredHealth | null = null;
   monitoringStats$.subscribe((health) => {
@@ -27,6 +28,7 @@ export function createTaskManagerUsageCollector(
     fetch: async () => {
       return {
         ephemeral_tasks_enabled: ephemeralTasksEnabled,
+        ephemeral_request_capacity: ephemeralRequestCapacity,
         ephemeral_stats: {
           status: lastMonitoredHealth?.stats.ephemeral?.status ?? '',
           queued_tasks: {
@@ -52,6 +54,7 @@ export function createTaskManagerUsageCollector(
     },
     schema: {
       ephemeral_tasks_enabled: { type: 'boolean' },
+      ephemeral_request_capacity: { type: 'short' },
       ephemeral_stats: {
         status: { type: 'keyword' },
         queued_tasks: {
@@ -80,12 +83,14 @@ export function createTaskManagerUsageCollector(
 export function registerTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
-  ephemeralTasksEnabled: boolean
+  ephemeralTasksEnabled: boolean,
+  ephemeralRequestCapacity: number
 ) {
   const collector = createTaskManagerUsageCollector(
     usageCollection,
     monitoringStats$,
-    ephemeralTasksEnabled
+    ephemeralTasksEnabled,
+    ephemeralRequestCapacity
   );
   usageCollection.registerCollector(collector);
 }

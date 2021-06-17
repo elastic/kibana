@@ -15,6 +15,7 @@ describe('config validation', () => {
         "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
+          "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
@@ -67,6 +68,7 @@ describe('config validation', () => {
         "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
+          "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
@@ -106,6 +108,7 @@ describe('config validation', () => {
         "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
+          "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
         "max_attempts": 3,

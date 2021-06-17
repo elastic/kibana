@@ -108,7 +108,8 @@ export class TaskManagerPlugin
       registerTaskManagerUsageCollector(
         usageCollection,
         monitoredHealth$,
-        this.config.ephemeral_tasks.enabled
+        this.config.ephemeral_tasks.enabled,
+        this.config.ephemeral_tasks.request_capacity
       );
     }
 

@@ -162,7 +162,7 @@ export class EphemeralTaskLifecycle {
     if (this.lifecycleSubscription.closed) {
       return asErr(task);
     }
-    return pushIntoSet(this.ephemeralTaskQueue, this.config.request_capacity, task);
+    return pushIntoSet(this.ephemeralTaskQueue, this.config.ephemeral_tasks.request_capacity, task);
   }
 
   public get queuedTasks() {
