@@ -184,7 +184,12 @@ const FieldEditorFlyoutContentComponent = ({
 
   return (
     <>
-      <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180} fixedPanelWidths>
+      <FlyoutPanels.Group
+        flyoutClassName={euiFlyoutClassname}
+        maxWidth={1180}
+        data-test-subj="fieldEditor"
+        fixedPanelWidths
+      >
         {/* Editor panel */}
         <FlyoutPanels.Item width={600}>
           <FlyoutPanels.Content>
