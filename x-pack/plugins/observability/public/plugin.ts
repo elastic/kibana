@@ -6,11 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, of } from 'rxjs';
-import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+import { BehaviorSubject, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ConfigSchema } from '.';
 import {
   AppMountParameters,
   AppUpdater,
@@ -28,16 +26,19 @@ import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
+import { CasesUiStart } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import { CASES_APP_ID } from './components/app/cases/constants';
+import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry } from './services/navigation_registry';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
-import { ConfigSchema } from '.';
-import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
-import { createLazyObservabilityPageTemplate } from './components/shared';
-import { CASES_APP_ID } from './components/app/cases/constants';
-import { CasesUiStart } from '../../cases/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -67,6 +68,7 @@ export class Plugin
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly alertsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -115,6 +117,7 @@ export class Plugin
       mount,
       updater$,
     });
+
     if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
@@ -124,7 +127,7 @@ export class Plugin
         category,
         euiIconType,
         mount,
-        updater$,
+        updater$: this.alertsAppUpdater$,
       });
     }
 
@@ -172,13 +175,28 @@ export class Plugin
     }
 
     this.navigationRegistry.registerSections(
-      of([
-        {
-          label: '',
-          sortKey: 100,
-          entries: [{ label: 'Overview', app: 'observability-overview', path: '/overview' }],
-        },
-      ])
+      from(coreSetup.getStartServices()).pipe(
+        map(([coreStart]) => {
+          const shouldShowAlerts = config.unsafe.alertingExperience.enabled;
+          const shouldShowCases =
+            config.unsafe.cases.enabled &&
+            coreStart.application.capabilities.observabilityCases.read_cases;
+
+          return [
+            {
+              label: '',
+              sortKey: 100,
+              entries: [
+                { label: 'Overview', app: 'observability-overview', path: '/overview' },
+                ...(shouldShowAlerts
+                  ? [{ label: 'Alerts', app: 'observability-alerts', path: '/' }]
+                  : []),
+                ...(shouldShowCases ? [{ label: 'Cases', app: CASES_APP_ID, path: '/' }] : []),
+              ],
+            },
+          ];
+        })
+      )
     );
 
     return {
@@ -190,6 +208,7 @@ export class Plugin
       },
     };
   }
+
   public start({ application }: CoreStart) {
     toggleOverviewLinkInNav(this.appUpdater$, this.casesAppUpdater$, application);
 

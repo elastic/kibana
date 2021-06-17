@@ -13,11 +13,13 @@ import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permi
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { CaseCallOut, permissionsReadOnlyErrorMessage } from '../../components/app/cases/callout';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
     application: { navigateToApp },
   } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
@@ -30,7 +32,7 @@ export const CaseDetailsPage = React.memo(() => {
   }
 
   return caseId != null ? (
-    <>
+    <ObservabilityPageTemplate>
       {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
         <CaseCallOut
           title={permissionsReadOnlyErrorMessage.title}
@@ -42,7 +44,7 @@ export const CaseDetailsPage = React.memo(() => {
         subCaseId={subCaseId}
         userCanCrud={userPermissions?.crud ?? false}
       />
-    </>
+    </ObservabilityPageTemplate>
   ) : null;
 });
 
