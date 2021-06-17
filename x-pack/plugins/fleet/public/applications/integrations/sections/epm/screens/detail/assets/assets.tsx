@@ -206,7 +206,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                         });
                         return (
                           <>
-                            <EuiSplitPanel.Inner onClick={() => {}} grow={false} key={idx}>
+                            <EuiSplitPanel.Inner grow={false} key={idx}>
                               <EuiText size="m">
                                 <p>
                                   {pathToObjectInApp ? (

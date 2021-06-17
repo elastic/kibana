@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -66,7 +66,14 @@ interface PackagePoliciesPanelProps {
   version: string;
 }
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
-  const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(null);
+  const { search } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const agentPolicyIdFromParams = useMemo(() => queryParams.get('addAgentToPolicyId'), [
+    queryParams,
+  ]);
+  const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
+    agentPolicyIdFromParams
+  );
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);

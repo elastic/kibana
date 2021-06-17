@@ -19,10 +19,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { ApplicationStart } from 'kibana/public';
 
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type {
   AgentPolicy,
   PackageInfo,
@@ -43,6 +45,7 @@ import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
+import { pagePathGetters } from '../../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { CreatePackagePolicyPageLayout } from './components';
@@ -60,7 +63,7 @@ const StepsWithLessPadding = styled(EuiSteps)`
 `;
 
 const CustomEuiBottomBar = styled(EuiBottomBar)`
-  // Set a relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar
+  /* A relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar */
   z-index: 50;
 `;
 
@@ -280,6 +283,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         );
       }
 
+      const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
+
+      const fromPackageWithoutAgentsAssigned =
+        from === 'package' && packageInfo && agentPolicy && agentCount === 0;
+
+      const hasAgentsAssigned = agentCount && agentPolicy;
+
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
           defaultMessage: `'{packagePolicyName}' integration added.`,
@@ -287,22 +297,48 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
-        text:
-          agentCount && agentPolicy
-            ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
-                values: {
-                  agentPolicyName: agentPolicy.name,
-                },
-              })
-            : (params as AddToPolicyParams)?.policyId && agentPolicy && agentCount === 0
-            ? i18n.translate('xpack.fleet.createPackagePolicy.addAgentNextNotification', {
+        text: fromPolicyWithoutAgentsAssigned
+          ? i18n.translate(
+              'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
+              {
                 defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
                 values: {
-                  agentPolicyName: agentPolicy.name,
+                  agentPolicyName: agentPolicy!.name,
                 },
-              })
-            : undefined,
+              }
+            )
+          : fromPackageWithoutAgentsAssigned
+          ? toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.integrationsContextaddAgentNextNotificationMessage"
+                defaultMessage="Next, {link} to start ingesting data."
+                values={{
+                  link: (
+                    <EuiLink
+                      href={`#${
+                        pagePathGetters.integration_details_policies({
+                          pkgkey: `${packageInfo!.name}-${packageInfo!.version}`,
+                          addAgentToPolicyId: agentPolicy!.id,
+                        })[1]
+                      }`}
+                    >
+                      {i18n.translate(
+                        'xpack.fleet.createPackagePolicy.integrationsContextAddAgentLinkMessage',
+                        { defaultMessage: 'add an agent' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )
+          : hasAgentsAssigned
+          ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
+              defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+              values: {
+                agentPolicyName: agentPolicy!.name,
+              },
+            })
+          : undefined,
         'data-test-subj': 'packagePolicyCreateSuccessToast',
       });
     } else {
@@ -312,6 +348,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       setFormState('VALID');
     }
   }, [
+    from,
+    packageInfo,
     agentCount,
     agentPolicy,
     formState,

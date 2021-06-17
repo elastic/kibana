@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { stringify } from 'query-string';
+
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -87,10 +89,10 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
   ],
-  integration_details_policies: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/policies${integration ? `?integration=${integration}` : ''}`,
-  ],
+  integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
+    const qs = stringify({ integration, addAgentToPolicyId });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
+  },
   integration_details_assets: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
