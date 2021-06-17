@@ -28,7 +28,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
     reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar'],
+    seriesTypes: ['line', 'bar', 'area'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },

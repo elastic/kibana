@@ -30,7 +30,6 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
     yAxisColumns: [
       {
         sourceField: RECORDS_FIELD,
-        label: 'Transactions',
       },
     ],
     hasOperationType: false,
