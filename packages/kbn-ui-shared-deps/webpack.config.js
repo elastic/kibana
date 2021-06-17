@@ -7,6 +7,7 @@
  */
 
 const Path = require('path');
+const Os = require('os');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
@@ -14,7 +15,6 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
-const webpack = require('webpack');
 const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
@@ -31,7 +31,8 @@ module.exports = {
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  devtool: '#cheap-source-map',
+  //
+  devtool: 'cheap-source-map',
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -39,6 +40,7 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
+    futureEmitAssets: true,
   },
 
   module: {
@@ -110,6 +112,7 @@ module.exports = {
   optimization: {
     minimizer: [
       new CssMinimizerPlugin({
+        parallel: Math.min(Os.cpus().length, 2),
         minimizerOptions: {
           preset: [
             'default',
@@ -123,7 +126,7 @@ module.exports = {
         cache: false,
         sourceMap: false,
         extractComments: false,
-        parallel: false,
+        parallel: Math.min(Os.cpus().length, 2),
         terserOptions: {
           compress: true,
           mangle: true,
@@ -153,9 +156,6 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"',
     }),
     new CompressionPlugin({
       algorithm: 'brotliCompress',
