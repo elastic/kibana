@@ -480,7 +480,10 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      const resp = await pushCase(
+        { caseId: basicCase.id, connectorId, caseUrl: `${CASES_URL}/${basicCase.id}` },
+        abortCtrl.signal
+      );
       expect(resp).toEqual(pushedCase);
     });
   });

@@ -94,7 +94,6 @@ export const routes = {
         detailName: t.string,
       }),
     },
-    breadcrumb: [casesBreadcrumbs.cases],
   },
   '/alerts': {
     handler: (routeParams: any) => {
