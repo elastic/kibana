@@ -12,6 +12,8 @@ import {
   RuleRegistryPluginSetupContract,
 } from '../../../../rule_registry/server';
 
+type LifecycleRuleTypeCreator = ReturnType<typeof createLifecycleRuleTypeFactory>;
+
 export interface RulesServiceSetupDeps {
   alerting: AlertingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -21,8 +23,8 @@ export interface RulesServiceSetupDeps {
 export interface RulesServiceStartDeps {}
 
 export interface RulesServiceSetup {
+  createLifecycleRuleType: LifecycleRuleTypeCreator;
   ruleDataClient: RuleDataClient;
-  createLifecycleRuleType: ReturnType<typeof createLifecycleRuleTypeFactory>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

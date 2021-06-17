@@ -11,12 +11,10 @@ import moment from 'moment';
 import { AlertTypeState, RecoveredActionGroup } from '../../../../../alerting/common';
 import {
   ActionGroupIdsOf,
-  AlertExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
 } from '../../../../../alerting/server';
-import { LifecycleAlertServices } from '../../../../../rule_registry/server';
+import { LifecycleRuleExecutor } from '../../../../../rule_registry/server';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -31,21 +29,16 @@ import { MetricThresholdAlertTypeParams } from './schema';
 import { AlertStates, Comparator } from './types';
 
 type MetricThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
-type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
+
+export const createMetricThresholdExecutor = (
+  libs: InfraBackendLibs
+): LifecycleRuleExecutor<
   MetricThresholdAlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   MetricThresholdActionGroups
-> & {
-  services: LifecycleAlertServices<AlertInstanceContext> &
-    AlertServices<AlertInstanceState, AlertInstanceContext, MetricThresholdActionGroups>;
-};
-
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
-  services,
-  params,
-}: MetricThresholdAlertExecutorOptions): Promise<AlertTypeState | void> => {
+> => async ({ services, params }): Promise<AlertTypeState | void> => {
   const { criteria } = params;
   if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
