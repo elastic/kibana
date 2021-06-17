@@ -6,7 +6,6 @@
  */
 
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
-import { errorRenderer, debugRenderer } from '../../../../../src/plugins/expression_error/public';
 
-export const renderFunctions = [revealImageRenderer, errorRenderer, debugRenderer];
+export const renderFunctions = [revealImageRenderer];
 export const renderFunctionFactories = [];
