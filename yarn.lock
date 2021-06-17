@@ -1359,10 +1359,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@30.0.0":
-  version "30.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-30.0.0.tgz#e19ad8b94928aa9bac5d7facc488fa69b683ff1e"
-  integrity sha512-r22T2dlW3drEmrIx6JNlOOzSp0JCkI/qbIfmvzdMBu8E8hITkJTaXJaLsNN4mz9EvR9jEM8XQQPQXOFKJhWixw==
+"@elastic/charts@30.1.0":
+  version "30.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-30.1.0.tgz#eb9b3348c149ce13f74876738a9d2899b6b10067"
+  integrity sha512-aUfXRQYQopm+6O48tEO0v/w6fETYORGiSPBRtqlq5xPncZGhGnQbgXVNQsPngYqapnKpOupXAqzjopF+RJ4QWg==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2617,6 +2617,10 @@
   uid ""
 
 "@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+  version "0.0.0"
+  uid ""
+
+"@kbn/common-utils@link:bazel-bin/packages/kbn-common-utils":
   version "0.0.0"
   uid ""
 
@@ -9293,17 +9297,16 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^90.0.0:
-  version "90.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-90.0.0.tgz#1b18960a31a12884981bdc270b43c4356ce7a65a"
-  integrity sha512-k+GMmNb7cmuCCctQvUIeNxDGSq8DJauO+UKQS2qLT8aA36CPEcv8rpFepf6lRkNaIlfwdCUt/0B5bZDw3wY2yw==
+chromedriver@^91.0.1:
+  version "91.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-91.0.1.tgz#4d70a569901e356c978a41de3019c464f2a8ebd0"
+  integrity sha512-9LktpHiUxM4UWUsr+jI1K1YKx2GENt6BKKJ2mibPj1Wc6ODzX/3fFIlr8CZ4Ftuyga+dHTTbAyPWKwKvybEbKA==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.21.1"
     del "^6.0.0"
     extract-zip "^2.0.1"
     https-proxy-agent "^5.0.0"
-    mkdirp "^1.0.4"
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.1"
 
@@ -10870,7 +10873,7 @@ d3-array@>=2.5, d3-array@^2.3.0, d3-array@^2.7.1:
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.8.0.tgz#f76e10ad47f1f4f75f33db5fc322eb9ffde5ef23"
   integrity sha512-6V272gsOeg7+9pTW1jSYOR1QE37g95I3my1hBmY+vOUNHRrk9yt4OTz/gK7PMkVAVDrYYq4mq3grTiZ8iJdNIw==
 
-d3-cloud@1.2.5, d3-cloud@^1.2.5:
+d3-cloud@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/d3-cloud/-/d3-cloud-1.2.5.tgz#3e91564f2d27fba47fcc7d812eb5081ea24c603d"
   integrity sha512-4s2hXZgvs0CoUIw31oBAGrHt9Kt/7P9Ik5HIVzISFiWkD0Ga2VLAuO/emO/z1tYIpE7KG2smB4PhMPfFMJpahw==
@@ -20301,9 +20304,9 @@ normalize-url@^3.0.0:
   integrity sha512-U+JJi7duF1o+u2pynbp2zXDW2/PADgC30f0GsHZtRh+HOcXHnw137TrNlyxxRvWW5fjKd3bcLHPxofWuCjaeZg==
 
 normalize-url@^4.1.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
-  integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.1.tgz#0dd90cf1288ee1d1313b87081c9a5932ee48518a"
+  integrity sha512-9UZCFRHQdNrfTpGg8+1INIg93B6zE0aXMVFkw1WFwvO4SlZywU6aLg5Of0Ap/PgcbSw4LNxvMWXMeugwMCX0AA==
 
 now-and-later@^2.0.0:
   version "2.0.0"

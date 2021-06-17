@@ -5,9 +5,28 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash/fp';
+import { useCallback } from 'react';
 import { useKibana } from '../../utils/kibana_react';
+
+export const casesBreadcrumbs = {
+  cases: {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesLinkText', {
+      defaultMessage: 'Cases',
+    }),
+  },
+  create: {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesCreateLinkText', {
+      defaultMessage: 'Create',
+    }),
+  },
+  configure: {
+    text: i18n.translate('xpack.observability.breadcrumbs.casesConfigureLinkText', {
+      defaultMessage: 'Configure',
+    }),
+  },
+};
 
 export const getCaseDetailsUrl = ({ id, subCaseId }: { id: string; subCaseId?: string }) => {
   if (subCaseId) {

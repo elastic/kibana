@@ -11,7 +11,6 @@ exports[`TOCEntry is rendered 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -26,6 +25,7 @@ exports[`TOCEntry is rendered 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -39,12 +39,12 @@ exports[`TOCEntry is rendered 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -85,7 +85,6 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -100,6 +99,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -113,12 +113,12 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -159,7 +159,6 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -174,6 +173,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -187,12 +187,12 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -233,7 +233,6 @@ exports[`TOCEntry props isReadOnly 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -248,6 +247,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -292,7 +292,6 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -307,6 +306,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "showAtZoomLevel": [Function],
         }
       }
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -320,12 +320,12 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
