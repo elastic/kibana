@@ -7,7 +7,7 @@
 
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
