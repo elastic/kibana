@@ -76,6 +76,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:observability/getReporters",
             "cases:1.0.0-zeta1:observability/getUserActions",
             "cases:1.0.0-zeta1:observability/findConfigurations",
+            "cases:1.0.0-zeta1:observability/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:observability/getAlertsAttachedToCase",
           ]
         `);
       });
@@ -115,6 +117,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:security/getReporters",
             "cases:1.0.0-zeta1:security/getUserActions",
             "cases:1.0.0-zeta1:security/findConfigurations",
+            "cases:1.0.0-zeta1:security/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:security/getAlertsAttachedToCase",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
@@ -164,6 +168,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:security/getReporters",
             "cases:1.0.0-zeta1:security/getUserActions",
             "cases:1.0.0-zeta1:security/findConfigurations",
+            "cases:1.0.0-zeta1:security/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:security/getAlertsAttachedToCase",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
@@ -179,6 +185,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:obs/getReporters",
             "cases:1.0.0-zeta1:obs/getUserActions",
             "cases:1.0.0-zeta1:obs/findConfigurations",
+            "cases:1.0.0-zeta1:obs/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:obs/getAlertsAttachedToCase",
           ]
         `);
       });
@@ -219,6 +227,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:security/getReporters",
             "cases:1.0.0-zeta1:security/getUserActions",
             "cases:1.0.0-zeta1:security/findConfigurations",
+            "cases:1.0.0-zeta1:security/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:security/getAlertsAttachedToCase",
             "cases:1.0.0-zeta1:security/createCase",
             "cases:1.0.0-zeta1:security/deleteCase",
             "cases:1.0.0-zeta1:security/updateCase",
@@ -234,6 +244,8 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:other-security/getReporters",
             "cases:1.0.0-zeta1:other-security/getUserActions",
             "cases:1.0.0-zeta1:other-security/findConfigurations",
+            "cases:1.0.0-zeta1:other-security/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:other-security/getAlertsAttachedToCase",
             "cases:1.0.0-zeta1:other-security/createCase",
             "cases:1.0.0-zeta1:other-security/deleteCase",
             "cases:1.0.0-zeta1:other-security/updateCase",
@@ -249,12 +261,16 @@ describe(`cases`, () => {
             "cases:1.0.0-zeta1:obs/getReporters",
             "cases:1.0.0-zeta1:obs/getUserActions",
             "cases:1.0.0-zeta1:obs/findConfigurations",
+            "cases:1.0.0-zeta1:obs/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:obs/getAlertsAttachedToCase",
             "cases:1.0.0-zeta1:other-obs/getCase",
             "cases:1.0.0-zeta1:other-obs/getComment",
             "cases:1.0.0-zeta1:other-obs/getTags",
             "cases:1.0.0-zeta1:other-obs/getReporters",
             "cases:1.0.0-zeta1:other-obs/getUserActions",
             "cases:1.0.0-zeta1:other-obs/findConfigurations",
+            "cases:1.0.0-zeta1:other-obs/getCaseIDsByAlertID",
+            "cases:1.0.0-zeta1:other-obs/getAlertsAttachedToCase",
           ]
         `);
       });

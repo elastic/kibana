@@ -19,6 +19,8 @@ const readOperations: string[] = [
   'getReporters',
   'getUserActions',
   'findConfigurations',
+  'getCaseIDsByAlertID',
+  'getAlertsAttachedToCase',
 ];
 const writeOperations: string[] = [
   'createCase',
