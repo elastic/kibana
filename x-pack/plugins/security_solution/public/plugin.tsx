@@ -44,6 +44,7 @@ import {
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
+  CASES_APP_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
@@ -277,7 +278,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.case}`,
+      id: CASES_APP_ID,
       title: CASE,
       order: 9002,
       euiIconType: APP_ICON_SOLUTION,

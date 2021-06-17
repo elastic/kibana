@@ -21,39 +21,37 @@ import {
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
-  throwErrors,
-  excess,
-  CasesResponseRt,
-  ESCasePatchRequest,
-  CasePatchRequest,
-  CasesResponse,
-  CaseStatuses,
-  CasesPatchRequestRt,
-  CommentType,
-  ESCaseAttributes,
-  CaseType,
-  CasesPatchRequest,
   AssociationType,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CasePatchRequest,
+  CasesPatchRequest,
+  CasesPatchRequestRt,
+  CasesResponse,
+  CasesResponseRt,
+  CaseStatuses,
+  CaseType,
   CommentAttributes,
-} from '../../../common/api';
+  CommentType,
+  ENABLE_CASE_CONNECTOR,
+  ESCaseAttributes,
+  ESCasePatchRequest,
+  excess,
+  MAX_CONCURRENT_SEARCHES,
+  SUB_CASE_SAVED_OBJECT,
+  throwErrors,
+} from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
 
 import { CasesService } from '../../services';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
-import {
   createAlertUpdateRequest,
-  transformCaseConnectorToEsConnector,
+  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
+  transformCaseConnectorToEsConnector,
 } from '../../common';
-import { createCaseError } from '../../common/error';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';

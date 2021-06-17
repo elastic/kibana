@@ -15,30 +15,28 @@ import {
 } from 'src/core/server';
 import {
   AssociationType,
+  CASE_SAVED_OBJECT,
+  CaseResponse,
+  CaseResponseRt,
   CaseSettings,
   CaseStatuses,
   CaseType,
-  CaseResponse,
-  CaseResponseRt,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
   CommentType,
   ESCaseAttributes,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
-} from '../../../common/api';
+} from '../../../common';
 import {
   transformESConnectorToCaseConnector,
   flattenCommentSavedObjects,
   flattenSubCaseSavedObject,
   transformNewComment,
 } from '..';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';

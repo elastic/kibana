@@ -12,10 +12,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
+import { CASE_COMMENTS_URL, FindQueryParamsRt, throwErrors, excess } from '../../../../common';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
 export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
   router.get(

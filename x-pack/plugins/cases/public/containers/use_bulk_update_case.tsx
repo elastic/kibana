@@ -141,12 +141,13 @@ export const useUpdateCases = (): UseUpdateCases => {
     []
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, updateBulkStatus, dispatchResetIsUpdated };
 };
