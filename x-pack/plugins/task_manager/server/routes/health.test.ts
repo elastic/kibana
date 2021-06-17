@@ -23,6 +23,7 @@ import {
 import { ServiceStatusLevels } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
+import { FillPoolResult } from '../lib/fill_pool';
 
 jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
@@ -510,11 +511,13 @@ function mockHealthStats(overrides = {}) {
             duration: [500, 400, 3000],
             claim_conflicts: [0, 100, 75],
             claim_mismatches: [0, 100, 75],
+            claim_duration: [0, 100, 75],
             result_frequency_percent_as_number: [
-              'NoTasksClaimed',
-              'NoTasksClaimed',
-              'NoTasksClaimed',
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
+              FillPoolResult.NoTasksClaimed,
             ],
+            persistence: [],
           },
         },
       },
