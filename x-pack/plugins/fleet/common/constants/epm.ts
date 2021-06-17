@@ -16,26 +16,26 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
 /*
  Package rules:
-|               | requiredPackages | defaultPackages | autoUpdatePackages |
-|---------------|:----------------:|:---------------:|:------------------:|
-| Removable     |         ❌        |        ✔️        |          ✔️         |
-| Auto-installs |         ❌        |        ✔️        |          ❌         |
-| Auto-updates  |         ❌        |        ✔️        |          ✔️         |
+|               | unremovablePackages | defaultPackages | autoUpdatePackages |
+|---------------|:---------------------:|:---------------:|:------------------:|
+| Removable     |         ❌             |        ✔️        |          ✔️         |
+| Auto-installs |         ❌             |        ✔️        |          ❌         |
+| Auto-updates  |         ❌             |        ✔️        |          ✔️         |
 
 `endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
 removable, but it doesn't install by default. Following the table, it needs to
-be in `requiredPackages` and in `autoUpdatePackages`, but not in
+be in `unremovablePackages` and in `autoUpdatePackages`, but not in
 `defaultPackages`.
 */
 
-export const requiredPackages = [
+export const unremovablePackages = [
   FLEET_SYSTEM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
 ];
 
-export const defaultPackages = requiredPackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
+export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
 
 export const autoUpdatePackages = [FLEET_ENDPOINT_PACKAGE];
 

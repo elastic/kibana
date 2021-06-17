@@ -7,7 +7,7 @@
 
 import type { SavedObject } from 'src/core/server';
 
-import { requiredPackages, installationStatuses } from '../../../../common';
+import { unremovablePackages, installationStatuses } from '../../../../common';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
@@ -32,8 +32,8 @@ export {
 } from './install';
 export { removeInstallation } from './remove';
 
-export function isRequiredPackage(value: string): boolean {
-  return requiredPackages.includes(value);
+export function isUnremovablePackage(value: string): boolean {
+  return unremovablePackages.includes(value);
 }
 
 export class PackageNotInstalledError extends Error {

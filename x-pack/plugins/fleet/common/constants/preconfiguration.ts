@@ -9,7 +9,7 @@ import type { PreconfiguredAgentPolicy } from '../types';
 
 import {
   defaultPackages,
-  requiredPackages,
+  unremovablePackages,
   FLEET_SYSTEM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   autoUpdatePackages,
@@ -61,11 +61,6 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
-
-export const REQUIRED_PACKAGES = requiredPackages.map((name) => ({
-  name,
-  version: PRECONFIGURATION_LATEST_KEYWORD,
-}));
 
 export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
   name,

@@ -28,7 +28,7 @@ import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom, isRequiredPackage } from './index';
+import { createInstallableFrom, isUnremovablePackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -125,7 +125,7 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: !isRequiredPackage(pkgName),
+    removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
   };
   const updated = { ...packageInfo, ...additions };
