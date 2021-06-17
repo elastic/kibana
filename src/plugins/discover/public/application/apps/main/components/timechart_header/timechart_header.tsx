@@ -77,8 +77,8 @@ export function TimechartHeader({
   });
   useEffect(() => {
     const subscription = savedSearchData$.subscribe((res) => {
-      if (res.chart && res.chart.fetchStatus !== data.fetchStatus) {
-        setData({ ...data, ...res.chart });
+      if (res && res.fetchStatus !== data.fetchStatus) {
+        setData({ ...data, ...res });
       }
     });
     return () => subscription.unsubscribe();
