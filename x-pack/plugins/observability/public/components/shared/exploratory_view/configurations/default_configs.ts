@@ -16,7 +16,6 @@ import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
 import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
 import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
 
-
 interface Props {
   reportType: keyof typeof ReportViewTypes;
   indexPattern: IndexPattern;

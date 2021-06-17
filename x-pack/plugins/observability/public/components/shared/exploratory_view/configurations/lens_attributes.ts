@@ -187,9 +187,8 @@ export class LensAttributes {
     };
   }
 
-  getCardinalityColumn(sourceField: string,
-    label?: string) {
-      return this.getNumberOperationColumn(sourceField, 'unique_count', label);
+  getCardinalityColumn(sourceField: string, label?: string) {
+    return this.getNumberOperationColumn(sourceField, 'unique_count', label);
   }
 
   getNumberColumn(
@@ -199,7 +198,12 @@ export class LensAttributes {
     label?: string
   ) {
     if (columnType === 'operation' || operationType) {
-      if (operationType === 'median' || operationType === 'average' || operationType === 'sum' || operationType === 'unique_count') {
+      if (
+        operationType === 'median' ||
+        operationType === 'average' ||
+        operationType === 'sum' ||
+        operationType === 'unique_count'
+      ) {
         return this.getNumberOperationColumn(sourceField, operationType, label);
       }
       if (operationType?.includes('th')) {
@@ -213,7 +217,11 @@ export class LensAttributes {
     sourceField: string,
     operationType: 'average' | 'median' | 'sum' | 'unique_count',
     label?: string
-  ): AvgIndexPatternColumn | MedianIndexPatternColumn | SumIndexPatternColumn | CardinalityIndexPatternColumn {
+  ):
+    | AvgIndexPatternColumn
+    | MedianIndexPatternColumn
+    | SumIndexPatternColumn
+    | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
       label:
@@ -243,7 +251,7 @@ export class LensAttributes {
       params: { percentile: Number(percentileValue.split('th')[0]) },
     };
   }
-  
+
   getDateHistogramColumn(sourceField: string): DateHistogramIndexPatternColumn {
     return {
       sourceField,
@@ -256,10 +264,10 @@ export class LensAttributes {
     };
   }
 
-  getTermsColumn(sourceField: string, label?: string) : TermsIndexPatternColumn{
+  getTermsColumn(sourceField: string, label?: string): TermsIndexPatternColumn {
     return {
       operationType: 'terms',
-      sourceField: sourceField,
+      sourceField,
       label: label || 'Top values of ' + sourceField,
       dataType: 'string',
       isBucketed: true,
@@ -268,10 +276,10 @@ export class LensAttributes {
         size: 10,
         orderBy: {
           type: 'alphabetical',
-          fallback: false
+          fallback: false,
         },
         orderDirection: 'desc',
-      }
+      },
     };
   }
 
@@ -301,10 +309,8 @@ export class LensAttributes {
     } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
 
-    if(columnType === TERMS_COLUMN){
-      return this.getTermsColumn(
-        fieldName, columnLabel || label
-      );
+    if (columnType === TERMS_COLUMN) {
+      return this.getTermsColumn(fieldName, columnLabel || label);
     }
 
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
