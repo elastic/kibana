@@ -326,7 +326,7 @@ describe('DraggableWrapperHoverContent', () => {
     const aggregatableStringField = 'cloud.account.id';
     const draggableId = 'draggable.id';
 
-    [/* false,*/ true].forEach((showTopN) => {
+    [false, true].forEach((showTopN) => {
       [value, null].forEach((maybeValue) => {
         [draggableId, undefined].forEach((maybeDraggableId) => {
           const shouldRender = !showTopN && maybeValue != null && maybeDraggableId != null;

@@ -84,6 +84,7 @@ const AlertsTableComponent: React.FC<Props> = ({
         excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         title: i18n.ALERTS_TABLE_TITLE,
+        // TODO: avoid passing this through the store
         unit: (n: number) => i18n.UNIT(n),
       })
     );

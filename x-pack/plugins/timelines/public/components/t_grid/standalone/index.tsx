@@ -291,15 +291,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             data-timeline-id={STANDALONE_ID}
             data-test-subj={`events-container-loading-${loading}`}
           >
-            {/* <TimelineRefetch
-                id={id}
-                inputId="global"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              /> */}
-
-            {/* {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />} */}
             <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
               <ScrollableFlexItem grow={1}>
                 <StatefulBody
@@ -309,7 +300,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                   id={STANDALONE_ID}
                   isEventViewer={true}
                   onRuleChange={onRuleChange}
-                  // refetch={refetch}
                   renderCellValue={renderCellValue}
                   rowRenderers={rowRenderers}
                   sort={sort}

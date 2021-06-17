@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
+// eslint-disable-next-line no-duplicate-imports
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -22,6 +23,7 @@ import type {
   DataProvider,
   RowRenderer,
 } from '../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   esQuery,
@@ -301,15 +303,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              {/* <TimelineRefetch
-                id={id}
-                inputId="global"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              /> */}
-
-              {/* {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />} */}
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
@@ -319,7 +312,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     id={id}
                     isEventViewer={true}
                     onRuleChange={onRuleChange}
-                    // refetch={refetch}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
                     sort={sort}

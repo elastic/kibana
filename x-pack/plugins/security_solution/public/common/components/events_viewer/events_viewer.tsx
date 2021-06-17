@@ -14,7 +14,7 @@ import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
+import { KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -36,18 +36,21 @@ import {
   Query,
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
+import {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
-import {
-  defaultControlColumn,
-  ControlColumnProps,
-} from '../../../timelines/components/timeline/body/control_columns';
+import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -167,16 +170,14 @@ const EventsViewerComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
-  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
-
   useEffect(() => {
-    setIsTimelineLoading({ id, isLoading: isQueryLoading });
-  }, [id, isQueryLoading, setIsTimelineLoading]);
+    timelineActions.updateIsLoading({ id, isLoading: isQueryLoading });
+  }, [id, isQueryLoading]);
 
-  const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { queryFields, title, unit } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, id)
+  );
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 

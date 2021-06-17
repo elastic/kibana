@@ -7,7 +7,6 @@
 
 import { Direction } from '../../../../../../../common/search_strategy';
 import { ColumnHeaderOptions, SortDirection } from '../../../../../../../common/types/timeline';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { Sort } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {
@@ -35,7 +34,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
     case 'none':
       return Direction.desc;
     default:
-      return assertUnreachable(currentSort.sortDirection as never, 'Unhandled sort direction');
+      return Direction.desc;
   }
 };
 

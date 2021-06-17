@@ -59,7 +59,6 @@ export interface TGridModel extends TGridModelSettings {
   };
   /** Uniquely identifies the timeline */
   id: string;
-  /** TO DO sourcerer @X define this */
   indexNames: string[];
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/

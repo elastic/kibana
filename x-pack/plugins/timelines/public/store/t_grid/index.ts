@@ -60,7 +60,5 @@ export const createStore = (
     composeEnhancers(applyMiddleware(epicMiddleware))
   );
 
-  // epicMiddleware.run(createRootEpic<CombinedState<State>>());
-
   return store;
 };
