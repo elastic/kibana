@@ -19,6 +19,7 @@ import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
+export const numberOfRulesLabel = (count: number) => `${count} rule${count > 1 ? 's' : ''}`;
 
 const MAX_TO_SHOW_BY_CATEGORY = 8;
 
@@ -93,10 +94,12 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     <EuiBadge
       iconType="bell"
       color={inSetupMode ? 'default' : 'danger'}
-      onClickAriaLabel={numberOfAlertsLabel(alertCount)}
+      onClickAriaLabel={
+        inSetupMode ? numberOfRulesLabel(alertCount) : numberOfAlertsLabel(alertCount)
+      }
       onClick={() => setShowPopover(true)}
     >
-      {numberOfAlertsLabel(alertCount)}
+      {inSetupMode ? numberOfRulesLabel(alertCount) : numberOfAlertsLabel(alertCount)}
     </EuiBadge>
   );
 
