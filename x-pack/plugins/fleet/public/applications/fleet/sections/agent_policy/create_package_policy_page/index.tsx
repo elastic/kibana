@@ -495,7 +495,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             <PolicyBreadcrumb policyName={agentPolicy.name} policyId={agentPolicy.id} />
           )}
       <StepsWithLessPadding steps={steps} />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="xl" />
+      <EuiSpacer size="xl" />
       <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
