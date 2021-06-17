@@ -210,7 +210,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       const resSettings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-settings`,
+        path: `/_component_template/${logsTemplateName}@settings`,
       });
       expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
@@ -348,7 +348,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
-            id: 'logs-all_assets.test_logs-settings',
+            id: 'logs-all_assets.test_logs@settings',
             type: 'component_template',
           },
           {

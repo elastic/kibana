@@ -47,7 +47,7 @@ export default function (providerContext: FtrProviderContext) {
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
         `${templateName}@mappings`,
-        `${templateName}-settings`,
+        `${templateName}@settings`,
         `${templateName}-user_settings`,
       ]);
 
@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
 
       ({ body } = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${templateName}-settings`,
+        path: `/_component_template/${templateName}@settings`,
       }));
 
       // The settings override provided in the package is set in the settings component template
@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
           index_patterns: [`${templateName}-*`],
           composed_of: [
             `${templateName}@mappings`,
-            `${templateName}-settings`,
+            `${templateName}@settings`,
             `${templateName}-user_settings`,
           ],
         },
