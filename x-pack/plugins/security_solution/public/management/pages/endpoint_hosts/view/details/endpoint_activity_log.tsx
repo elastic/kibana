@@ -66,16 +66,6 @@ export const EndpointActivityLog = memo(
             },
           });
         }
-        if (!isIntersecting) {
-          dispatch({
-            type: 'endpointDetailsActivityLogUpdatePaging',
-            payload: {
-              disabled: false,
-              page,
-              pageSize,
-            },
-          });
-        }
       },
       [activityLogLoaded, dispatch, isPagingDisabled, page, pageSize]
     );
@@ -121,6 +111,12 @@ export const EndpointActivityLog = memo(
               <EuiFlexItem>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
                 {!activityLogLoading && !isPagingDisabled && <Sentinel ref={fetchMoreCallOut} />}
+                {isPagingDisabled && (
+                  <p>
+                    <EuiText color="subdued" textAlign="center">
+                      {i18.ACTIVITY_LOG.LogEntry.endOfLog}
+                    </EuiText>
+                  </p>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

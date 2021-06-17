@@ -19,6 +19,12 @@ export const ACTIVITY_LOG = {
     defaultMessage: 'Show more activity log',
   }),
   LogEntry: {
+    endOfLog: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
+      {
+        defaultMessage: 'Nothing more to show',
+      }
+    ),
     action: {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
