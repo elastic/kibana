@@ -23,7 +23,16 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
-import { AGENT_POLICY_API_ROUTES, GetAgentPoliciesResponse } from '../../../../../fleet/common';
+import {
+  AGENT_POLICY_API_ROUTES,
+  EPM_API_ROUTES,
+  GetAgentPoliciesResponse,
+  GetPackagesResponse,
+} from '../../../../../fleet/common';
+import {
+  PendingActionsHttpMockInterface,
+  pendingActionsHttpMock,
+} from '../../../common/lib/endpoint_pending_actions/mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
@@ -40,11 +49,15 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
 
         return {
           hosts: Array.from({ length: 10 }, () => {
-            return {
+            const endpoint = {
               metadata: generator.generateHostMetadata(),
               host_status: HostStatus.UNHEALTHY,
               query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
             };
+
+            generator.updateCommonInfo();
+
+            return endpoint;
           }),
           total: 10,
           request_page_size: 10,
@@ -88,6 +101,7 @@ export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPol
 
 type FleetApisHttpMockInterface = ResponseProvidersInterface<{
   agentPolicy: () => GetAgentPoliciesResponse;
+  packageList: () => GetPackagesResponse;
 }>;
 export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterface>([
   {
@@ -113,11 +127,24 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
       };
     },
   },
+  {
+    id: 'packageList',
+    method: 'get',
+    path: EPM_API_ROUTES.LIST_PATTERN,
+    handler() {
+      const generator = new EndpointDocGenerator('seed');
+
+      return {
+        response: [generator.generateEpmPackage()],
+      };
+    },
+  },
 ]);
 
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
   EndpointPolicyResponseHttpMockInterface &
-  FleetApisHttpMockInterface;
+  FleetApisHttpMockInterface &
+  PendingActionsHttpMockInterface;
 /**
  * HTTP Mocks that support the Endpoint List and Details page
  */
@@ -125,4 +152,5 @@ export const endpointPageHttpMock = composeHttpHandlerMocks<EndpointPageHttpMock
   endpointMetadataHttpMocks,
   endpointPolicyResponseHttpMock,
   fleetApisHttpMock,
+  pendingActionsHttpMock,
 ]);

@@ -6,22 +6,28 @@
  */
 
 import React, { Component } from 'react';
-
-import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
 import {
+  EDIT_FEATURES_LABEL,
+  EDIT_LAYER_SETTINGS_LABEL,
+  FIT_TO_DATA_LABEL,
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  EDIT_LAYER_LABEL,
-  FIT_TO_DATA_LABEL,
 } from '../action_labels';
+import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
+import { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
+  enableShapeEditing: (layerId: string) => void;
+  enablePointEditing: (layerId: string) => void;
   displayName: string;
-  editLayer: () => void;
+  openLayerSettings: () => void;
   escapedDisplayName: string;
   fitToBounds: (layerId: string) => void;
   isEditButtonDisabled: boolean;
@@ -34,10 +40,62 @@ export interface Props {
 
 interface State {
   isPopoverOpen: boolean;
+  supportsFeatureEditing: boolean;
+  canEditFeatures: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false };
+  state: State = { isPopoverOpen: false, supportsFeatureEditing: false, canEditFeatures: false };
+  private _isMounted = false;
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate() {
+    this._checkLayerEditable();
+  }
+
+  async _checkLayerEditable() {
+    if (!(this.props.layer instanceof VectorLayer)) {
+      return;
+    }
+    const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
+    const canEditFeatures = await this._getCanEditFeatures();
+    if (
+      !this._isMounted ||
+      (supportsFeatureEditing === this.state.supportsFeatureEditing &&
+        canEditFeatures === this.state.canEditFeatures)
+    ) {
+      return;
+    }
+    this.setState({ supportsFeatureEditing, canEditFeatures });
+  }
+
+  async _getCanEditFeatures(): Promise<boolean> {
+    const vectorLayer = this.props.layer as VectorLayer;
+    const layerSource = await this.props.layer.getSource();
+    if (!(layerSource instanceof ESSearchSource)) {
+      return false;
+    }
+    const isClustered =
+      (layerSource?.getSyncMeta() as ESSearchSourceSyncMeta)?.scalingType ===
+      SCALING_TYPES.CLUSTERS;
+    if (
+      isClustered ||
+      (await vectorLayer.isFilteredByGlobalTime()) ||
+      vectorLayer.isPreviewLayer() ||
+      !vectorLayer.isVisible() ||
+      vectorLayer.hasJoins()
+    ) {
+      return false;
+    }
+    return true;
+  }
 
   _togglePopover = () => {
     this.setState((prevState) => ({
@@ -97,15 +155,41 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     ];
 
     if (!this.props.isReadOnly) {
+      if (this.state.supportsFeatureEditing) {
+        actionItems.push({
+          name: EDIT_FEATURES_LABEL,
+          icon: <EuiIcon type="vector" size="m" />,
+          'data-test-subj': 'editLayerButton',
+          toolTipContent: this.state.canEditFeatures
+            ? null
+            : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
+                defaultMessage:
+                  'Edit features only supported for document layers without clustering, joins, or time filtering',
+              }),
+          disabled: !this.state.canEditFeatures,
+          onClick: async () => {
+            this._closePopover();
+            const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
+            const supportsShapes =
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON) &&
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE);
+            if (supportsShapes) {
+              this.props.enableShapeEditing(this.props.layer.getId());
+            } else {
+              this.props.enablePointEditing(this.props.layer.getId());
+            }
+          },
+        });
+      }
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
-        name: EDIT_LAYER_LABEL,
+        name: EDIT_LAYER_SETTINGS_LABEL,
         icon: <EuiIcon type="pencil" size="m" />,
-        'data-test-subj': 'editLayerButton',
+        'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this.props.editLayer();
+          this.props.openLayerSettings();
         },
       });
       actionItems.push({
