@@ -9,9 +9,10 @@
 import React, { useCallback } from 'react';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TimeseriesVisParams } from '../../types';
+import type { TimeseriesVisParams } from '../../types';
+import type { Annotation } from '../../../common/types';
 
-interface YesNoProps<ParamName extends keyof TimeseriesVisParams> {
+interface YesNoProps<ParamName extends keyof TimeseriesVisParams | keyof Annotation> {
   name: ParamName;
   value: boolean | number | undefined;
   disabled?: boolean;
@@ -19,7 +20,7 @@ interface YesNoProps<ParamName extends keyof TimeseriesVisParams> {
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
 
-export function YesNo<ParamName extends keyof TimeseriesVisParams>({
+export function YesNo<ParamName extends keyof TimeseriesVisParams | keyof Annotation>({
   name,
   value,
   disabled,
