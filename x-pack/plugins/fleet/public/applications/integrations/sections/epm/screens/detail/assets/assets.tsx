@@ -9,7 +9,17 @@ import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import type { SimpleSavedObject } from 'src/core/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiAccordion } from '@elastic/eui';
+import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiAccordion,
+  EuiSpacer,
+  EuiBadge,
+  EuiSplitPanel,
+} from '@elastic/eui';
 
 import { Loading } from '../../../../../components';
 
@@ -20,9 +30,19 @@ import { useGetPackageInstallStatus, useLink, useStartServices } from '../../../
 
 import { AssetTitleMap } from '../../../../../constants';
 
+import './assets.scss';
+
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
+
+const CustomSplitPanelInner = styled(EuiSplitPanel.Inner)``;
+
+const CustomSplitPanelOuter = styled(EuiSplitPanel.Outer)`
+  ${CustomSplitPanelInner}:not(:last-child) {
+    border-bottom: var(--childBorders);
+  }
+`;
 
 const allowedAssetTypes: KibanaAssetType[] = [
   KibanaAssetType.dashboard,
@@ -30,18 +50,19 @@ const allowedAssetTypes: KibanaAssetType[] = [
   KibanaAssetType.visualization,
 ];
 
+type AssetSavedObject = SimpleSavedObject<{ title: string; description?: string }>;
+
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const {
     savedObjects: { client: savedObjectsClient },
-    http,
   } = useStartServices();
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(packageInfo.name);
 
-  const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | SimpleSavedObject[]>();
+  const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -67,7 +88,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
               type,
             }))
           );
-          setAssetsSavedObjects(savedObjects);
+          setAssetsSavedObjects(savedObjects as AssetSavedObject[]);
         } catch (e) {
           setFetchError(e);
         } finally {
@@ -119,16 +140,52 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           }
 
           return (
-            <EuiAccordion
-              buttonContent={
-                <span>
-                  {AssetTitleMap[assetType]} {sectionAssetSavedObjects.length}
-                </span>
-              }
-              id={assetType}
-            >
-              {sectionAssetSavedObjects.map(({ attributes }) => attributes.title)}
-            </EuiAccordion>
+            <>
+              <EuiAccordion
+                buttonContent={
+                  <EuiFlexGroup
+                    justifyContent="center"
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="s">
+                        <h3>{AssetTitleMap[assetType]}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge>{sectionAssetSavedObjects.length}</EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                id={assetType}
+              >
+                <>
+                  <EuiSpacer size="l" />
+                  <CustomSplitPanelOuter
+                    className="customOuterSplitPanel"
+                    hasBorder
+                    hasShadow={false}
+                  >
+                    {sectionAssetSavedObjects.map(({ attributes: { title, description } }, idx) => (
+                      <CustomSplitPanelInner grow={false} key={idx}>
+                        <EuiText size="m">
+                          <p>{title}</p>
+                        </EuiText>
+                        <EuiSpacer size="s" />
+                        {description && (
+                          <EuiText size="s" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        )}
+                      </CustomSplitPanelInner>
+                    ))}
+                  </CustomSplitPanelOuter>
+                </>
+              </EuiAccordion>
+              <EuiSpacer size="l" />
+            </>
           );
         })}
       </>
