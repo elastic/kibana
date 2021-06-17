@@ -18,21 +18,26 @@ import { ReportBreakdowns } from './columns/report_breakdowns';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { DEVICE_DISTRIBUTION_LABEL } from '../configurations/constants/labels';
+import {
+  CORE_WEB_VITALS_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
+  KPI_OVER_TIME_LABEL,
+  PERF_DIST_LABEL,
+} from '../configurations/constants/labels';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'kpi', label: 'KPI over time' },
-    { id: 'dist', label: 'Performance distribution' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
   ],
   ux: [
-    { id: 'kpi', label: 'KPI over time' },
-    { id: 'dist', label: 'Performance distribution' },
-    { id: 'cwv', label: 'Core Web Vitals' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'cwv', label: CORE_WEB_VITALS_LABEL },
   ],
   mobile: [
-    { id: 'kpi', label: 'KPI over time' },
-    { id: 'dist', label: 'Performance distribution' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
     { id: 'mdd', label: DEVICE_DISTRIBUTION_LABEL },
   ],
   apm: [],

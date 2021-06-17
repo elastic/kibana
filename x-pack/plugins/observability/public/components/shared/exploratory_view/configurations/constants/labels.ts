@@ -165,7 +165,7 @@ export const KPI_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
 export const PERF_DIST_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.performanceDistribution',
   {
-    defaultMessage: 'Performance Distribution',
+    defaultMessage: 'Performance distribution',
   }
 );
 
@@ -184,7 +184,7 @@ export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
 );
 
 export const MOBILE_RESPONSE_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.mobileReponse',
+  'xpack.observability.expView.fieldLabels.mobileResponse',
   {
     defaultMessage: 'Mobile response',
   }
@@ -197,7 +197,7 @@ export const MEMORY_USAGE_LABEL = i18n.translate(
   }
 );
 
-export const KIP_OVER_TIME_LABEL = i18n.translate(
+export const KPI_OVER_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.kpiOverTime',
   {
     defaultMessage: 'KPI over time',

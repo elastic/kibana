@@ -19,7 +19,7 @@ import {
   FCP_LABEL,
   FID_LABEL,
   HOST_NAME_LABEL,
-  KIP_OVER_TIME_LABEL,
+  KPI_OVER_TIME_LABEL,
   KPI_LABEL,
   LCP_LABEL,
   LOCATION_LABEL,
@@ -79,7 +79,7 @@ export const FieldLabels: Record<string, string> = {
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
   dist: PERF_DIST_LABEL,
-  kpi: KIP_OVER_TIME_LABEL,
+  kpi: KPI_OVER_TIME_LABEL,
   cwv: CORE_WEB_VITALS_LABEL,
   mdd: DEVICE_DISTRIBUTION_LABEL,
 };
