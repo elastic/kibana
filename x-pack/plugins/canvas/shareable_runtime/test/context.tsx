@@ -11,7 +11,7 @@ import {
   CanvasShareableStateProvider,
   useCanvasShareableState,
 } from '../context/index';
-import { getSupportedRenderFunctions } from '../supported_renderers';
+import { renderFunctions } from '../supported_renderers';
 import { CanvasShareableState } from '../types';
 import { RendererSpec } from '../../types';
 import { sharedWorkpads, WorkpadNames } from '.';
@@ -60,7 +60,7 @@ export const Context = ({
 }: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
-  getSupportedRenderFunctions().forEach((rendererFn) => {
+  renderFunctions.forEach((rendererFn) => {
     const renderer = rendererFn();
     renderers[renderer.name] = renderer;
   });

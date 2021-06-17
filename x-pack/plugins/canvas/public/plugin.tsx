@@ -32,7 +32,6 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-import { addSupportedRenderFunctions } from '../shareable_runtime/supported_renderers';
 
 export { CoreStart, CoreSetup };
 
@@ -135,7 +134,6 @@ export class CanvasPlugin
       canvasApi.addElements(elements);
       canvasApi.addRenderers(renderers);
       canvasApi.addViewUIs(uiViews);
-      addSupportedRenderFunctions(renderers);
     });
 
     canvasApi.addArgumentUIs(async () => {

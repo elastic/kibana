@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionRenderDefinition } from '../../../../src/plugins/expressions/public';
-
 import { RendererFactory } from '../types';
 
+export const renderFunctions: RendererFactory[];
 export const renderFunctionNames: string[];
-export const addSupportedRenderFunctions: (
-  renderers: RendererFactory[] | Array<() => ExpressionRenderDefinition<any>>
-) => void;
-export function getSupportedRenderFunctions(): RendererFactory[];
