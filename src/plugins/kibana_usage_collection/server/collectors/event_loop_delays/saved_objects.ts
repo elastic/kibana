@@ -44,9 +44,14 @@ export function serializeSavedObjectId({ date, pid }: { date: moment.MomentInput
 }
 
 export async function deleteHistogramSavedObjects(
-  savedObjects: Array<SavedObject<EventLoopDelaysDaily>>,
-  internalRepository: ISavedObjectsRepository
+  internalRepository: ISavedObjectsRepository,
+  daysTimeRange = 3
 ) {
+  const { saved_objects: savedObjects } = await internalRepository.find<EventLoopDelaysDaily>({
+    type: SAVED_OBJECTS_DAILY_TYPE,
+    filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < "now-${daysTimeRange}d/d"`,
+  });
+
   return await Promise.allSettled(
     savedObjects.map(async (savedObject) => {
       return await internalRepository.delete(SAVED_OBJECTS_DAILY_TYPE, savedObject.id);

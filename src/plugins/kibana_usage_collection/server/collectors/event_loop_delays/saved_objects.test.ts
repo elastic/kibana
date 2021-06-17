@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { storeHistogram, serializeSavedObjectId } from './saved_objects';
+import {
+  storeHistogram,
+  serializeSavedObjectId,
+  deleteHistogramSavedObjects,
+} from './saved_objects';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import type { SavedObjectsFindResponse } from '../../../../../core/server/';
 import { mocked } from './event_loop_delays.mocks';
 import moment from 'moment';
 
@@ -39,5 +44,80 @@ describe('storeHistogram', () => {
       { ...mockHistogram, processId: pid, timestamp: moment(mockNow).toISOString() },
       { id, overwrite: true }
     );
+  });
+});
+
+describe('deleteHistogramSavedObjects', () => {
+  const mockInternalRepository = savedObjectsRepositoryMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInternalRepository.find.mockResolvedValue({
+      saved_objects: [{ id: 'test_obj_1' }, { id: 'test_obj_1' }],
+    } as SavedObjectsFindResponse);
+  });
+
+  it('builds filter query based on time range passed in days', async () => {
+    await deleteHistogramSavedObjects(mockInternalRepository);
+    await deleteHistogramSavedObjects(mockInternalRepository, 20);
+    expect(mockInternalRepository.find.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "filter": "event_loop_delays_daily.attributes.timestamp < \\"now-3d/d\\"",
+            "type": "event_loop_delays_daily",
+          },
+        ],
+        Array [
+          Object {
+            "filter": "event_loop_delays_daily.attributes.timestamp < \\"now-20d/d\\"",
+            "type": "event_loop_delays_daily",
+          },
+        ],
+      ]
+    `);
+  });
+
+  it('loops over saved objects and deletes them', async () => {
+    mockInternalRepository.delete.mockImplementation(async (type, id) => {
+      return id;
+    });
+
+    const results = await deleteHistogramSavedObjects(mockInternalRepository);
+    expect(results).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "status": "fulfilled",
+          "value": "test_obj_1",
+        },
+        Object {
+          "status": "fulfilled",
+          "value": "test_obj_1",
+        },
+      ]
+    `);
+  });
+
+  it('settles all promises even if some of the deletes fail.', async () => {
+    mockInternalRepository.delete.mockImplementationOnce(async (type, id) => {
+      throw new Error('Intentional failure');
+    });
+    mockInternalRepository.delete.mockImplementationOnce(async (type, id) => {
+      return id;
+    });
+
+    const results = await deleteHistogramSavedObjects(mockInternalRepository);
+    expect(results).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "reason": [Error: Intentional failure],
+          "status": "rejected",
+        },
+        Object {
+          "status": "fulfilled",
+          "value": "test_obj_1",
+        },
+      ]
+    `);
   });
 });
