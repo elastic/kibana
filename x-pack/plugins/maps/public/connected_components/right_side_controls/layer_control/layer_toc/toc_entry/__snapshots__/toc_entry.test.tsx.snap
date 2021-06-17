@@ -25,7 +25,7 @@ exports[`TOCEntry is rendered 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
-      layerSettings={[Function]}
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -39,12 +39,12 @@ exports[`TOCEntry is rendered 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Layer settings"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
-        title="Layer settings"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -99,7 +99,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
-      layerSettings={[Function]}
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -113,12 +113,12 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Layer settings"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
-        title="Layer settings"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -173,7 +173,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
-      layerSettings={[Function]}
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -187,12 +187,12 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Layer settings"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
-        title="Layer settings"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -247,7 +247,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
-      layerSettings={[Function]}
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -306,7 +306,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "showAtZoomLevel": [Function],
         }
       }
-      layerSettings={[Function]}
+      openLayerSettings={[Function]}
       supportsFitToBounds={false}
     />
     <div
@@ -320,12 +320,12 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Layer settings"
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
         key="settings"
         onClick={[Function]}
-        title="Layer settings"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
