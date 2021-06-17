@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileLayer } from '@elastic/ems-client';
+import type { FileLayer, FileLayerField } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 
 export interface SampleValuesConfig {
@@ -19,12 +19,15 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
+export interface EMSConfig {
+  layerId: string;
+  field: string;
+}
+
 export interface EMSMatch {
   regex: RegExp;
-  emsConfig: {
-    layerId: string;
-    field: string;
-  };
+  emsConfig: EMSConfig;
+  emsField: FileLayerField;
 }
 
 interface UniqueMatch {
@@ -32,8 +35,14 @@ interface UniqueMatch {
   count: number;
 }
 
+type SampleValues = Array<string | number>;
+
 let wellKnownColumnNames: EMSMatch[];
 let wellKnownColumnFormats: EMSMatch[];
+let wellKnownIdFields: Array<{
+  emsConfig: EMSConfig;
+  emsField: FileLayerField;
+}>;
 
 async function loadMeta() {
   if (wellKnownColumnFormats && wellKnownColumnNames) {
@@ -46,32 +55,35 @@ async function loadMeta() {
   wellKnownColumnFormats = [];
 
   fileLayers.forEach((fileLayer) => {
-    const fields = fileLayer.getFields();
-
-    fields.forEach((field) => {
+    const emsFields = fileLayer.getFields();
+    emsFields.forEach((emsField) => {
       const emsConfig = {
         layerId: fileLayer.getId(),
-        field: field.id,
+        field: emsField.id,
       };
 
-      if (field.regex) {
+      if (emsField.regex) {
         wellKnownColumnFormats.push({
-          regex: new RegExp(field.regex, 'i'),
+          regex: new RegExp(emsField.regex, 'i'),
           emsConfig,
+          emsField,
         });
       }
 
-      if (field.alias && field.alias.length) {
-        field.alias.forEach((alias) => {
+      if (emsField.alias && emsField.alias.length) {
+        emsField.alias.forEach((alias) => {
           wellKnownColumnNames.push({
             regex: new RegExp(alias, 'i'),
             emsConfig,
+            emsField,
           });
         });
       }
     });
   });
 }
+
+function idValuesMatch() {}
 
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
@@ -80,19 +92,21 @@ export async function suggestEMSTermJoinConfig(
   const matches: EMSTermJoinConfig[] = [];
 
   if (sampleValuesConfig.sampleValuesColumnName) {
-    matches.push(...suggestByName(sampleValuesConfig.sampleValuesColumnName));
+    matches.push(
+      ...suggestByName(sampleValuesConfig.sampleValuesColumnName, sampleValuesConfig.sampleValues)
+    );
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       matches.push(
-        ...(await suggestByEMSLayerIds(
+        ...(await suggestsByAllEMSColumns(
           sampleValuesConfig.emsLayerIds,
           sampleValuesConfig.sampleValues
         ))
       );
     } else {
-      matches.push(...suggestByValues(sampleValuesConfig.sampleValues));
+      matches.push(...suggestByFormats(sampleValuesConfig.sampleValues));
     }
   }
 
@@ -119,9 +133,8 @@ export async function suggestEMSTermJoinConfig(
 
   return uniqMatches.length ? uniqMatches[0].config : null;
 }
-window._suggest = suggestEMSTermJoinConfig;
 
-function suggestByName(columnName: string): EMSTermJoinConfig[] {
+function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
     return columnName.match(wellknown.regex);
   });
@@ -131,7 +144,9 @@ function suggestByName(columnName: string): EMSTermJoinConfig[] {
   });
 }
 
-function suggestByValues(values: Array<string | number>): EMSTermJoinConfig[] {
+function suggestByIdValues(values: SampleValues): EMSTermJoinConfig[] {}
+
+function suggestByFormats(values: SampleValues): EMSTermJoinConfig[] {
   const matches = wellKnownColumnFormats.filter((wellknown) => {
     for (let i = 0; i < values.length; i++) {
       const value = values[i].toString();
@@ -157,7 +172,7 @@ function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boo
   return false;
 }
 
-function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<string | number>) {
+function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: SampleValues) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
     if (!existsInEMS(emsJson, emsFieldId, sampleValue)) {
@@ -169,7 +184,7 @@ function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<s
 
 async function getMatchesForEMSLayer(
   emsLayerId: string,
-  sampleValues: Array<string | number>
+  sampleValues: SampleValues
 ): Promise<EMSTermJoinConfig[]> {
   const fileLayers: FileLayer[] = await getEmsFileLayers();
   const emsFileLayer: FileLayer | undefined = fileLayers.find((fl: FileLayer) =>
@@ -199,9 +214,9 @@ async function getMatchesForEMSLayer(
   }
 }
 
-async function suggestByEMSLayerIds(
+async function suggestsByAllEMSColumns(
   emsLayerIds: string[],
-  values: Array<string | number>
+  values: SampleValues
 ): Promise<EMSTermJoinConfig[]> {
   const matches = [];
   for (const emsLayerId of emsLayerIds) {
