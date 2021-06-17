@@ -6,8 +6,6 @@
  */
 
 import { sortBy, slice, get, cloneDeep } from 'lodash';
-import { estypes, ApiResponse } from '@elastic/elasticsearch';
-import { timeFormatter } from '@elastic/charts';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -35,7 +33,6 @@ import { annotationServiceProvider } from '../annotation_service';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
-const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 
 export interface CriteriaField {
   fieldType?: string;
@@ -629,15 +626,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
-    const [DATAFEED, JOBS] = [0, 1];
-    const results = await Promise.all([
+
+    const [datafeedConfig, { body: jobsResponse }] = await Promise.all([
       getDatafeedByJobId(jobId),
       mlClient.getJobs({ job_id: jobId }),
     ]);
-
-    const datafeedConfig = results[DATAFEED] as estypes.MlDatafeed;
-    const jobsApiResponse = results[JOBS] as ApiResponse<estypes.MlGetJobsResponse> | undefined;
-    const jobsResponse = jobsApiResponse?.body as estypes.MlGetJobsResponse;
 
     if (jobsResponse && (jobsResponse.count === 0 || jobsResponse.jobs === undefined)) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
@@ -737,7 +730,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         finalResults.annotationResultsLine.push({
           dataValue: timestamp,
           details: annotation.annotation,
-          header: dateFormatter(timestamp),
         });
       } else {
         finalResults.annotationResultsRect.push({

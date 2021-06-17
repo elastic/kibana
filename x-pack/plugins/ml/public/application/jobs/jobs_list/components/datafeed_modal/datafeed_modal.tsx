@@ -147,7 +147,10 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       setBucketData(chartData.bucketResults);
       setAnnotationData({
         rect: chartData.annotationResultsRect,
-        line: chartData.annotationResultsLine,
+        line: chartData.annotationResultsLine.map((lineDatum) => {
+          lineDatum.header = dateFormatter(lineDatum.dataValue);
+          return lineDatum;
+        }),
       });
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
@@ -340,7 +343,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                             id={i18n.translate(
                               'xpack.ml.jobsList.datafeedModal.annotationRectSeriesId',
                               {
-                                defaultMessage: 'Annotations rect result',
+                                defaultMessage: 'Annotations rectangle result',
                               }
                             )}
                             style={{ fill: euiTheme.euiColorDangerText }}
