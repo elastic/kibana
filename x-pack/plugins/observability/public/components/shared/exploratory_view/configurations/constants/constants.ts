@@ -11,18 +11,13 @@ import {
   AGENT_HOST_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
-  CARRIER_LOCATION,
-  CARRIER_NAME,
   CLS_LABEL,
-  CONNECTION_TYPE,
   CORE_WEB_VITALS_LABEL,
   DEVICE_LABEL,
-  DEVICE_MODEL,
   ENVIRONMENT_LABEL,
   FCP_LABEL,
   FID_LABEL,
   HOST_NAME_LABEL,
-  HOST_OS,
   KIP_OVER_TIME_LABEL,
   KPI_LABEL,
   LCP_LABEL,
@@ -34,12 +29,10 @@ import {
   MONITOR_TYPE_LABEL,
   OBSERVER_LOCATION_LABEL,
   OS_LABEL,
-  OS_PLATFORM,
   PERF_DIST_LABEL,
   PORT_LABEL,
   REQUEST_METHOD,
   SERVICE_NAME_LABEL,
-  SERVICE_VERSION,
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
@@ -80,16 +73,7 @@ export const FieldLabels: Record<string, string> = {
 
   'performance.metric': METRIC_LABEL,
   'Business.KPI': KPI_LABEL,
-
-  'labels.net_connection_carrier_name': CARRIER_NAME,
   'http.request.method': REQUEST_METHOD,
-  'labels.net_connection_type': CONNECTION_TYPE,
-  'host.os.full': HOST_OS,
-  'service.version': SERVICE_VERSION,
-  'host.os.platform': OS_PLATFORM,
-  'labels.device_model': DEVICE_MODEL,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'labels.net_connection_carrier_isoCountryCode': CARRIER_LOCATION,
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
@@ -100,4 +84,5 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const TERMS_COLUMN = 'TERMS_COLUMN';
 export const OPERATION_COLUMN = 'operation';

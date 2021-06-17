@@ -20,8 +20,9 @@ import {
   MEMORY_USAGE,
   MOBILE_APP,
   RESPONSE_LATENCY,
-  TRANSACTION_PER_MINUTE,
+  TRANSACTIONS_PER_MINUTE,
 } from '../constants/labels';
+import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
@@ -38,28 +39,14 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
       },
     ],
     hasOperationType: true,
-    defaultFilters: [
-      'labels.net_connection_carrier_name',
-      'labels.device_model',
-      'labels.net_connection_type',
-      'host.os.platform',
-      'host.os.full',
-      'service.version',
-    ],
-    breakdowns: [
-      'labels.net_connection_carrier_name',
-      'labels.device_model',
-      'labels.net_connection_type',
-      'host.os.platform',
-      'host.os.full',
-      'service.version',
-      'labels.net_connection_carrier_isoCountryCode',
-    ],
+    defaultFilters: Object.keys(MobileFields),
+    breakdowns: Object.keys(MobileFields),
     filters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
     ],
     labels: {
       ...FieldLabels,
+      ...MobileFields,
       [TRANSACTION_DURATION]: RESPONSE_LATENCY,
       [SERVICE_NAME]: MOBILE_APP,
       [METRIC_SYSTEM_MEMORY_USAGE]: MEMORY_USAGE,
@@ -99,7 +86,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
           {
             field: RECORDS_FIELD,
             id: RECORDS_FIELD,
-            label: TRANSACTION_PER_MINUTE,
+            label: TRANSACTIONS_PER_MINUTE,
             columnFilters: [
               {
                 language: 'kuery',

@@ -15,7 +15,9 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
+
 import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
+import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
@@ -32,28 +34,14 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): D
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
-      'labels.net_connection_carrier_name',
-      'labels.device_model',
-      'labels.net_connection_type',
-      'host.os.platform',
-      'host.os.full',
-      'service.version',
-    ],
-    breakdowns: [
-      'labels.net_connection_carrier_name',
-      'labels.device_model',
-      'labels.net_connection_type',
-      'host.os.platform',
-      'host.os.full',
-      'service.version',
-      'labels.net_connection_carrier_isoCountryCode',
-    ],
+    defaultFilters: Object.keys(MobileFields),
+    breakdowns: Object.keys(MobileFields),
     filters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
     ],
     labels: {
       ...FieldLabels,
+      ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
     reportDefinitions: [

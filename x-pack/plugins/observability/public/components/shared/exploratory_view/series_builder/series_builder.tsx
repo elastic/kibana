@@ -32,6 +32,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   mobile: [
     { id: 'kpi', label: 'KPI over time' },
     { id: 'dist', label: 'Performance distribution' },
+    { id: 'mdd', label: 'Device distribution' },
   ],
   apm: [],
   infra_logs: [],
