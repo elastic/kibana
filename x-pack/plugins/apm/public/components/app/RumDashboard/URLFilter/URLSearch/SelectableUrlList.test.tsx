@@ -30,11 +30,11 @@ describe('SelectableUrlList', () => {
         data={{ items: [], total: 0 }}
         onChange={jest.fn()}
         searchValue={'blog'}
-        onClose={jest.fn()}
         onInputChange={jest.fn()}
         onTermChange={jest.fn()}
         popoverIsOpen={false}
         setPopoverIsOpen={jest.fn()}
+        onApply={jest.fn()}
       />,
       { customHistory }
     );
