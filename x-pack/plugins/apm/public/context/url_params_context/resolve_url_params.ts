@@ -23,7 +23,7 @@ import { IUrlParams } from './types';
 
 type TimeUrlParams = Pick<
   IUrlParams,
-  'start' | 'end' | 'rangeFrom' | 'rangeTo'
+  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {

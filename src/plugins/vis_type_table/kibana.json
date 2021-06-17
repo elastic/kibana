@@ -15,5 +15,10 @@
     "share",
     "visDefaultEditor"
   ],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Registers the datatable aggregation-based visualization. Currently it contains two implementations, the one based on EUI datagrid and the angular one. The second one is going to be removed in future minors."
 }
