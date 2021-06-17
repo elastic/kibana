@@ -5,22 +5,43 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiBasicTable,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 
 import { InstallStatus } from '../../../../../types';
-import { useLink, useUrlPagination, useGetPackageInstallStatus } from '../../../../../hooks';
+import {
+  useLink,
+  useUrlPagination,
+  useGetPackageInstallStatus,
+  AgentPolicyRefreshContext,
+} from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { AgentPolicySummaryLine } from '../../../../../components';
-import { LinkedAgentCount } from '../../../../../components';
+import {
+  AgentEnrollmentFlyout,
+  AgentPolicySummaryLine,
+  LinkedAgentCount,
+  PackagePolicyActionsMenu,
+} from '../../../../../components';
 
 import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
+
+const AddAgentButton = styled(EuiButtonIcon)`
+  margin-left: ${(props) => props.theme.eui.euiSizeS};
+`;
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: PackagePolicyAndAgentPolicy['packagePolicy'];
@@ -39,16 +60,18 @@ const IntegrationDetailsLink = memo<{
     </EuiLink>
   );
 });
+
 interface PackagePoliciesPanelProps {
   name: string;
   version: string;
 }
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
+  const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(null);
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data, isLoading } = usePackagePoliciesWithAgentPolicy({
+  const { data, isLoading, resendRequest: refreshPolicies } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
@@ -97,16 +120,36 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Agents',
         }),
         truncateText: true,
-        align: 'right',
+        align: 'left',
         width: '8ch',
         render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
+          const count = agentPolicy?.agents ?? 0;
+
           return (
-            <LinkedAgentCount
-              count={agentPolicy?.agents ?? 0}
-              agentPolicyId={packagePolicy.policy_id}
-              className="eui-textTruncate"
-              data-test-subj="rowAgentCount"
-            />
+            <>
+              <LinkedAgentCount
+                count={count}
+                agentPolicyId={packagePolicy.policy_id}
+                className="eui-textTruncate"
+                data-test-subj="rowAgentCount"
+              />
+              {count === 0 && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.epm.packageDetails.integrationList.addAgent',
+                    {
+                      defaultMessage: 'Add Agent',
+                    }
+                  )}
+                >
+                  <AddAgentButton
+                    iconType="plusInCircle"
+                    onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+                    data-test-subj="addAgentButton"
+                  />
+                </EuiToolTip>
+              )}
+            </>
           );
         },
       },
@@ -131,6 +174,19 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             <span className="eui-textTruncate" title={updatedAt}>
               <FormattedRelative value={updatedAt} />
             </span>
+          );
+        },
+      },
+      {
+        field: '',
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.actions', {
+          defaultMessage: 'Actions',
+        }),
+        width: '8ch',
+        align: 'right',
+        render({ agentPolicy, packagePolicy }) {
+          return (
+            <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
           );
         },
       },
@@ -165,19 +221,31 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   }
 
   return (
-    <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
-        <EuiBasicTable
-          items={data?.items || []}
-          columns={columns}
-          loading={isLoading}
-          data-test-subj="integrationPolicyTable"
-          pagination={tablePagination}
-          onChange={handleTableOnChange}
-          noItemsMessage={noItemsMessage}
+    <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
+      <EuiFlexGroup alignItems="flexStart">
+        <EuiFlexItem grow={1} />
+        <EuiFlexItem grow={6}>
+          <EuiBasicTable
+            items={data?.items || []}
+            columns={columns}
+            loading={isLoading}
+            data-test-subj="integrationPolicyTable"
+            pagination={tablePagination}
+            onChange={handleTableOnChange}
+            noItemsMessage={noItemsMessage}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {flyoutOpenForPolicyId && (
+        <AgentEnrollmentFlyout
+          onClose={() => setFlyoutOpenForPolicyId(null)}
+          agentPolicies={
+            data?.items
+              .filter(({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId)
+              .map(({ agentPolicy }) => agentPolicy) ?? []
+          }
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </AgentPolicyRefreshContext.Provider>
   );
 };

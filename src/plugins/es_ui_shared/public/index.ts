@@ -40,6 +40,7 @@ export {
   Privileges,
   MissingPrivileges,
   SectionError,
+  PageError,
   Error,
   useAuthorizationContext,
 } from './authorization';

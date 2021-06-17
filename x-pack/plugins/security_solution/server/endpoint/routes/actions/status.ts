@@ -10,7 +10,7 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   EndpointAction,
   EndpointActionResponse,
-  PendingActionsResponse,
+  EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
@@ -99,7 +99,7 @@ export const actionStatusRequestHandler = function (
     const actionResponses = responseResults.body?.hits?.hits?.map((a) => a._source!) || [];
 
     // respond with action-count per agent
-    const response = agentIDs.map((aid) => {
+    const response: EndpointPendingActions[] = agentIDs.map((aid) => {
       const responseIDsFromAgent = actionResponses
         .filter((r) => r.agent_id === aid)
         .map((r) => r.action_id);
@@ -115,8 +115,8 @@ export const actionStatusRequestHandler = function (
               acc[cur] = 1;
             }
             return acc;
-          }, {} as PendingActionsResponse['pending_actions']),
-      } as PendingActionsResponse;
+          }, {} as EndpointPendingActions['pending_actions']),
+      };
     });
 
     return res.ok({
