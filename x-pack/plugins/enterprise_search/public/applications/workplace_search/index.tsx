@@ -46,7 +46,6 @@ import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
-import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
 import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
@@ -96,13 +95,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SourceAdded />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? (
-          <ErrorState />
-        ) : (
-          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-            <Overview />
-          </Layout>
-        )}
+        <Overview />
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         <PersonalDashboardLayout
@@ -141,23 +134,13 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <RoleMappings />
-        </Layout>
+        <RoleMappings />
       </Route>
       <Route path={SECURITY_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <Security />
-        </Layout>
+        <Security />
       </Route>
       <Route path={ORG_SETTINGS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <SettingsRouter />
-        </Layout>
+        <SettingsRouter />
       </Route>
       <Route>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>

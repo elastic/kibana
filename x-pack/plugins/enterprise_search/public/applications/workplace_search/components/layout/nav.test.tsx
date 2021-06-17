@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import '../../../__mocks__/enterprise_search_url.mock';
+jest.mock('../../../shared/layout', () => ({
+  ...jest.requireActual('../../../shared/layout'),
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
+jest.mock('../../views/settings/components/settings_sub_nav', () => ({
+  useSettingsSubNav: () => [],
+}));
 
 import React from 'react';
 
@@ -13,7 +19,55 @@ import { shallow } from 'enzyme';
 
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
-import { WorkplaceSearchNav } from './';
+import { useWorkplaceSearchNav, WorkplaceSearchNav } from './';
+
+describe('useWorkplaceSearchNav', () => {
+  it('returns an array of top-level Workplace Search nav items', () => {
+    expect(useWorkplaceSearchNav()).toEqual([
+      {
+        id: '',
+        name: '',
+        items: [
+          {
+            id: 'root',
+            name: 'Overview',
+            href: '/',
+          },
+          {
+            id: 'sources',
+            name: 'Sources',
+            href: '/sources',
+            items: [],
+          },
+          {
+            id: 'groups',
+            name: 'Groups',
+            href: '/groups',
+            items: [],
+          },
+          {
+            id: 'usersRoles',
+            name: 'Users & roles',
+            href: '/role_mappings',
+          },
+          {
+            id: 'security',
+            name: 'Security',
+            href: '/security',
+          },
+          {
+            id: 'settings',
+            name: 'Settings',
+            href: '/settings',
+            items: [],
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+// TODO: Delete below once fully migrated to KibanaPageTemplate
 
 describe('WorkplaceSearchNav', () => {
   it('renders', () => {

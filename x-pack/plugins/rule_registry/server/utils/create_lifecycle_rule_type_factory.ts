@@ -217,7 +217,7 @@ export const createLifecycleRuleTypeFactory = ({
           ...alertData,
           ...ruleExecutorData,
           [TIMESTAMP]: timestamp,
-          [EVENT_KIND]: 'state',
+          [EVENT_KIND]: 'event',
           [ALERT_ID]: alertId,
         };
 
@@ -259,8 +259,29 @@ export const createLifecycleRuleTypeFactory = ({
       });
 
       if (eventsToIndex.length) {
+        const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
+
+        for (const event of eventsToIndex) {
+          const uuid = event[ALERT_UUID]!;
+          let storedEvent = alertEvents.get(uuid);
+          if (!storedEvent) {
+            storedEvent = event;
+          }
+          alertEvents.set(uuid, {
+            ...storedEvent,
+            [EVENT_KIND]: 'signal',
+          });
+        }
+
         await ruleDataClient.getWriter().bulk({
-          body: eventsToIndex.flatMap((event) => [{ index: {} }, event]),
+          body: eventsToIndex
+            .flatMap((event) => [{ index: {} }, event])
+            .concat(
+              Array.from(alertEvents.values()).flatMap((event) => [
+                { index: { _id: event[ALERT_UUID]! } },
+                event,
+              ])
+            ),
         });
       }
 
@@ -276,7 +297,7 @@ export const createLifecycleRuleTypeFactory = ({
       );
 
       return {
-        wrapped: nextWrappedState,
+        wrapped: nextWrappedState ?? {},
         trackedAlerts: nextTrackedAlerts,
       };
     },

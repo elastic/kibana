@@ -11,6 +11,8 @@ import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
 
+import { DefaultLayout } from '../../layouts';
+
 import { AgentPolicyListPage } from './list_page';
 import { AgentPolicyDetailsPage } from './details_page';
 import { CreatePackagePolicyPage } from './create_package_policy_page';
@@ -32,7 +34,9 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
           <AgentPolicyDetailsPage />
         </Route>
         <Route path={FLEET_ROUTING_PATHS.policies_list}>
-          <AgentPolicyListPage />
+          <DefaultLayout section="agent_policies">
+            <AgentPolicyListPage />
+          </DefaultLayout>
         </Route>
       </Switch>
     </Router>
