@@ -1158,7 +1158,7 @@ describe('migrations v2 model', () => {
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
-        const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
+        const transFormErr = new TransformSavedObjectDocumentError(originalTransformError, '7.11.0');
         const transformationErrors = [
           { rawId: 'bob:tail', err: transFormErr },
         ] as TransformErrorObjects[];
@@ -1222,7 +1222,7 @@ describe('migrations v2 model', () => {
       const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
       const corruptDocumentIds = ['a:somethingelse'];
       const originalTransformError = new Error('Dang diggity!');
-      const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
+      const transFormErr = new TransformSavedObjectDocumentError(originalTransformError, '7.11.0');
       const transformationErrors = [
         { rawId: 'bob:tail', err: transFormErr },
       ] as TransformErrorObjects[];

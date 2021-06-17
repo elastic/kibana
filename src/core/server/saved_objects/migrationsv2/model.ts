@@ -112,17 +112,22 @@ function extractTransformFailuresReason(
 ): string {
   const corruptDocumentIdReason =
     corruptDocumentIds.length > 0
-      ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}`
+      ? ` ${
+          corruptDocumentIds.length
+        } corrupt saved object documents were found: ${corruptDocumentIds.join(',')}`
       : '';
   // we have both the saved object Id and the stack trace in each `transformErrors` item.
   const transformErrorsReason =
     transformErrors.length > 0
-      ? ' Transformation errors: ' +
+      ? ` ${transformErrors.length} transformation errors were encountered:\n ` +
         transformErrors
-          .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
-          .join('/n')
+          .map((errObj) => `- ${errObj.rawId}: ${errObj.err.stack ?? errObj.err.message}\n`)
+          .join('')
       : '';
-  return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
+  return (
+    `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}\n` +
+    `To allow migrations to proceed, please delete or fix these documents.`
+  );
 }
 
 const delayRetryState = <S extends State>(
