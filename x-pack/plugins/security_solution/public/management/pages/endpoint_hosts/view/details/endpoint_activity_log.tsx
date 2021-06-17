@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useCallback, useEffect, useRef } from 'react';
+import styled from 'styled-components';
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -31,6 +31,11 @@ import {
   getLastLoadedActivityLogData,
   getActivityLogRequestLoading,
 } from '../../store/selectors';
+
+const Sentinel = styled.div`
+  height: 6px;
+  width: 100%;
+`;
 
 export const EndpointActivityLog = memo(
   ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
@@ -115,12 +120,7 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {!activityLogLoading && (
-                  <EuiCallOut
-                    ref={fetchMoreCallOut}
-                    size="s"
-                    title={i18.ACTIVITY_LOG.callOutTitle}
-                  />
+                {!activityLogLoading && !isPagingDisabled && <Sentinel ref={fetchMoreCallOut} />}
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
