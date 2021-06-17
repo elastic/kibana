@@ -11,6 +11,7 @@
 |  [AggConfig](./kibana-plugin-plugins-data-public.aggconfig.md) |  |
 |  [AggConfigs](./kibana-plugin-plugins-data-public.aggconfigs.md) |  |
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
+|  [DataPlugin](./kibana-plugin-plugins-data-public.dataplugin.md) |  |
 |  [DuplicateIndexPatternError](./kibana-plugin-plugins-data-public.duplicateindexpatternerror.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
@@ -19,7 +20,6 @@
 |  [IndexPatternsService](./kibana-plugin-plugins-data-public.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [PainlessError](./kibana-plugin-plugins-data-public.painlesserror.md) |  |
-|  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) | \* |
 |  [SearchTimeoutError](./kibana-plugin-plugins-data-public.searchtimeouterror.md) | Request Failure - When an entire multi request fails |
@@ -67,7 +67,7 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) | IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided |
+|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |

@@ -11,21 +11,19 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 export function SectionError(props) {
   const { title, error, ...rest } = props;
   const data = error.body ? error.body : error;
-  const {
-    error: errorString,
-    attributes, // wrapEsError() on the server add a "cause" array
-    message,
-  } = data;
+  const { error: errorString, attributes, message } = data;
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
       <div>{message || errorString}</div>
-      {attributes && attributes.cause && (
+      {attributes?.error?.root_cause && (
         <Fragment>
           <EuiSpacer size="m" />
           <ul>
-            {attributes.cause.map((message, i) => (
-              <li key={i}>{message}</li>
+            {attributes.error.root_cause.map(({ type, reason }, i) => (
+              <li key={i}>
+                {type}: {reason}
+              </li>
             ))}
           </ul>
         </Fragment>

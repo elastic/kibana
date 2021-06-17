@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebounceWithOptions } from '../../../../shared_components';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -19,7 +20,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } from '../helpers';
+import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -36,6 +37,8 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
+
+const WINDOW_DEFAULT_VALUE = 5;
 
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -58,9 +61,12 @@ export const movingAverageOperation: OperationDefinition<
   selectionStyle: 'full',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
+  ],
+  operationParams: [
+    { name: 'window', type: 'number', required: false, defaultValue: WINDOW_DEFAULT_VALUE },
   ],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
@@ -72,26 +78,31 @@ export const movingAverageOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: (
+    { referenceIds, previousColumn, layer },
+    columnParams = { window: WINDOW_DEFAULT_VALUE }
+  ) => {
     const metric = layer.columns[referenceIds[0]];
+    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale),
+      label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
+      filter: getFilter(previousColumn, columnParams),
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
       params: {
-        window: 5,
+        window,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
@@ -121,6 +132,29 @@ export const movingAverageOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.moving_average.signature', {
+      defaultMessage: 'metric: number, [window]: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation', {
+      defaultMessage: `
+Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
+The default window value is {defaultValue}.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Takes a named parameter \`window\` which specifies how many last values to include in the average calculation for the current value.
+
+Example: Smooth a line of measurements:
+\`moving_average(sum(bytes), window=5)\`
+      `,
+      values: {
+        defaultValue: WINDOW_DEFAULT_VALUE,
+      },
+    }),
+  },
+  shiftable: true,
 };
 
 function MovingAverageParamEditor({

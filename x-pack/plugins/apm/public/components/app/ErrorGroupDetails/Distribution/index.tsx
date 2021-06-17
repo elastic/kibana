@@ -18,13 +18,16 @@ import {
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
-import React from 'react';
+import React, { Suspense, useState } from 'react';
+import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { LazyAlertsFlyout } from '../../../../../../observability/public';
 
 type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
@@ -63,8 +66,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
   const xMax = d3.max(buckets, (d) => d.x0);
 
   const xFormatter = niceTimeFormatter([xMin, xMax]);
-
+  const { observabilityRuleTypeRegistry } = useApmPluginContext();
   const { alerts } = useApmServiceContext();
+  const { getFormatter } = observabilityRuleTypeRegistry;
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
+    undefined
+  );
 
   const tooltipProps: SettingsSpec['tooltip'] = {
     headerFormatter: (tooltip: TooltipValue) => {
@@ -115,10 +122,25 @@ export function ErrorDistribution({ distribution, title }: Props) {
           />
           {getAlertAnnotations({
             alerts: alerts?.filter(
-              (alert) => alert['rule.id'] === AlertType.ErrorCount
+              (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
             ),
+            chartStartTime: buckets[0].x0,
+            getFormatter,
+            selectedAlertId,
+            setSelectedAlertId,
             theme,
           })}
+          <Suspense fallback={null}>
+            <LazyAlertsFlyout
+              alerts={alerts}
+              isInApp={true}
+              observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+              onClose={() => {
+                setSelectedAlertId(undefined);
+              }}
+              selectedAlertId={selectedAlertId}
+            />
+          </Suspense>
         </Chart>
       </div>
     </div>

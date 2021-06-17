@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test/types/ftr';
+import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -305,6 +306,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
+    async deleteMLTestDashboard() {
+      await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
+    },
+
     async createDashboardIfNeeded(dashboard: any) {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);
@@ -527,6 +532,54 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
       }
       log.debug('> ML saved objects deleted.');
+    },
+
+    async installFleetPackage(packageName: string) {
+      log.debug(`Installing Fleet package '${packageName}'`);
+
+      const version = await this.getFleetPackageVersion(packageName);
+
+      await supertest
+        .post(`/api/fleet/epm/packages/${packageName}-${version}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeFleetPackage(packageName: string) {
+      log.debug(`Removing Fleet package '${packageName}'`);
+
+      const version = await this.getFleetPackageVersion(packageName);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${packageName}-${version}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Removed`);
+    },
+
+    async getFleetPackageVersion(packageName: string): Promise<string> {
+      log.debug(`Fetching version for Fleet package '${packageName}'`);
+
+      const { body } = await supertest
+        .get(`/api/fleet/epm/packages?experimental=true`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      const packageVersion =
+        body.response.find(
+          ({ name, version }: { name: string; version: string }) => name === packageName && version
+        )?.version ?? '';
+
+      expect(packageVersion).to.not.eql(
+        '',
+        `Fleet package definition for '${packageName}' should exist and have a version`
+      );
+
+      log.debug(` > found version '${packageVersion}'`);
+      return packageVersion;
     },
   };
 }

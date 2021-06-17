@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Threats } from '../common/schemas';
+import { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const getThreatMock = (): Threats => [
   {

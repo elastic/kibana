@@ -26,6 +26,11 @@ export interface MigrationLog {
   message: string;
 }
 
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
+}
+
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
@@ -48,7 +53,7 @@ export interface BaseState extends ControlState {
   readonly tempIndexMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   readonly preMigrationScript: Option.Option<string>;
-  readonly outdatedDocumentsQuery: estypes.QueryContainer;
+  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
   readonly retryCount: number;
   readonly retryDelay: number;
   /**
@@ -107,7 +112,7 @@ export interface BaseState extends ControlState {
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  readonly unusedTypesQuery: estypes.QueryContainer;
+  readonly unusedTypesQuery: estypes.QueryDslQueryContainer;
 }
 
 export interface InitState extends BaseState {
@@ -127,7 +132,7 @@ export interface PostInitState extends BaseState {
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
-  readonly outdatedDocumentsQuery: estypes.QueryContainer;
+  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
 }
 
 export interface DoneState extends PostInitState {
@@ -183,6 +188,7 @@ export interface ReindexSourceToTempRead extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -197,6 +203,7 @@ export interface ReindexSourceToTempIndex extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempIndexBulk extends PostInitState {
@@ -204,6 +211,7 @@ export interface ReindexSourceToTempIndexBulk extends PostInitState {
   readonly transformedDocs: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {
@@ -252,6 +260,7 @@ export interface OutdatedDocumentsSearchRead extends PostInitState {
   readonly hasTransformedDocs: boolean;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface OutdatedDocumentsSearchClosePit extends PostInitState {
@@ -276,6 +285,7 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly hasTransformedDocs: boolean;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 export interface TransformedDocumentsBulkIndex extends PostInitState {
   /**
@@ -286,6 +296,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
   readonly pitId: string;
+  readonly progress: Progress;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {
@@ -370,7 +381,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
-export type State =
+export type State = Readonly<
   | FatalState
   | InitState
   | DoneState
@@ -400,7 +411,8 @@ export type State =
   | LegacySetWriteBlockState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState;
+  | LegacyDeleteState
+>;
 
 export type AllControlStates = State['controlState'];
 /**

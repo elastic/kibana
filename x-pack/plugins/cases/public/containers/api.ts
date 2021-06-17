@@ -8,9 +8,14 @@
 import { assign, omit } from 'lodash';
 
 import {
+  ACTION_TYPES_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -18,30 +23,19 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  getCaseCommentsUrl,
+  getCaseDetailsUrl,
+  getCasePushUrl,
+  getCaseUserActionUrl,
+  getSubCaseDetailsUrl,
+  getSubCaseUserActionUrl,
   StatusAll,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-} from '../../common';
-
-import {
-  ACTION_TYPES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../common';
-
-import {
-  getCaseCommentsUrl,
-  getCasePushUrl,
-  getCaseDetailsUrl,
-  getCaseUserActionUrl,
-  getSubCaseDetailsUrl,
-  getSubCaseUserActionUrl,
 } from '../../common';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -111,26 +105,32 @@ export const getSubCase = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
+export const getCasesStatus = async (
+  signal: AbortSignal,
+  owner: string[]
+): Promise<CasesStatus> => {
   const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
-export const getTags = async (signal: AbortSignal): Promise<string[]> => {
+export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(CASE_TAGS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
+export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };
@@ -171,6 +171,7 @@ export const getCases = async ({
     reporters: [],
     status: StatusAll,
     tags: [],
+    owner: [],
   },
   queryParams = {
     page: 1,
@@ -182,10 +183,11 @@ export const getCases = async ({
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
-    tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
+    tags: filterOptions.tags,
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),
+    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {

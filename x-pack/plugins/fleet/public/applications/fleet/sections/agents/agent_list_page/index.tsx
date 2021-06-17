@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 
-import { AgentEnrollmentFlyout } from '../components';
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -37,7 +36,11 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, ContextMenuActions } from '../../../components';
+import {
+  AgentEnrollmentFlyout,
+  AgentPolicySummaryLine,
+  ContextMenuActions,
+} from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -70,7 +73,7 @@ const RowActions = React.memo<{
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
-      href={getHref('fleet_agent_details', { agentId: agent.id })}
+      href={getHref('agent_details', { agentId: agent.id })}
       key="viewAgent"
     >
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
@@ -143,7 +146,7 @@ function safeMetadata(val: any) {
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
-  useBreadcrumbs('fleet_agent_list');
+  useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
@@ -355,7 +358,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
+        <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
         </EuiLink>
       ),

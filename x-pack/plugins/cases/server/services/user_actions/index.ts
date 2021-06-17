@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsFindResponse,
-  Logger,
-  SavedObjectsBulkResponse,
-  SavedObjectReference,
-} from 'kibana/server';
+import { Logger, SavedObjectReference } from 'kibana/server';
 
-import { CaseUserActionAttributes } from '../../../common';
 import {
-  CASE_USER_ACTION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CaseUserActionAttributes,
+  MAX_DOCS_PER_PAGE,
   SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
+} from '../../../common';
 import { ClientArgs } from '..';
 
 interface GetCaseUserActionArgs extends ClientArgs {
@@ -34,52 +30,37 @@ interface PostCaseUserActionArgs extends ClientArgs {
   actions: UserActionItem[];
 }
 
-export interface CaseUserActionServiceSetup {
-  getUserActions(
-    args: GetCaseUserActionArgs
-  ): Promise<SavedObjectsFindResponse<CaseUserActionAttributes>>;
-  postUserActions(
-    args: PostCaseUserActionArgs
-  ): Promise<SavedObjectsBulkResponse<CaseUserActionAttributes>>;
-}
-
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
-  public setup = async (): Promise<CaseUserActionServiceSetup> => ({
-    getUserActions: async ({ client, caseId, subCaseId }: GetCaseUserActionArgs) => {
-      try {
-        const id = subCaseId ?? caseId;
-        const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-        const caseUserActionInfo = await client.find({
-          type: CASE_USER_ACTION_SAVED_OBJECT,
-          fields: [],
-          hasReference: { type, id },
-          page: 1,
-          perPage: 1,
-        });
-        return await client.find({
-          type: CASE_USER_ACTION_SAVED_OBJECT,
-          hasReference: { type, id },
-          page: 1,
-          perPage: caseUserActionInfo.total,
-          sortField: 'action_at',
-          sortOrder: 'asc',
-        });
-      } catch (error) {
-        this.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
-        throw error;
-      }
-    },
-    postUserActions: async ({ client, actions }: PostCaseUserActionArgs) => {
-      try {
-        this.log.debug(`Attempting to POST a new case user action`);
-        return await client.bulkCreate(
-          actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
-        );
-      } catch (error) {
-        this.log.error(`Error on POST a new case user action: ${error}`);
-        throw error;
-      }
-    },
-  });
+
+  public async getAll({ unsecuredSavedObjectsClient, caseId, subCaseId }: GetCaseUserActionArgs) {
+    try {
+      const id = subCaseId ?? caseId;
+      const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+
+      return await unsecuredSavedObjectsClient.find<CaseUserActionAttributes>({
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        hasReference: { type, id },
+        page: 1,
+        perPage: MAX_DOCS_PER_PAGE,
+        sortField: 'action_at',
+        sortOrder: 'asc',
+      });
+    } catch (error) {
+      this.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreate({ unsecuredSavedObjectsClient, actions }: PostCaseUserActionArgs) {
+    try {
+      this.log.debug(`Attempting to POST a new case user action`);
+      return await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributes>(
+        actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
+      );
+    } catch (error) {
+      this.log.error(`Error on POST a new case user action: ${error}`);
+      throw error;
+    }
+  }
 }

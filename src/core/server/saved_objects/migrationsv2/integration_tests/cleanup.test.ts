@@ -77,7 +77,7 @@ describe('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'trial',
+          license: 'basic',
           // original SO:
           // {
           //   _index: '.kibana_7.13.0_001',

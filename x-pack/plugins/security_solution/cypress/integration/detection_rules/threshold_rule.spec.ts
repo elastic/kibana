@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { indexPatterns, newThresholdRule } from '../../objects/rule';
+import { indexPatterns, newRule, newThresholdRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -26,6 +26,7 @@ import {
   RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
+import { PREVIEW_HEADER_SUBTITLE } from '../../screens/create_new_rule';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -58,19 +59,22 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
+import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
+  fillDefineThresholdRule,
   fillScheduleRuleAndContinue,
+  previewResults,
   selectThresholdRuleType,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -92,12 +96,12 @@ describe('Detection rules, threshold', () => {
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  it('Creates and activates a new threshold rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
+  });
+
+  it('Creates and activates a new threshold rule', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
@@ -109,7 +113,7 @@ describe('Detection rules, threshold', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
@@ -174,5 +178,20 @@ describe('Detection rules, threshold', () => {
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
+  });
+
+  it('Preview results', () => {
+    const previewRule = { ...newThresholdRule };
+    previewRule.index!.push('.siem-signals*');
+
+    createCustomRuleActivated(newRule);
+    goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
+    goToCreateNewRule();
+    selectThresholdRuleType();
+    fillDefineThresholdRule(previewRule);
+    previewResults();
+
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
   });
 });

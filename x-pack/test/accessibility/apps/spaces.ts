@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
@@ -111,14 +111,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
       await a11y.testAppSnapshot();
-      // a11y test for no space name in confirm dialogue box
-      await PageObjects.spaceSelector.confirmDeletingSpace();
-      await a11y.testAppSnapshot();
     });
 
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
     it('a11y test for space selection page', async () => {
-      await PageObjects.spaceSelector.setSpaceNameTobeDeleted('space_b');
       await PageObjects.spaceSelector.confirmDeletingSpace();
       await a11y.testAppSnapshot();
       await PageObjects.spaceSelector.clickSpaceCard('default');

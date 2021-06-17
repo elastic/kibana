@@ -180,51 +180,14 @@ export class SpacesGridPage extends Component<Props, State> {
             showConfirmDeleteModal: false,
           });
         }}
-        onConfirm={this.deleteSpace}
+        onSuccess={() => {
+          this.setState({
+            showConfirmDeleteModal: false,
+          });
+          this.loadGrid();
+        }}
       />
     );
-  };
-
-  public deleteSpace = async () => {
-    const { spacesManager } = this.props;
-
-    const space = this.state.selectedSpace;
-
-    if (!space) {
-      return;
-    }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
-
-    try {
-      await spacesManager.deleteSpace(space);
-    } catch (error) {
-      const { message: errorMessage = '' } = error.data || error.body || {};
-
-      this.props.notifications.toasts.addDanger(
-        i18n.translate('xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage', {
-          defaultMessage: 'Error deleting space: {errorMessage}',
-          values: {
-            errorMessage,
-          },
-        })
-      );
-      return;
-    }
-
-    this.loadGrid();
-
-    const message = i18n.translate(
-      'xpack.spaces.management.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
-      {
-        defaultMessage: 'Deleted "{spaceName}" space.',
-        values: { spaceName: space.name },
-      }
-    );
-
-    this.props.notifications.toasts.addSuccess(message);
   };
 
   public loadGrid = async () => {

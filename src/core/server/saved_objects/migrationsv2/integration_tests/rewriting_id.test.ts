@@ -88,6 +88,7 @@ function createRoot() {
   );
 }
 
+// FAILING: https://github.com/elastic/kibana/issues/98351
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -113,7 +114,7 @@ describe('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'trial',
+          license: 'basic',
           // original SO:
           // [
           //   { id: 'foo:1', type: 'foo', foo: { name: 'Foo 1 default' } },
@@ -132,7 +133,7 @@ describe('migration v2', () => {
           //     namespace: 'spacex',
           //   },
           // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_so_with_multiple_namespaces.zip'),
+          dataArchive: Path.join(__dirname, 'archives', '7.13.2_so_with_multiple_namespaces.zip'),
         },
       },
     });
@@ -194,6 +195,7 @@ describe('migration v2', () => {
           id: 'legacy-url-alias:spacex:foo:1',
           type: 'legacy-url-alias',
           'legacy-url-alias': {
+            sourceId: '1',
             targetId: newFooId,
             targetNamespace: 'spacex',
             targetType: 'foo',
@@ -226,6 +228,7 @@ describe('migration v2', () => {
           id: 'legacy-url-alias:spacex:bar:1',
           type: 'legacy-url-alias',
           'legacy-url-alias': {
+            sourceId: '1',
             targetId: newBarId,
             targetNamespace: 'spacex',
             targetType: 'bar',

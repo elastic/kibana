@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -14,15 +20,6 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import { getLastLoadedResourceState } from '../../../state/async_resource_state';
-
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  transformNewItemOutput,
-  transformOutput,
-  UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
 import {
   getCurrentListPageDataState,
   getCurrentLocation,
@@ -33,7 +30,13 @@ import {
   getFormEntry,
   getSubmissionResource,
   getNewComment,
+  isDeletionInProgress,
+  getItemToDelete,
+  getDeletionState,
 } from './selector';
+
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../constants';
 import {
   EventFiltersListPageData,
   EventFiltersListPageState,
@@ -44,7 +47,9 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
+  getLastLoadedResourceState,
 } from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 const addNewComments = (
   entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
@@ -52,7 +57,8 @@ const addNewComments = (
 ): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
   if (newComment) {
     if (!entry.comments) entry.comments = [];
-    entry.comments.push({ comment: newComment });
+    const trimmedComment = newComment.trim();
+    if (trimmedComment) entry.comments.push({ comment: trimmedComment });
   }
   return entry;
 };
@@ -233,12 +239,13 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       },
     });
 
-    const { page_size: pageSize, page_index: pageIndex } = getCurrentLocation(state);
+    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
     const query: EventFiltersServiceGetListOptions = {
       page: pageIndex + 1,
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
 
     try {
@@ -247,17 +254,9 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       dispatch({
         type: 'eventFiltersListPageDataChanged',
         payload: createLoadedResourceState({
-          query,
+          query: { ...query, filter },
           content: results,
         }),
-      });
-
-      dispatch({
-        type: 'eventFiltersListPageDataExistsChanged',
-        payload: {
-          type: 'LoadedResourceState',
-          data: Boolean(results.total),
-        },
       });
 
       // If no results were returned, then just check to make sure data actually exists for
@@ -265,6 +264,14 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       // messages to the user
       if (results.total === 0) {
         await checkIfEventFilterDataExist(store, eventFiltersService);
+      } else {
+        dispatch({
+          type: 'eventFiltersListPageDataExistsChanged',
+          payload: {
+            type: 'LoadedResourceState',
+            data: Boolean(results.total),
+          },
+        });
       }
     } catch (error) {
       dispatch({
@@ -272,6 +279,43 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
         payload: createFailedResourceState<EventFiltersListPageData>(error.body ?? error),
       });
     }
+  }
+};
+
+const eventFilterDeleteEntry: MiddlewareActionHandler = async (
+  { getState, dispatch },
+  eventFiltersService
+) => {
+  const state = getState();
+
+  if (isDeletionInProgress(state)) {
+    return;
+  }
+
+  const itemId = getItemToDelete(state)?.id;
+
+  if (!itemId) {
+    return;
+  }
+
+  dispatch({
+    type: 'eventFilterDeleteStatusChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState(getDeletionState(state).status),
+  });
+
+  try {
+    const response = await eventFiltersService.deleteOne(itemId);
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (e) {
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema, ServerApiError>(e.body ?? e),
+    });
   }
 };
 
@@ -294,9 +338,12 @@ export const createEventFiltersPageMiddleware = (
       if (
         action.type === 'userChangedUrl' ||
         action.type === 'eventFiltersCreateSuccess' ||
-        action.type === 'eventFiltersUpdateSuccess'
+        action.type === 'eventFiltersUpdateSuccess' ||
+        action.type === 'eventFilterDeleteStatusChanged'
       ) {
         refreshListDataIfNeeded(store, eventFiltersService);
+      } else if (action.type === 'eventFilterDeleteSubmit') {
+        eventFilterDeleteEntry(store, eventFiltersService);
       }
     }
   };

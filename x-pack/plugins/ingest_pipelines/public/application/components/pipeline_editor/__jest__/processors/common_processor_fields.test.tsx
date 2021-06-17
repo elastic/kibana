@@ -37,6 +37,21 @@ describe('Processor: Common Fields For All Processors', () => {
     testBed.component.update();
   });
 
+  test('prevents form submission if required type field is not provided', async () => {
+    const {
+      actions: { addProcessor, saveNewProcessor },
+      form,
+    } = testBed;
+
+    // Open flyout to add new processor
+    addProcessor();
+    // Click submit button without entering any fields
+    await saveNewProcessor();
+
+    // Expect form error as a processor type is required
+    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
+  });
+
   test('saves with common fields set', async () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },

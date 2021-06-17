@@ -12,8 +12,8 @@ import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices, SortDirection } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
-import { EsHitRecordList, fetchContextProvider } from './context';
-import { AnchorHitRecord } from './anchor';
+import { EsHitRecordList, fetchContextProvider, SurrDocType } from './context';
+import { EsHitRecord } from './context';
 import { DiscoverServices } from '../../../../build_services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -73,9 +73,9 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
-          'successors',
+          SurrDocType.SUCCESSORS,
           indexPatternId,
-          anchor as AnchorHitRecord,
+          anchor as EsHitRecord,
           timeField,
           tieBreakerField,
           sortDir,
@@ -268,9 +268,9 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
-          'successors',
+          SurrDocType.SUCCESSORS,
           indexPatternId,
-          anchor as AnchorHitRecord,
+          anchor as EsHitRecord,
           timeField,
           tieBreakerField,
           sortDir,

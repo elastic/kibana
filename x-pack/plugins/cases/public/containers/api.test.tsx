@@ -7,8 +7,13 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common';
-import { CASES_URL } from '../../common';
+import {
+  CASES_URL,
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common';
 
 import {
   deleteCases,
@@ -127,7 +132,7 @@ describe('Case Configuration API', () => {
     });
     test('check url, method, signal', async () => {
       await getCases({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -137,6 +142,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
@@ -150,6 +156,7 @@ describe('Case Configuration API', () => {
           tags,
           status: CaseStatuses.open,
           search: 'hello',
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -159,9 +166,10 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"coke"', '"pepsi"'],
+          tags: ['coke', 'pepsi'],
           search: 'hello',
           status: CaseStatuses.open,
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
@@ -177,6 +185,7 @@ describe('Case Configuration API', () => {
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -186,9 +195,10 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags: ['"("', '"\\"double\\""'],
+          tags: ['(', '"double"'],
           search: 'hello',
           status: CaseStatuses.open,
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
@@ -196,7 +206,7 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await getCases({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -210,15 +220,16 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(casesStatusSnake);
     });
     test('check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal);
+      await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
       });
     });
 
     test('happy path', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal);
+      const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(casesStatus);
     });
   });
@@ -250,15 +261,18 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal);
+      await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
       });
     });
 
     test('happy path', async () => {
-      const resp = await getReporters(abortCtrl.signal);
+      const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(respReporters);
     });
   });
@@ -270,15 +284,18 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getTags(abortCtrl.signal);
+      await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
       });
     });
 
     test('happy path', async () => {
-      const resp = await getTags(abortCtrl.signal);
+      const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
     });
   });
@@ -395,6 +412,7 @@ describe('Case Configuration API', () => {
       settings: {
         syncAlerts: true,
       },
+      owner: SECURITY_SOLUTION_OWNER,
     };
 
     test('check url, method, signal', async () => {
@@ -419,6 +437,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
+      owner: SECURITY_SOLUTION_OWNER,
       type: CommentType.user as const,
     };
 

@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { FleetPanel } from '../../components/app/fleet_panel';
-import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
 import { appsSection } from '../home/section';
@@ -33,16 +34,20 @@ const EuiCardWithoutPadding = styled(EuiCard)`
 export function LandingPage() {
   useTrackPageview({ app: 'observability-overview', path: 'landing' });
   useTrackPageview({ app: 'observability-overview', path: 'landing', delay: 15000 });
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.landingLinkText', {
+        defaultMessage: 'Getting started',
+      }),
+    },
+  ]);
 
-  const { core } = usePluginContext();
+  const { core, ObservabilityPageTemplate } = usePluginContext();
   const theme = useContext(ThemeContext);
 
   return (
-    <WithHeaderLayout
-      restrictWidth={1200}
-      headerColor={theme.eui.euiPageBackgroundColor}
-      bodyColor={theme.eui.euiColorEmptyShade}
-    >
+    <ObservabilityPageTemplate restrictWidth={1200}>
+      <ObservabilityHeaderMenu />
       <EuiFlexGroup direction="column">
         {/* title and description */}
         <EuiFlexItem className="obsLanding__title">
@@ -128,6 +133,6 @@ export function LandingPage() {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </WithHeaderLayout>
+    </ObservabilityPageTemplate>
   );
 }

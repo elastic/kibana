@@ -7,7 +7,7 @@
 
 import './layer_panel.scss';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -42,6 +42,7 @@ export function LayerPanel(
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
+    updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
     updateAll: (
       datasourceId: string,
       newDatasourcestate: unknown,
@@ -49,6 +50,8 @@ export function LayerPanel(
     ) => void;
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
+    toggleFullscreen: () => void;
+    isFullscreen: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -65,6 +68,11 @@ export function LayerPanel(
     activeVisualization,
     updateVisualization,
     updateDatasource,
+    toggleFullscreen,
+    isFullscreen,
+    updateAll,
+    updateDatasourceAsync,
+    visualizationState,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
@@ -72,6 +80,7 @@ export function LayerPanel(
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback((el) => registerNewLayerRef(layerId, el), [
     layerId,
     registerNewLayerRef,
@@ -108,7 +117,11 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
+  const { groups } = useMemo(
+    () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [layerDatasourceConfigProps.frame, layerDatasourceDropProps, activeVisualization]
+  );
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
@@ -196,9 +209,68 @@ export function LayerPanel(
     setNextFocusedButtonId,
   ]);
 
+  const isDimensionPanelOpen = Boolean(activeId);
+
+  const updateDataLayerState = useCallback(
+    (newState: unknown, { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}) => {
+      if (!activeGroup || !activeId) {
+        return;
+      }
+      if (allAccessors.includes(activeId)) {
+        if (isDimensionComplete) {
+          updateDatasourceAsync(datasourceId, newState);
+        } else {
+          // The datasource can indicate that the previously-valid column is no longer
+          // complete, which clears the visualization. This keeps the flyout open and reuses
+          // the previous columnId
+          updateAll(
+            datasourceId,
+            newState,
+            activeVisualization.removeDimension({
+              layerId,
+              columnId: activeId,
+              prevState: visualizationState,
+            })
+          );
+        }
+      } else if (isDimensionComplete) {
+        updateAll(
+          datasourceId,
+          newState,
+          activeVisualization.setDimension({
+            layerId,
+            groupId: activeGroup.groupId,
+            columnId: activeId,
+            prevState: visualizationState,
+          })
+        );
+        setActiveDimension({ ...activeDimension, isNew: false });
+      } else {
+        updateDatasourceAsync(datasourceId, newState);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeDimension,
+      activeGroup,
+      activeId,
+      activeVisualization,
+      datasourceId,
+      layerId,
+      updateAll,
+      updateDatasourceAsync,
+      visualizationState,
+    ]
+  );
+
   return (
     <>
-      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
+      <section
+        tabIndex={-1}
+        ref={registerLayerRef}
+        className="lnsLayerPanel"
+        style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
+      >
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
@@ -405,9 +477,17 @@ export function LayerPanel(
       </section>
 
       <DimensionContainer
-        isOpen={!!activeId}
+        panelRef={(el) => (panelRef.current = el)}
+        isOpen={isDimensionPanelOpen}
+        isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
+          if (
+            layerDatasource.canCloseDimensionEditor &&
+            !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
+          ) {
+            return false;
+          }
           if (layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
               state: layerDatasourceState,
@@ -419,9 +499,13 @@ export function LayerPanel(
             }
           }
           setActiveDimension(initialActiveDimensionState);
+          if (isFullscreen) {
+            toggleFullscreen();
+          }
+          return true;
         }}
         panel={
-          <>
+          <div>
             {activeGroup && activeId && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
@@ -433,46 +517,15 @@ export function LayerPanel(
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
-                  setState: (
-                    newState: unknown,
-                    {
-                      shouldReplaceDimension,
-                      shouldRemoveDimension,
-                    }: {
-                      shouldReplaceDimension?: boolean;
-                      shouldRemoveDimension?: boolean;
-                    } = {}
-                  ) => {
-                    if (shouldReplaceDimension || shouldRemoveDimension) {
-                      props.updateAll(
-                        datasourceId,
-                        newState,
-                        shouldRemoveDimension
-                          ? activeVisualization.removeDimension({
-                              layerId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
-                          : activeVisualization.setDimension({
-                              layerId,
-                              groupId: activeGroup.groupId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
-                      );
-                    } else {
-                      props.updateDatasource(datasourceId, newState);
-                    }
-                    setActiveDimension({
-                      ...activeDimension,
-                      isNew: false,
-                    });
-                  },
+                  toggleFullscreen,
+                  isFullscreen,
+                  setState: updateDataLayerState,
                 }}
               />
             )}
             {activeGroup &&
               activeId &&
+              !isFullscreen &&
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
@@ -484,11 +537,12 @@ export function LayerPanel(
                       groupId: activeGroup.groupId,
                       accessor: activeId,
                       setState: props.updateVisualization,
+                      panelRef,
                     }}
                   />
                 </div>
               )}
-          </>
+          </div>
         }
       />
     </>

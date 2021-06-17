@@ -65,13 +65,7 @@ export const ReportingCsvShareProvider = ({
       ? moment.tz.guess()
       : uiSettings.get('dateFormat:tz');
 
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    sharingData,
-    onClose,
-    isDirty,
-  }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -107,13 +101,13 @@ export const ReportingCsvShareProvider = ({
           title: panelTitle,
           content: (
             <ReportingPanelContent
+              requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               reportType={CSV_JOB_TYPE}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
-              isDirty={isDirty}
               onClose={onClose}
             />
           ),

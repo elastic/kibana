@@ -7,46 +7,47 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { AlertAttributes, RuleRangeTuple } from '../types';
+import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
 
 export const queryExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -62,7 +63,7 @@ export const queryExecutor = async ({
   });
 
   return searchAfterAndBulkCreate({
-    tuples,
+    tuple,
     listClient,
     exceptionsList: exceptionItems,
     ruleSO: rule,
@@ -74,7 +75,8 @@ export const queryExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
     pageSize: searchAfterSize,
-    refresh,
     buildRuleMessage,
+    bulkCreate,
+    wrapHits,
   });
 };

@@ -8,14 +8,13 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { formatErrors } from '../../../../common/format_errors';
-import { exactCheck } from '../../../../common/exact_check';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   addPrepackagedRulesSchema,
   AddPrepackagedRulesSchema,
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { BadRequestError } from '../errors/bad_request_error';
 
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';

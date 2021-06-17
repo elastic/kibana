@@ -41,12 +41,8 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   refreshCases,
   selectedCases,
 }) => {
-  const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
-  const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
-    title: '',
-    id: '',
-    type: null,
-  });
+  const [deleteCases, setDeleteCases] = useState<DeleteCase[]>([]);
+
   // Delete case
   const {
     dispatchResetIsDeleted,
@@ -86,24 +82,15 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   const toggleBulkDeleteModal = useCallback(
     (cases: Case[]) => {
       handleToggleModal();
-      if (cases.length === 1) {
-        const singleCase = cases[0];
-        if (singleCase) {
-          return setDeleteThisCase({
-            id: singleCase.id,
-            title: singleCase.title,
-            type: singleCase.type,
-          });
-        }
-      }
+
       const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title, type }) => ({
         id,
         title,
         type,
       }));
-      setDeleteBulk(convertToDeleteCases);
+      setDeleteCases(convertToDeleteCases);
     },
-    [setDeleteBulk, handleToggleModal]
+    [setDeleteCases, handleToggleModal]
   );
 
   const handleUpdateCaseStatus = useCallback(
@@ -128,6 +115,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     ),
     [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
   );
+
   return (
     <UtilityBar border>
       <UtilityBarSection>
@@ -159,14 +147,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
         </UtilityBarGroup>
       </UtilityBarSection>
       <ConfirmDeleteCaseModal
-        caseTitle={deleteThisCase.title}
+        caseTitle={deleteCases[0]?.title ?? ''}
         isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={deleteBulk.length > 0}
+        caseQuantity={deleteCases.length}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(
-          null,
-          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
-        )}
+        onConfirm={handleOnDeleteConfirm.bind(null, deleteCases)}
       />
     </UtilityBar>
   );

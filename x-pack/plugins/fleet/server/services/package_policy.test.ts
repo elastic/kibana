@@ -34,10 +34,27 @@ paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
+{{#if hosts}}
+hosts:
+{{#each hosts}}
+- {{this}}
+{{/each}}
+{{/if}}
 `),
       },
     ];
   }
+  if (dataset === 'dataset1_level1') {
+    return [
+      {
+        buffer: Buffer.from(`
+type: log
+metricset: ["dataset1.level1"]
+`),
+      },
+    ];
+  }
+
   return [
     {
       buffer: Buffer.from(`
@@ -98,6 +115,7 @@ describe('Package policy service', () => {
               type: 'logs',
               dataset: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
@@ -106,6 +124,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -151,14 +170,15 @@ describe('Package policy service', () => {
       ]);
     });
 
-    it('should work with config variables at the input level', async () => {
+    it('should work with a two level dataset name', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
           data_streams: [
             {
-              dataset: 'package.dataset1',
               type: 'logs',
+              dataset: 'package.dataset1.level1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1_level1',
             },
           ],
           policy_templates: [
@@ -167,6 +187,59 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1.level1'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should work with config variables at the input level', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -212,6 +285,74 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with config variables at the package level', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        {
+          hosts: {
+            value: ['localhost'],
+          },
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+                hosts: ['localhost'],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with an input with a template and no streams', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
@@ -222,6 +363,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -261,17 +403,25 @@ describe('Package policy service', () => {
               dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
             {
+              name: 'template_1',
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+            {
+              name: 'template_2',
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
+            policy_template: 'template_1',
             enabled: true,
             vars: {
               hosts: {
@@ -289,12 +439,24 @@ describe('Package policy service', () => {
               },
             ],
           },
+          {
+            type: 'log',
+            policy_template: 'template_2',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
         ]
       );
 
       expect(inputs).toEqual([
         {
           type: 'log',
+          policy_template: 'template_1',
           enabled: true,
           vars: {
             hosts: {
@@ -315,10 +477,25 @@ describe('Package policy service', () => {
               compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
+                hosts: ['localhost'],
                 type: 'log',
               },
             },
           ],
+        },
+        {
+          type: 'log',
+          policy_template: 'template_2',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
         },
       ]);
     });
@@ -332,6 +509,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         []
       );
 
@@ -347,6 +525,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         []
       );
 
@@ -420,6 +599,129 @@ describe('Package policy service', () => {
                 period: {
                   value: '6mo',
                   type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
                 },
               },
             },

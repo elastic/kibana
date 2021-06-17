@@ -9,12 +9,13 @@
 
 import {
   DrawState,
+  EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
+  Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
@@ -31,11 +32,12 @@ export type MapContext = {
     lon: number;
   };
   timeFilters?: TimeRange;
+  timeslice?: Timeslice;
   query?: MapQuery;
   filters: Filter[];
-  refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
+  editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };
@@ -61,6 +63,7 @@ export type MapSettings = {
   minZoom: number;
   showScaleControl: boolean;
   showSpatialFilters: boolean;
+  showTimesliderToggleButton: boolean;
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;

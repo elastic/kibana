@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DESCRIPTION, LIST_ID, META, NAME, _VERSION } from '../../constants.mock';
+import type { UpdateListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { UpdateListSchema } from './update_list_schema';
+import { DESCRIPTION, LIST_ID, META, NAME, _VERSION } from '../../constants.mock';
 
 export const getUpdateListSchemaMock = (): UpdateListSchema => ({
   _version: _VERSION,

@@ -124,6 +124,7 @@ const setUpModule = async (
       jobOverrides,
       datafeedOverrides,
       query,
+      useDedicatedIndex: true,
     },
     fetch
   );
@@ -136,7 +137,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateIndicesAPI(
@@ -167,7 +168,7 @@ const validateSetupDatasets = async (
   timestampField: string,
   startTime: number,
   endTime: number,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateDatasetsAPI(

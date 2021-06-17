@@ -17,6 +17,8 @@ import {
   HostPolicyResponseActionStatus,
   MetadataQueryStrategyVersions,
   HostStatus,
+  ActivityLog,
+  HostMetadata,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -26,6 +28,16 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
+import {
+  getLastLoadedResourceState,
+  isFailedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../state';
+
+import { ServerApiError } from '../../../../common/types';
+import { isEndpointHostIsolated } from '../../../../common/utils/validators';
+import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -39,11 +51,16 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) => state.details;
+export const detailsData = (state: Immutable<EndpointState>) =>
+  state.endpointDetails.hostDetails.details;
 
-export const detailsLoading = (state: Immutable<EndpointState>): boolean => state.detailsLoading;
+export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
+  state.endpointDetails.hostDetails.detailsLoading;
 
-export const detailsError = (state: Immutable<EndpointState>) => state.detailsError;
+export const detailsError = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
+  state.endpointDetails.hostDetails.detailsError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
@@ -171,6 +188,7 @@ export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   );
 };
 
+/** Sanitized list of URL query params supported by the Details page */
 export const uiQueryParams: (
   state: Immutable<EndpointState>
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
@@ -192,6 +210,14 @@ export const uiQueryParams: (
         'admin_query',
       ];
 
+      const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
+        'policy_response',
+        'details',
+        'isolate',
+        'unisolate',
+        'activity_log',
+      ];
+
       for (const key of keys) {
         const value: string | undefined =
           typeof query[key] === 'string'
@@ -202,8 +228,8 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details') {
-              data[key] = value;
+            if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
+              data[key] = value as EndpointIndexUIQueryParams['show'];
             }
           } else {
             data[key] = value;
@@ -227,12 +253,24 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (state: EndpointState) => 'policy_response' | 'details' = createSelector(
-  uiQueryParams,
-  (searchParams) => {
-    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
-  }
-);
+export const showView: (
+  state: EndpointState
+) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show ?? 'details';
+});
+
+/**
+ * Returns the selected endpoint's elastic agent Id
+ * used for fetching endpoint actions log
+ */
+export const selectedAgent = (state: Immutable<EndpointState>): string => {
+  const hostList = state.hosts;
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+  return (
+    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
+      .id || ''
+  );
+};
 
 /**
  * Returns the Host Status which is connected the fleet agent
@@ -297,5 +335,119 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
       }
     }
     return decodedQuery;
+  }
+);
+
+export const getCurrentIsolationRequestState = (
+  state: Immutable<EndpointState>
+): EndpointState['isolationRequestState'] => {
+  return state.isolationRequestState;
+};
+
+export const getIsIsolationRequestPending: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadingResourceState(isolateHost)
+);
+
+export const getWasIsolationRequestSuccessful: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadedResourceState(isolateHost)
+);
+
+export const getIsolationRequestError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
+  if (isFailedResourceState(isolateHost)) {
+    return isolateHost.error;
+  }
+});
+
+export const getActivityLogDataPaging = (
+  state: Immutable<EndpointState>
+): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
+  return {
+    page: state.endpointDetails.activityLog.page,
+    pageSize: state.endpointDetails.activityLog.pageSize,
+  };
+};
+
+export const getActivityLogData = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
+  state.endpointDetails.activityLog.logData;
+
+export const getLastLoadedActivityLogData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
+  return getLastLoadedResourceState(activityLog)?.data;
+});
+
+export const getActivityLogRequestLoading: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadingResourceState(activityLog)
+);
+
+export const getActivityLogRequestLoaded: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadedResourceState(activityLog)
+);
+
+export const getActivityLogIterableData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
+  const emptyArray: ActivityLog['data'] = [];
+  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
+});
+
+export const getActivityLogError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
+  if (isFailedResourceState(activityLog)) {
+    return activityLog.error;
+  }
+});
+
+export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
+  return (details && isEndpointHostIsolated(details)) || false;
+});
+
+export const getEndpointPendingActionsState = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointPendingActions']> => {
+  return state.endpointPendingActions;
+};
+
+/**
+ * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
+ * component for a given Endpoint
+ */
+export const getEndpointHostIsolationStatusPropsCallback: (
+  state: Immutable<EndpointState>
+) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
+  getEndpointPendingActionsState,
+  (pendingActionsState) => {
+    return (endpoint: HostMetadata) => {
+      let pendingIsolate = 0;
+      let pendingUnIsolate = 0;
+
+      if (isLoadedResourceState(pendingActionsState)) {
+        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
+
+        if (endpointPendingActions) {
+          pendingIsolate = endpointPendingActions?.isolate ?? 0;
+          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+        }
+      }
+
+      return {
+        isIsolated: isEndpointHostIsolated(endpoint),
+        pendingIsolate,
+        pendingUnIsolate,
+      };
+    };
   }
 );

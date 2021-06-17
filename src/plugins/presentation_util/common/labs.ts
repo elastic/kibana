@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const TIME_TO_PRESENT = `${LABS_PROJECT_PREFIX}presentation:timeToPresent` as const;
+export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
 
-export const projectIDs = [TIME_TO_PRESENT] as const;
+export const projectIDs = [TIME_TO_PRESENT, DEFER_BELOW_FOLD] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -32,6 +33,20 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
       defaultMessage: 'Enable the new presentation-oriented UI for Canvas.',
     }),
     solutions: ['canvas'],
+  },
+  [DEFER_BELOW_FOLD]: {
+    id: DEFER_BELOW_FOLD,
+    isActive: false,
+    isDisplayed: true,
+    environments: ['kibana', 'browser', 'session'],
+    name: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectName', {
+      defaultMessage: 'Defer loading below "the fold"',
+    }),
+    description: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectDescription', {
+      defaultMessage:
+        'Any Dashboard panels below the fold-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+    }),
+    solutions: ['dashboard'],
   },
 };
 

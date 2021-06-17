@@ -5,246 +5,94 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
-import {
-  CasesClientFactoryArguments,
-  CasesClient,
-  ConfigureFields,
-  MappingsClient,
-  CasesClientUpdateAlertsStatus,
-  CasesClientAddComment,
-  CasesClientGet,
-  CasesClientGetUserActions,
-  CasesClientGetAlerts,
-  CasesClientPush,
-} from './types';
-import { create } from './cases/create';
-import { update } from './cases/update';
-import { addComment } from './comments/add';
-import { getFields } from './configure/get_fields';
-import { getMappings } from './configure/get_mappings';
-import { updateAlertsStatus } from './alerts/update_status';
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  ConnectorMappingsServiceSetup,
-  CaseUserActionServiceSetup,
-  AlertServiceContract,
-} from '../services';
-import { CasesPatchRequest, CasePostRequest, User } from '../../common';
-import { get } from './cases/get';
-import { get as getUserActions } from './user_actions/get';
-import { get as getAlerts } from './alerts/get';
-import { push } from './cases/push';
-import { createCaseError } from '../common/error';
+import { CasesClientArgs } from './types';
+import { CasesSubClient, createCasesSubClient } from './cases/client';
+import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/client';
+import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
+import { CasesClientInternal, createCasesClientInternal } from './client_internal';
+import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
+import { ENABLE_CASE_CONNECTOR } from '../../common';
+import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
+import { createStatsSubClient, StatsSubClient } from './stats/client';
 
 /**
- * This class is a pass through for common case functionality (like creating, get a case).
+ * Client wrapper that contains accessor methods for individual entities within the cases system.
  */
-export class CasesClientHandler implements CasesClient {
-  private readonly _scopedClusterClient: ElasticsearchClient;
-  private readonly _caseConfigureService: CaseConfigureServiceSetup;
-  private readonly _caseService: CaseServiceSetup;
-  private readonly _connectorMappingsService: ConnectorMappingsServiceSetup;
-  private readonly user: User;
-  private readonly _savedObjectsClient: SavedObjectsClientContract;
-  private readonly _userActionService: CaseUserActionServiceSetup;
-  private readonly _alertsService: AlertServiceContract;
-  private readonly logger: Logger;
+export class CasesClient {
+  private readonly _casesClientInternal: CasesClientInternal;
+  private readonly _cases: CasesSubClient;
+  private readonly _attachments: AttachmentsSubClient;
+  private readonly _userActions: UserActionsSubClient;
+  private readonly _subCases: SubCasesClient;
+  private readonly _configure: ConfigureSubClient;
+  private readonly _stats: StatsSubClient;
 
-  constructor(clientArgs: CasesClientFactoryArguments) {
-    this._scopedClusterClient = clientArgs.scopedClusterClient;
-    this._caseConfigureService = clientArgs.caseConfigureService;
-    this._caseService = clientArgs.caseService;
-    this._connectorMappingsService = clientArgs.connectorMappingsService;
-    this.user = clientArgs.user;
-    this._savedObjectsClient = clientArgs.savedObjectsClient;
-    this._userActionService = clientArgs.userActionService;
-    this._alertsService = clientArgs.alertsService;
-    this.logger = clientArgs.logger;
+  constructor(args: CasesClientArgs) {
+    this._casesClientInternal = createCasesClientInternal(args);
+    this._cases = createCasesSubClient(args, this, this._casesClientInternal);
+    this._attachments = createAttachmentsSubClient(args, this._casesClientInternal);
+    this._userActions = createUserActionsSubClient(args);
+    this._subCases = createSubCasesClient(args, this._casesClientInternal);
+    this._configure = createConfigurationSubClient(args, this._casesClientInternal);
+    this._stats = createStatsSubClient(args);
   }
 
-  public async create(caseInfo: CasePostRequest) {
-    try {
-      return create({
-        savedObjectsClient: this._savedObjectsClient,
-        caseService: this._caseService,
-        caseConfigureService: this._caseConfigureService,
-        userActionService: this._userActionService,
-        user: this.user,
-        theCase: caseInfo,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to create a new case using client: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
+  /**
+   * Retrieves an interface for interacting with cases entities.
+   */
+  public get cases() {
+    return this._cases;
   }
 
-  public async update(cases: CasesPatchRequest) {
-    try {
-      return update({
-        savedObjectsClient: this._savedObjectsClient,
-        caseService: this._caseService,
-        userActionService: this._userActionService,
-        user: this.user,
-        cases,
-        casesClient: this,
-        logger: this.logger,
-      });
-    } catch (error) {
-      const caseIDVersions = cases.cases.map((caseInfo) => ({
-        id: caseInfo.id,
-        version: caseInfo.version,
-      }));
-      throw createCaseError({
-        message: `Failed to update cases using client: ${JSON.stringify(caseIDVersions)}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
+  /**
+   * Retrieves an interface for interacting with attachments (comments) entities.
+   */
+  public get attachments() {
+    return this._attachments;
   }
 
-  public async addComment({ caseId, comment }: CasesClientAddComment) {
-    try {
-      return addComment({
-        savedObjectsClient: this._savedObjectsClient,
-        caseService: this._caseService,
-        userActionService: this._userActionService,
-        casesClient: this,
-        caseId,
-        comment,
-        user: this.user,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to add comment using client case id: ${caseId}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
+  /**
+   * Retrieves an interface for interacting with the user actions associated with the plugin entities.
+   */
+  public get userActions() {
+    return this._userActions;
   }
 
-  public async getFields(fields: ConfigureFields) {
-    try {
-      return getFields(fields);
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to retrieve fields using client: ${error}`,
-        error,
-        logger: this.logger,
-      });
+  /**
+   * Retrieves an interface for interacting with the case as a connector entities.
+   *
+   * Currently this functionality is disabled and will throw an error if this function is called.
+   */
+  public get subCases() {
+    if (!ENABLE_CASE_CONNECTOR) {
+      throw new Error('The case connector feature is disabled');
     }
+    return this._subCases;
   }
 
-  public async getMappings(args: MappingsClient) {
-    try {
-      return getMappings({
-        ...args,
-        savedObjectsClient: this._savedObjectsClient,
-        connectorMappingsService: this._connectorMappingsService,
-        casesClient: this,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to get mappings using client: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
+  /**
+   * Retrieves an interface for interacting with the configuration of external connectors for the plugin entities.
+   */
+  public get configure() {
+    return this._configure;
   }
 
-  public async updateAlertsStatus(args: CasesClientUpdateAlertsStatus) {
-    try {
-      return updateAlertsStatus({
-        ...args,
-        alertsService: this._alertsService,
-        scopedClusterClient: this._scopedClusterClient,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to update alerts status using client alerts: ${JSON.stringify(
-          args.alerts
-        )}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
-  }
-
-  public async get(args: CasesClientGet) {
-    try {
-      return get({
-        ...args,
-        caseService: this._caseService,
-        savedObjectsClient: this._savedObjectsClient,
-        logger: this.logger,
-      });
-    } catch (error) {
-      this.logger.error(`Failed to get case using client id: ${args.id}: ${error}`);
-      throw error;
-    }
-  }
-
-  public async getUserActions(args: CasesClientGetUserActions) {
-    try {
-      return getUserActions({
-        ...args,
-        savedObjectsClient: this._savedObjectsClient,
-        userActionService: this._userActionService,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to get user actions using client id: ${args.caseId}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
-  }
-
-  public async getAlerts(args: CasesClientGetAlerts) {
-    try {
-      return getAlerts({
-        ...args,
-        alertsService: this._alertsService,
-        scopedClusterClient: this._scopedClusterClient,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to get alerts using client requested alerts: ${JSON.stringify(
-          args.alertsInfo
-        )}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
-  }
-
-  public async push(args: CasesClientPush) {
-    try {
-      return push({
-        ...args,
-        savedObjectsClient: this._savedObjectsClient,
-        caseService: this._caseService,
-        userActionService: this._userActionService,
-        user: this.user,
-        casesClient: this,
-        caseConfigureService: this._caseConfigureService,
-        logger: this.logger,
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to push case using client id: ${args.caseId}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
+  /**
+   * Retrieves an interface for retrieving statistics related to the cases entities.
+   */
+  public get stats() {
+    return this._stats;
   }
 }
+
+/**
+ * Creates a {@link CasesClient} for interacting with the cases entities
+ *
+ * @param args arguments for initializing the cases client
+ * @returns a {@link CasesClient}
+ *
+ * @ignore
+ */
+export const createCasesClient = (args: CasesClientArgs): CasesClient => {
+  return new CasesClient(args);
+};

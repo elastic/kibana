@@ -6,7 +6,7 @@
  */
 
 import { FeatureCollection } from 'geojson';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
@@ -69,12 +69,14 @@ export async function syncVectorSource({
   } = syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const canSkipFetch = await canSkipSourceUpdate({
-    source,
-    prevDataRequest,
-    nextMeta: requestMeta,
-    extentAware: source.isFilterByMapBounds(),
-  });
+  const canSkipFetch = syncContext.forceRefresh
+    ? false
+    : await canSkipSourceUpdate({
+        source,
+        prevDataRequest,
+        nextMeta: requestMeta,
+        extentAware: source.isFilterByMapBounds(),
+      });
   if (canSkipFetch) {
     return {
       refreshed: false,
@@ -136,6 +138,7 @@ export async function getVectorSourceBounds({
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
+    timeslice: dataFilters.timeslice,
     filters: dataFilters.filters,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),

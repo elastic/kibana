@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await ml.api.createCalendar(calendarId, testCalendar);
-      // @ts-expect-error not full interface
       await ml.api.createCalendarEvents(calendarId, testEvents);
     });
 

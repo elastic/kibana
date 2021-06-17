@@ -20,10 +20,10 @@ export function ChartEditOptions({ series, seriesId, breakdowns }: Props) {
   return (
     <EuiFlexGroup wrap>
       <EuiFlexItem>
-        <Breakdowns seriesId={seriesId} breakdowns={breakdowns} />
+        <Breakdowns seriesId={seriesId} breakdowns={breakdowns} reportViewConfig={series} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartOptions series={series} />
+        <ChartOptions series={series} seriesId={seriesId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Spatial relation"
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "intersects",
+            "value": "INTERSECTS",
+          },
+          Object {
+            "text": "disjoint",
+            "value": "DISJOINT",
+          },
+          Object {
+            "text": "within",
+            "value": "WITHIN",
+          },
+        ]
+      }
+      value="INTERSECTS"
+    />
+  </EuiFormRow>
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTextAlign
+    textAlign="right"
+  >
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
+</EuiForm>
+`;
+
+exports[`should render error message 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Spatial relation"
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "intersects",
+            "value": "INTERSECTS",
+          },
+          Object {
+            "text": "disjoint",
+            "value": "DISJOINT",
+          },
+          Object {
+            "text": "within",
+            "value": "WITHIN",
+          },
+        ]
+      }
+      value="INTERSECTS"
+    />
+  </EuiFormRow>
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormErrorText>
+    Simulated error
+  </EuiFormErrorText>
+  <EuiTextAlign
+    textAlign="right"
+  >
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
+</EuiForm>
+`;

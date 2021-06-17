@@ -6,7 +6,7 @@
 **_Gain insight to your data._**
 
 *Discover* enables you to quickly search and filter your data, get information
-about structure of the fields, and visualize your data with *Lens* and *Maps*.
+about the structure of the fields, and visualize your data with *Lens* and *Maps*.
 You can customize and save your searches and place them on a dashboard.
 
 ++++
@@ -101,14 +101,63 @@ image:images/find-manufacturer-field.png[Fields list that displays the top five 
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
-. Find the `day of week` field and add it to your document table. Your table should look like this:
+. Find the `customer_first_name` and `customer_last_name` last name fields and add
+them to your document table. Your table should look similar to this:
 +
 [role="screenshot"]
-image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
-
+image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
 . To rearrange the table columns, hover the mouse over a
-column header, and then use the move and sort controls.
+column header, and then use the move controls.
+
+. To view more of the document table, click *Hide chart*.
+
+[float]
+[[add-field-in-discover]]
+=== Add a field to your index pattern
+
+What happens if you forgot to define an important value as a separate field? Or, what if you
+want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
+You can add a runtime field to your index pattern from inside of **Discover**,
+and then use that field for analysis and visualizations,
+the same way you do with other fields.
+
+. Click the ellipsis icon (...), and then click *Add field to index pattern*.
++
+[role="screenshot"]
+image:images/add-field-to-pattern.png[Dropdown menu located next to index pattern field with item for adding a field to an index pattern, width=50%]
+
+. In the *Create field* form, enter `hello` for the name.
+
+. Turn on *Set value*.
+
+. Define the script using the Painless scripting language.  Runtime fields require an `emit()`.
++
+```ts
+emit("Hello World!");
+```
+
+. Click *Save*.
+
+. In the fields list, search for the *hello* field, and then add it to the table to view it's value.
++
+[role="screenshot"]
+image:images/hello-field.png[hello field in the document table]
+
+. Create a second field named `customer` that combines customer last name and first initial.
++
+```ts
+String str = doc['customer_first_name.keyword'].value;
+char ch1 = str.charAt(0);
+emit(doc['customer_last_name.keyword'].value + ", " + ch1);
+```
+. Simplify the the document table by removing `customer_first_name` and `customer_last_name` and adding `customer` in their place.
++
+[role="screenshot"]
+image:images/customer.png[Customer last name, first initial in the document table]
++
+For more information on adding fields and Painless scripting language examples,
+refer to <<runtime-fields, Explore your data with runtime fields>>.
 
 
 [float]
@@ -165,7 +214,7 @@ click the close icon (x) next to its name in the filter bar.
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
 
-. In the document table, expand any document. To view more of the document table, click *Hide chart*.
+. In the document table, expand any document.
 +
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
@@ -186,7 +235,8 @@ You can bookmark this document and share the link.
 === Save your search for later use
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
-Saving a search saves the query and the filters.
+Saving a search saves the query text, filters,
+and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the index pattern.
 
 . In the toolbar, click **Save**.
 
@@ -200,7 +250,7 @@ image:images/discover-save-saved-search.png[Save saved search in Discover, width
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
-. From the **Selected fields** list, click  `day_of_week`, and then click **Visualize**.
+. From the **Available fields** list, click  `day_of_week`, and then click **Visualize**.
 +
 [role="screenshot"]
 image:images/discover-visualize.png[Discover sidebar field popover with visualize button, width=75%]

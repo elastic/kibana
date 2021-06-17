@@ -7,8 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -21,7 +29,6 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -34,11 +41,18 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
-  registry,
+  alerting,
+  logger,
+  ruleDataClient,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.ErrorCount,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -92,22 +106,12 @@ export function registerErrorCountAlertType({
                 multi_terms: {
                   terms: [
                     { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT, missing: '' },
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                      missing: ENVIRONMENT_NOT_DEFINED.value,
+                    },
                   ],
                   size: 10000,
-                },
-                aggs: {
-                  latest: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: SERVICE_NAME },
-                        { field: SERVICE_ENVIRONMENT },
-                      ] as const),
-                      sort: {
-                        '@timestamp': 'desc' as const,
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -121,13 +125,8 @@ export function registerErrorCountAlertType({
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
-            const latest = bucket.latest.top[0].metrics;
-
-            return {
-              serviceName: latest['service.name'] as string,
-              environment: latest['service.environment'] as string | undefined,
-              errorCount: bucket.doc_count,
-            };
+            const [serviceName, environment] = bucket.key;
+            return { serviceName, environment, errorCount: bucket.doc_count };
           }) ?? [];
 
         errorCountResults
@@ -142,18 +141,15 @@ export function registerErrorCountAlertType({
                   .join('_'),
                 fields: {
                   [SERVICE_NAME]: serviceName,
-                  ...(environment
-                    ? { [SERVICE_ENVIRONMENT]: environment }
-                    : {}),
+                  ...getEnvironmentEsField(environment),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
-                  'kibana.observability.evaluation.value': errorCount,
-                  'kibana.observability.evaluation.threshold':
-                    alertParams.threshold,
+                  [ALERT_EVALUATION_VALUE]: errorCount,
+                  [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
                 serviceName,
-                environment: environment || ENVIRONMENT_NOT_DEFINED.text,
+                environment: getEnvironmentLabel(environment),
                 threshold: alertParams.threshold,
                 triggerValue: errorCount,
                 interval: `${alertParams.windowSize}${alertParams.windowUnit}`,

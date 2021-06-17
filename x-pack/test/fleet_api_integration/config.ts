@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.
@@ -50,7 +50,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
-    esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
       ...xPackAPITestsConfig.get('services'),
     },

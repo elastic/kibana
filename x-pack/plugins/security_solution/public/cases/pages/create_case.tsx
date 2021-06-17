@@ -6,24 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { Create } from '../components/create';
 import * as i18n from './translations';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const CreateCasePage = React.memo(() => {
-  const history = useHistory();
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
-
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
   const backOptions = useMemo(
     () => ({
       href: getCaseUrl(search),
@@ -34,7 +35,9 @@ export const CreateCasePage = React.memo(() => {
   );
 
   if (userPermissions != null && !userPermissions.crud) {
-    history.replace(getCaseUrl(search));
+    navigateToApp(CASES_APP_ID, {
+      path: getCaseUrl(search),
+    });
     return null;
   }
 

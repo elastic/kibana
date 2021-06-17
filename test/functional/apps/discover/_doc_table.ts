@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -29,10 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
@@ -57,6 +58,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    describe('classic table in window 900x700', async function () {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await browser.setWindowSize(900, 700);
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should load more rows when scrolling down the document table', async function () {
+        const initialRows = await testSubjects.findAll('docTableRow');
+        await testSubjects.scrollIntoView('discoverBackToTop');
+        // now count the rows
+        await retry.waitFor('next batch of documents to be displayed', async () => {
+          const actual = await testSubjects.findAll('docTableRow');
+          log.debug(`initial doc nr: ${initialRows.length}, actual doc nr: ${actual.length}`);
+          return actual.length > initialRows.length;
+        });
+      });
+    });
+
+    describe('classic table in window 600x700', async function () {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await browser.setWindowSize(600, 700);
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should load more rows when scrolling down the document table', async function () {
+        const initialRows = await testSubjects.findAll('docTableRow');
+        await testSubjects.scrollIntoView('discoverBackToTop');
+        // now count the rows
+        await retry.waitFor('next batch of documents to be displayed', async () => {
+          const actual = await testSubjects.findAll('docTableRow');
+          log.debug(`initial doc nr: ${initialRows.length}, actual doc nr: ${actual.length}`);
+          return actual.length > initialRows.length;
+        });
+      });
     });
 
     describe('legacy', async function () {

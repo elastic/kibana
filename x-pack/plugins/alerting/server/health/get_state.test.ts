@@ -58,7 +58,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const mockTaskManager = taskManagerMock.createStart();
     mockTaskManager.get.mockResolvedValue(getHealthCheckTask());
     const pollInterval = 100;
-    const halfInterval = Math.floor(pollInterval / 2);
 
     getHealthStatusStream(
       mockTaskManager,
@@ -72,20 +71,20 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       }),
       pollInterval
     ).subscribe();
 
-    // shouldn't fire before poll interval passes
+    // should fire before poll interval passes
     // should fire once each poll interval
-    jest.advanceTimersByTime(halfInterval);
-    expect(mockTaskManager.get).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(halfInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(1);
     jest.advanceTimersByTime(pollInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(2);
     jest.advanceTimersByTime(pollInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(3);
+    jest.advanceTimersByTime(pollInterval);
+    expect(mockTaskManager.get).toHaveBeenCalledTimes(4);
   });
 
   it('should retry on error', async () => {
@@ -93,7 +92,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     mockTaskManager.get.mockRejectedValue(new Error('Failure'));
     const retryDelay = 10;
     const pollInterval = 100;
-    const halfInterval = Math.floor(pollInterval / 2);
 
     getHealthStatusStream(
       mockTaskManager,
@@ -107,33 +105,33 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       }),
       pollInterval,
       retryDelay
     ).subscribe();
 
-    jest.advanceTimersByTime(halfInterval);
-    expect(mockTaskManager.get).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(halfInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(pollInterval);
+    expect(mockTaskManager.get).toHaveBeenCalledTimes(2);
 
     // Retry on failure
     let numTimesCalled = 1;
     for (let i = 0; i < MAX_RETRY_ATTEMPTS; i++) {
       await tick();
       jest.advanceTimersByTime(retryDelay);
-      expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled++ + 1);
+      expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled++ + 2);
     }
 
     // Once we've exceeded max retries, should not try again
     await tick();
     jest.advanceTimersByTime(retryDelay);
-    expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled);
+    expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled + 1);
 
     // Once another poll interval passes, should call fn again
     await tick();
     jest.advanceTimersByTime(pollInterval - MAX_RETRY_ATTEMPTS * retryDelay);
-    expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled + 1);
+    expect(mockTaskManager.get).toHaveBeenCalledTimes(numTimesCalled + 2);
   });
 
   it('should return healthy status when health status is "ok"', async () => {
@@ -152,6 +150,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       })
     ).toPromise();
 
@@ -182,6 +181,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       })
     ).toPromise();
 
@@ -212,6 +212,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       })
     ).toPromise();
 
@@ -239,6 +240,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -269,6 +271,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -305,6 +308,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        enableImportExport: false,
       })
     ).toPromise();
 

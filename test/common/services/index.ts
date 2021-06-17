@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { DeploymentProvider } from './deployment';
+import { DeploymentService } from './deployment';
 import { LegacyEsProvider } from './legacy_es';
 import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
-import { RetryProvider } from './retry';
-import { RandomnessProvider } from './randomness';
+import { RetryService } from './retry';
+import { RandomnessService } from './randomness';
 import { SecurityServiceProvider } from './security';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
-import { SavedObjectInfoProvider } from './saved_object_info';
+import { SavedObjectInfoService } from './saved_object_info';
 
 export const services = {
-  deployment: DeploymentProvider,
+  deployment: DeploymentService,
   legacyEs: LegacyEsProvider,
   es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
-  retry: RetryProvider,
-  randomness: RandomnessProvider,
+  retry: RetryService,
+  randomness: RandomnessService,
   security: SecurityServiceProvider,
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
-  savedObjectInfo: SavedObjectInfoProvider,
+  savedObjectInfo: SavedObjectInfoService,
 };
