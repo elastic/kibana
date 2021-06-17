@@ -19,6 +19,8 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
+import { coreMock } from '../mocks';
+import { CoreContext } from '../core_system';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -53,8 +55,39 @@ function defaultStartDeps(availableApps?: App[]) {
   return deps;
 }
 
+function createMockedCoreContextWithValidVersion(val?: string) {
+  const coreContextMock = coreMock.createCoreContext();
+  const { branch, buildNum, buildSha, dist, version } = coreContextMock.env.packageInfo;
+  return {
+    coreId: coreContextMock.coreId,
+    env: {
+      mode: coreContextMock.env.mode,
+      packageInfo: {
+        version: val ?? version,
+        branch,
+        buildNum,
+        buildSha,
+        dist,
+      },
+    },
+  };
+}
+
+function defaultStartTestOptions({
+  browserSupportsCsp = true,
+  coreContext = createMockedCoreContextWithValidVersion(),
+}: {
+  browserSupportsCsp?: boolean;
+  coreContext?: CoreContext;
+}): any {
+  return {
+    browserSupportsCsp,
+    coreContext,
+  };
+}
+
 async function start({
-  options = { browserSupportsCsp: true },
+  options = defaultStartTestOptions({}),
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
@@ -82,7 +115,10 @@ afterAll(() => {
 
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
+    const mockCoreContext = createMockedCoreContextWithValidVersion('7.0.0');
+    const { startDeps } = await start({
+      options: { browserSupportsCsp: false, coreContext: { ...mockCoreContext } },
+    });
 
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -93,6 +129,33 @@ describe('start', () => {
         ],
       ]
     `);
+  });
+
+  it('adds the kibana version class to the document body', async () => {
+    const mockCoreContext = createMockedCoreContextWithValidVersion('1.2.3');
+    const { chrome } = await start({
+      options: { browserSupportsCsp: false, coreContext: { ...mockCoreContext } },
+    });
+    const classes = chrome.getBodyClasses$().pipe(take(1));
+    classes.subscribe((classList) =>
+      expect(classList).toEqual([
+        'kbnBody',
+        'kibana-version-1-2-3',
+        'kbnBody--noHeaderBanner',
+        'kbnBody--chromeHidden',
+      ])
+    );
+  });
+
+  it('does not add the kibana version class if the version is not a valid semver version', async () => {
+    const mockCoreContext = createMockedCoreContextWithValidVersion('123');
+    const { chrome } = await start({
+      options: { browserSupportsCsp: false, coreContext: { ...mockCoreContext } },
+    });
+    const classes = chrome.getBodyClasses$().pipe(take(1));
+    classes.subscribe((classList) => {
+      expect(classList).toEqual(['kbnBody', 'kbnBody--noHeaderBanner', 'kbnBody--chromeHidden']);
+    });
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {

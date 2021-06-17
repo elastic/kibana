@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -109,7 +108,7 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
@@ -117,6 +116,7 @@ export class CoreSystem {
     this.deprecations = new DeprecationsService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+    this.chrome = new ChromeService({ browserSupportsCsp, coreContext: this.coreContext });
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }
