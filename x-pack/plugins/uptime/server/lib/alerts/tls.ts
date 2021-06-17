@@ -109,8 +109,16 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
 
       const foundCerts = total > 0;
 
+      const uniqueCerts = certs.reduce<Cert[]>((uniqueCertArray, currentCert) => {
+        if (!uniqueCertArray.find((cert) => cert.common_name === currentCert.common_name)) {
+          uniqueCertArray.push(currentCert);
+        }
+
+        return uniqueCertArray;
+      }, []);
+
       if (foundCerts) {
-        certs.forEach((cert) => {
+        uniqueCerts.forEach((cert) => {
           const absoluteExpirationThreshold = moment()
             .add(
               dynamicSettings.certExpirationThreshold ??
