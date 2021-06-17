@@ -47,8 +47,8 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
   });
   useEffect(() => {
     const subscription = savedSearchData$.subscribe((res) => {
-      if (res.totalHits && res.totalHits.fetchStatus !== data.fetchStatus) {
-        setData(res.totalHits);
+      if (res.fetchStatus !== data.fetchStatus) {
+        setData(res);
       }
     });
     return () => subscription.unsubscribe();

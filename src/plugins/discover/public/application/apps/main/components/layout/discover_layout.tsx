@@ -7,8 +7,6 @@
  */
 import './discover_layout.scss';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import {
   EuiSpacer,
@@ -51,7 +49,10 @@ import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { SavedSearchDataMessage } from '../../services/use_saved_search';
+import {
+  SavedSearchDataDocumentsMessage,
+  SavedSearchDataMessage,
+} from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
 
@@ -64,12 +65,14 @@ const DiscoverChartMemoized = React.memo(DiscoverChart);
 interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
   fetchStatus: FetchStatus;
   fetchCounter: number;
+  error?: Error;
+}
+
+interface DiscoverLayoutDocumentState extends SavedSearchDataDocumentsMessage {
+  fetchStatus: FetchStatus;
   fieldCounts: Record<string, number>;
-  documents: {
-    fetchStatus: FetchStatus;
-    result?: ElasticSearchHit[];
-    error?: Error;
-  };
+  result: ElasticSearchHit[];
+  error?: Error;
 }
 
 export function DiscoverLayout({
@@ -94,59 +97,38 @@ export function DiscoverLayout({
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
+  const { main$, documents$, charts$, totalHits$ } = savedSearchData$;
 
   const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
-    fetchStatus: savedSearchData$.getValue().fetchStatus,
-    fetchCounter: 0,
-    fieldCounts: {},
-    documents: {
-      fetchStatus: savedSearchData$.getValue().fetchStatus,
-    },
+    fetchStatus: main$.getValue().fetchStatus,
+    fetchCounter: main$.getValue().fetchCounter || 0,
   });
-  const { fetchStatus, fetchCounter, inspectorAdapters } = fetchState;
-  const rows = useMemo(() => fetchState.documents?.result || [], [fetchState.documents?.result]);
+  const [documentState, setDocumentState] = useState<DiscoverLayoutDocumentState>({
+    fetchStatus: documents$.getValue().fetchStatus,
+    fieldCounts: documents$.getValue().fieldCounts || {},
+    result: documents$.getValue().result || [],
+  });
+
+  const { fetchCounter, inspectorAdapters } = fetchState;
+  const rows = useMemo(() => documentState.result, [documentState.result]);
 
   useEffect(() => {
-    const subscription = savedSearchData$.subscribe((next) => {
-      if (
-        (next.documents || (next.fetchStatus && next.fetchStatus !== fetchState.fetchStatus)) &&
-        ((next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
-          (next.documents?.fetchStatus &&
-            next.documents.fetchStatus !== fetchState.documents?.fetchStatus))
-      ) {
-        const nextState = {
-          ...fetchState,
-          ...next,
-        };
-        if (next.documents && next.documents.result) {
-          nextState.documents = {
-            fetchStatus: next.documents?.fetchStatus || fetchState.documents?.fetchStatus,
-            result: next.documents?.result,
-          };
-        } else if (fetchState.documents.result) {
-          nextState.documents.result = fetchState.documents.result;
-        }
-        setFetchState(nextState);
+    const subscription = documents$.subscribe((next) => {
+      if (next.fetchStatus !== documentState.fetchStatus) {
+        setDocumentState({ ...documentState, ...next });
       }
     });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [savedSearchData$, fetchState]);
+    return () => subscription.unsubscribe();
+  }, [documents$, documentState, setDocumentState]);
 
-  const savedSearchDataChart$ = useMemo(() => new BehaviorSubject(savedSearchData$.getValue()), [
-    savedSearchData$,
-  ]);
-  const savedSearchDataTotalHits$ = useMemo(
-    () => new BehaviorSubject(savedSearchData$.getValue()),
-    [savedSearchData$]
-  );
   useEffect(() => {
-    savedSearchData$.pipe(filter((res) => Boolean(res.chart))).subscribe(savedSearchDataChart$);
-    savedSearchData$
-      .pipe(filter((res) => Boolean(res.totalHits)))
-      .subscribe(savedSearchDataTotalHits$);
-  }, [savedSearchData$, savedSearchDataChart$, savedSearchDataTotalHits$]);
+    const subscription = main$.subscribe((next) => {
+      if (next.fetchStatus !== fetchState.fetchStatus) {
+        setFetchState({ ...fetchState, ...next });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [main$, fetchState, setFetchState]);
 
   // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
   const isMobile = () => collapseIcon && !collapseIcon.current;
@@ -158,7 +140,10 @@ export function DiscoverLayout({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const resultState = useMemo(() => getResultState(fetchStatus, rows!), [fetchStatus, rows]);
+  const resultState = useMemo(() => getResultState(documentState.fetchStatus, rows!), [
+    documentState.fetchStatus,
+    rows,
+  ]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
@@ -276,7 +261,7 @@ export function DiscoverLayout({
             <EuiFlexItem grow={false}>
               <SidebarMemoized
                 columns={columns}
-                fieldCounts={fetchState.fieldCounts}
+                fieldCounts={documentState.fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
                 onAddField={onAddColumn}
@@ -351,8 +336,8 @@ export function DiscoverLayout({
                         state={state}
                         resetQuery={resetQuery}
                         savedSearch={savedSearch}
-                        savedSearchDataChart$={savedSearchDataChart$}
-                        savedSearchDataTotalHits$={savedSearchDataTotalHits$}
+                        savedSearchDataChart$={charts$}
+                        savedSearchDataTotalHits$={totalHits$}
                         stateContainer={stateContainer}
                         timefield={timeField}
                       />
@@ -397,10 +382,7 @@ export function DiscoverLayout({
                               columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
-                              isLoading={
-                                fetchStatus === FetchStatus.LOADING ||
-                                fetchStatus === FetchStatus.PARTIAL
-                              }
+                              isLoading={documentState.fetchStatus === FetchStatus.LOADING}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={sampleSize}

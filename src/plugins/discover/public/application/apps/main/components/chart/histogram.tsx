@@ -94,12 +94,8 @@ export function DiscoverHistogram({
 
   useEffect(() => {
     const dataSubscription = savedSearchData$.subscribe((res) => {
-      if (res.chart && res.chart.fetchStatus !== state.fetchStatus) {
-        const nextState = {
-          ...state,
-          chartData: res.chart.chartData,
-          fetchStatus: res.chart.fetchStatus,
-        };
+      if (res.fetchStatus !== state.fetchStatus) {
+        const nextState = { ...state, ...res };
         setState(nextState);
       }
     });

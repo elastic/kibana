@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart, SearchSource } from '../../../../../../data/public';
+import { filter } from 'rxjs/operators';
+import {
+  DataPublicPluginStart,
+  isCompleteResponse,
+  SearchSource,
+} from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
 
 export function fetchTotalHits({
@@ -32,18 +37,20 @@ export function fetchTotalHits({
   );
   childSearchSource.setField('size', 0);
 
-  return childSearchSource.fetch$({
-    inspector: {
-      adapter: inspectorAdapters.requests,
-      title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
-        defaultMessage: 'total hits data',
-      }),
-      description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
-        defaultMessage:
-          'This request queries Elasticsearch to fetch the total hits number for the search.',
-      }),
-    },
-    abortSignal: abortController.signal,
-    sessionId: searchSessionId,
-  });
+  return childSearchSource
+    .fetch$({
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
+          defaultMessage: 'total hits data',
+        }),
+        description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the total hits number for the search.',
+        }),
+      },
+      abortSignal: abortController.signal,
+      sessionId: searchSessionId,
+    })
+    .pipe(filter((res) => isCompleteResponse(res)));
 }
