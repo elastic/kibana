@@ -17,7 +17,8 @@ import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
-import { isEndpointHostIsolated } from '../../../../../common/utils/validators/is_endpoint_host_isolated';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useLicense } from '../../../../../common/hooks/use_license';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -26,6 +27,7 @@ import { isEndpointHostIsolated } from '../../../../../common/utils/validators/i
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
@@ -58,40 +60,48 @@ export const useEndpointActionItems = (
         selected_endpoint: endpointId,
       });
 
+      const isolationActions = [];
+
+      if (isIsolated) {
+        // Un-isolate is always available to users regardless of license level
+        isolationActions.push({
+          'data-test-subj': 'unIsolateLink',
+          icon: 'logoSecurity',
+          key: 'unIsolateHost',
+          navigateAppId: MANAGEMENT_APP_ID,
+          navigateOptions: {
+            path: endpointUnIsolatePath,
+          },
+          href: formatUrl(endpointUnIsolatePath),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.unIsolateHost"
+              defaultMessage="Unisolate host"
+            />
+          ),
+        });
+      } else if (isPlatinumPlus) {
+        // For Platinum++ licenses, users also have ability to isolate
+        isolationActions.push({
+          'data-test-subj': 'isolateLink',
+          icon: 'logoSecurity',
+          key: 'isolateHost',
+          navigateAppId: MANAGEMENT_APP_ID,
+          navigateOptions: {
+            path: endpointIsolatePath,
+          },
+          href: formatUrl(endpointIsolatePath),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.isolateHost"
+              defaultMessage="Isolate host"
+            />
+          ),
+        });
+      }
+
       return [
-        isIsolated
-          ? {
-              'data-test-subj': 'unIsolateLink',
-              icon: 'logoSecurity',
-              key: 'unIsolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointUnIsolatePath,
-              },
-              href: formatUrl(endpointUnIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.unIsolateHost"
-                  defaultMessage="Unisolate host"
-                />
-              ),
-            }
-          : {
-              'data-test-subj': 'isolateLink',
-              icon: 'logoSecurity',
-              key: 'isolateHost',
-              navigateAppId: MANAGEMENT_APP_ID,
-              navigateOptions: {
-                path: endpointIsolatePath,
-              },
-              href: formatUrl(endpointIsolatePath),
-              children: (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.actions.isolateHost"
-                  defaultMessage="Isolate host"
-                />
-              ),
-            },
+        ...isolationActions,
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
@@ -138,13 +148,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }`,
           },
           href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }`,
@@ -162,13 +172,13 @@ export const useEndpointActionItems = (
           navigateAppId: 'fleet',
           navigateOptions: {
             path: `#${
-              pagePathGetters.fleet_agent_details({
+              pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }/activity?openReassignFlyout=true`,
           },
           href: `${getUrlForApp('fleet')}#${
-            pagePathGetters.fleet_agent_details({
+            pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
           }/activity?openReassignFlyout=true`,
@@ -183,5 +193,12 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
+  }, [
+    allCurrentUrlParams,
+    endpointMetadata,
+    fleetAgentPolicies,
+    formatUrl,
+    getUrlForApp,
+    isPlatinumPlus,
+  ]);
 };
