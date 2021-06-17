@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
