@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { AlertInfo } from '../../common';
 import { CasesClientGetAlertsResponse } from './types';
 import { get } from './get';
