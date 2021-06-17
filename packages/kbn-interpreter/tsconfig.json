@@ -9,6 +9,7 @@
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-interpreter/src",
+    "stripInternal": true,
     "types": [
       "jest",
       "node"

@@ -17,6 +17,7 @@ export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
 export { castProvider } from './lib/cast';
 // @ts-expect-error
+// @internal
 export { parse } from '../../grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';

@@ -21,11 +21,13 @@ export interface ExpressionFunctionAST {
 }
 
 export interface Ast {
+  /** @internal */
   function: any;
+  /** @internal */
   arguments: any;
   type: 'expression';
   chain: ExpressionFunctionAST[];
-
+  /** @internal */
   replace(regExp: RegExp, s: string): string;
 }
 
