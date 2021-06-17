@@ -46,14 +46,14 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
-        `${templateName}-mappings`,
+        `${templateName}@mappings`,
         `${templateName}-settings`,
         `${templateName}-user_settings`,
       ]);
 
       ({ body } = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${templateName}-mappings`,
+        path: `/_component_template/${templateName}@mappings`,
       }));
 
       // The mappings override provided in the package is set in the mappings component template
@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           index_patterns: [`${templateName}-*`],
           composed_of: [
-            `${templateName}-mappings`,
+            `${templateName}@mappings`,
             `${templateName}-settings`,
             `${templateName}-user_settings`,
           ],

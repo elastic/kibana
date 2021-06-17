@@ -202,7 +202,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should have updated the component templates', async function () {
       const resMappings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-mappings`,
+        path: `/_component_template/${logsTemplateName}@mappings`,
       });
       expect(resMappings.statusCode).equal(200);
       expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
@@ -344,7 +344,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
-            id: 'logs-all_assets.test_logs-mappings',
+            id: 'logs-all_assets.test_logs@mappings',
             type: 'component_template',
           },
           {

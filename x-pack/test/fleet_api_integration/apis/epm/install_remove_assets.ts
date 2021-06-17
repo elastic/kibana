@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
         const resMappings = await es.transport.request(
           {
             method: 'GET',
-            path: `/_component_template/${logsTemplateName}-mappings`,
+            path: `/_component_template/${logsTemplateName}@mappings`,
           },
           {
             ignore: [404],
@@ -365,7 +365,7 @@ const expectAssetsInstalled = ({
   it('should have installed the component templates', async function () {
     const resMappings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-mappings`,
+      path: `/_component_template/${logsTemplateName}@mappings`,
     });
     expect(resMappings.statusCode).equal(200);
     const resSettings = await es.transport.request({
@@ -527,7 +527,7 @@ const expectAssetsInstalled = ({
       ],
       installed_es: [
         {
-          id: 'logs-all_assets.test_logs-mappings',
+          id: 'logs-all_assets.test_logs@mappings',
           type: 'component_template',
         },
         {

@@ -193,7 +193,7 @@ function putComponentTemplate(
   };
 }
 
-const mappingsSuffix = '-mappings';
+const mappingsSuffix = '@mappings';
 const settingsSuffix = '-settings';
 const userSettingsSuffix = '-user_settings';
 type TemplateBaseName = string;
