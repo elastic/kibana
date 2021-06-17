@@ -51,5 +51,6 @@ export function createDiscoverGridDirective(reactDirective: any) {
     ['settings', { watchDepth: 'reference' }],
     ['showTimeCol', { watchDepth: 'value' }],
     ['sort', { watchDepth: 'value' }],
+    ['className', { watchDepth: 'value' }],
   ]);
 }

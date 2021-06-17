@@ -26,11 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'saml1' } } })
         .expect(200);
 
-      await esArchiver.load('../../functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('../../functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     afterEach(async () => {
@@ -43,10 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         deployment.getHostPort() + '/app/management/security/users#some=hash-value'
       );
 
-      await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
-        20000
-      );
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());

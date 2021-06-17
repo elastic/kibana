@@ -27,10 +27,10 @@ export default ({ getService }: FtrProviderContext): void => {
     const defaultSignalsIndex = '.siem-signals-default-000001';
 
     beforeEach(async () => {
-      await esArchiver.load('cases/signals/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
     });
     afterEach(async () => {
-      await esArchiver.unload('cases/signals/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
       await deleteAllCaseItems(es);
     });
 

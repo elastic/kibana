@@ -187,6 +187,19 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        /** Options for how FTR should execute and interact with Kibana */
+        runOptions: Joi.object()
+          .keys({
+            /**
+             * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+             * Note that this log message must not be filtered out by the current logging config, for example by the
+             * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+             */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+          })
+          .default(),
       })
       .default(),
 
@@ -208,13 +221,6 @@ export const schema = Joi.object()
 
     // definition of apps that work with `common.navigateToApp()`
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
-
-    // settings for the esArchiver module
-    esArchiver: Joi.object()
-      .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
-      })
-      .default(),
 
     // settings for the saved objects svc
     kbnArchiver: Joi.object()

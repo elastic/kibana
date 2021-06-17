@@ -1389,14 +1389,14 @@
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 11
             }
           },
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 133
             }
           },

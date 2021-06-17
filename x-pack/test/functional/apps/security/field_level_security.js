@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
-      await esArchiver.load('security/flstest/kibana'); //(savedobject)
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); //( data)
+      await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/kibana'); //(savedobject)
       await browser.setWindowSize(1600, 1000);
     });
 

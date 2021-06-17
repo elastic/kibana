@@ -13,10 +13,6 @@ import {
 import { PLUGIN_ID } from '../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
-  // register ML for the kibana home screen.
-  // so the file data visualizer appears to allow people to import data
-  home.environment.update({ ml: true });
-
   // register ML so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: PLUGIN_ID,

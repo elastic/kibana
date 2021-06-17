@@ -60,6 +60,8 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 [[task-manager-diagnosing-root-cause]]
 ==== Diagnose a root cause for drift
 
+experimental[]
+
 The following guide helps you identify a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
 By analyzing the different sections of the output, you can evaluate different theories that explain the drift in a deployment.
@@ -72,6 +74,7 @@ By analyzing the different sections of the output, you can evaluate different th
 ** <<task-manager-theory-long-running-tasks,Tasks run for too long, overrunning their schedule>>
 ** <<task-manager-theory-high-fail-rate,Tasks take multiple attempts to succeed>>
 * <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
+* <<task-manager-health-evaluate-the-capacity-estimation,Evaluate the Capacity Estimation>>
 
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
 
@@ -176,6 +179,11 @@ The API returns the following:
               "p99": 166
             }
           },
+          "persistence": {
+            "recurring": 88,
+            "non_recurring": 4,
+            "ephemeral": 8
+          },
           "result_frequency_percent_as_number": {
             "alerting:.index-threshold": {
               "Success": 100,
@@ -231,11 +239,43 @@ The API returns the following:
           ["1m", 2],
           ["60s", 2],
           ["5m", 2],
-          ["60m", 4]
+          ["60m", 4],
+          ["3600s", 1],
+          ["720m", 1]
         ],
-        "overdue": 0,
-        "estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0]
+        "non_recurring": 18,
+        "owner_ids": 0,
+        "overdue": 10,
+        "overdue_non_recurring": 10,
+        "estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
+        "capacity_requirments": {
+          "per_minute": 6,
+          "per_hour": 28,
+          "per_day": 2
+        }
       },
+      "status": "OK"
+    },
+    "capacity_estimation": {
+      "timestamp": "2021-02-16T11:38:06.826Z",
+      "value": {
+        "observed": {
+          "observed_kibana_instances": 1,
+          "max_throughput_per_minute_per_kibana": 200,
+          "max_throughput_per_minute": 200,
+          "minutes_to_drain_overdue": 1,
+          "avg_recurring_required_throughput_per_minute": 28,
+          "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+          "avg_required_throughput_per_minute": 28,
+          "avg_required_throughput_per_minute_per_kibana": 28
+        },
+        "proposed": {
+          "min_required_kibana": 1,
+          "provisioned_kibana": 1,
+          "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+          "avg_required_throughput_per_minute_per_kibana": 28
+        }
+      }
       "status": "OK"
     }
   }
@@ -528,7 +568,7 @@ Evaluating the health stats in this hypothetical scenario, you see the following
 You can infer from these stats that the high drift the Task Manager is experiencing is most likely due to Elasticsearch query alerts that are running for a long time.
 
 Resolving this issue is context dependent and changes from case to case.
-In the preceding example above, this would be resolved by modifying the queries in these alerts to make them faster, or improving the {es} throughput to speed up the exiting query.
+In the preceding example, this would be resolved by modifying the queries in these alerts to make them faster, or improving the {es} throughput to speed up the exiting query.
 
 [[task-manager-theory-high-fail-rate]]
 *Theory*:
@@ -569,6 +609,82 @@ Evaluating the preceding health stats, you see the following output under `stats
 You can infer from these stats that most `actions:.index` tasks, which back the ES Index {kib} action, fail.
 Resolving that would require deeper investigation into the {kib} Server Log, where the exact errors are logged, and addressing these specific errors.
 
+[[task-manager-theory-spikes-in-non-recurring-tasks]]
+*Theory*:
+Spikes in non-recurring and ephemeral tasks are consuming a high percentage of the available capacity
+
+*Diagnosis*:
+Task Manager uses ad-hoc non-recurring tasks to load balance operations across multiple {kib} instances.
+Additionally, {kib} can use Task Manager to allocate resources for expensive operations by executing an ephemeral task. Ephemeral tasks are identical in operation to non-recurring tasks, but are not persisted and cannot be load balanced across {kib} instances.
+
+Evaluating the preceding health stats, you see the following output under `stats.runtime.value.execution.persistence`:
+
+[source,json]
+--------------------------------------------------
+{
+  "recurring": 88, # <1>
+  "non_recurring": 4, # <2>
+  "ephemeral": 8 # <3>
+},
+--------------------------------------------------
+<1> 88% of executed tasks are recurring tasks
+<2> 4% of executed tasks are non-recurring tasks
+<3> 8% of executed tasks are ephemeral tasks
+
+You can infer from these stats that the majority of executions consist of recurring tasks at 88%.
+You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficiency of the available capacity.
+
+To assess the capacity, you should evaluate these stats against the `load` under `stats.runtime.value`:
+
+[source,json]
+--------------------------------------------------
+{
+    "load": { # <2>
+        "p50": 40,
+        "p90": 40,
+        "p95": 60,
+        "p99": 80
+    }
+}
+--------------------------------------------------
+
+You can infer from these stats that it is very unusual for Task Manager to run out of capacity, so the capacity is likely sufficient to handle the amount of non-recurring and ephemeral tasks.
+
+Suppose you have an alternate scenario, where you see the following output under `stats.runtime.value.execution.persistence`:
+
+[source,json]
+--------------------------------------------------
+{
+  "recurring": 60, # <1>
+  "non_recurring": 30, # <2>
+  "ephemeral": 10 # <3>
+},
+--------------------------------------------------
+<1> 60% of executed tasks are recurring tasks
+<2> 30% of executed tasks are non-recurring tasks
+<3> 10% of executed tasks are ephemeral tasks
+
+You can infer from these stats that even though most executions are recurring tasks, a substantial percentage of executions are non-recurring and ephemeral tasks at 40%.
+
+Evaluating the `load` under `stats.runtime.value`, you see the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "load": { # <2>
+        "p50": 70,
+        "p90": 100,
+        "p95": 100,
+        "p99": 100
+    }
+}
+--------------------------------------------------
+
+You can infer from these stats that it is quite common for this {kib} instance to run out of capacity.
+Given the high rate of non-recurring and ephemeral tasks, it would be reasonable to assess that there is insufficient capacity in the {kib} cluster to handle the amount of tasks.
+
+Keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
+
 [[task-manager-health-evaluate-the-workload]]
 ===== Evaluate the Workload
 
@@ -577,7 +693,7 @@ Predicting the required throughput a deplyment might need to support Task Manage
 <<task-manager-health-monitoring>> provides statistics that make it easier to monitor the adequacy of the existing throughput.
 By evaluating the workload, the required throughput can be estimated, which is used when following the Task Manager <<task-manager-scaling-guidance>>.
 
-Evaluating the preceding health stats above, you see the following output under `stats.workload.value`:
+Evaluating the preceding health stats in the previous example, you see the following output under `stats.workload.value`:
 
 [source,json]
 --------------------------------------------------
@@ -605,27 +721,39 @@ Evaluating the preceding health stats above, you see the following output under 
       }
     },
   },
-  "schedule": [ # <4>
+  "non_recurring": 0, # <4>
+  "owner_ids": 1, # <5>
+  "schedule": [ # <6>
     ["10s", 2],
     ["1m", 2],
     ["90s", 2],
     ["5m", 8]
   ],
-  "overdue": 0, # <5>
-  "estimated_schedule_density": [  # <6>
+  "overdue_non_recurring": 0, # <7>
+  "overdue": 0, # <8>
+  "estimated_schedule_density": [ # <9>
     0, 1, 0, 0, 0, 1, 0, 1, 0, 1,
     0, 0, 0, 1, 0, 0, 1, 1, 1, 0,
     0, 3, 0, 0, 0, 1, 0, 1, 0, 1,
     0, 0, 0, 1, 0, 0, 1, 1, 1, 0
-  ]
+  ],
+  "capacity_requirments": { # <10>
+    "per_minute": 14,
+    "per_hour": 240,
+    "per_day": 0
+  }
 }
 --------------------------------------------------
 <1> There are 26 tasks in the system, including regular tasks, recurring tasks, and failed tasks.
 <2> There are 2 `idle` index threshold alert tasks, meaning they are scheduled to run at some point in the future.
 <3> Of the 14 tasks backing the ES index action, 10 have failed and 2 are running.
-<4> A histogram of all scheduled recurring tasks shows that 2 tasks are scheduled to run every 10 seconds, 2  tasks are scheduled to run once a minute, and so on.
-<5> There are no tasks overdue, which means that all tasks that *should* have run by now *have* run.
-<6> This histogram shows the tasks scheduled to run throughout the upcoming 20 polling cycles. The histogram represents the entire deployment, rather than just this {kib} instance
+<4> There are no non-recurring tasks in the queue.
+<5> There is one Task Manager actively executing tasks. There might be additional idle Task Managers, but they aren't actively executing tasks at this moment in time.
+<6> A histogram of all scheduled recurring tasks shows that 2 tasks are scheduled to run every 10 seconds, 2  tasks are scheduled to run once a minute, and so on.
+<7> There are no overdue non-recurring tasks. Non-recurring tasks are usually scheduled to execute immediately, so overdue non-recurring tasks are often a symptom of a congested system.
+<8> There are no overdue tasks, which means that all tasks that *should* have run by now *have* run.
+<9> This histogram shows the tasks scheduled to run throughout the upcoming 20 polling cycles. The histogram represents the entire deployment, rather than just this {kib} instance.
+<10> The capacity required to handle the recurring tasks in the system. These are buckets, rather than aggregated sums, and we recommend <<task-manager-health-evaluate-the-capacity-estimation,evaluating the Capacity Estimation>> section, rather than evaluating these buckets  yourself.
 
 The `workload` section summarizes the work load across the cluster, listing the tasks in the system, their types, schedules, and current status.
 
@@ -672,6 +800,8 @@ Suppose the output of `stats.workload.value` looked something like this:
       }
     },
   },
+  "non_recurring": 0,
+  "owner_ids": 1,
   "schedule": [ # <2>
     ["10s", 38],
     ["1m", 101],
@@ -681,29 +811,130 @@ Suppose the output of `stats.workload.value` looked something like this:
     ["60m", 106],
     ["1d", 61]
   ],
+  "overdue_non_recurring": 0,
   "overdue": 0, # <5>
   "estimated_schedule_density": [  # <3>
     10, 1, 0, 10, 0, 20, 0, 1, 0, 1,
     9, 0, 3, 10, 0, 0, 10, 10, 7, 0,
     0, 31, 0, 12, 16, 31, 0, 10, 0, 10,
     3, 22, 0, 10, 0, 2, 10, 10, 1, 0
-  ]
+  ],
+  "capacity_requirments": {
+    "per_minute": 329, # <4>
+    "per_hour": 4272, # <5>
+    "per_day": 61 # <6>
+  }
 }
 --------------------------------------------------
 <1> There are 2,191 tasks in the system.
 <2> The scheduled tasks are distributed across a variety of cadences.
 <3> The schedule density shows that you expect to exceed the default 10 concurrent tasks.
+<4> There are 329 task executions that recur  within the space of every minute.
+<5> There are 4,273 task executions that recur within the space of every hour.
+<6> There are 61 task executions that recur within the space of every day.
 
 You can infer several important attributes of your workload from this output:
 
 * There are many tasks in your system and ensuring these tasks run on their scheduled cadence will require attention to the Task Manager throughput.
-* Assessing the high frequency tasks (tasks that recur at a cadence of a couple of minutes or less), you must support a throughput of approximately 400 tasks per minute (38 every 10 seconds + 101 every minute + 55 every 90 seconds).
-* Assessing the medium frequency tasks (tasks that recur at a cadence of an hour or less), you must support an additional throughput of over 2000 tasks per hour (89 every 5 minutes, + 62 every 20 minutes + 106 each hour). You can average the needed throughput for the hour by counting these tasks as an additional 30 to 40 tasks per minute.
+* Assessing the high frequency tasks (tasks that recur at a cadence of a couple of minutes or less), you must support a throughput of approximately 330 task executions per minute (38 every 10 seconds + 101 every minute).
+* Assessing the medium frequency tasks (tasks that recur at a cadence of an hour or less), you must support an additional throughput of over 4,272 task executions per hour (55 every 90 seconds + 89 every 5 minutes, + 62 every 20 minutes + 106 each hour). You can average the needed throughput for the hour by counting these tasks as an additional 70 - 80 tasks per minute.
 * Assessing the estimated schedule density, there are cycles that are due to run upwards of 31 tasks concurrently, and along side these cycles, there are empty cycles. You can expect Task Manager to load balance these tasks throughout the empty cycles, but this won't leave much capacity to handle spikes in fresh tasks that might be scheduled in the future.
 
-These rough calculations give you a lower bound to the required throughput, which is _at least_ 440 tasks per minute to ensure recurring tasks are executed, at their scheduled time. This throughput doesn't account for nonrecurring tasks that might have been scheduled, nor does it account for tasks (recurring or otherwise) that might be scheduled in the future.
+These rough calculations give you a lower bound to the required throughput, which is _at least_ 410 tasks per minute to ensure recurring tasks are executed, at their scheduled time. This throughput doesn't account for nonrecurring tasks that might have been scheduled, nor does it account for tasks (recurring or otherwise) that might be scheduled in the future.
 
 Given these inferred attributes, it would be safe to assume that a single {kib} instance with default settings **would not** provide the required throughput. It is possible that scaling horizontally by adding a couple more {kib} instances will.
+
+For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+
+
+[[task-manager-health-evaluate-the-capacity-estimation]]
+===== Evaluate the Capacity Estimation
+
+Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
+
+As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated alongside the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assume all {kib} instances are configured identically.
+
+We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
+
+Evaluating the health stats in the previous example, you can see the following output under `stats.capacity_estimation.value`:
+
+[source,json]
+--------------------------------------------------
+{
+  "observed": {
+    "observed_kibana_instances": 1, # <1>
+    "minutes_to_drain_overdue": 1, # <2>
+    "max_throughput_per_minute_per_kibana": 200,
+    "max_throughput_per_minute": 200, # <3>
+    "avg_recurring_required_throughput_per_minute": 28, # <4>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+    "avg_required_throughput_per_minute": 28, # <5>
+    "avg_required_throughput_per_minute_per_kibana": 28
+  },
+  "proposed": {
+    "min_required_kibana": 1, # <6>
+    "provisioned_kibana": 1, # <7>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+    "avg_required_throughput_per_minute_per_kibana": 28
+  }
+}
+--------------------------------------------------
+<1> These estimates assume that there is one {kib} instance actively executing tasks.
+<2> Based on past throughput the overdue tasks in the system could be executed within 1 minute.
+<3> Assuming all {kib} instances in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute.
+<4> On average, the recurring tasks in the system have historically required a throughput of 28 tasks per minute.
+<5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute.
+<6> One {kib} instance should be sufficient to run the current recurring workload.
+<7> We propose waiting for the workload to change before additional {kib} instances are provisioned.
+
+The `capacity_estimation` section is made up of two subsections:
+
+* `observed` estimates the current capacity by observing historical runtime and workload statistics
+* `proposed` estimates the baseline {kib} cluster size and the expected throughput under such a deployment strategy
+
+You can infer from these estimates that the current system is under-utilized and has enough capacity to handle many more tasks than it currently does.
+
+Suppose an alternate scenario, where you see the following output under `stats.capacity_estimation.value`:
+
+[source,json]
+--------------------------------------------------
+{
+  "observed": {
+    "observed_kibana_instances": 2, # <1>
+    "max_throughput_per_minute_per_kibana": 200,
+    "max_throughput_per_minute": 400, # <2>
+    "minutes_to_drain_overdue": 12, # <3>
+    "avg_recurring_required_throughput_per_minute": 354, # <4>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 177, # <5>
+    "avg_required_throughput_per_minute": 434, # <6>
+    "avg_required_throughput_per_minute_per_kibana": 217
+  },
+  "proposed": {
+    "min_required_kibana": 2, # <7>
+    "provisioned_kibana": 3, # <8>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 118, # <9>
+    "avg_required_throughput_per_minute_per_kibana": 145 # <10>
+  }
+}
+--------------------------------------------------
+<1> These estimates assume that there are two {kib} instance actively executing tasks.
+<2> The maximum available throughput in the system currently is 400 tasks per minute.
+<3> Based on past throughput the overdue tasks in the system should be executed within 12 minutes.
+<4> On average, the recurring tasks in the system have historically required a throughput of 354 tasks per minute.
+<5> On average, each {kib} instance utilizes 177 tasks per minute of its capacity to execute recurring tasks.
+<6> On average the tasks in the system have historically required a throughput of 434 tasks per minute.
+<7> The system estimates that at least two {kib} instances are required to run the current recurring workload.
+<8> The system recommends provisioning three {kib} instances to handle the workload.
+<9> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute.
+<10> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned.
+
+Evaluating by these estimates, we can infer some interesting attributes of our system:
+
+* These estimates are produced based on the assumption that there are two {kib} instances in the cluster. This number is based on the number of {kib} instances actively executing tasks in recent minutes. At times this number might fluctuate if {kib} instances remain idle, so validating these estimates against what you know about the system is recommended.
+* There appear to be so many overdue tasks that it would take 12 minutes of executions to catch up with that backlog. This does not take into account tasks that might become overdue during those 12 minutes. Although this congestion might be temporary, the system could also remain consistently under provisioned and might never drain the backlog entirely.
+* Evaluating the recurring tasks in the workload, the system requires a throughput of 354 tasks per minute on average to execute tasks on time, which is lower then the estimated maximum throughput of 400 tasks per minute. Once we take into account historical throughput though, we estimate the required throughput at 434 tasks per minute. This suggests that, historically, approximately 20% of tasks have been ad-hoc non-recurring tasks, the scale of which are harder to predict than recurring tasks.
+
+You can infer from these estimates that the capacity in the current system is insufficient and at least one additional {kib} instance is required to keep up with the workload.
 
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 

@@ -184,7 +184,7 @@ describe('health check', () => {
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-getting-started.html#alerting-setup-prerequisites"`
+      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
     );
   });
 });

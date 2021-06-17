@@ -6,11 +6,15 @@
  */
 
 import fs from 'fs';
+import { resolve } from 'path';
 import expect from '@kbn/expect';
 import { Client as EsClient } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import { EsArchiver } from '@kbn/es-archiver';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, REPO_ROOT } from '@kbn/dev-utils';
+
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+const ARCHIVE = resolve(INTEGRATION_TEST_ROOT, 'test/es_archives/metricbeat');
 
 export default ({ getService, getPageObjects }) => {
   describe('Cross cluster search test in discover', async () => {
@@ -227,14 +231,12 @@ export default ({ getService, getPageObjects }) => {
         url: process.env.TEST_KIBANA_URLDATA,
         certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
         uiSettingDefaults: kibanaServer.uiSettings,
-        importExportDir: config.get('kbnArchiver.directory'),
       });
 
       const esArchiver = new EsArchiver({
         log,
         client: esClient,
         kbnClient,
-        dataDir: config.get('esArchiver.directory'),
       });
 
       let signalsId;
@@ -263,7 +265,7 @@ export default ({ getService, getPageObjects }) => {
 
       before('Prepare data:metricbeat-*', async function () {
         log.info('Create index');
-        await esArchiver.load('metricbeat');
+        await esArchiver.load(ARCHIVE);
 
         log.info('Create index pattern');
         dataId = await supertest
@@ -323,7 +325,7 @@ export default ({ getService, getPageObjects }) => {
         }
 
         log.info('Delete index');
-        await esArchiver.unload('metricbeat');
+        await esArchiver.unload(ARCHIVE);
       });
 
       after('Clean up .siem-signal-*', async function () {

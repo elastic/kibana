@@ -6,17 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
 import { snakeToCamel } from '../utils';
 import { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
+import { WritePluginDocsOpts } from './types';
 
-export function writePluginDocSplitByFolder(folder: string, doc: PluginApi, log: ToolingLog) {
+export function writePluginDocSplitByFolder(
+  folder: string,
+  { doc, plugin, pluginStats, log }: WritePluginDocsOpts
+) {
   const apisByFolder = splitApisByFolder(doc);
 
   log.debug(`Split ${doc.id} into ${apisByFolder.length} services`);
   apisByFolder.forEach((docDef) => {
-    writePluginDoc(folder, docDef, log);
+    // TODO: we should probably see if we can break down these stats by service folder. As it is, they will represent stats for
+    // the entire plugin.
+    writePluginDoc(folder, { doc: docDef, plugin, pluginStats, log });
   });
 }
 

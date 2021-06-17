@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useState, useCallback } from 'react';
+import React, { useEffect, useReducer, useState, useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -30,6 +30,7 @@ import {
   applyVisualizeFieldSuggestions,
   getTopSuggestionForField,
   switchToSuggestion,
+  Suggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
@@ -117,56 +118,74 @@ export function EditorFrame(props: EditorFrameProps) {
   );
   const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
 
-  const framePublicAPI: FramePublicAPI = {
-    datasourceLayers,
-    activeData,
-    dateRange,
-    query,
-    filters,
-    searchSessionId,
-    availablePalettes: props.palettes,
+  const framePublicAPI: FramePublicAPI = useMemo(
+    () => ({
+      datasourceLayers,
+      activeData,
+      dateRange,
+      query,
+      filters,
+      searchSessionId,
+      availablePalettes: props.palettes,
 
-    addNewLayer() {
-      const newLayerId = generateId();
+      addNewLayer() {
+        const newLayerId = generateId();
 
-      dispatch({
-        type: 'UPDATE_LAYER',
-        datasourceId: state.activeDatasourceId!,
-        layerId: newLayerId,
-        updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
-      });
-
-      return newLayerId;
-    },
-
-    removeLayers(layerIds: string[]) {
-      if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          visualizationId: activeVisualization.id,
-          updater: layerIds.reduce(
-            (acc, layerId) =>
-              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-            state.visualization.state
-          ),
-        });
-      }
-
-      layerIds.forEach((layerId) => {
-        const layerDatasourceId = Object.entries(props.datasourceMap).find(
-          ([datasourceId, datasource]) =>
-            state.datasourceStates[datasourceId] &&
-            datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-        )![0];
         dispatch({
           type: 'UPDATE_LAYER',
-          layerId,
-          datasourceId: layerDatasourceId,
-          updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          datasourceId: state.activeDatasourceId!,
+          layerId: newLayerId,
+          updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
         });
-      });
-    },
-  };
+
+        return newLayerId;
+      },
+
+      removeLayers(layerIds: string[]) {
+        if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
+          dispatch({
+            type: 'UPDATE_VISUALIZATION_STATE',
+            visualizationId: activeVisualization.id,
+            updater: layerIds.reduce(
+              (acc, layerId) =>
+                activeVisualization.removeLayer
+                  ? activeVisualization.removeLayer(acc, layerId)
+                  : acc,
+              state.visualization.state
+            ),
+          });
+        }
+
+        layerIds.forEach((layerId) => {
+          const layerDatasourceId = Object.entries(props.datasourceMap).find(
+            ([datasourceId, datasource]) =>
+              state.datasourceStates[datasourceId] &&
+              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+          )![0];
+          dispatch({
+            type: 'UPDATE_LAYER',
+            layerId,
+            datasourceId: layerDatasourceId,
+            updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          });
+        });
+      },
+    }),
+    [
+      activeData,
+      activeVisualization,
+      datasourceLayers,
+      dateRange,
+      query,
+      filters,
+      searchSessionId,
+      props.palettes,
+      props.datasourceMap,
+      state.activeDatasourceId,
+      state.datasourceStates,
+      state.visualization.state,
+    ]
+  );
 
   useEffect(
     () => {
@@ -327,45 +346,37 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
-  const getSuggestionForField = React.useCallback(
-    (field: DragDropIdentifier) => {
-      const { activeDatasourceId, datasourceStates } = state;
-      const activeVisualizationId = state.visualization.activeId;
-      const visualizationState = state.visualization.state;
-      const { visualizationMap, datasourceMap } = props;
+  // Using a ref to prevent rerenders in the child components while keeping the latest state
+  const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
+  getSuggestionForField.current = (field: DragDropIdentifier) => {
+    const { activeDatasourceId, datasourceStates } = state;
+    const activeVisualizationId = state.visualization.activeId;
+    const visualizationState = state.visualization.state;
+    const { visualizationMap, datasourceMap } = props;
 
-      if (!field || !activeDatasourceId) {
-        return;
-      }
+    if (!field || !activeDatasourceId) {
+      return;
+    }
 
-      return getTopSuggestionForField(
-        datasourceLayers,
-        activeVisualizationId,
-        visualizationMap,
-        visualizationState,
-        datasourceMap[activeDatasourceId],
-        datasourceStates,
-        field
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      state.visualization.state,
-      props.datasourceMap,
-      props.visualizationMap,
-      state.activeDatasourceId,
-      state.datasourceStates,
-    ]
-  );
+    return getTopSuggestionForField(
+      datasourceLayers,
+      activeVisualizationId,
+      visualizationMap,
+      visualizationState,
+      datasourceMap[activeDatasourceId],
+      datasourceStates,
+      field
+    );
+  };
 
   const hasSuggestionForField = useCallback(
-    (field: DragDropIdentifier) => getSuggestionForField(field) !== undefined,
+    (field: DragDropIdentifier) => getSuggestionForField.current!(field) !== undefined,
     [getSuggestionForField]
   );
 
   const dropOntoWorkspace = useCallback(
     (field) => {
-      const suggestion = getSuggestionForField(field);
+      const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
         switchToSuggestion(dispatch, suggestion, 'SWITCH_VISUALIZATION');
@@ -377,6 +388,7 @@ export function EditorFrame(props: EditorFrameProps) {
   return (
     <RootDragDropProvider>
       <FrameLayout
+        isFullscreen={Boolean(state.isFullscreenDatasource)}
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
@@ -414,6 +426,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
             />
           )
         }
@@ -429,11 +442,12 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
               visualizeTriggerFieldContext={visualizeTriggerFieldContext}
-              getSuggestionForField={getSuggestionForField}
+              getSuggestionForField={getSuggestionForField.current}
             />
           )
         }
