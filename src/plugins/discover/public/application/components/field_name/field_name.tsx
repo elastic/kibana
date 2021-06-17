@@ -56,17 +56,22 @@ export function FieldName({
       </EuiFlexItem>
       {isMultiField && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            color="default"
-            title={i18n.translate('discover.fieldChooser.discoverField.multiFieldTooltipContent', {
-              defaultMessage: 'Multi field',
-            })}
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'discover.fieldChooser.discoverField.multiFieldTooltipContent',
+              {
+                defaultMessage: 'Multifields can have multiple values per field',
+              })
+            }
           >
-            <FormattedMessage
-              id="discover.fieldChooser.discoverField.multiField"
-              defaultMessage="multifield"
-            />
-          </EuiBadge>
+            <EuiBadge title="" className="dscMultiFieldBadge" color="default">
+              <FormattedMessage
+                id="discover.fieldChooser.discoverField.multiField"
+                defaultMessage="multifield"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

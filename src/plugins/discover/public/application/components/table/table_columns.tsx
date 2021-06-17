@@ -66,7 +66,7 @@ export const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         <strong>
           <FormattedMessage
             id="discover.fieldChooser.discoverField.action"
-            defaultMessage="Action"
+            defaultMessage="Actions"
           />
         </strong>
       </EuiText>
