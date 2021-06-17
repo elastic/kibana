@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING_TIMELINE_DATA = i18n.translate(
-  'xpack.securitySolution.footer.loadingTimelineData',
-  {
-    defaultMessage: 'Loading Timeline data',
-  }
-);
+export const LOADING_TIMELINE_DATA = i18n.translate('xpack.timelines.footer.loadingTimelineData', {
+  defaultMessage: 'Loading Timeline data',
+});
 
 export const EVENTS = i18n.translate('xpack.timelines.footer.events', {
   defaultMessage: 'Events',
@@ -30,15 +27,12 @@ export const LOADING = i18n.translate('xpack.timelines.footer.loadingLabel', {
   defaultMessage: 'Loading',
 });
 
-export const TOTAL_COUNT_OF_EVENTS = i18n.translate(
-  'xpack.securitySolution.footer.totalCountOfEvents',
-  {
-    defaultMessage: 'events',
-  }
-);
+export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.timelines.footer.totalCountOfEvents', {
+  defaultMessage: 'events',
+});
 
 export const AUTO_REFRESH_ACTIVE = i18n.translate(
-  'xpack.securitySolution.footer.autoRefreshActiveDescription',
+  'xpack.timelines.footer.autoRefreshActiveDescription',
   {
     defaultMessage: 'Auto-Refresh Active',
   }

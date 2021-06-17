@@ -10,6 +10,15 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPlugin } from './plugin';
 export * as tGridActions from './store/t_grid/actions';
 export * as tGridSelectors from './store/t_grid/selectors';
+export type {
+  Inspect,
+  SortField,
+  TimerangeInput,
+  PaginationInputPaginated,
+  DocValueFields,
+  Maybe,
+} from '../common/search_strategy/common';
+export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
 export {

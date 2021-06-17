@@ -8,35 +8,35 @@
 import { i18n } from '@kbn/i18n';
 
 export const NOTES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.addOrViewNotesForThisEventTooltip',
+  'xpack.timelines.timeline.body.notes.addOrViewNotesForThisEventTooltip',
   {
     defaultMessage: 'Add notes for this event',
   }
 );
 
 export const NOTES_DISABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
+  'xpack.timelines.timeline.body.notes.disableEventTooltip',
   {
     defaultMessage: 'Notes may not be added here while editing a template timeline',
   }
 );
 
 export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.timeline.body.copyToClipboardButtonLabel',
+  'xpack.timelines.timeline.body.copyToClipboardButtonLabel',
   {
     defaultMessage: 'Copy to Clipboard',
   }
 );
 
 export const INVESTIGATE = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.investigateLabel',
+  'xpack.timelines.timeline.body.actions.investigateLabel',
   {
     defaultMessage: 'Investigate',
   }
 );
 
 export const UNPINNED = i18n.translate(
-  'xpack.securitySolution.timeline.body.pinning.unpinnedTooltip',
+  'xpack.timelines.timeline.body.pinning.unpinnedTooltip',
   {
     defaultMessage: 'Unpinned event',
   }
@@ -47,42 +47,42 @@ export const PINNED = i18n.translate('xpack.timelines.timeline.body.pinning.pinn
 });
 
 export const PINNED_WITH_NOTES = i18n.translate(
-  'xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip',
+  'xpack.timelines.timeline.body.pinning.pinnnedWithNotesTooltip',
   {
     defaultMessage: 'This event cannot be unpinned because it has notes',
   }
 );
 
 export const SORTED_ASCENDING = i18n.translate(
-  'xpack.securitySolution.timeline.body.sort.sortedAscendingTooltip',
+  'xpack.timelines.timeline.body.sort.sortedAscendingTooltip',
   {
     defaultMessage: 'Sorted ascending',
   }
 );
 
 export const SORTED_DESCENDING = i18n.translate(
-  'xpack.securitySolution.timeline.body.sort.sortedDescendingTooltip',
+  'xpack.timelines.timeline.body.sort.sortedDescendingTooltip',
   {
     defaultMessage: 'Sorted descending',
   }
 );
 
 export const DISABLE_PIN = i18n.translate(
-  'xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip',
+  'xpack.timelines.timeline.body.pinning.disablePinnnedTooltip',
   {
     defaultMessage: 'This event may not be pinned while editing a template timeline',
   }
 );
 
 export const VIEW_DETAILS = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.viewDetailsAriaLabel',
+  'xpack.timelines.timeline.body.actions.viewDetailsAriaLabel',
   {
     defaultMessage: 'View details',
   }
 );
 
 export const VIEW_SUMMARY = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.viewSummaryLabel',
+  'xpack.timelines.timeline.body.actions.viewSummaryLabel',
   {
     defaultMessage: 'View summary',
   }
@@ -102,21 +102,21 @@ export const VIEW_DETAILS_FOR_ROW = ({
   });
 
 export const EXPAND_EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.expandEventTooltip',
+  'xpack.timelines.timeline.body.actions.expandEventTooltip',
   {
     defaultMessage: 'View details',
   }
 );
 
 export const COLLAPSE = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
+  'xpack.timelines.timeline.body.actions.collapseAriaLabel',
   {
     defaultMessage: 'Collapse',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.investigateInResolverTooltip',
+  'xpack.timelines.timeline.body.actions.investigateInResolverTooltip',
   {
     defaultMessage: 'Analyze event',
   }
@@ -145,7 +145,7 @@ export const ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW = ({
   columnValues: string;
 }) =>
   i18n.translate(
-    'xpack.securitySolution.timeline.body.actions.investigateInResolverForRowAriaLabel',
+    'xpack.timelines.timeline.body.actions.investigateInResolverForRowAriaLabel',
     {
       values: { ariaRowindex, columnValues },
       defaultMessage:
@@ -161,7 +161,7 @@ export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({
   columnValues: string;
 }) =>
   i18n.translate(
-    'xpack.securitySolution.timeline.body.actions.sendAlertToTimelineForRowAriaLabel',
+    'xpack.timelines.timeline.body.actions.sendAlertToTimelineForRowAriaLabel',
     {
       values: { ariaRowindex, columnValues },
       defaultMessage:
@@ -236,7 +236,7 @@ export const MORE_ACTIONS_FOR_ROW = ({
   });
 
 export const INVESTIGATE_IN_RESOLVER_DISABLED = i18n.translate(
-  'xpack.securitySolution.timeline.body.actions.investigateInResolverDisabledTooltip',
+  'xpack.timelines.timeline.body.actions.investigateInResolverDisabledTooltip',
   {
     defaultMessage: 'This event cannot be analyzed since it has incompatible field mappings',
   }

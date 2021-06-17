@@ -356,7 +356,7 @@ export const FooterComponent = ({
                   color="subdued"
                   content={
                     <FormattedMessage
-                      id="xpack.securitySolution.footer.autoRefreshActiveTooltip"
+                      id="xpack.timelines.footer.autoRefreshActiveTooltip"
                       defaultMessage="While auto-refresh is enabled, timeline will show you the latest {numberOfItems} events that match your query."
                       values={{
                         numberOfItems: itemsCount,

@@ -12,7 +12,7 @@ export const SHOWING = i18n.translate('xpack.timelines.eventsViewer.showingLabel
 });
 
 export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
-  'xpack.securitySolution.eventsViewer.errorFetchingEventsData',
+  'xpack.timelines.eventsViewer.errorFetchingEventsData',
   {
     defaultMessage: 'Failed to query events data',
   }
@@ -23,7 +23,7 @@ export const EVENTS = i18n.translate('xpack.timelines.eventsViewer.eventsLabel',
 });
 
 export const LOADING_EVENTS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.footer.loadingEventsDataLabel',
+  'xpack.timelines.eventsViewer.footer.loadingEventsDataLabel',
   {
     defaultMessage: 'Loading Events',
   }

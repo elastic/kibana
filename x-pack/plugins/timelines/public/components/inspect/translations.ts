@@ -16,20 +16,17 @@ export const CLOSE = i18n.translate('xpack.timelines.inspect.modal.closeTitle', 
 });
 
 export const SOMETHING_WENT_WRONG = i18n.translate(
-  'xpack.securitySolution.inspect.modal.somethingWentWrongDescription',
+  'xpack.timelines.inspect.modal.somethingWentWrongDescription',
   {
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
-export const INDEX_PATTERN = i18n.translate(
-  'xpack.securitySolution.inspect.modal.indexPatternLabel',
-  {
-    defaultMessage: 'Index pattern',
-  }
-);
+export const INDEX_PATTERN = i18n.translate('xpack.timelines.inspect.modal.indexPatternLabel', {
+  defaultMessage: 'Index pattern',
+});
 
 export const INDEX_PATTERN_DESC = i18n.translate(
-  'xpack.securitySolution.inspect.modal.indexPatternDescription',
+  'xpack.timelines.inspect.modal.indexPatternDescription',
   {
     defaultMessage:
       'The index pattern that connected to the Elasticsearch indices. These indices can be configured in Kibana > Advanced Settings.',
@@ -41,29 +38,26 @@ export const QUERY_TIME = i18n.translate('xpack.timelines.inspect.modal.queryTim
 });
 
 export const QUERY_TIME_DESC = i18n.translate(
-  'xpack.securitySolution.inspect.modal.queryTimeDescription',
+  'xpack.timelines.inspect.modal.queryTimeDescription',
   {
     defaultMessage:
       'The time it took to process the query. Does not include the time to send the request or parse it in the browser.',
   }
 );
 
-export const REQUEST_TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.inspect.modal.reqTimestampLabel',
-  {
-    defaultMessage: 'Request timestamp',
-  }
-);
+export const REQUEST_TIMESTAMP = i18n.translate('xpack.timelines.inspect.modal.reqTimestampLabel', {
+  defaultMessage: 'Request timestamp',
+});
 
 export const REQUEST_TIMESTAMP_DESC = i18n.translate(
-  'xpack.securitySolution.inspect.modal.reqTimestampDescription',
+  'xpack.timelines.inspect.modal.reqTimestampDescription',
   {
     defaultMessage: 'Time when the start of the request has been logged',
   }
 );
 
 export const NO_ALERT_INDEX_FOUND = i18n.translate(
-  'xpack.securitySolution.inspect.modal.noAlertIndexFound',
+  'xpack.timelines.inspect.modal.noAlertIndexFound',
   {
     defaultMessage: 'No alert index found',
   }

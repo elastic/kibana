@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const PRESS = i18n.translate(
-  'xpack.timelines.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel',
+  'xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel',
   {
     defaultMessage: 'Press',
   }

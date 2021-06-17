@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ERROR_TIMELINE_EVENTS = i18n.translate(
-  'xpack.securitySolution.timelineEvents.errorSearchDescription',
+  'xpack.timelines.timelineEvents.errorSearchDescription',
   {
     defaultMessage: `An error has occurred on timeline events search`,
   }
 );
 
 export const FAIL_TIMELINE_EVENTS = i18n.translate(
-  'xpack.securitySolution.timelineEvents.failSearchDescription',
+  'xpack.timelines.timelineEvents.failSearchDescription',
   {
     defaultMessage: `Failed to run search on timeline events`,
   }
