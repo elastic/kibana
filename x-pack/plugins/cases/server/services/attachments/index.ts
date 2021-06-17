@@ -8,10 +8,10 @@
 import { Logger, SavedObject, SavedObjectReference } from 'kibana/server';
 
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CommentAttributes as AttachmentAttributes,
   CommentPatchAttributes as AttachmentPatchAttributes,
-} from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+} from '../../../common';
 import { ClientArgs } from '..';
 
 interface GetAttachmentArgs extends ClientArgs {
