@@ -228,7 +228,7 @@ export function ServiceOverviewInstancesChartAndTable({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <ServiceOverviewInstancesTable
             mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
