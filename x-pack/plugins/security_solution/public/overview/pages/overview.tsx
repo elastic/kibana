@@ -85,7 +85,7 @@ const OverviewComponent = () => {
               </>
             )}
             <Sourcerer scope={SourcererScopeName.default} />
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
               </SidebarFlexItem>
