@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { missingImage } from '../../common/lib/missing_asset';
+import { missingImage } from '../../../../../src/plugins/presentation_util/common';
 import { isValidUrl } from './url';
 
 describe('resolve_dataurl', () => {

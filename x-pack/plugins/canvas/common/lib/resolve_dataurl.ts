@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { isValidUrl } from '../../common/lib/url';
-import { missingImage } from '../../common/lib/missing_asset';
+import { missingImage } from '../../../../../src/plugins/presentation_util/common';
 
 /*
  * NOTE: args.dataurl can come as an expression here.

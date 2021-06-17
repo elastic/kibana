@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { missingImage } from '../../common/lib/missing_asset';
+import { missingImage } from '../../../../../src/plugins/presentation_util/common';
 import { resolveFromArgs, resolveWithMissingImage } from './resolve_dataurl';
 
 describe('resolve_dataurl', () => {
