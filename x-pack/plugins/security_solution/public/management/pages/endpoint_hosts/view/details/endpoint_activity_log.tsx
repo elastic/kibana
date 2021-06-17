@@ -61,7 +61,7 @@ export const EndpointActivityLog = memo(
       });
     }, [dispatch, pageSize]);
 
-    const fetchMoreCallOut = useRef<HTMLInputElement | null>(null);
+    const fetchMoreSentinel = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
         const isIntersecting = entries.some((entry) => entry.intersectionRatio > 0);
@@ -82,7 +82,7 @@ export const EndpointActivityLog = memo(
       const observer = new IntersectionObserver(getActivityLog, {
         rootMargin: '-50px',
       });
-      const element = fetchMoreCallOut.current;
+      const element = fetchMoreSentinel.current;
       if (element) {
         observer.observe(element);
       }
@@ -123,7 +123,7 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {!activityLogLoading && !isPagingDisabled && <Sentinel ref={fetchMoreCallOut} />}
+                {!activityLogLoading && !isPagingDisabled && <Sentinel ref={fetchMoreSentinel} />}
                 {isPagingDisabled && (
                   <p>
                     <EuiText color="subdued" textAlign="center">
