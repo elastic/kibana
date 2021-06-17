@@ -517,7 +517,7 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                fleet: ['all'],
+                advancedSettings: ['read'],
               },
               spaces: ['*'],
             },
