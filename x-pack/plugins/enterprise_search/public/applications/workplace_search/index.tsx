@@ -46,7 +46,6 @@ import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
-import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
 import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
@@ -141,13 +140,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <Security />
       </Route>
       <Route path={ORG_SETTINGS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <SettingsRouter />
-        </Layout>
+        <SettingsRouter />
       </Route>
       <Route>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
