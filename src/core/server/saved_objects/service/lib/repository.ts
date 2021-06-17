@@ -283,28 +283,18 @@ export class SavedObjectsRepository {
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
-    if (initialNamespaces) {
-      if (!this._registry.isShareable(type)) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.initialNamespaces" can only be used on multi-namespace types'
-        );
-      } else if (!initialNamespaces.length) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.initialNamespaces" must be a non-empty array of strings'
-        );
-      }
-    }
+    this.validateInitialNamespaces(type, initialNamespaces);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
     const time = this._getCurrentTime();
-    let savedObjectNamespace;
+    let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
 
-    if (this._registry.isSingleNamespace(type) && namespace) {
-      savedObjectNamespace = namespace;
+    if (this._registry.isSingleNamespace(type)) {
+      savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
@@ -369,32 +359,29 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const expectedResults: Either[] = objects.map((object) => {
+      const { type, id, initialNamespaces } = object;
       let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(object.type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
-      } else if (object.initialNamespaces) {
-        if (!this._registry.isShareable(object.type)) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" can only be used on multi-namespace types'
-          );
-        } else if (!object.initialNamespaces.length) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" must be a non-empty array of strings'
-          );
+      if (!this._allowedTypes.includes(type)) {
+        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      } else {
+        try {
+          this.validateInitialNamespaces(type, initialNamespaces);
+        } catch (e) {
+          error = e;
         }
       }
 
       if (error) {
         return {
           tag: 'Left' as 'Left',
-          error: { id: object.id, type: object.type, error: errorContent(error) },
+          error: { id, type, error: errorContent(error) },
         };
       }
 
-      const method = object.id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      const method = id && overwrite ? 'index' : 'create';
+      const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
 
-      if (object.id == null) {
+      if (id == null) {
         object.id = SavedObjectsUtils.generateId();
       }
 
@@ -434,8 +421,8 @@ export class SavedObjectsRepository {
         return expectedBulkGetResult;
       }
 
-      let savedObjectNamespace;
-      let savedObjectNamespaces;
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
       let versionProperties;
       const {
         esRequestIndex,
@@ -469,7 +456,7 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = namespace;
+          savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
@@ -2079,6 +2066,29 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsResolveResponse<T>> {
     const object = await this.get<T>(type, id, options);
     return { saved_object: object, outcome: 'exactMatch' };
+  }
+
+  private validateInitialNamespaces(type: string, initialNamespaces: string[] | undefined) {
+    if (!initialNamespaces) {
+      return;
+    }
+
+    if (this._registry.isNamespaceAgnostic(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" cannot be used on space-agnostic types'
+      );
+    } else if (!initialNamespaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" must be a non-empty array of strings'
+      );
+    } else if (
+      !this._registry.isShareable(type) &&
+      (initialNamespaces.length > 1 || initialNamespaces.includes(ALL_NAMESPACES_STRING))
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" can only specify a single space when used with space-isolated types'
+      );
+    }
   }
 }
 
