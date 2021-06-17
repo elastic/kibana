@@ -35,7 +35,7 @@ import {
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading, SettingFlyout } from './components';
+import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -180,7 +180,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             error={initializationError}
           />
         ) : (
-          <Loading />
+          <FleetSetupLoading />
         )}
       </ErrorLayout>
     );
