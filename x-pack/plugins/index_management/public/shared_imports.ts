@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
 export {
   SendRequestConfig,
   SendRequestResponse,
