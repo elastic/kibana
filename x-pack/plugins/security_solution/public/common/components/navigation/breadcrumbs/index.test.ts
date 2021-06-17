@@ -112,8 +112,10 @@ const getMockObject = (
 });
 
 // The string returned is different from what getUrlForApp returns, but does not matter for the purposes of this test.
-const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
-  `${appId}${options?.path ?? ''}`;
+const getUrlForAppMock = (
+  appId: string,
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
+) => `${appId}${options?.deepLinkId ?? ''}${options?.path ?? ''}`;
 
 describe('Navigation Breadcrumbs', () => {
   const hostName = 'siem-kibana';
@@ -302,7 +304,7 @@ describe('Navigation Breadcrumbs', () => {
         { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Administration',
-          href: 'securitySolution:administration',
+          href: 'securitySolutionadministration',
         },
       ]);
     });
@@ -310,20 +312,35 @@ describe('Navigation Breadcrumbs', () => {
 
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock);
+      const navigateToUrlMock = jest.fn();
+      setBreadcrumbs(
+        getMockObject('hosts', '/', hostName),
+        chromeMock,
+        getUrlForAppMock,
+        navigateToUrlMock
+      );
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'Security', href: 'securitySolutionoverview' },
-        {
+        expect.objectContaining({
+          text: 'Security',
+          href: 'securitySolutionoverview',
+          onClick: expect.any(Function),
+        }),
+        expect.objectContaining({
           text: 'Hosts',
           href:
             "securitySolution:hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-        },
-        {
+          onClick: expect.any(Function),
+        }),
+        expect.objectContaining({
           text: 'siem-kibana',
           href:
             "securitySolution:hosts/siem-kibana?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          onClick: expect.any(Function),
+        }),
+        {
+          text: 'Authentications',
+          href: '',
         },
-        { text: 'Authentications', href: '' },
       ]);
     });
   });

@@ -32,6 +32,7 @@ jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 const mockGetUrlForApp = jest.fn();
+const mockNavigateToUrl = jest.fn();
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: () => ({
@@ -40,6 +41,7 @@ jest.mock('../../lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
       },
     }),
@@ -97,57 +99,7 @@ describe('SIEM Navigation', () => {
       1,
       {
         detailName: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'hosts',
         pathName: '/',
         search: '',
@@ -188,7 +140,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -204,57 +157,7 @@ describe('SIEM Navigation', () => {
         detailName: undefined,
         filters: [],
         flowTarget: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'network',
         pathName: '/',
         query: { language: 'kuery', query: '' },
@@ -288,7 +191,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
 });
