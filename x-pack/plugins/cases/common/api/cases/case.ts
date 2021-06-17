@@ -254,6 +254,9 @@ export const CasePushRequestParamsRt = rt.type({
   case_id: rt.string,
   connector_id: rt.string,
 });
+export const CasePushRequestRt = rt.type({
+  case_url: rt.string,
+});
 
 export const ExternalServiceResponseRt = rt.intersection([
   rt.type({

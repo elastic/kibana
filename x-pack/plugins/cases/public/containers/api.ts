@@ -329,16 +329,18 @@ export const deleteSubCases = async (caseIds: string[], signal: AbortSignal): Pr
   return response;
 };
 
-export const pushCase = async (
-  caseId: string,
-  connectorId: string,
-  signal: AbortSignal
-): Promise<Case> => {
+interface PushData {
+  caseId: string;
+  caseUrl: string;
+  connectorId: string;
+}
+
+export const pushCase = async (pushData: PushData, signal: AbortSignal): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
-    getCasePushUrl(caseId, connectorId),
+    getCasePushUrl(pushData.caseId, pushData.connectorId),
     {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ case_url: pushData.caseUrl }),
       signal,
     }
   );

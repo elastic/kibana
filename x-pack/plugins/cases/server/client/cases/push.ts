@@ -54,7 +54,7 @@ export interface PushParams {
   /**
    * The Kibana url of a case
    */
-  caseUrl?: string;
+  caseUrl: string;
   /**
    * The ID of an external system to push to
    */
