@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -16,6 +17,7 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
+  TaskManagerDoc,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -30,11 +32,12 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask.body._source!;
     }
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -119,9 +122,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
-              const { _source: taskRecord } = await getScheduledTask(
-                updatedAlert.scheduled_task_id
-              );
+              const taskRecord = await getScheduledTask(updatedAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -351,9 +352,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
-              const { _source: taskRecord } = await getScheduledTask(
-                updatedAlert.scheduled_task_id
-              );
+              const taskRecord = await getScheduledTask(updatedAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({

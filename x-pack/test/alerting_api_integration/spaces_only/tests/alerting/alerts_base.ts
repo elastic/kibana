@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { Response as SupertestResponse } from 'supertest';
 import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
@@ -21,6 +22,11 @@ import {
   ensureDatetimeIsWithinRange,
   TaskManagerUtils,
 } from '../../../common/lib';
+import {
+  TaskRunning,
+  TaskRunningStage,
+} from '../../../../../plugins/task_manager/server/task_running';
+import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -327,7 +333,7 @@ instanceStateValue: true
 
     it('should handle custom retry logic', async () => {
       // We'll use this start time to query tasks created after this point
-      const testStart = new Date();
+      const testStart = new Date().toISOString();
       // We have to provide the test.rate-limit the next runAt, for testing purposes
       const retryDate = new Date(Date.now() + 60000);
 
@@ -370,8 +376,12 @@ instanceStateValue: true
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
-      const scheduledActionTask = await retry.try(async () => {
-        const searchResult = await es.search({
+      const scheduledActionTask: estypes.SearchHit<
+        TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+      > = await retry.try(async () => {
+        const searchResult: ApiResponse<
+          estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
+        > = await es.search({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -404,10 +414,10 @@ instanceStateValue: true
             },
           },
         });
-        expect(searchResult.hits.total.value).to.eql(1);
-        return searchResult.hits.hits[0];
+        expect(searchResult.body.hits.total.valueOf).to.eql(1);
+        return searchResult.body.hits.hits[0];
       });
-      expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
+      expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());
     });
 
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {

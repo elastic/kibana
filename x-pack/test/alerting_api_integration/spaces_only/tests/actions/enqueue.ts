@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should cleanup task after a failure', async () => {
-      const testStart = new Date();
+      const testStart = new Date().toISOString();
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -135,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(searchResult.hits.total.value).to.eql(0);
+        expect(searchResult.body.hits.total.valueOf).to.eql(0);
       });
     });
   });

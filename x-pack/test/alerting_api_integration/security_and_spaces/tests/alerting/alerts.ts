@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -21,6 +22,11 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+import {
+  TaskRunning,
+  TaskRunningStage,
+} from '../../../../../plugins/task_manager/server/task_running';
+import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 const NANOS_IN_MILLIS = 1000 * 1000;
 
@@ -454,7 +460,7 @@ instanceStateValue: true
         });
 
         it('should handle custom retry logic when appropriate', async () => {
-          const testStart = new Date();
+          const testStart = new Date().toISOString();
           // We have to provide the test.rate-limit the next runAt, for testing purposes
           const retryDate = new Date(Date.now() + 60000);
 
@@ -525,8 +531,12 @@ instanceStateValue: true
               objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for the task to be attempted once and idle
-              const scheduledActionTask = await retry.try(async () => {
-                const searchResult = await es.search({
+              const scheduledActionTask: estypes.SearchHit<
+                TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+              > = await retry.try(async () => {
+                const searchResult: ApiResponse<
+                  estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
+                > = await es.search({
                   index: '.kibana_task_manager',
                   body: {
                     query: {
@@ -559,12 +569,12 @@ instanceStateValue: true
                     },
                   },
                 });
-                expect(searchResult.hits.total.value).to.eql(1);
-                return searchResult.hits.hits[0];
+                expect(searchResult.body.hits.total.valueOf).to.eql(1);
+                return searchResult.body.hits.hits[0];
               });
 
               // Ensure the next runAt is set to the retryDate by custom logic
-              expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
+              expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

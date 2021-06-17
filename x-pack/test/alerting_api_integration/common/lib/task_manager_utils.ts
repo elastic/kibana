@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
+
+export interface TaskManagerDoc {
+  type: string;
+  task: SerializedConcreteTaskInstance;
+}
 export class TaskManagerUtils {
   private readonly es: any;
   private readonly retry: any;

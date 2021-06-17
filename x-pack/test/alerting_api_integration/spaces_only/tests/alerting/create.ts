@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -13,6 +14,7 @@ import {
   getTestAlertData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
+  TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -26,11 +28,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask.body._source!;
     }
 
     it('should handle create alert request appropriately', async () => {
@@ -96,7 +99,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
 
       expect(typeof response.body.scheduled_task_id).to.be('string');
-      const { _source: taskRecord } = await getScheduledTask(response.body.scheduled_task_id);
+      const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
       expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -328,7 +331,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));
 
         expect(typeof response.body.scheduledTaskId).to.be('string');
-        const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
+        const taskRecord = await getScheduledTask(response.body.scheduledTaskId);
         expect(taskRecord.type).to.eql('task');
         expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
         expect(JSON.parse(taskRecord.task.params)).to.eql({
