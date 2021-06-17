@@ -164,16 +164,21 @@ export class APMPlugin
       });
 
       await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('apm-index-template'),
-        body: {
-          index_patterns: [
-            ruleDataService.getFullAssetName('observability-apm*'),
-          ],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
+        template: {
+          name: ruleDataService.getFullAssetName('apm-index-template'),
+          body: {
+            index_patterns: [
+              ruleDataService.getFullAssetName('observability-apm*'),
+            ],
+            composed_of: [
+              ruleDataService.getFullAssetName(
+                TECHNICAL_COMPONENT_TEMPLATE_NAME
+              ),
+              componentTemplateName,
+            ],
+          },
         },
+        templateVersion: 1,
       });
     });
 

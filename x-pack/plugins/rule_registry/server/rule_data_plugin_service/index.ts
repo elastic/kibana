@@ -129,12 +129,35 @@ export class RuleDataPluginService {
     });
   }
 
-  private async _createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+  private async _createOrUpdateIndexTemplate({
+    template,
+    templateVersion,
+  }: {
+    template: PutIndexTemplateRequest;
+    templateVersion: number;
+  }) {
     this.assertWriteEnabled();
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing index template ${template.name}`);
-    return clusterClient.indices.putIndexTemplate(template);
+    return clusterClient.indices.putIndexTemplate({
+      ...template,
+      body: {
+        ...template.body,
+        template: {
+          ...template.body?.template,
+          mappings: {
+            ...template.body?.template?.mappings,
+            _meta: {
+              ...template.body?.template?.mappings?._meta,
+              versions: {
+                [template.name]: templateVersion,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   private async _createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
@@ -156,9 +179,15 @@ export class RuleDataPluginService {
     return this._createOrUpdateComponentTemplate({ template, templateVersion });
   }
 
-  async createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+  async createOrUpdateIndexTemplate({
+    template,
+    templateVersion,
+  }: {
+    template: PutIndexTemplateRequest;
+    templateVersion: number;
+  }) {
     await this.wait();
-    return this._createOrUpdateIndexTemplate(template);
+    return this._createOrUpdateIndexTemplate({ template, templateVersion });
   }
 
   async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {

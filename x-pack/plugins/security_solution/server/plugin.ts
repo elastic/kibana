@@ -238,15 +238,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security-solution-index-template'),
-          body: {
-            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
-            composed_of: [
-              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-              componentTemplateName,
-            ],
+          template: {
+            name: ruleDataService.getFullAssetName('security-solution-index-template'),
+            body: {
+              index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+              composed_of: [
+                ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+                ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+                componentTemplateName,
+              ],
+            },
           },
+          templateVersion: 1,
         });
       });
 
