@@ -205,7 +205,16 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: 'Show multi-fields',
     }),
     description: i18n.translate('discover.advancedSettings.discover.showMultifieldsDescription', {
-      defaultMessage: `When enabled will show multi fields in document viewer. In majority of cases, multi-fields are the same as regular fields. This option is only available when searchFieldsFromSource is off. `,
+      defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
+      values: {
+        multiFields:
+          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+            target="_blank" rel="noopener">` +
+          i18n.translate('data.advancedSettings.timepicker.quickRanges.multiFieldsLinkText', {
+            defaultMessage: 'multi-fields',
+          }) +
+          '</a>',
+      },
     }),
     value: false,
     category: ['discover'],
