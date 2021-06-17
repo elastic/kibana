@@ -583,6 +583,46 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
 
+    it('should inherit filters from the incomplete column when passed', () => {
+      expect(
+        insertNewColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Date histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+              },
+            },
+          },
+          columnId: 'col2',
+          indexPattern,
+          op: 'average',
+          field: indexPattern.fields[2],
+          visualizationGroups: [],
+          incompleteFilters: { filter: { language: 'kuery', query: '' }, timeShift: '3d' },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col2: expect.objectContaining({
+              filter: { language: 'kuery', query: '' },
+              timeShift: '3d',
+            }),
+          }),
+        })
+      );
+    });
+
     describe('inserting a new reference', () => {
       it('should throw if the required references are impossible to match', () => {
         // @ts-expect-error this function is not valid

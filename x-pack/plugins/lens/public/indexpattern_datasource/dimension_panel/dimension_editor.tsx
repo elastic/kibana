@@ -136,8 +136,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
-  const incompleteOperation = incompleteInfo?.operationType;
-  const incompleteField = incompleteInfo?.sourceField ?? null;
+  const {
+    operationType: incompleteOperation,
+    sourceField: incompleteField = null,
+    ...incompleteFilters
+  } = incompleteInfo || {};
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
@@ -486,6 +489,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     field: currentIndexPattern.getFieldByName(choice.field),
                     visualizationGroups: dimensionGroups,
                     targetGroup: props.groupId,
+                    incompleteFilters,
                   })
                 );
               }}
