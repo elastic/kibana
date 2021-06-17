@@ -12,6 +12,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
+  SHOW_MULTIFIELDS,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
 
@@ -26,6 +27,8 @@ export const uiSettingsMock = ({
     } else if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
       return ['_doc'];
     } else if (key === SEARCH_FIELDS_FROM_SOURCE) {
+      return false;
+    } else if (key === SHOW_MULTIFIELDS) {
       return false;
     }
   },
