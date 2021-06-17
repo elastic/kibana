@@ -13,7 +13,7 @@ import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DOC_VIEW_COLUMNS } from './table_columns';
 
-interface DocViewerTableProps {
+export interface DocViewerTableProps {
   columns?: string[];
   filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
@@ -40,7 +40,6 @@ export interface FieldRecord {
   };
 }
 
-const TABLE_ROW_PROPS = { className: 'kbnDocViewer_TableRow' };
 const PAGINATION = { pageSize: 50 };
 
 export const DocViewerTable = ({
@@ -71,6 +70,13 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
+  const onSetRowProps = useCallback(({ field: { fieldName } }: FieldRecord) => {
+    return {
+      className: 'kbnDocViewer_tableRow',
+      'data-test-subj': `tableDocViewRow-${fieldName}`,
+    };
+  }, []);
+
   if (!indexPattern) {
     return null;
   }
@@ -85,10 +91,11 @@ export const DocViewerTable = ({
       return nameA.localeCompare(nameB);
     })
     .map((fieldName) => {
+      const fieldMapping = mapping(fieldName);
       const fieldType = isNestedFieldParent(fieldName, indexPattern)
         ? 'nested'
-        : indexPattern.fields.getByName(fieldName)?.type;
-      const fieldMapping = mapping(fieldName);
+        : fieldMapping?.type;
+
       return {
         action: {
           onToggleColumn,
@@ -108,11 +115,10 @@ export const DocViewerTable = ({
 
   return (
     <EuiInMemoryTable
-      className="kbnDocViewer"
       items={items}
       columns={DOC_VIEW_COLUMNS}
       pagination={PAGINATION}
-      rowProps={TABLE_ROW_PROPS}
+      rowProps={onSetRowProps}
     />
   );
 };

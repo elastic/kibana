@@ -16,6 +16,37 @@ import { TableFieldValue } from './table_cell_value';
 
 export const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
   {
+    field: 'action',
+    width: '108px',
+    name: (
+      <EuiText size="xs">
+        <strong>
+          <FormattedMessage
+            id="discover.fieldChooser.discoverField.actions"
+            defaultMessage="Actions"
+          />
+        </strong>
+      </EuiText>
+    ),
+    render: (
+      { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
+      { field: { fieldName, fieldMapping } }: FieldRecord
+    ) => {
+      return (
+        onFilter && (
+          <TableActions
+            isActive={isActive}
+            fieldName={fieldName}
+            fieldMapping={fieldMapping}
+            flattenedField={flattenedField}
+            onFilter={onFilter}
+            onToggleColumn={onToggleColumn}
+          />
+        )
+      );
+    },
+  },
+  {
     field: 'field',
     name: (
       <EuiText size="xs">
@@ -55,37 +86,6 @@ export const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
           fieldName={fieldName}
           fieldMapping={fieldMapping}
         />
-      );
-    },
-  },
-  {
-    field: 'action',
-    width: '108px',
-    name: (
-      <EuiText size="xs">
-        <strong>
-          <FormattedMessage
-            id="discover.fieldChooser.discoverField.action"
-            defaultMessage="Actions"
-          />
-        </strong>
-      </EuiText>
-    ),
-    render: (
-      { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-      { field: { fieldName, fieldMapping } }: FieldRecord
-    ) => {
-      return (
-        onFilter && (
-          <TableActions
-            isActive={isActive}
-            fieldName={fieldName}
-            fieldMapping={fieldMapping}
-            flattenedField={flattenedField}
-            onFilter={onFilter}
-            onToggleColumn={onToggleColumn}
-          />
-        )
       );
     },
   },

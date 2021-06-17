@@ -62,10 +62,15 @@ export function FieldName({
               'discover.fieldChooser.discoverField.multiFieldTooltipContent',
               {
                 defaultMessage: 'Multifields can have multiple values per field',
-              })
-            }
+              }
+            )}
           >
-            <EuiBadge title="" className="dscMultiFieldBadge" color="default">
+            <EuiBadge
+              title=""
+              className="dscMultiFieldBadge"
+              color="default"
+              data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
+            >
               <FormattedMessage
                 id="discover.fieldChooser.discoverField.multiField"
                 defaultMessage="multifield"
