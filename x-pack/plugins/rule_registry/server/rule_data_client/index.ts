@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { get } from 'lodash';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import {
   IRuleDataClient,
@@ -70,9 +69,11 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  getWriter(options: { namespace?: string } = {}): RuleDataWriter {
+  async getWriter(options: { namespace?: string } = {}): Promise<RuleDataWriter> {
     const { namespace } = options;
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    await this.createOrUpdateWriteTarget({ namespace });
+    await this.rolloverAliasIfNeeded({ namespace });
     return {
       bulk: async (request) => {
         const clusterClient = await this.getClusterClient();
@@ -102,6 +103,51 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
+  async rolloverAliasIfNeeded({ namespace }: { namespace?: string }) {
+    const clusterClient = await this.getClusterClient();
+    const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    const { body: simulatedRollover } = await clusterClient.indices.rollover({
+      alias,
+      dry_run: true,
+    });
+    const writeIndexMapping = await clusterClient.indices.get({
+      index: simulatedRollover.old_index,
+    });
+    const currentVersions = get(writeIndexMapping, [
+      'body',
+      simulatedRollover.old_index,
+      'mappings',
+      '_meta',
+      'versions',
+    ]);
+    const { body: simulatedIndex } = await clusterClient.indices.simulateIndexTemplate({
+      name: simulatedRollover.new_index,
+    });
+    const targetVersions = get(simulatedIndex, ['template', 'mappings', '_meta', 'versions']);
+    const componentTemplateRemoved =
+      Object.keys(currentVersions).length > Object.keys(targetVersions).length;
+    const componentTemplateUpdated = Object.entries(targetVersions).reduce(
+      (acc, [templateName, targetTemplateVersion]) => {
+        const currentTemplateVersion = get(currentVersions, templateName);
+        const templateUpdated =
+          currentTemplateVersion == null || currentTemplateVersion < Number(targetTemplateVersion);
+        return acc || templateUpdated;
+      },
+      false
+    );
+    const needRollover = componentTemplateRemoved || componentTemplateUpdated;
+    if (needRollover) {
+      await clusterClient.indices.rollover({
+        alias,
+        body: {
+          conditions: {
+            max_age: '5s',
+          },
+        },
+      });
+    }
+  }
+
   async createOrUpdateWriteTarget({ namespace }: { namespace?: string }) {
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
@@ -110,7 +156,6 @@ export class RuleDataClient implements IRuleDataClient {
     const { body: aliasExists } = await clusterClient.indices.existsAlias({
       name: alias,
     });
-
     const concreteIndexName = `${alias}-000001`;
 
     if (!aliasExists) {
@@ -132,20 +177,5 @@ export class RuleDataClient implements IRuleDataClient {
         }
       }
     }
-
-    const { body: simulateResponse } = await clusterClient.transport.request({
-      method: 'POST',
-      path: `/_index_template/_simulate_index/${concreteIndexName}`,
-    });
-
-    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
-
-    if (isEmpty(mappings)) {
-      throw new Error(
-        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
-      );
-    }
-
-    await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }
 }

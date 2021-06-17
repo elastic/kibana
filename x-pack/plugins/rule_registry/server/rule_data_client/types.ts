@@ -33,7 +33,7 @@ export interface RuleDataWriter {
 
 export interface IRuleDataClient {
   getReader(options?: { namespace?: string }): RuleDataReader;
-  getWriter(options?: { namespace?: string }): RuleDataWriter;
+  getWriter(options?: { namespace?: string }): Promise<RuleDataWriter>;
   createOrUpdateWriteTarget(options: { namespace?: string }): Promise<void>;
 }
 

@@ -235,7 +235,9 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
           });
         }
 
-        await ruleDataClient.getWriter().bulk({
+        const ruleDataClientWriter = await ruleDataClient.getWriter();
+
+        await ruleDataClientWriter.bulk({
           body: eventsToIndex
             .flatMap((event) => [{ index: {} }, event])
             .concat(

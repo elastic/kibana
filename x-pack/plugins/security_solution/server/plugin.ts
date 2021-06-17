@@ -223,15 +223,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
 
         await ruleDataService.createOrUpdateComponentTemplate({
-          name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
+          template: {
+            name: componentTemplateName,
+            body: {
+              template: {
+                settings: {
+                  number_of_shards: 1,
+                },
+                mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
               },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
             },
           },
+          templateVersion: 1,
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({

@@ -78,13 +78,19 @@ export class RuleDataPluginService {
     });
 
     await this._createOrUpdateComponentTemplate({
-      name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-      body: technicalComponentTemplate,
+      template: {
+        name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+        body: technicalComponentTemplate,
+      },
+      templateVersion: 1,
     });
 
     await this._createOrUpdateComponentTemplate({
-      name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-      body: ecsComponentTemplate,
+      template: {
+        name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+        body: ecsComponentTemplate,
+      },
+      templateVersion: 1,
     });
 
     this.options.logger.info(`Installed all assets`);
@@ -92,14 +98,35 @@ export class RuleDataPluginService {
     this.signal.complete();
   }
 
-  private async _createOrUpdateComponentTemplate(
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
-  ) {
+  private async _createOrUpdateComponentTemplate({
+    template,
+    templateVersion,
+  }: {
+    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
+    templateVersion: number;
+  }) {
     this.assertWriteEnabled();
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing component template ${template.name}`);
-    return clusterClient.cluster.putComponentTemplate(template);
+    return clusterClient.cluster.putComponentTemplate({
+      ...template,
+      body: {
+        ...template.body,
+        template: {
+          ...template.body.template,
+          mappings: {
+            ...template.body.template.mappings,
+            _meta: {
+              ...template.body.template.mappings._meta,
+              versions: {
+                [template.name]: templateVersion,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   private async _createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
@@ -118,11 +145,15 @@ export class RuleDataPluginService {
     return clusterClient.ilm.putLifecycle(policy);
   }
 
-  async createOrUpdateComponentTemplate(
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
-  ) {
+  async createOrUpdateComponentTemplate({
+    template,
+    templateVersion,
+  }: {
+    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
+    templateVersion: number;
+  }) {
     await this.wait();
-    return this._createOrUpdateComponentTemplate(template);
+    return this._createOrUpdateComponentTemplate({ template, templateVersion });
   }
 
   async createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
