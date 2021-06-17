@@ -16,7 +16,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('expression editor', function () {
+  describe('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
