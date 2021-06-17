@@ -1,4 +1,4 @@
-****# Kibana Actions
+# Kibana Actions
 
 The Kibana actions plugin provides a framework to create executable actions. You can:
 
@@ -14,6 +14,24 @@ The Kibana actions plugin provides a framework to create executable actions. You
 
 Table of Contents
 
+- [Kibana Actions](#kibana-actions)
+  - [Terminology](#terminology)
+  - [Usage](#usage)
+  - [Kibana Actions Configuration](#kibana-actions-configuration)
+    - [Configuration Options](#configuration-options)
+      - [**allowedHosts** configuration](#allowedhosts-configuration)
+    - [Configuration Utilities](#configuration-utilities)
+  - [Action types](#action-types)
+    - [Methods](#methods)
+    - [Executor](#executor)
+    - [Example](#example)
+  - [RESTful API](#restful-api)
+  - [Firing actions](#firing-actions)
+    - [Accessing a scoped ActionsClient](#accessing-a-scoped-actionsclient)
+    - [actionsClient.enqueueExecution(options)](#actionsclientenqueueexecutionoptions)
+      - [Example](#example-1)
+    - [actionsClient.execute(options)](#actionsclientexecuteoptions)
+      - [Example](#example-2)
 - [Built-in Action Types](#built-in-action-types)
   - [ServiceNow](#servicenow)
     - [`params`](#params)
