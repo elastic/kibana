@@ -366,11 +366,8 @@ export const getIsolationRequestError: (
 
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
-): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
-  return {
-    page: state.endpointDetails.activityLog.page,
-    pageSize: state.endpointDetails.activityLog.pageSize,
-  };
+): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
+  return state.endpointDetails.activityLog.paging;
 };
 
 export const getActivityLogData = (

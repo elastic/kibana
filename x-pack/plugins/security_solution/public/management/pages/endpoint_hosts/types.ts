@@ -38,8 +38,11 @@ export interface EndpointState {
   error?: ServerApiError;
   endpointDetails: {
     activityLog: {
-      page: number;
-      pageSize: number;
+      paging: {
+        disabled: boolean;
+        page: number;
+        pageSize: number;
+      };
       logData: AsyncResourceState<ActivityLog>;
     };
     hostDetails: {

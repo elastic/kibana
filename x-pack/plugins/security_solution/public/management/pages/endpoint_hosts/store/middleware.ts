@@ -401,6 +401,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           query: { page, page_size: pageSize },
         });
 
+        const hasMoreData = activityLog.data.length;
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
         if (lastLoadedLogData !== undefined) {
           const updatedLogDataItems = [
@@ -416,8 +417,16 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             type: 'endpointDetailsActivityLogChanged',
             payload: createLoadedResourceState<ActivityLog>(updatedLogData),
           });
-          // TODO dispatch 'noNewLogData' if !activityLog.length
-          // resets paging to previous state
+          if (!hasMoreData) {
+            dispatch({
+              type: 'endpointDetailsActivityLogUpdatePaging',
+              payload: {
+                disabled: true,
+                page: activityLog.page - 1,
+                pageSize: activityLog.pageSize,
+              },
+            });
+          }
         } else {
           dispatch({
             type: 'endpointDetailsActivityLogChanged',

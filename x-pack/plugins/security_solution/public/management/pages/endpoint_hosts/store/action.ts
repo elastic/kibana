@@ -163,12 +163,22 @@ export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsS
   payload: EndpointState['endpointPendingActions'];
 };
 
+export interface EndpointDetailsActivityLogUpdatePaging {
+  type: 'endpointDetailsActivityLogUpdatePaging';
+  payload: {
+    disabled: boolean;
+    page: number;
+    pageSize: number;
+  };
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
   | AppRequestedEndpointActivityLog
+  | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse

@@ -20,8 +20,11 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     error: undefined,
     endpointDetails: {
       activityLog: {
-        page: 1,
-        pageSize: 50,
+        paging: {
+          disabled: false,
+          page: 1,
+          pageSize: 50,
+        },
         logData: createUninitialisedResourceState(),
       },
       hostDetails: {

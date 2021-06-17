@@ -41,16 +41,18 @@ export const EndpointActivityLog = memo(
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
-    const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
+    const { page, pageSize, disabled: isPagingDisabled } = useEndpointSelector(
+      getActivityLogDataPaging
+    );
 
     // TODO
     const onSearch = useCallback(() => {}, []);
 
     const fetchMoreCallOut = useRef<HTMLInputElement | null>(null);
-    const calloutTitle = i18.ACTIVITY_LOG.callOutTitle;
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
-        if (activityLogLoaded && entries.some((entry) => entry.intersectionRatio > 0)) {
+        const isIntersecting = entries.some((entry) => entry.intersectionRatio > 0);
+        if (isIntersecting && activityLogLoaded && !isPagingDisabled) {
           dispatch({
             type: 'appRequestedEndpointActivityLog',
             payload: {
@@ -59,8 +61,18 @@ export const EndpointActivityLog = memo(
             },
           });
         }
+        if (!isIntersecting) {
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdatePaging',
+            payload: {
+              disabled: false,
+              page,
+              pageSize,
+            },
+          });
+        }
       },
-      [activityLogLoaded, dispatch, page, pageSize]
+      [activityLogLoaded, dispatch, isPagingDisabled, page, pageSize]
     );
 
     useEffect(() => {
@@ -101,12 +113,16 @@ export const EndpointActivityLog = memo(
                     <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
                   ))}
               </EuiFlexItem>
-              {activityLogLoading && <EuiLoadingContent lines={2} />}
-              {!activityLogLoading && (
-                <EuiFlexItem>
-                  <EuiCallOut ref={fetchMoreCallOut} size="s" title={calloutTitle} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem>
+                {activityLogLoading && <EuiLoadingContent lines={3} />}
+                {!activityLogLoading && (
+                  <EuiCallOut
+                    ref={fetchMoreCallOut}
+                    size="s"
+                    title={i18.ACTIVITY_LOG.callOutTitle}
+                  />
+                )}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </div>
         )}
