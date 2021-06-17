@@ -69,7 +69,11 @@ export const mathColumn: ExpressionFunctionDefinition<
       return id === args.id;
     });
     if (existingColumnIndex > -1) {
-      throw new Error('ID must be unique');
+      throw new Error(
+        i18n.translate('expressions.functions.mathColumn.uniqueIdError', {
+          defaultMessage: 'ID must be unique',
+        })
+      );
     }
 
     const newRows = input.rows.map((row) => {
@@ -90,7 +94,12 @@ export const mathColumn: ExpressionFunctionDefinition<
         if (result.length === 1) {
           return { ...row, [args.id]: result[0] };
         }
-        throw new Error(`Cannot perform math on array values at ${args.name}`);
+        throw new Error(
+          i18n.translate('expressions.functions.mathColumn.arrayValueError', {
+            defaultMessage: 'Cannot perform math on array values at {name}',
+            values: { name: args.name },
+          })
+        );
       }
 
       return { ...row, [args.id]: result };
