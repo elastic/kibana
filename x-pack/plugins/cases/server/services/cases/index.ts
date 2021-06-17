@@ -21,21 +21,27 @@ import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/commo
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
-  ESCaseAttributes,
-  CommentAttributes,
-  User,
-  SubCaseAttributes,
   AssociationType,
-  SubCaseResponse,
-  CommentType,
-  CaseType,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
   CaseResponse,
-  caseTypeField,
   CasesFindRequest,
   CaseStatuses,
-  OWNER_FIELD,
+  CaseType,
+  caseTypeField,
+  CommentAttributes,
+  CommentType,
+  ENABLE_CASE_CONNECTOR,
+  ESCaseAttributes,
   GetCaseIdsByAlertIdAggs,
-} from '../../../common/api';
+  MAX_CONCURRENT_SEARCHES,
+  MAX_DOCS_PER_PAGE,
+  OWNER_FIELD,
+  SUB_CASE_SAVED_OBJECT,
+  SubCaseAttributes,
+  SubCaseResponse,
+  User,
+} from '../../../common';
 import {
   defaultSortField,
   flattenCaseSavedObject,
@@ -43,17 +49,7 @@ import {
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
-import {
-  ENABLE_CASE_CONNECTOR,
-  MAX_CONCURRENT_SEARCHES,
-  MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import {
-  CASE_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
 import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';

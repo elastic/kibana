@@ -13,8 +13,7 @@ import { getCaseDetailsUrl, getCreateCaseUrl } from '../../common/components/lin
 import { RouteSpyState } from '../../common/utils/route/types';
 import * as i18n from './translations';
 import { GetUrlForApp } from '../../common/components/navigation/types';
-import { APP_ID } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
+import { CASES_APP_ID } from '../../../common/constants';
 
 export const getBreadcrumbs = (
   params: RouteSpyState,
@@ -26,17 +25,17 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+      href: getUrlForApp(CASES_APP_ID, {
         path: queryParameters,
       }),
     },
   ];
-  if (params.detailName === 'create') {
+  if (params.pathName === '/create') {
     breadcrumb = [
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(CASES_APP_ID, {
           path: getCreateCaseUrl(queryParameters),
         }),
       },
@@ -46,7 +45,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state?.caseTitle ?? '',
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        href: getUrlForApp(CASES_APP_ID, {
           path: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
         }),
       },

@@ -8,7 +8,7 @@
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../common';
 
 /*
  * Be aware that this api will only return 20 connectors
