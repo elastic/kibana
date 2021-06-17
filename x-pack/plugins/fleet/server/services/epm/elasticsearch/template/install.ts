@@ -50,8 +50,8 @@ export const installTemplates = async (
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
 
-  const installedTemplates = await Promise.all(
-    dataStreams.flatMap((dataStream) =>
+  const installedTemplatesNested = await Promise.all(
+    dataStreams.map((dataStream) =>
       installTemplateForDataStream({
         pkg: installablePackage,
         esClient,
@@ -59,6 +59,7 @@ export const installTemplates = async (
       })
     )
   );
+  const installedTemplates = installedTemplatesNested.flat();
 
   // get template refs to save
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
