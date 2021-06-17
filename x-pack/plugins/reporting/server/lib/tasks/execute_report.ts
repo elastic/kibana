@@ -30,7 +30,7 @@ import {
 } from './';
 import { errorLogger } from './error_logger';
 
-interface ReportingExecuteTaskInstance /* extends TaskInstanceWithDeprecatedFields */ {
+interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
   params: ReportTaskParams;
