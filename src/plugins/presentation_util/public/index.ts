@@ -27,7 +27,6 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
-  RendererWrapper,
   withSuspense,
 } from './components';
 
