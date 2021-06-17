@@ -13,6 +13,11 @@ export interface TotalValue {
   relation: string;
 }
 
+export interface CursorType {
+  value?: Maybe<string>;
+  tiebreaker?: Maybe<string>;
+}
+
 export interface Inspect {
   dsl: string[];
 }
