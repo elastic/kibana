@@ -8,7 +8,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { NodeDimensions, RevealImageRendererConfig, Origin } from '../expression_renderers/types';
+import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl } from '../../common/lib/url';
 import { elasticOutline } from '../../common/lib/elastic_outline';
 
@@ -66,8 +66,8 @@ function RevealImageComponent({
     };
   }, [handlers, updateImageView]);
 
-  function getClipPath(percentParam: number, originParam: Origin = 'bottom') {
-    const directions: Record<Origin, number> = { bottom: 0, left: 1, top: 2, right: 3 };
+  function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
+    const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
     const values: Array<number | string> = [0, 0, 0, 0];
     values[directions[originParam]] = `${100 - percentParam * 100}%`;
     return `inset(${values.join(' ')})`;
