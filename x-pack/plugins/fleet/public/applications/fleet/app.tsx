@@ -206,6 +206,17 @@ export const FleetAppContext: React.FC<{
   ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
+    // Sync our hash history with Kibana scoped history
+    useEffect(() => {
+      const unlistenParentHistory = history.listen(() => {
+        const newHash = createHashHistory();
+        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
+          routerHistoryInstance.replace(newHash.location.pathname);
+        }
+      });
+
+      return unlistenParentHistory;
+    }, [history, routerHistoryInstance]);
 
     return (
       <startServices.i18n.Context>

@@ -8,6 +8,4 @@
 import { useContext } from 'react';
 import { CasesTimelineIntegrationContext } from '.';
 
-export const useTimelineContext = () => {
-  return useContext(CasesTimelineIntegrationContext);
-};
+export const useTimelineContext = () => useContext(CasesTimelineIntegrationContext);

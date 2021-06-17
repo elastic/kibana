@@ -41,8 +41,9 @@ export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
-export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
+export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
+export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
@@ -106,6 +107,7 @@ export const SOURCE_DATA_REQUEST_ID = 'source';
 export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
+export const IS_EDITABLE_REQUEST_ID = 'isEditable';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -154,10 +156,20 @@ export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   features: [],
 };
 
-export enum DRAW_TYPE {
+export enum DRAW_MODE {
+  DRAW_SHAPES = 'DRAW_SHAPES',
+  DRAW_POINTS = 'DRAW_POINTS',
+  DRAW_FILTERS = 'DRAW_FILTERS',
+  NONE = 'NONE',
+}
+
+export enum DRAW_SHAPE {
   BOUNDS = 'BOUNDS',
   DISTANCE = 'DISTANCE',
   POLYGON = 'POLYGON',
+  POINT = 'POINT',
+  LINE = 'LINE',
+  SIMPLE_SELECT = 'SIMPLE_SELECT',
 }
 
 export const AGG_DELIMITER = '_of_';
