@@ -685,7 +685,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   } = {}): AlertEvent {
     const processName = this.randomProcessName();
     const isShellcode = alertType === AlertTypes.MEMORY_SHELLCODE;
-    return {
+    const newAlert: AlertEvent = {
       ...this.commonInfo,
       data_stream: alertsDataStream,
       '@timestamp': ts,
@@ -743,6 +743,30 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       dll: alertsDefaultDll,
     };
+
+    // shellcode_thread memory alert have an additional process field
+    if (isShellcode) {
+      newAlert.Target = {
+        process: {
+          thread: {
+            Ext: {
+              start_address_allocation_offset: 0,
+              start_address_bytes_disasm_hash: 'a disam hash',
+              start_address_details: {
+                allocation_type: 'PRIVATE',
+                allocation_size: 4000,
+                region_size: 4000,
+                region_protection: 'RWX',
+                memory_pe: {
+                  imphash: 'a hash',
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    return newAlert;
   }
   /**
    * Creates an alert from the simulated host represented by this EndpointDocGenerator

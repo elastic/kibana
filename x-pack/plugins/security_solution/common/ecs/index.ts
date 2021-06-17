@@ -31,6 +31,7 @@ import { SystemEcs } from './system';
 import { ThreatEcs } from './threat';
 import { Ransomware } from './ransomware';
 import { MemoryProtection } from './memory_protection';
+import { Target } from './target';
 
 export interface Ecs {
   _id: string;
@@ -66,4 +67,5 @@ export interface Ecs {
   Ransomware?: Ransomware;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Memory_protection?: MemoryProtection;
+  Target?: Target;
 }

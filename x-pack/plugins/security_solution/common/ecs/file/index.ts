@@ -19,10 +19,25 @@ export interface Token {
   integrity_level_name: string;
 }
 
+export interface MemoryPe {
+  imphash?: string;
+}
+
+export interface StartAddressDetails {
+  allocation_type?: string;
+  allocation_size?: number;
+  region_size?: number;
+  region_protection?: string;
+  memory_pe?: MemoryPe;
+}
+
 export interface Ext {
   code_signature?: CodeSignature[] | CodeSignature;
   original?: Original;
   token?: Token;
+  start_address_allocation_offset?: number;
+  start_address_bytes_disasm_hash?: string;
+  start_address_details?: StartAddressDetails;
 }
 export interface Hash {
   md5?: string[];
