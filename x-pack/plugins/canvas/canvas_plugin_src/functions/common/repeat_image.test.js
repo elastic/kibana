@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import {
   elasticLogo,
   elasticOutline,
+  functionWrapper,
 } from '../../../../../../src/plugins/presentation_util/common';
 import { repeatImage } from './repeat_image';
 

@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
 import { getFunctionErrors } from '../../../i18n';
 import { testTable } from './__fixtures__/test_tables';
 import { ply } from './ply';

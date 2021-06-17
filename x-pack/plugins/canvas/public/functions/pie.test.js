@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../test_helpers/function_wrapper';
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
+import { functionWrapper } from '../../../../../src/plugins/presentation_util/common';
 import {
   fontStyle,
   grayscalePalette,
