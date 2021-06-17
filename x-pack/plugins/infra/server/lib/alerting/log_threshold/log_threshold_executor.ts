@@ -5,57 +5,60 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
 import {
-  AlertExecutorOptions,
-  AlertServices,
-  AlertInstance,
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceContext,
-  AlertInstanceState,
   ActionGroup,
   ActionGroupIdsOf,
+  AlertExecutorOptions,
+  AlertInstance,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+  AlertTypeState,
 } from '../../../../../alerting/server';
+import { LifecycleAlertServices, LifecycleRuleExecutor } from '../../../../../rule_registry/server';
 import {
+  AlertParams,
   AlertStates,
   Comparator,
-  AlertParams,
-  Criterion,
-  GroupedSearchQueryResponseRT,
-  UngroupedSearchQueryResponseRT,
-  UngroupedSearchQueryResponse,
-  GroupedSearchQueryResponse,
-  alertParamsRT,
-  isRatioAlertParams,
-  hasGroupBy,
-  getNumerator,
-  getDenominator,
-  CountCriteria,
   CountAlertParams,
+  CountCriteria,
+  Criterion,
+  getDenominator,
+  getNumerator,
+  GroupedSearchQueryResponse,
+  GroupedSearchQueryResponseRT,
+  hasGroupBy,
+  isRatioAlertParams,
   RatioAlertParams,
+  UngroupedSearchQueryResponse,
+  UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { decodeOrThrow } from '../../../../common/runtime_types';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { InfraBackendLibs } from '../../infra_types';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
-type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
+export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
+export type LogThresholdAlertParams = AlertParams;
 type LogThresholdAlertServices = AlertServices<
   AlertInstanceState,
   AlertInstanceContext,
   LogThresholdActionGroups
 >;
 type LogThresholdAlertExecutorOptions = AlertExecutorOptions<
-  AlertTypeParams,
+  LogThresholdAlertParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   LogThresholdActionGroups
->;
+> & {
+  services: LifecycleAlertServices<AlertInstanceContext> &
+    AlertServices<AlertInstanceState, AlertInstanceContext, LogThresholdActionGroups>;
+};
 
 const COMPOSITE_GROUP_SIZE = 40;
 
@@ -68,10 +71,23 @@ const checkValueAgainstComparatorMap: {
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
-export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function ({ services, params }: LogThresholdAlertExecutorOptions) {
-    const { alertInstanceFactory, savedObjectsClient, scopedClusterClient } = services;
+export const createLogThresholdExecutor = (
+  libs: InfraBackendLibs
+): LifecycleRuleExecutor<
+  LogThresholdAlertParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  LogThresholdActionGroups
+> =>
+  async function ({ services, params }) {
+    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
+    const alertInstanceFactory = (id: string) =>
+      alertWithLifecycle({
+        id,
+        fields: {},
+      });
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
@@ -82,30 +98,24 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       )
     );
 
-    try {
-      const validatedParams = decodeOrThrow(alertParamsRT)(params);
-
-      if (!isRatioAlertParams(validatedParams)) {
-        await executeAlert(
-          validatedParams,
-          timestampField,
-          indices,
-          runtimeMappings,
-          scopedClusterClient.asCurrentUser,
-          alertInstanceFactory
-        );
-      } else {
-        await executeRatioAlert(
-          validatedParams,
-          timestampField,
-          indices,
-          runtimeMappings,
-          scopedClusterClient.asCurrentUser,
-          alertInstanceFactory
-        );
-      }
-    } catch (e) {
-      throw new Error(e);
+    if (!isRatioAlertParams(params)) {
+      await executeAlert(
+        params,
+        timestampField,
+        indices,
+        runtimeMappings,
+        scopedClusterClient.asCurrentUser,
+        alertInstanceFactory
+      );
+    } else {
+      await executeRatioAlert(
+        params,
+        timestampField,
+        indices,
+        runtimeMappings,
+        scopedClusterClient.asCurrentUser,
+        alertInstanceFactory
+      );
     }
   };
 

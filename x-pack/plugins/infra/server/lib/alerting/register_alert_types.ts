@@ -24,10 +24,7 @@ const registerAlertTypes = (
     alertingPlugin.registerType(registerMetricInventoryThresholdAlertType(libs));
     alertingPlugin.registerType(registerMetricAnomalyAlertType(libs, ml));
 
-    const registerFns = [registerLogThresholdAlertType];
-    registerFns.forEach((fn) => {
-      fn(alertingPlugin, libs);
-    });
+    registerLogThresholdAlertType(alertingPlugin, libs);
   }
 };
 

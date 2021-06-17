@@ -6,21 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../alerting/server';
 import {
-  PluginSetupContract,
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceContext,
-  AlertInstanceState,
-  ActionGroupIdsOf,
-} from '../../../../../alerting/server';
-import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
-import {
-  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   alertParamsRT,
+  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
 } from '../../../../common/alerting/logs/log_threshold/types';
-import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { InfraBackendLibs } from '../../infra_types';
+import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -79,7 +72,7 @@ const denominatorConditionsActionVariableDescription = i18n.translate(
 );
 
 export async function registerLogThresholdAlertType(
-  alertingPlugin: PluginSetupContract,
+  alertingPlugin: AlertingPluginSetup,
   libs: InfraBackendLibs
 ) {
   if (!alertingPlugin) {
@@ -88,42 +81,42 @@ export async function registerLogThresholdAlertType(
     );
   }
 
-  alertingPlugin.registerType<
-    AlertTypeParams,
-    AlertTypeState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    ActionGroupIdsOf<typeof FIRED_ACTIONS>
-  >({
-    id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.logs.alertName', {
-      defaultMessage: 'Log threshold',
-    }),
-    validate: {
-      params: {
-        validate: (params) => decodeOrThrow(alertParamsRT)(params),
-      },
-    },
-    defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS],
-    minimumLicenseRequired: 'basic',
-    executor: createLogThresholdExecutor(libs),
-    actionVariables: {
-      context: [
-        { name: 'timestamp', description: timestampActionVariableDescription },
-        { name: 'matchingDocuments', description: documentCountActionVariableDescription },
-        { name: 'conditions', description: conditionsActionVariableDescription },
-        { name: 'group', description: groupByActionVariableDescription },
-        // Ratio alerts
-        { name: 'isRatio', description: isRatioActionVariableDescription },
-        { name: 'ratio', description: ratioActionVariableDescription },
-        { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
-        {
-          name: 'denominatorConditions',
-          description: denominatorConditionsActionVariableDescription,
+  alertingPlugin.registerType(
+    libs.logsRules.createLifecycleRuleType({
+      id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+      name: i18n.translate('xpack.infra.logs.alertName', {
+        defaultMessage: 'Log threshold',
+      }),
+      validate: {
+        params: {
+          // validate: (params) => decodeOrThrow(alertParamsRT)(params),
+          validate: (params) => decodeOrThrow(alertParamsRT)(params),
         },
-      ],
-    },
-    producer: 'logs',
-  });
+      },
+      defaultActionGroupId: FIRED_ACTIONS.id,
+      actionGroups: [FIRED_ACTIONS],
+      minimumLicenseRequired: 'basic',
+      executor: createLogThresholdExecutor(libs),
+      actionVariables: {
+        context: [
+          { name: 'timestamp', description: timestampActionVariableDescription },
+          { name: 'matchingDocuments', description: documentCountActionVariableDescription },
+          { name: 'conditions', description: conditionsActionVariableDescription },
+          { name: 'group', description: groupByActionVariableDescription },
+          // Ratio alerts
+          { name: 'isRatio', description: isRatioActionVariableDescription },
+          { name: 'ratio', description: ratioActionVariableDescription },
+          {
+            name: 'numeratorConditions',
+            description: numeratorConditionsActionVariableDescription,
+          },
+          {
+            name: 'denominatorConditions',
+            description: denominatorConditionsActionVariableDescription,
+          },
+        ],
+      },
+      producer: 'logs',
+    })
+  );
 }
