@@ -37,6 +37,10 @@ const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
 
+const StyledSecuritySolutionPageWrapper = styled(SecuritySolutionPageWrapper)`
+  overflow-x: auto;
+`;
+
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -73,7 +77,7 @@ const OverviewComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper>
+          <StyledSecuritySolutionPageWrapper>
             {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
@@ -81,7 +85,7 @@ const OverviewComponent = () => {
               </>
             )}
             <Sourcerer scope={SourcererScopeName.default} />
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
               </SidebarFlexItem>
@@ -139,7 +143,7 @@ const OverviewComponent = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </SecuritySolutionPageWrapper>
+          </StyledSecuritySolutionPageWrapper>
         </>
       ) : (
         <OverviewEmpty />

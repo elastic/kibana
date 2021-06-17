@@ -21,6 +21,8 @@ import {
   SecuritySolutionBottomBar,
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
+import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
+import { gutterTimeline } from '../../../common/lib/helpers';
 
 /* eslint-disable react/display-name */
 
@@ -30,6 +32,7 @@ import {
  */
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
+  $isTimelineBottomBarVisible?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -46,6 +49,15 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
       transform: none;
     }
   }
+
+  // If the bottom bar is visible add padding to the navigation
+  ${({ $isTimelineBottomBarVisible }) =>
+    $isTimelineBottomBarVisible &&
+    `
+      .euiPageSideBar--sticky.kbnPageTemplate__pageSideBar {
+        padding-bottom: ${gutterTimeline};
+      }
+  `}
 `;
 
 interface SecuritySolutionPageWrapperProps {
@@ -55,6 +67,7 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
   ({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
+    const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
@@ -62,6 +75,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
 
     return (
       <StyledKibanaPageTemplate
+        $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
