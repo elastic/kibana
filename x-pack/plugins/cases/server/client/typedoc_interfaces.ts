@@ -29,7 +29,6 @@ import {
   SubCaseResponse,
   SubCasesFindResponse,
   SubCasesResponse,
-  AlertResponse,
 } from '../../common';
 
 /**
@@ -56,5 +55,3 @@ export interface ISubCaseResponse extends SubCaseResponse {}
 export interface ISubCasesResponse extends SubCasesResponse {}
 
 export interface ICaseUserActionsResponse extends CaseUserActionsResponse {}
-
-export interface IAlertResponse extends AlertResponse {}

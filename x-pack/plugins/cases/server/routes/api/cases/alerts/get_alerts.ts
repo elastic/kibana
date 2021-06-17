@@ -36,7 +36,7 @@ export function initGetAllAlertsAttachToCaseApi({ router, logger }: RouteDeps) {
         });
       } catch (error) {
         logger.error(
-          `Failed to retrieve case ids for this alert id: ${request.params.case_id}: ${error}`
+          `Failed to retrieve alert ids for this case id: ${request.params.case_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

@@ -186,10 +186,10 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetAlertsAttachedToCase]: {
     ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_alerts_attach_to_case',
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_alerts_attach_to_case',
     verbs: accessVerbs,
-    docType: 'cases',
+    docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   // comments operations

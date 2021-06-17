@@ -268,7 +268,6 @@ export class CasesService {
         sortField: 'created_at',
         sortOrder: 'asc',
         filter: combinedFilter,
-        fields: includeFieldsRequiredForAuthentication(),
         perPage: MAX_DOCS_PER_PAGE,
       });
 

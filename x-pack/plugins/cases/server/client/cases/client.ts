@@ -12,11 +12,11 @@ import {
   User,
   AllTagsFindRequest,
   AllReportersFindRequest,
+  AlertResponse,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {
-  IAlertResponse,
   ICasePostRequest,
   ICaseResponse,
   ICasesFindRequest,
@@ -88,7 +88,7 @@ export interface CasesSubClient {
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
-  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<IAlertResponse>;
+  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<AlertResponse>;
 }
 
 /**
