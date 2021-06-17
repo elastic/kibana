@@ -113,7 +113,7 @@ export default function (providerContext: FtrProviderContext) {
         const resUserSettings = await es.transport.request(
           {
             method: 'GET',
-            path: `/_component_template/${logsTemplateName}-user_settings`,
+            path: `/_component_template/${logsTemplateName}@custom`,
           },
           {
             ignore: [404],
@@ -375,7 +375,7 @@ const expectAssetsInstalled = ({
     expect(resSettings.statusCode).equal(200);
     const resUserSettings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-user_settings`,
+      path: `/_component_template/${logsTemplateName}@custom`,
     });
     expect(resUserSettings.statusCode).equal(200);
   });
@@ -535,11 +535,11 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
-          id: 'logs-all_assets.test_logs-user_settings',
+          id: 'logs-all_assets.test_logs@custom',
           type: 'component_template',
         },
         {
-          id: 'metrics-all_assets.test_metrics-user_settings',
+          id: 'metrics-all_assets.test_metrics@custom',
           type: 'component_template',
         },
         {

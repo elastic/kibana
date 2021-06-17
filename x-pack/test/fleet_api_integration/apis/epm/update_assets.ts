@@ -218,13 +218,13 @@ export default function (providerContext: FtrProviderContext) {
       });
       const resUserSettings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-user_settings`,
+        path: `/_component_template/${logsTemplateName}@custom`,
       });
       expect(resUserSettings.statusCode).equal(200);
       expect(resUserSettings.body).eql({
         component_templates: [
           {
-            name: 'logs-all_assets.test_logs-user_settings',
+            name: 'logs-all_assets.test_logs@custom',
             component_template: {
               _meta: {
                 package: {
@@ -352,7 +352,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
-            id: 'logs-all_assets.test_logs-user_settings',
+            id: 'logs-all_assets.test_logs@custom',
             type: 'component_template',
           },
           {
@@ -360,7 +360,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
-            id: 'logs-all_assets.test_logs2-user_settings',
+            id: 'logs-all_assets.test_logs2@custom',
             type: 'component_template',
           },
           {
@@ -368,7 +368,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
-            id: 'metrics-all_assets.test_metrics-user_settings',
+            id: 'metrics-all_assets.test_metrics@custom',
             type: 'component_template',
           },
         ],

@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(indexTemplate.composed_of).to.eql([
         `${templateName}@mappings`,
         `${templateName}@settings`,
-        `${templateName}-user_settings`,
+        `${templateName}@custom`,
       ]);
 
       ({ body } = await es.transport.request({
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
 
       ({ body } = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${templateName}-user_settings`,
+        path: `/_component_template/${templateName}@custom`,
       }));
 
       // The user_settings component template is an empty/stub template at first
@@ -81,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
       // Update the user_settings component template
       ({ body } = await es.transport.request({
         method: 'PUT',
-        path: `/_component_template/${templateName}-user_settings`,
+        path: `/_component_template/${templateName}@custom`,
         body: {
           template: {
             settings: {
@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
           composed_of: [
             `${templateName}@mappings`,
             `${templateName}@settings`,
-            `${templateName}-user_settings`,
+            `${templateName}@custom`,
           ],
         },
       }));

@@ -195,7 +195,7 @@ function putComponentTemplate(
 
 const mappingsSuffix = '@mappings';
 const settingsSuffix = '@settings';
-const userSettingsSuffix = '-user_settings';
+const userSettingsSuffix = '@custom';
 type TemplateBaseName = string;
 type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}`;
 
