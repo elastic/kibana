@@ -71,11 +71,12 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       ],
     },
     resolve: {
-      // Tell Webpack about the scss extension
-      extensions: ['.scss'],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
+      mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
       },
+      symlinks: false,
     },
     stats,
   };
