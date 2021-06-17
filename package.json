@@ -141,6 +141,7 @@
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/securitysolution-list-constants": "link:bazel-bin/packages/kbn-securitysolution-list-constants",
     "@kbn/securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils",
+    "@kbn/securitysolution-hook-utils": "link:bazel-bin/packages/kbn-securitysolution-hook-utils",
     "@kbn/securitysolution-io-ts-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-types",
     "@kbn/securitysolution-io-ts-alerting-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types",
     "@kbn/securitysolution-io-ts-list-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-list-types",
