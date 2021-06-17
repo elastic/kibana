@@ -110,7 +110,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
-        timeShift: previousColumn?.timeShift,
+        timeShift: columnParams?.shift || previousColumn?.timeShift,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T;
     },
