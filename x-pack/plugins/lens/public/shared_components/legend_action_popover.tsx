@@ -35,7 +35,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 'main',
-      title: `${label}`,
+      title: label,
       items: [
         {
           name: i18n.translate('xpack.lens.shared.legend.filterForValueButtonAriaLabel', {
