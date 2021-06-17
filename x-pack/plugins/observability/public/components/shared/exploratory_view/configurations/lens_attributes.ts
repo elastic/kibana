@@ -25,13 +25,14 @@ import {
   FieldBasedIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
+  CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/common';
-import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN } from './constants';
+import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN, TERMS_COLUMN } from './constants';
 import { ColumnFilter, DataSeries, UrlFilter, URLReportDefinition } from '../types';
 
 function getLayerReferenceName(layerId: string) {
@@ -186,6 +187,11 @@ export class LensAttributes {
     };
   }
 
+  getCardinalityColumn(sourceField: string,
+    label?: string) {
+      return this.getNumberOperationColumn(sourceField, 'unique_count', label);
+  }
+
   getNumberColumn(
     sourceField: string,
     columnType?: string,
@@ -193,7 +199,7 @@ export class LensAttributes {
     label?: string
   ) {
     if (columnType === 'operation' || operationType) {
-      if (operationType === 'median' || operationType === 'average' || operationType === 'sum') {
+      if (operationType === 'median' || operationType === 'average' || operationType === 'sum' || operationType === 'unique_count') {
         return this.getNumberOperationColumn(sourceField, operationType, label);
       }
       if (operationType?.includes('th')) {
@@ -205,9 +211,9 @@ export class LensAttributes {
 
   getNumberOperationColumn(
     sourceField: string,
-    operationType: 'average' | 'median' | 'sum',
+    operationType: 'average' | 'median' | 'sum' | 'unique_count',
     label?: string
-  ): AvgIndexPatternColumn | MedianIndexPatternColumn | SumIndexPatternColumn {
+  ): AvgIndexPatternColumn | MedianIndexPatternColumn | SumIndexPatternColumn | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
       label:
@@ -237,7 +243,7 @@ export class LensAttributes {
       params: { percentile: Number(percentileValue.split('th')[0]) },
     };
   }
-
+  
   getDateHistogramColumn(sourceField: string): DateHistogramIndexPatternColumn {
     return {
       sourceField,
@@ -247,6 +253,25 @@ export class LensAttributes {
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
+    };
+  }
+
+  getTermsColumn(sourceField: string, label?: string) : TermsIndexPatternColumn{
+    return {
+      operationType: 'terms',
+      sourceField: sourceField,
+      label: label || 'Top values of ' + sourceField,
+      dataType: 'string',
+      isBucketed: true,
+      scale: 'ordinal',
+      params: {
+        size: 10,
+        orderBy: {
+          type: 'alphabetical',
+          fallback: false
+        },
+        orderDirection: 'desc',
+      }
     };
   }
 
@@ -276,6 +301,12 @@ export class LensAttributes {
     } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
 
+    if(columnType === TERMS_COLUMN){
+      return this.getTermsColumn(
+        fieldName, columnLabel || label
+      );
+    }
+
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
         columnLabel || label,
@@ -289,6 +320,9 @@ export class LensAttributes {
     }
     if (fieldType === 'number') {
       return this.getNumberColumn(fieldName, columnType, operationType, columnLabel || label);
+    }
+    if (operationType === 'unique_count') {
+      return this.getCardinalityColumn(fieldName, columnLabel || label);
     }
 
     // FIXME review my approach again

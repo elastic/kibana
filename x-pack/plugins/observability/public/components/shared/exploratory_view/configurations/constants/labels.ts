@@ -284,9 +284,16 @@ export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels
   defaultMessage: 'CPU Usage',
 });
 
-export const TRANSACTION_PER_MINUTE = i18n.translate(
+export const TRANSACTIONS_PER_MINUTE = i18n.translate(
   'xpack.observability.expView.fieldLabels.transactionPerMinute',
   {
     defaultMessage: 'Transactions per minute',
+  }
+);
+
+export const NUMBER_OF_DEVICES = i18n.translate(
+  'xpack.observability.expView.fieldLabels.numberOfDevices',
+  {
+    defaultMessage: 'Number of Devices',
   }
 );

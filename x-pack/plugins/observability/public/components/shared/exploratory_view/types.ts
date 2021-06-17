@@ -23,6 +23,7 @@ export const ReportViewTypes = {
   dist: 'data-distribution',
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
+  mdd: 'mobile-device-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -45,7 +46,7 @@ export interface ReportDefinition {
     field?: string;
     label: string;
     description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
+    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
     columnFilters?: ColumnFilter[];
     timeScale?: string;
   }>;
