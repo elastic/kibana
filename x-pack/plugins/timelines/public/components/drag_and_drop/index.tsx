@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { noop } from 'lodash/fp';
-import deepEqual from 'fast-deep-equal';
-import React from 'react';
-import { useCallback } from 'react';
-import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
-import { useDispatch } from 'react-redux';
-import type { ColumnHeaderOptions, BrowserFields } from '../../../common';
 import {
+  IS_DRAGGING_CLASS_NAME,
   draggableIsField,
   fieldWasDroppedOnTimelineColumns,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
-} from '../../../common/types/drag_and_drop';
+} from '@kbn/securitysolution-t-grid';
+import { noop } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
+import React, { useCallback } from 'react';
+import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
+import { useDispatch } from 'react-redux';
+
+import type { ColumnHeaderOptions, BrowserFields } from '../../../common';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { addFieldToTimelineColumns, getTimelineIdFromColumnDroppableId } from './helpers';
 

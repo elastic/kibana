@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { DRAG_TYPE_FIELD, droppableTimelineColumnsPrefix } from '@kbn/securitysolution-t-grid';
 import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
@@ -13,6 +15,7 @@ import type {
   ColumnHeaderOptions,
   HeaderActionProps,
 } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 
@@ -26,10 +29,6 @@ import {
 } from '../../styles';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
-import {
-  DRAG_TYPE_FIELD,
-  droppableTimelineColumnsPrefix,
-} from '../../../../../common/types/drag_and_drop';
 import { DraggableFieldBadge } from '../../../draggables';
 
 interface Props {

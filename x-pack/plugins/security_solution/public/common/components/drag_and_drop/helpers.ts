@@ -7,15 +7,50 @@
 import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
+import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
 import { BrowserField } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { getProviderIdFromDraggable } from '../../../../common/types/drag_and_drop';
 
-export * from '../../../../common/types/drag_and_drop';
+export {
+  draggableIdPrefix,
+  droppableIdPrefix,
+  draggableContentPrefix,
+  draggableTimelineProvidersPrefix,
+  draggableFieldPrefix,
+  draggableIsField,
+  droppableContentPrefix,
+  droppableFieldPrefix,
+  droppableTimelineProvidersPrefix,
+  droppableTimelineColumnsPrefix,
+  droppableTimelineFlyoutBottomBarPrefix,
+  getDraggableId,
+  getDraggableFieldId,
+  getTimelineProviderDroppableId,
+  getTimelineProviderDraggableId,
+  getDroppableId,
+  sourceIsContent,
+  sourceAndDestinationAreSameTimelineProviders,
+  draggableIsContent,
+  reasonIsDrop,
+  destinationIsTimelineProviders,
+  destinationIsTimelineColumns,
+  destinationIsTimelineButton,
+  getProviderIdFromDraggable,
+  getFieldIdFromDraggable,
+  escapeDataProviderId,
+  escapeContextId,
+  escapeFieldId,
+  unEscapeFieldId,
+  providerWasDroppedOnTimeline,
+  userIsReArrangingProviders,
+  fieldWasDroppedOnTimelineColumns,
+  DRAG_TYPE_FIELD,
+  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
+} from '@kbn/securitysolution-t-grid';
 interface AddProviderToTimelineParams {
   activeTimelineDataProviders: DataProvider[];
   dataProviders: IdToDataProvider;

@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './api';
-export * from './drag_and_drop';
+module.exports = {
+  env: {
+    web: {
+      presets: ['@kbn/babel-preset/webpack_preset'],
+    },
+    node: {
+      presets: ['@kbn/babel-preset/node_preset'],
+    },
+  },
+  ignore: ['**/*.test.ts', '**/*.test.tsx'],
+};

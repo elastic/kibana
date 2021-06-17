@@ -6,14 +6,16 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover } from '@elastic/eui';
+import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  getDraggableFieldId,
+} from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 
@@ -26,10 +28,10 @@ import { Header } from './header';
 import * as i18n from './translations';
 import { tGridActions } from '../../../../store/t_grid';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { Direction } from '../../../../../common/search_strategy';
-import { getDraggableFieldId } from '../../../../../common/types/drag_and_drop';
 import { useDraggableKeyboardWrapper } from '../../../drag_and_drop';
 
 const ContextMenu = styled(EuiContextMenu)`

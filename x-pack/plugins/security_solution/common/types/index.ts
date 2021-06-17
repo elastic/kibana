@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './drag_and_drop';
 export * from './timeline';
