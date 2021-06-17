@@ -6,7 +6,7 @@
  */
 
 import { KueryNode } from '../../../../../src/plugins/data/server';
-import { SavedObjectFindOptions } from '../../common/api';
+import { SavedObjectFindOptions } from '../../common';
 
 /**
  * This structure holds the alert ID and index from an alert comment

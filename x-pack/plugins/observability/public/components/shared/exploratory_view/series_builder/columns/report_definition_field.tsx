@@ -67,7 +67,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
         <FieldValueSuggestions
           label={labels[field]}
           sourceField={field}
-          indexPattern={indexPattern}
+          indexPatternTitle={indexPattern.title}
           selectedValue={selectedReportDefinitions?.[field]}
           onChange={(val?: string[]) => onChange(field, val)}
           filters={queryFilters}

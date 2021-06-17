@@ -5,47 +5,83 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiTitle,
   EuiSpacer,
-  EuiHorizontalRule,
-  EuiButtonEmpty,
   EuiAccordion,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { Filter } from './Filter';
+import { ESFilter } from 'typings/elasticsearch';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
-import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import {
+  uxFiltersByName,
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../../../common/ux_ui_filter';
 import { useBreakPoints } from '../../../../hooks/use_break_points';
+import { FieldValueSuggestions } from '../../../../../../observability/public';
+import { URLFilter } from '../URLFilter';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { SelectedFilters } from './SelectedFilters';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import { useIndexPattern } from './use_index_pattern';
+import { environmentQuery } from './queries';
 
-interface Props {
-  filterNames: LocalUIFilterName[];
-  params?: Record<string, string | number | boolean | undefined>;
-  showCount?: boolean;
-  children?: React.ReactNode;
-  shouldFetch?: boolean;
-}
+const filterNames: UxLocalUIFilterName[] = [
+  'location',
+  'device',
+  'os',
+  'browser',
+];
 
-const ButtonWrapper = euiStyled.div`
-  display: inline-block;
-`;
+export const getExcludedName = (filterName: string) => {
+  return `${filterName}Excluded` as UxLocalUIFilterName;
+};
 
-function LocalUIFilters({
-  params,
-  filterNames,
-  children,
-  showCount = true,
-  shouldFetch = true,
-}: Props) {
-  const { filters, setFilterValue, clearValues } = useLocalUIFilters({
-    filterNames,
-    params,
-    shouldFetch,
+const RUM_DATA_FILTERS = [
+  { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+];
+
+function LocalUIFilters() {
+  const { indexPatternTitle, indexPattern } = useIndexPattern();
+
+  const {
+    filters = [],
+    setFilterValue,
+    invertFilter,
+    clearValues,
+  } = useLocalUIFilters({
+    filterNames: uxLocalUIFilterNames.filter(
+      (name) => !['serviceName'].includes(name)
+    ),
   });
 
-  const hasValues = filters.some((filter) => filter.value.length > 0);
+  const {
+    urlParams: { start, end, serviceName, environment },
+  } = useUrlParams();
+
+  const getFilters = useMemo(() => {
+    const dataFilters: ESFilter[] = [
+      ...RUM_DATA_FILTERS,
+      ...environmentQuery(environment),
+    ];
+    if (serviceName) {
+      dataFilters.push({
+        term: {
+          [SERVICE_NAME]: serviceName,
+        },
+      });
+    }
+    return dataFilters;
+  }, [environment, serviceName]);
 
   const { isSmall } = useBreakPoints();
 
@@ -61,39 +97,54 @@ function LocalUIFilters({
 
   const content = (
     <>
-      {children}
-      {filters.map((filter) => {
-        return (
-          <React.Fragment key={filter.name}>
-            <Filter
-              {...filter}
-              onChange={(value) => {
-                setFilterValue(filter.name, value);
-              }}
-              showCount={showCount}
-            />
-            <EuiHorizontalRule margin="none" />
-          </React.Fragment>
-        );
-      })}
-      {hasValues ? (
-        <>
-          <EuiSpacer size="s" />
-          <ButtonWrapper>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="cross"
-              flush="left"
-              onClick={clearValues}
-              data-cy="clearFilters"
-            >
-              {i18n.translate('xpack.apm.clearFilters', {
-                defaultMessage: 'Clear filters',
-              })}
-            </EuiButtonEmpty>
-          </ButtonWrapper>
-        </>
-      ) : null}
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <URLFilter />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFilterGroup fullWidth={true}>
+            {filterNames.map((filterName) => (
+              <FieldValueSuggestions
+                key={filterName}
+                sourceField={uxFiltersByName[filterName].fieldName}
+                indexPatternTitle={indexPatternTitle}
+                label={uxFiltersByName[filterName].title}
+                asCombobox={false}
+                selectedValue={
+                  filters.find((ft) => ft.name === filterName && !ft.excluded)
+                    ?.value
+                }
+                excludedValue={
+                  filters.find(
+                    (ft) =>
+                      ft.name === getExcludedName(filterName) && ft.excluded
+                  )?.value
+                }
+                asFilterButton={true}
+                onChange={(values, excludedValues) => {
+                  setFilterValue(filterName, values || []);
+                  setFilterValue(
+                    getExcludedName(filterName),
+                    excludedValues || []
+                  );
+                }}
+                filters={getFilters}
+                time={{ from: start!, to: end! }}
+              />
+            ))}
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <SelectedFilters
+        filters={filters}
+        onChange={(name, values) => {
+          setFilterValue(name, values);
+        }}
+        clearValues={clearValues}
+        invertFilter={invertFilter}
+        indexPattern={indexPattern}
+      />
     </>
   );
 
@@ -102,11 +153,7 @@ function LocalUIFilters({
       {content}
     </EuiAccordion>
   ) : (
-    <>
-      {title}
-      <EuiSpacer size="s" />
-      {content}
-    </>
+    <>{content}</>
   );
 }
 
