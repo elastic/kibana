@@ -77,6 +77,10 @@ describe('EndpointList store concerns', () => {
         isolationRequestState: {
           type: 'UninitialisedResourceState',
         },
+        endpointPendingActions: {
+          data: new Map(),
+          type: 'LoadedResourceState',
+        },
       });
     });
 

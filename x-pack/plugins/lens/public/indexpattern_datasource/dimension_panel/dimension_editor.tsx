@@ -146,6 +146,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .filter(({ hidden }) => !hidden)
+      .filter(
+        (operationDefinition) =>
+          !('selectionStyle' in operationDefinition) ||
+          operationDefinition.selectionStyle !== 'hidden'
+      )
       .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
@@ -395,6 +400,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <ReferenceEditor
                   key={index}
                   layer={state.layers[layerId]}
+                  layerId={layerId}
+                  activeData={props.activeData}
                   columnId={referenceId}
                   updateLayer={(
                     setter:
@@ -489,6 +496,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         {shouldDisplayExtraOptions && ParamEditor && (
           <ParamEditor
             layer={state.layers[layerId]}
+            layerId={layerId}
+            activeData={props.activeData}
             updateLayer={setStateWrapper}
             columnId={columnId}
             currentColumn={state.layers[layerId].columns[columnId]}
@@ -603,6 +612,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const formulaTab = ParamEditor ? (
     <ParamEditor
       layer={state.layers[layerId]}
+      layerId={layerId}
+      activeData={props.activeData}
       updateLayer={setStateWrapper}
       columnId={columnId}
       currentColumn={state.layers[layerId].columns[columnId]}

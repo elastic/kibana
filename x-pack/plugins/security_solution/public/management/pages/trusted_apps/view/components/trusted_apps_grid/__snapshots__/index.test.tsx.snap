@@ -514,7 +514,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -803,7 +809,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1092,7 +1104,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1381,7 +1399,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1670,7 +1694,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1959,7 +1989,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2248,7 +2284,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2537,7 +2579,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2826,7 +2874,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3115,7 +3169,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3712,7 +3772,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4001,7 +4067,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4290,7 +4362,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4579,7 +4657,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4868,7 +4952,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5157,7 +5247,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5446,7 +5542,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5735,7 +5837,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6024,7 +6132,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6313,7 +6427,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6867,7 +6987,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7156,7 +7282,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7445,7 +7577,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7734,7 +7872,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8023,7 +8167,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8312,7 +8462,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8601,7 +8757,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8890,7 +9052,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -9179,7 +9347,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -9468,7 +9642,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
