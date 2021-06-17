@@ -25,3 +25,4 @@ export const AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL = 5;
 
 export const AGENTS_INDEX = '.fleet-agents';
 export const AGENT_ACTIONS_INDEX = '.fleet-actions';
+export const AGENT_ACTIONS_RESULTS_INDEX = '.fleet-actions-results';
