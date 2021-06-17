@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../kibana_services', () => ({}));
+jest.mock('../../../../kibana_services', () => ({}));
 
 jest.mock('./load_index_settings', () => ({
   loadIndexSettings: async () => {
@@ -17,7 +17,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScalingForm } from './scaling_form';
-import { SCALING_TYPES } from '../../../../common/constants';
+import { SCALING_TYPES } from '../../../../../common/constants';
 
 const defaultProps = {
   filterByMapBounds: true,
