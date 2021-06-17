@@ -36,7 +36,7 @@ const DefaultMissingRequirements = () => {
         defaultMessage="Before enrolling agents, {link}."
         values={{
           link: (
-            <EuiLink href={getHref('fleet')}>
+            <EuiLink href={getHref('overview')}>
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.setUpAgentsLink"
                 defaultMessage="set up central management for Elastic Agents"
