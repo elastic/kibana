@@ -18,13 +18,15 @@ export default function canvasCustomElementTest({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // load test workpad
