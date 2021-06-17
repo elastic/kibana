@@ -132,7 +132,7 @@ export function DashboardTopNav({
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   useEffect(() => {
@@ -163,6 +163,7 @@ export function DashboardTopNav({
           notifications: core.notifications,
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+          reportUiCounter: usageCollection?.reportUiCounter,
         }),
       }));
     }
@@ -174,6 +175,7 @@ export function DashboardTopNav({
     core.savedObjects,
     core.overlays,
     uiSettings,
+    usageCollection,
   ]);
 
   const createNewVisType = useCallback(
@@ -183,7 +185,7 @@ export function DashboardTopNav({
 
       if (visType) {
         if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+          trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
         if ('aliasPath' in visType) {
