@@ -7,7 +7,6 @@
 
 import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
-import { emsWorldLayerId, emsRegionLayerId, emsUsaZipLayerId } from '../../common';
 
 export interface SampleValuesConfig {
   emsLayerIds?: string[];
@@ -20,48 +19,64 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
-const wellKnownColumnNames = [
-  {
-    regex: /(geo\.){0,}country_iso_code$/i, // ECS postfix for country
-    emsConfig: {
-      layerId: emsWorldLayerId,
-      field: 'iso2',
-    },
-  },
-  {
-    regex: /(geo\.){0,}region_iso_code$/i, // ECS postfixn for region
-    emsConfig: {
-      layerId: emsRegionLayerId,
-      field: 'region_iso_code',
-    },
-  },
-  {
-    regex: /^country/i, // anything starting with country
-    emsConfig: {
-      layerId: emsWorldLayerId,
-      field: 'name',
-    },
-  },
-];
-
-const wellKnownColumnFormats = [
-  {
-    regex: /(^\d{5}$)/i, // 5-digit zipcode
-    emsConfig: {
-      layerId: emsUsaZipLayerId,
-      field: 'zip',
-    },
-  },
-];
+export interface EMSMatch {
+  regex: RegExp;
+  emsConfig: {
+    layerId: string;
+    field: string;
+  };
+}
 
 interface UniqueMatch {
   config: { layerId: string; field: string };
   count: number;
 }
 
+let wellKnownColumnNames: EMSMatch[];
+let wellKnownColumnFormats: EMSMatch[];
+
+async function loadMeta() {
+  if (wellKnownColumnFormats && wellKnownColumnNames) {
+    return;
+  }
+
+  const fileLayers: FileLayer[] = await getEmsFileLayers();
+
+  wellKnownColumnNames = [];
+  wellKnownColumnFormats = [];
+
+  fileLayers.forEach((fileLayer) => {
+    const fields = fileLayer.getFields();
+
+    fields.forEach((field) => {
+      const emsConfig = {
+        layerId: fileLayer.getId(),
+        field: field.id,
+      };
+
+      if (field.regex) {
+        wellKnownColumnFormats.push({
+          regex: new RegExp(field.regex, 'i'),
+          emsConfig,
+        });
+      }
+
+      if (field.alias && field.alias.length) {
+        field.alias.forEach((alias) => {
+          wellKnownColumnNames.push({
+            regex: new RegExp(alias, 'i'),
+            emsConfig,
+          });
+        });
+      }
+    });
+  });
+}
+
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
 ): Promise<EMSTermJoinConfig | null> {
+  await loadMeta();
   const matches: EMSTermJoinConfig[] = [];
 
   if (sampleValuesConfig.sampleValuesColumnName) {
@@ -104,6 +119,7 @@ export async function suggestEMSTermJoinConfig(
 
   return uniqMatches.length ? uniqMatches[0].config : null;
 }
+window._suggest = suggestEMSTermJoinConfig;
 
 function suggestByName(columnName: string): EMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
