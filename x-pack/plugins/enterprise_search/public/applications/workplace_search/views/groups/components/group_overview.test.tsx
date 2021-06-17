@@ -14,10 +14,8 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
 import { GroupOverview } from './group_overview';
 
@@ -49,19 +47,21 @@ describe('GroupOverview', () => {
     });
     setMockValues(mockValues);
   });
+
   it('renders', () => {
     const wrapper = shallow(<GroupOverview />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(4);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(SourcesTable)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  it('handles loading state fallbacks', () => {
+    setMockValues({ ...mockValues, group: {}, dataLoading: true });
     const wrapper = shallow(<GroupOverview />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('isLoading')).toEqual(true);
+    expect(wrapper.prop('pageChrome')).toEqual(['Groups', '...']);
+    expect(wrapper.prop('pageHeader').pageTitle).toEqual(undefined);
   });
 
   it('updates the input value', () => {
