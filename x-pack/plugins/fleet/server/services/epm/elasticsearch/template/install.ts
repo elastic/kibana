@@ -164,6 +164,7 @@ export async function installTemplateForDataStream({
 }
 
 interface TemplateMapEntry {
+  _meta: { package: { name: string } };
   template:
     | {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
@@ -201,21 +202,25 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(userSettingsSuffix);
 
-function buildComponentTemplates(
-  templateName: string,
-  registryElasticsearch: RegistryElasticsearch | undefined
-) {
+function buildComponentTemplates(params: {
+  templateName: string;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+  packageName: string;
+}) {
+  const { templateName, registryElasticsearch, packageName } = params;
   const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
   const settingsTemplateName = `${templateName}${settingsSuffix}`;
   const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
 
   const templatesMap: TemplateMap = {};
+  const _meta = { package: { name: packageName } };
 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
     templatesMap[mappingsTemplateName] = {
       template: {
         mappings: registryElasticsearch['index_template.mappings'],
       },
+      _meta,
     };
   }
 
@@ -224,25 +229,29 @@ function buildComponentTemplates(
       template: {
         settings: registryElasticsearch['index_template.settings'],
       },
-    };
-
-    // return empty/stub template
-    templatesMap[userSettingsTemplateName] = {
-      template: {
-        settings: {},
-      },
+      _meta,
     };
   }
+
+  // return empty/stub template
+  templatesMap[userSettingsTemplateName] = {
+    template: {
+      settings: {},
+    },
+    _meta,
+  };
 
   return templatesMap;
 }
 
-async function installDataStreamComponentTemplates(
-  templateName: string,
-  registryElasticsearch: RegistryElasticsearch | undefined,
-  esClient: ElasticsearchClient
-) {
-  const templates = buildComponentTemplates(templateName, registryElasticsearch);
+async function installDataStreamComponentTemplates(params: {
+  templateName: string;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+  esClient: ElasticsearchClient;
+  packageName: string;
+}) {
+  const { templateName, registryElasticsearch, esClient, packageName } = params;
+  const templates = buildComponentTemplates({ templateName, registryElasticsearch, packageName });
   const templateNames = Object.keys(templates);
   const templateEntries = Object.entries(templates);
 
@@ -327,11 +336,12 @@ export async function installTemplate({
     await esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] });
   }
 
-  const composedOfTemplates = await installDataStreamComponentTemplates(
+  const composedOfTemplates = await installDataStreamComponentTemplates({
     templateName,
-    dataStream.elasticsearch,
-    esClient
-  );
+    registryElasticsearch: dataStream.elasticsearch,
+    esClient,
+    packageName,
+  });
 
   const template = getTemplate({
     type: dataStream.type,
