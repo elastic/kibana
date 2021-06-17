@@ -7,35 +7,19 @@
 import React from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
-import {
-  GLOBAL_HEADER_HEIGHT,
-  GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER,
-} from '../../../../../common/constants';
 import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_header_portal';
 
 const StyledStickyWrapper = styled.div`
   position: sticky;
   z-index: ${(props) => props.theme.eui.euiZLevel2};
-  top: ${GLOBAL_HEADER_HEIGHT}px;
-
-  .kbnBody--chromeHidden & {
-    top: 0;
-  }
-  // header, banner
-  .kbnBody--hasHeaderBanner & {
-    top: ${GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER}px;
-  }
-  // no header, banner
-  .kbnBody--chromeHidden.kbnBody--hasHeaderBanner & {
-    top: ${(props) => props.theme.eui.euiSizeXL}; // $kbnHeaderBannerHeight
-  }
+  // TOP location is declared in src/public/rendering/_base.scss to keep in line with Kibana Chrome
 `;
 
 export const GlobalKQLHeader = React.memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
-    <StyledStickyWrapper>
+    <StyledStickyWrapper id="securitySolutionStickyKQL">
       <OutPortal node={globalKQLHeaderPortalNode} />
     </StyledStickyWrapper>
   );

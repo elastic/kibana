@@ -54,9 +54,11 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   ${({ $isTimelineBottomBarVisible }) =>
     $isTimelineBottomBarVisible &&
     `
-      .euiPageSideBar--sticky.kbnPageTemplate__pageSideBar {
+    @media (min-width: 768px) {
+      .kbnPageTemplateSolutionNav {
         padding-bottom: ${gutterTimeline};
       }
+    }
   `}
 `;
 
