@@ -15,8 +15,10 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { endpointPageHttpMock } from '../../../mocks';
 import { fireEvent } from '@testing-library/dom';
+import { licenseService } from '../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/hooks/use_license');
 
 describe('When using the Endpoint Details Actions Menu', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -70,6 +72,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
       ['View host details', 'hostLink'],
       ['View agent policy', 'agentPolicyLink'],
       ['View agent details', 'agentDetailsLink'],
+      ['Reassign agent policy', 'agentPolicyReassignLink'],
     ])('should display %s action', async (_, dataTestSubj) => {
       await render();
       expect(renderResult.getByTestId(dataTestSubj)).not.toBeNull();
@@ -80,6 +83,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
       ['View host details', 'hostLink'],
       ['View agent policy', 'agentPolicyLink'],
       ['View agent details', 'agentDetailsLink'],
+      ['Reassign agent policy', 'agentPolicyReassignLink'],
     ])(
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
@@ -108,6 +112,27 @@ describe('When using the Endpoint Details Actions Menu', () => {
       });
 
       expect(coreStart.application.navigateToApp).toHaveBeenCalled();
+    });
+  });
+
+  describe('and license is NOT PlatinumPlus', () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    beforeEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(false));
+
+    afterEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(true));
+
+    it('should not show the `isoalte` action', async () => {
+      setEndpointMetadataResponse();
+      await render();
+      expect(renderResult.queryByTestId('isolateLink')).toBeNull();
+    });
+
+    it('should still show `unisolate` action for endpoints that are currently isolated', async () => {
+      setEndpointMetadataResponse(true);
+      await render();
+      expect(renderResult.queryByTestId('isolateLink')).toBeNull();
+      expect(renderResult.getByTestId('unIsolateLink')).not.toBeNull();
     });
   });
 });

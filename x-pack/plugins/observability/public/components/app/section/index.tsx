@@ -25,7 +25,7 @@ interface Props {
 export function SectionContainer({ title, appLink, children, hasError }: Props) {
   const { core } = usePluginContext();
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiAccordion
         initialIsOpen
         id={title}

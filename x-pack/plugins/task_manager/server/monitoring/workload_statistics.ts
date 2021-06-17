@@ -8,7 +8,7 @@
 import { combineLatest, Observable, timer } from 'rxjs';
 import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { keyBy, mapValues } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
