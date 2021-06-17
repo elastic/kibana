@@ -41,7 +41,7 @@ export class JobDetailsUI extends Component {
   }
 
   render() {
-    const { job } = this.state;
+    const job = this.state.job ?? this.props.job;
     const {
       services: {
         http: { basePath },
