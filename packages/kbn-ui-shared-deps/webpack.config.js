@@ -7,9 +7,11 @@
  */
 
 const Path = require('path');
+const Os = require('os');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
@@ -29,7 +31,6 @@ module.exports = {
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  //
   devtool: 'cheap-source-map',
   output: {
     path: UiSharedDeps.distDir,
@@ -109,11 +110,26 @@ module.exports = {
 
   optimization: {
     minimizer: [
-      new ESBuildMinifyPlugin({
-        target: 'es6',
-        css: true,
-        sourcemap: false,
-        legalComments: 'none',
+      new CssMinimizerPlugin({
+        parallel: Math.min(Os.cpus().length, 2),
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: Math.min(Os.cpus().length, 2),
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
       }),
     ],
     noEmitOnErrors: true,
