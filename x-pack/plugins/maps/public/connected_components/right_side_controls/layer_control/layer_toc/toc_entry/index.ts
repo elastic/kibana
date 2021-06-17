@@ -15,6 +15,7 @@ import {
   getMapZoom,
   hasDirtyState,
   getSelectedLayer,
+  getEditState,
 } from '../../../../../selectors/map_selectors';
 import {
   getIsReadOnly,
@@ -40,6 +41,7 @@ function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStatePr
     isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
     isEditButtonDisabled:
       flyoutDisplay !== FLYOUT_STATE.NONE && flyoutDisplay !== FLYOUT_STATE.LAYER_PANEL,
+    editModeActiveForLayer: getEditState(state)?.layerId === ownProps.layer.getId(),
   };
 }
 
