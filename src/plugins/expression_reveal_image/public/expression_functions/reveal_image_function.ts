@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolveWithMissingImage } from '../../common/lib/resolve_dataurl';
-import { elasticOutline } from '../../common/lib/elastic_outline';
+import { resolveWithMissingImage, elasticOutline } from '../../../presentation_util/public';
 import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
 import { ExpressionRevealImageFunction, Origin } from '../../common/types';
 

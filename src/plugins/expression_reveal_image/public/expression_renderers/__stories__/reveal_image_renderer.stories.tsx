@@ -9,9 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { revealImageRenderer } from '../';
-import { Render } from '../../__stories__';
-import { elasticOutline } from '../../../common/lib/elastic_outline';
-import { elasticLogo } from '../../../common/lib/elastic_logo';
+import { Render, elasticOutline, elasticLogo } from '../../../../presentation_util/public';
 import { Origin } from '../../../common/types/expression_functions';
 import './reveal_image.scss';
 

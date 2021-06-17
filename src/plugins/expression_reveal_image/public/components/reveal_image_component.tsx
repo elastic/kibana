@@ -9,8 +9,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl } from '../../common/lib/url';
-import { elasticOutline } from '../../common/lib/elastic_outline';
+import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
   handlers: IInterpreterRenderHandlers;

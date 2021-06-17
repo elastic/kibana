@@ -7,12 +7,17 @@
  */
 
 import { mapValues } from 'lodash';
-import { ExpressionRevealImageFunction } from '../types';
+import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
+
+type FnType = () => ExpressionFunctionDefinition<
+  string,
+  number,
+  Record<string, any>,
+  ExpressionValueRender<unknown>
+>;
 
 // It takes a function spec and passes in default args into the spec fn
-export const functionWrapper = (
-  fnSpec: ExpressionRevealImageFunction
-): ReturnType<ExpressionRevealImageFunction>['fn'] => {
+export const functionWrapper = (fnSpec: FnType): ReturnType<FnType>['fn'] => {
   const spec = fnSpec();
   const defaultArgs = mapValues(spec.args, (argSpec) => {
     return argSpec.default;

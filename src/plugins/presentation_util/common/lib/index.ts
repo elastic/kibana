@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
-
-export * from './labs';
-export * from './lib';
-export * from './test_helpers';
+export * from './dataurl';
+export * from './elastic_logo';
+export * from './elastic_outline';
+export * from './httpurl';
+export * from './missing_asset';
+export * from './resolve_dataurl';
+export * from './url';

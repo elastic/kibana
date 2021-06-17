@@ -9,14 +9,15 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { withSuspense } from '../../../presentation_util/public';
 import { getRendererStrings } from '../../common/i18n';
 import { RevealImageRendererConfig } from '../../common/types';
-import { RendererWrapper } from '../components/renderer_wrapper';
 import './reveal_image.scss';
 
 const { revealImage: revealImageStrings } = getRendererStrings();
 
-const RevealImageComponent = lazy(() => import('../components/reveal_image_component'));
+const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
+const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
 
 export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
   name: 'revealImage',
@@ -34,9 +35,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
 
     render(
       <I18nProvider>
-        <RendererWrapper>
-          <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
-        </RendererWrapper>
+        <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );

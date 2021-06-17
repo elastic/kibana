@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../common/test_helpers/function_wrapper';
-import { elasticOutline } from '../../common/lib/elastic_outline';
-import { elasticLogo } from '../../common/lib/elastic_logo';
+import { functionWrapper, elasticOutline, elasticLogo } from '../../../presentation_util/public';
 import { getFunctionErrors } from '../../common/i18n';
 import { revealImageFunction } from './reveal_image_function';
 import { Origin } from '../../common/types/expression_functions';
