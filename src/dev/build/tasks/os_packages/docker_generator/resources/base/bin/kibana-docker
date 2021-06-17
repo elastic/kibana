@@ -322,6 +322,7 @@ kibana_vars=(
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_required_freshness
     xpack.task_manager.monitored_stats_running_average_window
+    xpack.task_manager.monitored_stats_warn_delayed_task_start_in_seconds
     xpack.task_manager.monitored_task_execution_thresholds
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
