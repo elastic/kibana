@@ -24,8 +24,13 @@ import {
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
-import { PageError, attemptToURIDecode, reactRouterNavigate } from '../../../../shared_imports';
-import { SectionLoading, LegacyIndexTemplatesDeprecation } from '../../../components';
+import {
+  PageLoading,
+  PageError,
+  attemptToURIDecode,
+  reactRouterNavigate,
+} from '../../../../shared_imports';
+import { LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
@@ -222,12 +227,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
           defaultMessage="Loading templates…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (

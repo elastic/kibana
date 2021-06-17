@@ -23,6 +23,7 @@ import {
 import { ScopedHistory } from 'kibana/public';
 
 import {
+  PageLoading,
   PageError,
   Error,
   reactRouterNavigate,
@@ -31,7 +32,6 @@ import {
   APP_WRAPPER_CLASS,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { SectionLoading } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
@@ -170,12 +170,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.loadingDataStreamsDescription"
           defaultMessage="Loading data streams…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (

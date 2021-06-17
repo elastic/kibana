@@ -6,7 +6,6 @@
  */
 
 export { SectionError, Error } from './section_error';
-export { SectionLoading } from './section_loading';
 export { NoMatch } from './no_match';
 export { TemplateDeleteModal } from './template_delete_modal';
 export { TemplateForm } from './template_form';

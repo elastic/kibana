@@ -13,8 +13,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { APP_WRAPPER_CLASS, PageError, attemptToURIDecode } from '../../../../shared_imports';
-import { SectionLoading } from '../../section_loading';
+import {
+  APP_WRAPPER_CLASS,
+  PageLoading,
+  PageError,
+  attemptToURIDecode,
+} from '../../../../shared_imports';
 import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -142,12 +146,12 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   if (isLoading) {
     return (
-      <SectionLoading data-test-subj="sectionLoading">
+      <PageLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
           defaultMessage="Loading component templates…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (data?.length) {
     content = (

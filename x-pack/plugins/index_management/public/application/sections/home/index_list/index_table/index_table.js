@@ -37,13 +37,18 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { PageError, reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
+import {
+  PageLoading,
+  PageError,
+  reactRouterNavigate,
+  attemptToURIDecode,
+} from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { getDataStreamDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { SectionLoading, NoMatch, DataHealth } from '../../../../components';
+import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -440,12 +445,12 @@ export class IndexTable extends Component {
       const renderNoContent = () => {
         if (indicesLoading) {
           return (
-            <SectionLoading>
+            <PageLoading>
               <FormattedMessage
                 id="xpack.idxMgmt.indexTable.loadingIndicesDescription"
                 defaultMessage="Loading indices…"
               />
-            </SectionLoading>
+            </PageLoading>
           );
         } else if (indicesError) {
           if (indicesError.status === 403) {

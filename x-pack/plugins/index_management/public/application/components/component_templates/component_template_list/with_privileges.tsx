@@ -9,10 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 
 import {
+  PageLoading,
   PageError,
   useAuthorizationContext,
   WithPrivileges,
-  SectionLoading,
   NotAuthorizedSection,
 } from '../shared_imports';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../constants';
@@ -45,12 +45,12 @@ export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <SectionLoading>
+            <PageLoading>
               <FormattedMessage
                 id="xpack.idxMgmt.home.componentTemplates.checkingPrivilegesDescription"
                 defaultMessage="Checking privileges…"
               />
-            </SectionLoading>
+            </PageLoading>
           );
         }
 
