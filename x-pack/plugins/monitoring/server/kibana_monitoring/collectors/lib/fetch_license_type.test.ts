@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { fetchLicenseType } from './fetch_license_type';
 
 describe('fetchLicenseType', () => {
   const clusterUuid = '1abcde2';
   const availableCcs: string[] = [];
-  const callCluster = jest.fn().mockImplementation(() => ({
-    hits: {
-      hits: [
-        {
-          _source: {
-            license: {
-              type: 'trial',
+  const callCluster = ({
+    search: jest.fn().mockImplementation(() => ({
+      body: {
+        hits: {
+          hits: [
+            {
+              _source: {
+                license: {
+                  type: 'trial',
+                },
+              },
             },
-          },
+          ],
         },
-      ],
-    },
-  }));
+      },
+    })),
+  } as unknown) as ElasticsearchClient;
 
   it('should get the license type', async () => {
     const result = await fetchLicenseType(callCluster, availableCcs, clusterUuid);
@@ -30,11 +35,15 @@ describe('fetchLicenseType', () => {
   });
 
   it('should handle no license data', async () => {
-    const customCallCluster = jest.fn().mockImplementation(() => ({
-      hits: {
-        hits: [],
-      },
-    }));
+    const customCallCluster = ({
+      search: jest.fn().mockImplementation(() => ({
+        body: {
+          hits: {
+            hits: [],
+          },
+        },
+      })),
+    } as unknown) as ElasticsearchClient;
     const result = await fetchLicenseType(customCallCluster, availableCcs, clusterUuid);
     expect(result).toStrictEqual(null);
   });

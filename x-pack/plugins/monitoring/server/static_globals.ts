@@ -68,7 +68,7 @@ export class Globals {
   private static _app: IAppGlobals;
 
   public static init(options: InitSetupOptions) {
-    const { coreSetup, setupPlugins, config, log, getLogger } = options;
+    const { coreSetup, setupPlugins, config, getLogger } = options;
     const getLegacyClusterShim = async (
       client: ElasticsearchClient,
       endpoint: EndpointTypes,

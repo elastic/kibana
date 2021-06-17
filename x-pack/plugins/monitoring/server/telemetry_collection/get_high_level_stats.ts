@@ -323,7 +323,7 @@ export async function fetchHighLevelStats<
         end,
         type: `${product}_stats`,
         filters,
-      }) as estypes.QueryContainer,
+      }) as estypes.QueryDslQueryContainer,
       collapse: {
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
         field: `${product}_stats.${product}.uuid`,

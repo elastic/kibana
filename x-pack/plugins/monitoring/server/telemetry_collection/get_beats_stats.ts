@@ -354,7 +354,7 @@ async function fetchBeatsByType(
             },
           },
         ],
-      }) as estypes.QueryContainer,
+      }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
       collapse: { field: `${type}.beat.uuid` },
       sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
