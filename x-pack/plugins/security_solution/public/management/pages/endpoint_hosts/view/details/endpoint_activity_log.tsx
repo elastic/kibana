@@ -51,8 +51,15 @@ export const EndpointActivityLog = memo(
       getActivityLogDataPaging
     );
 
-    // TODO
-    const onRefresh = useCallback(() => {}, []);
+    const onRefresh = useCallback(() => {
+      dispatch({
+        type: 'appRequestedEndpointActivityLog',
+        payload: {
+          page: 1,
+          pageSize,
+        },
+      });
+    }, [dispatch, pageSize]);
 
     const fetchMoreCallOut = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(

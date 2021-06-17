@@ -411,7 +411,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           const updatedLogData = {
             page: activityLog.page,
             pageSize: activityLog.pageSize,
-            data: updatedLogDataItems,
+            data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
           };
           dispatch({
             type: 'endpointDetailsActivityLogChanged',
