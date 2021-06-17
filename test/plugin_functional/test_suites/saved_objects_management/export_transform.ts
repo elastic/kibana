@@ -262,7 +262,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           });
       });
 
-      it('exclude objects if `isExportable` throws', async () => {
+      it('excludes objects if `isExportable` throws', async () => {
         await supertest
           .post('/api/saved_objects/_export')
           .set('kbn-xsrf', 'true')

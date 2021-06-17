@@ -8,6 +8,7 @@
 
 import type { SavedObject } from '../../../types';
 import type { KibanaRequest } from '../../http';
+import type { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
@@ -24,6 +25,8 @@ interface CollectExportedObjectOptions {
   request: KibanaRequest;
   /** export transform per type */
   typeRegistry: ISavedObjectTypeRegistry;
+  /** logger to use to log potential errors */
+  logger: Logger;
 }
 
 interface CollectExportedObjectResult {
@@ -47,6 +50,7 @@ export const collectExportedObjects = async ({
   request,
   typeRegistry,
   savedObjectsClient,
+  logger,
 }: CollectExportedObjectOptions): Promise<CollectExportedObjectResult> => {
   const exportTransforms = buildTransforms(typeRegistry);
   const isExportable = buildIsExportable(typeRegistry);
@@ -64,7 +68,7 @@ export const collectExportedObjects = async ({
     const {
       exportable: untransformedExportableInitialObjects,
       nonExportable: nonExportableInitialObjects,
-    } = await splitByExportability(currentObjects, isExportable);
+    } = await splitByExportability(currentObjects, isExportable, logger);
     collectedNonExportableObjects.push(...nonExportableInitialObjects);
     nonExportableInitialObjects.forEach((obj) => alreadyProcessed.add(objKey(obj)));
 
@@ -86,7 +90,7 @@ export const collectExportedObjects = async ({
     const {
       exportable: exportableAdditionalObjects,
       nonExportable: nonExportableAdditionalObjects,
-    } = await splitByExportability(additionalObjects, isExportable);
+    } = await splitByExportability(additionalObjects, isExportable, logger);
     const allExportableObjects = [...exportableInitialObjects, ...exportableAdditionalObjects];
     collectedNonExportableObjects.push(...nonExportableAdditionalObjects);
     collectedObjects.push(...allExportableObjects);
@@ -191,7 +195,8 @@ const buildIsExportable = (
 
 const splitByExportability = (
   objects: SavedObject[],
-  isExportable: SavedObjectsExportablePredicate<any>
+  isExportable: SavedObjectsExportablePredicate<any>,
+  logger: Logger
 ) => {
   const exportableObjects: SavedObject[] = [];
   const nonExportableObjects: ExcludedObject[] = [];
@@ -209,6 +214,11 @@ const splitByExportability = (
         });
       }
     } catch (e) {
+      logger.error(
+        `Error invoking "isExportable" for object ${obj.type}:${obj.id}. Error was: ${
+          e.stack ?? e.message
+        }`
+      );
       nonExportableObjects.push({
         id: obj.id,
         type: obj.type,

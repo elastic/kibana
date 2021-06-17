@@ -120,6 +120,7 @@ export class SavedObjectsExporter {
       request,
       typeRegistry: this.#typeRegistry,
       savedObjectsClient: this.#savedObjectsClient,
+      logger: this.#log,
     });
 
     // sort with the provided sort function then with the default export sorting

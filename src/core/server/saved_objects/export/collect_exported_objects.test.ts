@@ -9,6 +9,7 @@
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '../../mocks';
 import { httpServerMock } from '../../http/http_server.mocks';
+import { loggerMock } from '../../logging/logger.mock';
 import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
@@ -42,6 +43,7 @@ const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.e
 describe('collectExportedObjects', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let logger: ReturnType<typeof loggerMock.create>;
   let typeRegistry: SavedObjectTypeRegistry;
 
   const registerType = (
@@ -71,6 +73,7 @@ describe('collectExportedObjects', () => {
     typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
     request = httpServerMock.createKibanaRequest();
+    logger = loggerMock.create();
     applyExportTransformsMock.mockImplementation(({ objects }) => objects);
     savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
   });
@@ -100,6 +103,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(applyExportTransformsMock).toHaveBeenCalledTimes(1);
@@ -136,6 +140,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(fooExportable).toHaveBeenCalledTimes(2);
@@ -182,6 +187,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(missingRefs).toHaveLength(0);
@@ -211,6 +217,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(objects).toEqual([foo1, bar3]);
@@ -247,12 +254,65 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(objects).toEqual([foo2, bar3]);
       expect(excludedObjects).toEqual(
         [foo1].map((obj) => toExcludedObject(obj, 'predicate_error'))
       );
+    });
+
+    it('logs an error for each predicate error', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+      });
+      const foo2 = createObject({
+        type: 'foo',
+        id: '2',
+      });
+      const foo3 = createObject({
+        type: 'foo',
+        id: '3',
+      });
+
+      registerType('foo', {
+        isExportable: (obj) => {
+          if (obj.id !== '2') {
+            throw new Error('reason');
+          }
+          return true;
+        },
+      });
+
+      const { objects, excludedObjects } = await collectExportedObjects({
+        objects: [foo1, foo2, foo3],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+        logger,
+      });
+
+      expect(objects).toEqual([foo2]);
+      expect(excludedObjects).toEqual(
+        [foo1, foo3].map((obj) => toExcludedObject(obj, 'predicate_error'))
+      );
+
+      expect(logger.error).toHaveBeenCalledTimes(2);
+      const logMessages = logger.error.mock.calls.map((call) => call[0]);
+
+      expect(
+        (logMessages[0] as string).startsWith(
+          `Error invoking "isExportable" for object foo:1. Error was: Error: reason`
+        )
+      ).toBe(true);
+      expect(
+        (logMessages[1] as string).startsWith(
+          `Error invoking "isExportable" for object foo:3. Error was: Error: reason`
+        )
+      ).toBe(true);
     });
 
     it('excludes references filtered by the `isExportable` predicate', async () => {
@@ -295,6 +355,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(objects).toEqual([foo1, bar2]);
@@ -331,6 +392,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(objects).toEqual([foo1, bar2]);
@@ -389,6 +451,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(missingRefs).toEqual([missing1, missing2].map(toIdTuple));
@@ -411,6 +474,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(missingRefs).toHaveLength(0);
@@ -454,6 +518,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -528,6 +593,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(2);
@@ -592,6 +658,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -637,6 +704,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -700,6 +768,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(2);
@@ -769,6 +838,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: true,
+        logger,
       });
 
       expect(objects).toEqual([foo1, bar2, dolly3]);
@@ -796,6 +866,7 @@ describe('collectExportedObjects', () => {
         request,
         typeRegistry,
         includeReferences: false,
+        logger,
       });
 
       expect(missingRefs).toHaveLength(0);
