@@ -247,7 +247,7 @@ describe('migrateRawDocsSafely', () => {
     expect(result.left.transformErrors.length).toEqual(1);
     expect(result.left.transformErrors[0]).toMatchInlineSnapshot(`
       Object {
-        "err": [Error: error during transform],
+        "err": [Error: Migration function for version 8.0.0 threw an error],
         "rawId": "a:b",
       }
     `);
