@@ -11,7 +11,7 @@ export { useConfig, ConfigContext } from './use_config';
 export { useKibanaVersion, KibanaVersionContext } from './use_kibana_version';
 export { licenseService, useLicense } from './use_license';
 export { useLink } from './use_link';
-export { useKibanaLink } from './use_kibana_link';
+export { useKibanaLink, getKibanaLink } from './use_kibana_link';
 export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
 export { usePagination, Pagination, PAGE_SIZE_OPTIONS } from './use_pagination';
 export { useUrlPagination } from './use_url_pagination';

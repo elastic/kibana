@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { HttpStart } from 'src/core/public';
 
 import { useStartServices } from './';
 
 const KIBANA_BASE_PATH = '/app/kibana';
 
+export const getKibanaLink = (http: HttpStart, path: string) => {
+  return http.basePath.prepend(`${KIBANA_BASE_PATH}#${path}`);
+};
+
 export function useKibanaLink(path: string = '/') {
-  const core = useStartServices();
-  return core.http.basePath.prepend(`${KIBANA_BASE_PATH}#${path}`);
+  const { http } = useStartServices();
+  return getKibanaLink(http, path);
 }

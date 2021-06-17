@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiLink,
   EuiText,
   EuiAccordion,
   EuiSpacer,
@@ -26,17 +27,26 @@ import { Loading } from '../../../../../components';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus, KibanaAssetType } from '../../../../../types';
 
-import { useGetPackageInstallStatus, useLink, useStartServices } from '../../../../../hooks';
+import {
+  useGetPackageInstallStatus,
+  useLink,
+  useStartServices,
+  getKibanaLink,
+} from '../../../../../hooks';
 
 import { AssetTitleMap } from '../../../../../constants';
-
-import './assets.scss';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
 
-const allowedAssetTypes: KibanaAssetType[] = [
+type AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization
+];
+
+const allowedAssetTypes: AllowedAssetTypes = [
   KibanaAssetType.dashboard,
   KibanaAssetType.search,
   KibanaAssetType.visualization,
@@ -44,10 +54,38 @@ const allowedAssetTypes: KibanaAssetType[] = [
 
 type AssetSavedObject = SimpleSavedObject<{ title: string; description?: string }>;
 
+/**
+ * TODO: This is a temporary solution for getting links to various assets. It is very risky because:
+ *
+ * 1. The plugin might not exist/be enabled
+ * 2. URLs and paths might not always be supported
+ *
+ * We should migrate to using the new URL service locators.
+ */
+const getPathToObjectInApp = ({
+  type,
+  id,
+}: {
+  type: KibanaAssetType;
+  id: string;
+}): undefined | string => {
+  switch (type) {
+    case KibanaAssetType.dashboard:
+      return `/dashboard/${id}`;
+    case KibanaAssetType.search:
+      return `/discover/${id}`;
+    case KibanaAssetType.visualization:
+      return `/visualize/edit/${id}`;
+    default:
+      return undefined;
+  }
+};
+
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const {
     savedObjects: { client: savedObjectsClient },
+    http,
   } = useStartServices();
 
   const { getPath } = useLink();
@@ -160,24 +198,40 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                     hasBorder
                     hasShadow={false}
                   >
-                    {sectionAssetSavedObjects.map(({ attributes: { title, description } }, idx) => (
-                      <>
-                        <EuiSplitPanel.Inner grow={false} key={idx}>
-                          <EuiText size="m">
-                            <p>{title}</p>
-                          </EuiText>
-                          <EuiSpacer size="s" />
-                          {description && (
-                            <EuiText size="s" color="subdued">
-                              <p>{description}</p>
-                            </EuiText>
-                          )}
-                        </EuiSplitPanel.Inner>
-                        {idx + 1 < sectionAssetSavedObjects.length && (
-                          <EuiHorizontalRule margin="none" />
-                        )}
-                      </>
-                    ))}
+                    {sectionAssetSavedObjects.map(
+                      ({ id, type, attributes: { title, description } }, idx) => {
+                        const pathToObjectInApp = getPathToObjectInApp({
+                          id,
+                          type: type as KibanaAssetType,
+                        });
+                        return (
+                          <>
+                            <EuiSplitPanel.Inner onClick={() => {}} grow={false} key={idx}>
+                              <EuiText size="m">
+                                <p>
+                                  {pathToObjectInApp ? (
+                                    <EuiLink href={getKibanaLink(http, pathToObjectInApp)}>
+                                      {title}
+                                    </EuiLink>
+                                  ) : (
+                                    title
+                                  )}
+                                </p>
+                              </EuiText>
+                              <EuiSpacer size="s" />
+                              {description && (
+                                <EuiText size="s" color="subdued">
+                                  <p>{description}</p>
+                                </EuiText>
+                              )}
+                            </EuiSplitPanel.Inner>
+                            {idx + 1 < sectionAssetSavedObjects.length && (
+                              <EuiHorizontalRule margin="none" />
+                            )}
+                          </>
+                        );
+                      }
+                    )}
                   </EuiSplitPanel.Outer>
                 </>
               </EuiAccordion>
