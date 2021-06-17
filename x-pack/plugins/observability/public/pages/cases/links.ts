@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-import { useCallback } from 'react';
-import { isEmpty } from 'lodash/fp';
-import { useKibana } from '../../utils/kibana_react';
-
-=======
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
@@ -34,7 +28,6 @@ export const casesBreadcrumbs = {
   },
 };
 
->>>>>>> master
 export const getCaseDetailsUrl = ({ id, subCaseId }: { id: string; subCaseId?: string }) => {
   if (subCaseId) {
     return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}`;

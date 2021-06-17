@@ -18,17 +18,6 @@ import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
-<<<<<<< HEAD
-import { AlertsPage } from '../pages/alerts';
-import { CreateCasePage } from '../pages/cases/create_case';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { casesBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { alertStatusRt } from '../../common/typings';
-=======
->>>>>>> master
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -72,30 +61,18 @@ export const routes = {
       return <AllCasesPage />;
     },
     params: {},
-<<<<<<< HEAD
-    breadcrumb: [casesBreadcrumbs.cases],
-=======
->>>>>>> master
   },
   '/cases/create': {
     handler: () => {
       return <CreateCasePage />;
     },
     params: {},
-<<<<<<< HEAD
-    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.create],
-=======
->>>>>>> master
   },
   '/cases/configure': {
     handler: () => {
       return <ConfigureCasesPage />;
     },
     params: {},
-<<<<<<< HEAD
-    breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.configure],
-=======
->>>>>>> master
   },
   '/cases/:detailName': {
     handler: () => {
@@ -106,10 +83,6 @@ export const routes = {
         detailName: t.string,
       }),
     },
-<<<<<<< HEAD
-    breadcrumb: [casesBreadcrumbs.cases],
-=======
->>>>>>> master
   },
   '/alerts': {
     handler: (routeParams: any) => {
