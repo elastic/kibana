@@ -127,12 +127,6 @@ export const useField = <T, FormType = FormData, I = T>(
     const changeIteration = ++changeCounter.current;
     const startTime = Date.now();
 
-    setIsModified(() => {
-      if (typeof value === 'object') {
-        return JSON.stringify(value) !== JSON.stringify(initialValue);
-      }
-      return value !== initialValue;
-    });
     setPristine(false);
     setIsChangingValue(true);
 
@@ -176,7 +170,6 @@ export const useField = <T, FormType = FormData, I = T>(
   }, [
     path,
     value,
-    initialValue,
     valueChangeListener,
     valueChangeDebounceTime,
     fieldsToValidateOnChange,
@@ -575,6 +568,15 @@ export const useField = <T, FormType = FormData, I = T>(
       }
     };
   }, [onValueChange]);
+
+  useEffect(() => {
+    setIsModified(() => {
+      if (typeof value === 'object') {
+        return JSON.stringify(value) !== JSON.stringify(initialValue);
+      }
+      return value !== initialValue;
+    });
+  }, [value, initialValue]);
 
   useEffect(() => {
     if (!isMounted.current) {
