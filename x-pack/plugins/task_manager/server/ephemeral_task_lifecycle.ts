@@ -12,12 +12,7 @@ import { Logger } from '../../../../src/core/server';
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import {
-  asTaskManagerStatEvent,
-  isTaskRunEvent,
-  TaskEventType,
-  TaskPollingCycle,
-} from './task_events';
+import { asTaskManagerStatEvent, isTaskRunEvent, isTaskPollingCycleEvent } from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -76,7 +71,7 @@ export class EphemeralTaskLifecycle {
       this.lifecycleSubscription = this.lifecycleEvent
         .pipe(
           filter((e) => {
-            const hasPollingCycleCompleted = isPollingCycleCompletedEvent(e);
+            const hasPollingCycleCompleted = isTaskPollingCycleEvent(e);
             if (hasPollingCycleCompleted) {
               this.emitEvent(
                 asTaskManagerStatEvent('queuedEphemeralTasks', asOk(this.queuedTasks))
@@ -198,8 +193,4 @@ function pushIntoSet<T>(set: Set<T>, maxCapacity: number, value: T): Result<T, T
   }
   set.add(value);
   return asOk(value);
-}
-
-function isPollingCycleCompletedEvent(e: TaskLifecycleEvent): e is TaskPollingCycle {
-  return e.type === TaskEventType.TASK_POLLING_CYCLE;
 }

@@ -21,6 +21,8 @@ import {
   isTaskManagerStatEvent,
   TaskManagerStat,
   TaskPersistence,
+  TaskClaim,
+  isTaskClaimEvent,
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
@@ -38,13 +40,16 @@ import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
-  last_successful_poll: string;
-  last_polling_delay: string;
   duration: number[];
   claim_duration: number[];
   claim_conflicts: number[];
   claim_mismatches: number[];
   result_frequency_percent_as_number: FillPoolResult[];
+  persistence: TaskPersistence[];
+}
+interface OptionalFillPoolStat extends JsonObject {
+  last_successful_poll: string;
+  last_polling_delay: string;
 }
 
 interface ExecutionStat extends JsonObject {
@@ -59,8 +64,7 @@ export interface TaskRunStat extends JsonObject {
   drift_by_type: Record<string, number[]>;
   load: number[];
   execution: ExecutionStat;
-  polling: Omit<FillPoolStat, 'last_successful_poll' | 'last_polling_delay'> &
-    Pick<Partial<FillPoolStat>, 'last_successful_poll' | 'last_polling_delay'>;
+  polling: FillPoolStat & Partial<OptionalFillPoolStat>;
 }
 
 interface FillPoolRawStat extends JsonObject {
@@ -74,6 +78,7 @@ interface FillPoolRawStat extends JsonObject {
     [FillPoolResult.RunningAtCapacity]: number;
     [FillPoolResult.PoolFilled]: number;
   };
+  persistence: TaskPersistenceTypes;
 }
 
 interface ResultFrequency extends JsonObject {
@@ -143,6 +148,9 @@ export function createTaskRunAggregator(
   const claimDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const polledTasksByPersistenceQueue = createRunningAveragedStat<TaskPersistence>(
+    runningAverageWindowSize
+  );
   const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
     // get latest polling stats
     taskPollingLifecycle.events.pipe(
@@ -184,6 +192,22 @@ export function createTaskRunAggregator(
       ),
       map(() => new Date().toISOString())
     ),
+    // get the average ratio of polled tasks by their persistency
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) => isTaskClaimEvent(taskEvent) && isOk(taskEvent.event)
+      ),
+      map((taskClaimEvent) => {
+        const claimedTask = ((taskClaimEvent as TaskClaim).event as Ok<ConcreteTaskInstance>).value;
+        return polledTasksByPersistenceQueue(
+          claimedTask.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring
+        );
+      }),
+      // unlike the other streams that emit once TM polls, this will only emit when a task is actually
+      // claimed, so to make sure `combineLatest` doesn't stall until a task is actually emitted we seed
+      // the stream with an empty queue
+      startWith([])
+    ),
     // get duration of task claim stage in polling
     taskPollingLifecycle.events.pipe(
       filter(
@@ -194,16 +218,15 @@ export function createTaskRunAggregator(
       ),
       map((claimDurationEvent) => {
         const duration = ((claimDurationEvent as TaskManagerStat).event as Ok<number>).value;
-        return {
-          claimDuration: duration ? claimDurationQueue(duration) : claimDurationQueue(),
-        };
+        return duration ? claimDurationQueue(duration) : claimDurationQueue();
       })
     ),
   ]).pipe(
-    map(([{ polling }, pollingDelay, { claimDuration }]) => ({
+    map(([{ polling }, pollingDelay, persistence, claimDuration]) => ({
       polling: {
         last_polling_delay: pollingDelay,
         claim_duration: claimDuration,
+        persistence,
         ...polling,
       },
     }))
@@ -235,6 +258,7 @@ export function createTaskRunAggregator(
           claim_conflicts: [],
           claim_mismatches: [],
           result_frequency_percent_as_number: [],
+          persistence: [],
         },
       })
     ),
@@ -308,11 +332,6 @@ const DEFAULT_POLLING_FREQUENCIES = {
   [FillPoolResult.RunningAtCapacity]: 0,
   [FillPoolResult.PoolFilled]: 0,
 };
-const DEFAULT_PERSISTENCE_FREQUENCIES = {
-  [TaskPersistence.Recurring]: 0,
-  [TaskPersistence.NonRecurring]: 0,
-  [TaskPersistence.Ephemeral]: 0,
-};
 
 export function summarizeTaskRunStat(
   {
@@ -327,6 +346,7 @@ export function summarizeTaskRunStat(
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
       claim_mismatches: claimMismatches,
+      persistence: pollingPersistence,
     },
     drift,
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -356,6 +376,11 @@ export function summarizeTaskRunStat(
           ...DEFAULT_POLLING_FREQUENCIES,
           ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
         },
+        persistence: {
+          [TaskPersistence.Recurring]: 0,
+          [TaskPersistence.NonRecurring]: 0,
+          ...calculateFrequency<TaskPersistence>(pollingPersistence as TaskPersistence[]),
+        },
       },
       drift: calculateRunningAverage(drift),
       drift_by_type: mapValues(drift_by_type, (typedDrift) => calculateRunningAverage(typedDrift)),
@@ -366,7 +391,9 @@ export function summarizeTaskRunStat(
           calculateRunningAverage(typedDurations)
         ),
         persistence: {
-          ...DEFAULT_PERSISTENCE_FREQUENCIES,
+          [TaskPersistence.Recurring]: 0,
+          [TaskPersistence.NonRecurring]: 0,
+          [TaskPersistence.Ephemeral]: 0,
           ...calculateFrequency<TaskPersistence>(persistence),
         },
         result_frequency_percent_as_number: mapValues(

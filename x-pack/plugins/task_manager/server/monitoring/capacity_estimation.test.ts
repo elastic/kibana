@@ -46,13 +46,20 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // no non-recurring executions in the system in recent history
               persistence: {
+                // no non-recurring executions in the system in recent history
                 ephemeral: 0,
                 non_recurring: 0,
                 recurring: 100,
               },
               result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring tasks polled in the system in recent history
+              persistence: {
+                non_recurring: 0,
+                recurring: 100,
+              },
             },
           }
         )
@@ -101,13 +108,19 @@ describe('estimateCapacity', () => {
                   p99: 253150,
                 },
               },
-              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              persistence: {
+                // no non-recurring tasks polled in the system in recent history
                 non_recurring: 0,
                 recurring: 100,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -139,13 +152,19 @@ describe('estimateCapacity', () => {
             execution: {
               duration: {},
               duration_by_persistence: {},
-              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring tasks polled in the system in recent history
+              persistence: {
                 non_recurring: 0,
                 recurring: 100,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -194,13 +213,19 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring task polling in the system in recent history
+              persistence: {
                 non_recurring: 0,
                 recurring: 100,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -252,11 +277,18 @@ describe('estimateCapacity', () => {
               },
               // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring tasks polled in the system in recent history
+              persistence: {
                 non_recurring: 0,
                 recurring: 100,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -305,13 +337,19 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring tasks polled in the system in recent history
+              persistence: {
                 non_recurring: 0,
                 recurring: 100,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -374,12 +412,18 @@ describe('estimateCapacity', () => {
                 },
               },
               persistence: {
-                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
-                ephemeral: 25,
-                non_recurring: 25,
-                recurring: 50,
+                ephemeral: 33,
+                non_recurring: 33,
+                recurring: 33,
               },
               result_frequency_percent_as_number: {},
+            },
+            polling: {
+              persistence: {
+                // 50% of polled tasks are non-recurring in the system in recent history
+                non_recurring: 50,
+                recurring: 50,
+              },
             },
           }
         )
@@ -397,7 +441,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  test('estimates the min required kibana instances when there is sufficient capacity for recurring but not for non-recurring/ephemeral', async () => {
+  test('estimates the min required kibana instances when there is sufficient capacity for recurring but not for non-recurring', async () => {
     const provisionedKibanaInstances = 2;
     const recurringTasksPerMinute = 251;
     // 50% for non-recurring/epehemral + half of recurring task workload
@@ -454,12 +498,18 @@ describe('estimateCapacity', () => {
                 },
               },
               persistence: {
-                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
                 ephemeral: 25,
                 non_recurring: 25,
                 recurring: 50,
               },
               result_frequency_percent_as_number: {},
+            },
+            polling: {
+              persistence: {
+                // 50% of polled tasks are non-recurring in the system in recent history
+                non_recurring: 50,
+                recurring: 50,
+              },
             },
           }
         )
@@ -536,13 +586,19 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // 20% average of non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
+                ephemeral: 50,
+                non_recurring: 10,
+                recurring: 40,
+              },
+              result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // 20% average of polled non-recurring in the system in recent history
+              persistence: {
                 non_recurring: 20,
                 recurring: 80,
               },
-              result_frequency_percent_as_number: {},
             },
           }
         )
@@ -597,13 +653,20 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
                 non_recurring: 20,
                 recurring: 80,
               },
               result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // no non-recurring tasks polled in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 20,
+                recurring: 80,
+              },
             },
           }
         )
@@ -658,13 +721,19 @@ describe('estimateCapacity', () => {
                   p99: 1500,
                 },
               },
-              // 20% average of non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
                 non_recurring: 20,
                 recurring: 80,
               },
               result_frequency_percent_as_number: {},
+            },
+            polling: {
+              // 20% average of polled tasks are non-recurring in the system in recent history
+              persistence: {
+                non_recurring: 20,
+                recurring: 80,
+              },
             },
           }
         )
@@ -726,6 +795,12 @@ describe('estimateCapacity', () => {
               },
               result_frequency_percent_as_number: {},
             },
+            polling: {
+              persistence: {
+                recurring: 0,
+                non_recurring: 100,
+              },
+            },
           }
         )
       )
@@ -736,7 +811,7 @@ describe('estimateCapacity', () => {
         observed: {
           observed_kibana_instances: 1,
           avg_recurring_required_throughput_per_minute: 29,
-          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
+          // we obesrve 100% capacity on non-recurring tasks, which is 200tpm
           // and add to that the 29tpm for recurring tasks
           avg_required_throughput_per_minute_per_kibana: 229,
         },
@@ -801,6 +876,12 @@ describe('estimateCapacity', () => {
               },
               result_frequency_percent_as_number: {},
             },
+            polling: {
+              persistence: {
+                recurring: 0,
+                non_recurring: 100,
+              },
+            },
           }
         )
       )
@@ -811,12 +892,12 @@ describe('estimateCapacity', () => {
         observed: {
           observed_kibana_instances: 1,
           avg_recurring_required_throughput_per_minute: 210,
-          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
+          // we obesrve 100% capacity on non-recurring tasks, which is 200tpm
           // and add to that the 210tpm for recurring tasks
           avg_required_throughput_per_minute_per_kibana: 410,
         },
         proposed: {
-          // we propose provisioning 3 instances for recurring + non-recurring/ephemeral
+          // we propose provisioning 3 instances for recurring + non-recurring
           provisioned_kibana: 3,
           // but need at least 2 for recurring
           min_required_kibana: 2,
