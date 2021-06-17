@@ -8,7 +8,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
 import {
   EuiCode,
   EuiComboBoxOptionOption,
@@ -30,30 +29,14 @@ import { IndexPatternSelect } from './lib/index_pattern_select';
 import { KBN_FIELD_TYPES, Query } from '../../../../../plugins/data/public';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
-import { collectionActions } from './lib/collection_actions';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { getDataStart } from '../../services';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import type {
-  Panel,
-  Annotation,
-  FetchedIndexPattern,
-  IndexPatternValue,
-} from '../../../common/types';
+import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const INDEX_PATTERN_NAME = 'index_pattern';
-
-export const newAnnotation = () => ({
-  id: uuid.v1(),
-  color: '#F00',
-  index_pattern: '',
-  time_field: '',
-  icon: 'fa-tag',
-  ignore_global_filters: 1,
-  ignore_panel_filters: 1,
-});
 
 const annotationDefaults = {
   fields: '',
@@ -65,56 +48,37 @@ const annotationDefaults = {
 export interface AnnotationRowProps {
   annotation: Annotation;
   fields: VisFields;
-  model: Panel;
-  name: keyof Panel;
-  onChange: (partialModel: Partial<Panel>) => void;
+  onChange: (partialModel: Partial<Annotation>) => void;
+  handleAdd: () => void;
+  handleDelete: () => void;
+  handleChange: (
+    annotation: Annotation,
+    name: string
+  ) => (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) => void;
+  handleQueryChange: (annotation: Annotation, filter: Query) => void;
 }
 
-export const AnnotationRow = (props: AnnotationRowProps) => {
-  const model = useMemo(() => ({ ...annotationDefaults, ...props.annotation }), [props.annotation]);
+export const AnnotationRow = ({
+  annotation,
+  fields,
+  onChange,
+  handleAdd,
+  handleDelete,
+  handleChange,
+  handleQueryChange,
+}: AnnotationRowProps) => {
+  const model = useMemo(() => ({ ...annotationDefaults, ...annotation }), [annotation]);
 
   const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>(null);
 
-  const updateFetchedIndex = useCallback(async (indexPatternValue: IndexPatternValue = '') => {
-    const { indexPatterns } = getDataStart();
-    setFetchedIndex(await fetchIndexPattern(indexPatternValue, indexPatterns));
-  }, []);
-
   useEffect(() => {
+    const updateFetchedIndex = async (indexPatternValue: IndexPatternValue = '') => {
+      const { indexPatterns } = getDataStart();
+      setFetchedIndex(await fetchIndexPattern(indexPatternValue, indexPatterns));
+    };
+
     updateFetchedIndex(model.index_pattern);
-  }, [model.index_pattern, updateFetchedIndex]);
-
-  const handleChange = useCallback(
-    (item: Annotation, name: string) => {
-      return (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) =>
-        collectionActions.handleChange(props, {
-          ...item,
-          [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
-        });
-    },
-    [props]
-  );
-  const handleQueryChange = useCallback(
-    (item: Annotation, filter: Query) =>
-      collectionActions.handleChange(props, {
-        ...item,
-        query_string: filter,
-      }),
-    [props]
-  );
-
-  const onChange = useCallback(
-    (part: Partial<Annotation>) => collectionActions.handleChange(props, { ...model, ...part }),
-    [props, model]
-  );
-
-  const changeFetchedIndex = useCallback(
-    async (index: { [INDEX_PATTERN_NAME]: IndexPatternValue }) => {
-      onChange(index);
-      await updateFetchedIndex(index[INDEX_PATTERN_NAME]);
-    },
-    [onChange, updateFetchedIndex]
-  );
+  }, [model.index_pattern]);
 
   const togglePanelActivation = useCallback(
     () =>
@@ -125,11 +89,6 @@ export const AnnotationRow = (props: AnnotationRowProps) => {
   );
 
   const htmlId = htmlIdGenerator(model.id);
-  const handleAdd = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
-  const handleDelete = useCallback(() => collectionActions.handleDelete(props, model), [
-    props,
-    model,
-  ]);
 
   return (
     <div className="tvbAnnotationsEditor" key={model.id}>
@@ -144,7 +103,7 @@ export const AnnotationRow = (props: AnnotationRowProps) => {
               <IndexPatternSelect
                 value={model.index_pattern}
                 indexPatternName={INDEX_PATTERN_NAME}
-                onChange={changeFetchedIndex}
+                onChange={onChange}
                 fetchedIndex={fetchedIndex}
               />
             </EuiFlexItem>
@@ -161,7 +120,7 @@ export const AnnotationRow = (props: AnnotationRowProps) => {
                 value={model.time_field}
                 onChange={handleChange(model, 'time_field')}
                 indexPattern={model.index_pattern}
-                fields={props.fields}
+                fields={fields}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
