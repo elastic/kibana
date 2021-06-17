@@ -18,7 +18,7 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
-import { EndpointAppContext } from '../../../server/endpoint/types';
+import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
@@ -67,16 +67,8 @@ export class TelemetryEventsSender {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(
-    telemetrySetup?: TelemetryPluginSetup,
-    taskManager?: TaskManagerSetupContract,
-    endpointContext?: EndpointAppContext
-  ) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
-    this.agentService = endpointContext?.service.getAgentService();
-    this.agentPolicyService = endpointContext?.service.getAgentPolicyService();
-    const fakeRequest = { headers: {} } as KibanaRequest;
-    this.savedObjectClient = endpointContext?.service.getScopedSavedObjectsClient(fakeRequest);
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
@@ -87,11 +79,16 @@ export class TelemetryEventsSender {
   public start(
     core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
-    taskManager?: TaskManagerStartContract
+    taskManager?: TaskManagerStartContract,
+    endpointContextService?: EndpointAppContextService
   ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
     this.esClient = core?.elasticsearch.client.asInternalUser;
+    this.agentService = endpointContextService?.getAgentService();
+    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    // const fakeRequest = { headers: {} } as KibanaRequest;
+    // this.savedObjectClient = endpointContextService?.getScopedSavedObjectsClient(fakeRequest);
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);

@@ -49,7 +49,8 @@ export class TelemetryEndpointTask {
                 taskInstance.state?.lastExecutionTimestamp
               );
 
-              const _hits = await this.runTask(taskInstance.id, executeFrom, executeTo);
+              const hits = await this.runTask(taskInstance.id, executeFrom, executeTo);
+              this.logger.debug(`hits: ${hits}`);
 
               return {
                 state: {
@@ -101,14 +102,16 @@ export class TelemetryEndpointTask {
     }
 
     // 1. [PH] Get the fleet agents
-    const agents = this.sender.fetchEndpointAgents();
-    // console.log(agents)
+    const agents = await this.sender.fetchEndpointAgents();
+    this.logger.debug(`total agents: ${agents}`);
 
     // 2. [PH/] Get the fleet index (policies)
-    const policies = this.sender.fetchEndpointPolicyConfigs();
+    const policies = await this.sender.fetchEndpointPolicyConfigs();
+    this.logger.debug(`policy configs: ${policies}`);
 
     // 3. [PH] Get the endpoint policy failure responses
-    const policyResponses = this.sender.fetchEndpointPolicyResponses();
+    const policyResponses = await this.sender.fetchEndpointPolicyResponses();
+    this.logger.debug(`ep policy responses: ${policyResponses}`);
 
     // 4. [CD] Get the EP metrics
     // 5. [PH/CD] Document restructuring / Join on agent / host id

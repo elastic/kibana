@@ -465,7 +465,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager, endpointContext);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
 
     return {};
   }
@@ -541,7 +541,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
-    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.start(
+      core,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.endpointAppContextService
+    );
     return {};
   }
 
