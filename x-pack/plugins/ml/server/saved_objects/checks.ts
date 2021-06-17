@@ -24,7 +24,7 @@ interface JobSavedObjectStatus {
   };
 }
 
-interface JobStatus {
+export interface JobStatus {
   jobId: string;
   datafeedId?: string | null;
   checks: {
@@ -68,7 +68,9 @@ export function checksFactory(
 
         if (type === 'anomaly-detector') {
           jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
-          datafeedExists = datafeeds.datafeeds.some((d) => d.job_id === jobId);
+          datafeedExists = datafeeds.datafeeds.some(
+            (d) => d.datafeed_id === datafeedId && d.job_id === jobId
+          );
         } else {
           jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
         }

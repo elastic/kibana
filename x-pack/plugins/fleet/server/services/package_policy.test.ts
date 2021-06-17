@@ -408,6 +408,11 @@ describe('Package policy service', () => {
           ],
           policy_templates: [
             {
+              name: 'template_1',
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+            {
+              name: 'template_2',
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
@@ -416,6 +421,7 @@ describe('Package policy service', () => {
         [
           {
             type: 'log',
+            policy_template: 'template_1',
             enabled: true,
             vars: {
               hosts: {
@@ -433,12 +439,24 @@ describe('Package policy service', () => {
               },
             ],
           },
+          {
+            type: 'log',
+            policy_template: 'template_2',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
         ]
       );
 
       expect(inputs).toEqual([
         {
           type: 'log',
+          policy_template: 'template_1',
           enabled: true,
           vars: {
             hosts: {
@@ -464,6 +482,20 @@ describe('Package policy service', () => {
               },
             },
           ],
+        },
+        {
+          type: 'log',
+          policy_template: 'template_2',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
         },
       ]);
     });
@@ -567,6 +599,129 @@ describe('Package policy service', () => {
                 period: {
                   value: '6mo',
                   type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
                 },
               },
             },

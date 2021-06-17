@@ -14,6 +14,8 @@ import type {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
@@ -24,24 +26,21 @@ import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public'
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
-import { PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
-import { BASE_PATH } from './applications/fleet/constants';
-import { licenseService } from './applications/fleet/hooks/use_license';
-import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
+import { FLEET_BASE_PATH } from './constants';
+import { licenseService } from './hooks';
+import { setHttpClient } from './hooks/use_request';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
-} from './applications/fleet/components/home_integration';
-import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
-import type {
-  UIExtensionRegistrationCallback,
-  UIExtensionsStorage,
-} from './applications/fleet/types';
+} from './components/home_integration';
+import { createExtensionRegistrationCallback } from './services/ui_extensions';
+import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 
 export { FleetConfigType } from '../common/types';
 
@@ -67,6 +66,7 @@ export interface FleetSetupDeps {
 
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
@@ -95,6 +95,36 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Set up license service
     licenseService.start(deps.licensing.license$);
+
+    // Register Integrations app
+    core.application.register({
+      id: INTEGRATIONS_PLUGIN_ID,
+      category: DEFAULT_APP_CATEGORIES.management,
+      title: i18n.translate('xpack.fleet.integrationsAppTitle', {
+        defaultMessage: 'Integrations',
+      }),
+      order: 9019,
+      euiIconType: 'logoElastic',
+      mount: async (params: AppMountParameters) => {
+        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
+          CoreStart,
+          FleetStartDeps,
+          FleetStart
+        ];
+        const startServices: FleetStartServices = {
+          ...coreStartServices,
+          ...startDepsServices,
+          storage: this.storage,
+        };
+        const { renderApp, teardownIntegrations } = await import('./applications/integrations');
+        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
+
+        return () => {
+          unmount();
+          teardownIntegrations(startServices);
+        };
+      },
+    });
 
     // Register main Fleet app
     core.application.register({
@@ -156,7 +186,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         }),
         icon: 'indexManagementApp',
         showOnHomePage: true,
-        path: BASE_PATH,
+        path: FLEET_BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });

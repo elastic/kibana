@@ -16,29 +16,23 @@ import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
 import {
-  KibanaServices,
   KibanaContextProvider,
+  KibanaServices,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
+import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
-import {
-  withNotifyOnErrors,
-  createKbnUrlStateStorage,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+import { AllSeries, UrlStorageContext } from './hooks/use_series_storage';
+
 import * as fetcherHook from '../../../hooks/use_fetcher';
-import * as useUrlHook from './hooks/use_url_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
@@ -73,6 +67,11 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
   url?: Url;
+  initSeries?: {
+    data?: AllSeries;
+    filters?: UrlFilter[];
+    breakdown?: string;
+  };
 }
 
 function getSetting<T = any>(key: string): T {
@@ -127,17 +126,8 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
 export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   children,
   core,
-  history,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const { notifications } = core!;
-
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    ...withNotifyOnErrors(notifications!.toasts),
-  });
-
   const indexPattern = mockIndexPattern;
 
   setIndexPatterns(({
@@ -149,11 +139,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
       <EuiThemeProvider darkMode={false}>
         <I18nProvider>
-          <IndexPatternContextProvider>
-            <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-              {children}
-            </UrlStorageContextProvider>
-          </IndexPatternContextProvider>
+          <IndexPatternContextProvider>{children}</IndexPatternContextProvider>
         </I18nProvider>
       </EuiThemeProvider>
     </KibanaContextProvider>
@@ -184,6 +170,7 @@ export function render<ExtraCore>(
     kibanaProps,
     renderOptions,
     url,
+    initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
   if (url) {
@@ -195,15 +182,20 @@ export function render<ExtraCore>(
     ...customCore,
   };
 
+  const seriesContextValue = mockSeriesStorageContext(initSeries);
+
   return {
     ...reactTestLibRender(
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        {ui}
+        <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+          {ui}
+        </UrlStorageContext.Provider>
       </MockRouter>,
       renderOptions
     ),
     history,
     core,
+    ...seriesContextValue,
   };
 }
 
@@ -256,7 +248,7 @@ export const mockUseValuesList = (values?: string[]) => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockUrlStorage = ({
+function mockSeriesStorageContext({
   data,
   filters,
   breakdown,
@@ -264,10 +256,10 @@ export const mockUrlStorage = ({
   data?: AllSeries;
   filters?: UrlFilter[];
   breakdown?: string;
-}) => {
+}) {
   const mockDataSeries = data || {
     'performance-distribution': {
-      reportType: 'pld',
+      reportType: 'dist',
       dataType: 'ux',
       breakdown: breakdown || 'user_agent.name',
       time: { from: 'now-15m', to: 'now' },
@@ -282,18 +274,18 @@ export const mockUrlStorage = ({
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
-  const spy = jest.spyOn(useUrlHook, 'useUrlStorage').mockReturnValue({
+  const getSeries = jest.fn().mockReturnValue(series);
+
+  return {
     firstSeriesId,
     allSeriesIds,
     removeSeries,
     setSeries,
-    series,
+    getSeries,
     firstSeries: mockDataSeries[firstSeriesId],
     allSeries: mockDataSeries,
-  } as any);
-
-  return { spy, removeSeries, setSeries };
-};
+  };
+}
 
 export function mockUseSeriesFilter() {
   const removeFilter = jest.fn();
