@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiText, EuiBetaBadge } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useLink } from '../../../hooks';
@@ -30,15 +30,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
         <EuiText>
           <h1>
             <FormattedMessage id="xpack.fleet.integrationsAppTitle" defaultMessage="Integrations" />{' '}
-            <EuiBetaBadge
-              label={<FormattedMessage id="xpack.fleet.betaLabel" defaultMessage="Beta" />}
-              tooltipContent={
-                <FormattedMessage
-                  id="xpack.fleet.integrationsBetaDescription"
-                  defaultMessage="Fleet is not recommended for production environments."
-                />
-              }
-            />
           </h1>
         </EuiText>
       }
