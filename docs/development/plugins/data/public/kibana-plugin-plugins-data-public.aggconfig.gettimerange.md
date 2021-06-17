@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-getTimeRange(): import("../../../public").TimeRange | undefined;
+getTimeRange(): import("../../query").TimeRange | undefined;
 ```
 <b>Returns:</b>
 
-`import("../../../public").TimeRange | undefined`
+`import("../../query").TimeRange | undefined`
 

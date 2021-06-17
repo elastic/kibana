@@ -153,7 +153,7 @@ export class AggConfig {
     // (undocumented)
     getResponseAggs(): AggConfig[];
     // (undocumented)
-    getTimeRange(): import("../../../public").TimeRange | undefined;
+    getTimeRange(): import("../../query").TimeRange | undefined;
     // (undocumented)
     getTimeShift(): undefined | moment.Duration;
     // (undocumented)
