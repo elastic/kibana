@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LicenseExpiration } from './license_expiration';
+export { LicensePageHeader } from './license_page_header';

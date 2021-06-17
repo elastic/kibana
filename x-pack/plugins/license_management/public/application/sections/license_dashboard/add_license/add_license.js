@@ -18,6 +18,7 @@ export const AddLicense = ({ uploadPath = `/upload_license` }) => {
 
   return (
     <EuiCard
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
