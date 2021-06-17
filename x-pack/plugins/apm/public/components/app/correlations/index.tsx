@@ -52,15 +52,17 @@ const errorRateTab = {
   }),
   component: ErrorCorrelations,
 };
-// @todo: Rename tab
-const demo1Tab = {
-  key: 'demo1',
-  label: i18n.translate('xpack.apm.correlations.tabs.demo1Label', {
-    defaultMessage: 'ML Correlations',
-  }),
+const latencyCorrelationsTab = {
+  key: 'latencyCorrelations',
+  label: i18n.translate(
+    'xpack.apm.correlations.tabs.latencyCorrelationsLabel',
+    {
+      defaultMessage: 'Latency correlations',
+    }
+  ),
   component: MlCorrelations,
 };
-const tabs = [latencyTab, errorRateTab, demo1Tab];
+const tabs = [latencyTab, errorRateTab, latencyCorrelationsTab];
 
 export function Correlations() {
   const license = useLicenseContext();
