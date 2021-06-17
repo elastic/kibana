@@ -285,30 +285,28 @@ export class BaseAlert {
 
       // for each node, update the alert's state with node states
       for (const node of nodes) {
-        if (!node.shouldFire) {
-          continue;
-        }
         const newAlertStates: AlertNodeState[] = [];
         const instance = services.alertInstanceFactory(node.meta.nodeId || node.meta.instanceId);
 
-        const { meta } = node;
-
-        // create a default alert state for this node and add data from node.meta and other data
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
-        if (key) {
-          nodeState[key] = meta[key];
+        if (node.shouldFire) {
+          const { meta } = node;
+          // create a default alert state for this node and add data from node.meta and other data
+          const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
+          if (key) {
+            nodeState[key] = meta[key];
+          }
+          nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
+          // TODO: make these functions more generic, so it's node/item agnostic
+          nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
+          nodeState.itemLabel = meta.itemLabel;
+          nodeState.meta = meta;
+          nodeState.ui.triggeredMS = currentUTC;
+          nodeState.ui.isFiring = true;
+          nodeState.ui.severity = node.severity;
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          // store the state of each node in array.
+          newAlertStates.push(nodeState);
         }
-        nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
-        // TODO: make these functions more generic, so it's node/item agnostic
-        nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
-        nodeState.itemLabel = meta.itemLabel;
-        nodeState.meta = meta;
-        nodeState.ui.triggeredMS = currentUTC;
-        nodeState.ui.isFiring = true;
-        nodeState.ui.severity = node.severity;
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-        // store the state of each node in array.
-        newAlertStates.push(nodeState);
         const alertInstanceState = { alertStates: newAlertStates };
         // update the alert's state with the new node states
         instance.replaceState(alertInstanceState);
