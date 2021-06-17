@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
+import { lazy } from 'react';
 import {
   Plugin,
   ObservabilityPublicPluginsStart,
@@ -43,6 +44,8 @@ export {
   FieldValueSuggestions,
 } from './components/shared/';
 
+export type { LazyObservabilityPageTemplateProps } from './components/shared';
+
 export {
   useTrackPageview,
   useUiTracker,
@@ -52,11 +55,13 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
+export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 
 export * from './typings';
 
 export { useChartTheme } from './hooks/use_chart_theme';
+export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';

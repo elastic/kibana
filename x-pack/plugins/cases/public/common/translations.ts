@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAVED_OBJECT_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsTitle',
+export const CASES_FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.cases.caseFeatureNoPermissionsTitle',
   {
     defaultMessage: 'Kibana feature privileges required',
   }
 );
 
-export const SAVED_OBJECT_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsMessage',
+export const CASES_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.cases.caseFeatureNoPermissionsMessage',
   {
     defaultMessage:
-      'To view cases, you must have privileges for the Saved Object Management feature in the Kibana space. For more information, contact your Kibana administrator.',
+      'To view cases, you must have privileges for the Cases feature in the Kibana space. For more information, contact your Kibana administrator.',
   }
 );
 
@@ -30,13 +30,11 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
-  defaultMessage: 'Delete case',
-});
-
-export const DELETE_CASES = i18n.translate('xpack.cases.confirmDeleteCase.deleteCases', {
-  defaultMessage: 'Delete cases',
-});
+export const DELETE_CASE = (quantity: number = 1) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
+    values: { quantity },
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {cases}}`,
+  });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',

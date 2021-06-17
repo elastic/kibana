@@ -11,6 +11,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiLoadingContent,
   EuiTitle,
   EuiText,
@@ -31,8 +32,6 @@ import {
   detailsError,
   detailsLoading,
   getActivityLogData,
-  getActivityLogError,
-  getActivityLogRequestLoading,
   showView,
   policyResponseConfigurations,
   policyResponseActions,
@@ -55,10 +54,11 @@ import {
 } from './components/endpoint_details_tabs';
 
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
-import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
+import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
+import { ActionsMenu } from './components/actions_menu';
 
 const DetailsFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -85,8 +85,6 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
 
   const activityLog = useEndpointSelector(getActivityLogData);
-  const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
-  const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
   const hostDetailsError = useEndpointSelector(detailsError);
@@ -119,14 +117,13 @@ export const EndpointDetailsFlyout = memo(() => {
     },
     {
       id: EndpointDetailsTabsTypes.activityLog,
-      name: i18.ACTIVITY_LOG,
-      content: activityLoading ? (
-        ContentLoadingMarkup
-      ) : (
-        <EndpointActivityLog endpointActions={activityLog} />
-      ),
+      name: i18.ACTIVITY_LOG.tabTitle,
+      content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];
+
+  const showFlyoutFooter =
+    show === 'details' || show === 'policy_response' || show === 'activity_log';
 
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
@@ -149,17 +146,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-    if (activityError !== undefined) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorTitle', {
-          defaultMessage: 'Could not find activity log for host',
-        }),
-        text: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorBody', {
-          defaultMessage: 'Please exit the flyout and select another host with actions.',
-        }),
-      });
-    }
-  }, [hostDetailsError, activityError, toasts]);
+  }, [hostDetailsError, toasts]);
 
   return (
     <EuiFlyout
@@ -167,14 +154,14 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
-      paddingSize="m"
+      paddingSize="l"
     >
-      <EuiFlyoutHeader hasBorder>
-        {hostDetailsLoading || activityLoading ? (
+      <EuiFlyoutHeader>
+        {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">
-            <EuiTitle size="s">
+            <EuiTitle>
               <h2
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
@@ -203,7 +190,15 @@ export const EndpointDetailsFlyout = memo(() => {
 
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
 
-          {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={hostDetails} />}
+          {(show === 'isolate' || show === 'unisolate') && (
+            <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
+          )}
+
+          {showFlyoutFooter && (
+            <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
+              <ActionsMenu />
+            </EuiFlyoutFooter>
+          )}
         </>
       )}
     </EuiFlyout>

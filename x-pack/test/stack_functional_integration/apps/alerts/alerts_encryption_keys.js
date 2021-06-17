@@ -6,8 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
-const ARCHIVE = 'email_connectors_with_encryption_rotation';
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+const ARCHIVE = resolve(
+  INTEGRATION_TEST_ROOT,
+  'test/es_archives/email_connectors_with_encryption_rotation'
+);
 
 export default ({ getPageObjects, getService }) => {
   const esArchiver = getService('esArchiver');

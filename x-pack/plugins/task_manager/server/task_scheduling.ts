@@ -10,6 +10,7 @@ import { filter } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
+import agent from 'elastic-apm-node';
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
 import {
@@ -85,7 +86,10 @@ export class TaskScheduling {
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
-    return await this.store.schedule(modifiedTask);
+    return await this.store.schedule({
+      ...modifiedTask,
+      traceparent: agent.currentTraceparent ?? '',
+    });
   }
 
   /**

@@ -14,7 +14,7 @@ import { TIMEOUT } from './constants';
  * Data returned by GET /_nodes/usage, but flattened as an array of {@link estypes.NodeUsageInformation}
  * with the node ID set in the field `node_id`.
  */
-export interface NodeUsage extends estypes.NodeUsageInformation {
+export interface NodeUsage extends estypes.NodesUsageNodeUsage {
   /**
    * The Node ID as reported by ES
    */

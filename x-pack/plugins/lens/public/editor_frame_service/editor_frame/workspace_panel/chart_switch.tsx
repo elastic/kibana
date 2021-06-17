@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiIconTip,
   EuiSelectableOption,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -286,6 +287,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                 .map(
                   (v): SelectableEntry => ({
                     'aria-label': v.fullLabel || v.label,
+                    className: 'lnsChartSwitch__option',
                     isGroupLabel: false,
                     key: `${v.visualizationId}:${v.id}`,
                     value: `${v.visualizationId}:${v.id}`,
@@ -295,22 +297,45 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
                     append:
-                      v.selection.dataLoss !== 'nothing' ? (
-                        <EuiIconTip
-                          aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                            defaultMessage: 'Warning',
-                          })}
-                          type="alert"
-                          color="warning"
-                          content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                            defaultMessage:
-                              'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
-                          })}
-                          iconProps={{
-                            className: 'lnsChartSwitch__chartIcon',
-                            'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                          }}
-                        />
+                      v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
+                        <EuiFlexGroup
+                          gutterSize="xs"
+                          responsive={false}
+                          className="lnsChartSwitch__append"
+                        >
+                          {v.selection.dataLoss !== 'nothing' ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                                  defaultMessage: 'Warning',
+                                })}
+                                type="alert"
+                                color="warning"
+                                content={i18n.translate(
+                                  'xpack.lens.chartSwitch.dataLossDescription',
+                                  {
+                                    defaultMessage:
+                                      'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                  }
+                                )}
+                                iconProps={{
+                                  className: 'lnsChartSwitch__chartIcon',
+                                  'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                                }}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                          {v.showExperimentalBadge ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.experimentalLabel"
+                                  defaultMessage="Experimental"
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
                       ) : null,
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
@@ -363,6 +388,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelectable
+          className="lnsChartSwitch__options"
           height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
           searchable
           singleSelection

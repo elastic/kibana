@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+          useCreate: true,
+        });
         // wait for transform
         await new Promise((r) => setTimeout(r, 120000));
       });
