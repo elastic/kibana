@@ -10,10 +10,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CasesConfigureRequestRt, throwErrors } from '../../../../common/api';
+import { CASE_CONFIGURE_URL, CasesConfigureRequestRt, throwErrors } from '../../../../common';
 import { RouteDeps } from '../types';
 import { wrapError, escapeHatch } from '../utils';
-import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 
 export function initPostCaseConfigure({ router, logger }: RouteDeps) {
   router.post(
