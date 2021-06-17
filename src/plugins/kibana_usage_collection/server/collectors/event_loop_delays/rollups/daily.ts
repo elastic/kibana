@@ -8,12 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { ISavedObjectsRepository } from '../../../../../../core/server';
-
-import {
-  EventLoopDelaysDaily,
-  deleteHistogramSavedObjects,
-  SAVED_OBJECTS_DAILY_TYPE,
-} from '../saved_objects';
+import { deleteHistogramSavedObjects } from '../saved_objects';
 
 /**
  * Deletes docs older than 3 days

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ElasticsearchClient,
-  Logger,
-  ISavedObjectsRepository,
-} from '../../../../../../../core/server';
+import type { Logger, ISavedObjectsRepository } from '../../../../../../../core/server';
 import {
   createTestServers,
   TestElasticsearchUtils,
@@ -55,7 +51,6 @@ const rawEventLoopDelaysDaily = [
 
 describe('daily rollups integration test', () => {
   let root: TestKibanaUtils['root'];
-  let client: ElasticsearchClient;
   let internalRepository: ISavedObjectsRepository;
   let logger: Logger;
 
@@ -69,7 +64,6 @@ describe('daily rollups integration test', () => {
 
     await root.setup();
     const start = await root.start();
-    client = start.elasticsearch.client.asInternalUser;
     logger = root.logger.get('test dailt rollups');
     internalRepository = start.savedObjects.createInternalRepository();
 
