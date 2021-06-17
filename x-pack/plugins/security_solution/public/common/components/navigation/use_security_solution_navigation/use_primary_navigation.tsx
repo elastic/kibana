@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,19 +27,11 @@ export const usePrimaryNavigation = ({
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
-  const mapLocationToTab = useCallback(
-    (): string =>
-      getOr(
-        '',
-        'id',
-        Object.values(navTabs).find(
-          (item) =>
-            (tabName === item.id && item.pageId != null) ||
-            (pageName === item.id && item.pageId == null)
-        )
-      ),
-    [pageName, tabName, navTabs]
-  );
+  const mapLocationToTab = useCallback((): string => navTabs[tabName || pageName]?.id ?? '', [
+    pageName,
+    tabName,
+    navTabs,
+  ]);
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 

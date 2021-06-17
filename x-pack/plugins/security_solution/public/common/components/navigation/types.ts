@@ -59,5 +59,7 @@ export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 
 export type GetUrlForApp = (
   appId: string,
-  options?: { path?: string; absolute?: boolean }
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
 ) => string;
+
+export type NavigateToUrl = (url: string) => void;

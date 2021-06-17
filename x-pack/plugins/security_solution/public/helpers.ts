@@ -100,7 +100,8 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     default:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.overview,
         replace: true,
         path: `${search}`,
       });

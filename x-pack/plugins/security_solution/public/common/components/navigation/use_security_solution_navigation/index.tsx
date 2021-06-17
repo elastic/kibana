@@ -23,7 +23,7 @@ export const useSecuritySolutionNavigation = () => {
   const { urlState } = useUrlState();
   const {
     chrome,
-    application: { getUrlForApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
@@ -48,7 +48,8 @@ export const useSecuritySolutionNavigation = () => {
           timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp
+        getUrlForApp,
+        navigateToUrl
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
