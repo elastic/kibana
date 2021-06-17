@@ -17,7 +17,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../../shared/loading';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 
 import { AddSource } from './add_source';
 import { AddSourceSteps } from './add_source_logic';
@@ -68,11 +71,20 @@ describe('AddSourceList', () => {
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
   });
 
-  it('handles loading state', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+  describe('layout', () => {
+    it('renders the default workplace search layout when on an organization view', () => {
+      setMockValues({ ...mockValues, isOrganization: true });
+      const wrapper = shallow(<AddSource sourceIndex={1} />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
+    });
+
+    it('renders the personal dashboard layout when not in an organization', () => {
+      setMockValues({ ...mockValues, isOrganization: false });
+      const wrapper = shallow(<AddSource sourceIndex={1} />);
+
+      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
+    });
   });
 
   it('renders Config Completed step', () => {
