@@ -135,8 +135,8 @@ export const favoriteTimeline = ({
     method: 'PATCH',
     url: 'api/timeline/_favorite',
     body: {
-      templateTimelineId,
-      templateTimelineVersion,
+      templateTimelineId: templateTimelineId ?? null,
+      templateTimelineVersion: templateTimelineVersion ?? null,
       timelineId,
       timelineType,
     },
