@@ -24,7 +24,7 @@ import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
-import { initializeDatasources, createDatasourceLayers } from './state_helpers';
+import { createDatasourceLayers } from './state_helpers';
 import {
   getVisualizeFieldSuggestions,
   getTopSuggestionForField,
@@ -53,29 +53,30 @@ export interface EditorFrameProps {
   initialContext?: VisualizeFieldContext;
 }
 
+let counter = 0;
+
 export function EditorFrame(props: EditorFrameProps) {
   const lensState = useLensSelector((state) => state.app);
   const {
     filters,
+    query,
+    resolvedDateRange: dateRange,
     searchSessionId,
     savedQuery,
-    query,
-    persistedDoc,
     indexPatternsForTopNav,
+    persistedDoc,
     lastKnownDoc,
     activeData,
-    isSaveable,
-    resolvedDateRange: dateRange,
     title,
     description,
     persistedId,
     activeDatasourceId,
-    isFullscreenDatasource,
     visualization,
     datasourceStates,
     stagedPreview,
+    isFullscreenDatasource,
   } = lensState;
-
+  console.log(++counter);
   const dispatchLens = useLensDispatch();
   const dispatchChange: DispatchSetState = useCallback(
     (s: Partial<LensAppState>) => dispatchLens(onChangeFromEditorFrame(s)),
@@ -128,23 +129,17 @@ export function EditorFrame(props: EditorFrameProps) {
     arg: {
       filterableIndexPatterns: string[];
       doc: Document;
-      isSaveable: boolean;
     },
     oldState: {
-      isSaveable: boolean;
       indexPatternsForTopNav: IndexPattern[];
       persistedDoc?: Document;
       lastKnownDoc?: Document;
     }
   ) => Promise<Partial<LensAppState> | undefined> = async (
-    { filterableIndexPatterns, doc, isSaveable: incomingIsSaveable },
+    { filterableIndexPatterns, doc },
     prevState
   ) => {
     const batchedStateToUpdate: Partial<LensAppState> = {};
-
-    if (incomingIsSaveable !== prevState.isSaveable) {
-      batchedStateToUpdate.isSaveable = incomingIsSaveable;
-    }
 
     if (!isEqual(prevState.persistedDoc, doc) && !isEqual(prevState.lastKnownDoc, doc)) {
       batchedStateToUpdate.lastKnownDoc = doc;
@@ -191,7 +186,8 @@ export function EditorFrame(props: EditorFrameProps) {
         ),
         visualization: activeVisualization,
         state: { datasourceStates, visualization },
-        framePublicAPI,
+        filters,
+        query,
         title,
         description,
         persistedId,
@@ -200,7 +196,6 @@ export function EditorFrame(props: EditorFrameProps) {
       // Frame loader (app or embeddable) is expected to call this when it loads and updates
       // This should be replaced with a top-down state
       getStateToUpdate(savedObjectFormat, {
-        isSaveable,
         persistedDoc,
         indexPatternsForTopNav,
         lastKnownDoc,

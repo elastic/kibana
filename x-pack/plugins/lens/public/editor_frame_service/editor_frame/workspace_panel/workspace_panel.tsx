@@ -60,6 +60,7 @@ import {
   useLensDispatch,
   updateVisualizationState,
   updateDatasourceState,
+  onChangeFromEditorFrame,
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
@@ -199,6 +200,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             datasourceStates,
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
+
           if (ast) {
             // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
             // turning it into a string will make sure the expression renderer only re-renders if the
@@ -237,6 +239,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   // todo: isSaveable change here
   const expressionExists = Boolean(expression);
+  const hasLoaded = Boolean(
+    activeVisualization && visualizationState && datasourceMap && datasourceStates
+  );
+  useEffect(() => {
+    if (hasLoaded) {
+      dispatchLens(
+        onChangeFromEditorFrame({
+          isSaveable: expressionExists,
+        })
+      );
+    }
+  }, [hasLoaded, expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {

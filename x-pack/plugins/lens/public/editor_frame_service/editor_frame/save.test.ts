@@ -37,17 +37,8 @@ describe('save editor frame state', () => {
       },
       visualization: { activeId: '2', state: {} },
     },
-    framePublicAPI: {
-      ...createMockFramePublicAPI(),
-      addNewLayer: jest.fn(),
-      removeLayers: jest.fn(),
-      datasourceLayers: {
-        first: mockDatasource.publicAPIMock,
-      },
-      query: { query: '', language: 'lucene' },
-      dateRange: { fromDate: 'now-7d', toDate: 'now' },
-      filters: [esFilters.buildExistsFilter(mockField, mockIndexPattern)],
-    },
+    query: { query: '', language: 'lucene' },
+    filters: [esFilters.buildExistsFilter(mockField, mockIndexPattern)],
   };
 
   it('transforms from internal state to persisted doc format', async () => {
@@ -63,7 +54,7 @@ describe('save editor frame state', () => {
     const visualization = createMockVisualization();
     visualization.toExpression.mockReturnValue('vis | expr');
 
-    const { doc, filterableIndexPatterns, isSaveable } = await getSavedObjectFormat({
+    const { doc, filterableIndexPatterns } = await getSavedObjectFormat({
       ...saveArgs,
       activeDatasources: {
         indexpattern: datasource,
@@ -81,7 +72,6 @@ describe('save editor frame state', () => {
     });
 
     expect(filterableIndexPatterns).toEqual([]);
-    expect(isSaveable).toEqual(true);
     expect(doc).toEqual({
       id: undefined,
       description: 'desc',

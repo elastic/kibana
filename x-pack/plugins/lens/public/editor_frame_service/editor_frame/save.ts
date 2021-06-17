@@ -10,14 +10,14 @@ import { SavedObjectReference } from 'kibana/public';
 import { Document } from '../../persistence/saved_object_store';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { extractFilterReferences } from '../../persistence';
-import { buildExpression } from './expression_helpers';
 import { PreviewState } from '../../state_management';
 
 export interface Props {
   activeDatasources: Record<string, Datasource>;
   state: PreviewState;
   visualization: Visualization;
-  framePublicAPI: FramePublicAPI;
+  filters: Filter[];
+  query: Query;
   title: string;
   description?: string;
   persistedId?: string;
@@ -26,15 +26,14 @@ export interface Props {
 export function getSavedObjectFormat({
   activeDatasources,
   state,
-  visualization,
-  framePublicAPI,
+  filters,
+  query,
   title,
   description,
   persistedId,
 }: Props): {
   doc: Document;
   filterableIndexPatterns: string[];
-  isSaveable: boolean;
 } {
   const datasourceStates: Record<string, unknown> = {};
   const references: SavedObjectReference[] = [];
@@ -50,18 +49,9 @@ export function getSavedObjectFormat({
     references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
   );
 
-  const { persistableFilters, references: filterReferences } = extractFilterReferences(
-    framePublicAPI.filters
-  );
+  const { persistableFilters, references: filterReferences } = extractFilterReferences(filters);
 
   references.push(...filterReferences);
-  const expression = buildExpression({
-    visualization,
-    visualizationState: state.visualization.state,
-    datasourceMap: activeDatasources,
-    datasourceStates: state.datasourceStates,
-    datasourceLayers: framePublicAPI.datasourceLayers,
-  });
 
   return {
     doc: {
@@ -73,12 +63,11 @@ export function getSavedObjectFormat({
       state: {
         datasourceStates,
         visualization: state.visualization.state,
-        query: framePublicAPI.query,
+        query: query,
         filters: persistableFilters,
       },
       references,
     },
     filterableIndexPatterns: uniqueFilterableIndexPatternIds,
-    isSaveable: expression !== null,
   };
 }

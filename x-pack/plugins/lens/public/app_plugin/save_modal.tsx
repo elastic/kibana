@@ -23,7 +23,6 @@ import {
 export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
 export interface Props {
-  isVisible: boolean;
   savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
@@ -32,7 +31,9 @@ export interface Props {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   tagsIds: string[];
 
-  lastKnownDoc?: Document;
+  title?: string;
+  savedObjectId?: string;
+  description?: string;
 
   getAppNameFromId: () => string | undefined;
   returnToOriginSwitchLabel?: string;
@@ -42,16 +43,14 @@ export interface Props {
 }
 
 export const SaveModal = (props: Props) => {
-  if (!props.isVisible || !props.lastKnownDoc) {
-    return null;
-  }
-
   const {
     originatingApp,
     savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
-    lastKnownDoc,
+    savedObjectId,
+    title,
+    description,
     allowByValueEmbeddables,
     returnToOriginSwitchLabel,
     getAppNameFromId,
@@ -70,9 +69,9 @@ export const SaveModal = (props: Props) => {
         onSave={(saveProps) => onSave(saveProps, { saveToLibrary: true })}
         getAppNameFromId={getAppNameFromId}
         documentInfo={{
-          id: lastKnownDoc.savedObjectId,
-          title: lastKnownDoc.title || '',
-          description: lastKnownDoc.description || '',
+          id: savedObjectId,
+          title: title || '',
+          description: description || '',
         }}
         returnToOriginSwitchLabel={returnToOriginSwitchLabel}
         objectType={i18n.translate('xpack.lens.app.saveModalType', {
@@ -95,9 +94,9 @@ export const SaveModal = (props: Props) => {
       onClose={onClose}
       documentInfo={{
         // if the user cannot save to the library - treat this as a new document.
-        id: savingToLibraryPermitted ? lastKnownDoc.savedObjectId : undefined,
-        title: lastKnownDoc.title || '',
-        description: lastKnownDoc.description || '',
+        id: savingToLibraryPermitted ? savedObjectId : undefined,
+        title: title || '',
+        description: description || '',
       }}
       objectType={i18n.translate('xpack.lens.app.saveModalType', {
         defaultMessage: 'Lens visualization',
