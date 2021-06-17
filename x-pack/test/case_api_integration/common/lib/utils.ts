@@ -45,6 +45,7 @@ import {
   CasesStatusResponse,
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
+  AlertResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -1101,4 +1102,24 @@ export const pushCase = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getAlertsAttachedToCase = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<AlertResponse> => {
+  const { body: theCase } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theCase;
 };
