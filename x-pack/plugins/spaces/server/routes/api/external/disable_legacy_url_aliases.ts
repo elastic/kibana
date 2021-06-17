@@ -12,7 +12,8 @@ import { createLicensedRouteHandler } from '../../lib';
 import type { ExternalRouteDeps } from './';
 
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService } = deps;
+  const { externalRouter, getSpacesService, usageStatsServicePromise } = deps;
+  const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   externalRouter.post(
     {
@@ -33,6 +34,10 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
       const spacesClient = getSpacesService().createSpacesClient(request);
 
       const { aliases } = request.body;
+
+      usageStatsClientPromise.then((usageStatsClient) =>
+        usageStatsClient.incrementDisableLegacyUrlAliases()
+      );
 
       try {
         await spacesClient.disableLegacyUrlAliases(aliases);

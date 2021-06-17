@@ -19,6 +19,7 @@ import {
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
+import { usageStatsClientMock } from '../../../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import {
   createMockSavedObjectsRepository,
@@ -51,7 +52,10 @@ describe('_disable_legacy_url_aliases', () => {
       basePath: httpService.basePath,
     });
 
-    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+    const usageStatsClient = usageStatsClientMock.create();
+    const usageStatsServicePromise = Promise.resolve(
+      usageStatsServiceMock.createSetupContract(usageStatsClient)
+    );
 
     const clientServiceStart = clientService.start(coreStart);
 
@@ -74,8 +78,26 @@ describe('_disable_legacy_url_aliases', () => {
       routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
+      usageStatsClient,
     };
   };
+
+  it('records usageStats data', async () => {
+    const payload = {
+      aliases: [{ targetSpace: 'space-1', targetType: 'type-1', sourceId: 'id-1' }],
+    };
+
+    const { routeHandler, usageStatsClient } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      body: payload,
+      method: 'post',
+    });
+
+    await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(usageStatsClient.incrementDisableLegacyUrlAliases).toHaveBeenCalled();
+  });
 
   it('should disable the provided aliases', async () => {
     const payload = {
