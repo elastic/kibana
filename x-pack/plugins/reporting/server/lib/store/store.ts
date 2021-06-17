@@ -16,6 +16,29 @@ import { mapping } from './mapping';
 import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 
 /*
+ * When the instance claims a job, we like to know which instance it is
+ */
+export type ReportProcessingFields = Required<{
+  kibana_id: Report['kibana_id'];
+  kibana_name: Report['kibana_name'];
+  browser_type: Report['browser_type'];
+  attempts: Report['attempts'];
+  started_at: Report['started_at'];
+  timeout: Report['timeout'];
+  process_expiration: Report['process_expiration'];
+}>;
+
+export type ReportFailedFields = Required<{
+  completed_at: Report['completed_at'];
+  output: Report['output'];
+}>;
+
+export type ReportCompletedFields = Required<{
+  completed_at: Report['completed_at'];
+  output: Report['output'];
+}>;
+
+/*
  * When searching for long-pending reports, we get a subset of fields
  */
 export interface ReportRecordTimeout {
@@ -221,10 +244,10 @@ export class ReportingStore {
 
   public async setReportClaimed(
     report: Report,
-    stats: Partial<Report>
+    processingInfo: ReportProcessingFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
-      ...stats,
+      ...processingInfo,
       status: statuses.JOB_STATUS_PROCESSING,
     });
 
@@ -253,10 +276,10 @@ export class ReportingStore {
 
   public async setReportFailed(
     report: Report,
-    stats: Partial<Report>
+    failedInfo: ReportFailedFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
-      ...stats,
+      ...failedInfo,
       status: statuses.JOB_STATUS_FAILED,
     });
 
@@ -282,15 +305,15 @@ export class ReportingStore {
 
   public async setReportCompleted(
     report: Report,
-    stats: Partial<Report>
+    completedInfo: ReportCompletedFields
   ): Promise<UpdateResponse<ReportDocument>> {
-    const { output } = stats;
+    const { output } = completedInfo;
     const status =
       output && output.warnings && output.warnings.length > 0
         ? statuses.JOB_STATUS_WARNINGS
         : statuses.JOB_STATUS_COMPLETED;
     const doc = sourceDoc({
-      ...stats,
+      ...completedInfo,
       status,
     });
 
