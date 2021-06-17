@@ -98,7 +98,7 @@
     "**/grunt-legacy-log-utils/lodash": "^4.17.21",
     "**/grunt-legacy-util/lodash": "^4.17.21",
     "**/grunt/js-yaml": "^3.13.1",
-    "**/highlight.js": "^9.18.5",
+    "**/@elastic/eui/highlight.js": "^9.18.5",
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/js-yaml": "^3.13.1",
