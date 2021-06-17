@@ -63,7 +63,6 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
-  DefaultPackages,
   IndexTemplateEntry,
   IndexTemplateMappings,
   Settings,

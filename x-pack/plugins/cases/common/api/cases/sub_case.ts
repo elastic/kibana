@@ -10,8 +10,7 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt } from './status';
-import { CaseStatusRt } from './status';
+import { CaseStatusRt, CasesStatusResponseRt } from './status';
 
 const SubCaseBasicRt = rt.type({
   /**
