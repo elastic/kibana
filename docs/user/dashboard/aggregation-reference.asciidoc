@@ -46,14 +46,14 @@ This reference can help simplify the comparison if you need a specific feature.
 ^| &check;
 |
 ^| &check;
-|
+^| &check;
 |
 
 | Treemap
 ^| &check;
 |
 |
-|
+^| &check;
 |
 
 | Heat map
@@ -67,7 +67,7 @@ This reference can help simplify the comparison if you need a specific feature.
 |
 ^| &check;
 ^| &check;
-|
+^| &check;
 |
 
 | Markdown
@@ -119,7 +119,7 @@ This reference can help simplify the comparison if you need a specific feature.
 
 | Color by value
 ^| &check;
-|
+^| &check;
 |
 
 |===
@@ -201,14 +201,14 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 ^| &check;
 
 | Date range
-| 
+^| Use filters
 | 
 ^| &check;
 
 | Filter
 |
 ^| &check;
-^| &check;
+|
 
 | Filters
 ^| &check;
@@ -236,8 +236,8 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 ^| &check;
 
 | Significant terms
-^| &check;
 |
+^| &check;
 ^| &check;
 
 |===
