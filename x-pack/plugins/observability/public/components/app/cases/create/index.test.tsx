@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { Create } from '.';
 import { useKibana } from '../../../../utils/kibana_react';
 import { basicCase } from '../../../../../../cases/public/containers/mock';
-import { CASES_APP_ID, CASES_OWNER } from '../constants';
+import { CASES_OWNER } from '../constants';
 import { Case } from '../../../../../../cases/common';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
 
