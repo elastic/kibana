@@ -18,15 +18,16 @@ const PageTitle = ({ license }) => {
 
   return (
     <>
-      {license.isExpired
-        ? <FormattedMessage
+      {license.isExpired ? (
+        <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
           defaultMessage="Your {licenseType} license has expired"
           values={{
             licenseType,
           }}
         />
-        : <FormattedMessage
+      ) : (
+        <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
           defaultMessage="Your {licenseType} license is {status}"
           values={{
@@ -34,7 +35,7 @@ const PageTitle = ({ license }) => {
             status: license.status,
           }}
         />
-      }
+      )}
     </>
   );
 };
@@ -74,8 +75,8 @@ const getPageIconConfig = ({ license }) => {
   return {
     iconType: license.isExpired ? 'alert' : 'checkInCircleFilled',
     iconProps: {
-      color: license.isExpired ? 'danger' : 'success'
-    }
+      color: license.isExpired ? 'danger' : 'success',
+    },
   };
 };
 

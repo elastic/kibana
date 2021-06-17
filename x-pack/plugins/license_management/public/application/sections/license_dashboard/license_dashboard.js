@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContentBody, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { StartTrial } from './start_trial';

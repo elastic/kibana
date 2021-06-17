@@ -139,22 +139,30 @@ export const getStartBasicMessages = (state) => {
   return state.startBasicStatus.messages;
 };
 
-export const getLicenseState = createSelector(getLicense, getExpirationDateFormatted, isExpired, (license, expirationDate, isExpired) => {
-  const { isActive, type } = license;
+export const getLicenseState = createSelector(
+  getLicense,
+  getExpirationDateFormatted,
+  isExpired,
+  (license, expirationDate, isExpired) => {
+    const { isActive, type } = license;
 
-  return {
-    type,
-    isExpired,
-    expirationDate,
-    status: isActive
-      ? i18n.translate('xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusText', {
-        defaultMessage: 'active',
-      })
-      : i18n.translate(
-        'xpack.licenseMgmt.licenseDashboard.licenseStatus.inactiveLicenseStatusText',
-        {
-          defaultMessage: 'inactive',
-        }
-      ),
-  };
-});
+    return {
+      type,
+      isExpired,
+      expirationDate,
+      status: isActive
+        ? i18n.translate(
+            'xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusText',
+            {
+              defaultMessage: 'active',
+            }
+          )
+        : i18n.translate(
+            'xpack.licenseMgmt.licenseDashboard.licenseStatus.inactiveLicenseStatusText',
+            {
+              defaultMessage: 'inactive',
+            }
+          ),
+    };
+  }
+);
