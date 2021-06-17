@@ -64,7 +64,7 @@ describe('TraceLink', () => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
         rangeId: 0,
         refreshTimeRange: jest.fn(),
-        uiFilters: {},
+        uxUiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
@@ -92,7 +92,7 @@ describe('TraceLink', () => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
         rangeId: 0,
         refreshTimeRange: jest.fn(),
-        uiFilters: {},
+        uxUiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',

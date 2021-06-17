@@ -53,6 +53,7 @@ export function getRumPageLoadTransactionsProjection({
         : []),
       ...getEsFilter(uiFilters),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
@@ -96,6 +97,7 @@ export function getRumErrorsProjection({
           ]
         : []),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
