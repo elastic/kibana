@@ -19,6 +19,7 @@ import {
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
+import { useSettingsSubNav } from '../../views/settings/components/settings_sub_nav';
 
 export const useWorkplaceSearchNav = () => {
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -53,7 +54,7 @@ export const useWorkplaceSearchNav = () => {
       id: 'settings',
       name: NAV.SETTINGS,
       ...generateNavLink({ to: ORG_SETTINGS_PATH }),
-      items: [], // TODO: Settings subnav
+      items: useSettingsSubNav(),
     },
   ];
 
