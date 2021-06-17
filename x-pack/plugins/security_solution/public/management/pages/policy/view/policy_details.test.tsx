@@ -17,17 +17,7 @@ import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../../../common/hooks/use_license', () => {
-  const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-  };
-  return {
-    licenseService: licenseServiceInstance,
-    useLicense: () => {
-      return licenseServiceInstance;
-    },
-  };
-});
+jest.mock('../../../../common/hooks/use_license');
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
