@@ -33,9 +33,11 @@ const createSetupContract = (): ManagementSetup => ({
   locator: {
     getLocation: jest.fn(async () => ({
       app: 'MANAGEMENT',
-      route: '',
+      path: '',
       state: {},
     })),
+    getUrl: jest.fn(),
+    useUrl: jest.fn(),
     navigate: jest.fn(),
   },
 });
