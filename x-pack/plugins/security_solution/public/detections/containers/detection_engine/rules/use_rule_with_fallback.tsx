@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-list-hooks';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isNotFoundError } from '../../../../common/utils/api';
 import { useQueryAlerts } from '../alerts/use_query';

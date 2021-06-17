@@ -8,7 +8,7 @@
 import { useEffect, useCallback } from 'react';
 
 import { flow } from 'fp-ts/lib/function';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-list-hooks';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { pureFetchRuleById } from './api';
