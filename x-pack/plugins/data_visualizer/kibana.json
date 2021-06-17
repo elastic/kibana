@@ -22,8 +22,7 @@
     "home",
     "kibanaReact",
     "maps",
-    "esUiShared",
-    "home"
+    "esUiShared"
   ],
   "extraPublicDirs": [
     "common"
