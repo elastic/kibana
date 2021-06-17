@@ -65,7 +65,7 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.title"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.rareDetectorSelect.title"
             defaultMessage="Rare detector"
           />
         </h3>
