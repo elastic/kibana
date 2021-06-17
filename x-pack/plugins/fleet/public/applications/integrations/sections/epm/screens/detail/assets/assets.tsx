@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import type { SimpleSavedObject } from 'src/core/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
   EuiBadge,
   EuiSplitPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { Loading } from '../../../../../components';
@@ -35,14 +35,6 @@ import './assets.scss';
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
-
-const CustomSplitPanelInner = styled(EuiSplitPanel.Inner)``;
-
-const CustomSplitPanelOuter = styled(EuiSplitPanel.Outer)`
-  ${CustomSplitPanelInner}:not(:last-child) {
-    border-bottom: var(--childBorders);
-  }
-`;
 
 const allowedAssetTypes: KibanaAssetType[] = [
   KibanaAssetType.dashboard,
@@ -163,25 +155,30 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
               >
                 <>
                   <EuiSpacer size="l" />
-                  <CustomSplitPanelOuter
+                  <EuiSplitPanel.Outer
                     className="customOuterSplitPanel"
                     hasBorder
                     hasShadow={false}
                   >
                     {sectionAssetSavedObjects.map(({ attributes: { title, description } }, idx) => (
-                      <CustomSplitPanelInner grow={false} key={idx}>
-                        <EuiText size="m">
-                          <p>{title}</p>
-                        </EuiText>
-                        <EuiSpacer size="s" />
-                        {description && (
-                          <EuiText size="s" color="subdued">
-                            <p>{description}</p>
+                      <>
+                        <EuiSplitPanel.Inner grow={false} key={idx}>
+                          <EuiText size="m">
+                            <p>{title}</p>
                           </EuiText>
+                          <EuiSpacer size="s" />
+                          {description && (
+                            <EuiText size="s" color="subdued">
+                              <p>{description}</p>
+                            </EuiText>
+                          )}
+                        </EuiSplitPanel.Inner>
+                        {idx + 1 < sectionAssetSavedObjects.length && (
+                          <EuiHorizontalRule margin="none" />
                         )}
-                      </CustomSplitPanelInner>
+                      </>
                     ))}
-                  </CustomSplitPanelOuter>
+                  </EuiSplitPanel.Outer>
                 </>
               </EuiAccordion>
               <EuiSpacer size="l" />
