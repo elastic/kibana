@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
 import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 
 import { Schema } from './schema';
@@ -69,13 +68,6 @@ describe('Schema', () => {
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(SchemaFieldsTable)).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('handles empty state', () => {
