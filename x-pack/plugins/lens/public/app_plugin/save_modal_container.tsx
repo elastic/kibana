@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { ChromeStart, NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { partition, uniq } from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { SaveModal } from './save_modal';
 import { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
@@ -112,6 +113,7 @@ export function SaveModalContainer({
             attributeService,
             redirectTo,
             redirectToOrigin,
+            originatingApp,
             getIsByValueMode: () => false,
             onAppLeave: () => {},
           },
@@ -178,6 +180,7 @@ export const runSaveLensVisualization = async (
     lastKnownDoc?: Document;
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
+    originatingApp?: string;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -190,6 +193,7 @@ export const runSaveLensVisualization = async (
   const {
     chrome,
     initialInput,
+    originatingApp,
     lastKnownDoc,
     persistedDoc,
     savedObjectsClient,
@@ -197,6 +201,7 @@ export const runSaveLensVisualization = async (
     notifications,
     stateTransfer,
     attributeService,
+    usageCollection,
     savedObjectsTagging,
     getIsByValueMode,
     redirectToOrigin,
@@ -209,6 +214,9 @@ export const runSaveLensVisualization = async (
     persistedDoc && savedObjectsTagging
       ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
       : [];
+  if (usageCollection) {
+    usageCollection.reportUiCounter(originatingApp || 'visualize', METRIC_TYPE.CLICK, 'lens:save');
+  }
 
   let references = lastKnownDoc.references;
   if (savedObjectsTagging) {

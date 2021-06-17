@@ -11,7 +11,6 @@ export * from './field_wildcard';
 export * from './of';
 export * from './ui';
 export * from './state_containers';
-export * from './typed_json';
 export * from './errors';
 export { AbortError, abortSignalToPromise } from './abort_utils';
 export { createGetterSetter, Get, Set } from './create_getter_setter';
