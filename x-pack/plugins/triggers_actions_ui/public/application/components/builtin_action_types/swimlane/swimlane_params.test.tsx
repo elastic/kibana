@@ -18,7 +18,6 @@ describe('SwimlaneParamsFields renders', () => {
       subActionParams: {
         incident: {
           ruleName: 'rule name',
-          alertSource: 'alert source',
           caseId: '3456789',
           caseName: 'my case name',
           severity: 'critical',
@@ -54,6 +53,5 @@ describe('SwimlaneParamsFields renders', () => {
 
     expect(wrapper.find('[data-test-subj="severity"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="comments"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="alertSource"]').exists()).toBeTruthy();
   });
 });

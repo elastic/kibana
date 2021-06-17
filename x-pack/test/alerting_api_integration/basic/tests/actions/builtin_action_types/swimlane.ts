@@ -23,12 +23,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       appId: '123456asdf',
       connectorType: 'all',
       mappings: {
-        alertSourceConfig: {
-          id: 'adnjls',
-          name: 'Alert Source',
-          key: 'alert-source',
-          fieldType: 'text',
-        },
         severityConfig: {
           id: 'adnlas',
           name: 'Severity',

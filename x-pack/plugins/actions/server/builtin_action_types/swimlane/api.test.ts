@@ -101,7 +101,6 @@ describe('api', () => {
       expect(externalService.createRecord).toHaveBeenCalledWith({
         incident: {
           alertId: '123456',
-          alertSource: 'elastic',
           caseId: '123456',
           caseName: 'case name',
           description: 'case desc',

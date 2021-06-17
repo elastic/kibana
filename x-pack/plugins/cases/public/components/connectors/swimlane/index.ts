@@ -19,7 +19,6 @@ export const getCaseConnector = (): CaseConnector<SwimlaneFieldsType> => {
 };
 
 export const fieldLabels = {
-  alertSource: i18n.ALERT_SOURCE_LABEL,
   caseId: i18n.CASE_ID_LABEL,
   caseName: i18n.CASE_NAME_LABEL,
   severity: i18n.SEVERITY_LABEL,

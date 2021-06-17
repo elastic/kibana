@@ -14,7 +14,6 @@ type ConfigMapping = Omit<TypeOf<typeof ConfigMappingSchema>, 'commentsConfig'>;
 const mappingKeysToIncidentKeys: Record<keyof ConfigMapping, keyof Incident> = {
   ruleNameConfig: 'ruleName',
   alertIdConfig: 'alertId',
-  alertSourceConfig: 'alertSource',
   caseIdConfig: 'caseId',
   caseNameConfig: 'caseName',
   severityConfig: 'severity',

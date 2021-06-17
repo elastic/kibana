@@ -43,7 +43,6 @@ describe('swimlane connector validation', () => {
         connectorType: 'all',
         mappings: {
           alertIdConfig: { id: '1234' },
-          alertSourceConfig: { id: '1234' },
           severityConfig: { id: '1234' },
           ruleNameConfig: { id: '1234' },
           caseIdConfig: { id: '1234' },
@@ -143,7 +142,6 @@ describe('swimlane connector validation', () => {
             {
               alertIdConfig: 'Alert ID is required.',
               ruleNameConfig: 'Rule name is required.',
-              alertSourceConfig: 'Alert source is required.',
             },
           ],
           connectorType: [],

@@ -16,7 +16,6 @@ describe('Create Record Mapping', () => {
       alertId: 'al123',
       ruleName: 'Rule Name',
       severity: 'Critical',
-      alertSource: 'Elastic',
       caseName: 'Case Name',
       caseId: 'es3456789',
       description: 'case desc',
@@ -26,7 +25,6 @@ describe('Create Record Mapping', () => {
     const data = getBodyForEventAction(appId, mappings, params);
     expect(data.applicationId).toEqual(appId);
     expect(data.id).not.toBeDefined();
-    expect(data.values?.[mappings.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
     expect(data.values?.[mappings.ruleNameConfig.id]).toEqual(params.ruleName);
     expect(data.values?.[mappings.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
     expect(data.values?.[mappings.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
@@ -39,7 +37,6 @@ describe('Create Record Mapping', () => {
       alertId: 'al123',
       ruleName: 'Rule Name',
       severity: 'Critical',
-      alertSource: 'Elastic',
       caseName: 'Case Name',
       caseId: 'es3456789',
       description: 'case desc',
@@ -54,7 +51,6 @@ describe('Create Record Mapping', () => {
       alertId: 'al123',
       ruleName: 'Rule Name',
       severity: 'Critical',
-      alertSource: 'Elastic',
       caseName: 'Case Name',
       caseId: 'es3456789',
       description: 'case desc',

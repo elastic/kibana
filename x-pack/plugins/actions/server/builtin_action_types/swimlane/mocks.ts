@@ -9,12 +9,6 @@ import { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } 
 
 export const applicationFields = [
   {
-    id: 'adnjls',
-    name: 'Alert Source',
-    key: 'alert-source',
-    fieldType: 'text',
-  },
-  {
     id: 'adnlas',
     name: 'Severity',
     key: 'severity',
@@ -59,14 +53,13 @@ export const applicationFields = [
 ];
 
 export const mappings = {
-  alertSourceConfig: applicationFields[0],
-  severityConfig: applicationFields[1],
-  ruleNameConfig: applicationFields[2],
-  caseIdConfig: applicationFields[3],
-  caseNameConfig: applicationFields[4],
-  commentsConfig: applicationFields[5],
-  descriptionConfig: applicationFields[6],
-  alertIdConfig: applicationFields[7],
+  severityConfig: applicationFields[0],
+  ruleNameConfig: applicationFields[1],
+  caseIdConfig: applicationFields[2],
+  caseNameConfig: applicationFields[3],
+  commentsConfig: applicationFields[4],
+  descriptionConfig: applicationFields[5],
+  alertIdConfig: applicationFields[6],
 };
 
 export const getApplicationResponse = { fields: applicationFields };
@@ -108,7 +101,6 @@ const executorParams: ExecutorSubActionPushParams = {
     alertId: '123456',
     caseName: 'case name',
     severity: 'critical',
-    alertSource: 'elastic',
     caseId: '123456',
     description: 'case desc',
     externalId: 'incident-3',

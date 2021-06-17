@@ -19,7 +19,6 @@ export const ConfigMapSchema = schema.object(ConfigMap);
 export const ConfigMapping = {
   ruleNameConfig: schema.nullable(ConfigMapSchema),
   alertIdConfig: schema.nullable(ConfigMapSchema),
-  alertSourceConfig: schema.nullable(ConfigMapSchema),
   caseIdConfig: schema.nullable(ConfigMapSchema),
   caseNameConfig: schema.nullable(ConfigMapSchema),
   commentsConfig: schema.nullable(ConfigMapSchema),
@@ -47,7 +46,6 @@ export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsC
 const SwimlaneFields = {
   alertId: schema.nullable(schema.string()),
   ruleName: schema.nullable(schema.string()),
-  alertSource: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
   caseName: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),

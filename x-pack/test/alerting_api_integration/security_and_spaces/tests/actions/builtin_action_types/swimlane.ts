@@ -33,12 +33,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           key: 'alert-id',
           fieldType: 'text',
         },
-        alertSourceConfig: {
-          id: 'adnjls',
-          name: 'Alert Source',
-          key: 'alert-source',
-          fieldType: 'text',
-        },
         severityConfig: {
           id: 'adnlas',
           name: 'Severity',
@@ -87,7 +81,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           alertId: 'fs345f78g',
           ruleName: 'Rule Name',
           severity: 'Critical',
-          alertSource: 'Elastic',
           caseName: 'Case Name',
           caseId: 'es3456789',
           description: 'This is a description',

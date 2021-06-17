@@ -86,7 +86,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
 
   const state = useMemo(
     () => ({
-      alertSourceConfig: createSelectedOption(mappings?.alertSourceConfig),
       alertIdConfig: createSelectedOption(mappings?.alertIdConfig),
       severityConfig: createSelectedOption(mappings?.severityConfig),
       ruleNameConfig: createSelectedOption(mappings?.ruleNameConfig),
@@ -197,30 +196,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
               data-test-subj="swimlaneAlertNameInput"
               onChange={(e) => editMappings('ruleNameConfig', e)}
               isInvalid={mappingErrors?.ruleNameConfig != null && !hasChangedConnectorType}
-            />
-          </EuiFormRow>
-        </>
-      )}
-      {isValidFieldForConnector(
-        connectorType as SwimlaneConnectorType.All,
-        'alertSourceConfig'
-      ) && (
-        <>
-          <EuiFormRow
-            id="alertSourceConfig"
-            fullWidth
-            label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
-            error={mappingErrors?.alertSourceConfig}
-            isInvalid={mappingErrors?.alertSourceConfig != null && !hasChangedConnectorType}
-          >
-            <EuiComboBox
-              fullWidth
-              selectedOptions={state.alertSourceConfig}
-              options={textOptions}
-              singleSelection={SINGLE_SELECTION}
-              data-test-subj="swimlaneAlertSourceInput"
-              onChange={(e) => editMappings('alertSourceConfig', e)}
-              isInvalid={mappingErrors?.alertSourceConfig != null && !hasChangedConnectorType}
             />
           </EuiFormRow>
         </>

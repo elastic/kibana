@@ -83,7 +83,6 @@ export function getActionType(): ActionTypeModel<
       const errors = {
         'subActionParams.incident.ruleName': new Array<string>(),
         'subActionParams.incident.alertId': new Array<string>(),
-        'subActionParams.incident.alertSource': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -97,10 +96,6 @@ export function getActionType(): ActionTypeModel<
 
       if (hasIncident && !actionParams.subActionParams.incident.alertId?.length) {
         errors['subActionParams.incident.alertId'].push(i18n.SW_REQUIRED_ALERT_ID);
-      }
-
-      if (hasIncident && !actionParams.subActionParams.incident.alertSource?.length) {
-        errors['subActionParams.incident.alertSource'].push(i18n.SW_REQUIRED_ALERT_SOURCE);
       }
 
       return validationResult;

@@ -25,7 +25,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
         mappings: {
-          alertSourceConfig: { id: '123', key: 'product-source' },
           severityConfig: { id: '123', key: 'severity' },
           caseNameConfig: { id: '123', key: 'case-name' },
           caseIdConfig: { id: '123', key: 'case-id' },
@@ -88,7 +87,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
         mappings: {
-          alertSourceConfig: { id: '123', key: 'product-source' },
           severityConfig: { id: '123', key: 'severity' },
           caseNameConfig: { id: '123', key: 'case-name' },
           caseIdConfig: { id: '123', key: 'case-id' },

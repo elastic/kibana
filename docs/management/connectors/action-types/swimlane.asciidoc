@@ -36,11 +36,6 @@ API token::  Swimlane API authentication token for HTTP Basic authentication.
          id: agp4s
          key: alert-id
          name: Alert ID 
-       alertSourceConfig:
-         fieldType: text
-         id: adnls
-         key: alert-source
-         name: Alert Source
        caseIdConfig:
          fieldType: text
          id: ae1mi
@@ -104,7 +99,6 @@ image::management/connectors/images/swimlane-params-test.png[Swimlane params tes
 
 Swimlane actions have the following configuration properties.
 
-Alert Source:: The alert source of the incident.
 Comments:: Additional information for the client, such as how to troubleshoot the issue.
 Severity:: The severity of the incident.
 
