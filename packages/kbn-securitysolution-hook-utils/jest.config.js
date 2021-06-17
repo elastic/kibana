@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { readListIndex } from '@kbn/securitysolution-list-api';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-
-const readListIndexWithOptionalSignal = withOptionalSignal(readListIndex);
-
-export const useReadListIndex = () => useAsync(readListIndexWithOptionalSignal);
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-securitysolution-hook-utils'],
+};

@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { readListIndex } from '@kbn/securitysolution-list-api';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-
-const readListIndexWithOptionalSignal = withOptionalSignal(readListIndex);
-
-export const useReadListIndex = () => useAsync(readListIndexWithOptionalSignal);
+/**
+ * Represents the state of an asynchronous task, along with an initiator
+ * function to kick off the work.
+ */
+export interface Task<Args extends unknown[], Result> {
+  loading: boolean;
+  error: unknown | undefined;
+  result: Result | undefined;
+  start: (...args: Args) => void;
+}
