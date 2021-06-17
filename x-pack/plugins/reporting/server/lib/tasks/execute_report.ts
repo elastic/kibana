@@ -21,6 +21,7 @@ import { durationToNumber, numberToDuration } from '../../../common/schema_utils
 import { ReportingConfigType } from '../../config';
 import { BasePayload, RunTaskFn } from '../../types';
 import { Report, ReportDocument, ReportingStore } from '../store';
+import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
   ReportingTaskStatus,
@@ -108,6 +109,13 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<Report> {
+    if (this.kibanaId == null) {
+      throw new Error(`Kibana instance ID is undefined!`);
+    }
+    if (this.kibanaName == null) {
+      throw new Error(`Kibana instance name is undefined!`);
+    }
+
     const store = await this.getStore();
     let report: Report;
     if (task.id && task.index) {
@@ -142,7 +150,7 @@ export class ExecuteReportTask implements ReportingTask {
     const startTime = m.toISOString();
     const expirationTime = m.add(queueTimeout).toISOString();
 
-    const stats = {
+    const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
       browser_type: this.config.capture.browser.type,
@@ -154,7 +162,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     const claimedReport = new Report({
       ...report,
-      ...stats,
+      ...doc,
     });
 
     this.logger.debug(
@@ -166,7 +174,7 @@ export class ExecuteReportTask implements ReportingTask {
         `[process_expiration: ${expirationTime}]`
     );
 
-    const resp = await store.setReportClaimed(claimedReport, stats);
+    const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no;
     claimedReport._primary_term = resp._primary_term;
     return claimedReport;
@@ -187,7 +195,7 @@ export class ExecuteReportTask implements ReportingTask {
     // update the report in the store
     const store = await this.getStore();
     const completedTime = moment().toISOString();
-    const doc = {
+    const doc: ReportFailedFields = {
       completed_at: completedTime,
       output: docOutput,
     };
