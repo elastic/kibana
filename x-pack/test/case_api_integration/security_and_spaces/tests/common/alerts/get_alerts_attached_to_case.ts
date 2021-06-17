@@ -83,18 +83,18 @@ export default ({ getService }: FtrProviderContext): void => {
           ),
         ]);
 
-        const [_, case2WithComments] = await Promise.all([
-          createComment({
-            supertest: supertestWithoutAuth,
-            caseId: case1.id,
-            params: postCommentAlertReq,
-            auth: secOnlyAuth,
-          }),
+        const [case2WithComments] = await Promise.all([
           createComment({
             supertest: supertestWithoutAuth,
             caseId: case2.id,
             params: { ...postCommentAlertReq, alertId: 'test-id-3', owner: 'observabilityFixture' },
             auth: obsOnlyAuth,
+          }),
+          createComment({
+            supertest: supertestWithoutAuth,
+            caseId: case1.id,
+            params: postCommentAlertReq,
+            auth: secOnlyAuth,
           }),
         ]);
 

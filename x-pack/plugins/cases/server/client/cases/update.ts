@@ -54,7 +54,7 @@ import {
 } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { UpdateAlertRequest } from '../alerts/client';
+import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
