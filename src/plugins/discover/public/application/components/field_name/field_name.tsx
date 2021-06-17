@@ -58,6 +58,7 @@ export function FieldName({
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="default"
+            className="dscMultiFieldBadge"
             title={i18n.translate('discover.fieldChooser.discoverField.multiFieldTooltipContent', {
               defaultMessage: 'Multi field',
             })}

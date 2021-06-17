@@ -42,6 +42,13 @@
 
 .kbnDocViewer__fieldNameCell {
   width: 100%;
+  .dscMultiFieldBadge {
+    @include euiFont;
+  }
+}
+
+.kbnDocViewer__value {
+  line-height: $euiLineHeight;
 }
 
 .kbnDocViewer__warning {
