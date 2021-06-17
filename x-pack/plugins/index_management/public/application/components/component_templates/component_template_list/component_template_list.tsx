@@ -13,9 +13,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { attemptToURIDecode } from '../../../../shared_imports';
+import { APP_WRAPPER_CLASS, PageError, attemptToURIDecode } from '../../../../shared_imports';
 import { SectionLoading } from '../../section_loading';
-import { SectionError } from '../../section_error';
 import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -185,7 +184,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     content = <EmptyPrompt history={history} />;
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.home.componentTemplates.list.loadingErrorMessage"
@@ -199,7 +198,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <div data-test-subj="componentTemplateList">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="componentTemplateList">
       {content}
 
       {/* delete modal */}

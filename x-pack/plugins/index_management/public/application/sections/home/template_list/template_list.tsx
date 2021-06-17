@@ -24,13 +24,8 @@ import {
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
-import { attemptToURIDecode, reactRouterNavigate } from '../../../../shared_imports';
-import {
-  SectionError,
-  SectionLoading,
-  Error,
-  LegacyIndexTemplatesDeprecation,
-} from '../../../components';
+import { PageError, attemptToURIDecode, reactRouterNavigate } from '../../../../shared_imports';
+import { SectionLoading, LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
@@ -236,14 +231,14 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
             defaultMessage="Error loading templates"
           />
         }
-        error={error as Error}
+        error={error}
       />
     );
   } else if (!hasTemplates) {

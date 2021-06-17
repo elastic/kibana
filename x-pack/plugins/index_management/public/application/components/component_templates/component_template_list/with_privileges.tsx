@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 
 import {
-  SectionError,
+  PageError,
   useAuthorizationContext,
   WithPrivileges,
   SectionLoading,
@@ -26,7 +26,7 @@ export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
 
   if (apiError) {
     return (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.home.componentTemplates.checkingPrivilegesErrorMessage"
