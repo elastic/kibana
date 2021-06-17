@@ -863,9 +863,10 @@ describe('migrations v2 model', () => {
         });
         const newState = model(testState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"Migrations failed. Reason: Corrupt saved object documents: a:b. To allow migrations to proceed, please delete these documents."`
-        );
+        expect(newState.reason).toMatchInlineSnapshot(`
+          "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
+          To allow migrations to proceed, please delete or fix these documents."
+        `);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1158,7 +1159,10 @@ describe('migrations v2 model', () => {
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
-        const transFormErr = new TransformSavedObjectDocumentError(originalTransformError, '7.11.0');
+        const transFormErr = new TransformSavedObjectDocumentError(
+          originalTransformError,
+          '7.11.0'
+        );
         const transformationErrors = [
           { rawId: 'bob:tail', err: transFormErr },
         ] as TransformErrorObjects[];
@@ -1175,8 +1179,8 @@ describe('migrations v2 model', () => {
         const newState = model(transformErrorsState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
         expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
-        expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
-        expect(newState.reason.includes('Transformation errors: ')).toBe(true);
+        expect(newState.reason.includes('1 corrupt saved object documents were found')).toBe(true);
+        expect(newState.reason.includes('1 transformation errors were encountered')).toBe(true);
         expect(newState.reason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
