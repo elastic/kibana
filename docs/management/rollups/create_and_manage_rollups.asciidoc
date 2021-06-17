@@ -2,6 +2,7 @@
 [[data-rollups]]
 == Rollup jobs
 
+experimental::[]
 
 A rollup job is a periodic task that aggregates data from indices specified
 by an index pattern and rolls it into a new index. Rollup indices are a good way to
