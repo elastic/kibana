@@ -7,26 +7,33 @@
 
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
-import React from 'react';
+jest.mock('../../../../shared/layout', () => ({
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
 
-import { shallow } from 'enzyme';
+import { useGroupSubNav } from './group_sub_nav';
 
-import { SideNavLink } from '../../../../shared/layout';
-
-import { GroupSubNav } from './group_sub_nav';
-
-describe('GroupSubNav', () => {
-  it('renders empty when no group id present', () => {
-    setMockValues({ group: {} });
-    const wrapper = shallow(<GroupSubNav />);
-
-    expect(wrapper.find(SideNavLink)).toHaveLength(0);
-  });
-
+describe('useGroupSubNav', () => {
   it('renders nav items', () => {
     setMockValues({ group: { id: '1' } });
-    const wrapper = shallow(<GroupSubNav />);
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(2);
+    expect(useGroupSubNav()).toEqual([
+      {
+        id: 'groupOverview',
+        name: 'Overview',
+        href: '/groups/1',
+      },
+      {
+        id: 'groupSourcePrioritization',
+        name: 'Source Prioritization',
+        href: '/groups/1/source_prioritization',
+      },
+    ]);
+  });
+
+  it('returns undefined when no group id is present', () => {
+    setMockValues({ group: {} });
+
+    expect(useGroupSubNav()).toEqual(undefined);
   });
 });

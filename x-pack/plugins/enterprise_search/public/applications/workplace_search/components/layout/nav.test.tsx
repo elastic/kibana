@@ -9,6 +9,9 @@ jest.mock('../../../shared/layout', () => ({
   ...jest.requireActual('../../../shared/layout'),
   generateNavLink: jest.fn(({ to }) => ({ href: to })),
 }));
+jest.mock('../../views/groups/components/group_sub_nav', () => ({
+  useGroupSubNav: () => [],
+}));
 
 import React from 'react';
 
