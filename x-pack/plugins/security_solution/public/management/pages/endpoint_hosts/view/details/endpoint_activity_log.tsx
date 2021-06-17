@@ -9,6 +9,8 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
+  EuiText,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -18,7 +20,6 @@ import {
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
 import * as i18 from '../translations';
-import { SearchBar } from '../../../../components/search_bar';
 import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
 import { useEndpointSelector } from '../hooks';
@@ -51,7 +52,7 @@ export const EndpointActivityLog = memo(
     );
 
     // TODO
-    const onSearch = useCallback(() => {}, []);
+    const onRefresh = useCallback(() => {}, []);
 
     const fetchMoreCallOut = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
@@ -94,10 +95,15 @@ export const EndpointActivityLog = memo(
             body={<p>{'No actions have been logged for this endpoint.'}</p>}
           />
         ) : (
-          <div>
-            <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
-            <EuiSpacer size="l" />
+          <>
             <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <div>
+                  <EuiButton onClick={onRefresh} iconType="refresh">
+                    {i18.ACTIVITY_LOG.refresh}
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
               <EuiFlexItem>
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (
@@ -120,7 +126,7 @@ export const EndpointActivityLog = memo(
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </div>
+          </>
         )}
       </>
     );
