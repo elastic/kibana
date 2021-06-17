@@ -7,12 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type {
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpHandler,
-  HttpStart,
-} from 'kibana/public';
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
 import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
@@ -102,7 +97,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
    * The handler for providing a response to for this API call.
    * It should return the "raw" value, __NOT__ a `Promise`
    */
-  handler: (...args: Parameters<HttpHandler>) => any;
+  handler: (options: HttpFetchOptionsWithPath) => any;
   /**
    * A function that returns a promise. The API response will be delayed until this promise is
    * resolved. This can be helpful when wanting to test an intermediate UI state while the API
@@ -203,14 +198,25 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
         const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
-          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
-
-          await responseProvider[routeMock.id].mockDelay();
-
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
-          return responseProvider[routeMock.id](...args);
+
+          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
+          await responseProvider[routeMock.id].mockDelay();
+
+          const fetchOptions: HttpFetchOptionsWithPath = isHttpFetchOptionsWithPath(args[0])
+            ? args[0]
+            : {
+                // Ignore below is needed because the http service methods are defined via an overloaded interface.
+                // If the first argument is NOT fetch with options, then we know that its a string and `args` has
+                // a potential for being of `.length` 2.
+                // @ts-ignore
+                ...(args[1] || {}),
+                path: args[0],
+              };
+
+          return responseProvider[routeMock.id](fetchOptions);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
         }

@@ -400,6 +400,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     moving_average: ExpressionFunctionMovingAverage;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionOverallMetric" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    overall_metric: ExpressionFunctionOverallMetric;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

@@ -58,6 +58,11 @@ Object {
               "transaction.type": "page-load",
             },
           },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
         ],
       },
     },
@@ -492,6 +497,11 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
         ],
       },
     },
@@ -532,6 +542,11 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
             },
           },
         ],

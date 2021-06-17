@@ -16,7 +16,8 @@
   "optionalPlugins": [
     "home",
     "share",
-    "savedObjectsTaggingOss"
+    "savedObjectsTaggingOss",
+    "usageCollection"
   ],
   "requiredBundles": [
     "kibanaUtils",

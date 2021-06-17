@@ -300,7 +300,9 @@ image::images/lens_missing_values_strategy.png[Lens Missing values strategies me
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
 ===== Is it possible to statically define the scale of the y-axis in a visualization?
 
-The ability to start the y-axis from another value than 0, or use a logarithmic scale, is unsupported in *Lens*.
+Yes, you can set the bounds on bar, line and area chart types in Lens, unless using percentage mode. Bar
+and area charts must have 0 in the bounds. Logarithmic scales are unsupported in *Lens*.
+To set the y-axis bounds, click the icon representing the axis you want to customize.
 
 [float]
 [[is-it-possible-to-have-pagination-for-datatable]]

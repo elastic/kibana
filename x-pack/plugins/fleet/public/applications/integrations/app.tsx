@@ -29,6 +29,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
+import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from './constants';
 
 import { Error, Loading } from './components';
@@ -201,9 +202,11 @@ export const IntegrationsAppContext: React.FC<{
                     <FleetStatusProvider>
                       <IntraAppStateProvider kibanaScopedHistory={history}>
                         <Router history={routerHistoryInstance}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
                         </Router>
                       </IntraAppStateProvider>
                     </FleetStatusProvider>

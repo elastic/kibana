@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
@@ -84,7 +84,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const roleCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'roleType',
     name: ROLE_LABEL,
-    render: (_, { rules }: SharedRoleMapping) => getFirstAttributeValue(rules),
+    render: (_, { roleType }: SharedRoleMapping) => roleType,
   };
 
   const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
@@ -124,11 +124,16 @@ export const RoleMappingsTable: React.FC<Props> = ({
     field: 'id',
     name: '',
     align: 'right',
-    render: (_, { id }: SharedRoleMapping) => (
-      <UsersAndRolesRowActions
-        onManageClick={() => initializeRoleMapping(id)}
-        onDeleteClick={() => handleDeleteMapping(id)}
-      />
+    render: (_, { id, toolTip }: SharedRoleMapping) => (
+      <>
+        {id && (
+          <UsersAndRolesRowActions
+            onManageClick={() => initializeRoleMapping(id)}
+            onDeleteClick={() => handleDeleteMapping(id)}
+          />
+        )}
+        {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
+      </>
     ),
   };
 

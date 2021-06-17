@@ -9,16 +9,39 @@ import React, { memo, useContext, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { Config, ConfigKeys, DataStream } from './types';
+import { PolicyConfig, DataStream } from './types';
 import {
-  SimpleFieldsContext,
+  MonitorTypeContext,
   HTTPAdvancedFieldsContext,
   TCPAdvancedFieldsContext,
   TLSFieldsContext,
+  HTTPSimpleFieldsContext,
+  TCPSimpleFieldsContext,
+  ICMPSimpleFieldsContext,
+  defaultHTTPAdvancedFields,
+  defaultHTTPSimpleFields,
+  defaultICMPSimpleFields,
+  defaultTCPSimpleFields,
+  defaultTCPAdvancedFields,
+  defaultTLSFields,
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
+
+export const defaultConfig: PolicyConfig = {
+  [DataStream.HTTP]: {
+    ...defaultHTTPSimpleFields,
+    ...defaultHTTPAdvancedFields,
+    ...defaultTLSFields,
+  },
+  [DataStream.TCP]: {
+    ...defaultTCPSimpleFields,
+    ...defaultTCPAdvancedFields,
+    ...defaultTLSFields,
+  },
+  [DataStream.ICMP]: defaultICMPSimpleFields,
+};
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -26,20 +49,22 @@ import { validate } from './validation';
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const { fields: simpleFields } = useContext(SimpleFieldsContext);
+    const { monitorType } = useContext(MonitorTypeContext);
+    const { fields: httpSimpleFields } = useContext(HTTPSimpleFieldsContext);
+    const { fields: tcpSimpleFields } = useContext(TCPSimpleFieldsContext);
+    const { fields: icmpSimpleFields } = useContext(ICMPSimpleFieldsContext);
     const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
     const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
     const { fields: tlsFields } = useContext(TLSFieldsContext);
-    const defaultConfig: Config = {
-      name: '',
-      ...simpleFields,
-      ...httpAdvancedFields,
-      ...tcpAdvancedFields,
-      ...tlsFields,
-    };
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
-    const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
+    const { setConfig } = useUpdatePolicy({
+      monitorType,
+      defaultConfig,
+      newPolicy,
+      onChange,
+      validate,
+    });
 
     // Fleet will initialize the create form with a default name for the integratin policy, however,
     // for synthetics, we want the user to explicitely type in a name to use as the monitor name,
@@ -57,24 +82,40 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 
     useDebounce(
       () => {
-        setConfig((prevConfig) => ({
-          ...prevConfig,
-          ...simpleFields,
-          ...httpAdvancedFields,
-          ...tcpAdvancedFields,
-          ...tlsFields,
-          // ensure proxyUrl is not overwritten
-          [ConfigKeys.PROXY_URL]:
-            simpleFields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP
-              ? httpAdvancedFields[ConfigKeys.PROXY_URL]
-              : tcpAdvancedFields[ConfigKeys.PROXY_URL],
-        }));
+        setConfig(() => {
+          switch (monitorType) {
+            case DataStream.HTTP:
+              return {
+                ...httpSimpleFields,
+                ...httpAdvancedFields,
+                ...tlsFields,
+              };
+            case DataStream.TCP:
+              return {
+                ...tcpSimpleFields,
+                ...tcpAdvancedFields,
+                ...tlsFields,
+              };
+            case DataStream.ICMP:
+              return {
+                ...icmpSimpleFields,
+              };
+          }
+        });
       },
       250,
-      [setConfig, simpleFields, httpAdvancedFields, tcpAdvancedFields, tlsFields]
+      [
+        setConfig,
+        httpSimpleFields,
+        tcpSimpleFields,
+        icmpSimpleFields,
+        httpAdvancedFields,
+        tcpAdvancedFields,
+        tlsFields,
+      ]
     );
 
-    return <CustomFields typeEditable validate={validate[config[ConfigKeys.MONITOR_TYPE]]} />;
+    return <CustomFields typeEditable validate={validate[monitorType]} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';

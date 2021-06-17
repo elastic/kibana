@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
+import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
@@ -259,7 +260,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -286,7 +289,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -313,7 +318,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -346,7 +353,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "open",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.duration.us": Array [
               0,
@@ -416,7 +423,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "open",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.duration.us": Array [
               0,
@@ -486,7 +493,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           index: ALERTS_INDEX_TARGET,
           body: {
             query: {
-              match_all: {},
+              term: {
+                [EVENT_KIND]: 'signal',
+              },
             },
             size: 1,
             sort: {
@@ -521,7 +530,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "close",
             ],
             "event.kind": Array [
-              "state",
+              "signal",
             ],
             "kibana.rac.alert.evaluation.threshold": Array [
               30,
