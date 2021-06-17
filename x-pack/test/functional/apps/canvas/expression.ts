@@ -14,14 +14,16 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('expression editor', function () {
+  describe.only('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
