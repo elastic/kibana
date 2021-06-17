@@ -420,6 +420,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         fields: [{ key: name, value: get(document, name) }],
         error: null,
       });
+      setIsLoadingPreview(false);
     }
   }, [name, document, script]);
 
