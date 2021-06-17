@@ -42,8 +42,6 @@ const basicReq: EssqlSearchStrategyRequest = {
 };
 
 describe('ESSQL search strategy', () => {
-  // beforeEach(() => {});
-
   describe('strategy interface', () => {
     it('returns a strategy with a `search` function', async () => {
       const essqlSearch = await essqlSearchStrategyProvider();
