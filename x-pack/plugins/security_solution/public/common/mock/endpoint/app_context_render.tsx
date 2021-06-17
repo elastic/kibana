@@ -24,6 +24,7 @@ import { PLUGIN_ID } from '../../../../../fleet/common';
 import { APP_ID } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
+import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -149,6 +150,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     KibanaServices.init(globalKibanaServicesParams);
   }
 
+  // Some APIs need to be mocked right from the start because they are called as soon as the store is initialized
+  applyDefaultCoreHttpMocks(coreStart.http);
+
   return {
     store,
     history,
@@ -180,4 +184,11 @@ const createCoreStartMock = (): ReturnType<typeof coreMock.createStart> => {
   });
 
   return coreStart;
+};
+
+const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http']) => {
+  // Need to mock getting the endpoint package from the fleet API because it is used as soon
+  // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
+  // unnecessary errors being output to the console
+  fleetGetPackageListHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
 };
