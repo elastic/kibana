@@ -20,6 +20,11 @@ import { NotFound } from '../shared/not_found';
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
+  PersonalDashboardLayout,
+  PrivateSourcesSidebar,
+  AccountSettingsSidebar,
+} from './components/layout';
+import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
@@ -34,7 +39,6 @@ import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
-import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
@@ -42,7 +46,6 @@ import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
-import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
 import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
@@ -92,23 +95,25 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SourceAdded />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? (
-          <ErrorState />
-        ) : (
-          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-            <Overview />
-          </Layout>
-        )}
+        <Overview />
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+          sidebar={<PrivateSourcesSidebar />}
+        >
           <SourcesRouter />
-        </PrivateSourcesLayout>
+        </PersonalDashboardLayout>
       </Route>
       <Route path={PERSONAL_SETTINGS_PATH}>
-        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
+        <PersonalDashboardLayout
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+          sidebar={<AccountSettingsSidebar />}
+        >
           <AccountSettings />
-        </PrivateSourcesLayout>
+        </PersonalDashboardLayout>
       </Route>
       <Route path={SOURCES_PATH}>
         <Layout
@@ -129,23 +134,13 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <RoleMappings />
-        </Layout>
+        <RoleMappings />
       </Route>
       <Route path={SECURITY_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <Security />
-        </Layout>
+        <Security />
       </Route>
       <Route path={ORG_SETTINGS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <SettingsRouter />
-        </Layout>
+        <SettingsRouter />
       </Route>
       <Route>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>

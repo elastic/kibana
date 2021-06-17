@@ -22,6 +22,16 @@ interface Props {
   isInvalid: boolean;
 }
 
+const ENTITY_TYPES = ['string', 'number', 'ip'];
+export function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    const isSpecifiedSupportedField = ENTITY_TYPES.includes(field.type);
+    const hasLeadingUnderscore = field.name.startsWith('_');
+    const isAggregatable = !!field.aggregatable;
+    return isSpecifiedSupportedField && isAggregatable && !hasLeadingUnderscore;
+  });
+}
+
 export const EntityByExpression: FunctionComponent<Props> = ({
   errors,
   entity,
@@ -29,9 +39,6 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ENTITY_TYPES = ['string', 'number', 'ip'];
-
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
     useEffect(() => {
@@ -48,14 +55,12 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   });
   useEffect(() => {
     if (!_.isEqual(oldIndexFields, indexFields)) {
-      fields.current.indexFields = indexFields.filter(
-        (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
-      );
+      fields.current.indexFields = getValidIndexPatternFields(indexFields);
       if (!entity && fields.current.indexFields.length) {
         setAlertParamsEntity(fields.current.indexFields[0].name);
       }
     }
-  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity, entity]);
+  }, [indexFields, oldIndexFields, setAlertParamsEntity, entity]);
 
   const indexPopover = (
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>
