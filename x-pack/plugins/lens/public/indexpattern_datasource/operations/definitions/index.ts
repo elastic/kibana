@@ -181,6 +181,7 @@ export interface ParamEditorProps<C> {
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
+  layerId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
@@ -381,7 +382,11 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params'] & { kql?: string; lucene?: string }
+    columnParams?: (IndexPatternColumn & C)['params'] & {
+      kql?: string;
+      lucene?: string;
+      shift?: string;
+    }
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -487,6 +492,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       kql?: string;
       lucene?: string;
+      shift?: string;
     }
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

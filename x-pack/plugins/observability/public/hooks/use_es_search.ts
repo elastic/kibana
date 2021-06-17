@@ -21,21 +21,23 @@ export const useEsSearch = <TParams extends estypes.SearchRequest>(
   } = useKibana<{ data: DataPublicPluginStart }>();
 
   const { data: response = {}, loading } = useFetcher(() => {
-    return new Promise((resolve) => {
-      const search$ = data.search
-        .search({
-          params,
-        })
-        .subscribe({
-          next: (result) => {
-            if (isCompleteResponse(result)) {
-              // Final result
-              resolve(result);
-              search$.unsubscribe();
-            }
-          },
-        });
-    });
+    if (params.index) {
+      return new Promise((resolve) => {
+        const search$ = data.search
+          .search({
+            params,
+          })
+          .subscribe({
+            next: (result) => {
+              if (isCompleteResponse(result)) {
+                // Final result
+                resolve(result);
+                search$.unsubscribe();
+              }
+            },
+          });
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...fnDeps]);
 

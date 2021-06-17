@@ -9,6 +9,7 @@
 
 import {
   DrawState,
+  EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
@@ -36,6 +37,7 @@ export type MapContext = {
   filters: Filter[];
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
+  editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };
