@@ -87,7 +87,7 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
-    const serviceStatus$ = healthRoute(
+    const { serviceStatus$, monitoredHealth$ } = healthRoute(
       router,
       this.monitoringStats$,
       this.logger,
@@ -107,7 +107,7 @@ export class TaskManagerPlugin
     if (usageCollection) {
       registerTaskManagerUsageCollector(
         usageCollection,
-        this.monitoringStats$,
+        monitoredHealth$,
         this.config.ephemeral_tasks.enabled
       );
     }

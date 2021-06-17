@@ -7,4 +7,25 @@
 
 export interface TaskManagerUsage {
   ephemeral_tasks_enabled: boolean;
+  ephemeral_stats: {
+    status: string;
+    queued_tasks: {
+      p50: number;
+      p90: number;
+      p95: number;
+      p99: number;
+    };
+    load: {
+      p50: number;
+      p90: number;
+      p95: number;
+      p99: number;
+    };
+    executions_per_cycle: {
+      p50: number;
+      p90: number;
+      p95: number;
+      p99: number;
+    };
+  };
 }
