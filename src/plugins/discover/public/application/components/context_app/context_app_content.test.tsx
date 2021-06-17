@@ -9,34 +9,27 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { uiSettingsMock as mockUiSettings } from '../../../__mocks__/ui_settings';
-import { IndexPattern } from '../../../../../data/common/index_patterns';
-import { ContextAppLegacy } from './context_app_legacy';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
-import { ContextErrorMessage } from '../context_error_message';
-import { TopNavMenuMock } from './__mocks__/top_nav_menu';
 import { AppState, GetStateReturn } from '../../angular/context_state';
 import { SortDirection } from 'src/plugins/data/common';
 import { EsHitRecordList } from '../../angular/context/api/context';
+import { ContextAppContent, ContextAppContentProps } from './context_app_content';
+import { getServices } from '../../../kibana_services';
+import { LoadingStatus } from '../../angular/context_query_state';
+import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { DiscoverGrid } from '../discover_grid/discover_grid';
 
 jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
-      metadata: {
-        branch: 'test',
-      },
-      capabilities: {
-        discover: {
-          save: true,
-        },
-      },
       uiSettings: mockUiSettings,
     }),
   };
 });
 
-describe('ContextAppLegacy test', () => {
+describe('ContextAppContent test', () => {
   const hit = {
     _id: '123',
     _index: 'test_index',
@@ -53,75 +46,59 @@ describe('ContextAppLegacy test', () => {
     fields: [{ order_date: ['2020-10-19T13:35:02.000Z'] }],
     sort: [1603114502000, 2092],
   };
-  const indexPattern = {
-    id: 'test_index_pattern',
-  } as IndexPattern;
-  const defaultProps = {
-    columns: ['_source'],
-    filter: () => {},
-    hits: ([hit] as unknown) as EsHitRecordList,
-    sorting: [['order_date', 'desc']] as Array<[string, SortDirection]>,
-    minimumVisibleRows: 5,
-    indexPattern,
+  const defaultProps = ({
+    columns: ['Time (@timestamp)', '_source'],
+    indexPattern: indexPatternMock,
     appState: ({} as unknown) as AppState,
     stateContainer: ({} as unknown) as GetStateReturn,
-    anchorId: 'test_anchor_id',
-    anchorStatus: 'loaded',
-    anchorReason: 'no reason',
+    anchorStatus: LoadingStatus.LOADED,
+    predecessorsStatus: LoadingStatus.LOADED,
+    successorsStatus: LoadingStatus.LOADED,
+    rows: ([hit] as unknown) as EsHitRecordList,
+    predecessors: [],
+    successors: [],
     defaultStepSize: 5,
     predecessorCount: 10,
     successorCount: 10,
-    predecessorAvailable: 10,
-    successorAvailable: 10,
-    onChangePredecessorCount: jest.fn(),
-    onChangeSuccessorCount: jest.fn(),
-    predecessorStatus: 'loaded',
-    successorStatus: 'loaded',
-    topNavMenu: TopNavMenuMock,
     useNewFieldsApi: false,
     isPaginationEnabled: false,
-  };
-  const topNavProps = {
-    appName: 'context',
-    showSearchBar: true,
-    showQueryBar: false,
-    showFilterBar: true,
-    showSaveQuery: false,
-    showDatePicker: false,
-    indexPatterns: [indexPattern],
-    useDefaultBehaviors: true,
-  };
+    onAddColumn: () => {},
+    onRemoveColumn: () => {},
+    onSetColumns: () => {},
+    services: getServices(),
+    sort: [['order_date', 'desc']] as Array<[string, SortDirection]>,
+    isLegacy: true,
+    setAppState: () => {},
+    addFilter: () => {},
+  } as unknown) as ContextAppContentProps;
 
-  it('renders correctly', () => {
-    const component = mountWithIntl(<ContextAppLegacy {...defaultProps} />);
+  it('should render legacy table correctly', () => {
+    const component = mountWithIntl(<ContextAppContent {...defaultProps} />);
     expect(component.find(DocTableLegacy).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
-    const topNavMenu = component.find(TopNavMenuMock);
-    expect(topNavMenu.length).toBe(1);
-    expect(topNavMenu.props()).toStrictEqual(topNavProps);
   });
 
   it('renders loading indicator', () => {
     const props = { ...defaultProps };
-    props.anchorStatus = 'loading';
-    const component = mountWithIntl(<ContextAppLegacy {...props} />);
+    props.anchorStatus = LoadingStatus.LOADING;
+    const component = mountWithIntl(<ContextAppContent {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
-    expect(component.find(ActionBar).length).toBe(2);
-    expect(component.find(TopNavMenuMock).length).toBe(1);
   });
 
   it('renders error message', () => {
     const props = { ...defaultProps };
-    props.anchorStatus = 'failed';
-    props.anchorReason = 'something went wrong';
-    const component = mountWithIntl(<ContextAppLegacy {...props} />);
+    props.anchorStatus = LoadingStatus.FAILED;
+    const component = mountWithIntl(<ContextAppContent {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
-    expect(component.find(TopNavMenuMock).length).toBe(0);
-    const errorMessage = component.find(ContextErrorMessage);
-    expect(errorMessage.length).toBe(1);
+  });
+
+  it('should render discover grid correctly', () => {
+    const props = { ...defaultProps, isLegacy: false };
+    const component = mountWithIntl(<ContextAppContent {...props} />);
+    expect(component.find(DiscoverGrid).length).toBe(1);
   });
 });
