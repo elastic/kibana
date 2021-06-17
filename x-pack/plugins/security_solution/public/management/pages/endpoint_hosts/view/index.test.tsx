@@ -911,7 +911,10 @@ describe('when on the endpoint list page', () => {
           history.push('/endpoints?selected_endpoint=1&show=isolate');
         });
         renderResult = await renderAndWaitForData();
+        // Need to reset `http.post` and adjust it so that the mock for http host
+        // isolation api does not output error noise to the console
         coreStart.http.post.mockReset();
+        coreStart.http.post.mockImplementation(async () => null);
         isolateApiMock = hostIsolationHttpMocks(coreStart.http);
       });
 
