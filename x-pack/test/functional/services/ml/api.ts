@@ -541,7 +541,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async waitForDatafeedToNotExist(datafeedId: string) {
-      await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
+      await retry.waitForWithTimeout(`'${datafeedId}' to not exist`, 5 * 1000, async () => {
         if ((await this.datafeedExist(datafeedId)) === false) {
           return true;
         } else {

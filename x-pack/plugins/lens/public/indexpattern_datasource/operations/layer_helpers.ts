@@ -169,6 +169,10 @@ export function insertNewColumn({
     if (field) {
       throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
     }
+    if (operationDefinition.input === 'managedReference') {
+      // TODO: need to create on the fly the new columns for Formula,
+      // like we do for fullReferences to show a seamless transition
+    }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
@@ -358,9 +362,9 @@ export function replaceColumn({
     tempLayer = resetIncomplete(tempLayer, columnId);
 
     if (previousDefinition.input === 'managedReference') {
-      // Every transition away from a managedReference resets it, we don't have a way to keep the state
+      // If the transition is incomplete, leave the managed state until it's finished.
       tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
-      return insertNewColumn({
+      const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,
         indexPattern,
@@ -368,6 +372,14 @@ export function replaceColumn({
         field,
         visualizationGroups,
       });
+      if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
+        return {
+          ...layer,
+          incompleteColumns: hypotheticalLayer.incompleteColumns,
+        };
+      } else {
+        return hypotheticalLayer;
+      }
     }
 
     if (operationDefinition.input === 'fullReference') {
@@ -402,11 +414,21 @@ export function replaceColumn({
             indexPattern,
           });
 
+          const column = copyCustomLabel({ ...referenceColumn }, previousColumn);
+          // do not forget to move over also any filter/shift/anything (if compatible)
+          // from the reference definition to the new operation.
+          if (referencedOperation.filterable) {
+            column.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
+          }
+          if (referencedOperation.shiftable) {
+            column.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
+          }
+
           tempLayer = {
             ...tempLayer,
             columns: {
               ...tempLayer.columns,
-              [columnId]: copyCustomLabel({ ...referenceColumn }, previousColumn),
+              [columnId]: column,
             },
           };
           return updateDefaultLabels(
@@ -859,7 +881,10 @@ function addBucket(
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
 ): IndexPatternLayer {
-  const [buckets, metrics, references] = getExistingColumnGroups(layer);
+  const [buckets, metrics] = partition(
+    layer.columnOrder,
+    (colId) => layer.columns[colId].isBucketed
+  );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
     (columnId) => layer.columns[columnId].operationType === 'date_histogram'
@@ -873,12 +898,11 @@ function addBucket(
       addedColumnId,
       ...buckets.slice(oldDateHistogramIndex, buckets.length),
       ...metrics,
-      ...references,
     ];
   } else {
     // Insert the new bucket after existing buckets. Users will see the same data
     // they already had, with an extra level of detail.
-    updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
+    updatedColumnOrder = [...buckets, addedColumnId, ...metrics];
   }
   updatedColumnOrder = reorderByGroups(
     visualizationGroups,
@@ -1169,8 +1193,20 @@ export function getErrorMessages(
         }
     >
   | undefined {
-  const errors = Object.entries(layer.columns)
+  const columns = Object.entries(layer.columns);
+  const visibleManagedReferences = columns.filter(
+    ([columnId, column]) =>
+      !isReferenced(layer, columnId) &&
+      operationDefinitionMap[column.operationType].input === 'managedReference'
+  );
+  const skippedColumns = visibleManagedReferences.flatMap(([columnId]) =>
+    getManagedColumnsFrom(columnId, layer.columns).map(([id]) => id)
+  );
+  const errors = columns
     .flatMap(([columnId, column]) => {
+      if (skippedColumns.includes(columnId)) {
+        return;
+      }
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
@@ -1216,6 +1252,25 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
     'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
+}
+
+export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
+  const referencedIds: string[] = [];
+  function collect(id: string) {
+    const column = layer.columns[id];
+    if (column && 'references' in column) {
+      const columnReferences = column.references;
+      // only record references which have created columns yet
+      const existingReferences = columnReferences.filter((reference) =>
+        Boolean(layer.columns[reference])
+      );
+      referencedIds.push(...existingReferences);
+      existingReferences.forEach(collect);
+    }
+  }
+  collect(columnId);
+
+  return referencedIds;
 }
 
 export function isOperationAllowedAsReference({

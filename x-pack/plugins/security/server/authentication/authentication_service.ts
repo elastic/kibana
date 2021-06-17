@@ -51,7 +51,7 @@ interface AuthenticationServiceStartParams {
   loggers: LoggerFactory;
 }
 
-export interface AuthenticationServiceStartInternal extends AuthenticationServiceStart {
+export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
     APIKeys,
     | 'areAPIKeysEnabled'
@@ -227,7 +227,7 @@ export class AuthenticationService {
     legacyAuditLogger,
     loggers,
     session,
-  }: AuthenticationServiceStartParams): AuthenticationServiceStartInternal {
+  }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),

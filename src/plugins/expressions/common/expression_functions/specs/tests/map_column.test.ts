@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { Datatable } from '../../../expression_types';
 import { mapColumn, MapColumnArguments } from '../map_column';
 import { emptyTable, functionWrapper, testTable } from './utils';
@@ -16,138 +17,227 @@ const pricePlusTwo = (datatable: Datatable) => of(datatable.rows[0].price + 2);
 describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
   const runFn = (input: Datatable, args: MapColumnArguments) =>
-    fn(input, args) as Promise<Datatable>;
+    fn(input, args) as Observable<Datatable>;
+  let testScheduler: TestScheduler;
 
-  it('returns a datatable with a new column with the values from mapping a function over each row in a datatable', async () => {
-    const arbitraryRowIndex = 2;
-    const result = await runFn(testTable, {
-      id: 'pricePlusTwo',
-      name: 'pricePlusTwo',
-      expression: pricePlusTwo,
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
+
+  it('returns a datatable with a new column with the values from mapping a function over each row in a datatable', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(testTable, {
+          id: 'pricePlusTwo',
+          name: 'pricePlusTwo',
+          expression: pricePlusTwo,
+        })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            ...testTable.columns,
+            {
+              id: 'pricePlusTwo',
+              name: 'pricePlusTwo',
+              meta: { type: 'number', params: { id: 'number' } },
+            },
+          ],
+          rows: expect.arrayContaining([
+            expect.objectContaining({
+              pricePlusTwo: expect.anything(),
+            }),
+          ]),
+        }),
+      ]);
     });
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toEqual([
-      ...testTable.columns,
-      { id: 'pricePlusTwo', name: 'pricePlusTwo', meta: { type: 'number' } },
-    ]);
-    expect(result.columns[result.columns.length - 1]).toHaveProperty('name', 'pricePlusTwo');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
   });
 
-  it('allows the id arg to be optional, looking up by name instead', async () => {
-    const result = await runFn(testTable, { name: 'name label', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name label');
-    const arbitraryRowIndex = 4;
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(testTable.columns.length);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'name');
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
-    expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('name label');
-  });
-
-  it('allows a duplicate name when the ids are different', async () => {
-    const result = await runFn(testTable, {
-      id: 'new',
-      name: 'name label',
-      expression: pricePlusTwo,
+  it('allows the id arg to be optional, looking up by name instead', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(runFn(testTable, { name: 'name label', expression: pricePlusTwo })).toBe(
+        '(0|)',
+        [
+          expect.objectContaining({
+            type: 'datatable',
+            columns: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'name',
+                name: 'name label',
+                meta: expect.objectContaining({ type: 'number' }),
+              }),
+            ]),
+            rows: expect.arrayContaining([
+              expect.objectContaining({
+                name: 202,
+              }),
+            ]),
+          }),
+        ]
+      );
     });
-    const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
-    const arbitraryRowIndex = 4;
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(testTable.columns.length + 1);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
   });
 
-  it('adds a column to empty tables', async () => {
-    const result = await runFn(emptyTable, { name: 'name', expression: pricePlusTwo });
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(1);
-    expect(result.columns[0]).toHaveProperty('name', 'name');
-    expect(result.columns[0].meta).toHaveProperty('type', 'null');
+  it('allows a duplicate name when the ids are different', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(testTable, {
+          id: 'new',
+          name: 'name label',
+          expression: pricePlusTwo,
+        })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'new',
+              name: 'name label',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ]),
+          rows: expect.arrayContaining([
+            expect.objectContaining({
+              new: 202,
+            }),
+          ]),
+        }),
+      ]);
+    });
   });
 
-  it('should assign specific id, different from name, when id arg is passed for new columns', async () => {
-    const result = await runFn(emptyTable, { name: 'name', id: 'myid', expression: pricePlusTwo });
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(1);
-    expect(result.columns[0]).toHaveProperty('name', 'name');
-    expect(result.columns[0]).toHaveProperty('id', 'myid');
-    expect(result.columns[0].meta).toHaveProperty('type', 'null');
+  it('overwrites existing column with the new column if an existing column name is provided', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(runFn(testTable, { name: 'name', expression: pricePlusTwo })).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'name',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ]),
+          rows: expect.arrayContaining([
+            expect.objectContaining({
+              name: 202,
+            }),
+          ]),
+        }),
+      ]);
+    });
   });
 
-  it('should copy over the meta information from the specified column', async () => {
-    const result = await runFn(
-      {
-        ...testTable,
-        columns: [
-          ...testTable.columns,
-          // add a new entry
+  it('adds a column to empty tables', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(runFn(emptyTable, { name: 'name', expression: pricePlusTwo })).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            expect.objectContaining({
+              name: 'name',
+              meta: expect.objectContaining({ type: 'null' }),
+            }),
+          ],
+        }),
+      ]);
+    });
+  });
+
+  it('should assign specific id, different from name, when id arg is passed for copied column', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(testTable, { name: 'name', id: 'myid', expression: pricePlusTwo })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'myid',
+              name: 'name',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ]),
+        }),
+      ]);
+    });
+  });
+
+  it('should copy over the meta information from the specified column', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(
           {
-            id: 'myId',
-            name: 'myName',
-            meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
+            ...testTable,
+            columns: [
+              ...testTable.columns,
+              // add a new entry
+              {
+                id: 'myId',
+                name: 'myName',
+                meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
+              },
+            ],
+            rows: testTable.rows.map((row) => ({ ...row, myId: Date.now() })),
           },
-        ],
-        rows: testTable.rows.map((row) => ({ ...row, myId: Date.now() })),
-      },
-      { name: 'name', copyMetaFrom: 'myId', expression: pricePlusTwo }
-    );
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns[nameColumnIndex]).toEqual({
-      id: 'name',
-      name: 'name',
-      meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
+          { name: 'name', copyMetaFrom: 'myId', expression: pricePlusTwo }
+        )
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'name',
+              name: 'name',
+              meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
+            }),
+          ]),
+        }),
+      ]);
     });
   });
 
-  it('should be resilient if the references column for meta information does not exists', async () => {
-    const result = await runFn(emptyTable, {
-      name: 'name',
-      copyMetaFrom: 'time',
-      expression: pricePlusTwo,
+  it('should be resilient if the references column for meta information does not exists', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(emptyTable, {
+          name: 'name',
+          copyMetaFrom: 'time',
+          expression: pricePlusTwo,
+        })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            expect.objectContaining({
+              id: 'name',
+              name: 'name',
+              meta: expect.objectContaining({ type: 'null' }),
+            }),
+          ],
+        }),
+      ]);
     });
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(1);
-    expect(result.columns[0]).toHaveProperty('name', 'name');
-    expect(result.columns[0]).toHaveProperty('id', 'name');
-    expect(result.columns[0].meta).toHaveProperty('type', 'null');
   });
 
-  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', async () => {
-    const result = await runFn(
-      { ...emptyTable, rows: [...emptyTable.rows, { value: 5 }] },
-      { name: 'value', copyMetaFrom: 'time', expression: pricePlusTwo }
-    );
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(1);
-    expect(result.columns[0]).toHaveProperty('name', 'value');
-    expect(result.columns[0]).toHaveProperty('id', 'value');
-    expect(result.columns[0].meta).toHaveProperty('type', 'number');
-  });
-
-  describe('expression', () => {
-    it('maps null values to the new column', async () => {
-      const result = await runFn(testTable, { name: 'empty' });
-      const emptyColumnIndex = result.columns.findIndex(({ name }) => name === 'empty');
-      const arbitraryRowIndex = 8;
-
-      expect(result.columns[emptyColumnIndex]).toHaveProperty('name', 'empty');
-      expect(result.columns[emptyColumnIndex].meta).toHaveProperty('type', 'null');
-      expect(result.rows[arbitraryRowIndex]).toHaveProperty('empty', null);
+  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(
+          { ...emptyTable, rows: [...emptyTable.rows, { value: 5 }] },
+          { name: 'value', copyMetaFrom: 'time', expression: pricePlusTwo }
+        )
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            expect.objectContaining({
+              id: 'value',
+              name: 'value',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ],
+        }),
+      ]);
     });
   });
 });

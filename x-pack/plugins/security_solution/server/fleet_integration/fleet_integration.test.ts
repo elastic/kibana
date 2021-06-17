@@ -100,7 +100,7 @@ describe('ingest_integration tests ', () => {
     let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      const artifacts = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts();
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
       ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
@@ -147,7 +147,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
 
@@ -170,7 +173,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
@@ -197,10 +203,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 

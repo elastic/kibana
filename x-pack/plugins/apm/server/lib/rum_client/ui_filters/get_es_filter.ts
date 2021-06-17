@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import {
+  uxLocalUIFilterNames,
+  uxLocalUIFilters,
+} from '../../../../common/ux_ui_filter';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
-import { UIFilters } from '../../../../typings/ui_filters';
-import { localUIFilters, localUIFilterNames } from './local_ui_filters/config';
+import { UxUIFilters } from '../../../../typings/ui_filters';
+import { environmentQuery } from '../../../utils/queries';
 
-export function getEsFilter(uiFilters: UIFilters) {
+export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
   const localFilterValues = uiFilters;
-  const mappedFilters = localUIFilterNames
-    .filter((name) => name in localFilterValues)
+  const mappedFilters = uxLocalUIFilterNames
+    .filter((name) => {
+      const validFilter = name in localFilterValues;
+      if (exclude) {
+        return name.includes('Excluded') && validFilter;
+      }
+      return !name.includes('Excluded') && validFilter;
+    })
     .map((filterName) => {
-      const field = localUIFilters[filterName];
+      const field = uxLocalUIFilters[filterName];
       const value = localFilterValues[filterName];
+
       return {
         terms: {
           [field.fieldName]: value,
@@ -23,5 +34,5 @@ export function getEsFilter(uiFilters: UIFilters) {
       };
     }) as ESFilter[];
 
-  return mappedFilters;
+  return [...mappedFilters, ...environmentQuery(uiFilters.environment)];
 }

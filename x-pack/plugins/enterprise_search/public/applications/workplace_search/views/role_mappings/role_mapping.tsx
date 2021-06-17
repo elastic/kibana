@@ -9,35 +9,15 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiComboBox,
-  EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiRadioGroup,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 
-import {
-  AttributeSelector,
-  RoleSelector,
-  RoleOptionLabel,
-  RoleMappingFlyout,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 
 import { Role } from '../../types';
 
-import {
-  ADMIN_ROLE_TYPE_DESCRIPTION,
-  USER_ROLE_TYPE_DESCRIPTION,
-  GROUP_ASSIGNMENT_INVALID_ERROR,
-  GROUP_ASSIGNMENT_LABEL,
-  ALL_GROUPS_LABEL,
-  ALL_GROUPS_DESCRIPTION,
-  SPECIFIC_GROUPS_LABEL,
-  SPECIFIC_GROUPS_DESCRIPTION,
-} from './constants';
+import { ADMIN_ROLE_TYPE_DESCRIPTION, USER_ROLE_TYPE_DESCRIPTION } from './constants';
 
+import { GroupAssignmentSelector } from './group_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 interface RoleType {
@@ -56,24 +36,9 @@ const roleOptions = [
   },
 ] as RoleType[];
 
-const groupOptions = [
-  {
-    id: 'all',
-    label: <RoleOptionLabel label={ALL_GROUPS_LABEL} description={ALL_GROUPS_DESCRIPTION} />,
-  },
-  {
-    id: 'specific',
-    label: (
-      <RoleOptionLabel label={SPECIFIC_GROUPS_LABEL} description={SPECIFIC_GROUPS_DESCRIPTION} />
-    ),
-  },
-];
-
 export const RoleMapping: React.FC = () => {
   const {
     handleSaveMapping,
-    handleGroupSelectionChange,
-    handleAllGroupsSelectionChange,
     handleAttributeValueChange,
     handleAttributeSelectorChange,
     handleRoleChange,
@@ -87,13 +52,11 @@ export const RoleMapping: React.FC = () => {
     roleType,
     attributeValue,
     attributeName,
-    availableGroups,
     selectedGroups,
     includeInAllGroups,
     availableAuthProviders,
     multipleAuthProvidersConfig,
     selectedAuthProviders,
-    selectedOptions,
     roleMapping,
     roleMappingErrors,
   } = useValues(RoleMappingsLogic);
@@ -132,29 +95,7 @@ export const RoleMapping: React.FC = () => {
           onChange={handleRoleChange}
           label="Role"
         />
-        <EuiHorizontalRule />
-        <EuiFormRow>
-          <EuiRadioGroup
-            options={groupOptions}
-            idSelected={includeInAllGroups ? 'all' : 'specific'}
-            onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
-            legend={{
-              children: <span>{GROUP_ASSIGNMENT_LABEL}</span>,
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
-          <EuiComboBox
-            data-test-subj="groupsSelect"
-            selectedOptions={selectedOptions}
-            options={availableGroups.map(({ name, id }) => ({ label: name, value: id }))}
-            onChange={(options) => {
-              handleGroupSelectionChange(options.map(({ value }) => value as string));
-            }}
-            fullWidth
-            isDisabled={includeInAllGroups}
-          />
-        </EuiFormRow>
+        <GroupAssignmentSelector />
       </EuiForm>
     </RoleMappingFlyout>
   );

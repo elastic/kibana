@@ -38,7 +38,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  integration?: string;
+  integrationToEnable?: string;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
@@ -47,7 +47,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     agentPolicy,
     packageInfo,
     packagePolicy,
-    integration,
+    integrationToEnable,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
@@ -95,7 +95,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
                 : 1
             }`,
-            packagePolicy.description
+            packagePolicy.description,
+            integrationToEnable
           )
         );
       }
@@ -107,7 +108,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           namespace: agentPolicy.namespace,
         });
       }
-    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integration]);
+    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
 
     return validationResults ? (
       <EuiDescribedFormGroup

@@ -11,8 +11,6 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy } from '../../types';
-import { NewEnrollmentTokenModal } from '../../components';
 import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
@@ -23,11 +21,10 @@ import {
   useFleetServerInstructions,
 } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
+import type { BaseProps } from './types';
 
-interface Props {
-  agentPolicies?: AgentPolicy[];
-}
+type Props = BaseProps;
 
 const DefaultMissingRequirements = () => {
   const { getHref } = useLink();
@@ -39,7 +36,7 @@ const DefaultMissingRequirements = () => {
         defaultMessage="Before enrolling agents, {link}."
         values={{
           link: (
-            <EuiLink href={getHref('fleet')}>
+            <EuiLink href={getHref('overview')}>
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.setUpAgentsLink"
                 defaultMessage="set up central management for Elastic Agents"
@@ -56,7 +53,7 @@ const FleetServerMissingRequirements = () => {
   return <FleetServerRequirementPage />;
 };
 
-export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
   const fleetStatus = useFleetStatus();
 
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -78,11 +75,13 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
     const baseSteps: EuiContainedStepProps[] = [
       DownloadStep(),
-      AgentPolicySelectionStep({
-        agentPolicies,
-        setSelectedAPIKeyId,
-        setIsFleetServerPolicySelected,
-      }),
+      !agentPolicy
+        ? AgentPolicySelectionStep({
+            agentPolicies,
+            setSelectedAPIKeyId,
+            setIsFleetServerPolicySelected,
+          })
+        : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
     ];
     if (isFleetServerPolicySelected) {
       baseSteps.push(
@@ -103,6 +102,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     }
     return baseSteps;
   }, [
+    agentPolicy,
     agentPolicies,
     selectedAPIKeyId,
     apiKey.data,
@@ -110,11 +110,6 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     settings.data?.item?.fleet_server_hosts,
     fleetServerInstructions,
   ]);
-
-  const [isModalOpen, setModalOpen] = useState(false);
-  const closeModal = () => {
-    setModalOpen(false);
-  };
 
   return (
     <>
@@ -128,10 +123,6 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
           </EuiText>
           <EuiSpacer size="l" />
           <EuiSteps steps={steps} />
-
-          {isModalOpen && (
-            <NewEnrollmentTokenModal agentPolicies={agentPolicies} onClose={closeModal} />
-          )}
         </>
       ) : fleetStatus.missingRequirements?.length === 1 &&
         fleetStatus.missingRequirements[0] === 'fleet_server' ? (

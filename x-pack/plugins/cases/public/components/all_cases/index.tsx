@@ -14,16 +14,16 @@ export interface AllCasesProps extends Owner {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelector)
   configureCasesNavigation: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)
   createCaseNavigation: CasesNavigation;
+  disableAlerts?: boolean;
+  showTitle?: boolean;
   userCanCrud: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = (props) => {
-  return (
-    <OwnerProvider owner={props.owner}>
-      <AllCasesGeneric {...props} />
-    </OwnerProvider>
-  );
-};
+export const AllCases: React.FC<AllCasesProps> = (props) => (
+  <OwnerProvider owner={props.owner}>
+    <AllCasesGeneric {...props} />
+  </OwnerProvider>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { AllCases as default };

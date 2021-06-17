@@ -60,6 +60,7 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldForma
   const isSame =
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
+    param1?.useShortSuffix === param2?.useShortSuffix &&
     param1?.showSuffix === param2?.showSuffix;
 
   if (param2.outputPrecision !== undefined) {

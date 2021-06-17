@@ -10,12 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { Datafeed, DatafeedStats, Job } from '../../../common/types/anomaly_detection_jobs';
-import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
-import { fieldsServiceProvider } from '../fields_service';
+import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
@@ -235,154 +231,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     }
   }
 
-  async function datafeedPreview(job: Job, datafeed: Datafeed) {
-    let query: any = { match_all: {} };
-    if (datafeed.query) {
-      query = datafeed.query;
-    }
-    const { getTimeFieldRange } = fieldsServiceProvider(client);
-    const { start } = await getTimeFieldRange(
-      datafeed.indices,
-      job.data_description.time_field,
-      query,
-      datafeed.runtime_mappings,
-      datafeed.indices_options
-    );
-
-    // Get bucket span
-    // Get first doc time for datafeed
-    // Create a new query - must user query and must range query.
-    // Time range 'to' first doc time plus < 10 buckets
-
-    // Do a preliminary search to get the date of the earliest doc matching the
-    // query in the datafeed. This will be used to apply a time range criteria
-    // on the datafeed search preview.
-    // This time filter is required for datafeed searches using aggregations to ensure
-    // the search does not create too many buckets (default 10000 max_bucket limit),
-    // but apply it to searches without aggregations too for consistency.
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-    if (bucketSpan === null) {
-      return;
-    }
-    const earliestMs = start.epoch;
-    const latestMs = +start.epoch + 10 * bucketSpan.asMilliseconds();
-
-    const body: any = {
-      query: {
-        bool: {
-          must: [
-            {
-              range: {
-                [job.data_description.time_field]: {
-                  gte: earliestMs,
-                  lt: latestMs,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-            query,
-          ],
-        },
-      },
-    };
-
-    // if aggs or aggregations is set, add it to the search
-    const aggregations = datafeed.aggs ?? datafeed.aggregations;
-    if (isPopulatedObject(aggregations)) {
-      body.size = 0;
-      body.aggregations = aggregations;
-
-      // add script_fields if present
-      const scriptFields = datafeed.script_fields;
-      if (isPopulatedObject(scriptFields)) {
-        body.script_fields = scriptFields;
-      }
-
-      // add runtime_mappings if present
-      const runtimeMappings = datafeed.runtime_mappings;
-      if (isPopulatedObject(runtimeMappings)) {
-        body.runtime_mappings = runtimeMappings;
-      }
-    } else {
-      // if aggregations is not set and retrieveWholeSource is not set, add all of the fields from the job
-      body.size = ML_DATA_PREVIEW_COUNT;
-
-      // add script_fields if present
-      const scriptFields = datafeed.script_fields;
-      if (isPopulatedObject(scriptFields)) {
-        body.script_fields = scriptFields;
-      }
-
-      // add runtime_mappings if present
-      const runtimeMappings = datafeed.runtime_mappings;
-      if (isPopulatedObject(runtimeMappings)) {
-        body.runtime_mappings = runtimeMappings;
-      }
-
-      const fields = new Set<string>();
-
-      // get fields from detectors
-      if (job.analysis_config.detectors) {
-        job.analysis_config.detectors.forEach((dtr) => {
-          if (dtr.by_field_name) {
-            fields.add(dtr.by_field_name);
-          }
-          if (dtr.field_name) {
-            fields.add(dtr.field_name);
-          }
-          if (dtr.over_field_name) {
-            fields.add(dtr.over_field_name);
-          }
-          if (dtr.partition_field_name) {
-            fields.add(dtr.partition_field_name);
-          }
-        });
-      }
-
-      // get fields from influencers
-      if (job.analysis_config.influencers) {
-        job.analysis_config.influencers.forEach((inf) => {
-          fields.add(inf);
-        });
-      }
-
-      // get fields from categorizationFieldName
-      if (job.analysis_config.categorization_field_name) {
-        fields.add(job.analysis_config.categorization_field_name);
-      }
-
-      // get fields from summary_count_field_name
-      if (job.analysis_config.summary_count_field_name) {
-        fields.add(job.analysis_config.summary_count_field_name);
-      }
-
-      // get fields from time_field
-      if (job.data_description.time_field) {
-        fields.add(job.data_description.time_field);
-      }
-
-      // add runtime fields
-      if (runtimeMappings) {
-        Object.keys(runtimeMappings).forEach((fieldName) => {
-          fields.add(fieldName);
-        });
-      }
-
-      const fieldsList = [...fields];
-      if (fieldsList.length) {
-        body.fields = fieldsList;
-        body._source = false;
-      }
-    }
-    const data = {
-      index: datafeed.indices,
-      body,
-      ...(datafeed.indices_options ?? {}),
-    };
-
-    return (await client.asCurrentUser.search(data)).body;
-  }
-
   return {
     forceStartDatafeeds,
     stopDatafeeds,
@@ -390,6 +238,5 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     getDatafeedIdsByJobId,
     getJobIdsByDatafeedId,
     getDatafeedByJobId,
-    datafeedPreview,
   };
 }

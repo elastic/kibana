@@ -16,7 +16,7 @@ import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../../authentication';
-import type { AuthenticationServiceStartInternal } from '../../authentication/authentication_service';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
@@ -26,7 +26,7 @@ import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStartInternal>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;

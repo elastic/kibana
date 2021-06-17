@@ -11,7 +11,7 @@ import type {
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ import {
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  IS_EDITABLE_REQUEST_ID,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -43,7 +44,6 @@ import {
   getLineFilterExpression,
   getPointFilterExpression,
 } from '../../util/mb_filter_expressions';
-
 import {
   DynamicStylePropertyOptions,
   MapFilters,
@@ -93,12 +93,13 @@ export interface IVectorLayer extends ILayer {
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   canShowTooltip(): boolean;
+  supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
-
   protected readonly _style: IVectorStyle;
   private readonly _joins: InnerJoin[];
 
@@ -173,6 +174,13 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
+  }
+
+  supportsFeatureEditing(): boolean {
+    const dataRequest = this.getDataRequest(IS_EDITABLE_REQUEST_ID);
+    const data = dataRequest?.getData() as { isEditable: boolean } | undefined;
+
+    return data ? data.isEditable : false;
   }
 
   hasJoins() {
@@ -670,6 +678,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         syncContext,
         source,
       });
+      await this._syncIsEditable({ syncContext });
       if (
         !sourceResult.featureCollection ||
         !sourceResult.featureCollection.features.length ||
@@ -684,6 +693,27 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;
       }
+    }
+  }
+
+  async _syncIsEditable({ syncContext }: { syncContext: DataRequestContext }) {
+    if (syncContext.dataFilters.isReadOnly) {
+      return;
+    }
+    const { startLoading, stopLoading, onLoadError } = syncContext;
+    const dataRequestId = IS_EDITABLE_REQUEST_ID;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
+    const prevDataRequest = this.getDataRequest(dataRequestId);
+    if (prevDataRequest) {
+      return;
+    }
+    try {
+      startLoading(dataRequestId, requestToken);
+      const isEditable = await this.getSource().loadIsEditable();
+      stopLoading(dataRequestId, requestToken, { isEditable });
+    } catch (error) {
+      onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
     }
   }
 
@@ -1056,5 +1086,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async getLicensedFeatures() {
     return await this._source.getLicensedFeatures();
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    const layerSource = this.getSource();
+    await layerSource.addFeature(geometry);
   }
 }

@@ -49,7 +49,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiPanel>
+            <EuiPanel hasBorder={true}>
               <LatencyChart height={200} />
             </EuiPanel>
           </EuiFlexItem>
@@ -63,7 +63,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 <ServiceOverviewThroughputChart height={chartHeight} />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <ServiceOverviewTransactionsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
@@ -84,7 +84,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={7}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <ServiceOverviewErrorsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
@@ -101,7 +101,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               </EuiFlexItem>
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
-                  <EuiPanel>
+                  <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       serviceName={serviceName}
                     />

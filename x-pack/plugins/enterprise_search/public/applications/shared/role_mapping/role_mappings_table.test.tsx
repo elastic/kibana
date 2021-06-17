@@ -9,13 +9,14 @@ import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { EuiFieldSearch, EuiTableRow } from '@elastic/eui';
+import { EuiInMemoryTable, EuiTableHeaderCell } from '@elastic/eui';
 
 import { ALL_LABEL, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 
 import { RoleMappingsTable } from './role_mappings_table';
+import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
 describe('RoleMappingsTable', () => {
   const initializeRoleMapping = jest.fn();
@@ -41,55 +42,44 @@ describe('RoleMappingsTable', () => {
     handleDeleteMapping,
   };
 
-  it('renders', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
+  it('renders with "shouldShowAuthProvider" true', () => {
+    const wrapper = mount(<RoleMappingsTable {...props} />);
 
-    expect(wrapper.find(EuiFieldSearch)).toHaveLength(1);
-    expect(wrapper.find(EuiTableRow)).toHaveLength(1);
+    expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
+    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(6);
+  });
+
+  it('renders with "shouldShowAuthProvider" false', () => {
+    const wrapper = mount(<RoleMappingsTable {...props} shouldShowAuthProvider={false} />);
+
+    expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
+    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(5);
   });
 
   it('renders auth provider display names', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
+    const wrapper = mount(<RoleMappingsTable {...props} />);
 
-    expect(wrapper.find('[data-test-subj="AuthProviderDisplay"]').prop('children')).toEqual(
+    expect(wrapper.find('[data-test-subj="AuthProviderDisplayValue"]').prop('children')).toEqual(
       `${ANY_AUTH_PROVIDER_OPTION_LABEL}, other_auth`
     );
   });
 
-  it('handles input change', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
-    const input = wrapper.find(EuiFieldSearch);
-    const value = 'Query';
-    input.simulate('change', { target: { value } });
-
-    expect(wrapper.find(EuiTableRow)).toHaveLength(0);
-  });
-
   it('handles manage click', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
-    wrapper.find('[data-test-subj="ManageButton"]').simulate('click');
+    const wrapper = mount(<RoleMappingsTable {...props} />);
+    wrapper.find(UsersAndRolesRowActions).prop('onManageClick')();
 
     expect(initializeRoleMapping).toHaveBeenCalled();
   });
 
   it('handles delete click', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
-    wrapper.find('[data-test-subj="DeleteButton"]').simulate('click');
+    const wrapper = mount(<RoleMappingsTable {...props} />);
+    wrapper.find(UsersAndRolesRowActions).prop('onDeleteClick')();
 
     expect(handleDeleteMapping).toHaveBeenCalled();
   });
 
-  it('handles input change with special chars', () => {
-    const wrapper = shallow(<RoleMappingsTable {...props} />);
-    const input = wrapper.find(EuiFieldSearch);
-    const value = '*//username';
-    input.simulate('change', { target: { value } });
-
-    expect(wrapper.find(EuiTableRow)).toHaveLength(1);
-  });
-
   it('shows default message when "accessAllEngines" is true', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <RoleMappingsTable {...props} roleMappings={[asRoleMapping as any]} accessItemKey="engines" />
     );
 
@@ -100,7 +90,7 @@ describe('RoleMappingsTable', () => {
     const noItemsRoleMapping = { ...asRoleMapping, engines: [] };
     noItemsRoleMapping.accessAllEngines = false;
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <RoleMappingsTable
         {...props}
         roleMappings={[noItemsRoleMapping as any]}

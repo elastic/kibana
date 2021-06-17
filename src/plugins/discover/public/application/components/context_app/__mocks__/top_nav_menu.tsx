@@ -8,4 +8,4 @@
 
 import React from 'react';
 
-export const TopNavMenuMock = () => <div>Hello World</div>;
+export const mockTopNavMenu = () => <div>Hello World</div>;

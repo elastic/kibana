@@ -73,7 +73,7 @@ export const FormContext: React.FC<Props> = ({
 
   const submitCase = useCallback(
     async (
-      { connectorId: dataConnectorId, fields, syncAlerts, ...dataWithoutConnectorId },
+      { connectorId: dataConnectorId, fields, syncAlerts = true, ...dataWithoutConnectorId },
       isValid
     ) => {
       if (isValid) {

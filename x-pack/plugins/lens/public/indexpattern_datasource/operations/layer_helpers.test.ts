@@ -24,7 +24,7 @@ import type { IndexPattern, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
-import { createMockedFullReference } from './mocks';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
 
 jest.mock('../operations');
 jest.mock('../../id_generator');
@@ -91,10 +91,13 @@ describe('state_helpers', () => {
 
     // @ts-expect-error we are inserting an invalid type
     operationDefinitionMap.testReference = createMockedFullReference();
+    // @ts-expect-error we are inserting an invalid type
+    operationDefinitionMap.managedReference = createMockedManagedReference();
   });
 
   afterEach(() => {
     delete operationDefinitionMap.testReference;
+    delete operationDefinitionMap.managedReference;
   });
 
   describe('copyColumn', () => {
@@ -102,19 +105,19 @@ describe('state_helpers', () => {
       const source = {
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'Formula',
+        label: 'moving_average(sum(bytes), window=5)',
         operationType: 'formula' as const,
         params: {
           formula: 'moving_average(sum(bytes), window=5)',
           isFormulaBroken: false,
         },
-        references: ['formulaX3'],
+        references: ['formulaX1'],
       };
       const math = {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'math',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'math' as const,
         params: { tinymathAst: 'formulaX2' },
         references: ['formulaX2'],
@@ -123,7 +126,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX0',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
         scale: 'ratio' as const,
         sourceField: 'bytes',
@@ -132,10 +135,10 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX2',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'moving_average' as const,
         params: { window: 5 },
-        references: ['formulaX1'],
+        references: ['formulaX0'],
       };
       expect(
         copyColumn({
@@ -149,7 +152,7 @@ describe('state_helpers', () => {
               formulaX2: movingAvg,
               formulaX3: {
                 ...math,
-                label: 'formulaX3',
+                label: 'Part of moving_average(sum(bytes), window=5)',
                 references: ['formulaX2'],
                 params: { tinymathAst: 'formulaX2' },
               },
@@ -182,26 +185,24 @@ describe('state_helpers', () => {
           formulaX2: movingAvg,
           formulaX3: {
             ...math,
-            label: 'formulaX3',
             references: ['formulaX2'],
             params: { tinymathAst: 'formulaX2' },
           },
           copy: expect.objectContaining({ ...source, references: ['copyX3'] }),
-          copyX0: expect.objectContaining({ ...sum, label: 'copyX0' }),
+          copyX0: expect.objectContaining({
+            ...sum,
+          }),
           copyX1: expect.objectContaining({
             ...math,
-            label: 'copyX1',
             references: ['copyX0'],
             params: { tinymathAst: 'copyX0' },
           }),
           copyX2: expect.objectContaining({
             ...movingAvg,
-            label: 'copyX2',
             references: ['copyX1'],
           }),
           copyX3: expect.objectContaining({
             ...math,
-            label: 'copyX3',
             references: ['copyX2'],
             params: { tinymathAst: 'copyX2' },
           }),
@@ -385,6 +386,42 @@ describe('state_helpers', () => {
           visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+    });
+
+    it('should not change order of metrics and references on inserting new buckets', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            label: 'Cumulative sum of count of records',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'cumulative_sum',
+            references: ['col2'],
+          },
+          col2: {
+            label: 'Count of records',
+            dataType: 'document',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        },
+      };
+      expect(
+        insertNewColumn({
+          layer,
+          indexPattern,
+          columnId: 'col3',
+          op: 'filters',
+          visualizationGroups: [],
+        })
+      ).toEqual(expect.objectContaining({ columnOrder: ['col3', 'col1', 'col2'] }));
     });
 
     it('should insert both incomplete states if the aggregation does not support the field', () => {
@@ -1758,12 +1795,14 @@ describe('state_helpers', () => {
 
       it('should promote the inner references when switching away from reference to field-based operation (case a2)', () => {
         const expectedCol = {
-          label: 'Count of records',
+          label: 'Count of records -3h',
           dataType: 'number' as const,
           isBucketed: false,
 
           operationType: 'count' as const,
           sourceField: 'Records',
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
         const layer: IndexPatternLayer = {
           indexPatternId: '1',
@@ -1778,6 +1817,8 @@ describe('state_helpers', () => {
               // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['col1'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };
@@ -1806,6 +1847,8 @@ describe('state_helpers', () => {
           isBucketed: false,
           sourceField: 'bytes',
           operationType: 'average' as const,
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
 
         const layer: IndexPatternLayer = {
@@ -1819,6 +1862,8 @@ describe('state_helpers', () => {
               isBucketed: false,
               operationType: 'differences',
               references: ['metric'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };
@@ -2652,6 +2697,36 @@ describe('state_helpers', () => {
         {}
       );
       expect(mock).toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
+    });
+
+    it('should only collect the top level errors from managed references', () => {
+      const notCalledMock = jest.fn();
+      const mock = jest.fn().mockReturnValue(['error 1']);
+      operationDefinitionMap.testReference.getErrorMessage = notCalledMock;
+      operationDefinitionMap.managedReference.getErrorMessage = mock;
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'managedReference', references: ['col2'] },
+            col2: {
+              // @ts-expect-error not statically analyzed
+              operationType: 'testReference',
+              references: [],
+            },
+          },
+        },
+        indexPattern,
+        {},
+        '1',
+        {}
+      );
+      expect(notCalledMock).not.toHaveBeenCalled();
+      expect(mock).toHaveBeenCalledTimes(1);
       expect(errors).toHaveLength(1);
     });
 

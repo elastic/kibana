@@ -48,6 +48,7 @@ export const renderApp = (
     cloud: plugins.cloud || {},
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
+    security: plugins.security || {},
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
