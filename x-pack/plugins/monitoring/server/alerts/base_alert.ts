@@ -273,25 +273,27 @@ export class BaseAlert {
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
+
+    // for each cluster filter the nodes that belong to this cluster
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {
         continue;
       }
 
-      const firingNodeUuids = nodes
-        .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId || node.meta.instanceId)
-        .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertNodeState[] = [];
       const key = this.alertOptions.accessorKey;
+
+      // for each node, update the alert's state with node states
       for (const node of nodes) {
         if (!node.shouldFire) {
           continue;
         }
+        const newAlertStates: AlertNodeState[] = [];
+        const instance = services.alertInstanceFactory(node.meta.nodeId || node.meta.instanceId);
+
         const { meta } = node;
+
+        // create a default alert state for this node and add data from node.meta and other data
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
         if (key) {
           nodeState[key] = meta[key];
@@ -305,14 +307,15 @@ export class BaseAlert {
         nodeState.ui.isFiring = true;
         nodeState.ui.severity = node.severity;
         nodeState.ui.message = this.getUiMessage(nodeState, node);
+        // store the state of each node in array.
         newAlertStates.push(nodeState);
-      }
-
-      const alertInstanceState = { alertStates: newAlertStates };
-      instance.replaceState(alertInstanceState);
-      if (newAlertStates.length) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
-        state.lastExecutedAction = currentUTC;
+        const alertInstanceState = { alertStates: newAlertStates };
+        // update the alert's state with the new node states
+        instance.replaceState(alertInstanceState);
+        if (newAlertStates.length) {
+          this.executeActions(instance, alertInstanceState, null, cluster);
+          state.lastExecutedAction = currentUTC;
+        }
       }
     }
 
