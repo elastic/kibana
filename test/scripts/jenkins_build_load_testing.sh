@@ -80,6 +80,7 @@ popd
 
 echo " -> Running gatling load testing"
 for i in "${sim_array[@]}"; do
+  sleep 30
   echo "Running simulation $i .."
   export GATLING_SIMULATIONS="$i"
   node scripts/functional_tests \
