@@ -87,7 +87,7 @@ export const getCertSummary = (
 export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
   uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.tls',
-    name: tlsTranslations.alertFactoryName,
+    name: tlsTranslations.legacyAlertFactoryName,
     validate: {
       params: schema.object({}),
     },

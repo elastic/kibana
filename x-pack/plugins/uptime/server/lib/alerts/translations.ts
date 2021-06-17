@@ -151,6 +151,9 @@ export const tlsTranslations = {
   alertFactoryName: i18n.translate('xpack.uptime.alerts.tls', {
     defaultMessage: 'Uptime TLS',
   }),
+  legacyAlertFactoryName: i18n.translate('xpack.uptime.alerts.tlsLegacy', {
+    defaultMessage: 'Uptime TLS (Legacy)',
+  }),
   actionVariables: [
     {
       name: 'count',

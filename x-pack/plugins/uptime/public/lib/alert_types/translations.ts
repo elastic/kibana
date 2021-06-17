@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TlsTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.legacy.defaultActionMessage', {
     defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is expiring or becoming too old. Certificate {summary}
 `,
     values: {
@@ -17,11 +17,12 @@ export const TlsTranslations = {
       summary: '{{state.summary}}',
     },
   }),
-  name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
-    defaultMessage: 'Uptime TLS',
+  name: i18n.translate('xpack.uptime.alerts.tls.legacy.clientName', {
+    defaultMessage: 'Uptime TLS (Legacy)',
   }),
-  description: i18n.translate('xpack.uptime.alerts.tls.description', {
-    defaultMessage: 'Alert when the TLS certificate of an Uptime monitor is about to expire.',
+  description: i18n.translate('xpack.uptime.alerts.tls.legacy.description', {
+    defaultMessage:
+      'Alert when the TLS certificate of an Uptime monitor is about to expire. This alert will be deprecated in a future version.',
   }),
 };
 

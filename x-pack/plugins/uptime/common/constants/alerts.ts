@@ -19,7 +19,7 @@ export const MONITOR_STATUS: MonitorStatusActionGroup = {
 
 export const TLS_LEGACY: TLSLegacyActionGroup = {
   id: 'xpack.uptime.alerts.actionGroups.tls',
-  name: 'Uptime TLS Alert',
+  name: 'Uptime TLS Alert (Legacy)',
 };
 
 export const TLS: TLSActionGroup = {
