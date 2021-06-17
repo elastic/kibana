@@ -24,6 +24,7 @@ import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../editor_frame_service/embeddable';
 import { EditorFrameInstance } from '../types';
+import { Document } from '../persistence/saved_object_store';
 import {
   setState as setAppState,
   useLensSelector,
@@ -36,6 +37,7 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
+import { getSavedObjectFormat } from '../editor_frame_service/editor_frame/save';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -55,7 +57,8 @@ export function App({
   redirectToOrigin,
   setHeaderActionMenu,
   initialContext,
-  datasourceMap
+  datasourceMap,
+  visualizationMap,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -79,11 +82,62 @@ export function App({
   );
 
   const appState = useLensSelector((state) => state.app);
+  const {
+    datasourceStates,
+    visualization,
+    filters,
+    query,
+    title,
+    description,
+    persistedId,
+    activeDatasourceId,
+  } = appState;
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const { lastKnownDoc } = appState;
+  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+
+  useEffect(() => {
+    const activeVisualization = visualization.activeId && visualizationMap[visualization.activeId];
+    const activeDatasource =
+      activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
+        ? datasourceMap[activeDatasourceId]
+        : undefined;
+
+    if (!activeDatasource || !activeVisualization || !visualization.state) {
+      return;
+    }
+    setLastKnownDoc(
+      getSavedObjectFormat({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+        visualization,
+        filters,
+        query,
+        title,
+        description,
+        persistedId,
+      })
+    );
+  }, [
+    datasourceStates,
+    visualization,
+    filters,
+    query,
+    title,
+    description,
+    persistedId,
+    activeDatasourceId,
+    datasourceMap,
+    visualizationMap,
+  ]);
 
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
@@ -93,11 +147,7 @@ export function App({
     if (indicateNoData) {
       setIndicateNoData(false);
     }
-  }, [
-    setIndicateNoData,
-    indicateNoData,
-    appState.searchSessionId,
-  ]);
+  }, [setIndicateNoData, indicateNoData, appState.searchSessionId]);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -254,6 +304,7 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          lastKnownDoc={lastKnownDoc}
         />
         {(!appState.isAppLoading || appState.persistedDoc) && (
           <MemoizedEditorFrameWrapper

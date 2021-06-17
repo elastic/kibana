@@ -7,10 +7,10 @@
 
 import { uniq } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
+import { Filter, Query } from 'src/plugins/data/public';
 import { Document } from '../../persistence/saved_object_store';
 import { Datasource } from '../../types';
 import { extractFilterReferences } from '../../persistence';
-import { Filter, Query } from 'src/plugins/data/public';
 
 export interface Props {
   activeDatasources: Record<string, Datasource>;
@@ -26,8 +26,13 @@ export interface Props {
   persistedId?: string;
 }
 
-export function getIndexPatterns({ activeDatasources, datasourceStates }: Props): string[] {
-  console.log(activeDatasources, datasourceStates);
+export function getIndexPatterns({
+  activeDatasources,
+  datasourceStates,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+}): string[] {
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
@@ -39,21 +44,6 @@ export function getIndexPatterns({ activeDatasources, datasourceStates }: Props)
   );
 
   return uniqueFilterableIndexPatternIds;
-}
-
-export function getIndexPatterns2({ activeDatasources, datasourceStates }: Props): string[] {
-  console.log(activeDatasources, datasourceStates);
-  // const references: SavedObjectReference[] = [];
-  // Object.entries(activeDatasources).forEach(([id, datasource]) => {
-  //   const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-  //   references.push(...savedObjectReferences);
-  // });
-
-  // const uniqueFilterableIndexPatternIds = uniq(
-  //   references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  // );
-
-  // return uniqueFilterableIndexPatternIds;
 }
 
 export function getSavedObjectFormat({
@@ -89,7 +79,7 @@ export function getSavedObjectFormat({
     state: {
       datasourceStates: persistibleDatasourceStates,
       visualization: visualization.state,
-      query: query,
+      query,
       filters: persistableFilters,
     },
     references,

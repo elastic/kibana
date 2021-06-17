@@ -237,7 +237,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ]
   );
 
-  // todo: isSaveable change here
   const expressionExists = Boolean(expression);
   const hasLoaded = Boolean(
     activeVisualization && visualizationState && datasourceMap && datasourceStates

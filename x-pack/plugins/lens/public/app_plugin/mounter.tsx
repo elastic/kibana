@@ -241,6 +241,7 @@ export async function mountApp(
             history={props.history}
             initialContext={initialContext}
             datasourceMap={datasourceMap}
+            visualizationMap={visualizationMap}
           />
         </Provider>
       );

@@ -16,13 +16,8 @@ import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
 import { LensByReferenceInput, LensEmbeddableInput } from '../editor_frame_service/embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
-import {
-  DataPublicPluginStart,
-  esFilters,
-  IndexPattern,
-} from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
-import { getAllIndexPatterns } from '../utils';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import { LensAppState } from '../state_management';
@@ -58,7 +53,6 @@ export function SaveModalContainer({
   lastKnownDoc: initLastKnowDoc,
   lensServices,
 }: SaveModalContainerProps) {
-  console.log('SAVE MODAL CONTQINER***')
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
   let title = '';
   let description;

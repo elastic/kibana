@@ -294,7 +294,7 @@ describe('Lens App', () => {
         lensStore.dispatch(
           setState({
             query: ('fake query' as unknown) as Query,
-            indexPatternsForTopNav: ['1'],
+
             lastKnownDoc: document,
             persistedDoc: document,
           })
@@ -839,7 +839,6 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            indexPatternsForTopNav: ['1'],
             lastKnownDoc: ({} as unknown) as Document,
             isSaveable: true,
           })
@@ -856,7 +855,6 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            indexPatternsForTopNav: ['2'],
             lastKnownDoc: ({} as unknown) as Document,
             isSaveable: true,
           })
@@ -1214,7 +1212,6 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            indexPatternsForTopNav: [],
             lastKnownDoc: mockUpdate.doc,
             isSaveable: true,
           })
@@ -1258,7 +1255,6 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            indexPatternsForTopNav: [],
             lastKnownDoc: ({
               savedObjectId: undefined,
               references: [],

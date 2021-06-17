@@ -13,7 +13,6 @@ import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
-
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   setState as setAppState,
@@ -23,9 +22,7 @@ import {
   DispatchSetState,
 } from '../state_management';
 import { getAllIndexPatterns } from '../utils';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import { getIndexPatterns, getIndexPatterns2 } from '../editor_frame_service/editor_frame/save';
-import { useQueryStringManager } from 'src/plugins/data/public/ui/search_bar/lib/use_query_string_manager';
+import { getIndexPatterns } from '../editor_frame_service/editor_frame/save';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -132,6 +129,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
+  lastKnownDoc,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -154,7 +152,6 @@ export const LensTopNavMenu = ({
     isSaveable,
     isLinkedToOriginatingApp,
     query,
-    lastKnownDoc,
     activeData,
     savedQuery,
     activeDatasourceId,
@@ -166,11 +163,10 @@ export const LensTopNavMenu = ({
       datasourceMap && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
         ? datasourceMap[activeDatasourceId]
         : undefined;
-    console.log(activeDatasource);
     if (!activeDatasource) {
       return;
     }
-    const indexPatternsForTopNav2 = getIndexPatterns({
+    const indexPatternIds = getIndexPatterns({
       activeDatasources: Object.keys(datasourceStates).reduce(
         (acc, datasourceId) => ({
           ...acc,
@@ -180,12 +176,12 @@ export const LensTopNavMenu = ({
       ),
       datasourceStates,
     });
-    getAllIndexPatterns(indexPatternsForTopNav2, data.indexPatterns).then(({ indexPatterns }) => {
-      setIndexPatterns(indexPatterns);
-    });
-    // setIndexPatterns2(indexPatternsForTopNav2);
-  }, [datasourceStates]);
-
+    getAllIndexPatterns(indexPatternIds, data.indexPatterns).then(
+      ({ indexPatterns: indexPatternObjects }) => {
+        setIndexPatterns(indexPatternObjects);
+      }
+    );
+  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -345,7 +341,6 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
-  console.log('indexPatterns********', indexPatterns);
   return (
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}

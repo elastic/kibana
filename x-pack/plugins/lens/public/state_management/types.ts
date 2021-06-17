@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, IndexPattern, Query, SavedQuery } from '../../../../../src/plugins/data/public';
+import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -25,10 +25,7 @@ export interface EditorFrameState extends PreviewState {
 }
 export interface LensAppState extends EditorFrameState {
   persistedDoc?: Document;
-  lastKnownDoc?: Document;
 
-  // index patterns used to determine which filters are available in the top nav.
-  indexPatternsForTopNav: string[];
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
   isSaveable: boolean;
