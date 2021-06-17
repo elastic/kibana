@@ -9,24 +9,23 @@
 import React, { useCallback } from 'react';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { TimeseriesVisParams } from '../../types';
-import type { Annotation } from '../../../common/types';
+import { TimeseriesVisParams } from '../../types';
 
-interface YesNoProps<ParamName extends keyof TimeseriesVisParams | keyof Annotation> {
-  name: ParamName;
+interface YesNoProps {
+  name: string;
   value: boolean | number | undefined;
   disabled?: boolean;
   'data-test-subj'?: string;
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
 
-export function YesNo<ParamName extends keyof TimeseriesVisParams | keyof Annotation>({
+export function YesNo({
   name,
   value,
   disabled,
   'data-test-subj': dataTestSubj,
   onChange,
-}: YesNoProps<ParamName>) {
+}: YesNoProps) {
   const handleChange = useCallback(
     (val: number) => {
       return () => onChange({ [name]: val });

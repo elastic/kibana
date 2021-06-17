@@ -6,35 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import uuid from 'uuid';
+import React, { useCallback } from 'react';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AnnotationRow } from './annotation_row';
+import { AnnotationRow, newAnnotation } from './annotation_row';
 import { collectionActions } from './lib/collection_actions';
-import type { Panel } from '../../../common/types';
-import type { VisFields } from '../lib/fetch_fields';
+import type { AnnotationRowProps } from './annotation_row';
 
-export const newAnnotation = () => ({
-  id: uuid.v1(),
-  color: '#F00',
-  index_pattern: '',
-  time_field: '',
-  icon: 'fa-tag',
-  ignore_global_filters: 1,
-  ignore_panel_filters: 1,
-});
-
-export interface AnnotationsEditorProps {
-  fields: VisFields;
-  model: Panel;
-  name: 'annotations';
-  onChange: (partialModel: Partial<Panel>) => void;
-}
-
-export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
+export const AnnotationsEditor = (props: Omit<AnnotationRowProps, 'annotation'>) => {
   const { annotations } = props.model;
+
+  const handleClick = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
 
   const content = annotations?.length ? (
     <div>
@@ -59,7 +42,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
           defaultMessage="Click the button below to create an annotation data source."
         />
       </p>
-      <EuiButton fill onClick={() => collectionActions.handleAdd(props, newAnnotation)}>
+      <EuiButton fill onClick={handleClick}>
         <FormattedMessage
           id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
           defaultMessage="Add data source"

@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/o licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
+import uuid from 'uuid';
 import {
   EuiCode,
   EuiComboBoxOptionOption,
@@ -41,12 +34,26 @@ import { collectionActions } from './lib/collection_actions';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { getDataStart } from '../../services';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../../common/types';
-import type { AnnotationsEditorProps } from './annotations_editor';
-import { newAnnotation } from './annotations_editor';
+import type {
+  Panel,
+  Annotation,
+  FetchedIndexPattern,
+  IndexPatternValue,
+} from '../../../common/types';
+import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const INDEX_PATTERN_NAME = 'index_pattern';
+
+export const newAnnotation = () => ({
+  id: uuid.v1(),
+  color: '#F00',
+  index_pattern: '',
+  time_field: '',
+  icon: 'fa-tag',
+  ignore_global_filters: 1,
+  ignore_panel_filters: 1,
+});
 
 const annotationDefaults = {
   fields: '',
@@ -55,54 +62,74 @@ const annotationDefaults = {
   query_string: { query: '', language: getDefaultQueryLanguage() },
 };
 
-interface AnnotationRowProps extends AnnotationsEditorProps {
+export interface AnnotationRowProps {
   annotation: Annotation;
+  fields: VisFields;
+  model: Panel;
+  name: keyof Panel;
+  onChange: (partialModel: Partial<Panel>) => void;
 }
 
 export const AnnotationRow = (props: AnnotationRowProps) => {
-  const model = { ...annotationDefaults, ...props.annotation };
-  const collectionActionProps = { model: props.model, name: props.name, onChange: props.onChange };
+  const model = useMemo(() => ({ ...annotationDefaults, ...props.annotation }), [props.annotation]);
 
   const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>(null);
 
-  const updateFetchedIndex = async (indexPatternValue: IndexPatternValue = '') => {
+  const updateFetchedIndex = useCallback(async (indexPatternValue: IndexPatternValue = '') => {
     const { indexPatterns } = getDataStart();
     setFetchedIndex(await fetchIndexPattern(indexPatternValue, indexPatterns));
-  };
+  }, []);
 
   useEffect(() => {
     updateFetchedIndex(model.index_pattern);
-  }, [model.index_pattern]);
+  }, [model.index_pattern, updateFetchedIndex]);
 
-  const handleChange = (item: Annotation, name: string) => {
-    return (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) =>
-      collectionActions.handleChange(collectionActionProps, {
+  const handleChange = useCallback(
+    (item: Annotation, name: string) => {
+      return (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) =>
+        collectionActions.handleChange(props, {
+          ...item,
+          [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
+        });
+    },
+    [props]
+  );
+  const handleQueryChange = useCallback(
+    (item: Annotation, filter: Query) =>
+      collectionActions.handleChange(props, {
         ...item,
-        [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
-      });
-  };
-  const handleQueryChange = (item: Annotation, filter: Query) =>
-    collectionActions.handleChange(collectionActionProps, {
-      ...item,
-      query_string: filter,
-    });
+        query_string: filter,
+      }),
+    [props]
+  );
 
-  const onChange = (part: Partial<Annotation>) =>
-    collectionActions.handleChange(collectionActionProps, { ...model, ...part });
+  const onChange = useCallback(
+    (part: Partial<Annotation>) => collectionActions.handleChange(props, { ...model, ...part }),
+    [props, model]
+  );
 
-  const changeFetchedIndex = async (index: { [INDEX_PATTERN_NAME]: IndexPatternValue }) => {
-    onChange(index);
-    await updateFetchedIndex(index[INDEX_PATTERN_NAME]);
-  };
+  const changeFetchedIndex = useCallback(
+    async (index: { [INDEX_PATTERN_NAME]: IndexPatternValue }) => {
+      onChange(index);
+      await updateFetchedIndex(index[INDEX_PATTERN_NAME]);
+    },
+    [onChange, updateFetchedIndex]
+  );
 
-  const togglePanelActivation = () =>
-    onChange({
-      hidden: !model.hidden,
-    });
+  const togglePanelActivation = useCallback(
+    () =>
+      onChange({
+        hidden: !model.hidden,
+      }),
+    [model.hidden, onChange]
+  );
 
   const htmlId = htmlIdGenerator(model.id);
-  const handleAdd = () => collectionActions.handleAdd(collectionActionProps, newAnnotation);
-  const handleDelete = () => collectionActions.handleDelete(collectionActionProps, model);
+  const handleAdd = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
+  const handleDelete = useCallback(() => collectionActions.handleDelete(props, model), [
+    props,
+    model,
+  ]);
 
   return (
     <div className="tvbAnnotationsEditor" key={model.id}>
