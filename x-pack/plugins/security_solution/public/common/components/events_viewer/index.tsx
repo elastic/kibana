@@ -18,12 +18,14 @@ import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/tim
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { EventsViewer } from './events_viewer';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -92,7 +94,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-
+  // TODO: Once we are past experimental phase this code should be removed
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -119,37 +122,66 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {timelinesUi.getTGrid<'embedded'>({
-            type: 'embedded',
-            browserFields,
-            columns,
-            dataProviders: dataProviders!,
-            deletedEventIds,
-            docValueFields,
-            end,
-            filters: globalFilters,
-            globalFullScreen,
-            headerFilterGroup,
-            id,
-            indexNames: selectedPatterns,
-            indexPattern,
-            isLive,
-            isLoadingIndexPattern,
-            itemsPerPage,
-            itemsPerPageOptions: itemsPerPageOptions!,
-            kqlMode,
-            query,
-            onRuleChange,
-            renderCellValue,
-            rowRenderers,
-            setGlobalFullScreen,
-            start,
-            sort,
-            utilityBar,
-            graphEventId,
-            leadingControlColumns,
-            trailingControlColumns,
-          })}
+          {tGridEnabled ? (
+            timelinesUi.getTGrid<'embedded'>({
+              type: 'embedded',
+              browserFields,
+              columns,
+              dataProviders: dataProviders!,
+              deletedEventIds,
+              docValueFields,
+              end,
+              filters: globalFilters,
+              globalFullScreen,
+              headerFilterGroup,
+              id,
+              indexNames: selectedPatterns,
+              indexPattern,
+              isLive,
+              isLoadingIndexPattern,
+              itemsPerPage,
+              itemsPerPageOptions: itemsPerPageOptions!,
+              kqlMode,
+              query,
+              onRuleChange,
+              renderCellValue,
+              rowRenderers,
+              setGlobalFullScreen,
+              start,
+              sort,
+              utilityBar,
+              graphEventId,
+              leadingControlColumns,
+              trailingControlColumns,
+            })
+          ) : (
+            <EventsViewer
+              browserFields={browserFields}
+              columns={columns}
+              docValueFields={docValueFields}
+              id={id}
+              dataProviders={dataProviders!}
+              deletedEventIds={deletedEventIds}
+              end={end}
+              isLoadingIndexPattern={isLoadingIndexPattern}
+              filters={globalFilters}
+              headerFilterGroup={headerFilterGroup}
+              indexNames={selectedPatterns}
+              indexPattern={indexPattern}
+              isLive={isLive}
+              itemsPerPage={itemsPerPage!}
+              itemsPerPageOptions={itemsPerPageOptions!}
+              kqlMode={kqlMode}
+              query={query}
+              onRuleChange={onRuleChange}
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              start={start}
+              sort={sort}
+              utilityBar={utilityBar}
+              graphEventId={graphEventId}
+            />
+          )}
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
