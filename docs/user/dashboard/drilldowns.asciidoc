@@ -112,7 +112,7 @@ The following panel types support drilldowns.
 ^| X
 ^| X
 
-| TSVB
+| TSVB (only for timeseries charts)
 ^| X
 ^| X
 
