@@ -57,10 +57,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   componentDidUpdate() {
-    this._checkLayerEditable();
+    this._loadFeatureEditing();
   }
 
-  async _checkLayerEditable() {
+  async _loadFeatureEditing() {
     if (!(this.props.layer instanceof VectorLayer)) {
       return;
     }
