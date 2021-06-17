@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PackagePolicy, PackagePolicyInput, PackagePolicyInputStream } from '../../fleet/common';
+
 export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
 export const usageMetricSavedObjectType = 'osquery-usage-metric';
@@ -26,3 +28,31 @@ export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infe
     ? { [K in keyof U]: U[K][0] }
     : never
   : never;
+
+export interface OsqueryManagerPackagePolicyConfigRecordEntry {
+  type: string;
+  value: string;
+  frozen?: boolean;
+}
+
+export interface OsqueryManagerPackagePolicyConfigRecord {
+  id: OsqueryManagerPackagePolicyConfigRecordEntry;
+  query: OsqueryManagerPackagePolicyConfigRecordEntry;
+  interval: OsqueryManagerPackagePolicyConfigRecordEntry;
+  platform?: OsqueryManagerPackagePolicyConfigRecordEntry;
+  version?: OsqueryManagerPackagePolicyConfigRecordEntry;
+}
+
+export interface OsqueryManagerPackagePolicyInputStream
+  extends Omit<PackagePolicyInputStream, 'config' | 'vars'> {
+  config?: OsqueryManagerPackagePolicyConfigRecord;
+  vars?: OsqueryManagerPackagePolicyConfigRecord;
+}
+
+export interface OsqueryManagerPackagePolicyInput extends Omit<PackagePolicyInput, 'streams'> {
+  streams: OsqueryManagerPackagePolicyInputStream[];
+}
+
+export interface OsqueryManagerPackagePolicy extends Omit<PackagePolicy, 'inputs'> {
+  inputs: OsqueryManagerPackagePolicyInput[];
+}

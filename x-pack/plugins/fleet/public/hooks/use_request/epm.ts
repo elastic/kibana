@@ -36,6 +36,14 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   });
 };
 
+export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {
+  return sendRequest<GetPackagesResponse>({
+    path: epmRouteService.getListPath(),
+    method: 'get',
+    query: { experimental: true, ...query },
+  });
+};
+
 export const useGetLimitedPackages = () => {
   return useRequest<GetLimitedPackagesResponse>({
     path: epmRouteService.getListLimitedPath(),
