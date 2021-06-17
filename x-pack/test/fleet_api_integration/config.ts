@@ -14,7 +14,9 @@ import { defineDockerServersConfig } from '@kbn/test';
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:fc104ac437370d80518e24da6d0b84370edf0c0c';
+export const dockerImage =
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/package-registry/distribution:fc104ac437370d80518e24da6d0b84370edf0c0c';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
