@@ -105,8 +105,9 @@ export class AutoFollowPatternList extends PureComponent {
 
   renderHeader() {
     const { isAuthorized, history } = this.props;
+
     return (
-      <Fragment>
+      <section>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <EuiText>
@@ -137,13 +138,71 @@ export class AutoFollowPatternList extends PureComponent {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
-      </Fragment>
+        <EuiSpacer size="l" />
+      </section>
     );
   }
 
-  renderContent(isEmpty) {
-    const { apiError, apiStatus, isAuthorized } = this.props;
+  renderEmpty() {
+    return (
+      <section>
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          data-test-subj="emptyPrompt"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
+                defaultMessage="Create your first auto-follow pattern"
+              />
+            </h1>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
+                defaultMessage="Use an auto-follow pattern to automatically replicate indices from
+                a remote cluster."
+              />
+            </p>
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createAutoFollowPatternButton"
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
+                defaultMessage="Create auto-follow pattern"
+              />
+            </EuiButton>
+          }
+        />
+      </section>
+    );
+  }
+
+  renderList() {
+    const { selectAutoFollowPattern, autoFollowPatterns } = this.props;
+
+    const { isDetailPanelOpen } = this.state;
+
+    return (
+      <>
+        {this.renderHeader()}
+        <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
+        {isDetailPanelOpen && (
+          <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />
+        )}
+      </>
+    );
+  }
+
+  render() {
+    const { autoFollowPatterns, apiError, apiStatus, isAuthorized } = this.props;
+    const isEmpty = apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length;
 
     if (!isAuthorized) {
       return (
@@ -172,10 +231,7 @@ export class AutoFollowPatternList extends PureComponent {
       );
 
       return (
-        <Fragment>
-          <SectionError title={title} error={apiError} />
-          <EuiSpacer size="m" />
-        </Fragment>
+        <SectionError title={title} error={apiError} />
       );
     }
 
@@ -185,83 +241,17 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (apiStatus === API_STATUS.LOADING) {
       return (
-        <SectionLoading dataTestSubj="autoFollowPatternLoading">
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
-            defaultMessage="Loading auto-follow patterns..."
-          />
-        </SectionLoading>
+        <section data-test-subj="autoFollowPatternLoading">
+          <SectionLoading >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
+              defaultMessage="Loading auto-follow patterns..."
+            />
+          </SectionLoading>
+        </section>
       );
     }
 
     return this.renderList();
-  }
-
-  renderEmpty() {
-    return (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
-              defaultMessage="Create your first auto-follow pattern"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
-                defaultMessage="Use an auto-follow pattern to automatically replicate indices from
-                  a remote cluster."
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createAutoFollowPatternButton"
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
-              defaultMessage="Create auto-follow pattern"
-            />
-          </EuiButton>
-        }
-        data-test-subj="emptyPrompt"
-      />
-    );
-  }
-
-  renderList() {
-    const { selectAutoFollowPattern, autoFollowPatterns } = this.props;
-
-    const { isDetailPanelOpen } = this.state;
-
-    return (
-      <>
-        <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
-        {isDetailPanelOpen && (
-          <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />
-        )}
-      </>
-    );
-  }
-
-  render() {
-    const { autoFollowPatterns, apiStatus } = this.props;
-    const isEmpty = apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length;
-
-    return (
-      <Fragment>
-        {!isEmpty && this.renderHeader()}
-        {this.renderContent(isEmpty)}
-      </Fragment>
-    );
   }
 }

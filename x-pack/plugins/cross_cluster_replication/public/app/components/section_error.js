@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+// TODO: is this file still used?
 export function SectionError(props) {
   const { title, error, ...rest } = props;
   const data = error.body ? error.body : error;

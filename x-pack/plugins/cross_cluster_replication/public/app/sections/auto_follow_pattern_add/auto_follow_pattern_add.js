@@ -8,16 +8,16 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPageContentBody } from '@elastic/eui';
 
-import { EuiPageContent } from '@elastic/eui';
 
 import { listBreadcrumb, addBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
   RemoteClustersProvider,
-  SectionLoading,
 } from '../../components';
+import { SectionLoading } from '../../../shared_imports';
 
 export class AutoFollowPatternAdd extends PureComponent {
   static propTypes = {
@@ -44,7 +44,7 @@ export class AutoFollowPatternAdd extends PureComponent {
     } = this.props;
 
     return (
-      <EuiPageContent>
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
         <AutoFollowPatternPageTitle
           title={
             <FormattedMessage
@@ -84,7 +84,7 @@ export class AutoFollowPatternAdd extends PureComponent {
             );
           }}
         </RemoteClustersProvider>
-      </EuiPageContent>
+      </EuiPageContentBody>
     );
   }
 }

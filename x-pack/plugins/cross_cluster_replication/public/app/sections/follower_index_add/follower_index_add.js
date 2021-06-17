@@ -8,16 +8,15 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContentBody } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
   RemoteClustersProvider,
-  SectionLoading,
 } from '../../components';
+import { SectionLoading } from '../../../shared_imports';
 
 export class FollowerIndexAdd extends PureComponent {
   static propTypes = {
@@ -45,7 +44,7 @@ export class FollowerIndexAdd extends PureComponent {
     } = this.props;
 
     return (
-      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
         <FollowerIndexPageTitle
           title={
             <FormattedMessage
@@ -86,7 +85,7 @@ export class FollowerIndexAdd extends PureComponent {
             );
           }}
         </RemoteClustersProvider>
-      </EuiPageContent>
+      </EuiPageContentBody>
     );
   }
 }
