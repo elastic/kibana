@@ -9,7 +9,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { ElementCard } from '../element_card';
-import { elasticLogo } from '../../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../../src/plugins/presentation_util/common';
 
 storiesOf('components/Elements/ElementCard', module)
   .addDecorator((story) => (

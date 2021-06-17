@@ -9,7 +9,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-import { elasticLogo } from '../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
 
 export enum ImageMode {
   CONTAIN = 'contain',

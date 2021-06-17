@@ -4,6 +4,9 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
+  "extraPublicDirs": [
+    "common"
+  ],
   "requiredPlugins": [
     "savedObjects"
   ],

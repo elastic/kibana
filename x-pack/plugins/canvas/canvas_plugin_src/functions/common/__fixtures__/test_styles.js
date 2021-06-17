@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticLogo } from '../../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../../src/plugins/presentation_util/common';
 
 export const fontStyle = {
   type: 'style',

@@ -6,7 +6,7 @@
  */
 
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 

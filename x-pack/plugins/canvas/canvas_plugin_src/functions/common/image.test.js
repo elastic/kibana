@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 // import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
 import { elasticOutline } from '../../lib/elastic_outline';
 // import { image } from './image';
 

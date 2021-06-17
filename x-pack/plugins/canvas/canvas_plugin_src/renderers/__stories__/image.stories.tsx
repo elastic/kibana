@@ -9,7 +9,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { image } from '../image';
 import { Render } from './render';
-import { elasticLogo } from '../../lib/elastic_logo';
+import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
 
 storiesOf('renderers/image', module).add('default', () => {
   const config = {
