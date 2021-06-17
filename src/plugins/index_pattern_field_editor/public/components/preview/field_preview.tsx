@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiSpacer, EuiResizeObserver } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
@@ -28,6 +28,7 @@ export const FieldPreview = () => {
     previewCount,
     fields,
     error,
+    reset,
   } = useFieldPreviewContext();
 
   // To show the preview we at least need a name to be defined, the script or the format
@@ -59,6 +60,12 @@ export const FieldPreview = () => {
       </ul>
     );
   };
+
+  useEffect(() => {
+    // When unmounting the preview pannel we make sure to reset
+    // the state of the preview panel.
+    return reset;
+  }, [reset]);
 
   return (
     <div className="indexPatternFieldEditor__previewPannel">

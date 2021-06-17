@@ -68,8 +68,8 @@ export interface Props {
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
-  /** Handler to receive update on the form "dirty" state */
-  onFormModifiedChange?: (isDirty: boolean) => void;
+  /** Handler to receive update on the form "isModified" state */
+  onFormModifiedChange?: (isModified: boolean) => void;
   syntaxError: ScriptSyntaxError;
 }
 

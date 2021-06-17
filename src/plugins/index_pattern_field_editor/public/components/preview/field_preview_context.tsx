@@ -30,7 +30,7 @@ type From = 'cluster' | 'custom';
 type EsDocument = Record<string, any>;
 
 interface PreviewError {
-  code: 'DOC_NOT_FOUND' | 'PAINLESS_SCRIPT_ERROR';
+  code: 'DOC_NOT_FOUND' | 'PAINLESS_SCRIPT_ERROR' | 'ERR_FETCHING_DOC';
   error: Record<string, any>;
 }
 
@@ -73,6 +73,7 @@ interface Context {
     next: () => void;
     prev: () => void;
   };
+  reset: () => void;
 }
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -170,7 +171,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setPreviewResponse({ fields: [], error: null });
       setIsFetchingDocument(true);
 
-      const response = await search
+      const [response, error] = await search
         .search({
           params: {
             index: indexPattern.title,
@@ -184,16 +185,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
             },
           },
         })
-        .toPromise();
+        .toPromise()
+        .then((res) => [res, null])
+        .catch((err) => [null, err]);
 
       setIsFetchingDocument(false);
-      setNavDocsIndex(0);
 
       if (response) {
         if (response.rawResponse.hits.total > 0) {
           setDocuments(response.rawResponse.hits.hits);
+          setNavDocsIndex(0);
         } else {
           setDocuments([]);
+          setNavDocsIndex(-1);
           setPreviewResponse({
             fields: [],
             error: {
@@ -210,8 +214,21 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
             },
           });
         }
+      } else if (error) {
+        // TODO: improve this error handling when there is a server
+        // error fetching a document
+        setPreviewResponse({
+          fields: [],
+          error: {
+            code: 'ERR_FETCHING_DOC',
+            error: {
+              message: error.toString(),
+            },
+          },
+        });
       } else {
         setDocuments([]);
+        setNavDocsIndex(-1);
       }
     },
     [indexPattern, search]
@@ -222,6 +239,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
+    const currentApiCall = previewCount.current;
+
     setIsLoadingPreview(true);
 
     const response = await getFieldPreview({
@@ -230,6 +249,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
     });
+
+    if (currentApiCall !== previewCount.current) {
+      // Discard this response as there is another one inflight
+      // or we have called reset() and don't need the response anymore.
+      return;
+    }
 
     previewCount.current = ++previewCount.current;
     setIsLoadingPreview(false);
@@ -291,6 +316,22 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     setIsLoadingPreview(true);
   }, [navDocsIndex, totalDocs]);
 
+  const reset = useCallback(() => {
+    // We increase the count of preview calls to discard any inflight
+    // API call response coming in after calling reset()
+    previewCount.current = ++previewCount.current;
+
+    setNavDocsIndex(0);
+    setFrom('cluster');
+    setPreviewResponse({ fields: [], error: null });
+    setIsLoadingPreview(false);
+    setIsFetchingDocument(false);
+
+    if (documents.length === 0) {
+      fetchSampleDocuments();
+    }
+  }, [documents, fetchSampleDocuments]);
+
   const ctx = useMemo<Context>(
     () => ({
       fields: previewResponse.fields,
@@ -321,6 +362,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         value: from,
         set: setFrom,
       },
+      reset,
     }),
     [
       previewResponse,
@@ -337,6 +379,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       goToPrevDoc,
       isPanelVisible,
       from,
+      reset,
     ]
   );
 
