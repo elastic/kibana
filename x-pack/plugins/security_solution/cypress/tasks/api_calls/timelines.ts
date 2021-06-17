@@ -121,13 +121,9 @@ export const loadPrepackagedTimelineTemplates = () =>
   });
 
 export const favoriteTimeline = ({
-  templateTimelineId,
-  templateTimelineVersion,
   timelineId,
   timelineType,
 }: {
-  templateTimelineId?: string;
-  templateTimelineVersion?: number;
   timelineId: string;
   timelineType: string;
 }) =>
@@ -135,8 +131,6 @@ export const favoriteTimeline = ({
     method: 'PATCH',
     url: 'api/timeline/_favorite',
     body: {
-      templateTimelineId: templateTimelineId ?? null,
-      templateTimelineVersion: templateTimelineVersion ?? null,
       timelineId,
       timelineType,
     },
