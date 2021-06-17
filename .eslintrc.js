@@ -742,10 +742,6 @@ module.exports = {
                 name: 'react-use',
                 message: 'Please use react-use/lib/{method} instead.',
               },
-              {
-                name: 'react-intl',
-                message: 'Please use @kbn/i18n/react instead',
-              },
             ],
           },
         ],
@@ -835,6 +831,23 @@ module.exports = {
             object: '_',
             property: 'assocPath',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+        ],
+      },
+    },
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['packages/kbn-i18n/src/react/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              {
+                name: 'react-intl',
+                message: 'Please use @kbn/i18n/react instead',
+              },
+            ],
           },
         ],
       },
