@@ -10,7 +10,6 @@ import type {
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
   ISavedObjectsRepository,
-  SavedObject,
 } from 'kibana/server';
 import moment from 'moment';
 import type { IntervalHistogram } from './event_loop_delays';
