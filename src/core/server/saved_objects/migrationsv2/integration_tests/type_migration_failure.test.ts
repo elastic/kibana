@@ -139,8 +139,6 @@ describe('migration v2 with corrupt saved object documents', () => {
           value: 'at migrationFn',
         },
       ]);
-
-      console.log('*** errorMessage', errorMessage);
     }
   });
 });
