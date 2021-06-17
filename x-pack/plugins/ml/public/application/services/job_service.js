@@ -104,9 +104,7 @@ class JobService {
       data_description: {
         time_field: '',
         time_format: '', // 'epoch',
-        field_delimiter: '',
-        quote_character: '"',
-        format: 'delimited',
+        format: 'xcontent',
       },
     };
   }
