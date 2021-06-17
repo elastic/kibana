@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { RollupPrompt } from './rollup_prompt';
+import { createLicenseServiceMock } from '../../../../common/license/mocks';
+
+export const licenseService = createLicenseServiceMock();
+export const useLicense = () => licenseService;
