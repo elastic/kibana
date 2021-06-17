@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
-import { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from 'src/core/server';
+import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
@@ -87,8 +87,7 @@ export class TelemetryEventsSender {
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    // const fakeRequest = { headers: {} } as KibanaRequest;
-    // this.savedObjectClient = endpointContextService?.getScopedSavedObjectsClient(fakeRequest);
+    this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
