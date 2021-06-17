@@ -45,7 +45,6 @@ import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
-import { pagePathGetters } from '../../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { CreatePackagePolicyPageLayout } from './components';
@@ -87,11 +86,15 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-  const from: CreatePackagePolicyFrom = 'policyId' in params ? 'policy' : 'package';
 
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const policyId = useMemo(() => queryParams.get('policyId') ?? undefined, [queryParams]);
+  const queryParamsPolicyId = useMemo(() => queryParams.get('policyId') ?? undefined, [
+    queryParams,
+  ]);
+
+  const from: CreatePackagePolicyFrom =
+    'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
@@ -390,13 +393,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       <StepSelectAgentPolicy
         pkgkey={(params as AddToPolicyParams).pkgkey}
         updatePackageInfo={updatePackageInfo}
-        defaultAgentPolicyId={policyId}
+        defaultAgentPolicyId={queryParamsPolicyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setIsLoadingSecondStep={setIsLoadingAgentPolicyStep}
       />
     ),
-    [params, updatePackageInfo, agentPolicy, updateAgentPolicy, policyId]
+    [params, updatePackageInfo, agentPolicy, updateAgentPolicy, queryParamsPolicyId]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');

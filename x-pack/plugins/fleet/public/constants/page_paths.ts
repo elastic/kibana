@@ -115,6 +115,7 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
+  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
   add_integration_from_policy: ({ policyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/add-integration`,
