@@ -430,7 +430,7 @@ describe('formula', () => {
             customLabel: true,
             dataType: 'number',
             isBucketed: false,
-            label: 'col1X0',
+            label: 'Part of average(bytes)',
             operationType: 'average',
             scale: 'ratio',
             sourceField: 'bytes',
@@ -440,7 +440,7 @@ describe('formula', () => {
             customLabel: true,
             dataType: 'number',
             isBucketed: false,
-            label: 'col1X1',
+            label: 'Part of average(bytes)',
             operationType: 'math',
             params: {
               tinymathAst: 'col1X0',

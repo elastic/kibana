@@ -23,7 +23,7 @@ import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export const threatMatchExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
@@ -36,7 +36,7 @@ export const threatMatchExecutor = async ({
   wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -51,7 +51,7 @@ export const threatMatchExecutor = async ({
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
   return createThreatSignals({
-    tuples,
+    tuple,
     threatMapping: ruleParams.threatMapping,
     query: ruleParams.query,
     inputIndex,

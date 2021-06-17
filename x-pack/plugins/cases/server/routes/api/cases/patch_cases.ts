@@ -7,8 +7,7 @@
 
 import { escapeHatch, wrapError } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common';
-import { CasesPatchRequest } from '../../../../common';
+import { CASES_URL, CasesPatchRequest } from '../../../../common';
 
 export function initPatchCasesApi({ router, logger }: RouteDeps) {
   router.patch(
