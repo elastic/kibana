@@ -35,7 +35,6 @@ import {
   CaseStatuses,
   OWNER_FIELD,
   GetCaseIdsByAlertIdAggs,
-  AttributesTypeAlerts,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -56,14 +55,9 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
-import { buildFilter, combineFilters } from '../../client/utils';
+import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
-
-interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
-  caseId: string;
-  filter?: KueryNode;
-}
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -245,43 +239,6 @@ export class CasesService {
       },
     },
   });
-
-  public async getAllAlertsAttachToCase({
-    unsecuredSavedObjectsClient,
-    caseId,
-    filter,
-  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AttributesTypeAlerts>>> {
-    try {
-      this.log.debug(`Attempting to GET all alerts for alert id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [CommentType.alert, CommentType.generatedAlert],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const combinedFilter = combineFilters([alertsFilter, filter]);
-
-      const finder = unsecuredSavedObjectsClient.createPointInTimeFinder<AttributesTypeAlerts>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        sortField: 'created_at',
-        sortOrder: 'asc',
-        filter: combinedFilter,
-        perPage: MAX_DOCS_PER_PAGE,
-      });
-
-      let result: Array<SavedObject<AttributesTypeAlerts>> = [];
-      for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(userActionSavedObject.saved_objects);
-      }
-
-      return result;
-    } catch (error) {
-      this.log.error(`Error on GET all cases for alert id ${caseId}: ${error}`);
-      throw error;
-    }
-  }
 
   public async getCaseIdsByAlertId({
     unsecuredSavedObjectsClient,

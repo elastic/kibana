@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('should return all cases with the same alert ID attached to them', async () => {
+    it('should return all alerts for the specified case id', async () => {
       const theCase = await createCase(supertest, getPostCaseRequest());
 
       await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
@@ -62,8 +62,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
     });
 
-    it('should return a 404 when case does not exists', async () => {
+    it('should return a 404 when case does not exist', async () => {
       await getAlertsAttachedToCase({ supertest, caseId: 'not-exists', expectedHttpCode: 404 });
+    });
+
+    it('should return a 404 when case id is empty', async () => {
+      await getAlertsAttachedToCase({ supertest, caseId: '', expectedHttpCode: 404 });
     });
 
     describe('rbac', () => {

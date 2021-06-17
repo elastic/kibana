@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
-import { CASE_DETAILS_ALERTS_URL } from '../../../../../common/constants';
+import { RouteDeps } from '../types';
+import { wrapError } from '../utils';
+import { CASE_DETAILS_ALERTS_URL } from '../../../../common/constants';
 
 export function initGetAllAlertsAttachToCaseApi({ router, logger }: RouteDeps) {
   router.get(
@@ -19,20 +17,18 @@ export function initGetAllAlertsAttachToCaseApi({ router, logger }: RouteDeps) {
       path: CASE_DETAILS_ALERTS_URL,
       validate: {
         params: schema.object({
-          case_id: schema.string(),
+          case_id: schema.string({ minLength: 1 }),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const caseId = request.params.case_id;
-        if (isEmpty(caseId)) {
-          throw Boom.badRequest('The `caseId` is not valid');
-        }
+
         const casesClient = await context.cases.getCasesClient();
 
         return response.ok({
-          body: await casesClient.cases.getAllAlertsAttachToCase({ caseId }),
+          body: await casesClient.attachments.getAllAlertsAttachToCase({ caseId }),
         });
       } catch (error) {
         logger.error(

@@ -24,76 +24,14 @@ import {
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-  AlertResponse,
-  AttributesTypeAlerts,
 } from '../../../common/api';
-import { countAlertsForID, flattenCaseSavedObject, getIDsAndIndicesAsArrays } from '../../common';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { CasesClient, CasesClientArgs } from '..';
+import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-
-const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
-  alerts.reduce((acc: AlertResponse, alert) => {
-    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
-
-    if (ids.length !== indices.length) {
-      return acc;
-    }
-
-    return [
-      ...acc,
-      ...ids.map((id, index) => ({
-        id,
-        index: indices[index],
-        attached_at: alert.attributes.created_at,
-      })),
-    ];
-  }, []);
-
-export interface GetAllAlertsAttachToCase {
-  caseId: string;
-}
-
-export const getAllAlertsAttachToCase = async (
-  { caseId }: GetAllAlertsAttachToCase,
-  clientArgs: CasesClientArgs,
-  casesClient: CasesClient
-): Promise<AlertResponse> => {
-  const { unsecuredSavedObjectsClient, authorization, caseService } = clientArgs;
-  const theCase = await casesClient.cases.get({
-    id: caseId,
-    includeComments: false,
-    includeSubCaseComments: false,
-  });
-
-  await authorization.ensureAuthorized({
-    entities: [{ owner: theCase.owner, id: caseId }],
-    operation: Operations.getAlertsAttachedToCase,
-  });
-
-  const {
-    filter: authorizationFilter,
-    ensureSavedObjectsAreAuthorized,
-  } = await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
-
-  const alerts = await caseService.getAllAlertsAttachToCase({
-    unsecuredSavedObjectsClient,
-    caseId: theCase.id,
-    filter: authorizationFilter,
-  });
-
-  ensureSavedObjectsAreAuthorized(
-    alerts.map((alert) => ({
-      owner: alert.attributes.owner,
-      id: alert.id,
-    }))
-  );
-
-  return normalizeAlertResponse(alerts);
-};
 
 /**
  * Parameters for finding cases IDs using an alert ID

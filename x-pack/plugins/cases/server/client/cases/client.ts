@@ -12,7 +12,6 @@ import {
   User,
   AllTagsFindRequest,
   AllReportersFindRequest,
-  AlertResponse,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -31,8 +30,6 @@ import { find } from './find';
 import {
   CaseIDsByAlertIDParams,
   get,
-  getAllAlertsAttachToCase,
-  GetAllAlertsAttachToCase,
   getCaseIDsByAlertID,
   GetParams,
   getReporters,
@@ -85,10 +82,6 @@ export interface CasesSubClient {
    * Retrieves the case IDs given a single alert ID
    */
   getCaseIDsByAlertID(params: CaseIDsByAlertIDParams): Promise<string[]>;
-  /**
-   * Retrieves all alerts attach to a case given a single case ID
-   */
-  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<AlertResponse>;
 }
 
 /**
@@ -112,8 +105,6 @@ export const createCasesSubClient = (
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCaseIDsByAlertID: (params: CaseIDsByAlertIDParams) =>
       getCaseIDsByAlertID(params, clientArgs),
-    getAllAlertsAttachToCase: (params: GetAllAlertsAttachToCase) =>
-      getAllAlertsAttachToCase(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

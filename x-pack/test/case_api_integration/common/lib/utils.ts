@@ -1117,7 +1117,6 @@ export const getAlertsAttachedToCase = async ({
 }): Promise<AlertResponse> => {
   const { body: theCase } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
-    .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
