@@ -409,7 +409,7 @@ export function Detail() {
       });
     }
 
-    if (packageInfo.assets) {
+    if (packageInfo.assets && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'assets',
         name: (
