@@ -193,9 +193,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
-
                     <SecuritySolutionTabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
-
                     <EuiSpacer />
                   </Display>
 
