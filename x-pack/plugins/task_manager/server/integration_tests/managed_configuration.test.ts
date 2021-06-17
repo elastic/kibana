@@ -50,6 +50,7 @@ describe('managed configuration', () => {
       },
       ephemeral_tasks: {
         enabled: true,
+        request_capacity: 10,
       },
     });
     logger = context.logger.get('taskManager');

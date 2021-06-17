@@ -37,6 +37,7 @@ describe('TaskManagerPlugin', () => {
         },
         ephemeral_tasks: {
           enabled: false,
+          request_capacity: 10,
         },
       });
 
@@ -73,6 +74,7 @@ describe('TaskManagerPlugin', () => {
         },
         ephemeral_tasks: {
           enabled: true,
+          request_capacity: 10,
         },
       });
 
