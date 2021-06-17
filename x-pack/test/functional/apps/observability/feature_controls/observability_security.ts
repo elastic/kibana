@@ -23,11 +23,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
-      await esArchiver.load('cases/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/cases/default');
     });
 
     after(async () => {
-      await esArchiver.unload('cases/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/cases/default');
     });
 
     describe('observability cases all privileges', () => {

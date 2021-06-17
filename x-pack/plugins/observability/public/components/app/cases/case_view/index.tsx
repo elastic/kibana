@@ -7,6 +7,10 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+<<<<<<< HEAD
+=======
+  casesBreadcrumbs,
+>>>>>>> master
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
   getCaseUrl,
@@ -17,7 +21,11 @@ import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CASES_APP_ID } from '../constants';
+<<<<<<< HEAD
 import { casesBreadcrumbs, useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+=======
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+>>>>>>> master
 
 interface Props {
   caseId: string;
@@ -81,8 +89,15 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: allCasesHref,
+<<<<<<< HEAD
       onClick: async (e) => {
         e.preventDefault();
+=======
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
+>>>>>>> master
         return navigateToApp(`${CASES_APP_ID}`, {
           path: allCasesLink,
         });
@@ -90,8 +105,15 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     },
     caseDetailsNavigation: {
       href: caseDetailsHref,
+<<<<<<< HEAD
       onClick: async (e) => {
         e.preventDefault();
+=======
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
+>>>>>>> master
         return navigateToApp(`${CASES_APP_ID}`, {
           path: getCaseDetailsUrl({ id: caseId }),
         });
@@ -100,8 +122,15 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     caseId,
     configureCasesNavigation: {
       href: configureCasesHref,
+<<<<<<< HEAD
       onClick: async (e) => {
         e.preventDefault();
+=======
+      onClick: async (ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
+>>>>>>> master
         return navigateToApp(`${CASES_APP_ID}`, {
           path: configureCasesLink,
         });

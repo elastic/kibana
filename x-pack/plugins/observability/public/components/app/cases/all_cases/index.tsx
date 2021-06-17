@@ -45,7 +45,13 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     configureCasesNavigation: {
       href: formatUrl(getConfigureCasesUrl()),
       onClick: async (ev) => {
+<<<<<<< HEAD
         ev.preventDefault();
+=======
+        if (ev != null) {
+          ev.preventDefault();
+        }
+>>>>>>> master
         return navigateToApp(`${CASES_APP_ID}`, {
           path: getConfigureCasesUrl(),
         });
@@ -54,7 +60,13 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     createCaseNavigation: {
       href: formatUrl(getCreateCaseUrl()),
       onClick: async (ev) => {
+<<<<<<< HEAD
         ev.preventDefault();
+=======
+        if (ev != null) {
+          ev.preventDefault();
+        }
+>>>>>>> master
         return navigateToApp(`${CASES_APP_ID}`, {
           path: getCreateCaseUrl(),
         });

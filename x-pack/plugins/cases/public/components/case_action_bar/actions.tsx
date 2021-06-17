@@ -41,7 +41,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
       {
         disabled,
         iconType: 'trash',
-        label: i18n.DELETE_CASE,
+        label: i18n.DELETE_CASE(),
         onClick: handleToggleModal,
       },
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
@@ -58,7 +58,11 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
+<<<<<<< HEAD
     allCasesNavigation.onClick(({ preventDefault: () => null } as unknown) as MouseEvent);
+=======
+    allCasesNavigation.onClick(null);
+>>>>>>> master
     return null;
   }
   return (
@@ -67,7 +71,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [
           { id: caseData.id, title: caseData.title, type: caseData.type },

@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as t from 'io-ts';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { alertStatusRt } from '../../common/typings';
+import { ExploratoryViewPage } from '../components/shared/exploratory_view';
+import { AlertsPage } from '../pages/alerts';
+import { AllCasesPage } from '../pages/cases/all_cases';
+import { CaseDetailsPage } from '../pages/cases/case_details';
+import { ConfigureCasesPage } from '../pages/cases/configure_cases';
+import { CreateCasePage } from '../pages/cases/create_case';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+<<<<<<< HEAD
 import { AlertsPage } from '../pages/alerts';
 import { CreateCasePage } from '../pages/cases/create_case';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
@@ -20,14 +27,14 @@ import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { AllCasesPage } from '../pages/cases/all_cases';
 import { casesBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { alertStatusRt } from '../../common/typings';
+=======
+>>>>>>> master
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
-
-export type Breadcrumbs = Array<{ text: string }>;
 
 export interface Params {
   query?: t.HasProps;
@@ -40,26 +47,12 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.landing.breadcrumb', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ],
   },
   '/overview': {
     handler: ({ query }: any) => {
@@ -73,34 +66,36 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
   },
   '/cases': {
     handler: () => {
       return <AllCasesPage />;
     },
     params: {},
+<<<<<<< HEAD
     breadcrumb: [casesBreadcrumbs.cases],
+=======
+>>>>>>> master
   },
   '/cases/create': {
     handler: () => {
       return <CreateCasePage />;
     },
     params: {},
+<<<<<<< HEAD
     breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.create],
+=======
+>>>>>>> master
   },
   '/cases/configure': {
     handler: () => {
       return <ConfigureCasesPage />;
     },
     params: {},
+<<<<<<< HEAD
     breadcrumb: [casesBreadcrumbs.cases, casesBreadcrumbs.configure],
+=======
+>>>>>>> master
   },
   '/cases/:detailName': {
     handler: () => {
@@ -111,7 +106,10 @@ export const routes = {
         detailName: t.string,
       }),
     },
+<<<<<<< HEAD
     breadcrumb: [casesBreadcrumbs.cases],
+=======
+>>>>>>> master
   },
   '/alerts': {
     handler: (routeParams: any) => {
@@ -127,13 +125,6 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.alerts.breadcrumb', {
-          defaultMessage: 'Alerts',
-        }),
-      },
-    ],
   },
   '/exploratory-view': {
     handler: () => {
@@ -147,12 +138,5 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Analyze data',
-        }),
-      },
-    ],
   },
 };

@@ -383,12 +383,17 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   <>
                     <UserActionTree
                       getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+<<<<<<< HEAD
                       getRuleDetailsHref={
                         ruleDetailsNavigation ? ruleDetailsNavigation.href : undefined
                       }
                       onRuleDetailsClick={
                         ruleDetailsNavigation ? ruleDetailsNavigation.onClick : undefined
                       }
+=======
+                      getRuleDetailsHref={ruleDetailsNavigation?.href}
+                      onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+>>>>>>> master
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
