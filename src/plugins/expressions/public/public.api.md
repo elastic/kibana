@@ -375,7 +375,7 @@ export interface ExpressionFunctionDefinition<Name extends string, Input, Argume
     help: string;
     inputTypes?: Array<TypeToString<Input>>;
     name: Name;
-    type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+    type?: TypeString<Output> | UnmappedTypeStrings;
 }
 
 // @public
@@ -400,6 +400,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     moving_average: ExpressionFunctionMovingAverage;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionOverallMetric" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    overall_metric: ExpressionFunctionOverallMetric;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -612,8 +616,8 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly renderers: ExpressionRendererRegistry;
     // (undocumented)
     readonly run: ExpressionsServiceStart['run'];
-    setup(): ExpressionsServiceSetup;
-    start(): ExpressionsServiceStart;
+    setup(...args: unknown[]): ExpressionsServiceSetup;
+    start(...args: unknown[]): ExpressionsServiceStart;
     // (undocumented)
     stop(): void;
     readonly telemetry: (state: ExpressionAstExpression, telemetryData?: Record<string, any>) => Record<string, any>;

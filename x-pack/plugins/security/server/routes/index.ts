@@ -10,7 +10,7 @@ import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 
 import type { KibanaFeature } from '../../../features/server';
 import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceStartInternal } from '../authentication';
+import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -39,7 +39,7 @@ export interface RouteDefinitionParams {
   license: SecurityLicense;
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
-  getAuthenticationService: () => AuthenticationServiceStartInternal;
+  getAuthenticationService: () => InternalAuthenticationServiceStart;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
