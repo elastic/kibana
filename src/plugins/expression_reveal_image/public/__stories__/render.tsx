@@ -8,21 +8,11 @@
 
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { RendererHandlers } from '../../common/types';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
-export const defaultHandlers: RendererHandlers = {
-  destroy: () => action('destroy'),
-  getElementId: () => 'element-id',
-  getFilter: () => 'filter',
+export const defaultHandlers: IInterpreterRenderHandlers = {
   getRenderMode: () => 'display',
   isSyncColorsEnabled: () => false,
-  onComplete: (fn) => undefined,
-  onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
-  onEmbeddableInputChange: action('onEmbeddableInputChange'),
-  onResize: action('onResize'),
-  resize: action('resize'),
-  setFilter: action('setFilter'),
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),
@@ -38,7 +28,7 @@ export const defaultHandlers: RendererHandlers = {
 interface RenderAdditionalProps {
   height?: string;
   width?: string;
-  handlers?: RendererHandlers;
+  handlers?: IInterpreterRenderHandlers;
 }
 
 export const Render = <Renderer,>({
