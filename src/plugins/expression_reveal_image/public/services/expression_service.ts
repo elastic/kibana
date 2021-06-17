@@ -12,7 +12,6 @@ import {
   StartInitializer,
   ExpressionRevealImageFunction,
 } from '../../common/types';
-import { elements } from '../elements';
 import { renderers } from '../expression_renderers';
 import { functions } from '../expression_functions';
 import { uiViews } from '../ui_views';
@@ -21,7 +20,6 @@ import { RevealImageRendererConfig } from '../expression_renderers/types';
 export type ExpressionServiceSetup = Pick<ExpressionService, 'registerExpression'>;
 
 export interface ExpressionSetup {
-  elements: ElementFactory[];
   renderers: Array<() => ExpressionRenderDefinition<RevealImageRendererConfig>>;
   uiViews: Array<StartInitializer<unknown>>;
   functions: ExpressionRevealImageFunction[];
@@ -34,7 +32,7 @@ export class ExpressionService {
     fn
   ) => {
     if (fn && typeof fn === 'function') {
-      fn({ elements, renderers, uiViews, functions });
+      fn({ renderers, uiViews, functions });
     }
   };
 

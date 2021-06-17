@@ -166,6 +166,14 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Repeats an image N times',
     }),
   },
+  revealImage: {
+    displayName: i18n.translate('xpack.canvas.elements.revealImageDisplayName', {
+      defaultMessage: 'Image reveal',
+    }),
+    help: i18n.translate('xpack.canvas.elements.revealImageHelpText', {
+      defaultMessage: 'Reveals a percentage of an image',
+    }),
+  },
   shape: {
     displayName: i18n.translate('xpack.canvas.elements.shapeDisplayName', {
       defaultMessage: 'Shape',

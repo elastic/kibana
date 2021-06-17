@@ -130,8 +130,7 @@ export class CanvasPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    plugins.expressionRevealImage?.registerExpression(({ elements, renderers, uiViews }) => {
-      canvasApi.addElements(elements);
+    plugins.expressionRevealImage?.registerExpression(({ renderers, uiViews }) => {
       canvasApi.addRenderers(renderers);
       canvasApi.addViewUIs(uiViews);
     });
