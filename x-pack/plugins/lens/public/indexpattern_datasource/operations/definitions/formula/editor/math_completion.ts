@@ -25,12 +25,15 @@ import { tinymathFunctions, groupArgsByType } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
+import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
+import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
   NAMED_ARGUMENT = 'named_argument',
   FUNCTIONS = 'functions',
   KQL = 'kql',
+  SHIFTS = 'shifts',
 }
 
 export type LensMathSuggestion =
@@ -116,6 +119,7 @@ export async function suggest({
   indexPattern,
   operationDefinitionMap,
   data,
+  dateHistogramInterval,
 }: {
   expression: string;
   zeroIndexedOffset: number;
@@ -123,6 +127,7 @@ export async function suggest({
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
+  dateHistogramInterval?: number;
 }): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
@@ -143,6 +148,7 @@ export async function suggest({
         ast: tokenAst as TinymathNamedArgument,
         data,
         indexPattern,
+        dateHistogramInterval,
       });
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
@@ -231,11 +237,17 @@ function getArgumentSuggestions(
     const { namedArguments } = groupArgsByType(ast.args);
     const list = [];
     if (operation.filterable) {
-      if (!namedArguments.find((arg) => arg.name === 'kql')) {
+      const hasFilterArgument = namedArguments.find(
+        (arg) => arg.name === 'kql' || arg.name === 'lucene'
+      );
+      if (!hasFilterArgument) {
         list.push('kql');
-      }
-      if (!namedArguments.find((arg) => arg.name === 'lucene')) {
         list.push('lucene');
+      }
+    }
+    if (operation.shiftable) {
+      if (!namedArguments.find((arg) => arg.name === 'shift')) {
+        list.push('shift');
       }
     }
     if ('operationParams' in operation) {
@@ -308,11 +320,28 @@ export async function getNamedArgumentSuggestions({
   ast,
   data,
   indexPattern,
+  dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
   data: DataPublicPluginStart;
+  dateHistogramInterval?: number;
 }) {
+  if (ast.name === 'shift') {
+    return {
+      list: timeShiftOptions
+        .filter(({ value }) => {
+          if (typeof dateHistogramInterval === 'undefined') return true;
+          const parsedValue = parseTimeShift(value);
+          return (
+            typeof parsedValue === 'string' ||
+            Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
+          );
+        })
+        .map(({ value }) => value),
+      type: SUGGESTION_TYPE.SHIFTS,
+    };
+  }
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
@@ -363,6 +392,9 @@ export function getSuggestion(
   const filterText: string = label;
 
   switch (type) {
+    case SUGGESTION_TYPE.SHIFTS:
+      sortText = String(timeShiftOptionOrder[label]).padStart(4, '0');
+      break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
       break;
@@ -387,7 +419,7 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene') {
+      if (label === 'kql' || label === 'lucene' || label === 'shift') {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
@@ -550,7 +582,10 @@ export function getSignatureHelp(
   } catch (e) {
     // do nothing
   }
-  return { value: { signatures: [], activeParameter: 0, activeSignature: 0 }, dispose: () => {} };
+  return {
+    value: { signatures: [], activeParameter: 0, activeSignature: 0 },
+    dispose: () => {},
+  };
 }
 
 export function getHover(
