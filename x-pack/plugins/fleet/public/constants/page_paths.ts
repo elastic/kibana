@@ -20,6 +20,7 @@ export type StaticPage =
 export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
+  | 'integration_details_assets'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
@@ -65,6 +66,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
+  integration_details_assets: '/detail/:pkgkey/assets',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
@@ -88,6 +90,10 @@ export const pagePathGetters: {
   integration_details_policies: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/policies${integration ? `?integration=${integration}` : ''}`,
+  ],
+  integration_details_assets: ({ pkgkey, integration }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_details_settings: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
