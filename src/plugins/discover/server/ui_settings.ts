@@ -210,7 +210,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         multiFields:
           `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
             target="_blank" rel="noopener">` +
-          i18n.translate('data.advancedSettings.timepicker.quickRanges.multiFieldsLinkText', {
+          i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
             defaultMessage: 'multi-fields',
           }) +
           '</a>',
