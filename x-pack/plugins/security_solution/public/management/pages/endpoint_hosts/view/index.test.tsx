@@ -79,6 +79,7 @@ describe('when on the endpoint list page', () => {
   afterAll(() => {
     abortSpy.mockRestore();
   });
+
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);

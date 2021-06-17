@@ -22,7 +22,7 @@ import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
 import { APP_ID } from '../../../../common/constants';
-import { KibanaContextProvider } from '../../lib/kibana';
+import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -120,6 +120,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       </AppRootProvider>
     </KibanaContextProvider>
   );
+
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
       wrapper: AppWrapper as React.ComponentType,
@@ -133,6 +134,20 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       payload: flags,
     });
   };
+
+  // Initialize the singleton `KibanaServices` with global services created for this test instance.
+  // The module (`../../lib/kibana`) could have been mocked at the test level via `jest.mock()`,
+  // and if so, then we set the return value of `KibanaServices.get` instead of calling `KibanaServices.init()`
+  const globalKibanaServicesParams = {
+    ...startServices,
+    kibanaVersion: '8.0.0',
+  };
+
+  if (jest.isMockFunction(KibanaServices.get)) {
+    (KibanaServices.get as jest.Mock).mockReturnValue(globalKibanaServicesParams);
+  } else {
+    KibanaServices.init(globalKibanaServicesParams);
+  }
 
   return {
     store,
