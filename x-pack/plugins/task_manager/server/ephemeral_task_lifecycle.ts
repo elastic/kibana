@@ -6,7 +6,7 @@
  */
 
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';

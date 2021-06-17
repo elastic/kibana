@@ -879,6 +879,30 @@ function mockStats(
         ...workload,
       },
     },
+    ephemeral: {
+      status: HealthStatus.OK,
+      timestamp: new Date().toISOString(),
+      value: {
+        load: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        executionsPerCycle: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+        queuedTasks: {
+          p50: 4,
+          p90: 6,
+          p95: 6,
+          p99: 6,
+        },
+      },
+    },
     runtime: {
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),

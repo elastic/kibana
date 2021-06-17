@@ -8,10 +8,10 @@ import { merge } from 'lodash';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { configSchema, TaskManagerConfig } from '../config';
 import { HealthStatus } from '../monitoring';
-import { TaskPersistence } from '../monitoring/task_run_statistics';
 import { MonitoredHealth } from '../routes/health';
 import { logHealthMetrics } from './log_health_metrics';
 import { Logger } from '../../../../../src/core/server';
+import { TaskPersistence } from '../task_events';
 
 jest.mock('./calculate_health_status', () => ({
   calculateHealthStatus: jest.fn(),

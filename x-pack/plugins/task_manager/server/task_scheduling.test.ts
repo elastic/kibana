@@ -15,6 +15,7 @@ import {
   asTaskClaimEvent,
   asTaskRunRequestEvent,
   TaskClaimErrorType,
+  TaskPersistence,
 } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
@@ -140,7 +141,12 @@ describe('TaskScheduling', () => {
       const result = taskScheduling.runNow(id);
 
       const task = mockTask({ id });
-      events$.next(asTaskRunEvent(id, asOk({ task, result: TaskRunResult.Success })));
+      events$.next(
+        asTaskRunEvent(
+          id,
+          asOk({ task, result: TaskRunResult.Success, persistence: TaskPersistence.Recurring })
+        )
+      );
 
       return expect(result).resolves.toEqual({ id });
     });
@@ -166,6 +172,7 @@ describe('TaskScheduling', () => {
             task,
             error: new Error('some thing gone wrong'),
             result: TaskRunResult.Failed,
+            persistence: TaskPersistence.Recurring,
           })
         )
       );
@@ -396,7 +403,14 @@ describe('TaskScheduling', () => {
       events$.next(asTaskClaimEvent(id, asOk(task)));
       events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
       events$.next(
-        asTaskRunEvent(differentTask, asOk({ task: otherTask, result: TaskRunResult.Success }))
+        asTaskRunEvent(
+          differentTask,
+          asOk({
+            task: otherTask,
+            result: TaskRunResult.Success,
+            persistence: TaskPersistence.Recurring,
+          })
+        )
       );
 
       events$.next(
@@ -406,6 +420,7 @@ describe('TaskScheduling', () => {
             task,
             error: new Error('some thing gone wrong'),
             result: TaskRunResult.Failed,
+            persistence: TaskPersistence.Recurring,
           })
         )
       );

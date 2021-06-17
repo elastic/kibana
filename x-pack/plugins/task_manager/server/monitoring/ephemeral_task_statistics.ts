@@ -6,7 +6,7 @@
  */
 
 import { map, filter, startWith, buffer, share } from 'rxjs/operators';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { Observable, zip } from 'rxjs';
 import { isOk, Ok } from '../lib/result_type';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';

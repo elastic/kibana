@@ -17,7 +17,7 @@ import { FillPoolResult } from './lib/fill_pool';
 import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
 import { ConcreteTaskInstance, TaskStatus } from './task';
 import uuid from 'uuid';
-import { asTaskPollingCycleEvent, asTaskRunEvent } from './task_events';
+import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
 import { TaskPoolMock } from './task_pool.mock';
@@ -51,6 +51,7 @@ describe('EphemeralTaskLifecycle', () => {
         monitored_aggregated_stats_refresh_rate: 5000,
         monitored_stats_required_freshness: 5000,
         monitored_stats_running_average_window: 50,
+        monitored_stats_warn_delayed_task_start_in_seconds: 60,
         monitored_task_execution_thresholds: {
           default: {
             error_threshold: 90,
@@ -168,6 +169,7 @@ describe('EphemeralTaskLifecycle', () => {
           asOk({
             task: mockTask(),
             result: TaskRunResult.Success,
+            persistence: TaskPersistence.Ephemeral,
           })
         )
       );

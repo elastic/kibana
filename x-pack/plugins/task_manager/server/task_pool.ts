@@ -16,8 +16,7 @@ import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
-import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
-import { asOk } from './lib/result_type';
+import { TaskManagerStat } from './task_events';
 
 interface Opts {
   maxWorkers$: Observable<number>;
