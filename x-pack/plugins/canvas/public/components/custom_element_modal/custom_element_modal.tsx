@@ -27,7 +27,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { encode } from '../../../common/lib/dataurl';
+import { encode } from '../../../../../../src/plugins/presentation_util/public';
 import { ElementCard } from '../element_card';
 import { ComponentStrings } from '../../../i18n/components';
 

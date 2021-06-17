@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isValidDataUrl } from '../../common/lib/dataurl';
+import { isValidDataUrl } from '../../../../../src/plugins/presentation_util/common';
 import { isValidHttpUrl } from '../../common/lib/httpurl';
 
 export function isValidUrl(url: string) {

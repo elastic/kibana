@@ -13,7 +13,7 @@ import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
 import { isValidHttpUrl } from '../../../../common/lib/httpurl';
-import { encode } from '../../../../common/lib/dataurl';
+import { encode } from '../../../../../../../src/plugins/presentation_util/public';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../../i18n';
