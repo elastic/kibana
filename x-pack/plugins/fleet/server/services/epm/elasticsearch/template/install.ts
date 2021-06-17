@@ -50,22 +50,15 @@ export const installTemplates = async (
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
 
-  const installTemplatePromises = dataStreams.reduce<Array<Promise<IndexTemplateEntry>>>(
-    (acc, dataStream) => {
-      acc.push(
-        installTemplateForDataStream({
-          pkg: installablePackage,
-          esClient,
-          dataStream,
-        })
-      );
-      return acc;
-    },
-    []
+  const installedTemplates = await Promise.all(
+    dataStreams.flatMap((dataStream) =>
+      installTemplateForDataStream({
+        pkg: installablePackage,
+        esClient,
+        dataStream,
+      })
+    )
   );
-
-  const res = await Promise.all(installTemplatePromises);
-  const installedTemplates = res.flat();
 
   // get template refs to save
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
