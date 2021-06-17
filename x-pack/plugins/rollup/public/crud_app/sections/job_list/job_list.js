@@ -90,7 +90,7 @@ export class JobListUi extends Component {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          data-test-subj="jobListError"
+          data-test-subj="jobListNoPermission"
           iconType="alert"
           title={<h1>{title}</h1>}
           body={
@@ -178,6 +178,7 @@ export class JobListUi extends Component {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
+          data-test-subj="jobListLoading"
           title={<EuiLoadingSpinner size="xl" />}
           body={
             <FormattedMessage

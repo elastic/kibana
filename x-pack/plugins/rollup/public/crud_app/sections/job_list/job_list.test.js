@@ -22,6 +22,15 @@ jest.mock('../../services', () => {
   };
 });
 
+jest.mock('../../services/documentation_links', () => {
+  const coreMocks = jest.requireActual('../../../../../../../src/core/public/mocks');
+
+  return {
+    init: jest.fn(),
+    documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
+  };
+});
+
 const defaultProps = {
   history: { location: {} },
   loadJobs: () => {},
@@ -71,21 +80,20 @@ describe('<JobList />', () => {
       },
     });
 
-    it('should display a callout with the status and the message', () => {
+    it('should display an error with the status and the message', () => {
       expect(exists('jobListError')).toBeTruthy();
       expect(find('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
     });
   });
 
   describe('when the user does not have the permission to access it', () => {
-    const { exists } = initTestBed({ jobLoadError: { status: 403 } });
+    const { exists, find } = initTestBed({ jobLoadError: { status: 403 } });
 
-    it('should render a callout message', () => {
+    it('should render an error message', () => {
       expect(exists('jobListNoPermission')).toBeTruthy();
-    });
-
-    it('should display the page header', () => {
-      expect(exists('jobListPageHeader')).toBeTruthy();
+      expect(find('jobListNoPermission').find('EuiText').text()).toEqual(
+        'You do not have permission to view or add rollup jobs.'
+      );
     });
   });
 });
