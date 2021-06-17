@@ -3429,7 +3429,6 @@
     "savedObjectsManagement.objects.savedObjectsDescription": "导入、导出和管理您的已保存搜索、可视化和仪表板。",
     "savedObjectsManagement.objects.savedObjectsTitle": "已保存对象",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "取消",
-    "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel": "删除",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName": "ID",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName": "标题",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName": "类型",

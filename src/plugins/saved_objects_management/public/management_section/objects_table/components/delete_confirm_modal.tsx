@@ -109,7 +109,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               title={
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.title"
-                  defaultMessage="{sharedObjectsCount, plural, one {# shared object} other {# shared objects}}"
+                  defaultMessage="{sharedObjectsCount, plural, one {# saved object is shared} other {# of your saved objects are shared}}"
                   values={{ sharedObjectsCount }}
                 />
               }
@@ -119,8 +119,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               <p>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.content"
-                  defaultMessage="Deleting {sharedObjectsCount, plural, one {this object} other {these objects}} will affect other spaces"
-                  values={{ sharedObjectsCount }}
+                  defaultMessage="Shared objects are deleted from every space they are in."
                 />
               </p>
             </EuiCallOut>
@@ -191,7 +190,8 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                 >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-                    defaultMessage="Delete"
+                    defaultMessage="Delete {objectsCount, plural, one {# object} other {# objects}}"
+                    values={{ objectsCount: deletableObjects.length }}
                   />
                 </EuiButton>
               </EuiFlexItem>

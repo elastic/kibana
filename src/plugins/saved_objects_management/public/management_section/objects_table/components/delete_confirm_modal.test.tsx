@@ -126,7 +126,7 @@ describe('DeleteConfirmModal', () => {
       const callout = findTestSubject(wrapper, 'sharedObjectsWarning');
       expect(callout).toHaveLength(1);
       expect(callout.text()).toMatchInlineSnapshot(
-        `"2 shared objectsDeleting these objects will affect other spaces"`
+        `"2 of your saved objects are sharedShared objects are deleted from every space they are in."`
       );
     });
   });
