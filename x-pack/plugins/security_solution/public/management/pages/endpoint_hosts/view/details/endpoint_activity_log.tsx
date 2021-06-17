@@ -107,8 +107,8 @@ export const EndpointActivityLog = memo(
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"
                 titleSize="s"
-                title={<h2>{'No logged actions'}</h2>}
-                body={<p>{'No actions have been logged for this endpoint.'}</p>}
+                title={<h2>{i18.ACTIVITY_LOG.LogEntry.emptyState.title}</h2>}
+                body={<p>{i18.ACTIVITY_LOG.LogEntry.emptyState.body}</p>}
               />
             </EuiFlexItem>
           ) : (
