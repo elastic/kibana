@@ -97,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -250,8 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -453,8 +453,8 @@ export default function ({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
@@ -477,8 +477,8 @@ export default function ({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,

@@ -149,5 +149,5 @@ async function getTestIndexItems(es: any) {
     index: ES_TEST_INDEX_NAME,
   });
 
-  return result.hits.hits;
+  return result.body.hits.hits;
 }

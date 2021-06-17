@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
       const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
-      expect(exists).to.be.eql(true);
+      expect(exists.body).to.be.eql(true);
       expect(configValue).to.be.eql(
         `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
       );

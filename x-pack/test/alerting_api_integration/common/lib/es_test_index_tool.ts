@@ -59,7 +59,10 @@ export class ESTestIndexTool {
   }
 
   async destroy() {
-    return await this.es.indices.delete({ index: this.index, ignore: [404] });
+    const indexExists = (await this.es.indices.exists({ index: this.index })).body;
+    if (indexExists) {
+      return await this.es.indices.delete({ index: this.index });
+    }
   }
 
   async search(source: string, reference: string) {
