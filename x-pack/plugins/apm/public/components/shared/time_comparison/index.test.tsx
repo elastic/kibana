@@ -15,7 +15,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../utils/testHelpers';
-import { TimeComparison } from './';
+import { getComparisonTypes, getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import moment from 'moment';
 import { TimeRangeComparisonType } from './get_time_range_comparison';
@@ -37,188 +37,248 @@ describe('TimeComparison', () => {
     moment.tz.setDefault('Europe/Amsterdam');
   });
   afterAll(() => moment.tz.setDefault(''));
-  const spy = jest.spyOn(urlHelpers, 'replace');
-  beforeEach(() => {
-    jest.resetAllMocks();
+
+  describe('getComparisonTypes', () => {
+    it('shows week and day before when 15 minutes is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-06-04T16:17:02.335Z',
+          end: '2021-06-04T16:32:02.335Z',
+        })
+      ).toEqual([
+        TimeRangeComparisonType.DayBefore.valueOf(),
+        TimeRangeComparisonType.WeekBefore.valueOf(),
+      ]);
+    });
+
+    it('shows week and day before when Today is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-06-04T04:00:00.000Z',
+          end: '2021-06-05T03:59:59.999Z',
+        })
+      ).toEqual([
+        TimeRangeComparisonType.DayBefore.valueOf(),
+        TimeRangeComparisonType.WeekBefore.valueOf(),
+      ]);
+    });
+
+    it('shows week and day before when 24 hours is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-06-03T16:31:35.748Z',
+          end: '2021-06-04T16:31:35.748Z',
+        })
+      ).toEqual([
+        TimeRangeComparisonType.DayBefore.valueOf(),
+        TimeRangeComparisonType.WeekBefore.valueOf(),
+      ]);
+    });
+    it('shows week before when 25 hours is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-06-02T12:32:00.000Z',
+          end: '2021-06-03T13:32:09.079Z',
+        })
+      ).toEqual([TimeRangeComparisonType.WeekBefore.valueOf()]);
+    });
+
+    it('shows week before when 7 days is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-05-28T16:32:17.520Z',
+          end: '2021-06-04T16:32:17.520Z',
+        })
+      ).toEqual([TimeRangeComparisonType.WeekBefore.valueOf()]);
+    });
+    it('shows period before when 8 days is selected', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-05-27T16:32:46.747Z',
+          end: '2021-06-04T16:32:46.747Z',
+        })
+      ).toEqual([TimeRangeComparisonType.PeriodBefore.valueOf()]);
+    });
   });
-  describe('Time range is between 0 - 24 hours', () => {
-    it('sets default values', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-28T14:45:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        rangeTo: 'now',
+
+  describe('getSelectOptions', () => {
+    it('returns formatted text based on comparison type', () => {
+      expect(
+        getSelectOptions({
+          comparisonTypes: [
+            TimeRangeComparisonType.DayBefore,
+            TimeRangeComparisonType.WeekBefore,
+            TimeRangeComparisonType.PeriodBefore,
+          ],
+          start: '2021-05-27T16:32:46.747Z',
+          end: '2021-06-04T16:32:46.747Z',
+        })
+      ).toEqual([
+        {
+          value: TimeRangeComparisonType.DayBefore.valueOf(),
+          text: 'Day before',
+        },
+        {
+          value: TimeRangeComparisonType.WeekBefore.valueOf(),
+          text: 'Week before',
+        },
+        {
+          value: TimeRangeComparisonType.PeriodBefore.valueOf(),
+          text: '19/05 18:32 - 27/05 18:32',
+        },
+      ]);
+    });
+
+    it('formats period before as DD/MM/YY HH:mm when range years are different', () => {
+      expect(
+        getSelectOptions({
+          comparisonTypes: [TimeRangeComparisonType.PeriodBefore],
+          start: '2020-05-27T16:32:46.747Z',
+          end: '2021-06-04T16:32:46.747Z',
+        })
+      ).toEqual([
+        {
+          value: TimeRangeComparisonType.PeriodBefore.valueOf(),
+          text: '20/05/19 18:32 - 27/05/20 18:32',
+        },
+      ]);
+    });
+  });
+
+  describe('TimeComparison component', () => {
+    const spy = jest.spyOn(urlHelpers, 'replace');
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    describe('Time range is between 0 - 24 hours', () => {
+      it('sets default values', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-04T16:17:02.335Z',
+          exactEnd: '2021-06-04T16:32:02.335Z',
+        });
+        render(<TimeComparison />, { wrapper: Wrapper });
+        expect(spy).toHaveBeenCalledWith(expect.anything(), {
+          query: {
+            comparisonEnabled: 'true',
+            comparisonType: TimeRangeComparisonType.DayBefore,
+          },
+        });
       });
-      render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).toHaveBeenCalledWith(expect.anything(), {
-        query: {
-          comparisonEnabled: 'true',
+      it('selects day before and enables comparison', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-04T16:17:02.335Z',
+          exactEnd: '2021-06-04T16:32:02.335Z',
+          comparisonEnabled: true,
           comparisonType: TimeRangeComparisonType.DayBefore,
-        },
+        });
+        const component = render(<TimeComparison />, { wrapper: Wrapper });
+        expectTextsInDocument(component, ['Day before', 'Week before']);
+        expect(
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+            .selectedIndex
+        ).toEqual(0);
       });
-    });
-    it('selects day before and enables comparison', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-28T14:45:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.DayBefore,
-        rangeTo: 'now',
+
+      it('enables day before option when date difference is equal to 24 hours', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-03T16:31:35.748Z',
+          exactEnd: '2021-06-04T16:31:35.748Z',
+          comparisonEnabled: true,
+          comparisonType: TimeRangeComparisonType.DayBefore,
+        });
+        const component = render(<TimeComparison />, { wrapper: Wrapper });
+        expectTextsInDocument(component, ['Day before', 'Week before']);
+        expect(
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+            .selectedIndex
+        ).toEqual(0);
       });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expectTextsInDocument(component, ['Day before', 'Week before']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
     });
 
-    it('enables yesterday option when date difference is equal to 24 hours', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-28T10:00:00.000Z',
-        end: '2021-01-29T10:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.DayBefore,
-        rangeTo: 'now',
-      });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expectTextsInDocument(component, ['Day before', 'Week before']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
-    });
-
-    it('selects previous period when rangeTo is different than now', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-28T10:00:00.000Z',
-        end: '2021-01-29T10:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
-        rangeTo: 'now-15m',
-      });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expectTextsInDocument(component, ['27/01 11:00 - 28/01 11:00']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
-    });
-  });
-
-  describe('Time range is between 24 hours - 1 week', () => {
-    it("doesn't show yesterday option when date difference is greater than 24 hours", () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-28T10:00:00.000Z',
-        end: '2021-01-29T11:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.WeekBefore,
-        rangeTo: 'now',
-      });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expectTextsNotInDocument(component, ['Day before']);
-      expectTextsInDocument(component, ['Week before']);
-    });
-    it('sets default values', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-26T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        rangeTo: 'now',
-      });
-      render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).toHaveBeenCalledWith(expect.anything(), {
-        query: {
-          comparisonEnabled: 'true',
+    describe('Time range is between 24 hours - 1 week', () => {
+      it("doesn't show day before option when date difference is greater than 24 hours", () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-02T12:32:00.000Z',
+          exactEnd: '2021-06-03T13:32:09.079Z',
+          comparisonEnabled: true,
           comparisonType: TimeRangeComparisonType.WeekBefore,
-        },
+        });
+        const component = render(<TimeComparison />, {
+          wrapper: Wrapper,
+        });
+        expectTextsNotInDocument(component, ['Day before']);
+        expectTextsInDocument(component, ['Week before']);
       });
-    });
-    it('selects week and enables comparison', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-26T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.WeekBefore,
-        rangeTo: 'now',
+      it('sets default values', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-02T12:32:00.000Z',
+          exactEnd: '2021-06-03T13:32:09.079Z',
+        });
+        render(<TimeComparison />, {
+          wrapper: Wrapper,
+        });
+        expect(spy).toHaveBeenCalledWith(expect.anything(), {
+          query: {
+            comparisonEnabled: 'true',
+            comparisonType: TimeRangeComparisonType.WeekBefore,
+          },
+        });
       });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
+      it('selects week before and enables comparison', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-06-02T12:32:00.000Z',
+          exactEnd: '2021-06-03T13:32:09.079Z',
+          comparisonEnabled: true,
+          comparisonType: TimeRangeComparisonType.WeekBefore,
+        });
+        const component = render(<TimeComparison />, {
+          wrapper: Wrapper,
+        });
+        expectTextsNotInDocument(component, ['Day before']);
+        expectTextsInDocument(component, ['Week before']);
+        expect(
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+            .selectedIndex
+        ).toEqual(0);
       });
-      expectTextsNotInDocument(component, ['Day before']);
-      expectTextsInDocument(component, ['Week before']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
     });
 
-    it('selects previous period when rangeTo is different than now', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-26T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
-        rangeTo: '2021-01-28T15:00:00.000Z',
+    describe('Time range is greater than 7 days', () => {
+      it('Shows absolute times without year when within the same year', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2021-05-27T16:32:46.747Z',
+          exactEnd: '2021-06-04T16:32:46.747Z',
+          comparisonEnabled: true,
+          comparisonType: TimeRangeComparisonType.PeriodBefore,
+        });
+        const component = render(<TimeComparison />, {
+          wrapper: Wrapper,
+        });
+        expect(spy).not.toHaveBeenCalled();
+        expectTextsInDocument(component, ['19/05 18:32 - 27/05 18:32']);
+        expect(
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+            .selectedIndex
+        ).toEqual(0);
       });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expectTextsInDocument(component, ['24/01 16:00 - 26/01 16:00']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
-    });
-  });
 
-  describe('Time range is greater than 7 days', () => {
-    it('Shows absolute times without year when within the same year', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-20T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
-        rangeTo: 'now',
+      it('Shows absolute times with year when on different year', () => {
+        const Wrapper = getWrapper({
+          exactStart: '2020-05-27T16:32:46.747Z',
+          exactEnd: '2021-06-04T16:32:46.747Z',
+          comparisonEnabled: true,
+          comparisonType: TimeRangeComparisonType.PeriodBefore,
+        });
+        const component = render(<TimeComparison />, {
+          wrapper: Wrapper,
+        });
+        expect(spy).not.toHaveBeenCalled();
+        expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
+        expect(
+          (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+            .selectedIndex
+        ).toEqual(0);
       });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['12/01 16:00 - 20/01 16:00']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
-    });
-
-    it('Shows absolute times with year when on different year', () => {
-      const Wrapper = getWrapper({
-        start: '2020-12-20T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
-        rangeTo: 'now',
-      });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['11/11/20 16:00 - 20/12/20 16:00']);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
-      ).toEqual(0);
     });
   });
 });

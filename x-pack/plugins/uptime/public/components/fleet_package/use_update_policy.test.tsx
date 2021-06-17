@@ -10,20 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { validate } from './validation';
 import { ConfigKeys, DataStream, TLSVersion } from './types';
-import {
-  defaultSimpleFields,
-  defaultTLSFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPAdvancedFields,
-} from './contexts';
-
-const defaultConfig = {
-  name: '',
-  ...defaultSimpleFields,
-  ...defaultTLSFields,
-  ...defaultHTTPAdvancedFields,
-  ...defaultTCPAdvancedFields,
-};
+import { defaultConfig } from './synthetics_policy_create_extension';
 
 describe('useBarChartsHooks', () => {
   const newPolicy: NewPackagePolicy = {
@@ -269,10 +256,10 @@ describe('useBarChartsHooks', () => {
   it('handles http data stream', () => {
     const onChange = jest.fn();
     const { result } = renderHook((props) => useUpdatePolicy(props), {
-      initialProps: { defaultConfig, newPolicy, onChange, validate },
+      initialProps: { defaultConfig, newPolicy, onChange, validate, monitorType: DataStream.HTTP },
     });
 
-    expect(result.current.config).toMatchObject({ ...defaultConfig });
+    expect(result.current.config).toMatchObject({ ...defaultConfig[DataStream.HTTP] });
 
     // expect only http to be enabled
     expect(result.current.updatedPolicy.inputs[0].enabled).toBe(true);
@@ -281,28 +268,28 @@ describe('useBarChartsHooks', () => {
 
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.MONITOR_TYPE].value
-    ).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.MONITOR_TYPE]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.URLS].value
-    ).toEqual(defaultConfig[ConfigKeys.URLS]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.URLS]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SCHEDULE].value
     ).toEqual(
       JSON.stringify(
-        `@every ${defaultConfig[ConfigKeys.SCHEDULE].number}${
-          defaultConfig[ConfigKeys.SCHEDULE].unit
+        `@every ${defaultConfig[DataStream.HTTP][ConfigKeys.SCHEDULE].number}${
+          defaultConfig[DataStream.HTTP][ConfigKeys.SCHEDULE].unit
         }`
       )
     );
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.PROXY_URL].value
-    ).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.PROXY_URL]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.APM_SERVICE_NAME].value
-    ).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}s`);
+    ).toEqual(`${defaultConfig[DataStream.HTTP][ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
         ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
@@ -316,29 +303,29 @@ describe('useBarChartsHooks', () => {
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_STATUS_CHECK]
         .value
-    ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.RESPONSE_STATUS_CHECK]));
+    ).toEqual(null);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.REQUEST_HEADERS_CHECK]
         .value
-    ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.REQUEST_HEADERS_CHECK]));
+    ).toEqual(null);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_HEADERS_CHECK]
         .value
-    ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.RESPONSE_HEADERS_CHECK]));
+    ).toEqual(null);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_BODY_INDEX]
         .value
-    ).toEqual(defaultConfig[ConfigKeys.RESPONSE_BODY_INDEX]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.RESPONSE_BODY_INDEX]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_HEADERS_INDEX]
         .value
-    ).toEqual(defaultConfig[ConfigKeys.RESPONSE_HEADERS_INDEX]);
+    ).toEqual(defaultConfig[DataStream.HTTP][ConfigKeys.RESPONSE_HEADERS_INDEX]);
   });
 
   it('stringifies array values and returns null for empty array values', () => {
     const onChange = jest.fn();
     const { result } = renderHook((props) => useUpdatePolicy(props), {
-      initialProps: { defaultConfig, newPolicy, onChange, validate },
+      initialProps: { defaultConfig, newPolicy, onChange, validate, monitorType: DataStream.HTTP },
     });
 
     act(() => {
@@ -419,16 +406,8 @@ describe('useBarChartsHooks', () => {
 
   it('handles tcp data stream', () => {
     const onChange = jest.fn();
-    const tcpConfig = {
-      ...defaultConfig,
-      [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
-    };
     const { result } = renderHook((props) => useUpdatePolicy(props), {
-      initialProps: { defaultConfig, newPolicy, onChange, validate },
-    });
-
-    act(() => {
-      result.current.setConfig(tcpConfig);
+      initialProps: { defaultConfig, newPolicy, onChange, validate, monitorType: DataStream.TCP },
     });
 
     // expect only tcp to be enabled
@@ -443,55 +422,47 @@ describe('useBarChartsHooks', () => {
 
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.MONITOR_TYPE].value
-    ).toEqual(tcpConfig[ConfigKeys.MONITOR_TYPE]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.MONITOR_TYPE]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.HOSTS].value
-    ).toEqual(defaultConfig[ConfigKeys.HOSTS]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.HOSTS]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.SCHEDULE].value
     ).toEqual(
       JSON.stringify(
-        `@every ${defaultConfig[ConfigKeys.SCHEDULE].number}${
-          defaultConfig[ConfigKeys.SCHEDULE].unit
+        `@every ${defaultConfig[DataStream.TCP][ConfigKeys.SCHEDULE].number}${
+          defaultConfig[DataStream.TCP][ConfigKeys.SCHEDULE].unit
         }`
       )
     );
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.PROXY_URL].value
-    ).toEqual(tcpConfig[ConfigKeys.PROXY_URL]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.PROXY_URL]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.APM_SERVICE_NAME].value
-    ).toEqual(tcpConfig[ConfigKeys.APM_SERVICE_NAME]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(`${tcpConfig[ConfigKeys.TIMEOUT]}s`);
+    ).toEqual(`${defaultConfig[DataStream.TCP][ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[
         ConfigKeys.PROXY_USE_LOCAL_RESOLVER
       ].value
-    ).toEqual(tcpConfig[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.PROXY_USE_LOCAL_RESOLVER]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_RECEIVE_CHECK]
         .value
-    ).toEqual(tcpConfig[ConfigKeys.RESPONSE_RECEIVE_CHECK]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.RESPONSE_RECEIVE_CHECK]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.REQUEST_SEND_CHECK]
         .value
-    ).toEqual(tcpConfig[ConfigKeys.REQUEST_SEND_CHECK]);
+    ).toEqual(defaultConfig[DataStream.TCP][ConfigKeys.REQUEST_SEND_CHECK]);
   });
 
   it('handles icmp data stream', () => {
     const onChange = jest.fn();
-    const icmpConfig = {
-      ...defaultConfig,
-      [ConfigKeys.MONITOR_TYPE]: DataStream.ICMP,
-    };
     const { result } = renderHook((props) => useUpdatePolicy(props), {
-      initialProps: { defaultConfig, newPolicy, onChange, validate },
-    });
-
-    act(() => {
-      result.current.setConfig(icmpConfig);
+      initialProps: { defaultConfig, newPolicy, onChange, validate, monitorType: DataStream.ICMP },
     });
 
     // expect only icmp to be enabled
@@ -506,25 +477,27 @@ describe('useBarChartsHooks', () => {
 
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.MONITOR_TYPE].value
-    ).toEqual(icmpConfig[ConfigKeys.MONITOR_TYPE]);
+    ).toEqual(defaultConfig[DataStream.ICMP][ConfigKeys.MONITOR_TYPE]);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.HOSTS].value
-    ).toEqual(icmpConfig[ConfigKeys.HOSTS]);
+    ).toEqual(defaultConfig[DataStream.ICMP][ConfigKeys.HOSTS]);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.SCHEDULE].value
     ).toEqual(
       JSON.stringify(
-        `@every ${icmpConfig[ConfigKeys.SCHEDULE].number}${icmpConfig[ConfigKeys.SCHEDULE].unit}`
+        `@every ${defaultConfig[DataStream.ICMP][ConfigKeys.SCHEDULE].number}${
+          defaultConfig[DataStream.ICMP][ConfigKeys.SCHEDULE].unit
+        }`
       )
     );
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.APM_SERVICE_NAME].value
-    ).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    ).toEqual(defaultConfig[DataStream.ICMP][ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(`${icmpConfig[ConfigKeys.TIMEOUT]}s`);
+    ).toEqual(`${defaultConfig[DataStream.ICMP][ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.WAIT].value
-    ).toEqual(`${icmpConfig[ConfigKeys.WAIT]}s`);
+    ).toEqual(`${defaultConfig[DataStream.ICMP][ConfigKeys.WAIT]}s`);
   });
 });

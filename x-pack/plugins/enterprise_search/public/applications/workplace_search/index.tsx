@@ -141,9 +141,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <RoleMappings />
-        </Layout>
+        <RoleMappings />
       </Route>
       <Route path={SECURITY_PATH}>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
