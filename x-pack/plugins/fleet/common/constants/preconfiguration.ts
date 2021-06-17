@@ -9,7 +9,6 @@ import type { PreconfiguredAgentPolicy } from '../types';
 
 import {
   defaultPackages,
-  unremovablePackages,
   FLEET_SYSTEM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   autoUpdatePackages,
