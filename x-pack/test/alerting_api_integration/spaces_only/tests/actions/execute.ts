@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
-      expect(searchResult.body.hits.total.valueOf).to.eql(1);
+      expect(searchResult.body.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source).to.eql({
         params: {
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-      expect(searchResult.body.hits.total.valueOf).to.eql(1);
+      expect(searchResult.body.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source.state).to.eql({
         callClusterSuccess: true,

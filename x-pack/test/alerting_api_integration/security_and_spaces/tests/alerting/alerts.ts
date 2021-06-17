@@ -134,7 +134,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'alert:test.always-firing',
                 reference
               );
-              expect(alertSearchResult.body.hits.total.valueOf).to.eql(1);
+              expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source,
                 ['alertInfo.createdAt', 'alertInfo.updatedAt']
@@ -189,7 +189,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(actionSearchResult.body.hits.total.valueOf).to.eql(1);
+              expect(actionSearchResult.body.hits.total.value).to.eql(1);
               expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -281,7 +281,7 @@ instanceStateValue: true
                 'alert:test.always-firing',
                 reference
               );
-              expect(alertSearchResult.body.hits.total.valueOf).to.eql(1);
+              expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source,
                 ['alertInfo.createdAt', 'alertInfo.updatedAt']
@@ -336,7 +336,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(actionSearchResult.body.hits.total.valueOf).to.eql(1);
+              expect(actionSearchResult.body.hits.total.value).to.eql(1);
               expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
                   unencrypted: 'ignored-but-required',
@@ -416,7 +416,7 @@ instanceStateValue: true
             reference2
           );
 
-          expect(alertSearchResult.body.hits.total.valueOf).to.be.greaterThan(0);
+          expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(0);
           const alertSearchResultInfoWithoutDates = omit(
             alertSearchResult.body.hits.hits[0]._source.alertInfo,
             ['createdAt', 'updatedAt']
@@ -630,7 +630,7 @@ instanceStateValue: true
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
-              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
@@ -661,7 +661,7 @@ instanceStateValue: true
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
-              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
@@ -747,7 +747,7 @@ instanceStateValue: true
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.body.total.valueOf).to.eql(1);
+              expect(searchResult.body.total.value).to.eql(1);
               expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
@@ -786,7 +786,7 @@ instanceStateValue: true
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
@@ -852,7 +852,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -931,7 +931,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.valueOf).to.eql(2);
+              expect(searchResult.body.hits.total.value).to.eql(2);
               const messages: string[] = searchResult.body.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
@@ -1005,7 +1005,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.valueOf).to.eql(2);
+              expect(searchResult.body.hits.total.value).to.eql(2);
               const messages: string[] = searchResult.body.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
@@ -1068,7 +1068,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.valueOf).to.eql(2);
+              expect(searchResult.body.hits.total.value).to.eql(2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1126,7 +1126,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.body.hits.total.valueOf).to.eql(0);
+              expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1184,7 +1184,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.body.hits.total.valueOf).to.eql(0);
+              expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1243,7 +1243,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.valueOf).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

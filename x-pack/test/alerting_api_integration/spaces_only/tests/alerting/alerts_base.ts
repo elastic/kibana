@@ -298,7 +298,7 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
 
       const actionTestRecord = await esTestIndexTool.search('action:test.index-record', reference);
-      expect(actionTestRecord.body.hits.total.valueOf).to.eql(0);
+      expect(actionTestRecord.body.hits.total.value).to.eql(0);
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
     });
 
