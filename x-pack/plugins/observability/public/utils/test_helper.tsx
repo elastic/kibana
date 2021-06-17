@@ -8,7 +8,7 @@
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { of } from 'rxjs';
 import {
   KibanaContextProvider,

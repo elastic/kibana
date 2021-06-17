@@ -742,6 +742,10 @@ module.exports = {
                 name: 'react-use',
                 message: 'Please use react-use/lib/{method} instead.',
               },
+              {
+                name: 'react-intl',
+                message: 'Please use @kbn/i18n/react instead',
+              },
             ],
           },
         ],
