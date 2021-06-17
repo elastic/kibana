@@ -42,7 +42,7 @@ PUT _watcher/watch/error_report
 <2> An example POST URL. You can copy and paste the URL for any report.
 <3> Optional, default is `40`.
 <4> Optional, default is `15s`.
-<5> User credentials for a user with permission to access {kib} and the {report-features}. For more information, refer to <<configuring-reporting>>.
+<5> User credentials for a user with permission to access {kib} and the {report-features}. For more information, refer to <<secure-reporting>>.
 
 [NOTE]
 ====

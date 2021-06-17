@@ -6,7 +6,37 @@
 <titleabbrev>Configure reporting</titleabbrev>
 ++++
 
-To enable users to manually and automatically generate reports, you must grant users access to the {report-features} and secure the reporting endpoints.
+To enable users to manually and automatically generate reports, install the reporting packages, grant users access to the {report-features}, and secure the reporting endpoints.
+
+[float]
+[[install-reporting-packages]]
+=== Install the reporting packages
+
+Make sure the {kib} server operating system has the appropriate packages installed for the distribution.
+
+If you are using CentOS/RHEL systems, install the following packages:
+
+* `ipa-gothic-fonts`
+* `xorg-x11-fonts-100dpi`
+* `xorg-x11-fonts-75dpi`
+* `xorg-x11-utils`
+* `xorg-x11-fonts-cyrillic`
+* `xorg-x11-fonts-Type1`
+* `xorg-x11-fonts-misc`
+* `fontconfig`
+* `freetype`
+
+If you are using Ubuntu/Debian systems, install the following packages:
+
+* `fonts-liberation`
+* `libfontconfig1`
+
+If the system is missing dependencies, *Reporting* fails in a non-deterministic way. {kib} runs a self-test at server startup, and
+if it encounters errors, logs them in the Console. The error message does not include
+information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
+that {kib} could not connect to the Chromium process.
+
+To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. For more information, refer to <<reporting-troubleshooting-puppeteer-debug-logs>>.
 
 [float]
 [[reporting-roles-management-ui]]

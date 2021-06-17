@@ -82,6 +82,13 @@ Share a direct link to a saved search, dashboard, or visualization. To access th
 
 * To generate a shortened link, select *Short URL*.
 
+* To automatically log in anonymous users when you have multiple authentication providers enabled, select *Public URL*.
++
+[role="screenshot"]
+image::images/permalink-public-url.png[Permalink share menu with Public URL option highlighted]
++
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share.
+
 . Click *Copy link*.
 
 [float]
@@ -125,7 +132,7 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 
 Display your dashboard or visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
 
-Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>>.
+Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>> and <<embedded-content-authentication>>.
 
 . Open the main menu, then open the dashboard or visualization you want to share.
 
@@ -141,11 +148,14 @@ Some users might not have access to the dashboard or visualization. For more inf
 
 * To generate a shortened link, select *Short URL*.
 
-. Click *Copy iFrame code*, or if you have multiple authentication providers enabled, and you want to automatically log in anonymous users, click *Public URL*.
+* To automatically log in anonymous users when you have multiple authentication providers enabled, select *Public URL*.
 +
-You can also use *Public URL* when you're generating permanent links to dashboards, visualizations, and saved searches.
+[role="screenshot"]
+image::images/embed-code-public-url.png[Embed code share menu with Public URL option highlighted]
 +
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed or share.
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed.
+
+. Click *Copy iFrame code*.
 
 --
 

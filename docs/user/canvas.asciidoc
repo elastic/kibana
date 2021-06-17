@@ -198,9 +198,7 @@ image::images/canvas-add-pages.gif[Add pages]
 [[workpad-share-options]]
 == Share your workpad
 
-When you've finished your workpad, you can share it outside of {kib}.
-
-For information on the sharing options, refer to <<reporting-getting-started, Reporting from {kib}>>.
+To share workpads with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[export-single-workpad]]
