@@ -223,7 +223,7 @@ const RulesPageComponent: React.FC = () => {
               <LinkButton
                 data-test-subj="create-new-rule"
                 fill
-                // onClick={goToNewRule}
+                onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
                 isDisabled={!userHasPermissions(canUserCRUD) || loading}

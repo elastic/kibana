@@ -48,7 +48,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-  const { search } = useFormatUrl(SecurityPageName.detections);
+  const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 

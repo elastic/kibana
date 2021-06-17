@@ -94,7 +94,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
       ev.preventDefault();
       if (backOptions) {
         navigateToApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
+          deepLinkId: backOptions?.pageId ?? SecurityPageName.overview,
           path: backOptions.href ?? '',
         });
       }

@@ -39,12 +39,14 @@ describe('AllRulesTable Columns', () => {
 
     test('duplicate rule onClick should call rule edit after the rule is duplicated', async () => {
       const ruleDuplicate = mockRule('newRule');
+      const navigateToApp = jest.fn();
       duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
 
       const duplicateRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
         history,
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         true
@@ -55,10 +57,13 @@ describe('AllRulesTable Columns', () => {
     });
 
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
+      const navigateToApp = jest.fn();
+
       const deleteRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
         history,
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         true

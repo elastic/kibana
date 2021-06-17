@@ -62,9 +62,10 @@ export const renderApp = ({
             <Route key={`subpligin-overview-route-${index}`} {...route} />
           ))
         }
-        {subPlugins.detections.routes!.map((route, index) => (
-          <Route key={`subpligin-detections-route-${index}`} {...route} />
+        {subPlugins.alerts.routes!.map((route, index) => (
+          <Route key={`subpligin-alerts-route-${index}`} {...route} />
         ))}
+
         <Route>
           <NotFoundPage />
         </Route>

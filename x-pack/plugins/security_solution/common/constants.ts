@@ -60,9 +60,10 @@ export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
+export const DETECTIONS = 'detections';
+
 export enum SecurityPageName {
   alerts = 'alerts',
-  detections = 'detections',
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
@@ -95,7 +96,7 @@ export const APP_RULES_PATH = `${APP_PATH}/rules`;
 export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}/exceptions`;
 
-export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
+export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:detections`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [

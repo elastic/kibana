@@ -293,7 +293,7 @@ const DetectionEnginePageComponent = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-      <SpyRoute pageName={SecurityPageName.detections} />
+      <SpyRoute pageName={SecurityPageName.alerts} />
     </>
   );
 };

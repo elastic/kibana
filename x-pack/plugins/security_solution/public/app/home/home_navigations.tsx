@@ -28,12 +28,12 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'overview',
   },
-  [SecurityPageName.detections]: {
-    id: SecurityPageName.detections,
+  [SecurityPageName.alerts]: {
+    id: SecurityPageName.alerts,
     name: i18n.ALERTS,
     href: APP_ALERTS_PATH,
     disabled: false,
-    urlKey: SecurityPageName.detections,
+    urlKey: SecurityPageName.alerts,
   },
   [SecurityPageName.rules]: {
     id: SecurityPageName.rules,

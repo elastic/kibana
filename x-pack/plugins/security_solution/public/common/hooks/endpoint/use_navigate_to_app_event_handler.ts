@@ -70,7 +70,7 @@ export const useNavigateToAppEventHandler = <S = unknown>(
       }
 
       ev.preventDefault();
-      services.application.navigateToApp(appId, { path, state });
+      services.application.navigateToApp(appId, { path, state, deepLinkId });
     },
     [appId, onClick, path, services.application, state]
   );

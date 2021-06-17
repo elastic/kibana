@@ -45,6 +45,7 @@ export const SpyRouteComponent = memo<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
     useEffect(() => {
+      console.log('pageName', pageName, route.pathName, pathname, detailName);
       if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
           dispatch({

@@ -36,7 +36,8 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
   if (tabPath === 'alerts') {
     return {
       text: i18nDetections.ALERT,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.alerts,
         path: getDetectionEngineTabUrl(tabPath, !isEmpty(search[0]) ? search[0] : ''),
       }),
     };
@@ -45,7 +46,8 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
         path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
       }),
     };

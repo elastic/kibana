@@ -34,7 +34,7 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  detections: [
+  alerts: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -104,7 +104,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
 export type LocationTypes =
   | CONSTANTS.caseDetails
   | CONSTANTS.casePage
-  | CONSTANTS.detectionsPage
+  | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails

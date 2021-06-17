@@ -156,7 +156,7 @@ const securityDeepLinks: SecurityDeepLinks = {
 };
 
 const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
-  detections: [
+  alerts: [
     i18n.translate('xpack.securitySolution.search.detections', {
       defaultMessage: 'Detections',
     }),

@@ -16,7 +16,7 @@ import { useSyncUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
-import { DETECTIONS_SUB_PLUGIN_ID, SecurityPageName } from '../../../common/constants';
+import { ALERTS_PATH, DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { GlobalHeader } from './global_header';
@@ -38,12 +38,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const { pathname } = useLocation();
 
   application.currentAppId$.subscribe((appId) => {
-    subPluginId.current =
-      pathname.startsWith(`/${SecurityPageName.alerts}`) ||
-      pathname.startsWith(`/${SecurityPageName.rules}`) ||
-      pathname.startsWith(`/${SecurityPageName.exceptions}`)
-        ? DETECTIONS_SUB_PLUGIN_ID
-        : appId ?? '';
+    subPluginId.current = pathname === ALERTS_PATH ? DETECTIONS_SUB_PLUGIN_ID : appId ?? '';
   });
 
   useInitSourcerer(

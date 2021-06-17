@@ -79,7 +79,9 @@ export interface AppObservableLibs {
 export type InspectResponse = Inspect & { response: string[] };
 
 export interface SubPlugins {
-  detections: Detections;
+  alerts: Detections;
+  rules: Detections;
+  exceptions: Detections;
   cases: Cases;
   hosts: Hosts;
   network: Network;
@@ -90,7 +92,9 @@ export interface SubPlugins {
 
 // TODO: [1101] find a better way to get those types
 export interface StartedSubPlugins {
-  detections: ReturnType<Detections['start']>;
+  alerts: ReturnType<Detections['start']>;
+  rules: ReturnType<Detections['start']>;
+  exceptions: ReturnType<Detections['start']>;
   cases: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;

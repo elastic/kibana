@@ -235,6 +235,10 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
+  const submitStepDefineRule = useCallback(() => {
+    submitStep(RuleStep.defineRule);
+  }, [submitStep]);
+
   const defineRuleButton = (
     <AccordionTitle
       name="1"
@@ -284,7 +288,7 @@ const CreateRulePageComponent: React.FC = () => {
     history.replace(getRulesUrl());
     return null;
   }
-
+  console.log('rendering');
   return (
     <>
       <SecuritySolutionPageWrapper>
@@ -294,7 +298,7 @@ const CreateRulePageComponent: React.FC = () => {
               backOptions={{
                 href: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.detections,
+                pageId: SecurityPageName.rules,
               }}
               border
               isLoading={isLoading || loading}
@@ -328,13 +332,13 @@ const CreateRulePageComponent: React.FC = () => {
                   isReadOnlyView={activeStep !== RuleStep.defineRule}
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.defineRule)}
+                  onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
                 />
               </StepDefineRuleAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={3}>
+            {/* <MyEuiPanel zindex={3}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.aboutRule}
@@ -367,9 +371,9 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
                 />
               </EuiAccordion>
-            </MyEuiPanel>
+            </MyEuiPanel> */}
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={2}>
+            {/* <MyEuiPanel zindex={2}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.scheduleRule}
@@ -400,9 +404,9 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
                 />
               </EuiAccordion>
-            </MyEuiPanel>
+            </MyEuiPanel> */}
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={1}>
+            {/* <MyEuiPanel zindex={1}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.ruleActions}
@@ -433,7 +437,7 @@ const CreateRulePageComponent: React.FC = () => {
                   actionMessageParams={actionMessageParams}
                 />
               </EuiAccordion>
-            </MyEuiPanel>
+            </MyEuiPanel> */}
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
