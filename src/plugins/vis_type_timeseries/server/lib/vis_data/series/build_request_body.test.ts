@@ -89,7 +89,10 @@ describe('buildRequestBody(req)', () => {
       capabilities,
       {
         get: async () => 50,
-      }
+      },
+      jest.fn().mockResolvedValue({
+        timeField: '@timestamp',
+      })
     );
 
     expect(doc).toEqual({
