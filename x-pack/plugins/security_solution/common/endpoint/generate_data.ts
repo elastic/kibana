@@ -423,6 +423,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Update the common host metadata - essentially creating an entire new endpoint metadata record
+   * when the `.generateHostMetadata()` is subsequently called
+   */
+  public updateCommonInfo() {
+    this.commonInfo = this.createHostData();
+  }
+
+  /**
    * Parses an index and returns the data stream fields extracted from the index.
    *
    * @param index the index name to parse into the data stream parts
@@ -439,7 +447,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
-    const isIsolated = this.randomBoolean();
+    const isIsolated = this.randomBoolean(0.3);
 
     return {
       agent: {
