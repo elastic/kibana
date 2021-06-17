@@ -16,7 +16,8 @@ export type {
   TimerangeInput,
   PaginationInputPaginated,
   DocValueFields,
-  Maybe,
+  CursorType,
+  TotalValue,
 } from '../common/search_strategy/common';
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';

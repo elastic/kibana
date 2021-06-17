@@ -11,9 +11,12 @@ export type {
   TimerangeInput,
   PaginationInputPaginated,
   DocValueFields,
-  Maybe,
+  CursorType,
+  TotalValue,
 } from '../../../../timelines/common';
 export { Direction } from '../../../../timelines/common';
+
+export type Maybe<T> = T | null;
 
 export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
@@ -22,12 +25,6 @@ export interface PageInfoPaginated {
   fakeTotalCount: number;
   showMorePagesIndicator: boolean;
 }
-
-export interface CursorType {
-  value?: Maybe<string>;
-  tiebreaker?: Maybe<string>;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
