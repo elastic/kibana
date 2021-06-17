@@ -1,9 +1,9 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-securitysolution-list-hooks"
+PKG_BASE_NAME = "kbn-securitysolution-hook-utils"
 
-PKG_REQUIRE_NAME = "@kbn/securitysolution-list-hooks"
+PKG_REQUIRE_NAME = "@kbn/securitysolution-hook-utils"
 
 SOURCE_FILES = glob(
   [
@@ -28,24 +28,15 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
-  "//packages/kbn-securitysolution-hook-utils",
-  "//packages/kbn-securitysolution-io-ts-list-types",
-  "//packages/kbn-securitysolution-list-api",
-  "//packages/kbn-securitysolution-list-constants",
-  "//packages/kbn-securitysolution-list-utils",
-  "//packages/kbn-securitysolution-utils",
-  "@npm//lodash",
-  "@npm//tslib",
   "@npm//react",
-  "@npm//react-intl",
+  "@npm//rxjs",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/react",
-  "@npm//@types/react-intl",
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
