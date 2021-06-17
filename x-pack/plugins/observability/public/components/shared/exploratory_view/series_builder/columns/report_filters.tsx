@@ -23,6 +23,7 @@ export function ReportFilters({
       filters={dataViewSeries.filters}
       seriesId={seriesId}
       isNew={true}
+      labels={dataViewSeries.labels}
     />
   );
 }

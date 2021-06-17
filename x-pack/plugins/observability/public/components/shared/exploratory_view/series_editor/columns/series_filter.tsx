@@ -27,6 +27,7 @@ interface Props {
   filters: DataSeries['filters'];
   series: DataSeries;
   isNew?: boolean;
+  labels?: Record<string, string>;
 }
 
 export interface Field {
@@ -36,21 +37,28 @@ export interface Field {
   isNegated?: boolean;
 }
 
-export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [], filters }: Props) {
+export function SeriesFilter({
+  series,
+  isNew,
+  seriesId,
+  defaultFilters = [],
+  filters,
+  labels,
+}: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
   const options: Field[] = defaultFilters.map((field) => {
     if (typeof field === 'string') {
-      return { label: FieldLabels[field], field };
+      return { label: labels?.[field] ?? FieldLabels[field], field };
     }
 
     return {
       field: field.field,
       nested: field.nested,
       isNegated: field.isNegated,
-      label: FieldLabels[field.field],
+      label: labels?.[field.field] ?? FieldLabels[field.field],
     };
   });
 

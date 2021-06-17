@@ -8,9 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import {
-  SERVICE_NAME,
-} from '../constants/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
@@ -18,7 +16,7 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
   return {
     reportType: 'mobile-device-distribution',
     defaultSeriesType: 'bar',
-    seriesTypes: ['bar', 'bar_horizontal' ],
+    seriesTypes: ['bar', 'bar_horizontal'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,
     },
@@ -35,7 +33,7 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
     filters: [
       ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
       ...buildPhraseFilter('processor.event', 'transaction', indexPattern),
-  ],
+    ],
     labels: {
       ...FieldLabels,
       ...MobileFields,
