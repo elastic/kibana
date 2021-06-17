@@ -53,24 +53,21 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 export function __kbnBootstrap__(): Promise<void>;
 
 // @public (undocumented)
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
     appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
     deepLinks?: AppDeepLink[];
     defaultPath?: string;
-    euiIconType?: string;
     exactRoute?: boolean;
-    icon?: string;
     id: string;
     keywords?: string[];
     mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
-    order?: number;
+    searchable?: boolean;
     status?: AppStatus;
     title: string;
-    tooltip?: string;
     updater$?: Observable<AppUpdater>;
 }
 
@@ -92,7 +89,8 @@ export type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
-} & ({
+    searchable?: boolean;
+} & AppNavOptions & ({
     path: string;
     deepLinks?: AppDeepLink[];
 } | {
@@ -152,6 +150,7 @@ export interface ApplicationStart {
     getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
+        deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
@@ -180,6 +179,14 @@ export enum AppNavLinkStatus {
 }
 
 // @public
+export interface AppNavOptions {
+    euiIconType?: string;
+    icon?: string;
+    order?: number;
+    tooltip?: string;
+}
+
+// @public
 export enum AppStatus {
     accessible = 0,
     inaccessible = 1
@@ -189,7 +196,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -314,8 +321,7 @@ export interface ChromeNavLink {
     readonly order?: number;
     readonly title: string;
     readonly tooltip?: string;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-    readonly url?: string;
+    readonly url: string;
 }
 
 // @public
@@ -916,10 +922,9 @@ export interface IUiSettingsClient {
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
-// Warning: (ae-missing-release-tag) "NavigateToAppOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface NavigateToAppOptions {
+    deepLinkId?: string;
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
@@ -1067,19 +1072,21 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus'> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
     deepLinks: PublicAppDeepLinkInfo[];
     keywords: string[];
     navLinkStatus: AppNavLinkStatus;
+    searchable: boolean;
 };
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
     keywords: string[];
     deepLinks: PublicAppDeepLinkInfo[];
+    searchable: boolean;
 };
 
 // @public
@@ -1249,7 +1256,7 @@ export interface SavedObjectsCreateOptions {
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
     // @alpha
-    aggs?: Record<string, estypes.AggregationContainer>;
+    aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -1275,7 +1282,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SortOrder;
+    sortOrder?: estypes.SearchSortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

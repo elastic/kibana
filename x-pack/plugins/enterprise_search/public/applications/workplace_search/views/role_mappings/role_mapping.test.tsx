@@ -5,23 +5,18 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox } from '@elastic/eui';
-
-import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
+import { GroupAssignmentSelector } from './group_assignment_selector';
 import { RoleMapping } from './role_mapping';
 
 describe('RoleMapping', () => {
@@ -60,6 +55,7 @@ describe('RoleMapping', () => {
     availableAuthProviders: [],
     multipleAuthProvidersConfig: true,
     selectedAuthProviders: [],
+    roleMappingErrors: [],
   };
 
   beforeEach(() => {
@@ -80,42 +76,23 @@ describe('RoleMapping', () => {
   });
 
   it('renders', () => {
+    setMockValues({ ...mockValues, roleMapping: wsRoleMapping });
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(2);
+    expect(wrapper.find(RoleSelector)).toHaveLength(1);
+    expect(wrapper.find(GroupAssignmentSelector)).toHaveLength(1);
   });
 
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  it('enables flyout when attribute value is valid', () => {
+    setMockValues({
+      ...mockValues,
+      attributeValue: 'foo',
+      attributeName: 'role',
+      includeInAllGroups: true,
+    });
     const wrapper = shallow(<RoleMapping />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('hides DeleteMappingCallout for new mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
-
-    expect(wrapper.find(DeleteMappingCallout)).toHaveLength(0);
-  });
-
-  it('handles group checkbox click', () => {
-    const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .first()
-      .simulate('change', { target: { checked: true } });
-
-    expect(handleGroupSelectionChange).toHaveBeenCalledWith(groups[0].id, true);
-  });
-
-  it('handles all groups checkbox click', () => {
-    const wrapper = shallow(<RoleMapping />);
-    wrapper
-      .find(EuiCheckbox)
-      .last()
-      .simulate('change', { target: { checked: true } });
-
-    expect(handleAllGroupsSelectionChange).toHaveBeenCalledWith(true);
+    expect(wrapper.find(RoleMappingFlyout).prop('disabled')).toBe(false);
   });
 });

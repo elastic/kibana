@@ -25,10 +25,10 @@ import { EngineNav, EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
-import { KibanaHeaderActions } from './components/layout/kibana_header_actions';
+import { KibanaHeaderActions } from './components/layout';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
@@ -92,6 +92,11 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
+      {canViewRoleMappings && (
+        <Route path={ROLE_MAPPINGS_PATH}>
+          <RoleMappings />
+        </Route>
+      )}
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           <Switch>
@@ -110,11 +115,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             <Route exact path={CREDENTIALS_PATH}>
               <Credentials />
             </Route>
-            {canViewRoleMappings && (
-              <Route path={ROLE_MAPPINGS_PATH}>
-                <RoleMappingsRouter />
-              </Route>
-            )}
             {canManageEngines && (
               <Route exact path={ENGINE_CREATION_PATH}>
                 <EngineCreation />

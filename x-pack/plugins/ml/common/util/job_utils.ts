@@ -78,7 +78,7 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
  * if composite is defined.
  * @param buckets
  */
-export function hasValidComposite(buckets: estypes.AggregationContainer) {
+export function hasValidComposite(buckets: estypes.AggregationsAggregationContainer) {
   if (
     isPopulatedObject(buckets, ['composite']) &&
     isPopulatedObject(buckets.composite, ['sources']) &&
@@ -157,7 +157,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
           }
           // if fieldName is an aggregated field under nested terms using bucket_script
           const aggregations =
-            getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
+            getAggregations<estypes.AggregationsAggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
           if (foundField?.bucket_script !== undefined) {
             return false;

@@ -17,121 +17,178 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     </div>
   }
 >
-  <div>
-    <EuiTitle>
-      <h1
-        className="euiTitle euiTitle--medium"
-      >
+  <EuiPageHeader
+    bottomBorder={true}
+    pageTitle={
+      <React.Fragment>
         Create test index pattern
-         
-        <EuiBetaBadge
-          label="Beta"
-        >
-          <span
-            className="euiBetaBadge"
-            title="Beta"
-          >
-            Beta
-          </span>
-        </EuiBetaBadge>
-      </h1>
-    </EuiTitle>
-    <EuiSpacer
-      size="s"
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+      </React.Fragment>
+    }
+  >
+    <header
+      className="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
     >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiText>
-      <div
-        className="euiText euiText--medium"
+      <EuiPageHeaderContent
+        pageTitle={
+          <React.Fragment>
+            Create test index pattern
+            <React.Fragment>
+               
+              <EuiBetaBadge
+                label="Beta"
+              />
+            </React.Fragment>
+          </React.Fragment>
+        }
+        responsive={true}
       >
-        <p>
-          <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
-            id="indexPatternManagement.createIndexPattern.description"
-            values={
-              Object {
-                "multiple": <strong>
-                  multiple
-                </strong>,
-                "single": <EuiCode>
-                  filebeat-4-3-22
-                </EuiCode>,
-                "star": <EuiCode>
-                  filebeat-*
-                </EuiCode>,
-              }
-            }
+        <div
+          className="euiPageHeaderContent"
+        >
+          <EuiFlexGroup
+            alignItems="flexStart"
+            className="euiPageHeaderContent__top"
+            gutterSize="l"
+            responsive={true}
           >
-            <span>
-              An index pattern can match a single source, for example, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-4-3-22
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              , or 
-              <strong>
-                multiple
-              </strong>
-               data sources, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-*
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              .
-            </span>
-          </FormattedMessage>
-          <br />
-          <EuiLink
-            external={true}
-            target="_blank"
-          >
-            <button
-              className="euiLink euiLink--primary"
-              disabled={false}
-              type="button"
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
             >
-              <FormattedMessage
-                defaultMessage="Read documentation"
-                id="indexPatternManagement.createIndexPattern.documentation"
-                values={Object {}}
+              <EuiFlexItem>
+                <div
+                  className="euiFlexItem"
+                >
+                  <EuiTitle
+                    size="l"
+                  >
+                    <h1
+                      className="euiTitle euiTitle--large"
+                    >
+                      Create test index pattern
+                       
+                      <EuiBetaBadge
+                        label="Beta"
+                      >
+                        <span
+                          className="euiBetaBadge"
+                          title="Beta"
+                        >
+                          Beta
+                        </span>
+                      </EuiBetaBadge>
+                    </h1>
+                  </EuiTitle>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+          <div
+            className="euiPageHeaderContent__bottom"
+          >
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
               >
-                <span>
-                  Read documentation
-                </span>
-              </FormattedMessage>
-            </button>
-          </EuiLink>
-        </p>
-      </div>
-    </EuiText>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <div>
-      Test prompt
-    </div>
-  </div>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+                    id="indexPatternManagement.createIndexPattern.description"
+                    values={
+                      Object {
+                        "multiple": <strong>
+                          multiple
+                        </strong>,
+                        "single": <EuiCode>
+                          filebeat-4-3-22
+                        </EuiCode>,
+                        "star": <EuiCode>
+                          filebeat-*
+                        </EuiCode>,
+                      }
+                    }
+                  >
+                    <span>
+                      An index pattern can match a single source, for example, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-4-3-22
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      , or 
+                      <strong>
+                        multiple
+                      </strong>
+                       data sources, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-*
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      .
+                    </span>
+                  </FormattedMessage>
+                  <br />
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                  >
+                    <button
+                      className="euiLink euiLink--primary"
+                      disabled={false}
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read documentation"
+                        id="indexPatternManagement.createIndexPattern.documentation"
+                        values={Object {}}
+                      >
+                        <span>
+                          Read documentation
+                        </span>
+                      </FormattedMessage>
+                    </button>
+                  </EuiLink>
+                </p>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <div>
+              Test prompt
+            </div>
+          </div>
+        </div>
+      </EuiPageHeaderContent>
+    </header>
+  </EuiPageHeader>
 </Header>
 `;
 
@@ -146,100 +203,145 @@ exports[`Header should render normally 1`] = `
   }
   indexPatternName="test index pattern"
 >
-  <div>
-    <EuiTitle>
-      <h1
-        className="euiTitle euiTitle--medium"
-      >
+  <EuiPageHeader
+    bottomBorder={true}
+    pageTitle={
+      <React.Fragment>
         Create test index pattern
-      </h1>
-    </EuiTitle>
-    <EuiSpacer
-      size="s"
+      </React.Fragment>
+    }
+  >
+    <header
+      className="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
     >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiText>
-      <div
-        className="euiText euiText--medium"
+      <EuiPageHeaderContent
+        pageTitle={
+          <React.Fragment>
+            Create test index pattern
+          </React.Fragment>
+        }
+        responsive={true}
       >
-        <p>
-          <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
-            id="indexPatternManagement.createIndexPattern.description"
-            values={
-              Object {
-                "multiple": <strong>
-                  multiple
-                </strong>,
-                "single": <EuiCode>
-                  filebeat-4-3-22
-                </EuiCode>,
-                "star": <EuiCode>
-                  filebeat-*
-                </EuiCode>,
-              }
-            }
+        <div
+          className="euiPageHeaderContent"
+        >
+          <EuiFlexGroup
+            alignItems="flexStart"
+            className="euiPageHeaderContent__top"
+            gutterSize="l"
+            responsive={true}
           >
-            <span>
-              An index pattern can match a single source, for example, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-4-3-22
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              , or 
-              <strong>
-                multiple
-              </strong>
-               data sources, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-*
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              .
-            </span>
-          </FormattedMessage>
-          <br />
-          <EuiLink
-            external={true}
-            target="_blank"
-          >
-            <button
-              className="euiLink euiLink--primary"
-              disabled={false}
-              type="button"
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
             >
-              <FormattedMessage
-                defaultMessage="Read documentation"
-                id="indexPatternManagement.createIndexPattern.documentation"
-                values={Object {}}
+              <EuiFlexItem>
+                <div
+                  className="euiFlexItem"
+                >
+                  <EuiTitle
+                    size="l"
+                  >
+                    <h1
+                      className="euiTitle euiTitle--large"
+                    >
+                      Create test index pattern
+                    </h1>
+                  </EuiTitle>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+          <div
+            className="euiPageHeaderContent__bottom"
+          >
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
               >
-                <span>
-                  Read documentation
-                </span>
-              </FormattedMessage>
-            </button>
-          </EuiLink>
-        </p>
-      </div>
-    </EuiText>
-  </div>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+                    id="indexPatternManagement.createIndexPattern.description"
+                    values={
+                      Object {
+                        "multiple": <strong>
+                          multiple
+                        </strong>,
+                        "single": <EuiCode>
+                          filebeat-4-3-22
+                        </EuiCode>,
+                        "star": <EuiCode>
+                          filebeat-*
+                        </EuiCode>,
+                      }
+                    }
+                  >
+                    <span>
+                      An index pattern can match a single source, for example, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-4-3-22
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      , or 
+                      <strong>
+                        multiple
+                      </strong>
+                       data sources, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-*
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      .
+                    </span>
+                  </FormattedMessage>
+                  <br />
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                  >
+                    <button
+                      className="euiLink euiLink--primary"
+                      disabled={false}
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read documentation"
+                        id="indexPatternManagement.createIndexPattern.documentation"
+                        values={Object {}}
+                      >
+                        <span>
+                          Read documentation
+                        </span>
+                      </FormattedMessage>
+                    </button>
+                  </EuiLink>
+                </p>
+              </div>
+            </EuiText>
+          </div>
+        </div>
+      </EuiPageHeaderContent>
+    </header>
+  </EuiPageHeader>
 </Header>
 `;
 
@@ -254,99 +356,144 @@ exports[`Header should render without including system indices 1`] = `
   }
   indexPatternName="test index pattern"
 >
-  <div>
-    <EuiTitle>
-      <h1
-        className="euiTitle euiTitle--medium"
-      >
+  <EuiPageHeader
+    bottomBorder={true}
+    pageTitle={
+      <React.Fragment>
         Create test index pattern
-      </h1>
-    </EuiTitle>
-    <EuiSpacer
-      size="s"
+      </React.Fragment>
+    }
+  >
+    <header
+      className="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
     >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiText>
-      <div
-        className="euiText euiText--medium"
+      <EuiPageHeaderContent
+        pageTitle={
+          <React.Fragment>
+            Create test index pattern
+          </React.Fragment>
+        }
+        responsive={true}
       >
-        <p>
-          <FormattedMessage
-            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
-            id="indexPatternManagement.createIndexPattern.description"
-            values={
-              Object {
-                "multiple": <strong>
-                  multiple
-                </strong>,
-                "single": <EuiCode>
-                  filebeat-4-3-22
-                </EuiCode>,
-                "star": <EuiCode>
-                  filebeat-*
-                </EuiCode>,
-              }
-            }
+        <div
+          className="euiPageHeaderContent"
+        >
+          <EuiFlexGroup
+            alignItems="flexStart"
+            className="euiPageHeaderContent__top"
+            gutterSize="l"
+            responsive={true}
           >
-            <span>
-              An index pattern can match a single source, for example, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-4-3-22
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              , or 
-              <strong>
-                multiple
-              </strong>
-               data sources, 
-              <EuiCode>
-                <EuiCodeBlockImpl
-                  inline={true}
-                >
-                  <span>
-                    <code>
-                      filebeat-*
-                    </code>
-                  </span>
-                </EuiCodeBlockImpl>
-              </EuiCode>
-              .
-            </span>
-          </FormattedMessage>
-          <br />
-          <EuiLink
-            external={true}
-            target="_blank"
-          >
-            <button
-              className="euiLink euiLink--primary"
-              disabled={false}
-              type="button"
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
             >
-              <FormattedMessage
-                defaultMessage="Read documentation"
-                id="indexPatternManagement.createIndexPattern.documentation"
-                values={Object {}}
+              <EuiFlexItem>
+                <div
+                  className="euiFlexItem"
+                >
+                  <EuiTitle
+                    size="l"
+                  >
+                    <h1
+                      className="euiTitle euiTitle--large"
+                    >
+                      Create test index pattern
+                    </h1>
+                  </EuiTitle>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+          <div
+            className="euiPageHeaderContent__bottom"
+          >
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
               >
-                <span>
-                  Read documentation
-                </span>
-              </FormattedMessage>
-            </button>
-          </EuiLink>
-        </p>
-      </div>
-    </EuiText>
-  </div>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+                    id="indexPatternManagement.createIndexPattern.description"
+                    values={
+                      Object {
+                        "multiple": <strong>
+                          multiple
+                        </strong>,
+                        "single": <EuiCode>
+                          filebeat-4-3-22
+                        </EuiCode>,
+                        "star": <EuiCode>
+                          filebeat-*
+                        </EuiCode>,
+                      }
+                    }
+                  >
+                    <span>
+                      An index pattern can match a single source, for example, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-4-3-22
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      , or 
+                      <strong>
+                        multiple
+                      </strong>
+                       data sources, 
+                      <EuiCode>
+                        <EuiCodeBlockImpl
+                          inline={true}
+                        >
+                          <span>
+                            <code>
+                              filebeat-*
+                            </code>
+                          </span>
+                        </EuiCodeBlockImpl>
+                      </EuiCode>
+                      .
+                    </span>
+                  </FormattedMessage>
+                  <br />
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                  >
+                    <button
+                      className="euiLink euiLink--primary"
+                      disabled={false}
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read documentation"
+                        id="indexPatternManagement.createIndexPattern.documentation"
+                        values={Object {}}
+                      >
+                        <span>
+                          Read documentation
+                        </span>
+                      </FormattedMessage>
+                    </button>
+                  </EuiLink>
+                </p>
+              </div>
+            </EuiText>
+          </div>
+        </div>
+      </EuiPageHeaderContent>
+    </header>
+  </EuiPageHeader>
 </Header>
 `;

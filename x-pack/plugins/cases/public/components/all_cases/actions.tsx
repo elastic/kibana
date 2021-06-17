@@ -80,9 +80,9 @@ export const getActions = ({
     makeInProgressAction,
     closeCaseAction,
     {
-      description: i18n.DELETE_CASE,
+      description: i18n.DELETE_CASE(),
       icon: 'trash',
-      name: i18n.DELETE_CASE,
+      name: i18n.DELETE_CASE(),
       onClick: deleteCaseOnClick,
       type: 'icon',
       'data-test-subj': 'action-delete',

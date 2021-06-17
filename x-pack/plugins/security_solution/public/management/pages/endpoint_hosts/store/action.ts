@@ -11,6 +11,7 @@ import {
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
+  ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -137,15 +138,29 @@ export interface ServerFailedToReturnEndpointsTotal {
 }
 
 export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
-  payload: HostIsolationRequestBody;
+  payload: {
+    type: ISOLATION_ACTIONS;
+    data: HostIsolationRequestBody;
+  };
 };
 
 export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
 };
 
+export interface AppRequestedEndpointActivityLog {
+  type: 'appRequestedEndpointActivityLog';
+  payload: {
+    page: number;
+    pageSize: number;
+  };
+}
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
-  payload: EndpointState['endpointDetails']['activityLog'];
+  payload: EndpointState['endpointDetails']['activityLog']['logData'];
+};
+
+export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
+  payload: EndpointState['endpointPendingActions'];
 };
 
 export type EndpointAction =
@@ -153,6 +168,7 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | AppRequestedEndpointActivityLog
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
@@ -174,4 +190,5 @@ export type EndpointAction =
   | ServerFailedToReturnAgenstWithEndpointsTotal
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
-  | EndpointIsolationRequestStateChange;
+  | EndpointIsolationRequestStateChange
+  | EndpointPendingActionsStateChanged;
