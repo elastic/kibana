@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.valueOf).to.eql(1);
               const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {

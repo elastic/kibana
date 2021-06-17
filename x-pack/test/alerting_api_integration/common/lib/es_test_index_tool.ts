@@ -93,10 +93,12 @@ export class ESTestIndexTool {
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {
     return await this.retry.try(async () => {
       const searchResult = await this.search(source, reference);
-      if (searchResult.hits.total.value < numDocs) {
-        throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
+      if (searchResult.body.hits.total.valueOf < numDocs) {
+        throw new Error(
+          `Expected ${numDocs} but received ${searchResult.body.hits.total.valueOf}.`
+        );
       }
-      return searchResult.hits.hits;
+      return searchResult.body.hits.hits;
     });
   }
 }
