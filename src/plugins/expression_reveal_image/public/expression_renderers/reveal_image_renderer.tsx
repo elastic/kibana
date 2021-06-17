@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { getRendererStrings } from '../../common/i18n';
-import { RevealImageRendererConfig } from './types';
+import { RevealImageRendererConfig } from '../../common/types';
 import { RendererWrapper } from '../components/renderer_wrapper';
 import './reveal_image.scss';
 

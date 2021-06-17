@@ -130,11 +130,6 @@ export class CanvasPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    plugins.expressionRevealImage?.registerExpression(({ renderers, uiViews }) => {
-      canvasApi.addRenderers(renderers);
-      canvasApi.addViewUIs(uiViews);
-    });
-
     canvasApi.addArgumentUIs(async () => {
       // @ts-expect-error
       const { argTypeSpecs } = await import('./expression_types/arg_types');

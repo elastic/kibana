@@ -10,7 +10,6 @@ import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
 import { revealImageFunction } from './expression_functions';
 import { revealImageRenderer } from './expression_renderers';
-import { ExpressionService, ExpressionServiceSetup, ExpressionServiceStart } from './services';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -20,8 +19,8 @@ interface StartDeps {
   expression: ExpressionsStart;
 }
 
-export type ExpressionRevealImagePluginSetup = ExpressionServiceSetup;
-export type ExpressionRevealImagePluginStart = ExpressionServiceStart;
+export type ExpressionRevealImagePluginSetup = void;
+export type ExpressionRevealImagePluginStart = void;
 
 export class ExpressionRevealImagePlugin
   implements
@@ -31,20 +30,12 @@ export class ExpressionRevealImagePlugin
       SetupDeps,
       StartDeps
     > {
-  private readonly expressionService: ExpressionService = new ExpressionService();
-
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
     expressions.registerRenderer(revealImageRenderer);
-
-    const setup = { ...this.expressionService.setup() };
-
-    return Object.freeze(setup);
   }
 
   public start(core: CoreStart): ExpressionRevealImagePluginStart {}
 
-  public stop() {
-    this.expressionService.stop();
-  }
+  public stop() {}
 }
