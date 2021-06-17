@@ -13,6 +13,11 @@ import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
+import {
+  AggregationsFiltersAggregate,
+  AggregationsFiltersBucketItem,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/api/types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -29,6 +34,7 @@ import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { coreUsageStatsType } from './core_usage_stats';
+import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
@@ -98,11 +104,21 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     this.stop$ = new Subject();
   }
 
-  private async getSavedObjectIndicesUsageData(
+  private async getSavedObjectUsageData(
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): Promise<CoreServicesUsageData['savedObjects']> {
-    const indices = await Promise.all(
+    return {
+      indices: await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch),
+      legacyUrlAliases: await this.getSavedObjectAliasUsageData(elasticsearch),
+    };
+  }
+
+  private async getSavedObjectIndicesUsageData(
+    savedObjects: SavedObjectsServiceStart,
+    elasticsearch: ElasticsearchServiceStart
+  ) {
+    return Promise.all(
       Array.from(
         savedObjects
           .getTypeRegistry()
@@ -138,10 +154,42 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           });
       })
     );
+  }
 
-    return {
-      indices,
-    };
+  private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
+    const { body: resp } = await elasticsearch.client.asInternalUser.search({
+      index: this.kibanaConfig!.index,
+      body: {
+        track_total_hits: true,
+        query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
+        aggs: {
+          aliases: {
+            filters: {
+              filters: {
+                disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                active: {
+                  bool: {
+                    must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                    must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+      },
+    });
+
+    const { hits, aggregations } = resp;
+    const totalCount = (hits.total as SearchTotalHits).value;
+    const aggregate = aggregations!.aliases as AggregationsFiltersAggregate;
+    const buckets = aggregate.buckets as Record<string, AggregationsFiltersBucketItem>;
+    const disabledCount = buckets.disabled.doc_count as number;
+    const activeCount = buckets.active.doc_count as number;
+    const inactiveCount = totalCount - disabledCount - activeCount;
+
+    return { totalCount, disabledCount, activeCount, inactiveCount };
   }
 
   private async getCoreUsageData(
@@ -164,7 +212,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     }
 
     const es = this.elasticsearchConfig;
-    const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
+    const soUsageData = await this.getSavedObjectUsageData(savedObjects, elasticsearch);
     const coreUsageStatsData = await this.coreUsageStatsClient.getUsageStats();
 
     const http = this.httpConfig;

@@ -377,6 +377,34 @@ export function getCoreUsageCollector(
               },
             },
           },
+          legacyUrlAliases: {
+            inactiveCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are inactive; they are not disabled, but they have not been resolved.',
+              },
+            },
+            activeCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are active; they are not disabled, and they have been resolved at least once.',
+              },
+            },
+            disabledCount: {
+              type: 'long',
+              _meta: {
+                description: 'Count of legacy URL aliases that are disabled.',
+              },
+            },
+            totalCount: {
+              type: 'long',
+              _meta: {
+                description: 'Total count of legacy URL aliases.',
+              },
+            },
+          },
         },
       },
       // Saved Objects Client APIs
