@@ -82,7 +82,7 @@ export const derivativeOperation: OperationDefinition<
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

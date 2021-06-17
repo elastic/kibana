@@ -35,6 +35,7 @@ const defaultProps = {
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {

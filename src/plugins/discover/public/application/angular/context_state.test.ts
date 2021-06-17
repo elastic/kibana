@@ -23,7 +23,7 @@ describe('Test Discover Context State', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      defaultStepSize: '4',
+      defaultSize: 4,
       timeFieldName: 'time',
       history,
       uiSettings: {
