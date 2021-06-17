@@ -25,6 +25,7 @@ import {
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
 import {
+  APP_WRAPPER_CLASS,
   PageLoading,
   PageError,
   attemptToURIDecode,
@@ -130,6 +131,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   const renderHeader = () => (
+    // flex-grow: 0 is needed here because the parent element is a flex column and the header would otherwise expand.
     <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
       <EuiFlexItem grow={true}>
         <EuiText color="subdued">
@@ -308,12 +310,8 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   }
 
-  // The inline styles below are required to center the loading and error states, above.
   return (
-    <div
-      data-test-subj="templateList"
-      style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
-    >
+    <div data-test-subj="templateList" className={APP_WRAPPER_CLASS}>
       {content}
     </div>
   );
