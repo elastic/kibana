@@ -8,9 +8,8 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { getRendererStrings } from '../../common/i18n';
-import { RendererHandlers } from '../../common/types';
 import { RevealImageRendererConfig } from './types';
 import { RendererWrapper } from '../components/renderer_wrapper';
 import './reveal_image.scss';
@@ -27,7 +26,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
   render: async (
     domNode: HTMLElement,
     config: RevealImageRendererConfig,
-    handlers: RendererHandlers
+    handlers: IInterpreterRenderHandlers
   ) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);

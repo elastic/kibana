@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 export * from './expression_functions';
-export * from './expression_renderers';
 export * from './elements';
 export * from './ui_views';
 export * from './dict';

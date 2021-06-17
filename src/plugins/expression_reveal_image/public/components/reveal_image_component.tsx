@@ -7,13 +7,13 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { NodeDimensions, RevealImageRendererConfig, Origin } from '../expression_renderers/types';
-import { RendererHandlers } from '../../common/types';
 import { isValidUrl } from '../../common/lib/url';
 import { elasticOutline } from '../../common/lib/elastic_outline';
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
-  handlers: RendererHandlers;
+  handlers: IInterpreterRenderHandlers;
   parentNode: HTMLElement;
 }
 
@@ -47,7 +47,7 @@ function RevealImageComponent({
   parentNode.className = 'revealImage';
 
   // set up the overlay image
-  const onLoad = useCallback(() => {
+  const updateImageView = useCallback(() => {
     if (imgRef.current) {
       setDimensions({
         height: imgRef.current.naturalHeight,
@@ -60,11 +60,11 @@ function RevealImageComponent({
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    handlers.onResize?.(onLoad);
+    handlers.event({ name: 'onResize', data: updateImageView });
     return () => {
-      handlers.destroy?.();
+      handlers.event({ name: 'destroy' });
     };
-  }, [onLoad, handlers]);
+  }, [handlers, updateImageView]);
 
   function getClipPath(percentParam: number, originParam: Origin = 'bottom') {
     const directions: Record<Origin, number> = { bottom: 0, left: 1, top: 2, right: 3 };
@@ -120,7 +120,7 @@ function RevealImageComponent({
     <div className="revealImageAligner" style={alignerStyles}>
       <img
         ref={imgRef}
-        onLoad={onLoad}
+        onLoad={updateImageView}
         className="revealImage__image"
         src={imgSrc ?? ''}
         alt=""
