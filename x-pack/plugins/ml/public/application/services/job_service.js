@@ -91,24 +91,6 @@ class JobService {
     };
   }
 
-  getBlankJob() {
-    return {
-      job_id: '',
-      description: '',
-      groups: [],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [],
-      },
-      data_description: {
-        time_field: '',
-        time_format: '', // 'epoch',
-        format: 'xcontent',
-      },
-    };
-  }
-
   loadJobs() {
     return new Promise((resolve, reject) => {
       jobs = [];
