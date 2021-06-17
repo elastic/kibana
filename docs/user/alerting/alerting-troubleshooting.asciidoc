@@ -13,8 +13,8 @@ If your problem isn’t described here, please review open issues in the followi
 Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
-[[rule-fails-to-decrypt-api-key]]
-=== Failing to decrypt apiKey
+[[rule-cannot-decrypt-api-key]]
+=== Rule cannot decrypt apiKey
 
 *Problem*:
 
@@ -22,11 +22,21 @@ The rule fails to execute and has an `Unable to decrypt attribute "apiKey"` erro
 
 *Solution*:
 
-This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value changed since creating the rule. Depending on the scenario, there are different ways to solve this problem:
+This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value used to create the rule does not match the value used during rule execution. Depending on the scenario, there are different ways to solve this problem:
 
-* Suppose the value in `xpack.encryptedSavedObjects.encryptionKey` was manually changed, and the previous encryption key is still known. In that case, any previous encryption key needs to be part of the <decryption only key, encryption-key-rotation>.
-* Suppose another {kib} instance with a different encryption key connects to the cluster. In that case, it probably created a rule with a different encryption key. Ensuring the encryption keys between all the {kib} instances are the same is necessary, and setting <decryption only keys, encryption-key-rotation> for previously used encryption keys.
-* If other scenarios don't apply, generating a new API key for the rule by disabling/enabling the rule can solve this problem.
+[cols="2*<"]
+|===
+
+| If the value in `xpack.encryptedSavedObjects.encryptionKey` was manually changed, and the previous encryption key is still known.
+| Ensure any previous encryption key is part of the <<encryption-key-rotation, decryption only key>>.
+
+| If another {kib} instance with a different encryption key connects to the cluster.
+| It might be trying to run the rule using a different encryption key than what the rule was created with. Ensure the encryption keys between all the {kib} instances are the same is necessary, and setting <<encryption-key-rotation, decryption only keys>> for previously used encryption keys.
+
+| If other scenarios don't apply.
+| Generate a new API key for the rule by disabling/enabling the rule.
+
+|===
 
 [float]
 [[rules-small-check-interval-run-late]]
