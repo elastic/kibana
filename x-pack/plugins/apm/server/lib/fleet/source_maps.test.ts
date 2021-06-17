@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import {
   ArtifactSourceMap,
   getPackagePolicyWithSourceMap,
-  updateSourceMapsOnFleetPolicies,
-  FleetPluginStart,
 } from './source_maps';
 
 const packagePolicy = {
