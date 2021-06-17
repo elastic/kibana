@@ -24,6 +24,7 @@ import { progressGauge } from './progress_gauge';
 import { progressSemicircle } from './progress_semicircle';
 import { progressWheel } from './progress_wheel';
 import { repeatImage } from './repeat_image';
+import { revealImage } from './reveal_image';
 import { shape } from './shape';
 import { table } from './table';
 import { timeFilter } from './time_filter';
@@ -52,6 +53,7 @@ const elementSpecs = [
   progressSemicircle,
   progressWheel,
   repeatImage,
+  revealImage,
   shape,
   table,
   timeFilter,
