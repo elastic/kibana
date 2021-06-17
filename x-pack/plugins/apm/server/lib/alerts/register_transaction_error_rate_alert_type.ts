@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerting/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -52,7 +61,13 @@ export function registerTransactionErrorRateAlertType({
   });
 
   alerting.registerType(
-    createLifecycleRuleType({
+    createLifecycleRuleType<
+      TypeOf<typeof paramsSchema>,
+      AlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext,
+      ThresholdMetActionGroupId
+    >({
       id: AlertType.TransactionErrorRate,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

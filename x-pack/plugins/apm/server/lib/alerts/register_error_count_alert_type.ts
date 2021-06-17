@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import { take } from 'rxjs/operators';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerting/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
@@ -49,7 +58,13 @@ export function registerErrorCountAlertType({
   });
 
   alerting.registerType(
-    createLifecycleRuleType({
+    createLifecycleRuleType<
+      TypeOf<typeof paramsSchema>,
+      AlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext,
+      ThresholdMetActionGroupId
+    >({
       id: AlertType.ErrorCount,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

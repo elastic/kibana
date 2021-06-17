@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { compact } from 'lodash';
-import { ESSearchResponse } from 'typings/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import { compact } from 'lodash';
+import { ESSearchResponse } from 'typings/elasticsearch';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerting/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
   PROCESSOR_EVENT,
@@ -24,18 +35,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { KibanaRequest } from '../../../../../../src/core/server';
-import {
-  AlertType,
-  ALERT_TYPES_CONFIG,
-  ANOMALY_ALERT_SEVERITY_TYPES,
-} from '../../../common/alert_types';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -66,7 +72,13 @@ export function registerTransactionDurationAnomalyAlertType({
   });
 
   alerting.registerType(
-    createLifecycleRuleType({
+    createLifecycleRuleType<
+      TypeOf<typeof paramsSchema>,
+      AlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext,
+      ThresholdMetActionGroupId
+    >({
       id: AlertType.TransactionDurationAnomaly,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

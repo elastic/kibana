@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerting/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -57,7 +66,13 @@ export function registerTransactionDurationAlertType({
     logger,
   });
 
-  const type = createLifecycleRuleType({
+  const type = createLifecycleRuleType<
+    TypeOf<typeof paramsSchema>,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    ThresholdMetActionGroupId
+  >({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
