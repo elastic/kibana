@@ -18,6 +18,7 @@ import { ReportBreakdowns } from './columns/report_breakdowns';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
+import { DEVICE_DISTRIBUTION_LABEL } from '../configurations/constants/labels';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
@@ -32,7 +33,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   mobile: [
     { id: 'kpi', label: 'KPI over time' },
     { id: 'dist', label: 'Performance distribution' },
-    { id: 'mdd', label: 'Device distribution' },
+    { id: 'mdd', label: DEVICE_DISTRIBUTION_LABEL },
   ],
   apm: [],
   infra_logs: [],

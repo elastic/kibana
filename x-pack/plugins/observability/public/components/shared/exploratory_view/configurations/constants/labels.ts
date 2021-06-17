@@ -176,6 +176,13 @@ export const CORE_WEB_VITALS_LABEL = i18n.translate(
   }
 );
 
+export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.deviceDistribution',
+  {
+    defaultMessage: 'Device distribution',
+  }
+);
+
 export const MOBILE_RESPONSE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobileReponse',
   {
