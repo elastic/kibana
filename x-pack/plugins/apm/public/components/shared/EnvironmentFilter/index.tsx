@@ -13,7 +13,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-  omitEsFieldValue,
 } from '../../../../common/environment_filter_values';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -52,9 +51,9 @@ function getOptions(environments: string[]) {
     }));
 
   return [
-    omitEsFieldValue(ENVIRONMENT_ALL),
+    ENVIRONMENT_ALL,
     ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [omitEsFieldValue(ENVIRONMENT_NOT_DEFINED)]
+      ? [ENVIRONMENT_NOT_DEFINED]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions,

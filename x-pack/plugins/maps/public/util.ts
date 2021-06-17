@@ -11,7 +11,6 @@ import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
-
 import fetch from 'node-fetch';
 import {
   GIS_API_PATH,

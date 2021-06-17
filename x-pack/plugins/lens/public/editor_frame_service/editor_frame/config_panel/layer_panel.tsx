@@ -70,6 +70,9 @@ export function LayerPanel(
     updateDatasource,
     toggleFullscreen,
     isFullscreen,
+    updateAll,
+    updateDatasourceAsync,
+    visualizationState,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
@@ -114,7 +117,11 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
+  const { groups } = useMemo(
+    () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [layerDatasourceConfigProps.frame, layerDatasourceDropProps, activeVisualization]
+  );
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
@@ -203,6 +210,58 @@ export function LayerPanel(
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);
+
+  const updateDataLayerState = useCallback(
+    (newState: unknown, { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}) => {
+      if (!activeGroup || !activeId) {
+        return;
+      }
+      if (allAccessors.includes(activeId)) {
+        if (isDimensionComplete) {
+          updateDatasourceAsync(datasourceId, newState);
+        } else {
+          // The datasource can indicate that the previously-valid column is no longer
+          // complete, which clears the visualization. This keeps the flyout open and reuses
+          // the previous columnId
+          updateAll(
+            datasourceId,
+            newState,
+            activeVisualization.removeDimension({
+              layerId,
+              columnId: activeId,
+              prevState: visualizationState,
+            })
+          );
+        }
+      } else if (isDimensionComplete) {
+        updateAll(
+          datasourceId,
+          newState,
+          activeVisualization.setDimension({
+            layerId,
+            groupId: activeGroup.groupId,
+            columnId: activeId,
+            prevState: visualizationState,
+          })
+        );
+        setActiveDimension({ ...activeDimension, isNew: false });
+      } else {
+        updateDatasourceAsync(datasourceId, newState);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeDimension,
+      activeGroup,
+      activeId,
+      activeVisualization,
+      datasourceId,
+      layerId,
+      updateAll,
+      updateDatasourceAsync,
+      visualizationState,
+    ]
+  );
 
   return (
     <>
@@ -460,43 +519,7 @@ export function LayerPanel(
                   dimensionGroups: groups,
                   toggleFullscreen,
                   isFullscreen,
-                  setState: (
-                    newState: unknown,
-                    { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}
-                  ) => {
-                    if (allAccessors.includes(activeId)) {
-                      if (isDimensionComplete) {
-                        props.updateDatasourceAsync(datasourceId, newState);
-                      } else {
-                        // The datasource can indicate that the previously-valid column is no longer
-                        // complete, which clears the visualization. This keeps the flyout open and reuses
-                        // the previous columnId
-                        props.updateAll(
-                          datasourceId,
-                          newState,
-                          activeVisualization.removeDimension({
-                            layerId,
-                            columnId: activeId,
-                            prevState: props.visualizationState,
-                          })
-                        );
-                      }
-                    } else if (isDimensionComplete) {
-                      props.updateAll(
-                        datasourceId,
-                        newState,
-                        activeVisualization.setDimension({
-                          layerId,
-                          groupId: activeGroup.groupId,
-                          columnId: activeId,
-                          prevState: props.visualizationState,
-                        })
-                      );
-                      setActiveDimension({ ...activeDimension, isNew: false });
-                    } else {
-                      props.updateDatasourceAsync(datasourceId, newState);
-                    }
-                  },
+                  setState: updateDataLayerState,
                 }}
               />
             )}

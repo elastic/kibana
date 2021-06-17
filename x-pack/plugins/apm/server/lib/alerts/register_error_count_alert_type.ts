@@ -12,8 +12,11 @@ import {
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -103,22 +106,12 @@ export function registerErrorCountAlertType({
                 multi_terms: {
                   terms: [
                     { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT, missing: '' },
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                      missing: ENVIRONMENT_NOT_DEFINED.value,
+                    },
                   ],
                   size: 10000,
-                },
-                aggs: {
-                  latest: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: SERVICE_NAME },
-                        { field: SERVICE_ENVIRONMENT },
-                      ] as const),
-                      sort: {
-                        '@timestamp': 'desc' as const,
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -132,13 +125,8 @@ export function registerErrorCountAlertType({
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
-            const latest = bucket.latest.top[0].metrics;
-
-            return {
-              serviceName: latest['service.name'] as string,
-              environment: latest['service.environment'] as string | undefined,
-              errorCount: bucket.doc_count,
-            };
+            const [serviceName, environment] = bucket.key;
+            return { serviceName, environment, errorCount: bucket.doc_count };
           }) ?? [];
 
         errorCountResults
@@ -153,9 +141,7 @@ export function registerErrorCountAlertType({
                   .join('_'),
                 fields: {
                   [SERVICE_NAME]: serviceName,
-                  ...(environment
-                    ? { [SERVICE_ENVIRONMENT]: environment }
-                    : {}),
+                  ...getEnvironmentEsField(environment),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
@@ -163,7 +149,7 @@ export function registerErrorCountAlertType({
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
                 serviceName,
-                environment: environment || ENVIRONMENT_NOT_DEFINED.text,
+                environment: getEnvironmentLabel(environment),
                 threshold: alertParams.threshold,
                 triggerValue: errorCount,
                 interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
