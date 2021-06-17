@@ -11,7 +11,7 @@ describe('xpack.cloud config', () => {
   describe('full_story', () => {
     it('allows orgId when enabled: false', () => {
       expect(() =>
-        config.schema.validate({ full_story: { enabled: false, orgId: 'asdf' } })
+        config.schema.validate({ full_story: { enabled: false, org_id: 'asdf' } })
       ).not.toThrow();
     });
 
@@ -19,18 +19,18 @@ describe('xpack.cloud config', () => {
       expect(() =>
         config.schema.validate({ full_story: { enabled: true } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[full_story.orgId]: expected value of type [string] but got [undefined]"`
+        `"[full_story.org_id]: expected value of type [string] but got [undefined]"`
       );
       expect(() =>
-        config.schema.validate({ full_story: { enabled: true, orgId: '' } })
+        config.schema.validate({ full_story: { enabled: true, org_id: '' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[full_story.orgId]: value has length [0] but it must have a minimum length of [1]."`
+        `"[full_story.org_id]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
     it('accepts orgId when enabled: true', () => {
       expect(() =>
-        config.schema.validate({ full_story: { enabled: true, orgId: 'asdf' } })
+        config.schema.validate({ full_story: { enabled: true, org_id: 'asdf' } })
       ).not.toThrow();
     });
   });

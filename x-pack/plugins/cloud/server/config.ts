@@ -20,7 +20,7 @@ const apmConfigSchema = schema.object({
 
 const fullStoryConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  orgId: schema.conditional(
+  org_id: schema.conditional(
     schema.siblingRef('enabled'),
     true,
     schema.string({ minLength: 1 }),
