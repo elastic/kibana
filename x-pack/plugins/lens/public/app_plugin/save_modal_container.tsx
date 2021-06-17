@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { ChromeStart, NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { partition, uniq } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { partition } from 'lodash';
 import { SaveModal } from './save_modal';
 import { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
@@ -86,8 +86,8 @@ export function SaveModalContainer({
           chrome,
           notifications,
           attributeService,
-        }).then((result) => {
-          if (result) setLastKnownDoc(result.doc);
+        }).then((doc) => {
+          if (doc) setLastKnownDoc(doc);
         });
       }
     }
@@ -334,7 +334,6 @@ export const runSaveLensVisualization = async (
 
     return {
       persistedDoc: newDoc,
-      lastKnownDoc: newDoc,
       isLinkedToOriginatingApp: false,
       title: newDoc.title,
       description: newDoc.description,
@@ -377,7 +376,7 @@ export const getLastKnownDoc = async ({
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
   chrome: ChromeStart;
-}): Promise<{ doc: Document; indexPatterns: string[] } | undefined> => {
+}): Promise<Document | undefined> => {
   let doc: Document;
 
   try {
@@ -396,19 +395,12 @@ export const getLastKnownDoc = async ({
         initialInput.savedObjectId
       );
     }
-    const indexPatternIds = uniq(
-      doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-    );
-    // const { indexPatterns } = await getAllIndexPatterns(indexPatternIds, data.indexPatterns);
 
     // Don't overwrite any pinned filters
     data.query.filterManager.setAppFilters(
       injectFilterReferences(doc.state.filters, doc.references)
     );
-    return {
-      doc,
-      indexPatterns: indexPatternIds,
-    };
+    return doc;
   } catch (e) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.lens.app.docLoadingError', {

@@ -80,7 +80,6 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
-  title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   isFullscreen: boolean;
@@ -135,7 +134,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
-  title,
   visualizeTriggerFieldContext,
   suggestionForDraggedField,
   isFullscreen,
@@ -404,7 +402,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   return (
     <WorkspacePanelWrapper
-      title={title}
       framePublicAPI={framePublicAPI}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
@@ -462,6 +459,8 @@ export const VisualizationWrapper = ({
       framePublicAPI.filters,
     ]
   );
+
+
 
   const dispatchLens = useLensDispatch();
 

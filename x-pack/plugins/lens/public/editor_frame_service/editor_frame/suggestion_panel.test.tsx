@@ -84,7 +84,6 @@ describe('suggestion_panel', () => {
       visualizationState: {},
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
-      plugins: { data: dataPluginMock.createStartContract() },
     };
   });
 

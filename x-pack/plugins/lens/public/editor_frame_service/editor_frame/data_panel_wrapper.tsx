@@ -15,7 +15,14 @@ import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { switchDatasource, useLensDispatch, updateDatasourceState } from '../../state_management';
+import {
+  switchDatasource,
+  useLensDispatch,
+  updateDatasourceState,
+  LensState,
+  useLensSelector,
+} from '../../state_management';
+import { createSelector } from '@reduxjs/toolkit';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -24,17 +31,24 @@ interface DataPanelWrapperProps {
   datasourceIsLoading: boolean;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
-  query: Query;
-  dateRange: FramePublicAPI['dateRange'];
-  filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
   plugins: { uiActions: UiActionsStart };
 }
 
+const getExternals = createSelector(
+  (state: LensState) => state.app,
+  ({ resolvedDateRange, query, filters }) => ({
+    dateRange: resolvedDateRange,
+    query,
+    filters,
+  })
+);
+
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const { activeDatasource } = props;
 
+  const { filters, query, dateRange } = useLensSelector(getExternals);
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
     return (updater) => {
@@ -53,9 +67,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     state: props.datasourceState,
     setState: setDatasourceState,
     core: props.core,
-    query: props.query,
-    dateRange: props.dateRange,
-    filters: props.filters,
+    filters,
+    query,
+    dateRange,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,

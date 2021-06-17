@@ -25,7 +25,6 @@ import {
   FilterManager,
   IFieldType,
   IIndexPattern,
-  IndexPattern,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
@@ -181,13 +180,14 @@ describe('Lens App', () => {
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
-  it('displays errors from the frame in a toast', async () => {
-    const { instance, frame, services } = await mountWith({});
-    const onError = frame.EditorFrameContainer.mock.calls[0][0].onError;
-    onError({ message: 'error' });
-    instance.update();
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
-  });
+  //move to mounter
+  // it('displays errors from the frame in a toast', async () => {
+  //   const { instance, frame, services } = await mountWith({});
+  //   const onError = frame.EditorFrameContainer.mock.calls[0][0].onError;
+  //   onError({ message: 'error' });
+  //   instance.update();
+  //   expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+  // });
 
   describe('breadcrumbs', () => {
     const breadcrumbDocSavedObjectId = defaultSavedObjectId;
@@ -294,8 +294,6 @@ describe('Lens App', () => {
         lensStore.dispatch(
           setState({
             query: ('fake query' as unknown) as Query,
-
-            lastKnownDoc: document,
             persistedDoc: document,
           })
         );

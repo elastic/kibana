@@ -24,7 +24,13 @@ import { Visualization, FramePublicAPI, Datasource, VisualizationType } from '..
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
-import { useLensDispatch } from '../../../state_management';
+import {
+  updateLayer,
+  updateVisualizationState,
+  useLensDispatch,
+  useLensSelector,
+} from '../../../state_management';
+import { generateId } from '../../../id_generator/id_generator';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -99,6 +105,44 @@ function getCurrentVisualizationId(
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
+  const activeDatasourceId = useLensSelector((state) => state.app.activeDatasourceId);
+  const visualization = useLensSelector((state) => state.app.visualization);
+  const datasourceStates = useLensSelector((state) => state.app.datasourceStates);
+
+  function removeLayers(layerIds: string[]) {
+    const activeVisualization =
+      visualization.activeId && props.visualizationMap[visualization.activeId];
+      console.log('REMOVE LAYERS 79799')
+    if (activeVisualization && activeVisualization.removeLayer && visualization.state) {
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: activeVisualization.id,
+          updater: layerIds.reduce(
+            (acc, layerId) =>
+              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+            visualization.state
+          ),
+        })
+      );
+    }
+    layerIds.forEach((layerId) => {
+      const layerDatasourceId = Object.entries(props.datasourceMap).find(
+        ([datasourceId, datasource]) => {
+          return (
+            datasourceStates[datasourceId] &&
+            datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
+          );
+        }
+      )![0];
+      dispatchLens(
+        updateLayer({
+          layerId,
+          datasourceId: layerDatasourceId,
+          updater: props.datasourceMap[layerDatasourceId].removeLayer,
+        })
+      );
+    });
+  }
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
@@ -118,7 +162,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
     ) {
-      props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
+      removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
     }
   };
 
@@ -171,6 +215,20 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dataLoss = 'nothing';
     }
 
+    function addNewLayer() {
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%% yo');
+      const newLayerId = generateId();
+      dispatchLens(
+        updateLayer({
+          datasourceId: activeDatasourceId!,
+          layerId: newLayerId,
+          updater: props.datasourceMap[activeDatasourceId!].insertLayer,
+        })
+      );
+
+      return newLayerId;
+    }
+
     return {
       visualizationId,
       subVisualizationId,
@@ -179,13 +237,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         ? () =>
             switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI, topSuggestion.visualizationState)
+              newVisualization.initialize(addNewLayer, topSuggestion.visualizationState)
             )
         : () => {
             return switchVisType(
               subVisualizationId,
               newVisualization.initialize(
-                props.framePublicAPI,
+                addNewLayer,
                 props.visualizationId === newVisualization.id
                   ? props.visualizationState
                   : undefined,

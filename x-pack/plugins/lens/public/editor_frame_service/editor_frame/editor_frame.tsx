@@ -16,7 +16,6 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
-import { generateId } from '../../id_generator';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { createDatasourceLayers } from './state_helpers';
@@ -27,12 +26,8 @@ import {
   Suggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import {
-  useLensSelector,
-  useLensDispatch,
-  updateLayer,
-  updateVisualizationState,
-} from '../../state_management';
+import { useLensSelector, useLensDispatch, LensState } from '../../state_management';
+import { createSelector } from '@reduxjs/toolkit';
 
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
@@ -45,35 +40,47 @@ export interface EditorFrameProps {
   initialContext?: VisualizeFieldContext;
 }
 
-export function EditorFrame(props: EditorFrameProps) {
-  const lensState = useLensSelector((state) => state.app);
-  const {
-    filters,
+const getFrameApi = createSelector(
+  (state: LensState) => state.app,
+  ({ activeData, resolvedDateRange, query, filters, searchSessionId }) => ({
+    activeData,
+    dateRange: resolvedDateRange,
     query,
+    filters,
+    searchSessionId,
+  })
+);
+
+export function EditorFrame(props: EditorFrameProps) {
+  const frameApi = useLensSelector(getFrameApi);
+  const {
+    activeData,
     resolvedDateRange: dateRange,
+    query,
+    filters,
     searchSessionId,
     persistedDoc,
-    activeData,
-    title,
     activeDatasourceId,
     visualization,
     datasourceStates,
     stagedPreview,
     isFullscreenDatasource,
-  } = lensState;
+  } = useLensSelector((state) => state.app);
+
   const dispatchLens = useLensDispatch();
 
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
   );
-  const activeVisualization =
-    visualization.activeId && props.visualizationMap[visualization.activeId];
 
   const allLoaded = Object.values(datasourceStates).every(
     ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
   );
 
-  const datasourceLayers = createDatasourceLayers(props.datasourceMap, datasourceStates);
+  const datasourceLayers = React.useMemo(
+    () => createDatasourceLayers(props.datasourceMap, datasourceStates),
+    [props.datasourceMap, datasourceStates]
+  );
 
   const framePublicAPI: FramePublicAPI = useMemo(
     () => ({
@@ -157,9 +164,6 @@ export function EditorFrame(props: EditorFrameProps) {
               activeDatasourceId ? datasourceStates[activeDatasourceId].isLoading : true
             }
             core={props.core}
-            query={query}
-            dateRange={dateRange}
-            filters={filters}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
@@ -184,7 +188,6 @@ export function EditorFrame(props: EditorFrameProps) {
         workspacePanel={
           allLoaded && (
             <WorkspacePanel
-              title={title}
               activeDatasourceId={activeDatasourceId}
               activeVisualizationId={visualization.activeId}
               datasourceMap={props.datasourceMap}
@@ -214,7 +217,6 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationMap={props.visualizationMap}
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={stagedPreview}
-              plugins={props.plugins}
             />
           )
         }

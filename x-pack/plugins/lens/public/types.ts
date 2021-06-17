@@ -45,7 +45,6 @@ export interface PublicAPIProps<T> {
 }
 
 export interface EditorFrameProps {
-  onError: ErrorCallback;
   initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }
@@ -527,20 +526,10 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
-
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
   searchSessionId: string;
-
-  /**
-   * A map of all available palettes (keys being the ids).
-   */
-  availablePalettes: PaletteRegistry;
-
-  // Adds a new layer. This has a side effect of updating the datasource state
-  addNewLayer: () => string;
-  removeLayers: (layerIds: string[]) => void;
 }
 
 /**
@@ -588,7 +577,7 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: T, mainPalette?: PaletteOutput) => T;
+  initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 

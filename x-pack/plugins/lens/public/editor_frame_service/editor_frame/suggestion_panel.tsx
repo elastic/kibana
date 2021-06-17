@@ -59,7 +59,6 @@ export interface SuggestionPanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
-  plugins: { data: DataPublicPluginStart };
 }
 
 const PreviewRenderer = ({
@@ -177,7 +176,6 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
-  plugins,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
 

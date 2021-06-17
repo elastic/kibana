@@ -124,18 +124,11 @@ export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
 }
 
 export function createMockFramePublicAPI(): FrameMock {
-  const palette = createMockPaletteDefinition();
   return {
     datasourceLayers: {},
-    addNewLayer: jest.fn(() => ''),
-    removeLayers: jest.fn(),
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    availablePalettes: {
-      get: () => palette,
-      getAll: () => [palette],
-    },
     searchSessionId: 'sessionId',
   };
 }

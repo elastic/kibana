@@ -15,7 +15,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
-import { Provider } from 'react-redux';
+import { batch, Provider } from 'react-redux';
 import { isEqual } from 'lodash';
 import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -343,19 +343,17 @@ export function loadDocument(
             const activeVisualization =
               visualization.activeId && visualizationMap[visualization.activeId];
             if (visualization.state === null && activeVisualization) {
-              const initialVisualizationState = activeVisualization.initialize({
-                addNewLayer: () => {
-                  const newLayerId = generateId();
-                  lensStore.dispatch(
-                    updateLayer({
-                      datasourceId: activeDatasourceId!,
-                      layerId: newLayerId,
-                      updater: datasourceMap[activeDatasourceId!].insertLayer,
-                    })
-                  );
+              const initialVisualizationState = activeVisualization.initialize(() => {
+                const newLayerId = generateId();
+                lensStore.dispatch(
+                  updateLayer({
+                    datasourceId: activeDatasourceId!,
+                    layerId: newLayerId,
+                    updater: datasourceMap[activeDatasourceId!].insertLayer,
+                  })
+                );
 
-                  return newLayerId;
-                },
+                return newLayerId;
               });
               lensStore.dispatch(
                 updateVisualizationState({
@@ -381,9 +379,8 @@ export function loadDocument(
     chrome,
     notifications,
   }).then(
-    (newState) => {
-      if (newState) {
-        const { doc, indexPatterns } = newState;
+    (doc) => {
+      if (doc) {
         const currentSessionId = data.search.session.getSessionId();
         const datasourceStates: LensAppState['datasourceStates'] = {};
         Object.entries(doc.state.datasourceStates).forEach(([datasourceId, state]) => {
@@ -391,56 +388,51 @@ export function loadDocument(
         });
         const activeDatasourceId =
           getActiveDatasourceIdFromDoc(doc) || Object.keys(datasourceMap)[0] || null;
-
-        lensStore.dispatch(
-          setLoadedDocument({
-            query: doc.state.query,
-            lastKnownDoc: doc,
-            searchSessionId:
-              dashboardFeatureFlag.allowByValueEmbeddables &&
-              Boolean(embeddableEditorIncomingState?.originatingApp) &&
-              !(initialInput as LensByReferenceInput)?.savedObjectId &&
-              currentSessionId
-                ? currentSessionId
-                : data.search.session.start(),
-            ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-            activeDatasourceId,
-            datasourceStates,
-            visualization: {
-              state: null,
-              activeId: doc?.visualizationType || Object.keys(visualizationMap)[0] || null,
-            },
-          })
-        );
-        lensStore.dispatch(
-          visualizationLoaded({
-            doc: {
-              ...doc,
-              state: {
-                ...doc.state,
-                visualization: doc.visualizationType
-                  ? visualizationMap[doc.visualizationType].initialize(
-                      {
-                        addNewLayer: () => {
-                          const newLayerId = generateId();
-                          lensStore.dispatch(
-                            updateLayer({
-                              datasourceId: activeDatasourceId!,
-                              layerId: newLayerId,
-                              updater: datasourceMap[activeDatasourceId!].insertLayer,
-                            })
-                          );
-
-                          return newLayerId;
-                        },
-                      },
-                      doc.state.visualization
-                    )
-                  : doc.state.visualization,
+        batch(() => {
+          lensStore.dispatch(
+            setLoadedDocument({
+              query: doc.state.query,
+              searchSessionId:
+                dashboardFeatureFlag.allowByValueEmbeddables &&
+                Boolean(embeddableEditorIncomingState?.originatingApp) &&
+                !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                currentSessionId
+                  ? currentSessionId
+                  : data.search.session.start(),
+              ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+              activeDatasourceId,
+              datasourceStates,
+              visualization: {
+                state: null,
+                activeId: doc?.visualizationType || Object.keys(visualizationMap)[0] || null,
               },
-            },
-          })
-        );
+            })
+          );
+          lensStore.dispatch(
+            visualizationLoaded({
+              doc: {
+                ...doc,
+                state: {
+                  ...doc.state,
+                  visualization: doc.visualizationType
+                    ? visualizationMap[doc.visualizationType].initialize(() => {
+                        const newLayerId = generateId();
+                        lensStore.dispatch(
+                          updateLayer({
+                            datasourceId: activeDatasourceId!,
+                            layerId: newLayerId,
+                            updater: datasourceMap[activeDatasourceId!].insertLayer,
+                          })
+                        );
+
+                        return newLayerId;
+                      }, doc.state.visualization)
+                    : doc.state.visualization,
+                },
+              },
+            })
+          );
+        });
 
         initializeDatasources(
           datasourceMap,
@@ -469,19 +461,16 @@ export function loadDocument(
               //   activeVisualization
               // );
               if (visualization.state === null && activeVisualization) {
-                const initialVisualizationState = activeVisualization.initialize({
-                  addNewLayer: () => {
-                    const newLayerId = generateId();
-                    lensStore.dispatch(
-                      updateLayer({
-                        datasourceId: activeDatasourceId!,
-                        layerId: newLayerId,
-                        updater: datasourceMap[activeDatasourceId!].insertLayer,
-                      })
-                    );
-
-                    return newLayerId;
-                  },
+                const initialVisualizationState = activeVisualization.initialize(() => {
+                  const newLayerId = generateId();
+                  lensStore.dispatch(
+                    updateLayer({
+                      datasourceId: activeDatasourceId!,
+                      layerId: newLayerId,
+                      updater: datasourceMap[activeDatasourceId!].insertLayer,
+                    })
+                  );
+                  return newLayerId;
                 });
                 lensStore.dispatch(
                   updateVisualizationState({

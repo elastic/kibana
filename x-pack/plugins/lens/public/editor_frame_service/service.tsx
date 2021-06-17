@@ -130,12 +130,11 @@ export class EditorFrameService {
       const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        EditorFrameContainer: ({ onError, showNoDataPopover, initialContext }) => {
+        EditorFrameContainer: ({ showNoDataPopover, initialContext }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
-                onError={onError}
                 core={core}
                 plugins={plugins}
                 palettes={palettes}

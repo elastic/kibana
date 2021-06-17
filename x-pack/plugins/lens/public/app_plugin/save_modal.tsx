@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { Document } from '../persistence';
 import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
 import {

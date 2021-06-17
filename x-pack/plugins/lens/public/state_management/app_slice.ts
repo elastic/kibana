@@ -281,13 +281,10 @@ export const appSlice = createSlice({
       };
     },
     onActiveDataChange: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-      if (!isEqual(state.activeData, payload?.activeData)) {
-        return {
-          ...state,
-          ...payload,
-        };
-      }
-      return state;
+      return {
+        ...state,
+        ...payload,
+      };
     },
     navigateAway: (state) => state,
   },

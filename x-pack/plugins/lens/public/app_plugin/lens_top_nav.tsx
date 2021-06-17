@@ -129,7 +129,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
-  lastKnownDoc,
+  title,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -176,11 +176,17 @@ export const LensTopNavMenu = ({
       ),
       datasourceStates,
     });
-    getAllIndexPatterns(indexPatternIds, data.indexPatterns).then(
-      ({ indexPatterns: indexPatternObjects }) => {
-        setIndexPatterns(indexPatternObjects);
-      }
-    );
+    const hasIndexPatternsChanged =
+      indexPatterns.length !== indexPatternIds.length ||
+      indexPatternIds.some((id) => !indexPatterns.find((indexPattern) => indexPattern.id === id));
+    // Update the cached index patterns if the user made a change to any of them
+    if (hasIndexPatternsChanged) {
+      getAllIndexPatterns(indexPatternIds, data.indexPatterns).then(
+        ({ indexPatterns: indexPatternObjects }) => {
+          setIndexPatterns(indexPatternObjects);
+        }
+      );
+    }
   }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap]);
 
   const { TopNavMenu } = navigation.ui;
@@ -220,7 +226,7 @@ export const LensTopNavMenu = ({
                 if (datatable) {
                   const postFix = datatables.length > 1 ? `-${i + 1}` : '';
 
-                  memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                  memo[`${title || unsavedTitle}${postFix}.csv`] = {
                     content: exporters.datatableToCSV(datatable, {
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
@@ -238,14 +244,14 @@ export const LensTopNavMenu = ({
             }
           },
           saveAndReturn: () => {
-            if (savingToDashboardPermitted && lastKnownDoc) {
+            if (savingToDashboardPermitted && title) {
               // disabling the validation on app leave because the document has been saved.
               onAppLeave((actions) => {
                 return actions.default();
               });
               runSave(
                 {
-                  newTitle: lastKnownDoc.title,
+                  newTitle: title,
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
@@ -278,7 +284,7 @@ export const LensTopNavMenu = ({
       initialInput,
       isLinkedToOriginatingApp,
       isSaveable,
-      lastKnownDoc,
+      title,
       onAppLeave,
       redirectToOrigin,
       runSave,
@@ -340,6 +346,8 @@ export const LensTopNavMenu = ({
       savedQuery: undefined,
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
+
+  
 
   return (
     <TopNavMenu

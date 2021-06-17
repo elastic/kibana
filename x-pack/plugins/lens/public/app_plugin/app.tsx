@@ -149,14 +149,6 @@ export function App({
     }
   }, [setIndicateNoData, indicateNoData, appState.searchSessionId]);
 
-  const onError = useCallback(
-    (e: { message: string }) =>
-      notifications.toasts.addDanger({
-        title: e.message,
-      }),
-    [notifications.toasts]
-  );
-
   const getIsByValueMode = useCallback(
     () =>
       Boolean(
@@ -261,35 +253,51 @@ export function App({
     appState.persistedDoc,
   ]);
 
-  const runSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
-    return runSaveLensVisualization(
-      {
-        lastKnownDoc,
-        getIsByValueMode,
-        savedObjectsTagging,
-        initialInput,
-        redirectToOrigin,
-        persistedDoc: appState.persistedDoc,
-        onAppLeave,
-        redirectTo,
-        originatingApp: incomingState?.originatingApp,
-        ...lensAppServices,
-      },
-      saveProps,
-      options
-    ).then(
-      (newState) => {
-        if (newState) {
-          dispatchSetState(newState);
-          setIsSaveModalVisible(false);
+  const runSave = useCallback(
+    (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      return runSaveLensVisualization(
+        {
+          lastKnownDoc,
+          getIsByValueMode,
+          savedObjectsTagging,
+          initialInput,
+          redirectToOrigin,
+          persistedDoc: appState.persistedDoc,
+          onAppLeave,
+          redirectTo,
+          originatingApp: incomingState?.originatingApp,
+          ...lensAppServices,
+        },
+        saveProps,
+        options
+      ).then(
+        (newState) => {
+          if (newState) {
+            dispatchSetState(newState);
+            setIsSaveModalVisible(false);
+          }
+        },
+        () => {
+          // error is handled inside the modal
+          // so ignoring it here
         }
-      },
-      () => {
-        // error is handled inside the modal
-        // so ignoring it here
-      }
-    );
-  };
+      );
+    },
+    [
+      incomingState?.originatingApp
+      lastKnownDoc,
+      appState.persistedDoc,
+      getIsByValueMode,
+      savedObjectsTagging,
+      initialInput,
+      redirectToOrigin,
+      onAppLeave,
+      redirectTo,
+      lensAppServices,
+      dispatchSetState,
+      setIsSaveModalVisible,
+    ]
+  );
 
   return (
     <>
@@ -304,12 +312,11 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
-          lastKnownDoc={lastKnownDoc}
+          title={lastKnownDoc?.title}
         />
         {(!appState.isAppLoading || appState.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
-            onError={onError}
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
           />
@@ -349,21 +356,15 @@ export function App({
 
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
-  onError,
   showNoDataPopover,
   initialContext,
 }: {
   editorFrame: EditorFrameInstance;
-  onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
   initialContext: VisualizeFieldContext | undefined;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
-    <EditorFrameContainer
-      onError={onError}
-      showNoDataPopover={showNoDataPopover}
-      initialContext={initialContext}
-    />
+    <EditorFrameContainer showNoDataPopover={showNoDataPopover} initialContext={initialContext} />
   );
 });

@@ -301,7 +301,6 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
-        availablePalettes: props.palettes,
         searchSessionId: 'sessionId-1',
       });
     });
