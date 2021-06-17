@@ -228,7 +228,7 @@ export class MVTSingleLayerVectorSource
     return tooltips;
   }
 
-  async loadIsEditable(): Promise<boolean> {
+  async supportsFeatureEditing(): Promise<boolean> {
     return false;
   }
 }
