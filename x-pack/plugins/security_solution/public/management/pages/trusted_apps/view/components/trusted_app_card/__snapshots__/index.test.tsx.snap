@@ -53,7 +53,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   <ItemPropertySummary
     name="Modified By"
     value={
-      <Memo(FormattedDate)
+      <TextFieldValue
         className="eui-textTruncate"
         fieldName="Modified By"
         value="someone"
@@ -177,7 +177,7 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
   <ItemPropertySummary
     name="Modified By"
     value={
-      <Memo(FormattedDate)
+      <TextFieldValue
         className="eui-textTruncate"
         fieldName="Modified By"
         value="someone"
