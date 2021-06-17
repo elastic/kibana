@@ -66,7 +66,7 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
-  loadIsEditable(): Promise<boolean>;
+  supportsFeatureEditing(): Promise<boolean>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
 }
 
@@ -160,7 +160,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     throw new Error('Should implement VectorSource#addFeature');
   }
 
-  async loadIsEditable(): Promise<boolean> {
+  async supportsFeatureEditing(): Promise<boolean> {
     return false;
   }
 }
