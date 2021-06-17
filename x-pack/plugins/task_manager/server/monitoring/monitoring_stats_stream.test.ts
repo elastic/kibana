@@ -9,7 +9,7 @@ import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
 import { createMonitoringStatsStream, AggregatedStat } from './monitoring_stats_stream';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -27,6 +27,7 @@ describe('createMonitoringStatsStream', () => {
     max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
     monitored_aggregated_stats_refresh_rate: 5000,
+    monitored_stats_warn_delayed_task_start_in_seconds: 60,
     monitored_stats_running_average_window: 50,
     monitored_task_execution_thresholds: {
       default: {
