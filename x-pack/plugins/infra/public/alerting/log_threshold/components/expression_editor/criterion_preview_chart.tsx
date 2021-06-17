@@ -68,6 +68,9 @@ export const CriterionPreview: React.FC<Props> = ({
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
     const params = {
       criteria,
+      count: {
+        comparator: alertParams.count.comparator,
+      },
       timeSize: alertParams.timeSize,
       timeUnit: alertParams.timeUnit,
       groupBy: alertParams.groupBy,
@@ -78,7 +81,13 @@ export const CriterionPreview: React.FC<Props> = ({
     } catch (error) {
       return null;
     }
-  }, [alertParams.timeSize, alertParams.timeUnit, alertParams.groupBy, chartCriterion]);
+  }, [
+    alertParams.timeSize,
+    alertParams.timeUnit,
+    alertParams.groupBy,
+    alertParams.count.comparator,
+    chartCriterion,
+  ]);
 
   // Check for the existence of properties that are necessary for a meaningful chart.
   if (chartAlertParams === null || chartAlertParams.criteria.length === 0) return null;

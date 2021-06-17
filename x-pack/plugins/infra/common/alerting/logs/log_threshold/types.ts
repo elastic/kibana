@@ -100,7 +100,7 @@ export enum AlertStates {
   ERROR,
 }
 
-const ThresholdRT = rt.type({
+export const ThresholdRT = rt.type({
   comparator: ComparatorRT,
   value: rt.number,
 });
@@ -264,7 +264,7 @@ export const UngroupedSearchQueryResponseRT = rt.intersection([
 
 export type UngroupedSearchQueryResponse = rt.TypeOf<typeof UngroupedSearchQueryResponseRT>;
 
-export const GroupedSearchQueryResponseRT = rt.intersection([
+export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     aggregations: rt.type({
@@ -301,4 +301,58 @@ export const GroupedSearchQueryResponseRT = rt.intersection([
   }),
 ]);
 
+export type UnoptimizedGroupedSearchQueryResponse = rt.TypeOf<
+  typeof UnoptimizedGroupedSearchQueryResponseRT
+>;
+
+export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
+  commonSearchSuccessResponseFieldsRT,
+  rt.type({
+    aggregations: rt.type({
+      groups: rt.intersection([
+        rt.type({
+          buckets: rt.array(
+            rt.intersection([
+              rt.type({
+                key: rt.record(rt.string, rt.string),
+                doc_count: rt.number,
+              }),
+              // Chart preview buckets
+              rt.partial({
+                histogramBuckets: rt.type({
+                  buckets: rt.array(chartPreviewHistogramBucket),
+                }),
+              }),
+            ])
+          ),
+        }),
+        rt.partial({
+          after_key: rt.record(rt.string, rt.string),
+        }),
+      ]),
+    }),
+    hits: rt.type({
+      total: rt.type({
+        value: rt.number,
+      }),
+    }),
+  }),
+]);
+
+export type OptimizedGroupedSearchQueryResponse = rt.TypeOf<
+  typeof OptimizedGroupedSearchQueryResponseRT
+>;
+
+export const GroupedSearchQueryResponseRT = rt.union([
+  UnoptimizedGroupedSearchQueryResponseRT,
+  OptimizedGroupedSearchQueryResponseRT,
+]);
+
 export type GroupedSearchQueryResponse = rt.TypeOf<typeof GroupedSearchQueryResponseRT>;
+
+export const isOptimizedGroupedSearchQueryResponse = (
+  response: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
+): response is OptimizedGroupedSearchQueryResponse['aggregations']['groups']['buckets'] => {
+  const result = response[0];
+  return result && !result.hasOwnProperty('filtered_results');
+};
