@@ -23,6 +23,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
+  TaskPersistence,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
 import {
@@ -271,6 +272,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
             this.id,
             asOk({
               task: { ...this.instance.task, state },
+              persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Success,
             }),
             taskTiming
@@ -283,6 +285,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
             this.id,
             asErr({
               task: { ...this.instance.task, state },
+              persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Failed,
               error,
             }),

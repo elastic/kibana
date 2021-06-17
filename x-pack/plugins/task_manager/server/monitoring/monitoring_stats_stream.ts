@@ -18,7 +18,12 @@ import {
   SummarizedWorkloadStat,
   WorkloadStat,
 } from './workload_statistics';
-import { EphemeralTaskStat, createEphemeralTaskAggregator } from './ephemeral_task_statistics';
+import {
+  EphemeralTaskStat,
+  createEphemeralTaskAggregator,
+  SummarizedEphemeralTaskStat,
+  summarizeEphemeralStat,
+} from './ephemeral_task_statistics';
 import {
   createTaskRunAggregator,
   summarizeTaskRunStat,
@@ -65,6 +70,7 @@ export interface RawMonitoringStats {
     configuration?: RawMonitoredStat<ConfigStat>;
     workload?: RawMonitoredStat<SummarizedWorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
+    ephemeral?: RawMonitoredStat<SummarizedEphemeralTaskStat>;
     capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
 }
@@ -78,7 +84,7 @@ export function createAggregators(
   managedConfig: ManagedConfiguration,
   logger: Logger
 ): AggregatedStatProvider {
-  return merge(
+  const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
     createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
     createWorkloadAggregator(
@@ -88,8 +94,17 @@ export function createAggregators(
       config.poll_interval,
       logger
     ),
-    createEphemeralTaskAggregator(ephemeralTaskLifecycle, logger)
-  );
+  ];
+  if (ephemeralTaskLifecycle.enabled) {
+    aggregators.push(
+      createEphemeralTaskAggregator(
+        ephemeralTaskLifecycle,
+        config.monitored_stats_running_average_window,
+        config.max_workers
+      )
+    );
+  }
+  return merge(...aggregators);
 }
 
 export function createMonitoringStatsStream(
@@ -158,7 +173,7 @@ export function summarizeMonitoringStats(
       ? {
           ephemeral: {
             timestamp: ephemeral.timestamp,
-            ...ephemeral.value,
+            ...summarizeEphemeralStat(ephemeral.value),
           },
         }
       : {}),

@@ -36,6 +36,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
+  TaskPersistence,
 } from '../task_events';
 import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
@@ -532,6 +533,10 @@ export class TaskManagerRunner implements TaskRunner {
             this.id,
             asOk({
               task,
+              persistence:
+                schedule || task.schedule
+                  ? TaskPersistence.Recurring
+                  : TaskPersistence.NonRecurring,
               result: await (runAt || schedule || task.schedule
                 ? this.processResultForRecurringTask(result)
                 : this.processResultWhenDone()),
@@ -544,7 +549,12 @@ export class TaskManagerRunner implements TaskRunner {
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,
-            asErr({ task, result: await this.processResultForRecurringTask(result), error }),
+            asErr({
+              task,
+              persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+              result: await this.processResultForRecurringTask(result),
+              error,
+            }),
             taskTiming
           )
         );

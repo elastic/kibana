@@ -17,6 +17,7 @@ import {
   asTaskPollingCycleEvent,
   TaskTiming,
   asTaskManagerStatEvent,
+  TaskPersistence,
 } from '../task_events';
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
@@ -400,6 +401,44 @@ describe('Task Run Statistics', () => {
       runningAverageWindowSize
     );
 
+    const taskEvents = [
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Failed
+      ),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.RetryScheduled
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+    ];
+
     return new Promise<void>((resolve, reject) => {
       taskRunAggregator
         .pipe(
@@ -423,8 +462,8 @@ describe('Task Run Statistics', () => {
               })
             ).value,
           })),
-          take(10),
-          bufferCount(10)
+          take(taskEvents.length),
+          bufferCount(taskEvents.length)
         )
         .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
           try {
@@ -485,6 +524,31 @@ describe('Task Run Statistics', () => {
                   "non_recurring": 40,
                   "recurring": 60,
                 },
+                Object {
+                  "ephemeral": 20,
+                  "non_recurring": 40,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 40,
+                  "non_recurring": 40,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 40,
+                  "non_recurring": 40,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 60,
+                  "non_recurring": 20,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 60,
+                  "non_recurring": 20,
+                  "recurring": 20,
+                },
               ]
             `);
             resolve();
@@ -493,40 +557,7 @@ describe('Task Run Statistics', () => {
           }
         });
 
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
-      events$.next(
-        mockTaskRunEvent(
-          { schedule: { interval: '3s' } },
-          { start: 0, stop: 0 },
-          TaskRunResult.Success
-        )
-      );
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
-      events$.next(
-        mockTaskRunEvent(
-          { schedule: { interval: '3s' } },
-          { start: 0, stop: 0 },
-          TaskRunResult.Failed
-        )
-      );
-      events$.next(
-        mockTaskRunEvent(
-          { schedule: { interval: '3s' } },
-          { start: 0, stop: 0 },
-          TaskRunResult.RetryScheduled
-        )
-      );
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled));
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
-      events$.next(
-        mockTaskRunEvent(
-          { schedule: { interval: '3s' } },
-          { start: 0, stop: 0 },
-          TaskRunResult.Success
-        )
-      );
+      taskEvents.forEach((event) => events$.next(event));
     });
   });
 
@@ -713,10 +744,20 @@ function runAtMillisecondsAgo(ms: number): Date {
 const mockTaskRunEvent = (
   overrides: Partial<ConcreteTaskInstance> = {},
   timing: TaskTiming,
-  result: TaskRunResult = TaskRunResult.Success
+  result: TaskRunResult = TaskRunResult.Success,
+  persistence?: TaskPersistence
 ) => {
   const task = mockTaskInstance(overrides);
-  return asTaskRunEvent(task.id, asOk({ task, result }), timing);
+  return asTaskRunEvent(
+    task.id,
+    asOk({
+      task,
+      persistence:
+        persistence ?? (task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring),
+      result,
+    }),
+    timing
+  );
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({

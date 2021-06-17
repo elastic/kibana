@@ -162,7 +162,15 @@ export class TaskPollingLifecycle {
           pollInterval$: pollIntervalConfiguration$,
           pollIntervalDelay$,
           bufferCapacity: config.request_capacity,
-          getCapacity: () => this.pool.availableWorkers,
+          getCapacity: () => {
+            const capacity = this.pool.availableWorkers;
+            if (!capacity) {
+              // if there isn't capacity, emit a load event so that we can expose how often
+              // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+              this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+            }
+            return capacity;
+          },
           pollRequests$: this.claimRequests$,
           work: this.pollForWork,
           // Time out the `work` phase if it takes longer than a certain number of polling cycles
@@ -229,8 +237,8 @@ export class TaskPollingLifecycle {
   private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
-      () =>
-        claimAvailableTasks(
+      () => {
+        return claimAvailableTasks(
           tasksToClaim.splice(0, this.pool.availableWorkers),
           this.taskClaiming,
           this.logger
@@ -244,11 +252,18 @@ export class TaskPollingLifecycle {
               }
             })
           )
-        ),
+        );
+      },
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
-      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
+      async (tasks: TaskRunner[]) => {
+        const result = await this.pool.run(tasks);
+        // Emit the load after fetching tasks, giving us a good metric for evaluating how
+        // busy Task manager tends to be in this Kibana instance
+        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+        return result;
+      }
     );
   };
 

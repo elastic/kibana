@@ -10,11 +10,14 @@ import { TaskLifecycleEvent } from './polling_lifecycle';
 import { of, Observable } from 'rxjs';
 
 export const ephemeralTaskLifecycleMock = {
-  create(opts: { events$?: Observable<TaskLifecycleEvent> }) {
+  create(opts: { events$?: Observable<TaskLifecycleEvent>; getQueuedTasks?: () => number }) {
     return ({
       attemptToRun: jest.fn(),
       get events() {
         return opts.events$ ?? of();
+      },
+      get queuedTasks() {
+        return opts.getQueuedTasks ? opts.getQueuedTasks() : 0;
       },
     } as unknown) as jest.Mocked<EphemeralTaskLifecycle>;
   },

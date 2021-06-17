@@ -20,6 +20,7 @@ import {
   TaskTiming,
   isTaskManagerStatEvent,
   TaskManagerStat,
+  TaskPersistence,
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
@@ -35,16 +36,6 @@ import {
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
-
-export enum TaskPersistence {
-  Recurring = 'recurring',
-  NonRecurring = 'non_recurring',
-  Ephemeral = 'ephemeral',
-}
-
-function persistenceOf(task: ConcreteTaskInstance) {
-  return task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
-}
 
 interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
@@ -123,8 +114,10 @@ export function createTaskRunAggregator(
   > = taskPollingLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
     map((taskEvent: TaskLifecycleEvent) => {
-      const { task, result }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
-      return taskRunEventToStat(task, taskEvent.timing!, result);
+      const { task, result, persistence }: RanTask | ErroredTask = unwrap(
+        (taskEvent as TaskRun).event
+      );
+      return taskRunEventToStat(task, persistence, taskEvent.timing!, result);
     })
   );
 
@@ -248,7 +241,7 @@ export function createTaskRunAggregator(
   ]).pipe(
     map(
       ([taskRun, load, polling]: [
-        Pick<TaskRunStat, 'drift' | 'execution'>,
+        Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>,
         Pick<TaskRunStat, 'load'>,
         Pick<TaskRunStat, 'polling'>
       ]) => {
@@ -282,12 +275,12 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
   );
   return (
     task: ConcreteTaskInstance,
+    persistence: TaskPersistence,
     timing: TaskTiming,
     result: TaskRunResult
   ): Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'> => {
     const drift = timing!.start - task.runAt.getTime();
     const duration = timing!.stop - timing!.start;
-    const persistence = persistenceOf(task);
     return {
       drift: driftQueue(drift),
       drift_by_type: driftByTaskQueue(task.taskType, drift),

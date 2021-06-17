@@ -15,6 +15,12 @@ import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
 import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 
+export enum TaskPersistence {
+  Recurring = 'recurring',
+  NonRecurring = 'non_recurring',
+  Ephemeral = 'ephemeral',
+}
+
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
@@ -50,6 +56,7 @@ export interface TaskEvent<OkResult, ErrorResult, ID = string> {
 }
 export interface RanTask {
   task: ConcreteTaskInstance;
+  persistence: TaskPersistence;
   result: TaskRunResult;
 }
 export type ErroredTask = RanTask & {
@@ -67,7 +74,7 @@ export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
-export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
+export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration' | 'queuedEphemeralTasks';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>

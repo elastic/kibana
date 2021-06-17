@@ -6,13 +6,18 @@
  */
 
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import { isTaskRunEvent, TaskEventType } from './task_events';
+import {
+  asTaskManagerStatEvent,
+  isTaskRunEvent,
+  TaskEventType,
+  TaskPollingCycle,
+} from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -67,17 +72,24 @@ export class EphemeralTaskLifecycle {
     this.lifecycleEvent = lifecycleEvent;
     this.config = config;
 
-    if (this.config.ephemeral_tasks.enabled) {
+    if (this.enabled) {
       this.lifecycleSubscription = this.lifecycleEvent
         .pipe(
-          filter(
-            (e) =>
+          filter((e) => {
+            const hasPollingCycleCompleted = isPollingCycleCompletedEvent(e);
+            if (hasPollingCycleCompleted) {
+              this.emitEvent(
+                asTaskManagerStatEvent('queuedEphemeralTasks', asOk(this.queuedTasks))
+              );
+            }
+            return (
+              // when a polling cycle or a task run have just completed
+              (hasPollingCycleCompleted || isTaskRunEvent(e)) &&
               // we want to know when the queue has ephemeral task run requests
-              this.ephemeralTaskQueue.size > 0 &&
-              // and when a polling cycle has just completed or a task has just been ran
-              (e.type === TaskEventType.TASK_POLLING_CYCLE || isTaskRunEvent(e)) &&
+              this.queuedTasks > 0 &&
               this.getCapacity() > 0
-          )
+            );
+          })
         )
         .subscribe(async (e) => {
           let overallCapacity = this.getCapacity();
@@ -122,6 +134,10 @@ export class EphemeralTaskLifecycle {
     }
   }
 
+  public get enabled(): boolean {
+    return this.config.ephemeral_tasks.enabled;
+  }
+
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
   }
@@ -147,6 +163,10 @@ export class EphemeralTaskLifecycle {
       return asErr(task);
     }
     return pushIntoSet(this.ephemeralTaskQueue, this.config.request_capacity, task);
+  }
+
+  public get queuedTasks() {
+    return this.ephemeralTaskQueue.size;
   }
 
   private createTaskRunnerForTask = (
@@ -178,4 +198,8 @@ function pushIntoSet<T>(set: Set<T>, maxCapacity: number, value: T): Result<T, T
   }
   set.add(value);
   return asOk(value);
+}
+
+function isPollingCycleCompletedEvent(e: TaskLifecycleEvent): e is TaskPollingCycle {
+  return e.type === TaskEventType.TASK_POLLING_CYCLE;
 }

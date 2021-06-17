@@ -88,10 +88,6 @@ export class TaskPool {
    * Gets how many workers are currently available.
    */
   public get availableWorkers() {
-    // emit load whenever we check how many available workers there are
-    // this should happen less often than the actual changes to the worker queue
-    // so is lighter than emitting the load every time we add/remove a task from the queue
-    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
