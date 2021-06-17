@@ -94,23 +94,25 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {(activityLogLoaded && !activityLogSize) || activityLogError ? (
-          <EuiEmptyPrompt
-            iconType="editorUnorderedList"
-            titleSize="s"
-            title={<h2>{'No logged actions'}</h2>}
-            body={<p>{'No actions have been logged for this endpoint.'}</p>}
-          />
-        ) : (
-          <>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <div>
-                  <EuiButton onClick={onRefresh} iconType="refresh">
-                    {i18.ACTIVITY_LOG.refresh}
-                  </EuiButton>
-                </div>
-              </EuiFlexItem>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <div>
+              <EuiButton onClick={onRefresh} iconType="refresh">
+                {i18.ACTIVITY_LOG.refresh}
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+          {(activityLogLoaded && !activityLogSize) || activityLogError ? (
+            <EuiFlexItem>
+              <EuiEmptyPrompt
+                iconType="editorUnorderedList"
+                titleSize="s"
+                title={<h2>{'No logged actions'}</h2>}
+                body={<p>{'No actions have been logged for this endpoint.'}</p>}
+              />
+            </EuiFlexItem>
+          ) : (
+            <>
               <EuiFlexItem>
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (
@@ -132,9 +134,9 @@ export const EndpointActivityLog = memo(
                   </p>
                 )}
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+            </>
+          )}
+        </EuiFlexGroup>
       </>
     );
   }
