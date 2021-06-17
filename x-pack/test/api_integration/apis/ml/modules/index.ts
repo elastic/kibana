@@ -10,10 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
-  const fleetPackages = ['apache-0.5.0', 'nginx-0.5.0'];
+  const fleetPackages = ['apache', 'nginx'];
 
-  // Failing: See https://github.com/elastic/kibana/issues/102282
-  describe.skip('modules', function () {
+  describe('modules', function () {
     before(async () => {
       for (const fleetPackage of fleetPackages) {
         await ml.testResources.installFleetPackage(fleetPackage);
