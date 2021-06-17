@@ -7,7 +7,7 @@
 
 import $ from 'jquery';
 import { times } from 'lodash';
-import { elasticOutline } from '../lib/elastic_outline';
+import { elasticOutline } from '../../../../../src/plugins/presentation_util/common';
 import { isValidUrl } from '../../common/lib/url';
 import { RendererStrings, ErrorStrings } from '../../i18n';
 import { Return as Arguments } from '../functions/common/repeat_image';

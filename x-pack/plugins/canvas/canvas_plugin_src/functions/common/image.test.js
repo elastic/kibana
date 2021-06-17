@@ -7,8 +7,10 @@
 
 import expect from '@kbn/expect';
 // import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common';
-import { elasticOutline } from '../../lib/elastic_outline';
+import {
+  elasticLogo,
+  elasticOutline,
+} from '../../../../../../src/plugins/presentation_util/common';
 // import { image } from './image';
 
 // TODO: the test was not running and is not up to date
