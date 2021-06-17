@@ -835,23 +835,6 @@ module.exports = {
         ],
       },
     },
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      excludedFiles: ['packages/kbn-i18n/src/react/**/*'],
-      rules: {
-        'no-restricted-imports': [
-          2,
-          {
-            paths: [
-              {
-                name: 'react-intl',
-                message: 'Please use @kbn/i18n/react instead',
-              },
-            ],
-          },
-        ],
-      },
-    },
 
     /**
      * APM and Observability overrides
