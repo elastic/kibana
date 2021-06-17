@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, defer, isObservable, of } from 'rxjs';
+import { map, concatMap } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   when?(): Observable<any>;
   if?: boolean;
-  then?(): Observable<any>;
+  then(): Observable<any>;
 }
 
 interface Case {
@@ -22,7 +22,7 @@ interface Case {
   result: any;
 }
 
-export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, Promise<Case>> {
+export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, Observable<Case>> {
   const { help, args: argHelp } = getFunctionHelp().case;
 
   return {
@@ -45,24 +45,24 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, P
         help: argHelp.then!,
       },
     },
-    fn: async (input, args) => {
-      const matches = await doesMatch(input, args);
-      const result = matches ? await getResult(input, args) : null;
-      return { type: 'case', matches, result };
+    fn(input, { if: condition, then, when }) {
+      return defer(() => {
+        const matches = condition ?? when?.().pipe(map((value) => value === input)) ?? true;
+
+        return isObservable(matches) ? matches : of(matches);
+      }).pipe(
+        concatMap((matches) =>
+          (matches ? then() : of(null)).pipe(
+            map(
+              (result): Case => ({
+                matches,
+                result,
+                type: 'case',
+              })
+            )
+          )
+        )
+      );
     },
   };
-}
-
-async function doesMatch(context: any, args: Arguments) {
-  if (typeof args.if !== 'undefined') {
-    return args.if;
-  }
-  if (typeof args.when !== 'undefined') {
-    return (await args.when().pipe(take(1)).toPromise()) === context;
-  }
-  return true;
-}
-
-async function getResult(context: any, args: Arguments) {
-  return args.then?.().pipe(take(1)).toPromise() ?? context;
 }

@@ -88,7 +88,7 @@ export interface SubPlugins {
   management: Management;
 }
 
-// TODO: think of a better way to get those types
+// TODO: [1101] find a better way to get those types
 export interface StartedSubPlugins {
   detections: ReturnType<Detections['start']>;
   cases: ReturnType<Cases['start']>;

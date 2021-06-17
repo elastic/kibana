@@ -73,15 +73,27 @@ export enum SecurityPageName {
   exceptions = 'exceptions',
 }
 
-export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
-export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
-export const APP_RULES_PATH = `${APP_PATH}/rules`;
-export const APP_EXCEPTIONS_PATH = `${APP_PATH}/exceptions`;
+export enum SecurityPageGroupName {
+  detect = 'detect',
+  explore = 'explore',
+  investigate = 'investigate',
+  manage = 'manage',
+}
+
+export const OVERVIEW_PATH = '/overview';
+export const ALERTS_PATH = '/alerts';
+export const RULES_PATH = '/rules';
+export const EXCEPTIONS_PATH = '/exceptions';
+export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
+export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+export const APP_RULES_PATH = `${APP_PATH}/rules`;
+export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
+export const APP_EXCEPTIONS_PATH = `${APP_PATH}/exceptions`;
 
 export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
 

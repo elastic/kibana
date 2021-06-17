@@ -7,15 +7,13 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { Redirect, Route, Router, Switch, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
-import { ExceptionListsTable } from './exceptions/exceptions_table';
-import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
@@ -72,7 +70,7 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const history = useHistory();
-    const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+    const { formatUrl } = useFormatUrl(SecurityPageName.rules);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
 
     const tabs = useMemo(

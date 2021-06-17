@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Route, Switch } from 'react-router-dom';
 
+import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
 import { RenderAppProps, RenderAppPropsOld } from './types';
 
-// TODO: remove renderAppOld when all sections migrated
+// TODO: [1101] remove renderAppOld when all sections migrated
 export const renderAppOld = ({
   element,
   history,
@@ -53,8 +55,20 @@ export const renderApp = ({
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
     >
-      <subPlugins.overview.SubPluginRoutes />
-      <subPlugins.detections.SubPluginRoutes />
+      <Switch>
+        {
+          /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
+          subPlugins.overview.routes!.map((route, index) => (
+            <Route key={`subpligin-overview-route-${index}`} {...route} />
+          ))
+        }
+        {subPlugins.detections.routes!.map((route, index) => (
+          <Route key={`subpligin-detections-route-${index}`} {...route} />
+        ))}
+        <Route>
+          <NotFoundPage />
+        </Route>
+      </Switch>
     </SecurityApp>,
     element
   );

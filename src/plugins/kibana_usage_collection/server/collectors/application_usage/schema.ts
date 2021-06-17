@@ -148,6 +148,7 @@ export const applicationUsageSchema = {
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  observabilityCases: commonSchema,
   'observability-overview': commonSchema,
   osquery: commonSchema,
   security_account: commonSchema,
@@ -158,7 +159,7 @@ export const applicationUsageSchema = {
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
   securitySolution: commonSchema, // It's a forward app so we'll likely never report it
-  'securitySolution:overview': commonSchema,
+  'securitySolution:detections': commonSchema,
   'securitySolution:hosts': commonSchema,
   'securitySolution:network': commonSchema,
   'securitySolution:timelines': commonSchema,

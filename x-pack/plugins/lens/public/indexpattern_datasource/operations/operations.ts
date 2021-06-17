@@ -93,7 +93,7 @@ export function isDocumentOperation(type: string) {
   return documentOperations.has(type);
 }
 
-type OperationFieldTuple =
+export type OperationFieldTuple =
   | {
       type: 'field';
       operationType: OperationType;

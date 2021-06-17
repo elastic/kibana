@@ -16,14 +16,14 @@ import {
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-
+import { RouteProps } from 'react-router-dom';
 import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
 import { StartedSubPlugins, StartServices } from '../types';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-// TODO: remove RenderAppPropsOld when all sections migrated
+// TODO: [1101] remove RenderAppPropsOld when all sections migrated
 export interface RenderAppPropsOld extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
@@ -43,7 +43,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
 import { SecurityPageName } from '../../common/constants';
-export { SecurityPageName } from '../../common/constants';
+export { SecurityPageName, SecurityPageGroupName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T | undefined>;
@@ -51,8 +51,12 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
+export type SecuritySubPluginRoutes = RouteProps[];
+
+// TODO: [1101] remove SubPluginRoutes and make routes required
 export interface SecuritySubPlugin {
   SubPluginRoutes: React.FC;
+  routes?: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 

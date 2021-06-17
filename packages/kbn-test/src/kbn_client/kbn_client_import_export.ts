@@ -16,25 +16,12 @@ import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@k
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { parseArchive } from './import_export/parse_archive';
 
 interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
 }
-
-interface SavedObject {
-  id: string;
-  type: string;
-  [key: string]: unknown;
-}
-
-async function parseArchive(path: string): Promise<SavedObject[]> {
-  return (await Fs.readFile(path, 'utf-8'))
-    .split('\n\n')
-    .filter((line) => !!line)
-    .map((line) => JSON.parse(line));
-}
-
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,
@@ -48,7 +35,12 @@ export class KbnClientImportExport {
       path = `${path}.json`;
     }
 
-    const absolutePath = Path.resolve(this.baseDir, path);
+    return Path.resolve(this.baseDir, path);
+  }
+
+  private resolveAndValidatePath(path: string) {
+    const absolutePath = this.resolvePath(path);
+
     if (!existsSync(absolutePath)) {
       throw new Error(
         `unable to resolve path [${path}] to import/export, resolved relative to [${this.baseDir}]`
@@ -59,7 +51,7 @@ export class KbnClientImportExport {
   }
 
   async load(path: string, options?: { space?: string }) {
-    const src = this.resolvePath(path);
+    const src = this.resolveAndValidatePath(path);
     this.log.debug('resolved import for', path, 'to', src);
 
     const objects = await parseArchive(src);
@@ -94,7 +86,7 @@ export class KbnClientImportExport {
   }
 
   async unload(path: string, options?: { space?: string }) {
-    const src = this.resolvePath(path);
+    const src = this.resolveAndValidatePath(path);
     this.log.debug('unloading docs from archive at', src);
 
     const objects = await parseArchive(src);
@@ -143,6 +135,7 @@ export class KbnClientImportExport {
       })
       .join('\n\n');
 
+    await Fs.mkdir(Path.dirname(dest), { recursive: true });
     await Fs.writeFile(dest, fileContents, 'utf-8');
 
     this.log.success('Exported', objects.length, 'saved objects to', dest);

@@ -7,7 +7,6 @@
 
 import { EuiBadge, EuiProgress, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -18,6 +17,8 @@ import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
 import { Sourcerer } from '../sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../lib/kibana';
 
 interface HeaderProps {
   border?: boolean;
@@ -85,16 +86,20 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   titleNode,
   ...rest
 }) => {
-  const history = useHistory();
+  const { navigateToApp } = useKibana().services.application;
+
   const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();
       if (backOptions) {
-        history.push(backOptions.href ?? '');
+        navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: backOptions.href ?? '',
+        });
       }
     },
-    [backOptions, history]
+    [backOptions, navigateToApp]
   );
   return (
     <EuiPageHeader alignItems="center" bottomBorder={border} paddingSize="l">

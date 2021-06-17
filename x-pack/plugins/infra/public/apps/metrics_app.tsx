@@ -16,7 +16,6 @@ import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
-import { MetricDetail } from '../pages/metrics/metric_detail';
 import { InfraClientStartDeps } from '../types';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
@@ -29,7 +28,7 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element);
+  prepareMountElement(element, 'infraMetricsPage');
 
   ReactDOM.render(
     <MetricsApp
@@ -75,9 +74,6 @@ const MetricsApp: React.FC<{
             )}
             {uiCapabilities?.infrastructure?.show && (
               <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <Route path="/detail/:type/:node" component={MetricDetail} />
             )}
             {uiCapabilities?.infrastructure?.show && (
               <Route path="/" component={InfrastructurePage} />

@@ -129,9 +129,10 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-// TODO: remove and use APP_ID directly when all sections migrated
+// TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
 const securitySubPlugins = [
   APP_ID,
+  `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
@@ -258,6 +259,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         ready,
       });
+
+      // sec
 
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));

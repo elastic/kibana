@@ -49,13 +49,13 @@ export const useFormatUrl = (page: SecurityPageName) => {
           : `?${pathArr[1]}`
       }`;
 
-      // FIX ME
-      return getUrlForApp(`security`, {
+      return getUrlForApp(`${APP_ID}`, {
+        deepLinkId: page,
         path: formattedPath,
         absolute,
       });
     },
-    [getUrlForApp, search]
+    [getUrlForApp, page, search]
   );
   return { formatUrl, search };
 };

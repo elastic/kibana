@@ -6,13 +6,22 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { OVERVIEW_PATH, SecurityPageName } from '../../common/constants';
+import { SecuritySubPluginRoutes } from '../app/types';
 
 import { Overview } from './pages';
 
 // TODO: import path from constants file
 export const OverviewRoutes = () => (
-  <Switch>
-    <Route path="/overview" render={() => <Overview />} />
-  </Switch>
+  <TrackApplicationView viewId={SecurityPageName.overview}>
+    <Overview />
+  </TrackApplicationView>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: OVERVIEW_PATH,
+    render: OverviewRoutes,
+  },
+];

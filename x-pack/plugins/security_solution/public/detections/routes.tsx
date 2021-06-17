@@ -5,70 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { Redirect, Route, Switch, useHistory, useLocation } from 'react-router-dom';
-import { SecurityPageName } from '../../common/constants';
-import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { useFormatUrl } from '../common/components/link_to';
-import { useUserData } from './components/user_info';
-import { useListsConfig } from './containers/detection_engine/lists/use_lists_config';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { ALERTS_PATH, EXCEPTIONS_PATH, RULES_PATH, SecurityPageName } from '../../common/constants';
 
-import { DetectionEngineContainer, RulesRoutes } from './pages/detection_engine';
+import { RulesSubRoutes } from './pages/detection_engine';
 import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
-import { RulesPage } from './pages/detection_engine/rules';
 import { ExceptionListsTable } from './pages/detection_engine/rules/all/exceptions/exceptions_table';
-import { CreateRulePage } from './pages/detection_engine/rules/create';
-import { userHasPermissions } from './pages/detection_engine/rules/helpers';
 
-export const AlertsRoutes: React.FC = () => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-  const history = useHistory();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-      hasIndexWrite,
-    },
-  ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    canWriteIndex: canWriteListsIndex,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+export const AlertsRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.alerts}>
+    <DetectionEnginePage />
+  </TrackApplicationView>
+);
 
+export const RulesRoutes = () => {
   return (
-    <Switch>
-      <Route path="/:pageName(alerts)">
-        <DetectionEnginePage />
-      </Route>
-      <Route path="/:pageName(rules)">
-        <Switch>
-          {RulesRoutes.map((route, index) => (
-            <Route
-              key={`rules-route-${route.path}`}
-              path={route.path}
-              exact={route?.exact ?? false}
-              children={<route.main />}
-            />
-          ))}
-        </Switch>
-      </Route>
-      <Route path="/:pageName(exceptions)">
-        <ExceptionListsTable
-          formatUrl={formatUrl}
-          history={history}
-          hasPermissions={userHasPermissions(canUserCRUD)}
-          loading={loading}
-        />
-      </Route>
-      <Route exact path="/detections">
-        <Redirect to="/alerts" />
-      </Route>
-    </Switch>
+    <TrackApplicationView viewId={SecurityPageName.rules}>
+      <Switch>
+        {RulesSubRoutes.map((route, index) => (
+          <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+            <route.main />
+          </Route>
+        ))}
+      </Switch>
+    </TrackApplicationView>
   );
 };
+
+export const ExceptionsRoutes = () => {
+  return (
+    <TrackApplicationView viewId={SecurityPageName.exceptions}>
+      <ExceptionListsTable />
+    </TrackApplicationView>
+  );
+};
+
+export const routes = [
+  {
+    path: ALERTS_PATH,
+    render: AlertsRoutes,
+  },
+  {
+    path: RULES_PATH,
+    render: RulesRoutes,
+  },
+  {
+    path: EXCEPTIONS_PATH,
+    render: ExceptionsRoutes,
+  },
+];

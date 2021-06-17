@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -59,6 +58,8 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -103,12 +104,12 @@ const DetectionEnginePageComponent = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
+  const { navigateToApp } = useKibana().services.application;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -130,9 +131,13 @@ const DetectionEnginePageComponent = () => {
   const goToRules = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getRulesUrl());
+      // history.push(getRulesUrl());
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRulesUrl(),
+      });
     },
-    [history]
+    [navigateToApp]
   );
 
   const alertsHistogramDefaultFilters = useMemo(

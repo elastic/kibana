@@ -6,8 +6,8 @@
  */
 
 import * as i18n from '../translations';
-import { SecurityPageName } from '../types';
-import { SiemNavTab } from '../../common/components/navigation/types';
+import { SecurityPageName, SecurityPageGroupName } from '../types';
+import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_HOSTS_PATH,
@@ -63,7 +63,6 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'network',
   },
-
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
@@ -84,5 +83,25 @@ export const navTabs: SiemNavTab = {
     href: APP_MANAGEMENT_PATH,
     disabled: false,
     urlKey: SecurityPageName.administration,
+  },
+};
+
+// TODO: [1101] i18n names
+export const navTabGroups: NavTabGroups = {
+  [SecurityPageGroupName.detect]: {
+    id: SecurityPageGroupName.detect,
+    name: 'Detect',
+  },
+  [SecurityPageGroupName.explore]: {
+    id: SecurityPageGroupName.explore,
+    name: 'Explore',
+  },
+  [SecurityPageGroupName.investigate]: {
+    id: SecurityPageGroupName.investigate,
+    name: 'Investigate',
+  },
+  [SecurityPageGroupName.manage]: {
+    id: SecurityPageGroupName.manage,
+    name: 'Manage',
   },
 };

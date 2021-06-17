@@ -40,11 +40,14 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   reFetchRules: () => Promise<void>,
   refetchPrePackagedRulesStatus: () => Promise<void>,
   actionsPrivileges:
@@ -64,7 +67,7 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    onClick: (rowItem: Rule) => editRuleAction(rowItem.id, navigateToApp),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
@@ -87,7 +90,7 @@ export const getActions = (
         dispatchToaster
       );
       if (createdRules?.length) {
-        editRuleAction(createdRules[0], history);
+        editRuleAction(createdRules[0].id, navigateToApp);
       }
     },
   },
@@ -127,6 +130,7 @@ interface GetColumns {
   hasMlPermissions: boolean;
   hasPermissions: boolean;
   loadingRuleIds: string[];
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
   hasReadActionsPrivileges:
@@ -144,6 +148,7 @@ export const getColumns = ({
   hasMlPermissions,
   hasPermissions,
   loadingRuleIds,
+  navigateToApp,
   reFetchRules,
   refetchPrePackagedRulesStatus,
   hasReadActionsPrivileges,
@@ -157,7 +162,10 @@ export const getColumns = ({
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            history.push(getRuleDetailsUrl(item.id));
+            navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.rules,
+              path: getRuleDetailsUrl(item.id),
+            });
           }}
           href={formatUrl(getRuleDetailsUrl(item.id))}
         >
@@ -292,6 +300,7 @@ export const getColumns = ({
         dispatch,
         dispatchToaster,
         history,
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges

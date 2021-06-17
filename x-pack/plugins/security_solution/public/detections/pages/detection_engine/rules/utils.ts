@@ -66,7 +66,8 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18nDetections.BREADCRUMB_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },
@@ -83,7 +84,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
           path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
         }),
       },
@@ -95,7 +97,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
           path: getCreateRuleUrl(!isEmpty(search[0]) ? search[0] : ''),
         }),
       },
@@ -107,7 +110,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        href: getUrlForApp(APP_ID, {
+          deepLinkId: SecurityPageName.rules,
           path: getEditRuleUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
         }),
       },

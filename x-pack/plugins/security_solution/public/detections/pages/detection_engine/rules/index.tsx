@@ -37,6 +37,8 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
+import { APP_ID } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 type Func = () => Promise<void>;
 
@@ -45,6 +47,8 @@ const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
+  const { navigateToApp } = useKibana().services.application;
+
   const [
     {
       loading: userInfoLoading,
@@ -93,7 +97,7 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -123,9 +127,10 @@ const RulesPageComponent: React.FC = () => {
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getCreateRuleUrl());
+      // history.push(getCreateRuleUrl());
+      navigateToApp(APP_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
-    [history]
+    [navigateToApp]
   );
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
@@ -183,14 +188,7 @@ const RulesPageComponent: React.FC = () => {
         title={i18n.IMPORT_RULE}
       />
       <SecuritySolutionPageWrapper>
-        <DetectionEngineHeaderPage
-          backOptions={{
-            href: getDetectionEngineUrl(),
-            text: i18n.BACK_TO_DETECTIONS,
-            pageId: SecurityPageName.detections,
-          }}
-          title={i18n.PAGE_TITLE}
-        >
+        <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
             {loadPrebuiltRulesAndTemplatesButton && (
               <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
@@ -225,6 +223,7 @@ const RulesPageComponent: React.FC = () => {
               <LinkButton
                 data-test-subj="create-new-rule"
                 fill
+                // onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
                 isDisabled={!userHasPermissions(canUserCRUD) || loading}
