@@ -25,7 +25,7 @@ elementsRegistry.register(image);
 import { getInitialState, getReducer, getMiddleware, patchDispatch } from '../addon/src/state';
 export { ADDON_ID, ACTIONS_PANEL_ID } from '../addon/src/constants';
 
-interface Params {
+export interface Params {
   workpad?: CanvasWorkpad;
   elements?: CanvasElement[];
   assets?: CanvasAsset[];

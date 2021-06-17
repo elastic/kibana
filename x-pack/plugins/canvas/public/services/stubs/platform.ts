@@ -9,13 +9,19 @@ import { PlatformService } from '../platform';
 
 const noop = (..._args: any[]): any => {};
 
+const uiSettings: Record<string, any> = {
+  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+};
+
+const getUISetting = (setting: string) => uiSettings[setting];
+
 export const platformService: PlatformService = {
   getBasePath: () => '/base/path',
   getBasePathInterface: noop,
   getDocLinkVersion: () => 'dockLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
   getHasWriteAccess: () => true,
-  getUISetting: noop,
+  getUISetting,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
   getSavedObjects: noop,

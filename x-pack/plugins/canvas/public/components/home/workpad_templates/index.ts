@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { WorkpadManager } from './workpad_manager';
+import React from 'react';
+
+export const LazyWorkpadTemplates = React.lazy(() => import('./workpad_templates'));
