@@ -8,11 +8,13 @@ do
 done
 echo "Simulation classes: $simulations";
 
+IFS=',' read -ra sim_array <<< "${simulations}"
+
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
 if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
-  ./test/scripts/jenkins_xpack_build_plugins.sh
+    ./test/scripts/jenkins_xpack_build_plugins.sh
 fi
 
 echo " -> Configure Metricbeat monitoring"
@@ -28,9 +30,9 @@ URL=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.11.0-li
 echo $URL
 # Downloading the Metricbeat package
 while [ 1 ]; do
-  wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
-  if [ $? = 0 ]; then break; fi; # check return value, break if successful (0)
-  sleep 1s;
+    wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
+    if [ $? = 0 ]; then break; fi; # check return value, break if successful (0)
+    sleep 1s;
 done;
 
 # Install Metricbeat
@@ -77,11 +79,16 @@ nohup ./metricbeat > metricbeat.log 2>&1 &
 popd
 
 echo " -> Running gatling load testing"
-export GATLING_SIMULATIONS="$simulations"
-node scripts/functional_tests \
-  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-  --config test/load/config.ts
-  
+for i in "${sim_array[@]}"; do
+  echo "Running simulation $i .."
+  export GATLING_SIMULATIONS="$i"
+  node scripts/functional_tests \
+    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+    --config test/load/config.ts || exit 0;
+done
+
+echo " -> Simulations run is finished"
+
 # Show output of Metricbeat. Disabled. Enable for debug purposes
-#echo "output of metricbeat.log" 
+#echo "output of metricbeat.log"
 #cat $KIBANA_DIR/metricbeat-install/metricbeat.log
