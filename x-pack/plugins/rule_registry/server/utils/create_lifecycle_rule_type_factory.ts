@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Logger } from '@kbn/logging';
-import { isLeft } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
 import { Mutable } from 'utility-types';
 import v4 from 'uuid/v4';
-import { AlertInstance } from '../../../alerting/server';
 import { RuleDataClient } from '..';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../alerting/common';
+import { AlertInstance, AlertType } from '../../../alerting/server';
+import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -28,45 +29,82 @@ import {
   RULE_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { AlertTypeWithExecutor } from '../types';
-import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { AlertTypeWithExecutor, ExecutorType, ExecutorTypeWithExtraServices } from '../types';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
-type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
+type LifecycleAlertService<
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
+> = (alert: {
   id: string;
   fields: Record<string, unknown>;
-}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
+}) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
-export interface LifecycleAlertServices<TAlertInstanceContext extends Record<string, unknown>> {
-  alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext>;
+export interface LifecycleAlertServices<
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
+> {
+  alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
 }
 
-const trackedAlertStateRt = t.type({
-  alertId: t.string,
-  alertUuid: t.string,
-  started: t.string,
-});
+export type LifecycleRuleExecutor<
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
+> = ExecutorTypeWithExtraServices<
+  ExecutorType<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+  LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
+>;
 
-const wrappedStateRt = t.type({
-  wrapped: t.record(t.string, t.unknown),
-  trackedAlerts: t.record(t.string, trackedAlertStateRt),
-});
+export interface TrackedLifecycleAlertState {
+  alertId: string;
+  alertUuid: string;
+  started: string;
+}
 
-type CreateLifecycleRuleTypeFactory = (options: {
-  ruleDataClient: RuleDataClient;
-  logger: Logger;
-}) => <
-  TParams extends AlertTypeParams,
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends LifecycleAlertServices<TAlertInstanceContext>
->(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
+export type WrappedLifecycleRuleState<State> = Record<string, unknown> & {
+  wrapped: State | void;
+  trackedAlerts: Record<string, TrackedLifecycleAlertState>;
+};
 
-export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
+export const createLifecycleRuleTypeFactory = ({
   logger,
   ruleDataClient,
-}) => (type) => {
+}: {
+  logger: Logger;
+  ruleDataClient: RuleDataClient;
+}) => <
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never
+>(
+  type: AlertTypeWithExecutor<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    ExecutorTypeWithExtraServices<
+      ExecutorType<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+      LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
+    >
+  >
+): AlertType<
+  Params,
+  WrappedLifecycleRuleState<State>,
+  InstanceState,
+  InstanceContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+> => {
   return {
     ...type,
     executor: async (options) => {
@@ -77,14 +115,10 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       const ruleExecutorData = getRuleExecutorData(type, options);
 
-      const decodedState = wrappedStateRt.decode(previousState);
-
-      const state = isLeft(decodedState)
-        ? {
-            wrapped: previousState,
-            trackedAlerts: {},
-          }
-        : decodedState.right;
+      const state: WrappedLifecycleRuleState<State> = previousState ?? {
+        wrapped: {},
+        trackedAlerts: {},
+      };
 
       const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
 
@@ -92,7 +126,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       const nextWrappedState = await type.executor({
         ...options,
-        state: state.wrapped,
+        state: state.wrapped != null ? state.wrapped : ({} as State),
         services: {
           ...options.services,
           alertWithLifecycle: ({ id, fields }) => {

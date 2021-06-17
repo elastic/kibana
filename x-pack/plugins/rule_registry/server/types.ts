@@ -11,30 +11,78 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../alerting/common';
-import { AlertType } from '../../alerting/server';
+import { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server';
 
-type SimpleAlertType<
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>;
+export type AlertExecutorOptionsWithExtraServices<
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  TExtraServices = never
+> = Omit<
+  AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+  'services'
+> & {
+  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds> & TExtraServices;
+};
 
-export type AlertTypeExecutor<
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {}
+export type ExecutorType<
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
 > = (
-  options: Parameters<SimpleAlertType<TParams, TAlertInstanceContext>['executor']>[0] & {
-    services: TServices;
-  }
-) => Promise<any>;
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+) => Promise<State | void>;
+
+export type ExecutorTypeWithExtraServices<
+  TExecutorType,
+  TExtraServices
+> = TExecutorType extends ExecutorType<
+  infer Params,
+  infer State,
+  infer InstanceState,
+  infer InstanceContext,
+  infer ActionGroupIds
+>
+  ? (
+      options: AlertExecutorOptionsWithExtraServices<
+        Params,
+        State,
+        InstanceState,
+        InstanceContext,
+        ActionGroupIds,
+        TExtraServices
+      >
+    ) => Promise<State | void>
+  : never;
 
 export type AlertTypeWithExecutor<
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {}
+  TParams extends AlertTypeParams = never,
+  TState extends AlertTypeState = never,
+  TInstanceState extends AlertInstanceState = never,
+  TInstanceContext extends AlertInstanceContext = never,
+  TActionGroupIds extends string = never,
+  TRecoveryActionGroupId extends string = never,
+  TExecutorType extends (...args: any[]) => Promise<TState | void> = ExecutorType<
+    TParams,
+    TState,
+    TInstanceState,
+    TInstanceContext,
+    TActionGroupIds
+  >
 > = Omit<
-  AlertType<TParams, AlertTypeState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  AlertType<
+    TParams,
+    TState,
+    TInstanceState,
+    TInstanceContext,
+    TActionGroupIds,
+    TRecoveryActionGroupId
+  >,
   'executor'
 > & {
-  executor: AlertTypeExecutor<TParams, TAlertInstanceContext, TServices>;
+  executor: TExecutorType;
 };

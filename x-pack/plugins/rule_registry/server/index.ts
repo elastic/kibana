@@ -17,6 +17,7 @@ export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor
 export {
   createLifecycleRuleTypeFactory,
   LifecycleAlertServices,
+  LifecycleRuleExecutor,
 } from './utils/create_lifecycle_rule_type_factory';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertExecutorOptions } from '../../../alerting/server';
 import {
   PRODUCER,
   RULE_CATEGORY,
@@ -13,7 +14,7 @@ import {
   RULE_UUID,
   TAGS,
 } from '../../common/technical_rule_data_field_names';
-import { AlertTypeExecutor, AlertTypeWithExecutor } from '../types';
+import { AlertTypeWithExecutor } from '../types';
 
 export interface RuleExecutorData {
   [RULE_CATEGORY]: string;
@@ -25,8 +26,8 @@ export interface RuleExecutorData {
 }
 
 export function getRuleExecutorData(
-  type: AlertTypeWithExecutor<any, any, any>,
-  options: Parameters<AlertTypeExecutor>[0]
+  type: AlertTypeWithExecutor<any, any, any, any, any, any, any>,
+  options: AlertExecutorOptions<any, any, any, any, any>
 ) {
   return {
     [RULE_ID]: type.id,
