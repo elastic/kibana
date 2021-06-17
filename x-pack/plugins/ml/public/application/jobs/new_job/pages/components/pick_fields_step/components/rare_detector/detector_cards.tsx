@@ -29,7 +29,7 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
         <>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
-            defaultMessage="Look for rare things."
+            defaultMessage="Look for distinct rare values in data over time."
           />
         </>
       }
@@ -52,7 +52,7 @@ export const RareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => 
         <>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
-            defaultMessage="Look for rare things in a population."
+            defaultMessage="Look for rare values in a population."
           />
         </>
       }
@@ -75,7 +75,7 @@ export const FrequentlyRareInPopulationCard: FC<CardProps> = ({ onClick, isSelec
         <>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
-            defaultMessage="Look for frequently rare things in a population."
+            defaultMessage="Look for frequently rare values in a population."
           />
         </>
       }

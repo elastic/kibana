@@ -189,7 +189,7 @@ export const Page: FC = () => {
         defaultMessage: 'Rare',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
-        defaultMessage: 'Detect rare things.',
+        defaultMessage: 'Detect rare values in time series data.',
       }),
       id: 'mlJobTypeLinkrareJob',
     },

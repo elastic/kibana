@@ -49,19 +49,19 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
   const desc = [];
 
   if (detectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION) {
-    desc.push('Frequently rare ');
+    desc.push('This job will detect frequently rare ');
   } else {
-    desc.push('Rare ');
+    desc.push('This job will detect rare ');
   }
+  desc.push('values of ');
   desc.push(rareFieldName);
-  desc.push(' values');
 
   if (populationFieldName !== undefined) {
-    desc.push(` compared to population of ${populationFieldName}`);
+    desc.push(` compared to the population of ${populationFieldName}`);
   }
 
   if (splitFieldName !== undefined) {
-    desc.push(`, split by ${splitFieldName}`);
+    desc.push(`, for each value of ${splitFieldName}`);
   }
 
   return desc.join('');
