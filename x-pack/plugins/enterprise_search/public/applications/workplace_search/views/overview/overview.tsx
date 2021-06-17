@@ -53,8 +53,9 @@ export const Overview: React.FC = () => {
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 
-  const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
-  const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
+  const headerTitle = dataLoading || hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
+  const headerDescription =
+    dataLoading || hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
     <WorkplaceSearchPageTemplate
@@ -66,8 +67,12 @@ export const Overview: React.FC = () => {
       pageViewTelemetry="overview"
       isLoading={dataLoading}
     >
-      {!hideOnboarding && <OnboardingSteps />}
-      <EuiSpacer size="xl" />
+      {!hideOnboarding && (
+        <>
+          <OnboardingSteps />
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <OrganizationStats />
       <EuiSpacer size="xl" />
       <RecentActivity />

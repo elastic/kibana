@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
 import './__mocks__/overview_logic.mock';
 import { mockActions, setMockValues } from './__mocks__';
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
@@ -19,7 +20,7 @@ import { RecentActivity } from './recent_activity';
 
 describe('Overview', () => {
   it('calls initialize function', async () => {
-    mount(<Overview />);
+    shallow(<Overview />);
 
     expect(mockActions.initializeOverview).toHaveBeenCalled();
   });
