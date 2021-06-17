@@ -41,7 +41,6 @@ import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
-import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
@@ -64,7 +63,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
 
   // We don't want so show the subnavs on the container root pages.
   const showSourcesSubnav = pathname !== SOURCES_PATH && pathname !== PERSONAL_SOURCES_PATH;
-  const showGroupsSubnav = pathname !== GROUPS_PATH;
 
   /**
    * Personal dashboard urls begin with /p/
@@ -132,13 +130,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Layout>
       </Route>
       <Route path={GROUPS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav groupsSubNav={showGroupsSubnav && <GroupSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <GroupsRouter />
-        </Layout>
+        <GroupsRouter />
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
         <RoleMappings />
