@@ -261,52 +261,48 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_metric/README.md[visTypeMetric]
-|Contains the metric visualization.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_metric[visTypeMetric]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_pie/README.md[visTypePie]
-|Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_pie[visTypePie]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_tagcloud/README.md[visTypeTagcloud]
-|Contains the tagcloud visualization.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_tagcloud[visTypeTagcloud]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_timelion/README.md[visTypeTimelion]
 |Contains the timelion visualization and the timelion backend.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_timeseries/README.md[visTypeTimeseries]
-|Contains everything around TSVB (the editor, visualizatin implementations and backends).
+|{kib-repo}blob/{branch}/src/plugins/vis_type_timeseries[visTypeTimeseries]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_vega/README.md[visTypeVega]
-|Contains the Vega visualization.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_vega[visTypeVega]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_vislib/README.md[visTypeVislib]
-|Contains the vislib visualizations. These are the classical area/line/bar, pie, gauge/goal and
-heatmap charts.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_vislib[visTypeVislib]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_xy/README.md[visTypeXy]
-|Contains the new xy-axis chart using the elastic-charts library, which will eventually
-replace the vislib xy-axis charts including bar, area, and line.
+|{kib-repo}blob/{branch}/src/plugins/vis_type_xy[visTypeXy]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/visualizations/README.md[visualizations]
-|Contains most of the visualization infrastructure, e.g. the visualization type registry or the
-visualization embeddable.
+|{kib-repo}blob/{branch}/src/plugins/visualizations[visualizations]
+|WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/visualize/README.md[visualize]
-|Contains the visualize application which includes the listing page and the app frame,
-which will load the visualization's editor.
+|{kib-repo}blob/{branch}/src/plugins/visualize[visualize]
+|WARNING: Missing README.
 
 
 |===
