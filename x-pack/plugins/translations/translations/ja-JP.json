@@ -13242,7 +13242,6 @@
     "xpack.maps.layerControl.addLayerButtonLabel": "レイヤーを追加",
     "xpack.maps.layerControl.closeLayerTOCButtonAriaLabel": "レイヤーパネルを畳む",
     "xpack.maps.layerControl.layersTitle": "レイヤー",
-    "xpack.maps.layerControl.layerTocActions.editButtonLabel": "レイヤーを編集",
     "xpack.maps.layerControl.openLayerTOCButtonAriaLabel": "レイヤーパネルを拡張",
     "xpack.maps.layerControl.tocEntry.grabButtonAriaLabel": "レイヤーの並べ替え",
     "xpack.maps.layerControl.tocEntry.grabButtonTitle": "レイヤーの並べ替え",

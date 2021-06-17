@@ -11,7 +11,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';
-import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
+import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
@@ -20,14 +20,14 @@ import {
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../draw_control';
+import { DrawControl } from '../';
 import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   disableDrawState: () => void;
   drawState?: DrawState;
-  isDrawingFilter: boolean;
+  filterModeActive: boolean;
   mbMap: MbMap;
   geoFieldNames: string[];
 }
@@ -39,7 +39,7 @@ export class DrawFilterControl extends Component<Props, {}> {
     }
 
     let filter: Filter | undefined;
-    if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+    if (this.props.drawState.drawShape === DRAW_SHAPE.DISTANCE) {
       const circle = e.features[0] as Feature & { properties: DrawCircleProperties };
       const distanceKm = _.round(
         circle.properties.radiusKm,
@@ -70,7 +70,7 @@ export class DrawFilterControl extends Component<Props, {}> {
 
       filter = createSpatialFilterWithGeometry({
         geometry:
-          this.props.drawState.drawType === DRAW_TYPE.BOUNDS
+          this.props.drawState.drawShape === DRAW_SHAPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
             : geometry,
         geoFieldNames: this.props.geoFieldNames,
@@ -100,13 +100,14 @@ export class DrawFilterControl extends Component<Props, {}> {
   render() {
     return (
       <DrawControl
-        drawType={
-          this.props.isDrawingFilter && this.props.drawState
-            ? this.props.drawState.drawType
+        drawShape={
+          this.props.filterModeActive && this.props.drawState
+            ? this.props.drawState.drawShape
             : undefined
         }
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
+        enable={this.props.filterModeActive}
       />
     );
   }

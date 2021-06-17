@@ -13419,7 +13419,6 @@
     "xpack.maps.layerControl.addLayerButtonLabel": "添加图层",
     "xpack.maps.layerControl.closeLayerTOCButtonAriaLabel": "折叠图层面板",
     "xpack.maps.layerControl.layersTitle": "图层",
-    "xpack.maps.layerControl.layerTocActions.editButtonLabel": "编辑图层",
     "xpack.maps.layerControl.openLayerTOCButtonAriaLabel": "展开图层面板",
     "xpack.maps.layerControl.tocEntry.grabButtonAriaLabel": "重新排序图层",
     "xpack.maps.layerControl.tocEntry.grabButtonTitle": "重新排序图层",
