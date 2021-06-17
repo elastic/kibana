@@ -568,22 +568,17 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
-      let packageVersion: string = '';
-
-      for (const packageDefinition of body.response) {
-        if (packageDefinition.name === packageName) {
-          if (packageDefinition.version) {
-            log.debug(` > found version '${packageDefinition.version}'`);
-            packageVersion = packageDefinition.version as string;
-            break;
-          }
-        }
-      }
+      const packageVersion =
+        body.response.find(
+          ({ name, version }: { name: string; version: string }) => name === packageName && version
+        )?.version ?? '';
 
       expect(packageVersion).to.not.eql(
         '',
         `Fleet package definition for '${packageName}' should exist and have a version`
       );
+
+      log.debug(` > found version '${packageVersion}'`);
       return packageVersion;
     },
   };
