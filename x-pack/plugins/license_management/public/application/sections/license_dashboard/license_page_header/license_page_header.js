@@ -71,7 +71,7 @@ const PageDescription = ({ license }) => {
   );
 };
 
-const getPageIconConfig = ({ license }) => {
+const getHeaderIconConfig = ({ license }) => {
   return {
     iconType: license.isExpired ? 'alert' : 'checkInCircleFilled',
     iconProps: {
@@ -89,7 +89,7 @@ export const LicensePageHeader = () => {
         bottomBorder
         pageTitle={<PageTitle license={license} />}
         description={<PageDescription license={license} />}
-        {...getPageIconConfig({ license })}
+        {...getHeaderIconConfig({ license })}
       />
 
       <EuiSpacer size="l" />
