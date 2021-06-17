@@ -14,8 +14,8 @@ import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getCaseUrl, useFormatUrl } from './links';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
