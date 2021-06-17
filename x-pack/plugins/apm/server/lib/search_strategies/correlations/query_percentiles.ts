@@ -52,6 +52,9 @@ export const getTransactionDurationPercentilesRequest = (
       aggs: {
         transaction_duration_percentiles: {
           percentiles: {
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
             field: TRANSACTION_DURATION,
             ...(Array.isArray(percents) ? { percents } : {}),
           },
