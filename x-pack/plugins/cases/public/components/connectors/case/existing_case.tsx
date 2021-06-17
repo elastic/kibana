@@ -16,11 +16,16 @@ import { useCreateCaseModal } from '../../use_create_case_modal';
 import { CasesDropdown, ADD_CASE_BUTTON_ID } from './cases_dropdown';
 
 interface ExistingCaseProps {
+  casesUrl: string;
   selectedCase: string | null;
   onCaseChanged: (id: string) => void;
 }
 
-const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
+const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({
+  casesUrl,
+  onCaseChanged,
+  selectedCase,
+}) => {
   const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases({
     initialQueryParams: DEFAULT_QUERY_PARAMS,
     initialFilterOptions: {
@@ -38,6 +43,7 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
   );
 
   const { modal, openModal } = useCreateCaseModal({
+    casesUrl,
     onCaseCreated,
     caseType: CaseType.collection,
     // FUTURE DEVELOPER

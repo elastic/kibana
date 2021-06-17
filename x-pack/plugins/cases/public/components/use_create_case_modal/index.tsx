@@ -13,6 +13,7 @@ import { CreateCaseModal } from './create_case_modal';
 export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
   caseType?: CaseType;
+  casesUrl: string;
   hideConnectorServiceNowSir?: boolean;
 }
 export interface UseCreateCaseModalReturnedValues {
@@ -24,6 +25,7 @@ export interface UseCreateCaseModalReturnedValues {
 
 export const useCreateCaseModal = ({
   caseType = CaseType.individual,
+  casesUrl,
   onCaseCreated,
   hideConnectorServiceNowSir = false,
 }: UseCreateCaseModalProps) => {
@@ -43,6 +45,7 @@ export const useCreateCaseModal = ({
     () => ({
       modal: (
         <CreateCaseModal
+          casesUrl={casesUrl}
           caseType={caseType}
           hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           isModalOpen={isModalOpen}
@@ -55,6 +58,15 @@ export const useCreateCaseModal = ({
       closeModal,
       openModal,
     }),
-    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal, owner]
+    [
+      caseType,
+      casesUrl,
+      closeModal,
+      hideConnectorServiceNowSir,
+      isModalOpen,
+      onSuccess,
+      openModal,
+      owner,
+    ]
   );
 };

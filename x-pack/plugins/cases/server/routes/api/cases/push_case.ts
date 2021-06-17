@@ -12,9 +12,13 @@ import { identity } from 'fp-ts/lib/function';
 
 import { wrapError, escapeHatch } from '../utils';
 
-import { throwErrors, CasePushRequestParamsRt, CasePushRequestRt } from '../../../../common';
+import {
+  throwErrors,
+  CasePushRequestParamsRt,
+  CasePushRequestRt,
+  CASE_PUSH_URL,
+} from '../../../../common';
 import { RouteDeps } from '../types';
-import { CASE_PUSH_URL } from '../../../../common';
 
 export function initPushCaseApi({ router, logger }: RouteDeps) {
   router.post(
@@ -30,6 +34,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
+
         const body = pipe(
           CasePushRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)

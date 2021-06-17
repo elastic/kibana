@@ -61,6 +61,7 @@ describe('usePushToService', () => {
       type: ConnectorTypes.serviceNowITSM,
       fields: null,
     },
+    caseUrl: `https://elastic.co`,
     caseId,
     caseServices,
     caseStatus: CaseStatuses.open,

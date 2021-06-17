@@ -48,14 +48,6 @@ export const NAME = i18n.translate('xpack.securitySolution.cases.caseView.name',
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.securitySolution.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
-});
-
-export const CLOSED_ON = i18n.translate('xpack.securitySolution.cases.caseView.closedOn', {
-  defaultMessage: 'Closed on',
-});
-
 export const REPORTER = i18n.translate('xpack.securitySolution.cases.caseView.reporterLabel', {
   defaultMessage: 'Reporter',
 });
@@ -86,20 +78,6 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const COMMENT_REQUIRED = i18n.translate(
-  'xpack.securitySolution.cases.caseView.commentFieldRequiredError',
-  {
-    defaultMessage: 'A comment is required.',
-  }
-);
-
-export const REQUIRED_FIELD = i18n.translate(
-  'xpack.securitySolution.cases.caseView.fieldRequiredError',
-  {
-    defaultMessage: 'Required field',
-  }
-);
-
 export const EDIT = i18n.translate('xpack.securitySolution.cases.caseView.edit', {
   defaultMessage: 'Edit',
 });
@@ -120,10 +98,6 @@ export const CLOSE_CASE = i18n.translate('xpack.securitySolution.cases.caseView.
   defaultMessage: 'Close case',
 });
 
-export const REOPEN_CASE = i18n.translate('xpack.securitySolution.cases.caseView.reopenCase', {
-  defaultMessage: 'Reopen case',
-});
-
 export const CASE_NAME = i18n.translate('xpack.securitySolution.cases.caseView.caseName', {
   defaultMessage: 'Case name',
 });
@@ -140,13 +114,6 @@ export const ACTIONS = i18n.translate('xpack.securitySolution.cases.allCases.act
   defaultMessage: 'Actions',
 });
 
-export const NO_TAGS_AVAILABLE = i18n.translate(
-  'xpack.securitySolution.cases.allCases.noTagsAvailable',
-  {
-    defaultMessage: 'No tags available',
-  }
-);
-
 export const NO_REPORTERS_AVAILABLE = i18n.translate(
   'xpack.securitySolution.cases.caseView.noReportersAvailable',
   {
@@ -157,14 +124,6 @@ export const NO_REPORTERS_AVAILABLE = i18n.translate(
 export const COMMENTS = i18n.translate('xpack.securitySolution.cases.allCases.comments', {
   defaultMessage: 'Comments',
 });
-
-export const TAGS_HELP = i18n.translate(
-  'xpack.securitySolution.cases.createCase.fieldTagsHelpText',
-  {
-    defaultMessage:
-      'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
-  }
-);
 
 export const NO_TAGS = i18n.translate('xpack.securitySolution.cases.caseView.noTags', {
   defaultMessage: 'No tags are currently assigned to this case.',
@@ -184,27 +143,6 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
   }
 );
 
-export const CONFIGURE_CASES_BUTTON = i18n.translate(
-  'xpack.securitySolution.cases.configureCasesButton',
-  {
-    defaultMessage: 'Edit external connection',
-  }
-);
-
-export const ADD_COMMENT = i18n.translate(
-  'xpack.securitySolution.cases.caseView.comment.addComment',
-  {
-    defaultMessage: 'Add comment',
-  }
-);
-
-export const ADD_COMMENT_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.cases.caseView.comment.addCommentHelpText',
-  {
-    defaultMessage: 'Add a new comment...',
-  }
-);
-
 export const SAVE = i18n.translate('xpack.securitySolution.cases.caseView.description.save', {
   defaultMessage: 'Save',
 });
@@ -219,10 +157,3 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
 export const CONNECTORS = i18n.translate('xpack.securitySolution.cases.caseView.connectors', {
   defaultMessage: 'External Incident Management System',
 });
-
-export const EDIT_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.cases.caseView.editConnector',
-  {
-    defaultMessage: 'Change external incident management system',
-  }
-);

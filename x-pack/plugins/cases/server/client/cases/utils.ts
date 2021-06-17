@@ -235,7 +235,7 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
     value: `${value} [${FIELD_INFORMATION('create', date, user)}](${caseUrl} )`,
     ...rest,
   }),
@@ -245,7 +245,7 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
     value: `${value} [${FIELD_INFORMATION('update', date, user)}](${caseUrl} )`,
     ...rest,
   }),
@@ -255,11 +255,16 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
     value: `${value} [${FIELD_INFORMATION('add', date, user)}](${caseUrl} )`,
     ...rest,
   }),
-  append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
+  append: ({
+    caseUrl,
+    value,
+    previousValue,
+    ...rest
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
     value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
     ...rest,
   }),

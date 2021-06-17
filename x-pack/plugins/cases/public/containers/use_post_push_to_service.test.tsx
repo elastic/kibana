@@ -23,7 +23,11 @@ describe('usePostPushToService', () => {
     fields: { issueType: 'Task', priority: 'Low', parent: null },
   } as CaseConnector;
   const caseId = pushedCase.id;
-
+  const pushArgs = {
+    caseId,
+    caseUrl: `https://elastic.co/app/security/cases/${caseId}`,
+    connector,
+  };
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
@@ -46,7 +50,7 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
+      result.current.pushCaseToExternalService(pushArgs);
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(caseId, connector.id, abortCtrl.signal);
     });
@@ -58,7 +62,7 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
+      result.current.pushCaseToExternalService(pushArgs);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -74,7 +78,7 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
+      result.current.pushCaseToExternalService(pushArgs);
       expect(result.current.isLoading).toBe(true);
     });
   });
@@ -90,7 +94,7 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.pushCaseToExternalService({ caseId, connector });
+      result.current.pushCaseToExternalService(pushArgs);
 
       expect(result.current).toEqual({
         isLoading: false,

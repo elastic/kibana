@@ -15,6 +15,7 @@ import { getCreateCaseLazy as getCreateCase } from '../../methods';
 
 export interface CreateCaseModalProps {
   caseType?: CaseType;
+  casesUrl: string;
   hideConnectorServiceNowSir?: boolean;
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
@@ -24,19 +25,21 @@ export interface CreateCaseModalProps {
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   caseType = CaseType.individual,
+  casesUrl,
   hideConnectorServiceNowSir,
   isModalOpen,
   onCloseCaseModal,
   onSuccess,
   owner,
-}) => {
-  return isModalOpen ? (
+}) =>
+  isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         {getCreateCase({
+          casesUrl,
           caseType,
           hideConnectorServiceNowSir,
           onCancel: onCloseCaseModal,
@@ -47,7 +50,6 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
       </EuiModalBody>
     </EuiModal>
   ) : null;
-};
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

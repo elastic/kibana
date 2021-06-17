@@ -102,12 +102,13 @@ export const usePostPushToService = (): UsePostPushToService => {
     []
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       abortCtrlRef.current.abort();
       cancel.current = true;
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, pushCaseToExternalService };
 };

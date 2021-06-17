@@ -83,6 +83,11 @@ export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
  * This variable is being also used by test files and mocks.
  */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
+/**
+ * This variable is being used in the ExistingCases component which is hard coded to only allow owner:securitySolution
+ * This value should match the CASES_APP_ID value in security_solution/common/constants.ts ( `${APP_ID}:${SecurityPageName.case}`)
+ */
+export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolution:case';
 
 /**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.

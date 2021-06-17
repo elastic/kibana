@@ -70,6 +70,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 };
 
 const defaultProps = {
+  casesUrl: `https://elastic.co`,
   onCancel: jest.fn(),
   onSuccess: jest.fn(),
 };

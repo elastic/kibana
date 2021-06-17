@@ -12,7 +12,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 import * as i18n from '../../translations';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
@@ -51,7 +51,10 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   onCloseFlyout,
   onSuccess,
 }) => {
-  const { cases } = useKibana().services;
+  const {
+    cases,
+    application: { getUrlForApp },
+  } = useKibana().services;
   return (
     <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
       <EuiFlyoutHeader hasBorder>
@@ -63,6 +66,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
         <FormWrapper>
           {cases.getCreateCase({
             afterCaseCreated,
+            casesUrl: getUrlForApp(CASES_APP_ID),
             onCancel: onCloseFlyout,
             onSuccess,
             withSteps: false,

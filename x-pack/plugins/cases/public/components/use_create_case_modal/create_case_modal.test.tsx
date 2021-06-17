@@ -18,6 +18,7 @@ const getCreateCaseMock = getCreateCase as jest.Mock;
 const onCloseCaseModal = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
+  casesUrl: `https://elastic.co`,
   isModalOpen: true,
   onCloseCaseModal,
   onSuccess,

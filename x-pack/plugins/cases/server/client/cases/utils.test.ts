@@ -38,6 +38,11 @@ const formatComment = {
 };
 
 const params = { ...basicParams };
+const caseUrl = `https://elastic.co/app/security/cases/1234`;
+const transformFieldsArgs = {
+  params,
+  caseUrl,
+};
 
 describe('utils', () => {
   describe('prepareFieldsForTransformation', () => {
@@ -97,13 +102,13 @@ describe('utils', () => {
       });
 
       const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
-        params,
+        ...transformFieldsArgs,
         fields,
       });
 
       expect(res).toEqual({
         short_description: 'a title',
-        description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+        description: `a description [(created at 2020-03-13T08:34:53.450Z by Elastic User)](${caseUrl} )`,
       });
     });
 
@@ -115,6 +120,7 @@ describe('utils', () => {
       });
 
       const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
+        ...transformFieldsArgs,
         params: {
           ...params,
           updatedAt: '2020-03-15T08:34:53.450Z',
@@ -127,14 +133,14 @@ describe('utils', () => {
         fields,
         currentIncident: {
           short_description: 'first title',
-          description: 'first description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          description: `first description [(created at 2020-03-13T08:34:53.450Z by Elastic User)](${caseUrl} )`,
         },
       });
 
       expect(res).toEqual({
         short_description: 'a title',
-        description:
-          'first description (created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-15T08:34:53.450Z by Another User)',
+        description: `first description [(created at 2020-03-13T08:34:53.450Z by Elastic User)](${caseUrl} ) \r\na description [(updated at 2020-03-15T08:34:53.450Z by Another User)](${caseUrl} )`,
+        // description: `first description [(created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-15T08:34:53.450Z by Another User)](${caseUrl} )`,
       });
     });
 
@@ -146,7 +152,7 @@ describe('utils', () => {
       });
 
       const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
-        params,
+        ...transformFieldsArgs,
         fields,
         currentIncident: {
           short_description: 'first title',
@@ -164,6 +170,7 @@ describe('utils', () => {
       });
 
       const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
+        ...transformFieldsArgs,
         params: {
           ...params,
           createdBy: { full_name: '', username: 'elastic', email: 'elastic@elastic.co' },
@@ -173,7 +180,7 @@ describe('utils', () => {
 
       expect(res).toEqual({
         short_description: 'a title',
-        description: 'a description (created at 2020-03-13T08:34:53.450Z by elastic)',
+        description: `a description [(created at 2020-03-13T08:34:53.450Z by elastic)](${caseUrl} )`,
       });
     });
 
@@ -185,6 +192,7 @@ describe('utils', () => {
       });
 
       const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
+        ...transformFieldsArgs,
         params: {
           ...params,
           updatedAt: '2020-03-15T08:34:53.450Z',
@@ -195,7 +203,7 @@ describe('utils', () => {
 
       expect(res).toEqual({
         short_description: 'a title',
-        description: 'a description (updated at 2020-03-15T08:34:53.450Z by anotherUser)',
+        description: `a description [(updated at 2020-03-15T08:34:53.450Z by anotherUser)](${caseUrl} )`,
       });
     });
   });
@@ -203,11 +211,11 @@ describe('utils', () => {
   describe('transformComments', () => {
     test('transform creation comments', () => {
       const comments = [commentObj];
-      const res = transformComments(comments, ['informationCreated']);
+      const res = transformComments(comments, ['informationCreated'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (created at ${comments[0].created_at} by ${comments[0].created_by.full_name})`,
+          comment: `${formatComment.comment} [(created at ${comments[0].created_at} by ${comments[0].created_by.full_name})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
@@ -224,22 +232,22 @@ describe('utils', () => {
           },
         },
       ];
-      const res = transformComments(comments, ['informationUpdated']);
+      const res = transformComments(comments, ['informationUpdated'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (updated at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})`,
+          comment: `${formatComment.comment} [(updated at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
 
     test('transform added comments', () => {
       const comments = [commentObj];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].created_at} by ${comments[0].created_by.full_name})`,
+          comment: `${formatComment.comment} [(added at ${comments[0].created_at} by ${comments[0].created_by.full_name})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
@@ -247,11 +255,11 @@ describe('utils', () => {
     test('transform comments without fullname', () => {
       const comments = [{ ...commentObj, createdBy: { username: commentObj.created_by.username } }];
       // @ts-ignore testing no full_name
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].created_at} by ${comments[0].created_by.username})`,
+          comment: `${formatComment.comment} [(added at ${comments[0].created_at} by ${comments[0].created_by.username})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
@@ -264,11 +272,11 @@ describe('utils', () => {
           updated_by: { full_name: 'Elastic2', username: 'elastic', email: 'elastic@elastic.co' },
         },
       ];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})`,
+          comment: `${formatComment.comment} [(added at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
@@ -281,44 +289,48 @@ describe('utils', () => {
           updated_by: { full_name: '', username: 'elastic2', email: 'elastic@elastic.co' },
         },
       ];
-      const res = transformComments(comments, ['informationAdded']);
+      const res = transformComments(comments, ['informationAdded'], caseUrl);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].updated_at} by ${comments[0].updated_by.username})`,
+          comment: `${formatComment.comment} [(added at ${comments[0].updated_at} by ${comments[0].updated_by.username})](${caseUrl}/${commentObj.id} )`,
         },
       ]);
     });
   });
 
   describe('transformers', () => {
+    const baseArgs = {
+      caseUrl,
+      value: 'a value',
+    };
     const { informationCreated, informationUpdated, informationAdded, append } = transformers;
     describe('informationCreated', () => {
       test('transforms correctly', () => {
         const res = informationCreated({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
         });
-        expect(res).toEqual({ value: 'a value (created at 2020-04-15T08:19:27.400Z by elastic)' });
+        expect(res).toEqual({
+          value: `a value [(created at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
+        });
       });
 
       test('transforms correctly without optional fields', () => {
-        const res = informationCreated({
-          value: 'a value',
-        });
-        expect(res).toEqual({ value: 'a value (created at  by )' });
+        const res = informationCreated(baseArgs);
+        expect(res).toEqual({ value: `a value [(created at  by )](${caseUrl} )` });
       });
 
       test('returns correctly rest fields', () => {
         const res = informationCreated({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
           previousValue: 'previous value',
         });
         expect(res).toEqual({
-          value: 'a value (created at 2020-04-15T08:19:27.400Z by elastic)',
+          value: `a value [(created at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
           previousValue: 'previous value',
         });
       });
@@ -327,29 +339,29 @@ describe('utils', () => {
     describe('informationUpdated', () => {
       test('transforms correctly', () => {
         const res = informationUpdated({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
         });
-        expect(res).toEqual({ value: 'a value (updated at 2020-04-15T08:19:27.400Z by elastic)' });
+        expect(res).toEqual({
+          value: `a value [(updated at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
+        });
       });
 
       test('transforms correctly without optional fields', () => {
-        const res = informationUpdated({
-          value: 'a value',
-        });
-        expect(res).toEqual({ value: 'a value (updated at  by )' });
+        const res = informationUpdated(baseArgs);
+        expect(res).toEqual({ value: `a value [(updated at  by )](${caseUrl} )` });
       });
 
       test('returns correctly rest fields', () => {
         const res = informationUpdated({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
           previousValue: 'previous value',
         });
         expect(res).toEqual({
-          value: 'a value (updated at 2020-04-15T08:19:27.400Z by elastic)',
+          value: `a value [(updated at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
           previousValue: 'previous value',
         });
       });
@@ -358,29 +370,29 @@ describe('utils', () => {
     describe('informationAdded', () => {
       test('transforms correctly', () => {
         const res = informationAdded({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
         });
-        expect(res).toEqual({ value: 'a value (added at 2020-04-15T08:19:27.400Z by elastic)' });
+        expect(res).toEqual({
+          value: `a value [(added at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
+        });
       });
 
       test('transforms correctly without optional fields', () => {
-        const res = informationAdded({
-          value: 'a value',
-        });
-        expect(res).toEqual({ value: 'a value (added at  by )' });
+        const res = informationAdded(baseArgs);
+        expect(res).toEqual({ value: `a value [(added at  by )](${caseUrl} )` });
       });
 
       test('returns correctly rest fields', () => {
         const res = informationAdded({
-          value: 'a value',
+          ...baseArgs,
           date: '2020-04-15T08:19:27.400Z',
           user: 'elastic',
           previousValue: 'previous value',
         });
         expect(res).toEqual({
-          value: 'a value (added at 2020-04-15T08:19:27.400Z by elastic)',
+          value: `a value [(added at 2020-04-15T08:19:27.400Z by elastic)](${caseUrl} )`,
           previousValue: 'previous value',
         });
       });
@@ -389,27 +401,27 @@ describe('utils', () => {
     describe('append', () => {
       test('transforms correctly', () => {
         const res = append({
-          value: 'a value',
-          previousValue: 'previous value',
+          ...baseArgs,
+          previousValue: `This is a brand new case of a bad meanie defacing data [(created at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} )`,
         });
-        expect(res).toEqual({ value: 'previous value \r\na value' });
+        expect(res).toEqual({
+          value: `This is a brand new case of a bad meanie defacing data [(created at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} ) \r\na value`,
+        });
       });
 
       test('transforms correctly without optional fields', () => {
-        const res = append({
-          value: 'a value',
-        });
+        const res = append(baseArgs);
         expect(res).toEqual({ value: 'a value' });
       });
 
       test('returns correctly rest fields', () => {
         const res = append({
-          value: 'a value',
+          ...baseArgs,
           user: 'elastic',
-          previousValue: 'previous value',
+          previousValue: `This is a brand new case of a bad meanie defacing data [(created at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} )`,
         });
         expect(res).toEqual({
-          value: 'previous value \r\na value',
+          value: `This is a brand new case of a bad meanie defacing data [(created at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} ) \r\na value`,
           user: 'elastic',
         });
       });
@@ -435,17 +447,19 @@ describe('utils', () => {
       },
       isPreconfigured: false,
     };
+    const basicCreateIncidentArgs = {
+      actionsClient: actionsMock,
+      alerts: [],
+      casesConnectors,
+      caseUrl,
+      connector,
+      mappings,
+      theCase,
+      userActions,
+    };
 
     it('creates an external incident', async () => {
-      const res = await createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions: [],
-        connector,
-        mappings,
-        alerts: [],
-        casesConnectors,
-      });
+      const res = await createIncident({ ...basicCreateIncidentArgs, userActions: [] });
 
       expect(res).toEqual({
         incident: {
@@ -454,8 +468,7 @@ describe('utils', () => {
           issueType: null,
           parent: null,
           short_description: 'Super Bad Security Issue',
-          description:
-            'This is a brand new case of a bad meanie defacing data (created at 2019-11-25T21:54:48.952Z by elastic)',
+          description: `This is a brand new case of a bad meanie defacing data [(created at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} )`,
           externalId: null,
         },
         comments: [],
@@ -464,22 +477,16 @@ describe('utils', () => {
 
     it('it creates comments correctly', async () => {
       const res = await createIncident({
-        actionsClient: actionsMock,
+        ...basicCreateIncidentArgs,
         theCase: {
           ...theCase,
           comments: [{ ...commentObj, id: 'comment-user-1' }],
         },
-        userActions,
-        connector,
-        mappings,
-        alerts: [],
-        casesConnectors,
       });
 
       expect(res.comments).toEqual([
         {
-          comment:
-            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          comment: `Wow, good luck catching that bad meanie! [(added at 2019-11-25T21:55:00.177Z by elastic)](${caseUrl}/comment-user-1 )`,
           commentId: 'comment-user-1',
         },
       ]);
@@ -487,13 +494,7 @@ describe('utils', () => {
 
     it('it does NOT creates comments when mapping is nothing', async () => {
       const res = await createIncident({
-        actionsClient: actionsMock,
-        theCase: {
-          ...theCase,
-          comments: [{ ...commentObj, id: 'comment-user-1' }],
-        },
-        userActions,
-        connector,
+        ...basicCreateIncidentArgs,
         mappings: [
           mappings[0],
           mappings[1],
@@ -503,8 +504,10 @@ describe('utils', () => {
             action_type: 'nothing',
           },
         ],
-        alerts: [],
-        casesConnectors,
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentObj, id: 'comment-user-1' }],
+        },
       });
 
       expect(res.comments).toEqual([]);
@@ -512,7 +515,7 @@ describe('utils', () => {
 
     it('it adds the total alert comments correctly', async () => {
       const res = await createIncident({
-        actionsClient: actionsMock,
+        ...basicCreateIncidentArgs,
         theCase: {
           ...theCase,
           comments: [
@@ -525,7 +528,6 @@ describe('utils', () => {
         },
         // Remove second push
         userActions: userActions.filter((item, index) => index !== 4),
-        connector,
         mappings: [
           ...mappings,
           {
@@ -534,14 +536,11 @@ describe('utils', () => {
             action_type: 'nothing',
           },
         ],
-        alerts: [],
-        casesConnectors,
       });
 
       expect(res.comments).toEqual([
         {
-          comment:
-            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          comment: `Wow, good luck catching that bad meanie! [(added at 2019-11-25T21:55:00.177Z by elastic)](${caseUrl}/comment-user-1 )`,
           commentId: 'comment-user-1',
         },
         {
@@ -553,7 +552,7 @@ describe('utils', () => {
 
     it('it removes alerts correctly', async () => {
       const res = await createIncident({
-        actionsClient: actionsMock,
+        ...basicCreateIncidentArgs,
         theCase: {
           ...theCase,
           comments: [
@@ -562,17 +561,11 @@ describe('utils', () => {
             commentGeneratedAlert,
           ],
         },
-        userActions,
-        connector,
-        mappings,
-        alerts: [],
-        casesConnectors,
       });
 
       expect(res.comments).toEqual([
         {
-          comment:
-            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          comment: `Wow, good luck catching that bad meanie! [(added at 2019-11-25T21:55:00.177Z by elastic)](${caseUrl}/comment-user-1 )`,
           commentId: 'comment-user-1',
         },
         {
@@ -588,21 +581,13 @@ describe('utils', () => {
         issueType: null,
         parent: null,
         short_description: 'fun title',
-        description: 'fun description',
+        description: `fun description [(created at 2019-11-25T21:55:00.177Z by elastic)](${caseUrl} )`,
       };
 
       const execute = jest.fn().mockReturnValue(existingIncidentData);
       actionsMock = { ...actionsMock, execute };
 
-      const res = await createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions,
-        connector,
-        mappings,
-        alerts: [],
-        casesConnectors,
-      });
+      const res = await createIncident({ ...basicCreateIncidentArgs, actionsClient: actionsMock });
 
       expect(res).toEqual({
         incident: {
@@ -610,8 +595,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
-          description:
-            'fun description \r\nThis is a brand new case of a bad meanie defacing data (updated at 2019-11-25T21:54:48.952Z by elastic)',
+          description: `fun description [(created at 2019-11-25T21:55:00.177Z by elastic)](${caseUrl} ) \r\nThis is a brand new case of a bad meanie defacing data [(updated at 2019-11-25T21:54:48.952Z by elastic)](${caseUrl} )`,
           externalId: 'external-id',
           short_description: 'Super Bad Security Issue',
         },
@@ -626,15 +610,7 @@ describe('utils', () => {
       });
 
       actionsMock = { ...actionsMock, execute };
-      createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions,
-        connector,
-        mappings,
-        alerts: [],
-        casesConnectors,
-      }).catch((e) => {
+      createIncident({ ...basicCreateIncidentArgs, actionsClient: actionsMock }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
           new Error(
@@ -645,16 +621,11 @@ describe('utils', () => {
     });
 
     it('throws error if connector is not supported', async () => {
-      expect.assertions(2);
       createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions,
+        ...basicCreateIncidentArgs,
         connector: { ...connector, actionTypeId: 'not-supported' },
-        mappings,
-        alerts: [],
-        casesConnectors,
       }).catch((e) => {
+        expect.assertions(2);
         expect(e).not.toBeNull();
         expect(e).toEqual(new Error('Invalid external service'));
       });
