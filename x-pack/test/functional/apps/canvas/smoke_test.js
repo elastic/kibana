@@ -12,15 +12,19 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
-  const esArchiver = getService('esArchiver');
+  // const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('smoke test', function () {
+  describe.only('smoke test', function () {
     this.tags('includeFirefox');
     const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
+      // await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       await PageObjects.common.navigateToApp('canvas');
     });
 
