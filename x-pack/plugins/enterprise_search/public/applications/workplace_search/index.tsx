@@ -96,13 +96,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SourceAdded />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? (
-          <ErrorState />
-        ) : (
-          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-            <Overview />
-          </Layout>
-        )}
+        <Overview />
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         <PersonalDashboardLayout

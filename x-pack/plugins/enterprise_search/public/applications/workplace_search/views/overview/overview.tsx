@@ -12,11 +12,8 @@ import { useActions, useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
@@ -54,26 +51,26 @@ export const Overview: React.FC = () => {
     initializeOverview();
   }, [initializeOverview]);
 
-  if (dataLoading) {
-    return <Loading />;
-  }
-
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 
   const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
-    <>
-      <SetPageChrome />
-      <SendTelemetry action="viewed" metric="overview" />
-
-      <ViewContentHeader title={headerTitle} description={headerDescription} />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[]}
+      pageHeader={{
+        pageTitle: headerTitle,
+        description: headerDescription,
+      }}
+      pageViewTelemetry="overview"
+      isLoading={dataLoading}
+    >
       {!hideOnboarding && <OnboardingSteps />}
       <EuiSpacer size="xl" />
       <OrganizationStats />
       <EuiSpacer size="xl" />
       <RecentActivity />
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };
