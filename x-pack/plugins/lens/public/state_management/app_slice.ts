@@ -17,7 +17,6 @@ export const initialState: LensAppState = {
   query: { language: 'kuery', query: '' },
   resolvedDateRange: { fromDate: '', toDate: '' },
   isFullscreenDatasource: false,
-  indexPatternsForTopNav: [],
   isSaveable: false,
   isAppLoading: false,
   isLinkedToOriginatingApp: false,

@@ -8,14 +8,17 @@
 import { uniq } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { Document } from '../../persistence/saved_object_store';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { Datasource } from '../../types';
 import { extractFilterReferences } from '../../persistence';
-import { PreviewState } from '../../state_management';
+import { Filter, Query } from 'src/plugins/data/public';
 
 export interface Props {
   activeDatasources: Record<string, Datasource>;
-  state: PreviewState;
-  visualization: Visualization;
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  visualization: {
+    activeId: string | null;
+    state: unknown;
+  };
   filters: Filter[];
   query: Query;
   title: string;
@@ -23,25 +26,11 @@ export interface Props {
   persistedId?: string;
 }
 
-export function getSavedObjectFormat({
-  activeDatasources,
-  state,
-  filters,
-  query,
-  title,
-  description,
-  persistedId,
-}: Props): {
-  doc: Document;
-  filterableIndexPatterns: string[];
-} {
-  const datasourceStates: Record<string, unknown> = {};
+export function getIndexPatterns({ activeDatasources, datasourceStates }: Props): string[] {
+  console.log(activeDatasources, datasourceStates);
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
-      state.datasourceStates[id].state
-    );
-    datasourceStates[id] = persistableState;
+    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
     references.push(...savedObjectReferences);
   });
 
@@ -49,25 +38,60 @@ export function getSavedObjectFormat({
     references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
   );
 
+  return uniqueFilterableIndexPatternIds;
+}
+
+export function getIndexPatterns2({ activeDatasources, datasourceStates }: Props): string[] {
+  console.log(activeDatasources, datasourceStates);
+  // const references: SavedObjectReference[] = [];
+  // Object.entries(activeDatasources).forEach(([id, datasource]) => {
+  //   const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+  //   references.push(...savedObjectReferences);
+  // });
+
+  // const uniqueFilterableIndexPatternIds = uniq(
+  //   references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+  // );
+
+  // return uniqueFilterableIndexPatternIds;
+}
+
+export function getSavedObjectFormat({
+  activeDatasources,
+  datasourceStates,
+  visualization,
+  filters,
+  query,
+  title,
+  description,
+  persistedId,
+}: Props): Document {
+  const persistibleDatasourceStates: Record<string, unknown> = {};
+  const references: SavedObjectReference[] = [];
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
+      datasourceStates[id].state
+    );
+    persistibleDatasourceStates[id] = persistableState;
+    references.push(...savedObjectReferences);
+  });
+
   const { persistableFilters, references: filterReferences } = extractFilterReferences(filters);
 
   references.push(...filterReferences);
 
   return {
-    doc: {
-      savedObjectId: persistedId,
-      title,
-      description,
-      type: 'lens',
-      visualizationType: state.visualization.activeId,
-      state: {
-        datasourceStates,
-        visualization: state.visualization.state,
-        query: query,
-        filters: persistableFilters,
-      },
-      references,
+    savedObjectId: persistedId,
+    title,
+    description,
+    type: 'lens',
+    visualizationType: visualization.activeId,
+    state: {
+      datasourceStates: persistibleDatasourceStates,
+      visualization: visualization.state,
+      query: query,
+      filters: persistableFilters,
     },
-    filterableIndexPatterns: uniqueFilterableIndexPatternIds,
+    references,
   };
 }

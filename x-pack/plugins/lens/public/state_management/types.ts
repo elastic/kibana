@@ -28,7 +28,7 @@ export interface LensAppState extends EditorFrameState {
   lastKnownDoc?: Document;
 
   // index patterns used to determine which filters are available in the top nav.
-  indexPatternsForTopNav: IndexPattern[];
+  indexPatternsForTopNav: string[];
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
   isSaveable: boolean;

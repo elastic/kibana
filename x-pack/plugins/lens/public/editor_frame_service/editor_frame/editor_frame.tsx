@@ -9,8 +9,6 @@ import React, { useEffect, useReducer, useState, useCallback, useRef, useMemo } 
 import { CoreStart } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
-import { getAllIndexPatterns } from '../../utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -20,7 +18,7 @@ import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { Document } from '../../persistence/saved_object_store';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
-import { getSavedObjectFormat } from './save';
+import { getIndexPatterns, getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
@@ -63,7 +61,6 @@ export function EditorFrame(props: EditorFrameProps) {
     resolvedDateRange: dateRange,
     searchSessionId,
     savedQuery,
-    indexPatternsForTopNav,
     persistedDoc,
     lastKnownDoc,
     activeData,
@@ -127,38 +124,19 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const getStateToUpdate: (
     arg: {
-      filterableIndexPatterns: string[];
       doc: Document;
     },
     oldState: {
-      indexPatternsForTopNav: IndexPattern[];
       persistedDoc?: Document;
       lastKnownDoc?: Document;
     }
-  ) => Promise<Partial<LensAppState> | undefined> = async (
-    { filterableIndexPatterns, doc },
-    prevState
-  ) => {
+  ) => Promise<Partial<LensAppState> | undefined> = async ({ doc }, prevState) => {
     const batchedStateToUpdate: Partial<LensAppState> = {};
 
     if (!isEqual(prevState.persistedDoc, doc) && !isEqual(prevState.lastKnownDoc, doc)) {
       batchedStateToUpdate.lastKnownDoc = doc;
     }
-    const hasIndexPatternsChanged =
-      prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-      filterableIndexPatterns.some(
-        (id) => !prevState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-      );
-    // Update the cached index patterns if the user made a change to any of them
-    if (hasIndexPatternsChanged) {
-      const { indexPatterns } = await getAllIndexPatterns(
-        filterableIndexPatterns,
-        props.plugins.data.indexPatterns
-      );
-      if (indexPatterns) {
-        batchedStateToUpdate.indexPatternsForTopNav = indexPatterns;
-      }
-    }
+
     if (Object.keys(batchedStateToUpdate).length) {
       return batchedStateToUpdate;
     }
@@ -176,7 +154,7 @@ export function EditorFrame(props: EditorFrameProps) {
         return;
       }
 
-      const savedObjectFormat = getSavedObjectFormat({
+      const doc = getSavedObjectFormat({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (datasourceMap, datasourceId) => ({
             ...datasourceMap,
@@ -184,8 +162,8 @@ export function EditorFrame(props: EditorFrameProps) {
           }),
           {}
         ),
-        visualization: activeVisualization,
-        state: { datasourceStates, visualization },
+        datasourceStates,
+        visualization,
         filters,
         query,
         title,
@@ -195,11 +173,13 @@ export function EditorFrame(props: EditorFrameProps) {
 
       // Frame loader (app or embeddable) is expected to call this when it loads and updates
       // This should be replaced with a top-down state
-      getStateToUpdate(savedObjectFormat, {
-        persistedDoc,
-        indexPatternsForTopNav,
-        lastKnownDoc,
-      }).then((batchedStateToUpdate) => {
+      getStateToUpdate(
+        { doc },
+        {
+          persistedDoc,
+          lastKnownDoc,
+        }
+      ).then((batchedStateToUpdate) => {
         if (batchedStateToUpdate) {
           dispatchChange(batchedStateToUpdate);
         }
