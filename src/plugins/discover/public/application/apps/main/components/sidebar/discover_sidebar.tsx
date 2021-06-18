@@ -36,7 +36,6 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { useSingleton } from '../../utils/use_singleton';
 
 /**
  * Default number of available fields displayed and added on scroll
