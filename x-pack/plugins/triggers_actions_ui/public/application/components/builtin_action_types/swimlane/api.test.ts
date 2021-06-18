@@ -81,5 +81,65 @@ describe('Swimlane API', () => {
         expect(e.message).toContain('bad');
       }
     });
+
+    it('it removes unsafe fields', async () => {
+      const abortCtrl = new AbortController();
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          fields: [
+            {
+              id: '__proto__',
+              name: 'Alert Id',
+              key: 'alert-id',
+              fieldType: 'text',
+            },
+            {
+              id: 'a6ide',
+              name: '__proto__',
+              key: 'alert-id',
+              fieldType: 'text',
+            },
+            {
+              id: 'a6ide',
+              name: 'Alert Id',
+              key: '__proto__',
+              fieldType: 'text',
+            },
+            {
+              id: 'a6ide',
+              name: 'Alert Id',
+              key: 'alert-id',
+              fieldType: '__proto__',
+            },
+            {
+              id: 'safe-id',
+              name: 'Safe',
+              key: 'safe-key',
+              fieldType: 'safe-text',
+            },
+          ],
+        }),
+      });
+
+      const res = await getApplication({
+        signal: abortCtrl.signal,
+        apiToken: '',
+        appId: '',
+        url: '',
+      });
+
+      expect(res).toEqual({
+        fields: [
+          {
+            id: 'safe-id',
+            name: 'Safe',
+            key: 'safe-key',
+            fieldType: 'safe-text',
+          },
+        ],
+      });
+    });
   });
 });

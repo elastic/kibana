@@ -187,7 +187,11 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
         </>
       </EuiFormRow>
       <EuiSpacer />
-      <EuiButton disabled={!isValid} onClick={connectSwimlane}>
+      <EuiButton
+        disabled={!isValid}
+        onClick={connectSwimlane}
+        data-test-subj="swimlaneConfigureMapping"
+      >
         {i18n.SW_RETRIEVE_CONFIGURATION_LABEL}
       </EuiButton>
     </>

@@ -39,8 +39,8 @@ export const applicationFields = [
   {
     id: 'a6fdf',
     name: 'Comments',
-    key: 'comments',
-    fieldType: 'notes',
+    key: 'notes',
+    fieldType: 'comments',
   },
   {
     id: 'a6fde',
