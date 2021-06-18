@@ -17,4 +17,3 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testRunner: OsqueryCypressVisualTestRunner,
   };
 }
-  
