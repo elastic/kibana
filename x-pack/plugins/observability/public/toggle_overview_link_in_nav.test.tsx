@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { AppUpdater, AppNavLinkStatus } from '../../../../src/core/public';
 import { applicationServiceMock } from '../../../../src/core/public/mocks';
 
