@@ -606,7 +606,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('change', { target: { value: 'New Label' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -709,7 +710,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('change', { target: { value: 'Maximum of bytes' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -1996,7 +1998,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!([{ value: 'bytes', label: 'Bytes' }]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -2080,7 +2083,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!({ currentTarget: { value: '0' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {

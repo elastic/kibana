@@ -347,6 +347,9 @@ const allowlistBaseEventFields: AllowlistFields = {
     direction: true,
   },
   registry: {
+    data: {
+      strings: true,
+    },
     hive: true,
     key: true,
     path: true,

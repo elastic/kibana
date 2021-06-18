@@ -26,7 +26,8 @@ export function getEsQuerySearchAfter(
 ): EsQuerySearchAfter {
   if (documents.length) {
     // already surrounding docs -> first or last record  is used
-    const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
+    const afterTimeRecIdx =
+      type === SurrDocType.SUCCESSORS && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
     let afterTimeValue = afterTimeDoc.sort[0] as string | number;
     if (nanoSeconds) {

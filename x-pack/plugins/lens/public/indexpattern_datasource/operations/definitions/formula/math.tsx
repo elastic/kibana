@@ -45,25 +45,12 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
     return [
       {
         type: 'function',
-        function: 'mapColumn',
+        function: 'mathColumn',
         arguments: {
           id: [columnId],
           name: [columnId],
-          exp: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'math',
-                  arguments: {
-                    expression: [astToString(column.params.tinymathAst)],
-                    onError: ['null'],
-                  },
-                },
-              ],
-            },
-          ],
+          expression: [astToString(column.params.tinymathAst)],
+          onError: ['null'],
         },
       },
     ];

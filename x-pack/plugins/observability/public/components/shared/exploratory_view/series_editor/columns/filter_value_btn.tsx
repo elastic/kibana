@@ -96,13 +96,14 @@ export function FilterValueButton({
     <FieldValueSuggestions
       button={button}
       label={'Version'}
-      indexPattern={indexPattern}
+      indexPatternTitle={indexPattern?.title}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}
       forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}
+      asCombobox={false}
     />
   ) : (
     button
