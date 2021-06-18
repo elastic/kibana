@@ -88,7 +88,7 @@ export interface DashboardAppLocatorParams extends SerializableState {
   savedQuery?: string;
 }
 
-export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorDefinition>;
+export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
