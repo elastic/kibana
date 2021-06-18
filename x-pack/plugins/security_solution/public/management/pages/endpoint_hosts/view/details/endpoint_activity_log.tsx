@@ -10,7 +10,6 @@ import styled from 'styled-components';
 
 import {
   EuiText,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -46,20 +45,10 @@ export const EndpointActivityLog = memo(
     const activityLogData = useEndpointSelector(getActivityLogIterableData);
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
-    const dispatch = useDispatch<(a: EndpointAction) => void>();
+    const dispatch = useDispatch<(action: EndpointAction) => void>();
     const { page, pageSize, disabled: isPagingDisabled } = useEndpointSelector(
       getActivityLogDataPaging
     );
-
-    const onRefresh = useCallback(() => {
-      dispatch({
-        type: 'appRequestedEndpointActivityLog',
-        payload: {
-          page: 1,
-          pageSize,
-        },
-      });
-    }, [dispatch, pageSize]);
 
     const fetchMoreSentinel = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
@@ -95,13 +84,6 @@ export const EndpointActivityLog = memo(
       <>
         <EuiSpacer size="l" />
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <div>
-              <EuiButton onClick={onRefresh} iconType="refresh">
-                {i18.ACTIVITY_LOG.refresh}
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
           {(activityLogLoaded && !activityLogSize) || activityLogError ? (
             <EuiFlexItem>
               <EuiEmptyPrompt

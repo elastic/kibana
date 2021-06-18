@@ -15,9 +15,6 @@ export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
     defaultMessage: 'Activity Log',
   }),
-  refresh: i18n.translate('xpack.securitySolution.endpointDetails.activityLog.refresh', {
-    defaultMessage: 'Refresh',
-  }),
   LogEntry: {
     endOfLog: i18n.translate(
       'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
