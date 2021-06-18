@@ -306,7 +306,6 @@ export const useCasesColumns = ({
                 <ConfirmDeleteCaseModal
                   caseTitle={deleteThisCase.title}
                   isModalVisible={isDisplayConfirmDeleteModal}
-                  isPlural={false}
                   onCancel={handleToggleModal}
                   onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
                 />

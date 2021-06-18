@@ -76,9 +76,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       {setHeaderActionMenu && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-          <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
+          <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+              <EuiButtonEmpty size={'xs'} color={'text'} {...settingsLinkProps}>
                 {settingsTabTitle}
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -9,7 +9,7 @@ import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@elastic/safer-lodash-set';
 import { Logger } from 'src/core/server';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
@@ -51,7 +51,6 @@ interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
-
 export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
 };
