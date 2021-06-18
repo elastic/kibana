@@ -6,7 +6,6 @@
  */
 import Boom from '@hapi/boom';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 import {
   AllCommentsResponse,
@@ -17,16 +16,17 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
+  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common/api';
+} from '../../../common';
 import {
+  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
 } from '../../common';
-import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
