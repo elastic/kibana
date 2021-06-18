@@ -65,12 +65,14 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
   return (props: EmbeddableComponentProps) => {
     const { embeddable: embeddableStart, uiActions, inspector } = plugins;
     const factory = embeddableStart.getEmbeddableFactory('lens')!;
-    const [embeddable, loading, error] = useEmbeddableFactory({ factory, input: props });
+    // by default hide the time badges. Consumers can always override via disabledActions prop
+    const input = { disabledActions: ['CUSTOM_TIME_RANGE_BADGE'], ...props };
+    const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
     const hasActions = props.withActions === true;
 
     if (!hasActions || loading || error || !embeddable) {
       return (
-        <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={props} />
+        <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />
       );
     }
     return (
@@ -80,6 +82,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
         getActions={uiActions.getTriggerCompatibleActions}
         inspector={inspector}
         filterActions={() => hasActions}
+        showShadow={false}
       />
     );
   };

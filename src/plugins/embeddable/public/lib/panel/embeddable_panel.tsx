@@ -65,6 +65,7 @@ interface Props {
   hideHeader?: boolean;
   filterActions?: (actionId: string) => boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
+  showShadow?: boolean;
 }
 
 interface State {
@@ -243,6 +244,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        hasShadow={this.props.showShadow}
       >
         {!this.props.hideHeader && (
           <PanelHeader
