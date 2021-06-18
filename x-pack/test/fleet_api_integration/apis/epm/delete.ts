@@ -11,7 +11,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const requiredPackage = 'system-0.11.0';
+  const requiredPackage = 'system-0.12.6';
 
   const installPackage = async (pkgkey: string) => {
     await supertest

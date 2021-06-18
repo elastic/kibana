@@ -7,21 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CASES_FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.cases.caseFeatureNoPermissionsTitle',
-  {
-    defaultMessage: 'Kibana feature privileges required',
-  }
-);
-
-export const CASES_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.cases.caseFeatureNoPermissionsMessage',
-  {
-    defaultMessage:
-      'To view cases, you must have privileges for the Cases feature in the Kibana space. For more information, contact your Kibana administrator.',
-  }
-);
-
 export const BACK_TO_ALL = i18n.translate('xpack.cases.caseView.backLabel', {
   defaultMessage: 'Back to cases',
 });
@@ -30,13 +15,11 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
-  defaultMessage: 'Delete case',
-});
-
-export const DELETE_CASES = i18n.translate('xpack.cases.confirmDeleteCase.deleteCases', {
-  defaultMessage: 'Delete cases',
-});
+export const DELETE_CASE = (quantity: number = 1) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
+    values: { quantity },
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {cases}}`,
+  });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
@@ -56,10 +39,6 @@ export const REPORTER = i18n.translate('xpack.cases.caseView.reporterLabel', {
 
 export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabel', {
   defaultMessage: 'Participants',
-});
-
-export const CREATE_BC_TITLE = i18n.translate('xpack.cases.caseView.breadcrumb', {
-  defaultMessage: 'Create',
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
@@ -181,16 +160,8 @@ export const SAVE = i18n.translate('xpack.cases.caseView.description.save', {
   defaultMessage: 'Save',
 });
 
-export const GO_TO_DOCUMENTATION = i18n.translate('xpack.cases.caseView.goToDocumentationButton', {
-  defaultMessage: 'View documentation',
-});
-
 export const CONNECTORS = i18n.translate('xpack.cases.caseView.connectors', {
   defaultMessage: 'External Incident Management System',
-});
-
-export const EDIT_CONNECTOR = i18n.translate('xpack.cases.caseView.editConnector', {
-  defaultMessage: 'Change external incident management system',
 });
 
 export const NO_CONNECTOR = i18n.translate('xpack.cases.common.noConnector', {

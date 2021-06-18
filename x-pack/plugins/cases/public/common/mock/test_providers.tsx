@@ -40,26 +40,24 @@ const TestProvidersComponent: React.FC<Props> = ({ children }) => (
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
-  return {
-    path: 'path',
-    type: 'type',
-    value: ('mockedValue' as unknown) as T,
-    isPristine: false,
-    isValidating: false,
-    isValidated: false,
-    isChangingValue: false,
-    errors: [],
-    isValid: true,
-    getErrorsMessages: jest.fn(),
-    onChange: jest.fn(),
-    setValue: jest.fn(),
-    setErrors: jest.fn(),
-    clearErrors: jest.fn(),
-    validate: jest.fn(),
-    reset: jest.fn(),
-    __isIncludedInOutput: true,
-    __serializeValue: jest.fn(),
-    ...options,
-  };
-};
+export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
+  path: 'path',
+  type: 'type',
+  value: ('mockedValue' as unknown) as T,
+  isPristine: false,
+  isValidating: false,
+  isValidated: false,
+  isChangingValue: false,
+  errors: [],
+  isValid: true,
+  getErrorsMessages: jest.fn(),
+  onChange: jest.fn(),
+  setValue: jest.fn(),
+  setErrors: jest.fn(),
+  clearErrors: jest.fn(),
+  validate: jest.fn(),
+  reset: jest.fn(),
+  __isIncludedInOutput: true,
+  __serializeValue: jest.fn(),
+  ...options,
+});

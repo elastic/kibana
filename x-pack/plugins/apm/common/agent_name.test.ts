@@ -14,6 +14,13 @@ describe('agent name helpers', () => {
         expect(isJavaAgentName('java')).toEqual(true);
       });
     });
+
+    describe('when the agent name is opentelemetry/java', () => {
+      it('returns true', () => {
+        expect(isJavaAgentName('opentelemetry/java')).toEqual(true);
+      });
+    });
+
     describe('when the agent name is not java', () => {
       it('returns true', () => {
         expect(isJavaAgentName('not java')).toEqual(false);

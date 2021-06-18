@@ -24,7 +24,7 @@ export function ServiceMetrics() {
       <EuiFlexGrid columns={2} gutterSize="s">
         {data.charts.map((chart) => (
           <EuiFlexItem key={chart.key}>
-            <EuiPanel>
+            <EuiPanel hasBorder={true}>
               <MetricsChart
                 start={start}
                 end={end}
