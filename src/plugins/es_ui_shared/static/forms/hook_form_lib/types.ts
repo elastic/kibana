@@ -59,6 +59,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
   __getFieldDefaultValue: (path: string) => unknown;
+  __getFieldsRemoved: () => FieldsMap;
 }
 
 export type FormSchema<T extends FormData = FormData> = {

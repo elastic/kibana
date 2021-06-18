@@ -174,7 +174,15 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
   const i18nTexts = geti18nTexts();
 
   const [formData] = useFormData({ form });
-  const isFormModified = useFormIsModified({ form });
+  const isFormModified = useFormIsModified({
+    form,
+    discard: [
+      '__meta__.isCustomLabelVisible',
+      '__meta__.isValueVisible',
+      '__meta__.isFormatVisible',
+      '__meta__.isPopularityVisible',
+    ],
+  });
 
   const { name: updatedName, type: updatedType, script: updatedScript } = formData;
   const { name: nameField, type: typeField } = getFields();

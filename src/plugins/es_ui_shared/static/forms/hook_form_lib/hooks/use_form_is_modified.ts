@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FormHook } from '../types';
+import { useMemo } from 'react';
+import { FieldHook, FormHook } from '../types';
 import { useFormContext } from '../form_context';
 import { useFormData } from './use_form_data';
 
 interface Options {
   form?: FormHook<any>;
+  /** List of field paths to discard when checking if a field has been modified */
+  discard?: string[];
 }
 
 /**
@@ -23,7 +26,10 @@ interface Options {
  * @param options - Optional options object
  * @returns flag to indicate if the form has been modified
  */
-export const useFormIsModified = ({ form: formFromOptions }: Options = {}): boolean => {
+export const useFormIsModified = ({
+  form: formFromOptions,
+  discard = [],
+}: Options = {}): boolean => {
   // As hook calls can not be conditional we first try to access the form through context
   let form = useFormContext({ throwIfNotFound: false });
 
@@ -37,13 +43,48 @@ export const useFormIsModified = ({ form: formFromOptions }: Options = {}): bool
     );
   }
 
-  const { getFields } = form;
+  const { getFields, __getFieldsRemoved } = form;
 
-  // We listen to all the form data change to trigger re-render...
+  const discardToString = JSON.stringify(discard);
+
+  // Create a map of the fields to discard to optimize look up
+  const fieldsToDiscard = useMemo(() => {
+    if (discard.length === 0) {
+      return;
+    }
+
+    return discard.reduce((acc, path) => ({ ...acc, [path]: {} }), {} as { [key: string]: {} });
+
+    // discardToString === discard, we don't want to add it to the deps so we
+    // the coansumer does not need to memoize the array he provides.
+  }, [discardToString]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // We listen to all the form data change to trigger a re-render
+  // and update our derived "isModified" state
   useFormData({ form });
 
-  // ...and update our derived "isModified" state
-  const isModified = Object.values(getFields()).some((field) => field.isModified);
+  let predicate: (arg: [string, FieldHook]) => boolean = () => true;
 
-  return isModified;
+  if (fieldsToDiscard) {
+    predicate = ([path]) => fieldsToDiscard[path] === undefined;
+  }
+
+  const isModified = Object.entries(getFields())
+    .filter(predicate)
+    .some(([_, field]) => field.isModified);
+
+  if (isModified) {
+    return isModified;
+  }
+
+  // Check if any field has been removed.
+  // If somme field has been removed then the form has been modified.
+  if (fieldsToDiscard) {
+    return (
+      Object.keys(__getFieldsRemoved()).filter((path) => fieldsToDiscard[path] === undefined)
+        .length > 0
+    );
+  }
+
+  return Object.keys(__getFieldsRemoved()).length > 0;
 };

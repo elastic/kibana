@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '../shared_imports';
@@ -15,20 +15,28 @@ import { Form } from '../components/form';
 import { UseField } from '../components/use_field';
 
 describe('useFormIsModified()', () => {
-  const TestComp = ({
-    onIsModifiedChange,
-  }: {
+  interface Props {
     onIsModifiedChange: (isModified: boolean) => void;
-  }) => {
+    discard?: string[];
+  }
+
+  const TestComp = ({ onIsModifiedChange, discard = [] }: Props) => {
     const { form } = useForm();
-    const isModified = useFormIsModified({ form });
+    const isModified = useFormIsModified({ form, discard });
+    const [isNameVisible, setIsNameVisible] = useState(true);
 
     // Call our jest.spy() with the latest hook value
     onIsModifiedChange(isModified);
 
     return (
       <Form form={form}>
-        <UseField path="name" defaultValue="initialValue" data-test-subj="nameField" />
+        {isNameVisible && (
+          <UseField path="name" defaultValue="initialValue" data-test-subj="nameField" />
+        )}
+        <UseField path="toDiscard" defaultValue="initialValue" data-test-subj="toDiscardField" />
+        <button data-test-subj="hideNameButton" onClick={() => setIsNameVisible(false)}>
+          Hide name
+        </button>
       </Form>
     );
   };
@@ -58,5 +66,31 @@ describe('useFormIsModified()', () => {
       form.setInputValue('nameField', 'initialValue');
     });
     expect(lastValue()).toBe(false);
+  });
+
+  test('should accepts a list of field to discard', async () => {
+    const { form } = await setup({ discard: ['toDiscard'] });
+
+    expect(lastValue()).toBe(false);
+
+    await act(async () => {
+      form.setInputValue('toDiscardField', 'changed');
+    });
+
+    // It should still not be modififed
+    expect(lastValue()).toBe(false);
+  });
+
+  test('should take into account if a field is removed from the DOM', async () => {
+    const { component, find } = await setup();
+
+    expect(lastValue()).toBe(false);
+
+    await act(async () => {
+      find('hideNameButton').simulate('click');
+    });
+    component.update();
+
+    expect(lastValue()).toBe(true);
   });
 });
