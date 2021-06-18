@@ -39,7 +39,9 @@ import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../.
 import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+
 const INDEX_PATTERN_KEY = 'index_pattern';
+const TIME_FIELD_KEY = 'time_field';
 
 export interface AnnotationRowProps {
   annotation: Annotation;
@@ -130,7 +132,7 @@ export const AnnotationRow = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <FieldSelect
-                type={'time_field'}
+                type={TIME_FIELD_KEY}
                 label={
                   <FormattedMessage
                     id="visTypeTimeseries.annotationsEditor.timeFieldLabel"
@@ -139,7 +141,7 @@ export const AnnotationRow = ({
                 }
                 restrict={RESTRICT_FIELDS}
                 value={model.time_field}
-                onChange={handleChange('time_field')}
+                onChange={handleChange(TIME_FIELD_KEY)}
                 indexPattern={model.index_pattern}
                 fields={fields}
               />
