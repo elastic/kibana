@@ -22,7 +22,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../../components';
+import { Loading, Error } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus, KibanaAssetType } from '../../../../../types';
@@ -120,7 +120,17 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   if (isLoading) {
     content = <Loading />;
   } else if (fetchError) {
-    content = <p>TODO HANDLE ERROR</p>;
+    content = (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.fetchAssetsErrorTitle"
+            defaultMessage="Error loading assets"
+          />
+        }
+        error={fetchError}
+      />
+    );
   } else if (assetSavedObjects === undefined) {
     content = (
       <EuiTitle>
