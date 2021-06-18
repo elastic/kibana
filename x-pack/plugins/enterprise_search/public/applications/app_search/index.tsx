@@ -97,6 +97,11 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <EngineCreation />
         </Route>
       )}
+      {canManageMetaEngines && (
+        <Route exact path={META_ENGINE_CREATION_PATH}>
+          <MetaEngineCreation />
+        </Route>
+      )}
       {canViewRoleMappings && (
         <Route path={ROLE_MAPPINGS_PATH}>
           <RoleMappings />
@@ -120,11 +125,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             <Route exact path={CREDENTIALS_PATH}>
               <Credentials />
             </Route>
-            {canManageMetaEngines && (
-              <Route exact path={META_ENGINE_CREATION_PATH}>
-                <MetaEngineCreation />
-              </Route>
-            )}
             <Route>
               <NotFound product={APP_SEARCH_PLUGIN} />
             </Route>
