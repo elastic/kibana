@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { cloneDeep, defaults, forOwn, assign } from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { SavedObjectNotFound } from '../../../../kibana_utils/public';
 import {
@@ -28,7 +28,7 @@ export async function applyESResp(
 ) {
   const mapping = expandShorthand(config.mapping ?? {});
   const savedObjectType = config.type || '';
-  savedObject._source = _.cloneDeep(resp._source);
+  savedObject._source = cloneDeep(resp._source);
   if (typeof resp.found === 'boolean' && !resp.found) {
     throw new SavedObjectNotFound(savedObjectType, savedObject.id || '');
   }
@@ -42,10 +42,10 @@ export async function applyESResp(
   }
 
   // assign the defaults to the response
-  _.defaults(savedObject._source, savedObject.defaults);
+  defaults(savedObject._source, savedObject.defaults);
 
   // transform the source using _deserializers
-  _.forOwn(mapping, (fieldMapping, fieldName) => {
+  forOwn(mapping, (fieldMapping, fieldName) => {
     if (fieldMapping._deserialize && typeof fieldName === 'string') {
       savedObject._source[fieldName] = fieldMapping._deserialize(
         savedObject._source[fieldName] as string
@@ -54,7 +54,7 @@ export async function applyESResp(
   });
 
   // Give obj all of the values in _source.fields
-  _.assign(savedObject, savedObject._source);
+  assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
   if (meta.searchSourceJSON) {

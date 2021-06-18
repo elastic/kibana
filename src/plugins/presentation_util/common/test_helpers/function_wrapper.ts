@@ -7,8 +7,11 @@
  */
 
 import { mapValues } from 'lodash';
-import { ExpressionFunctionDefinition } from '../../../expressions';
-import { ExpressionValueBoxed, typeSpecs } from '../../../expressions/common';
+import {
+  ExpressionValueBoxed,
+  typeSpecs,
+  ExpressionFunctionDefinition,
+} from '../../../expressions/common';
 
 type FnType = () => typeof typeSpecs[number] &
   ExpressionFunctionDefinition<string, any, Record<string, any>, ExpressionValueBoxed<any, any>>;
