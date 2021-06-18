@@ -14,7 +14,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../shared/loading';
 import { LicenseCallout } from '../../../components/shared/license_callout';
 
 import { Connectors } from './connectors';
@@ -31,16 +30,6 @@ describe('Connectors', () => {
     const wrapper = shallow(<Connectors />);
 
     expect(wrapper.find('[data-test-subj="ConnectorRow"]')).toHaveLength(configuredSources.length);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({
-      connectors: configuredSources,
-      dataLoading: true,
-    });
-    const wrapper = shallow(<Connectors />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders LicenseCallout for restricted items', () => {

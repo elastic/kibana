@@ -30,6 +30,10 @@
   }
 }
 
+.mapTocEntry-isInEditingMode {
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%) !important;
+}
+
 .mapTocEntry-isDragging {
   @include euiBottomShadowMedium;
 }

@@ -13,13 +13,10 @@ import * as i18n from './translations';
 
 export * from './types';
 
-export const getCaseConnector = (): CaseConnector<JiraFieldsType> => {
-  return {
-    id: '.jira',
-    fieldsComponent: lazy(() => import('./case_fields')),
-  };
-};
-
+export const getCaseConnector = (): CaseConnector<JiraFieldsType> => ({
+  id: '.jira',
+  fieldsComponent: lazy(() => import('./case_fields')),
+});
 export const fieldLabels = {
   issueType: i18n.ISSUE_TYPE,
   priority: i18n.PRIORITY,
