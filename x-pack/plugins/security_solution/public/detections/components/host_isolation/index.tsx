@@ -98,7 +98,7 @@ export const HostIsolationPanel = React.memo(
         endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
-        caseIds={casesInfo}
+        casesInfo={casesInfo}
         cancelCallback={cancelCallback}
       />
     );
