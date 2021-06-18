@@ -122,18 +122,22 @@ function extractColumns(
 
     if (nodeOperation.input === 'fullReference') {
       const [referencedOp] = functions;
+      const currentColumnIndex = columns.length;
       const consumedParam = parseNode(referencedOp);
+      const hasActualMathContent = typeof consumedParam !== 'string';
 
-      const subNodeVariables = consumedParam ? findVariables(consumedParam) : [];
-      const mathColumn = mathOperation.buildColumn({
-        layer,
-        indexPattern,
-      });
-      mathColumn.references = subNodeVariables.map(({ value }) => value);
-      mathColumn.params.tinymathAst = consumedParam!;
-      columns.push({ column: mathColumn });
-      mathColumn.customLabel = true;
-      mathColumn.label = label;
+      if (hasActualMathContent) {
+        const subNodeVariables = consumedParam ? findVariables(consumedParam) : [];
+        const mathColumn = mathOperation.buildColumn({
+          layer,
+          indexPattern,
+        });
+        mathColumn.references = subNodeVariables.map(({ value }) => value);
+        mathColumn.params.tinymathAst = consumedParam!;
+        columns.push({ column: mathColumn });
+        mathColumn.customLabel = true;
+        mathColumn.label = label;
+      }
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
       const newCol = (nodeOperation as OperationDefinition<
@@ -143,7 +147,9 @@ function extractColumns(
         {
           layer,
           indexPattern,
-          referenceIds: [getManagedId(idPrefix, columns.length - 1)],
+          referenceIds: [
+            getManagedId(idPrefix, hasActualMathContent ? columns.length - 1 : currentColumnIndex),
+          ],
         },
         mappedParams
       );
@@ -160,16 +166,19 @@ function extractColumns(
   if (root === undefined) {
     return [];
   }
-  const variables = findVariables(root);
-  const mathColumn = mathOperation.buildColumn({
-    layer,
-    indexPattern,
-  });
-  mathColumn.references = variables.map(({ value }) => value);
-  mathColumn.params.tinymathAst = root!;
-  mathColumn.customLabel = true;
-  mathColumn.label = label;
-  columns.push({ column: mathColumn });
+  const topLevelMath = typeof root !== 'string';
+  if (topLevelMath) {
+    const variables = findVariables(root);
+    const mathColumn = mathOperation.buildColumn({
+      layer,
+      indexPattern,
+    });
+    mathColumn.references = variables.map(({ value }) => value);
+    mathColumn.params.tinymathAst = root!;
+    mathColumn.customLabel = true;
+    mathColumn.label = label;
+    columns.push({ column: mathColumn });
+  }
   return columns;
 }
 
