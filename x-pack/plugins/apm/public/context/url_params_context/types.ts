@@ -6,7 +6,7 @@
  */
 
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { LocalUIFilterName } from '../../../common/ui_filter';
+import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 
 export type IUrlParams = {
@@ -36,4 +36,4 @@ export type IUrlParams = {
   latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
   comparisonType?: TimeRangeComparisonType;
-} & Partial<Record<LocalUIFilterName, string>>;
+} & Partial<Record<UxLocalUIFilterName, string>>;
