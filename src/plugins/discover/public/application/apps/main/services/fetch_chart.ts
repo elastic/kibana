@@ -42,6 +42,7 @@ export function fetchChart({
     data.query.timefilter.timefilter.createFilter(indexPattern!)
   );
   childSearchSource.setField('size', 0);
+  childSearchSource.setField('trackTotalHits', false);
   const chartAggConfigs = getChartAggConfigs(childSearchSource, interval, data);
   childSearchSource.setField('aggs', chartAggConfigs.toDsl());
 

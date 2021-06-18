@@ -5,27 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { BehaviorSubject, forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../../../data/common';
+import { IndexPattern, SearchSource } from '../../../../../../data/common';
 import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
 import { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { updateSearchSource } from '../utils/update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
 import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
+import { fetchDocuments } from './fetch_documents';
+import { updateSearchSource } from '../utils/update_search_source';
+import { SortOrder } from '../../../../saved_searches/types';
 
 export interface SavedSearchData {
   main$: SavedSearchDataSubject;
@@ -44,6 +44,7 @@ export interface UseSavedSearch {
   refetch$: SavedSearchRefetchSubject;
   data$: SavedSearchData;
   reset: () => void;
+  inspectorAdapters: { requests: RequestAdapter };
 }
 
 export type SavedSearchRefetchMsg = 'reset' | undefined;
@@ -71,7 +72,6 @@ export interface SavedSearchDataChartsMessage {
 export interface SavedSearchDataMessage {
   error?: Error;
   fetchCounter?: number;
-  inspectorAdapters?: { requests: RequestAdapter };
   fetchStatus: FetchStatus;
 }
 
@@ -99,6 +99,8 @@ export const useSavedSearch = ({
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
 
+  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
+
   /**
    * The observable the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
@@ -109,10 +111,7 @@ export const useSavedSearch = ({
         fetchStatus: initialFetchStatus,
       })
   );
-  /**
-   * The observable the UI (aka React component) subscribes to get notified about
-   * the changes in the data fetching process (high level: fetching started, data was received)
-   */
+
   const dataDocuments$: SavedSearchDataDocumentsSubject = useSingleton(
     () =>
       new BehaviorSubject<SavedSearchDataMessage>({
@@ -188,8 +187,14 @@ export const useSavedSearch = ({
         result: [],
         fieldCounts: {},
       });
+      dataCharts$.next({
+        fetchStatus: initialFetchStatus,
+      });
+      dataTotalHits$.next({
+        fetchStatus: initialFetchStatus,
+      });
     },
-    [data$, dataDocuments$, initialFetchStatus]
+    [data$, dataCharts$, dataDocuments$, dataTotalHits$, initialFetchStatus]
   );
   /**
    * Function to fetch data from ElasticSearch
@@ -199,7 +204,7 @@ export const useSavedSearch = ({
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
         return Promise.reject();
       }
-      const inspectorAdapters = { requests: new RequestAdapter() };
+      inspectorAdapters.requests.reset();
 
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
@@ -212,17 +217,13 @@ export const useSavedSearch = ({
         data$.next({
           fetchStatus: FetchStatus.LOADING,
           fetchCounter: ++refs.current.fetchCounter,
-          inspectorAdapters,
         });
-
         dataDocuments$.next({
           fetchStatus: FetchStatus.LOADING,
         });
-
         dataTotalHits$.next({
           fetchStatus: FetchStatus.LOADING,
         });
-
         dataCharts$.next({
           fetchStatus: FetchStatus.LOADING,
         });
@@ -230,11 +231,17 @@ export const useSavedSearch = ({
         refs.current.fetchStatus = FetchStatus.LOADING;
       }
 
-      const { sort, hideChart, interval } = stateContainer.appStateContainer.getState();
+      const { hideChart, interval, sort } = stateContainer.appStateContainer.getState();
+      updateSearchSource(searchSource, true, {
+        indexPattern,
+        services,
+        sort: sort as SortOrder[],
+        useNewFieldsApi,
+      });
 
       const fetchAndSubscribeChart = () => {
         const chartDataFetch$ = fetchChart({
-          searchSource: searchSource.getParent()!,
+          searchSource,
           data,
           abortController: refs.current.abortController!,
           searchSessionId: sessionId,
@@ -256,7 +263,7 @@ export const useSavedSearch = ({
       };
 
       const totalHitsFetch$ = fetchTotalHits({
-        searchSource: searchSource.getParent()!,
+        searchSource,
         data,
         abortController: refs.current.abortController,
         searchSessionId: sessionId,
@@ -268,31 +275,18 @@ export const useSavedSearch = ({
         data$.next({ fetchStatus: FetchStatus.PARTIAL });
       });
 
-      updateSearchSource(searchSource, false, {
+      const documentsSourceFetch$ = fetchDocuments({
+        abortController: refs.current.abortController,
         indexPattern,
+        inspectorAdapters,
+        searchSessionId: sessionId,
+        searchSource,
         services,
-        sort: sort as SortOrder[],
+        stateContainer,
         useNewFieldsApi,
       });
 
-      const searchSourceFetch$ = searchSource
-        .fetch$({
-          abortSignal: refs.current.abortController.signal,
-          sessionId,
-          inspector: {
-            adapter: inspectorAdapters.requests,
-            title: i18n.translate('discover.inspectorRequestDataTitle', {
-              defaultMessage: 'data',
-            }),
-            description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the search.',
-            }),
-          },
-        })
-        .pipe(filter((res) => isCompleteResponse(res)));
-
-      searchSourceFetch$.subscribe((res) => {
+      documentsSourceFetch$.subscribe((res) => {
         const documents = res.rawResponse.hits.hits;
         const fieldCounts = calcFieldCounts(refs.current.fieldCounts, documents, indexPattern);
         dataDocuments$.next({
@@ -309,7 +303,7 @@ export const useSavedSearch = ({
 
       forkJoin({
         totalHits: totalHitsFetch$,
-        documents: searchSourceFetch$,
+        documents: documentsSourceFetch$,
         chart: !hideChart && indexPattern.timeFieldName ? fetchAndSubscribeChart() : of(null),
       }).subscribe(
         () => {
@@ -321,7 +315,6 @@ export const useSavedSearch = ({
           refs.current.fetchStatus = FetchStatus.ERROR;
           data$.next({
             fetchStatus: FetchStatus.ERROR,
-            inspectorAdapters,
             error,
           });
         },
@@ -332,10 +325,11 @@ export const useSavedSearch = ({
       );
     },
     [
+      inspectorAdapters,
       timefilter,
       services,
       searchSessionManager,
-      stateContainer.appStateContainer,
+      stateContainer,
       searchSource,
       data,
       indexPattern,
@@ -392,5 +386,6 @@ export const useSavedSearch = ({
       charts$: dataCharts$,
     },
     reset: sendResetMsg,
+    inspectorAdapters,
   };
 };

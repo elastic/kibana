@@ -45,9 +45,10 @@ export function updateSearchSource(
     .setField('filter', data.query.filterManager.getFilters());
 
   if (!persist) {
+    const size = uiSettings.get(SAMPLE_SIZE_SETTING);
     searchSource
-      .setField('trackTotalHits', true)
-      .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
+      .setField('trackTotalHits', false)
+      .setField('size', size)
       .setField('sort', usedSort)
       .setField('highlightAll', true)
       .setField('version', true)

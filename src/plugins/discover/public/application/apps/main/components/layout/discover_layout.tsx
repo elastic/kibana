@@ -78,6 +78,7 @@ interface DiscoverLayoutDocumentState extends SavedSearchDataDocumentsMessage {
 export function DiscoverLayout({
   indexPattern,
   indexPatternList,
+  inspectorAdapters,
   navigateTo,
   onChangeIndexPattern,
   onUpdateQuery,
@@ -109,7 +110,7 @@ export function DiscoverLayout({
     result: documents$.getValue().result || [],
   });
 
-  const { fetchCounter, inspectorAdapters } = fetchState;
+  const { fetchCounter } = fetchState;
   const rows = useMemo(() => documentState.result, [documentState.result]);
 
   useEffect(() => {
