@@ -11,7 +11,7 @@ import {
   ExpressionValueBoxed,
   typeSpecs,
   ExpressionFunctionDefinition,
-} from '../../../expressions/common';
+} from '../../../../expressions/common';
 
 type FnType = () => typeof typeSpecs[number] &
   ExpressionFunctionDefinition<string, any, Record<string, any>, ExpressionValueBoxed<any, any>>;
