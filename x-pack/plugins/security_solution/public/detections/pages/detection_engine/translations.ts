@@ -37,7 +37,7 @@ export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.sig
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
-  defaultMessage: 'Detection alerts',
+  defaultMessage: 'Alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate(

@@ -14,7 +14,7 @@ import { SecuritySubPluginNames, SecurityDeepLinks } from '../types';
 import { App } from '../../../../../../src/core/public';
 
 const securityDeepLinks: SecurityDeepLinks = {
-  detections: {
+  rules: {
     base: [
       {
         id: 'siemDetectionRules',
@@ -23,6 +23,30 @@ const securityDeepLinks: SecurityDeepLinks = {
         }),
         keywords: ['rules'],
         path: '/rules',
+      },
+    ],
+  },
+  exceptions: {
+    base: [
+      {
+        id: 'siemDetectionExceptions',
+        title: i18n.translate('xpack.securitySolution.search.exceptions', {
+          defaultMessage: 'Exceptions',
+        }),
+        keywords: ['exceptions'],
+        path: '/exceptions',
+      },
+    ],
+  },
+  alerts: {
+    base: [
+      {
+        id: 'siemDetectionAlerts',
+        title: i18n.translate('xpack.securitySolution.search.alerts', {
+          defaultMessage: 'Aules',
+        }),
+        keywords: ['alerts'],
+        path: '/alerts',
       },
     ],
   },
@@ -159,6 +183,16 @@ const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
   alerts: [
     i18n.translate('xpack.securitySolution.search.detections', {
       defaultMessage: 'Detections',
+    }),
+  ],
+  rules: [
+    i18n.translate('xpack.securitySolution.search.rules', {
+      defaultMessage: 'Rules',
+    }),
+  ],
+  exceptions: [
+    i18n.translate('xpack.securitySolution.search.exceptions', {
+      defaultMessage: 'Exceptions',
     }),
   ],
   hosts: [

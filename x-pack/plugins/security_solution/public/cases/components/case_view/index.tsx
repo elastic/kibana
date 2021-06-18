@@ -131,7 +131,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   const dispatch = useDispatch();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.detections
+    SecurityPageName.rules
   );
 
   const allCasesLink = getCaseUrl(search);
@@ -161,7 +161,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
 
   const onDetectionsRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? ''),
       });
     },

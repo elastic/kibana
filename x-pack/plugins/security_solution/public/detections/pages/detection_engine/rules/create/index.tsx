@@ -338,7 +338,7 @@ const CreateRulePageComponent: React.FC = () => {
               </StepDefineRuleAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            {/* <MyEuiPanel zindex={3}>
+            <MyEuiPanel zindex={3}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.aboutRule}
@@ -371,9 +371,9 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
                 />
               </EuiAccordion>
-            </MyEuiPanel> */}
+            </MyEuiPanel>
             <EuiSpacer size="l" />
-            {/* <MyEuiPanel zindex={2}>
+            <MyEuiPanel zindex={2}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.scheduleRule}
@@ -404,9 +404,9 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
                 />
               </EuiAccordion>
-            </MyEuiPanel> */}
+            </MyEuiPanel>
             <EuiSpacer size="l" />
-            {/* <MyEuiPanel zindex={1}>
+            <MyEuiPanel zindex={1}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.ruleActions}
@@ -437,7 +437,7 @@ const CreateRulePageComponent: React.FC = () => {
                   actionMessageParams={actionMessageParams}
                 />
               </EuiAccordion>
-            </MyEuiPanel> */}
+            </MyEuiPanel>
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>

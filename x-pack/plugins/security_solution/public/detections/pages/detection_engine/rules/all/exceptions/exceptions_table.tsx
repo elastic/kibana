@@ -12,6 +12,7 @@ import {
   EuiLoadingContent,
   EuiProgress,
   EuiSearchBarProps,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -21,9 +22,10 @@ import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFormatUrl } from '../../../../../../common/components/link_to';
-import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
+import { DetectionEngineHeaderPage } from '../../../../../components/detection_engine_header_page';
+
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
 import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
@@ -33,7 +35,6 @@ import { ReferenceErrorModal } from '../../../../../components/value_lists_manag
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
-import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
@@ -334,6 +335,10 @@ export const ExceptionListsTable = React.memo(() => {
 
   return (
     <>
+      <DetectionEngineHeaderPage
+        title={i18n.ALL_EXCEPTIONS}
+        subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
+      />
       <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
         <>
           {loadingTableInfo && (
@@ -344,13 +349,8 @@ export const ExceptionListsTable = React.memo(() => {
               color="accent"
             />
           )}
-          <HeaderSection
-            split
-            title={i18n.ALL_EXCEPTIONS}
-            subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
-          >
-            {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
-          </HeaderSection>
+          {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+          <EuiSpacer size="m" />
 
           {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
             <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
@@ -397,7 +397,6 @@ export const ExceptionListsTable = React.memo(() => {
         showModal={showReferenceErrorModal}
         titleText={i18n.REFERENCE_MODAL_TITLE}
       />
-      <SpyRoute pageName={SecurityPageName.exceptions} />
     </>
   );
 });

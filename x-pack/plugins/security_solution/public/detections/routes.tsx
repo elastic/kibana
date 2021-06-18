@@ -10,6 +10,8 @@ import { Route, Switch } from 'react-router-dom';
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { ALERTS_PATH, EXCEPTIONS_PATH, RULES_PATH, SecurityPageName } from '../../common/constants';
 
+import { SpyRoute } from '../common/utils/route/spy_routes';
+
 import { RulesSubRoutes } from './pages/detection_engine';
 import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
 import { ExceptionListsTable } from './pages/detection_engine/rules/all/exceptions/exceptions_table';
@@ -17,6 +19,7 @@ import { ExceptionListsTable } from './pages/detection_engine/rules/all/exceptio
 export const AlertsRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
     <DetectionEnginePage />
+    <SpyRoute pageName={SecurityPageName.alerts} />
   </TrackApplicationView>
 );
 
@@ -38,6 +41,7 @@ export const ExceptionsRoutes = () => {
   return (
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
       <ExceptionListsTable />
+      <SpyRoute pageName={SecurityPageName.exceptions} />
     </TrackApplicationView>
   );
 };

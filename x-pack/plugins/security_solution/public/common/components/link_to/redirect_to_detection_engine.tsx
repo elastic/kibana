@@ -9,9 +9,6 @@ import { appendSearch } from './helpers';
 
 export const getDetectionEngineUrl = (search?: string) => `${appendSearch(search)}`;
 
-export const getDetectionEngineTabUrl = (tabPath: string, search?: string) =>
-  `/${tabPath}${appendSearch(search)}`;
-
 export const getRulesUrl = (search?: string) => `${appendSearch(search)}`;
 
 export const getCreateRuleUrl = (search?: string) => `/create${appendSearch(search)}`;

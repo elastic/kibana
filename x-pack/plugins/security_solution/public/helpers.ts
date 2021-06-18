@@ -47,7 +47,7 @@ export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'searc
 
 export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
   const { application } = coreStart;
-  const { pageName, path, search } = parseRoute(window.location);
+  const { pageName, path } = parseRoute(window.location);
 
   switch (pageName) {
     case SecurityPageName.overview:

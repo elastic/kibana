@@ -53,7 +53,7 @@ describe('AllRulesTable Columns', () => {
       )[1];
       await duplicateRulesActionObject.onClick(rule);
       expect(duplicateRulesActionMock).toHaveBeenCalled();
-      expect(editRuleActionMock).toHaveBeenCalledWith(ruleDuplicate, history);
+      expect(editRuleActionMock).toHaveBeenCalledWith(ruleDuplicate.id, navigateToApp);
     });
 
     test('delete rule onClick should call refetch after the rule is deleted', async () => {

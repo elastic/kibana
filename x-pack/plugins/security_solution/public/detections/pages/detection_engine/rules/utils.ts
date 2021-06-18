@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
-  getDetectionEngineTabUrl,
   getRulesUrl,
   getRuleDetailsUrl,
   getCreateRuleUrl,
@@ -36,10 +35,6 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
   if (tabPath === 'alerts') {
     return {
       text: i18nDetections.ALERT,
-      href: getUrlForApp(APP_ID, {
-        deepLinkId: SecurityPageName.alerts,
-        path: getDetectionEngineTabUrl(tabPath, !isEmpty(search[0]) ? search[0] : ''),
-      }),
     };
   }
 
@@ -65,15 +60,7 @@ export const getBreadcrumbs = (
   search: string[],
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] => {
-  let breadcrumb = [
-    {
-      text: i18nDetections.BREADCRUMB_TITLE,
-      href: getUrlForApp(APP_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
-  ];
+  let breadcrumb: ChromeBreadcrumb[] = [];
 
   const tabBreadcrumb = getTabBreadcrumb(params.pathName, search, getUrlForApp);
 

@@ -24,7 +24,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
@@ -293,7 +292,6 @@ const DetectionEnginePageComponent = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-      <SpyRoute pageName={SecurityPageName.alerts} />
     </>
   );
 };

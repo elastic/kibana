@@ -20,7 +20,6 @@ export const RouteCapture = memo(({ children }) => {
   const dispatch: (action: AppAction) => unknown = useDispatch();
 
   useEffect(() => {
-    console.log('location', location);
     dispatch({ type: 'userChangedUrl', payload: location });
   });
 
