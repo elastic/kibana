@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 import { isValidUrl } from './url';
 import { missingImage } from './missing_asset';
 
