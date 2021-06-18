@@ -9,8 +9,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { SHOW_MULTIFIELDS } from '../../../../common';
+import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import {
+  DocViewFilterFn,
+  ElasticSearchHit,
+  DocViewRenderProps,
+} from '../../doc_views/doc_views_types';
 import { DOC_VIEW_COLUMNS } from './table_columns';
 
 export interface DocViewerTableProps {
@@ -49,7 +55,9 @@ export const DocViewerTable = ({
   filter,
   onAddColumn,
   onRemoveColumn,
-}: DocViewerTableProps) => {
+}: DocViewRenderProps) => {
+  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+
   const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
     indexPattern?.fields,
   ]);
@@ -83,6 +91,11 @@ export const DocViewerTable = ({
 
   const flattened = indexPattern.flattenHit(hit);
   const items: FieldRecord[] = Object.keys(flattened)
+    .filter((fieldName) => {
+      const fieldMapping = mapping(fieldName);
+      const isMultiField = !!fieldMapping?.spec?.subType?.multi;
+      return isMultiField ? showMultiFields : true;
+    })
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
@@ -119,6 +132,7 @@ export const DocViewerTable = ({
       columns={DOC_VIEW_COLUMNS}
       pagination={PAGINATION}
       rowProps={onSetRowProps}
+      responsive={false}
     />
   );
 };

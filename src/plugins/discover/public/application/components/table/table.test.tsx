@@ -14,6 +14,22 @@ import { DocViewerTable, DocViewerTableProps } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
+jest.mock('../../../kibana_services', () => ({
+  getServices: jest.fn(),
+}));
+
+import { getServices } from '../../../kibana_services';
+
+(getServices as jest.Mock).mockImplementation(() => ({
+  uiSettings: {
+    get: (key: string) => {
+      if (key === 'discover:showMultiFields') {
+        return true;
+      }
+    },
+  },
+}));
+
 const indexPattern = ({
   fields: {
     getAll: () => [
@@ -374,9 +390,12 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  const component = mountComponent(props);
-  it('renders multifield rows', () => {
-    expect(findTestSubject(component, 'tableDocViewRow-category.keyword').length).toBe(1);
+
+  it('renders multifield rows if showMultiFields flag is set', () => {
+    const component = mountComponent(props);
+
+    const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
+    expect(categoryKeywordRow.length).toBe(1);
 
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
       1
@@ -398,5 +417,26 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
         .length
     ).toBe(1);
+  });
+
+  it('does not render multifield rows if showMultiFields flag is not set', () => {
+    (getServices as jest.Mock).mockImplementationOnce(() => ({
+      uiSettings: {
+        get: (key: string) => {
+          return key === 'discover:showMultiFields' && false;
+        },
+      },
+    }));
+    const component = mountComponent(props);
+
+    const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
+    expect(categoryKeywordRow.length).toBe(0);
+
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
+      0
+    );
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
+      0
+    );
   });
 });
