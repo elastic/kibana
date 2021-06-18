@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.setFieldFormat('duration');
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.setFieldFormat('duration');
-        await testSubjects.click('euiFlyoutCloseButton');
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
     });
