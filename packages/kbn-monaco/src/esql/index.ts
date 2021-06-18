@@ -10,4 +10,4 @@ import { LangModule as LangModuleType } from '../types';
 import { ID } from './constants';
 import { lexerRules } from './lexer_rules';
 
-export const EsqlLang = { ID, lexerRules } as LangModuleType;
+export const EsqlLang: LangModuleType = { ID, lexerRules };

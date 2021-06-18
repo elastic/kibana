@@ -11,12 +11,12 @@ import { lexerRules, languageConfiguration } from './lexer_rules';
 import { getSuggestionProvider, getSyntaxErrors } from './language';
 import { CompleteLangModule as CompleteLangModuleType } from '../types';
 
-export const PainlessLang = {
+export const PainlessLang: CompleteLangModuleType = {
   ID,
   getSuggestionProvider,
   lexerRules,
   languageConfiguration,
   getSyntaxErrors,
-} as CompleteLangModuleType;
+};
 
 export { PainlessContext, PainlessAutocompleteField } from './types';
