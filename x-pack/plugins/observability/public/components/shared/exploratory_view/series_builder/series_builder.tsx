@@ -297,3 +297,10 @@ export const SELECT_REPORT_TYPE = i18n.translate(
     defaultMessage: 'No report type selected',
   }
 );
+
+export const SELECT_DATA_TYPE = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectDataType',
+  {
+    defaultMessage: 'No data type selected',
+  }
+);

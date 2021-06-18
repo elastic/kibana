@@ -15,7 +15,7 @@ import { ReportViewType, SeriesUrl } from '../../types';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { ReportTypeItem } from '../series_builder';
+import { ReportTypeItem, SELECT_DATA_TYPE } from '../series_builder';
 
 interface Props {
   seriesId: string;
@@ -28,6 +28,10 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
   const { reportType: selectedReportType, ...restSeries } = getSeries(seriesId);
 
   const { loading, hasData } = useAppIndexPatternContext(restSeries.dataType);
+
+  if (!restSeries.dataType) {
+    return SELECT_DATA_TYPE;
+  }
 
   if (!loading && !hasData) {
     return (
