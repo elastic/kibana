@@ -117,7 +117,7 @@ export const EditConnector = React.memo(
       schema,
     });
 
-    const { setFieldValue, submit, getErrors } = form;
+    const { setFieldValue, submit } = form;
 
     const [{ currentConnector, fields, editConnector }, dispatch] = useReducer(
       editConnectorReducer,

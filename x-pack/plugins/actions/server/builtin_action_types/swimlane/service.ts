@@ -28,11 +28,11 @@ import * as i18n from './translations';
 
 const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
   if (errorResponse == null) {
-    return '';
+    return 'unknown';
   }
 
   const { ErrorCode, Argument } = errorResponse;
-  return Argument != null && ErrorCode != null ? `${Argument} (${ErrorCode})` : '';
+  return Argument != null && ErrorCode != null ? `${Argument} (${ErrorCode})` : 'unknown';
 };
 
 export const createExternalService = (

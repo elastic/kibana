@@ -376,7 +376,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
       );
     });
 
@@ -393,7 +393,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
       );
     });
 
@@ -410,7 +410,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: `
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
       );
     });
   });
