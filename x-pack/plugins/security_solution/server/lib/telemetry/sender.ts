@@ -140,16 +140,17 @@ export class TelemetryEventsSender {
     return callCluster('search', query);
   }
 
-  public async fetchEndpointAgents() {
+  public async fetchFleetAgents() {
     if (this.esClient === undefined) {
       this.logger.debug(`es client is not available`);
       return [];
     }
 
+    // require ALL fleet agents (inc inactive), not just the ones with EP Package.
+    // the reason for this is that the EP package could have failed to install.
     return this.agentService?.listAgents(this.esClient, {
-      kuery: `(packages : ${FleetDefaultPackages.Endpoint})`,
       perPage: this.max_records,
-      showInactive: false,
+      showInactive: true,
       sortField: 'enrolled_at',
       sortOrder: 'desc',
     });
@@ -166,14 +167,32 @@ export class TelemetryEventsSender {
     });
   }
 
-  public async fetchEndpointPolicyResponses() {
+  public async fetchFailedEndpointPolicyResponses() {
     if (this.esClient === undefined) {
       this.logger.debug(`es client is not available`);
       return [];
     }
 
-    // TODO:@pjhampton - write the query for the `.ds-metrics-endpoint.policy*` ds
-    return [];
+    /* 
+      TODO: Grant kibana_system access to this datastream
+        ~~>> https://github.com/elastic/elasticsearch/pull/74309
+      query the last 24h worth of failed policy responses 
+    */
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: `.ds-metrics-endpoint.policy*`,
+      size: this.maxQueueSize,
+      body: {
+        query: {
+          match: {
+            'Endpoint.policy.applied.status': 'failure',
+          },
+        },
+      },
+    };
+
+    const { body: failedPolicyResponses } = await this.esClient.search(query);
+    return failedPolicyResponses;
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {

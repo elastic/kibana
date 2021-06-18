@@ -17,8 +17,8 @@ import { TelemetryEventsSender } from './sender';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '1m',
-  TYPE: 'security:endpoint-metrics',
-  INTERVAL: '24h',
+  TYPE: 'security:endpoint-metrics-dev',
+  INTERVAL: '3m', // TODO:@pjhampton set this to 24h
   VERSION: '1.0.0',
 };
 
@@ -102,16 +102,16 @@ export class TelemetryEndpointTask {
     }
 
     // 1. [PH] Get the fleet agents
-    const agents = await this.sender.fetchEndpointAgents();
+    const agents = await this.sender.fetchFleetAgents();
     this.logger.debug(`total agents: ${agents}`);
 
-    // 2. [PH/] Get the fleet index (policies)
+    // 2. [PH] Get the fleet policy configurations
     const policies = await this.sender.fetchEndpointPolicyConfigs();
     this.logger.debug(`policy configs: ${policies}`);
 
     // 3. [PH] Get the endpoint policy failure responses
-    const policyResponses = await this.sender.fetchEndpointPolicyResponses();
-    this.logger.debug(`ep policy responses: ${policyResponses}`);
+    const failedPolicyResponses = await this.sender.fetchFailedEndpointPolicyResponses();
+    this.logger.debug(`ep policy responses: ${failedPolicyResponses}`);
 
     // 4. [CD] Get the EP metrics
     // 5. [PH/CD] Document restructuring / Join on agent / host id
