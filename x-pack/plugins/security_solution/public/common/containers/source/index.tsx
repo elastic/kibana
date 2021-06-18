@@ -146,7 +146,6 @@ export const useFetchIndex = (
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        console.log('======indexFieldsSearch======');
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
@@ -157,31 +156,14 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
-              console.log('======response======', response);
               if (isCompleteResponse(response)) {
-                console.log('======isCompleteResponse======', response.indicesExist.sort().join());
-                console.log('======indexFields======', response.indexFields.length);
                 const stringifyIndices = response.indicesExist.sort().join();
-                console.log('======indexExists======', response.indicesExist);
-                console.log(
-                  '======browserFields======',
-                  getBrowserFields(stringifyIndices, response.indexFields)
-                );
-                console.log(
-                  '======docValueFields======',
-                  getDocValueFields(stringifyIndices, response.indexFields)
-                );
-                console.log(
-                  '======indexPatterns======',
-                  getIndexFields(stringifyIndices, response.indexFields)
-                );
+
                 previousIndexesName.current = response.indicesExist;
-                console.log('======setLoading======');
                 setLoading((prevValue) => {
-                  console.log(prevValue);
                   return false;
                 });
-                console.log('======setState======');
+
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -189,15 +171,12 @@ export const useFetchIndex = (
                   indexExists: response.indicesExist.length > 0,
                   indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
                 });
-                console.log('======searchSubscription======', searchSubscription$.current);
+
                 searchSubscription$.current.unsubscribe();
-                console.log('======done isCompleteResponse======', response);
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.current.unsubscribe();
-              } else {
-                console.log('others------');
               }
             },
             error: (msg) => {
@@ -209,23 +188,18 @@ export const useFetchIndex = (
             },
           });
       };
-      console.log('cancel searching...');
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
-      console.log('search');
       asyncSearch();
     },
     [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
   );
 
   useEffect(() => {
-    console.log('tried to search', indexNames);
     if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      console.log('searching...');
       indexFieldsSearch(indexNames);
     }
     return () => {
-      console.log('unmounted');
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
