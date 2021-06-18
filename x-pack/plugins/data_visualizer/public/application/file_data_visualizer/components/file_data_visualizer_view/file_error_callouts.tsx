@@ -163,7 +163,7 @@ export const FindFileStructurePermissionDenied: FC = () => {
       >
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
-          defaultMessage="monitor_text_structure or monitor cluster privileges are required to use this feature"
+          defaultMessage="You must have monitor_text_structure or monitor cluster privileges to use this feature."
         />
       </EuiCallOut>
     </>
