@@ -68,11 +68,19 @@ export const EndpointDetailsFlyoutTabs = memo(
           },
         });
         if (tab.id === EndpointDetailsTabsTypes.activityLog) {
+          const paging = {
+            page: 1,
+            pageSize,
+          };
           dispatch({
             type: 'appRequestedEndpointActivityLog',
+            payload: paging,
+          });
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdatePaging',
             payload: {
-              page: 1,
-              pageSize,
+              disabled: false,
+              ...paging,
             },
           });
         }
