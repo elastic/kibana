@@ -23,7 +23,7 @@ import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { TimeRange, getTime, isRangeFilter } from '../../../common';
+import { TimeRange, getTime, isRangeFilter, calculateBounds } from '../../../common';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
@@ -125,6 +125,15 @@ export class AggConfigs {
     };
 
     this.aggs.forEach(updateAggTimeRange);
+  }
+
+  getResolvedTimeRange() {
+    return (
+      this.timeRange &&
+      calculateBounds(this.timeRange, {
+        forceNow: this.forceNow,
+      })
+    );
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)

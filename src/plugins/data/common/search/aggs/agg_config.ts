@@ -22,7 +22,6 @@ import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
-import { calculateBounds } from '../../query';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -193,9 +192,7 @@ export class AggConfig {
       } else if (!this.aggConfigs.timeRange) {
         return;
       }
-      const resolvedBounds = calculateBounds(this.aggConfigs.timeRange, {
-        forceNow: this.aggConfigs.forceNow,
-      });
+      const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
       return moment.duration(moment(resolvedBounds.max).diff(resolvedBounds.min));
     }
     return parsedTimeShift;
