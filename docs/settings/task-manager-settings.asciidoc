@@ -28,6 +28,9 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
   | `xpack.task_manager.max_workers`
   | The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
     Starting in 8.0, it will not be possible to set the value greater than 100.
+
+  | `xpack.task_manager.monitored_stats_warn_delayed_task_start_in_seconds`
+  | The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
 |===
 
 [float]

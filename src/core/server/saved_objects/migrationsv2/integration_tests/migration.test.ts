@@ -21,12 +21,36 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+const logFilePath = Path.join(__dirname, 'migration_test_kibana_from_v1.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
+}
+const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
+
+function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
+  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
+}
+
+async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
+  const { body } = await esClient.search<any>({
+    index,
+    body: {
+      query: {
+        match_all: {},
+      },
+      _source: ['type', 'id'],
+    },
+  });
+
+  return body.hits.hits
+    .map((h) => ({
+      ...h._source,
+      id: h._id,
+    }))
+    .sort(sortByTypeAndId);
 }
 
 describe('migration v2', () => {
@@ -40,7 +64,7 @@ describe('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'trial',
+          license: 'basic',
           dataArchive,
         },
       },
@@ -51,8 +75,8 @@ describe('migration v2', () => {
         migrations: {
           skip: false,
           enableV2: true,
-          // There are 53 docs in fixtures. Batch size configured to enforce 3 migration steps.
-          batchSize: 20,
+          // There are 40 docs in fixtures. Batch size configured to enforce 3 migration steps.
+          batchSize: 15,
         },
         logging: {
           appenders: {
@@ -85,8 +109,7 @@ describe('migration v2', () => {
         coreStart = start;
         esClient = coreStart.elasticsearch.client.asInternalUser;
       });
-
-    await Promise.all([startEsPromise, startKibanaPromise]);
+    return await Promise.all([startEsPromise, startKibanaPromise]);
   };
 
   const getExpectedVersionPerType = () =>
@@ -192,15 +215,19 @@ describe('migration v2', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/91107
-  describe.skip('migrating from the same Kibana version', () => {
+  describe('migrating from the same Kibana version that used v1 migrations', () => {
+    const originalIndex = `.kibana_1`; // v1 migrations index
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
       await removeLogFile();
       await startServers({
-        oss: true,
-        dataArchive: Path.join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
+        oss: false,
+        dataArchive: Path.join(
+          __dirname,
+          'archives',
+          '8.0.0_v1_migrations_sample_data_saved_objects.zip'
+        ),
       });
     });
 
@@ -215,7 +242,6 @@ describe('migration v2', () => {
         },
         { ignore: [404] }
       );
-
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
@@ -225,17 +251,23 @@ describe('migration v2', () => {
       ]);
     });
 
-    it('copies all the document of the previous index to the new one', async () => {
+    it('copies the documents from the previous index to the new one', async () => {
+      // original assertion on document count comparison (how atteched are we to this assertion?)
       const migratedIndexResponse = await esClient.count({
         index: migratedIndex,
       });
       const oldIndexResponse = await esClient.count({
-        index: '.kibana_1',
+        index: originalIndex,
       });
 
       // Use a >= comparison since once Kibana has started it might create new
       // documents like telemetry tasks
       expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+
+      // new assertion against a document array comparison
+      const originalDocs = await fetchDocuments(esClient, originalIndex);
+      const migratedDocs = await fetchDocuments(esClient, migratedIndex);
+      expect(assertMigratedDocuments(migratedDocs, originalDocs));
     });
 
     it('migrates the documents to the highest version', async () => {

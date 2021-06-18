@@ -150,6 +150,7 @@ export interface ApplicationStart {
     getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
+        deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;

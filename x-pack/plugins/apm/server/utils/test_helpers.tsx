@@ -11,12 +11,13 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../typings/elasticsearch';
-import { UIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
+  uiFilters?: Record<string, string>;
 }
 
 interface MockSetup {
@@ -25,7 +26,7 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UIFilters;
+  uiFilters: UxUIFilters;
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -86,7 +87,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: {},
+    uiFilters: options?.uiFilters ?? {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

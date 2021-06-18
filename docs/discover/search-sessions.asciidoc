@@ -68,3 +68,19 @@ behaves differently:
 * Relative dates are converted to absolute dates.
 * Panning and zooming is disabled for maps.
 * Changing a filter, query, or drilldown starts a new search session, which can be slow.
+
+[float]
+==== Limitations
+
+Certain visualization features do not fully support background search sessions yet. If a dashboard using these features gets restored,
+all panels using unsupported features won't load immediately, but instead send out additional data requests which can take a while to complete.
+In this case a warning *Your search session is still running* will be shown.
+
+You can either wait for these additional requests to complete or come back to the dashboard later when all data requests have been finished.
+
+A panel on a dashboard can behave like this if one of the following features is used:
+* *Lens* - A *top values* dimension with an enabled setting *Group other values as "Other"* (configurable in the *Advanced* section of the dimension)
+* *Lens* - An *intervals* dimension is used
+* *Aggregation based* visualizations - A *terms* aggregation is used with an enabled setting *Group other values in separate bucket*
+* *Aggregation based* visualizations - A *histogram* aggregation is used
+* *Maps* - Layers using joins, blended layers or tracks layers are used

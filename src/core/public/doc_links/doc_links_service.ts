@@ -142,7 +142,7 @@ export class DocLinksService {
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
-          indexTemplates: `${ELASTICSEARCH_DOCS}indices-templates.html`,
+          indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
           mappingCoerce: `${ELASTICSEARCH_DOCS}coerce.html`,
