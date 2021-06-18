@@ -26,7 +26,6 @@ import { RuntimeType, RuntimeField } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
 
 type From = 'cluster' | 'custom';
-
 type EsDocument = Record<string, any>;
 
 interface PreviewError {
@@ -34,6 +33,12 @@ interface PreviewError {
   error: Record<string, any>;
 }
 
+interface ClusterData {
+  documents: EsDocument[];
+  currentIdx: number;
+}
+
+// The parameters required to preview the field
 interface Params {
   name: string | null;
   index: string | null;
@@ -107,9 +112,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
   /** The sample documents fetched from the cluster */
-  const [documents, setDocuments] = useState<EsDocument[]>([]);
-  /** The current Array index of the document we are previewing (when previewing from the cluster) */
-  const [navDocsIndex, setNavDocsIndex] = useState(0);
+  const [clusterData, setClusterData] = useState<ClusterData>({
+    documents: [],
+    currentIdx: 0,
+  });
   /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   /** Flag to indicate if we are loading document from cluster */
@@ -124,14 +130,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     .filter(([key]) => key !== 'format')
     .every(([_, value]) => Boolean(value));
 
-  const currentDocument: Record<string, any> | undefined = useMemo(() => documents[navDocsIndex], [
+  const { documents, currentIdx } = clusterData;
+  const currentDocument: Record<string, any> | undefined = useMemo(() => documents[currentIdx], [
     documents,
-    navDocsIndex,
+    currentIdx,
   ]);
 
   const currentDocIndex = currentDocument?._index;
   const totalDocs = documents.length;
-  const { name, document, script } = params;
+  const { name, document, script, format } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -139,7 +146,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const fetchSampleDocuments = useCallback(
     async (limit = 50) => {
-      setPreviewResponse({ fields: [], error: null });
       setIsFetchingDocument(true);
       setIsLoadingPreview(true);
 
@@ -155,20 +161,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         .toPromise();
 
       setIsFetchingDocument(false);
-      setNavDocsIndex(0);
 
-      if (response) {
-        setDocuments(response.rawResponse.hits.hits);
-      } else {
-        setDocuments([]);
-      }
+      setPreviewResponse({ fields: [], error: null });
+      setClusterData({
+        documents: response ? response.rawResponse.hits.hits : [],
+        currentIdx: 0,
+      });
     },
     [indexPattern, search]
   );
 
   const loadDocument = useCallback(
     async (id: string) => {
-      setPreviewResponse({ fields: [], error: null });
       setIsFetchingDocument(true);
 
       const [response, error] = await search
@@ -191,13 +195,13 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       setIsFetchingDocument(false);
 
+      let loadedDocuments: EsDocument[] = [];
+
       if (response) {
         if (response.rawResponse.hits.total > 0) {
-          setDocuments(response.rawResponse.hits.hits);
-          setNavDocsIndex(0);
+          setPreviewResponse({ fields: [], error: null });
+          loadedDocuments = response.rawResponse.hits.hits;
         } else {
-          setDocuments([]);
-          setNavDocsIndex(-1);
           setPreviewResponse({
             fields: [],
             error: {
@@ -226,10 +230,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
             },
           },
         });
-      } else {
-        setDocuments([]);
-        setNavDocsIndex(-1);
       }
+
+      setClusterData({
+        documents: loadedDocuments,
+        currentIdx: 0,
+      });
     },
     [indexPattern, search]
   );
@@ -239,7 +245,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
-    const currentApiCall = previewCount.current;
+    const currentApiCall = ++previewCount.current;
 
     setIsLoadingPreview(true);
 
@@ -256,7 +262,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
-    previewCount.current = ++previewCount.current;
     setIsLoadingPreview(false);
 
     const { error: serverError } = response;
@@ -301,36 +306,37 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   ]);
 
   const goToNextDoc = useCallback(() => {
-    if (navDocsIndex >= totalDocs - 1) {
-      setNavDocsIndex(0);
+    if (currentIdx >= totalDocs - 1) {
+      setClusterData((prev) => ({ ...prev, currentIdx: 0 }));
+    } else {
+      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx + 1 }));
     }
-    setNavDocsIndex((prev) => prev + 1);
     setIsLoadingPreview(true);
-  }, [navDocsIndex, totalDocs]);
+  }, [currentIdx, totalDocs]);
 
   const goToPrevDoc = useCallback(() => {
-    if (navDocsIndex === 0) {
-      setNavDocsIndex(totalDocs - 1);
+    if (currentIdx === 0) {
+      setClusterData((prev) => ({ ...prev, currentIdx: totalDocs - 1 }));
+    } else {
+      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx - 1 }));
     }
-    setNavDocsIndex((prev) => prev - 1);
     setIsLoadingPreview(true);
-  }, [navDocsIndex, totalDocs]);
+  }, [currentIdx, totalDocs]);
 
   const reset = useCallback(() => {
     // We increase the count of preview calls to discard any inflight
     // API call response coming in after calling reset()
     previewCount.current = ++previewCount.current;
 
-    setNavDocsIndex(0);
+    setClusterData({
+      documents: [],
+      currentIdx: 0,
+    });
     setFrom('cluster');
     setPreviewResponse({ fields: [], error: null });
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
-
-    if (documents.length === 0) {
-      fetchSampleDocuments();
-    }
-  }, [documents, fetchSampleDocuments]);
+  }, []);
 
   const ctx = useMemo<Context>(
     () => ({
@@ -349,8 +355,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         isLoading: isFetchingDocument,
       },
       navigation: {
-        isFirstDoc: navDocsIndex === 0,
-        isLastDoc: navDocsIndex >= totalDocs - 1,
+        isFirstDoc: currentIdx === 0,
+        isLastDoc: currentIdx >= totalDocs - 1,
         next: goToNextDoc,
         prev: goToPrevDoc,
       },
@@ -373,7 +379,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       loadDocument,
       fetchSampleDocuments,
       isFetchingDocument,
-      navDocsIndex,
+      currentIdx,
       totalDocs,
       goToNextDoc,
       goToPrevDoc,
@@ -397,10 +403,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * field along with other document fields
    */
   useEffect(() => {
-    if (fieldTypeToProcess === 'runtime') {
+    if (isPanelVisible && fieldTypeToProcess === 'runtime') {
       fetchSampleDocuments();
     }
-  }, [fetchSampleDocuments, fieldTypeToProcess]);
+  }, [isPanelVisible, fetchSampleDocuments, fieldTypeToProcess]);
 
   /**
    * Each time the current document changes we update the parameters
@@ -413,16 +419,27 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     });
   }, [currentDocument, updateParams]);
 
-  /** If the script is null and we have a document we will preview the _source value */
   useEffect(() => {
     if (name && document && script === null) {
-      setPreviewResponse({
-        fields: [{ key: name, value: get(document, name) }],
-        error: null,
-      });
+      // We have a field name, a document loaded but no script (the set value toggle is
+      // either turned off or we have a blank script). If we have a format then we'll
+      // preview the field with the format by reading the value from _source
+      if (format) {
+        setPreviewResponse({
+          fields: [{ key: name, value: get(document, name) }],
+          error: null,
+        });
+      } else {
+        // We don't have a format yet defined, we reset the preview.
+        // This will display the empty prompt.
+        setPreviewResponse({
+          fields: [],
+          error: null,
+        });
+      }
       setIsLoadingPreview(false);
     }
-  }, [name, document, script]);
+  }, [name, document, script, format]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

@@ -277,7 +277,7 @@ const FieldEditorFlyoutContentComponent = ({
 
         {/* Preview panel */}
         {isPanelVisible && (
-          <FlyoutPanels.Item width={440} backgroundColor="euiPageBackground" border="right">
+          <FlyoutPanels.Item width={440} backgroundColor="euiPageBackground" border="left">
             <FieldPreview />
           </FlyoutPanels.Item>
         )}

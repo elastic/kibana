@@ -66,7 +66,6 @@ export const Panels: React.FC<Props> = ({
     const el = document.getElementsByClassName(flyoutClassName);
 
     if (el.length === 0) {
-      // throw new Error(`Flyout with className "${flyoutClassName}" not found.`);
       return null;
     }
 
