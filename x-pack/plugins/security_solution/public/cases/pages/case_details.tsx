@@ -17,7 +17,7 @@ import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
 import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
-import { CASES_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -31,7 +31,10 @@ export const CaseDetailsPage = React.memo(() => {
   const search = useGetUrlSearch(navTabs.case);
 
   if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.case,
+      path: getCaseUrl(search),
+    });
     return null;
   }
 

@@ -37,11 +37,8 @@ import {
   APP_ICON_SOLUTION,
   APP_OVERVIEW_PATH,
   NETWORK_PATH,
-  APP_TIMELINES_PATH,
   APP_MANAGEMENT_PATH,
-  APP_CASES_PATH,
   APP_PATH,
-  CASES_APP_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
@@ -50,6 +47,8 @@ import {
   RULES_PATH,
   ALERTS_PATH,
   HOSTS_PATH,
+  CASES_PATH,
+  TIMELINES_PATH,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -162,48 +161,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.timelines}`,
-      title: TIMELINES,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_TIMELINES_PATH,
-      ...getDeepLinksAndKeywords(SecurityPageName.timelines),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { timelines: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: CASES_APP_ID,
-      title: CASE,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_CASES_PATH,
-      updater$: this.caseUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { cases: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start().SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
@@ -281,7 +238,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           order: 9002,
           euiIconType: APP_ICON_SOLUTION,
         },
+        {
+          id: SecurityPageName.timelines,
+          title: TIMELINES,
+          path: TIMELINES_PATH,
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9002,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.case,
+          title: CASE,
+          path: CASES_PATH,
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9002,
+          euiIconType: APP_ICON_SOLUTION,
+        },
       ],
+
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);

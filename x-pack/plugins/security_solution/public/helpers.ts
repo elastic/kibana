@@ -86,13 +86,15 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     case SecurityPageName.timelines:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.timelines,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.case:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         replace: true,
         path,
       });

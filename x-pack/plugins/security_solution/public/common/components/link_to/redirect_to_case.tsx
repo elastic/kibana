@@ -19,11 +19,11 @@ export const getCaseDetailsUrl = ({
   subCaseId?: string;
 }) => {
   if (subCaseId) {
-    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
+    return `${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
       search ?? undefined
     )}`;
   }
-  return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+  return `${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
 };
 
 export const getCaseDetailsUrlWithCommentId = ({
@@ -38,7 +38,7 @@ export const getCaseDetailsUrlWithCommentId = ({
   subCaseId?: string;
 }) => {
   if (subCaseId) {
-    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(
+    return `${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(
       subCaseId
     )}/${encodeURIComponent(commentId)}${appendSearch(search ?? undefined)}`;
   }
