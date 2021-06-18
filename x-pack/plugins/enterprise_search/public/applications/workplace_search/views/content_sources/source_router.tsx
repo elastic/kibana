@@ -68,17 +68,17 @@ export const SourceRouter: React.FC = () => {
         <SourceContent />
       </Route>
       {isCustomSource && (
-        <Route path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
+        <Route exact path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
           <Schema />
         </Route>
       )}
       {isCustomSource && (
-        <Route path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}>
+        <Route exact path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}>
           <SchemaChangeErrors />
         </Route>
       )}
       {isCustomSource && (
-        <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
+        <Route exact path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
           <DisplaySettingsRouter />
         </Route>
       )}

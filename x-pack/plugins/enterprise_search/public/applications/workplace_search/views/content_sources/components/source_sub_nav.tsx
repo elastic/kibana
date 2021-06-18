@@ -48,7 +48,10 @@ export const useSourceSubNav = () => {
     navItems.push({
       id: 'sourceSchema',
       name: NAV.SCHEMA,
-      ...generateNavLink({ to: getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization) }),
+      ...generateNavLink({
+        to: getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization),
+        shouldShowActiveForSubroutes: true,
+      }),
     });
     navItems.push({
       id: 'sourceDisplaySettings',
