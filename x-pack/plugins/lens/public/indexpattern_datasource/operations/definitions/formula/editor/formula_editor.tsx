@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -47,8 +47,22 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
+import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
-export const MemoizedFormulaEditor = React.memo(FormulaEditor);
+export const WrappedFormulaEditor = ({
+  activeData,
+  ...rest
+}: ParamEditorProps<FormulaIndexPatternColumn>) => {
+  const dateHistogramInterval = getDateHistogramInterval(
+    rest.layer,
+    rest.indexPattern,
+    activeData,
+    rest.layerId
+  );
+  return <MemoizedFormulaEditor {...rest} dateHistogramInterval={dateHistogramInterval} />;
+};
+
+const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
@@ -61,7 +75,10 @@ export function FormulaEditor({
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
-}: ParamEditorProps<FormulaIndexPatternColumn>) {
+  dateHistogramInterval,
+}: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
+  dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
+}) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
     Array<{ severity: monaco.MarkerSeverity; message: string }>
@@ -77,6 +94,13 @@ export function FormulaEditor({
   const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
     operationDefinitionMap,
   ]);
+
+  const baseInterval =
+    'interval' in dateHistogramInterval
+      ? dateHistogramInterval.interval?.asMilliseconds()
+      : undefined;
+  const baseIntervalRef = useRef(baseInterval);
+  baseIntervalRef.current = baseInterval;
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -227,6 +251,7 @@ export function FormulaEditor({
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
           .flatMap(([id, column]) => {
+            const newWarnings: monaco.editor.IMarkerData[] = [];
             if (locations[id]) {
               const def = visibleOperationsMap[column.operationType];
               if (def.getErrorMessage) {
@@ -239,20 +264,32 @@ export function FormulaEditor({
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
                   const endPosition = offsetToRowColumn(text, locations[id].max);
-                  return [
-                    {
-                      message: messages.join(', '),
-                      startColumn: startPosition.column + 1,
-                      startLineNumber: startPosition.lineNumber,
-                      endColumn: endPosition.column + 1,
-                      endLineNumber: endPosition.lineNumber,
-                      severity: monaco.MarkerSeverity.Warning,
-                    },
-                  ];
+                  newWarnings.push({
+                    message: messages.join(', '),
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  });
                 }
               }
+              if (def.shiftable && column.timeShift) {
+                const startPosition = offsetToRowColumn(text, locations[id].min);
+                const endPosition = offsetToRowColumn(text, locations[id].max);
+                newWarnings.push(
+                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column).map((message) => ({
+                    message,
+                    startColumn: startPosition.column + 1,
+                    startLineNumber: startPosition.lineNumber,
+                    endColumn: endPosition.column + 1,
+                    endLineNumber: endPosition.lineNumber,
+                    severity: monaco.MarkerSeverity.Warning,
+                  }))
+                );
+              }
             }
-            return [];
+            return newWarnings;
           })
           .filter((marker) => marker);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
@@ -313,6 +350,7 @@ export function FormulaEditor({
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
             data,
+            dateHistogramInterval: baseIntervalRef.current,
           });
         }
       } else {
@@ -323,6 +361,7 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
           data,
+          dateHistogramInterval: baseIntervalRef.current,
         });
       }
 
@@ -332,7 +371,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data]
+    [indexPattern, visibleOperationsMap, data, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(
@@ -417,7 +456,9 @@ export function FormulaEditor({
             !tokenInfo ||
             typeof tokenInfo.ast === 'number' ||
             tokenInfo.ast.type !== 'namedArgument' ||
-            (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
+            (tokenInfo.ast.name !== 'kql' &&
+              tokenInfo.ast.name !== 'lucene' &&
+              tokenInfo.ast.name !== 'shift') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -437,7 +478,7 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'") {
+          if (char === "'" && tokenInfo.ast.name !== 'shift') {
             editOperation = {
               range: {
                 ...currentPosition,

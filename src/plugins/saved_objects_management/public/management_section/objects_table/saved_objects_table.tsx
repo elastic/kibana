@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsClientContract,
@@ -617,7 +617,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }));
 
     return (
-      <EuiPageContent horizontalPosition="center">
+      <div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -628,7 +628,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
         />
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="l" />
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
@@ -656,7 +656,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             canGoInApp={this.props.canGoInApp}
           />
         </RedirectAppLinks>
-      </EuiPageContent>
+      </div>
     );
   }
 }

@@ -75,13 +75,13 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -190,13 +190,13 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -306,13 +306,13 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },

@@ -28,7 +28,7 @@ import { ServiceDependencyItem } from '../../../../../server/lib/services/get_se
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { px, unit } from '../../../../style/variables';
-import { AgentIcon } from '../../../shared/AgentIcon';
+import { AgentIcon } from '../../../shared/agent_icon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
