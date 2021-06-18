@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -212,6 +213,7 @@ export const App = (props: {
                   onTableRowClick={(_data) => {
                     // call back event for on table row click event
                   }}
+                  viewMode={ViewMode.VIEW}
                 />
                 {isSaveModalVisible && (
                   <LensSaveModalComponent
