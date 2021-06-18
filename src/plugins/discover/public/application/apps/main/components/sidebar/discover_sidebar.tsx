@@ -21,6 +21,7 @@ import {
   EuiPageSideBar,
   useResizeObserver,
 } from '@elastic/eui';
+import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,6 +36,7 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { useSingleton } from '../../utils/use_singleton';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -205,7 +207,7 @@ export function DiscoverSidebar({
     return result;
   }, [fields]);
 
-  const multiFields = useMemo(() => {
+  const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
@@ -224,7 +226,13 @@ export function DiscoverSidebar({
       map.set(parent, value);
     });
     return map;
-  }, [fields, useNewFieldsApi, selectedFields]);
+  };
+
+  const [multiFields, setMultiFields] = useState(() => calculateMultiFields());
+
+  useShallowCompareEffect(() => {
+    setMultiFields(calculateMultiFields());
+  }, [fields, selectedFields, useNewFieldsApi]);
 
   const deleteField = useMemo(
     () =>
