@@ -35,7 +35,7 @@ serviceName: '',
     defaultMessage: 'Use if APM Server requires a secret token',
   }
 )}
-secretToken: '{{secretToken}}',
+secretToken: '{{{secretToken}}}',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
@@ -45,7 +45,7 @@ secretToken: '{{secretToken}}',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-serverUrl: '{{apmServerUrl}}',
+serverUrl: '{{{apmServerUrl}}}',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',

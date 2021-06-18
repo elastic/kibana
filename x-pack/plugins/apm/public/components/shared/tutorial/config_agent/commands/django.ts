@@ -39,7 +39,7 @@ ELASTIC_APM = {curlyOpen}
     defaultMessage: 'Use if APM Server requires a secret token',
   }
 )}
-'SECRET_TOKEN': '{{secretToken}}',
+'SECRET_TOKEN': '{{{secretToken}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
@@ -49,7 +49,7 @@ ELASTIC_APM = {curlyOpen}
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-'SERVER_URL': '{{apmServerUrl}}',
+'SERVER_URL': '{{{apmServerUrl}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',

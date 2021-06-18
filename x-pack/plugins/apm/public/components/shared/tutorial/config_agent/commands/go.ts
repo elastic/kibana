@@ -38,7 +38,7 @@ export ELASTIC_APM_SERVICE_NAME=
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-export ELASTIC_APM_SERVER_URL={{apmServerUrl}}
+export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
@@ -46,7 +46,7 @@ export ELASTIC_APM_SERVER_URL={{apmServerUrl}}
     defaultMessage: 'Use if APM Server requires a secret token',
   }
 )}
-export ELASTIC_APM_SECRET_TOKEN={{secretToken}}
+export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment',

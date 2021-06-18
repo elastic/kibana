@@ -5,24 +5,25 @@
  * 2.0.
  */
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
-  EuiSelectable,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { CopyCommands } from '../copy_commands';
+import {
+  EnvironmentConfigurationOption,
+  EnvironmentConfigurationSelector,
+} from './environment_configuration_selector';
 import { getCommands } from './commands/get_commands';
+
+const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 
 interface Props {
   variantId: string;
@@ -37,29 +38,71 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-const onPremStandaloneOption = {
-  key: 'onPrem_standalone',
-  label: 'Default Standalone configuration',
-  apmServerUrl: 'http://localhost:8200',
-  secretKey: '',
-  checked: 'on',
-};
-
 type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
-const INITIAL_STATE: APIResponseType = {
-  agentsCredentials: [],
-  cloudAgentPolicyCredential: undefined,
-  cloudCredentials: undefined,
-};
 
-type SelectValuesType = 'onPrem_standalone' | 'cloud_standalone' | string;
+const DEFAULT_STANDALONE_CONFIG_LABEL = i18n.translate(
+  'xpack.apm.tutorial.agent_config.defaultStandaloneConfig',
+  { defaultMessage: 'Default Standalone configuration' }
+);
 
-interface Credential {
-  key: string;
-  label: string;
-  apmServerUrl?: string;
-  secretToken?: string;
-  checked?: 'on';
+const MANAGE_FLEET_POLICIES_LABEL = i18n.translate(
+  'xpack.apm.tutorial.agent_config.manageFleetPolicies',
+  { defaultMessage: 'Manage fleet policies' }
+);
+
+const GET_STARTED_WITH_FLEET_LABEL = i18n.translate(
+  'xpack.apm.tutorial.agent_config.getStartedWithFleet',
+  { defaultMessage: 'Get started with fleet' }
+);
+
+export function getEnvironmentConfigurationOptions({
+  isCloudEnabled,
+  data,
+}: {
+  isCloudEnabled: boolean;
+  data: APIResponseType;
+}) {
+  const newOptions: EnvironmentConfigurationOption[] = [];
+  // When running on cloud and apm.url is defined
+  if (isCloudEnabled && data.cloudStandaloneSetup?.apmServerUrl) {
+    // pushes APM cloud standalone
+    newOptions.push({
+      key: 'cloud_standalone',
+      label: DEFAULT_STANDALONE_CONFIG_LABEL,
+      apmServerUrl: data.cloudStandaloneSetup?.apmServerUrl,
+      secretToken: data.cloudStandaloneSetup?.secretToken,
+      checked: data.hasPolicyElasticOnCloud ? undefined : 'on',
+    });
+  } else {
+    // pushes APM onprem standalone
+    newOptions.push({
+      key: 'onPrem_standalone',
+      label: DEFAULT_STANDALONE_CONFIG_LABEL,
+      apmServerUrl: 'http://localhost:8200',
+      secretToken: '',
+      checked: data.hasPolicyElasticOnCloud ? undefined : 'on',
+    });
+  }
+
+  // remaining agents with APM integration
+  newOptions.push(
+    ...data.agents.map(
+      ({
+        id,
+        name,
+        apmServerUrl,
+        secretToken,
+      }): EnvironmentConfigurationOption => ({
+        key: id,
+        label: name,
+        apmServerUrl,
+        secretToken,
+        checked: name === POLICY_ELASTIC_AGENT_ON_CLOUD ? 'on' : undefined,
+      })
+    )
+  );
+
+  return newOptions;
 }
 
 function TutorialAgentSecretTokenSelector({
@@ -68,16 +111,16 @@ function TutorialAgentSecretTokenSelector({
   basePath,
   isCloudEnabled,
 }: Props) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
+  const [data, setData] = useState<APIResponseType>({
+    agents: [],
+    hasPolicyElasticOnCloud: false,
+    cloudStandaloneSetup: undefined,
+  });
   const [isLoading, setIsLoading] = useState(true);
-  const [options, setOptions] = useState<Credential[]>([]);
-  const [option, setOption] = useState<Credential>();
-
-  useEffect(() => {
-    const checkedOption = options.find(({ checked }) => checked === 'on');
-    setOption(checkedOption);
-  }, [options]);
+  const [
+    selectedOption,
+    setSelectedOption,
+  ] = useState<EnvironmentConfigurationOption>();
 
   useEffect(() => {
     async function fetchData() {
@@ -93,50 +136,9 @@ function TutorialAgentSecretTokenSelector({
     fetchData();
   }, [http]);
 
-  useEffect(() => {
-    const newOptions = [];
-    if (isCloudEnabled) {
-      // has Elastic Cloud managed policy
-      if (data.cloudAgentPolicyCredential) {
-        const {
-          id,
-          name,
-          apmServerUrl,
-          secretToken,
-        } = data.cloudAgentPolicyCredential;
-        newOptions.push({
-          key: id,
-          label: name,
-          apmServerUrl,
-          secretToken,
-          checked: 'on',
-        });
-      } else {
-        // adds standalone cloud
-        newOptions.push({
-          key: 'cloud_standalone',
-          label: 'Default Standalone configuration',
-          apmServerUrl: data.cloudCredentials?.apmServerUrl,
-          secretToken: data.cloudCredentials?.secretToken,
-          checked: 'on',
-        });
-      }
-    } else {
-      // when onPrem
-      newOptions.push(onPremStandaloneOption);
-    }
-
-    newOptions.push(
-      ...data.agentsCredentials?.map(
-        ({ id, name, apmServerUrl, secretToken }) => ({
-          key: id,
-          label: name,
-          apmServerUrl,
-          secretToken,
-        })
-      )
-    );
-    setOptions(newOptions);
+  // Depending the environment running (onPrem/Cloud) different values must be available and automatically selected
+  const options = useMemo(() => {
+    return getEnvironmentConfigurationOptions({ isCloudEnabled, data });
   }, [data, isCloudEnabled]);
 
   if (isLoading) {
@@ -150,52 +152,34 @@ function TutorialAgentSecretTokenSelector({
   const command = getCommands({
     variantId,
     environmentDetails: {
-      apmServerUrl: option?.apmServerUrl,
-      secretToken: option?.secretToken,
+      apmServerUrl: selectedOption?.apmServerUrl,
+      secretToken: selectedOption?.secretToken,
     },
   });
 
-  function toggleIsPopoverOpen() {
-    setIsPopoverOpen((state) => !state);
-  }
+  const hasFleetAgents = !!data.agents.length;
+  const fleetLink = hasFleetAgents
+    ? {
+        label: MANAGE_FLEET_POLICIES_LABEL,
+        href: `${basePath}/app/fleet#/policies`,
+      }
+    : {
+        label: GET_STARTED_WITH_FLEET_LABEL,
+        href: `${basePath}/app/fleet#/integrations/detail/apm-0.2.0/overview`,
+      };
 
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={toggleIsPopoverOpen}
-              >
-                {option?.label}
-              </EuiButtonEmpty>
+          <EnvironmentConfigurationSelector
+            options={options}
+            selectedOption={selectedOption}
+            onChange={(newSelectedOption) =>
+              setSelectedOption(newSelectedOption)
             }
-            isOpen={isPopoverOpen}
-            closePopover={toggleIsPopoverOpen}
-          >
-            <EuiSelectable
-              searchable
-              searchProps={{ placeholder: 'Search', compressed: true }}
-              options={options}
-              onChange={(newOptions) => setOptions(newOptions)}
-              singleSelection
-            >
-              {(list, search) => (
-                <div style={{ width: 240 }}>
-                  <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-                  {list}
-                  <EuiPopoverFooter paddingSize="s">
-                    <EuiButton size="s" fullWidth>
-                      Manage this list
-                    </EuiButton>
-                  </EuiPopoverFooter>
-                </div>
-              )}
-            </EuiSelectable>
-          </EuiPopover>
+            fleetLink={fleetLink}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <CopyCommands commands={command} />

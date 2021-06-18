@@ -28,7 +28,7 @@ var apm = initApm({
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
-  serverUrl: '{{apmServerUrl}}',
+  serverUrl: '{{{apmServerUrl}}}',
 
   // ${i18n.translate(
     'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',

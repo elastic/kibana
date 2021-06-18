@@ -6,7 +6,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { AgentPolicy, PackagePolicy } from '../../../fleet/common';
 import { getFleetAgents } from '../lib/fleet/get_agents';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { createApmServerRoute } from './create_apm_server_route';
@@ -27,27 +26,12 @@ const hasFleetDataRoute = createApmServerRoute({
   },
 });
 
-function getAgentPolicyCredentials(
-  agent: AgentPolicy,
-  policiesGroupedById: Record<string, PackagePolicy>
-) {
-  const packagePolicy = policiesGroupedById[agent.id];
-  const apmServerCompiledInputs =
-    packagePolicy.inputs[0].compiled_input['apm-server'];
-  return {
-    id: agent.id,
-    name: agent.name,
-    apmServerUrl: apmServerCompiledInputs?.host,
-    secretToken: apmServerCompiledInputs?.secret_token,
-  };
-}
-
 const fleetAgentsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/agents',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
     const cloudSetup = plugins.cloud?.setup;
-    const cloudCredentials = cloudSetup
+    const cloudStandaloneSetup = cloudSetup
       ? {
           apmServerUrl: cloudSetup?.apm.url,
           secretToken: cloudSetup?.apm.secretToken,
@@ -70,17 +54,23 @@ const fleetAgentsRoute = createApmServerRoute({
       fleetPluginStart,
     });
 
-    const cloudAgentPolicy = agents.find(
+    const hasPolicyElasticOnCloud = agents.some(
       ({ name }) => name === POLICY_ELASTIC_AGENT_ON_CLOUD
     );
 
     return {
-      cloudAgentPolicyCredential: cloudAgentPolicy
-        ? getAgentPolicyCredentials(cloudAgentPolicy, policiesGroupedById)
-        : undefined,
-      cloudCredentials,
-      agentsCredentials: agents.map((agent) => {
-        return getAgentPolicyCredentials(agent, policiesGroupedById);
+      hasPolicyElasticOnCloud,
+      cloudStandaloneSetup,
+      agents: agents.map((agent) => {
+        const packagePolicy = policiesGroupedById[agent.id];
+        const apmServerCompiledInputs =
+          packagePolicy.inputs[0].compiled_input['apm-server'];
+        return {
+          id: agent.id,
+          name: agent.name,
+          apmServerUrl: apmServerCompiledInputs?.host,
+          secretToken: apmServerCompiledInputs?.secret_token,
+        };
       }),
     };
   },

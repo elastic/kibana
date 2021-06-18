@@ -13,10 +13,10 @@ export const rails = `# config/elastic_apm.yml:
 service_name: 'my-service'
 
 # Use if APM Server requires a secret token
-secret_token: '{{secretToken}}'
+secret_token: '{{{secretToken}}}'
 
 # Set the custom APM Server URL (default: http://localhost:8200)
-server_url: '{{apmServerUrl}}'
+server_url: '{{{apmServerUrl}}}'
 
 # Set the service environment
 environment: 'production'`;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiButton, EuiCopy } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface Props {
@@ -15,7 +16,9 @@ export function CopyCommands({ commands }: Props) {
     <EuiCopy textToCopy={commands}>
       {(copy) => (
         <EuiButton size="s" onClick={copy}>
-          Copy snippet
+          {i18n.translate('xpack.apm.tutorial.copySnippet', {
+            defaultMessage: 'Copy snippet',
+          })}
         </EuiButton>
       )}
     </EuiCopy>

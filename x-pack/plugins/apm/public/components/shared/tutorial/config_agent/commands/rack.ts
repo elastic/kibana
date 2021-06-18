@@ -30,7 +30,7 @@ service_name: 'my-service'
     defaultMessage: 'Use if APM Server requires a token',
   }
 )}
-secret_token: '{{secretToken}}'
+secret_token: '{{{secretToken}}}'
 
 # ${i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.setCustomApmServerComment',
@@ -39,7 +39,7 @@ secret_token: '{{secretToken}}'
     values: { defaultServerUrl: 'http://localhost:8200' },
   }
 )}
-server_url: {{apmServerUrl}},
+server_url: {{{apmServerUrl}}},
 
 # ${i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceEnvironment',
