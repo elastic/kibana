@@ -50,12 +50,10 @@ import {
   setState,
   setLoadedDocument,
   LensAppState,
-  updateDatasourceState,
-  visualizationLoaded,
   updateLayer,
   updateVisualizationState,
 } from '../state_management';
-import { getLastKnownDoc } from './save_modal_container';
+import { getPersistedDoc } from './save_modal_container';
 import { getResolvedDateRange, getActiveDatasourceIdFromDoc } from '../utils';
 import { initializeDatasources } from '../editor_frame_service/editor_frame';
 import { generateId } from '../id_generator';
@@ -225,7 +223,7 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      loadDocument(
+      loadInitialStore(
         redirectCallback,
         initialInput,
         lensServices,
@@ -248,7 +246,6 @@ export async function mountApp(
             onAppLeave={params.onAppLeave}
             setHeaderActionMenu={params.setHeaderActionMenu}
             history={props.history}
-            initialContext={initialContext}
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
           />
@@ -315,7 +312,7 @@ const getInitialDatasourceId = (datasourceMap: Record<string, Datasource>, doc?:
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
-export function loadDocument(
+export function loadInitialStore(
   redirectCallback: (savedObjectId?: string) => void,
   initialInput: LensEmbeddableInput | undefined,
   lensServices: LensAppServices,
@@ -338,7 +335,9 @@ export function loadDocument(
       lensStore.getState().app.datasourceStates,
       undefined,
       initialContext,
-      { isFullEditor: true }
+      {
+        isFullEditor: true,
+      }
     )
       .then((result) => {
         const datasourceStates = Object.entries(result).reduce(
@@ -374,7 +373,6 @@ export function loadDocument(
           }
 
           const activeDatasourceId = getInitialDatasourceId(datasourceMap);
-
           const visualization = lensStore.getState().app.visualization;
           const activeVisualization =
             visualization.activeId && visualizationMap[visualization.activeId];
@@ -398,16 +396,19 @@ export function loadDocument(
             );
           }
         }
-
-        lensStore.dispatch(setState({ isAppLoading: false }));
       })
       .catch((e) => {
-        // console.error('error ', e);
+        lensStore.dispatch(
+          setState({
+            isAppLoading: false,
+          })
+        );
+        redirectCallback();
       });
     return;
   }
 
-  getLastKnownDoc({
+  getPersistedDoc({
     initialInput,
     attributeService,
     data,
@@ -417,7 +418,7 @@ export function loadDocument(
     (doc) => {
       if (doc) {
         const currentSessionId = data.search.session.getSessionId();
-        const datasourceStates = Object.entries(doc.state.datasourceStates).reduce(
+        const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
           (stateMap, [datasourceId, datasourceState]) => ({
             ...stateMap,
             [datasourceId]: {
@@ -428,32 +429,28 @@ export function loadDocument(
           {}
         );
 
-        const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
-        lensStore.dispatch(
-          setLoadedDocument({
-            query: doc.state.query,
-            searchSessionId:
-              dashboardFeatureFlag.allowByValueEmbeddables &&
-              Boolean(embeddableEditorIncomingState?.originatingApp) &&
-              !(initialInput as LensByReferenceInput)?.savedObjectId &&
-              currentSessionId
-                ? currentSessionId
-                : data.search.session.start(),
-            ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-            activeDatasourceId,
-            datasourceStates,
-            visualization: {
-              activeId: doc.visualizationType,
-              state: doc.state.visualization,
-            },
-          })
-        );
-        initializeDatasources(datasourceMap, datasourceStates, doc.references, initialContext, {
+        initializeDatasources(datasourceMap, docDatasourceStates, doc.references, initialContext, {
           isFullEditor: true,
         })
           .then((result) => {
+            const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
+
             lensStore.dispatch(
-              setState({
+              setLoadedDocument({
+                query: doc.state.query,
+                searchSessionId:
+                  dashboardFeatureFlag.allowByValueEmbeddables &&
+                  Boolean(embeddableEditorIncomingState?.originatingApp) &&
+                  !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                  currentSessionId
+                    ? currentSessionId
+                    : data.search.session.start(),
+                ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+                activeDatasourceId,
+                visualization: {
+                  activeId: doc.visualizationType,
+                  state: doc.state.visualization,
+                },
                 datasourceStates: Object.entries(result).reduce(
                   (state, [datasourceId, datasourceState]) => ({
                     ...state,
@@ -483,7 +480,6 @@ export function loadDocument(
           isAppLoading: false,
         })
       );
-
       redirectCallback();
     }
   );

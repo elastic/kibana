@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Visualization } from '../../../types';
-import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../../mocks';
+import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../../../mocks';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { mountWithProvider } from '../../../mocks';
 

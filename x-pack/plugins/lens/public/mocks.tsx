@@ -15,6 +15,7 @@ import { coreMock } from 'src/core/public/mocks';
 import moment from 'moment';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
+import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
@@ -37,6 +38,108 @@ import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/publ
 import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
+import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
+
+export function createMockVisualization(): jest.Mocked<Visualization> {
+  return {
+    id: 'TEST_VIS',
+    clearLayer: jest.fn((state, _layerId) => state),
+    removeLayer: jest.fn(),
+    getLayerIds: jest.fn((_state) => ['layer1']),
+    visualizationTypes: [
+      {
+        icon: 'empty',
+        id: 'TEST_VIS',
+        label: 'TEST',
+        groupLabel: 'TEST_VISGroup',
+      },
+    ],
+    getVisualizationTypeId: jest.fn((_state) => 'empty'),
+    getDescription: jest.fn((_state) => ({ label: '' })),
+    switchVisualizationType: jest.fn((_, x) => x),
+    getSuggestions: jest.fn((_options) => []),
+    initialize: jest.fn((_frame, _state?) => ({})),
+    getConfiguration: jest.fn((props) => ({
+      groups: [
+        {
+          groupId: 'a',
+          groupLabel: 'a',
+          layerId: 'layer1',
+          supportsMoreColumns: true,
+          accessors: [],
+          filterOperations: jest.fn(() => true),
+          dataTestSubj: 'mockVisA',
+        },
+      ],
+    })),
+    toExpression: jest.fn((_state, _frame) => null),
+    toPreviewExpression: jest.fn((_state, _frame) => null),
+
+    setDimension: jest.fn(),
+    removeDimension: jest.fn(),
+    getErrorMessages: jest.fn((_state) => undefined),
+    renderDimensionEditor: jest.fn(),
+  };
+}
+
+export type DatasourceMock = jest.Mocked<Datasource> & {
+  publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
+};
+
+export function createMockDatasource(id: string): DatasourceMock {
+  const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
+    datasourceId: id,
+    getTableSpec: jest.fn(() => []),
+    getOperationForColumnId: jest.fn(),
+  };
+
+  return {
+    id: 'mockindexpattern',
+    clearLayer: jest.fn((state, _layerId) => state),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
+    getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
+    getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
+    getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
+    getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
+    initialize: jest.fn((_state?) => Promise.resolve()),
+    renderDataPanel: jest.fn(),
+    renderLayerPanel: jest.fn(),
+    toExpression: jest.fn((_frame, _state) => null),
+    insertLayer: jest.fn((_state, _newLayerId) => {}),
+    removeLayer: jest.fn((_state, _layerId) => {}),
+    removeColumn: jest.fn((props) => {}),
+    getLayers: jest.fn((_state) => []),
+    uniqueLabels: jest.fn((_state) => ({})),
+    renderDimensionTrigger: jest.fn(),
+    renderDimensionEditor: jest.fn(),
+    getDropProps: jest.fn(),
+    onDrop: jest.fn(),
+
+    // this is an additional property which doesn't exist on real datasources
+    // but can be used to validate whether specific API mock functions are called
+    publicAPIMock,
+    getErrorMessages: jest.fn((_state) => undefined),
+    checkIntegrity: jest.fn((_state) => []),
+  };
+}
+
+export function createExpressionRendererMock(): jest.Mock<
+  React.ReactElement,
+  [ReactExpressionRendererProps]
+> {
+  return jest.fn((_) => <span />);
+}
+
+export type FrameMock = jest.Mocked<FramePublicAPI>;
+export function createMockFramePublicAPI(): FrameMock {
+  return {
+    datasourceLayers: {},
+    dateRange: { fromDate: 'now-7d', toDate: 'now' },
+    query: { query: '', language: 'lucene' },
+    filters: [],
+    searchSessionId: 'sessionId',
+  };
+}
 
 export type Start = jest.Mocked<LensPublicStart>;
 

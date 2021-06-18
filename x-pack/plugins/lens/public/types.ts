@@ -45,7 +45,6 @@ export interface PublicAPIProps<T> {
 }
 
 export interface EditorFrameProps {
-  initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }
 

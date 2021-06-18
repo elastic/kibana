@@ -6,7 +6,7 @@
  */
 
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
-import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
+import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
 import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
 import { PaletteOutput } from 'src/plugins/charts/public';
 

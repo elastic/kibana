@@ -35,7 +35,7 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
-import { getSavedObjectFormat } from '../editor_frame_service/editor_frame/save';
+import { getSavedObjectFormat } from '../utils';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -54,7 +54,6 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  initialContext,
   datasourceMap,
   visualizationMap,
 }: LensAppProps) {
@@ -85,10 +84,8 @@ export function App({
     visualization,
     filters,
     query,
-    title,
-    description,
-    persistedId,
     activeDatasourceId,
+    persistedDoc,
   } = appState;
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
@@ -119,19 +116,19 @@ export function App({
         visualization,
         filters,
         query,
-        title,
-        description,
-        persistedId,
+        title: persistedDoc?.title || '',
+        description: persistedDoc?.description,
+        persistedId: persistedDoc?.savedObjectId,
       })
     );
   }, [
+    persistedDoc?.title,
+    persistedDoc?.description,
+    persistedDoc?.savedObjectId,
     datasourceStates,
     visualization,
     filters,
     query,
-    title,
-    description,
-    persistedId,
     activeDatasourceId,
     datasourceMap,
     visualizationMap,

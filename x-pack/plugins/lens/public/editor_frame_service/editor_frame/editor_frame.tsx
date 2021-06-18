@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from 'kibana/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -26,7 +25,6 @@ export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
   ExpressionRenderer: ReactExpressionRendererType;
-  palettes: PaletteRegistry;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;

@@ -13,14 +13,13 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../mocks';
+} from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
 

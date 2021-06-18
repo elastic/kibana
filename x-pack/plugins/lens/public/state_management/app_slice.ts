@@ -17,7 +17,6 @@ export const initialState: LensAppState = {
   isSaveable: false,
   isAppLoading: false,
   isLinkedToOriginatingApp: false,
-  title: '',
   activeDatasourceId: null,
   datasourceStates: {},
   visualization: {
@@ -40,9 +39,6 @@ export const appSlice = createSlice({
       return {
         ...state,
         ...payload,
-        title: payload.persistedDoc?.title || '',
-        description: payload.persistedDoc?.description,
-        persistedId: payload.persistedDoc?.savedObjectId,
       };
     },
     onChangeFromEditorFrame: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {

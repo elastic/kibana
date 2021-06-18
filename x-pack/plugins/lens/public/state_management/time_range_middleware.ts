@@ -24,7 +24,7 @@ export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: Midd
     }
 
     //  check if too much time passed to update searchSessionId
-    // check if document changed
+    // todo: check if document changed
     updateTimeRange(data, store.dispatch);
     next(action);
   };

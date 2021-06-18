@@ -127,7 +127,6 @@ export class EditorFrameService {
       ]);
 
       const { EditorFrame } = await import('../async_services');
-      const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
         EditorFrameContainer: ({ showNoDataPopover }) => {
@@ -137,7 +136,6 @@ export class EditorFrameService {
                 data-test-subj="lnsEditorFrame"
                 core={core}
                 plugins={plugins}
-                palettes={palettes}
                 showNoDataPopover={showNoDataPopover}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
@@ -146,7 +144,7 @@ export class EditorFrameService {
             </div>
           );
         },
-        datasourceMap: resolvedDatasources, // todo: check if only first is needed
+        datasourceMap: resolvedDatasources,
         visualizationMap: resolvedVisualizations,
       };
     };

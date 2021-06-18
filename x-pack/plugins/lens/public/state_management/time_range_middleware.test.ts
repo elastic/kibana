@@ -20,7 +20,6 @@ import moment from 'moment';
 import { initialState } from './app_slice';
 import { LensAppState } from './types';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { Document } from '../persistence';
 
 const sessionIdSubject = new Subject<string>();
 
@@ -158,7 +157,9 @@ describe('timeRangeMiddleware', () => {
       const { next, invoke, store } = createMiddleware(data);
       const action = {
         type: 'app/setState',
-        payload: { lastKnownDoc: ('new' as unknown) as Document },
+        payload: {
+          // lastKnownDoc: ('new' as unknown) as Document
+        },
       };
       invoke(action);
       expect(store.dispatch).toHaveBeenCalledWith({
@@ -188,7 +189,9 @@ describe('timeRangeMiddleware', () => {
       const { next, invoke, store } = createMiddleware(data);
       const action = {
         type: 'app/setState',
-        payload: { lastKnownDoc: ('new' as unknown) as Document },
+        payload: {
+          // lastKnownDoc: ('new' as unknown) as Document
+        },
       };
       invoke(action);
       expect(store.dispatch).not.toHaveBeenCalled();

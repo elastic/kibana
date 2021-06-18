@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { makeDefaultServices, mockLensStore, defaultDoc } from '../mocks';
-import { createMockDatasource, DatasourceMock } from '../editor_frame_service/mocks';
+import { createMockDatasource, DatasourceMock } from '../mocks';
 import { act } from 'react-dom/test-utils';
-import { loadDocument } from './mounter';
+import { loadInitialStore } from './mounter';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 const defaultSavedObjectId = '1234';
@@ -22,12 +22,12 @@ describe('Mounter', () => {
   };
   const visualizationMap = {};
 
-  describe('loadDocument', () => {
+  describe('loadInitialStore', () => {
     it('does not load a document if there is no initial input', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
       const lensStore = mockLensStore({ data: services.data });
-      await loadDocument(
+      await loadInitialStore(
         redirectCallback,
         undefined,
         services,
@@ -47,7 +47,7 @@ describe('Mounter', () => {
 
       const lensStore = await mockLensStore({ data: services.data });
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
@@ -75,7 +75,6 @@ describe('Mounter', () => {
           query: 'kuery',
           isAppLoading: false,
           activeDatasourceId: 'testDatasource',
-          persistedId: '1234',
         }),
       });
     });
@@ -86,7 +85,7 @@ describe('Mounter', () => {
       const lensStore = mockLensStore({ data: services.data });
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
@@ -99,7 +98,7 @@ describe('Mounter', () => {
       });
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
@@ -114,7 +113,7 @@ describe('Mounter', () => {
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: '5678' } as LensEmbeddableInput,
           services,
@@ -138,7 +137,7 @@ describe('Mounter', () => {
       services.attributeService.unwrapAttributes = jest.fn().mockRejectedValue('failed to load');
 
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
@@ -162,7 +161,7 @@ describe('Mounter', () => {
       const services = makeDefaultServices();
       const lensStore = mockLensStore({ data: services.data });
       await act(async () => {
-        await loadDocument(
+        await loadInitialStore(
           redirectCallback,
           ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
           services,

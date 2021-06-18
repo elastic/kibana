@@ -37,9 +37,9 @@ import { fromExpression } from '@kbn/interpreter/common';
 import {
   createMockVisualization,
   createMockDatasource,
-  createExpressionRendererMock,
   DatasourceMock,
-} from '../mocks';
+  createExpressionRendererMock,
+} from '../../mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
@@ -284,6 +284,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
+      // todo: move to mounter
       await act(async () => {
         mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
@@ -294,15 +295,7 @@ describe('editor_frame', () => {
         expect(mockVisualization.initialize).not.toHaveBeenCalled();
       });
 
-      expect(mockVisualization.initialize).toHaveBeenCalledWith({
-        datasourceLayers: {},
-        layerId: expect.any(Function),
-        removeLayers: expect.any(Function),
-        query: { query: '', language: 'lucene' },
-        filters: [],
-        dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
-        searchSessionId: 'sessionId-1',
-      });
+      expect(mockVisualization.initialize).toHaveBeenCalledWith('l10');
     });
 
     it('should add new layer on active datasource on frame api call', async () => {
@@ -350,7 +343,8 @@ describe('editor_frame', () => {
         },
       });
       act(() => {
-        mockVisualization.initialize.mock.calls[0][0].layerId();
+        // todo: test in chart switcher
+        // mockVisualization.initialize.mock.calls[0][0].addNewLayer();
       });
 
       expect(mockDatasource2.insertLayer).toHaveBeenCalledWith(initialState, expect.anything());
@@ -406,7 +400,8 @@ describe('editor_frame', () => {
       });
 
       act(() => {
-        mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
+        // todo: test in chart switcher
+        // mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
       });
 
       // expect(mockDatasource2.removeLayer).toHaveBeenCalledWith(initialState, 'abc');
@@ -1074,10 +1069,6 @@ describe('editor_frame', () => {
     it('should fetch suggestions of currently active datasource when initializes from visualization trigger', async () => {
       const props = {
         ...getDefaultProps(),
-        initialContext: {
-          indexPatternId: '1',
-          fieldName: 'test',
-        },
         visualizationMap: {
           testVis: mockVisualization,
         },

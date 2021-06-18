@@ -37,9 +37,6 @@ export interface LensAppState extends EditorFrameState {
   savedQuery?: SavedQuery;
   searchSessionId: string;
   resolvedDateRange: DateRange;
-  title: string;
-  description?: string;
-  persistedId?: string;
 }
 
 export type DispatchSetState = (

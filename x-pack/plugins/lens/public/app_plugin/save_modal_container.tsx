@@ -78,9 +78,9 @@ export function SaveModalContainer({
   }, [initLastKnowDoc]);
 
   useEffect(() => {
-    async function loadLastKnownDoc() {
+    async function loadPersistedDoc() {
       if (initialInput) {
-        getLastKnownDoc({
+        getPersistedDoc({
           data,
           initialInput,
           chrome,
@@ -92,7 +92,7 @@ export function SaveModalContainer({
       }
     }
 
-    loadLastKnownDoc();
+    loadPersistedDoc();
   }, [chrome, data, initialInput, notifications, attributeService]);
 
   const tagsIds =
@@ -335,9 +335,6 @@ export const runSaveLensVisualization = async (
     return {
       persistedDoc: newDoc,
       isLinkedToOriginatingApp: false,
-      title: newDoc.title,
-      description: newDoc.description,
-      persistedId: newDoc.savedObjectId,
     };
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -364,7 +361,7 @@ export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
     : doc;
 }
 
-export const getLastKnownDoc = async ({
+export const getPersistedDoc = async ({
   initialInput,
   attributeService,
   data,

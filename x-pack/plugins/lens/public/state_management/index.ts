@@ -26,12 +26,10 @@ export const {
   onChangeFromEditorFrame,
   onActiveDataChange,
   setLoadedDocument,
-
   updateState,
   updateDatasourceState,
   updateVisualizationState,
   updateLayer,
-  visualizationLoaded,
   switchVisualization,
   selectSuggestion,
   rollbackSuggestion,

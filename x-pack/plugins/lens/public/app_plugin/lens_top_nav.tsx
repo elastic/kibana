@@ -21,8 +21,7 @@ import {
   LensAppState,
   DispatchSetState,
 } from '../state_management';
-import { getAllIndexPatterns } from '../utils';
-import { getIndexPatterns } from '../editor_frame_service/editor_frame/save';
+import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -166,7 +165,7 @@ export const LensTopNavMenu = ({
     if (!activeDatasource) {
       return;
     }
-    const indexPatternIds = getIndexPatterns({
+    const indexPatternIds = getIndexPatternsIds({
       activeDatasources: Object.keys(datasourceStates).reduce(
         (acc, datasourceId) => ({
           ...acc,
@@ -181,7 +180,7 @@ export const LensTopNavMenu = ({
       indexPatternIds.some((id) => !indexPatterns.find((indexPattern) => indexPattern.id === id));
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getAllIndexPatterns(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
         ({ indexPatterns: indexPatternObjects }) => {
           setIndexPatterns(indexPatternObjects);
         }

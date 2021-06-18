@@ -15,7 +15,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../../mocks';
+} from '../../../mocks';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 jest.mock('../../../debounced_component', () => {
   return {

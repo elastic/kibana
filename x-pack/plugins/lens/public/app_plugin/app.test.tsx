@@ -87,6 +87,8 @@ describe('Lens App', () => {
       redirectToOrigin: jest.fn(),
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
+      datasourceMap: {},
+      visualizationMap: {},
     };
   }
 
@@ -142,8 +144,6 @@ describe('Lens App', () => {
       Array [
         Array [
           Object {
-            "initialContext": undefined,
-            "onError": [Function],
             "showNoDataPopover": [Function],
           },
           Object {},
@@ -558,7 +558,7 @@ describe('Lens App', () => {
       });
 
       it('saves existing docs', async () => {
-        const { props, services, instance, lensStore } = await save({
+        const { props, services, instance } = await save({
           initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: false,
           newTitle: 'hello there',
@@ -590,7 +590,6 @@ describe('Lens App', () => {
           lensStore.dispatch(
             setState({
               isSaveable: true,
-              lastKnownDoc: ({ id: undefined } as unknown) as Document,
             })
           );
         });
@@ -669,7 +668,7 @@ describe('Lens App', () => {
           lensStore.dispatch(
             setState({
               isSaveable: true,
-              lastKnownDoc: ({ savedObjectId: '123' } as unknown) as Document,
+              // lastKnownDoc: ({ savedObjectId: '123' } as unknown) as Document,
             })
           );
         });
@@ -704,7 +703,7 @@ describe('Lens App', () => {
           lensStore.dispatch(
             setState({
               isSaveable: true,
-              lastKnownDoc: ({} as unknown) as Document,
+              // lastKnownDoc: ({} as unknown) as Document,
             })
           );
         });
@@ -732,7 +731,7 @@ describe('Lens App', () => {
         lensStore.dispatch(
           setState({
             isSaveable: true,
-            lastKnownDoc: ({} as unknown) as Document,
+            // lastKnownDoc: ({} as unknown) as Document,
           })
         );
       });
@@ -746,7 +745,7 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({} as unknown) as Document,
+            // lastKnownDoc: ({} as unknown) as Document,
             isSaveable: false,
             activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
           })
@@ -771,7 +770,7 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({} as unknown) as Document,
+            // lastKnownDoc: ({} as unknown) as Document,
             isSaveable: true,
             activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
           })
@@ -816,7 +815,7 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({} as unknown) as Document,
+            // lastKnownDoc: ({} as unknown) as Document,
             isSaveable: true,
           })
         );
@@ -832,7 +831,7 @@ describe('Lens App', () => {
       await act(async () => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({} as unknown) as Document,
+            // lastKnownDoc: ({} as unknown) as Document,
             isSaveable: true,
           })
         );
@@ -1149,23 +1148,24 @@ describe('Lens App', () => {
       });
     });
 
-    const mockUpdate = {
-      filterableIndexPatterns: [],
-      doc: {
-        title: '',
-        description: '',
-        visualizationType: '',
-        state: {
-          datasourceStates: {},
-          visualization: {},
-          filters: [],
-          query: { query: '', language: 'lucene' },
-        },
-        references: [],
-      },
-      isSaveable: true,
-      activeData: undefined,
-    };
+    // todo
+    // const mockUpdate = {
+    //   filterableIndexPatterns: [],
+    //   doc: {
+    //     title: '',
+    //     description: '',
+    //     visualizationType: '',
+    //     state: {
+    //       datasourceStates: {},
+    //       visualization: {},
+    //       filters: [],
+    //       query: { query: '', language: 'lucene' },
+    //     },
+    //     references: [],
+    //   },
+    //   isSaveable: true,
+    //   activeData: undefined,
+    // };
 
     it('updates the state if session id changes from the outside', async () => {
       const services = makeDefaultServices(sessionIdSubject);
@@ -1189,7 +1189,7 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: mockUpdate.doc,
+            // lastKnownDoc: mockUpdate.doc,
             isSaveable: true,
           })
         );
@@ -1232,10 +1232,10 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({
-              savedObjectId: undefined,
-              references: [],
-            } as unknown) as Document,
+            // lastKnownDoc: ({
+            //   savedObjectId: undefined,
+            //   references: [],
+            // } as unknown) as Document,
             isSaveable: true,
           })
         );
@@ -1268,10 +1268,10 @@ describe('Lens App', () => {
         lensStore.dispatch(
           setState({
             persistedDoc: defaultDoc,
-            lastKnownDoc: ({
-              savedObjectId: defaultSavedObjectId,
-              references: [],
-            } as unknown) as Document,
+            // lastKnownDoc: ({
+            //   savedObjectId: defaultSavedObjectId,
+            //   references: [],
+            // } as unknown) as Document,
             isSaveable: true,
           })
         );
@@ -1304,10 +1304,10 @@ describe('Lens App', () => {
         lensStore.dispatch(
           setState({
             persistedDoc: defaultDoc,
-            lastKnownDoc: ({
-              savedObjectId: defaultSavedObjectId,
-              references: [],
-            } as unknown) as Document,
+            // lastKnownDoc: ({
+            //   savedObjectId: defaultSavedObjectId,
+            //   references: [],
+            // } as unknown) as Document,
             isSaveable: true,
           })
         );

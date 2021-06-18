@@ -12,7 +12,7 @@ import {
   createMockFramePublicAPI,
   createMockDatasource,
   DatasourceMock,
-} from '../../mocks';
+} from '../../../mocks';
 import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';

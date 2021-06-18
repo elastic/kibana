@@ -54,7 +54,6 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  initialContext?: VisualizeFieldContext;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
 }
