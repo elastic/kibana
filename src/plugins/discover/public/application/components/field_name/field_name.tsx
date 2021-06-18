@@ -61,7 +61,7 @@ export function FieldName({
             content={i18n.translate(
               'discover.fieldChooser.discoverField.multiFieldTooltipContent',
               {
-                defaultMessage: 'Multifields can have multiple values per field',
+                defaultMessage: 'Multi-fields can have multiple values per field',
               }
             )}
           >
@@ -73,7 +73,7 @@ export function FieldName({
             >
               <FormattedMessage
                 id="discover.fieldChooser.discoverField.multiField"
-                defaultMessage="multifield"
+                defaultMessage="multi-field"
               />
             </EuiBadge>
           </EuiToolTip>
