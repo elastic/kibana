@@ -20,30 +20,26 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { getDataStart } from '../../services';
+import { KBN_FIELD_TYPES, Query } from '../../../../../plugins/data/public';
+
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-// @ts-expect-error not typed yet
-import { IconSelect } from './icon_select/icon_select';
 import { IndexPatternSelect } from './lib/index_pattern_select';
-import { KBN_FIELD_TYPES, Query } from '../../../../../plugins/data/public';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
-import { getDataStart } from '../../services';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
+
+// @ts-expect-error not typed yet
+import { IconSelect } from './icon_select/icon_select';
+
 import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
-const INDEX_PATTERN_NAME = 'index_pattern';
-
-const annotationDefaults = {
-  fields: '',
-  template: '',
-  index_pattern: '',
-  query_string: { query: '', language: getDefaultQueryLanguage() },
-};
+const INDEX_PATTERN_KEY = 'index_pattern';
 
 export interface AnnotationRowProps {
   annotation: Annotation;
@@ -51,12 +47,14 @@ export interface AnnotationRowProps {
   onChange: (partialModel: Partial<Annotation>) => void;
   handleAdd: () => void;
   handleDelete: () => void;
-  handleChange: (
-    annotation: Annotation,
-    name: string
-  ) => (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) => void;
-  handleQueryChange: (annotation: Annotation, filter: Query) => void;
 }
+
+const getAnnotationDefaults = () => ({
+  fields: '',
+  template: '',
+  index_pattern: '',
+  query_string: { query: '', language: getDefaultQueryLanguage() },
+});
 
 export const AnnotationRow = ({
   annotation,
@@ -64,17 +62,24 @@ export const AnnotationRow = ({
   onChange,
   handleAdd,
   handleDelete,
-  handleChange,
-  handleQueryChange,
 }: AnnotationRowProps) => {
-  const model = useMemo(() => ({ ...annotationDefaults, ...annotation }), [annotation]);
+  const model = useMemo(() => ({ ...getAnnotationDefaults(), ...annotation }), [annotation]);
+  const htmlId = htmlIdGenerator(model.id);
 
   const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>(null);
 
   useEffect(() => {
-    const updateFetchedIndex = async (indexPatternValue: IndexPatternValue = '') => {
+    const updateFetchedIndex = async (index: IndexPatternValue) => {
       const { indexPatterns } = getDataStart();
-      setFetchedIndex(await fetchIndexPattern(indexPatternValue, indexPatterns));
+
+      setFetchedIndex(
+        index
+          ? await fetchIndexPattern(index, indexPatterns)
+          : {
+              indexPattern: undefined,
+              indexPatternString: undefined,
+            }
+      );
     };
 
     updateFetchedIndex(model.index_pattern);
@@ -88,7 +93,23 @@ export const AnnotationRow = ({
     [model.hidden, onChange]
   );
 
-  const htmlId = htmlIdGenerator(model.id);
+  const handleChange = useCallback(
+    (name: string) => (
+      event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>
+    ) =>
+      onChange({
+        [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
+      }),
+    [onChange]
+  );
+
+  const handleQueryChange = useCallback(
+    (filter: Query) =>
+      onChange({
+        query_string: filter,
+      }),
+    [onChange]
+  );
 
   return (
     <div className="tvbAnnotationsEditor" key={model.id}>
@@ -101,8 +122,8 @@ export const AnnotationRow = ({
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect
-                value={model.index_pattern}
-                indexPatternName={INDEX_PATTERN_NAME}
+                value={model[INDEX_PATTERN_KEY]}
+                indexPatternName={INDEX_PATTERN_KEY}
                 onChange={onChange}
                 fetchedIndex={fetchedIndex}
               />
@@ -118,7 +139,7 @@ export const AnnotationRow = ({
                 }
                 restrict={RESTRICT_FIELDS}
                 value={model.time_field}
-                onChange={handleChange(model, 'time_field')}
+                onChange={handleChange('time_field')}
                 indexPattern={model.index_pattern}
                 fields={fields}
               />
@@ -144,7 +165,7 @@ export const AnnotationRow = ({
                     language: model.query_string.language || getDefaultQueryLanguage(),
                     query: model.query_string.query || '',
                   }}
-                  onChange={(query) => handleQueryChange(model, query)}
+                  onChange={handleQueryChange}
                   indexPatterns={[model.index_pattern]}
                 />
               </EuiFormRow>
@@ -196,7 +217,7 @@ export const AnnotationRow = ({
                   />
                 }
               >
-                <IconSelect value={model.icon} onChange={handleChange(model, 'icon')} />
+                <IconSelect value={model.icon} onChange={handleChange('icon')} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -210,11 +231,7 @@ export const AnnotationRow = ({
                 }
                 fullWidth
               >
-                <EuiFieldText
-                  onChange={handleChange(model, 'fields')}
-                  value={model.fields}
-                  fullWidth
-                />
+                <EuiFieldText onChange={handleChange('fields')} value={model.fields} fullWidth />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -238,7 +255,7 @@ export const AnnotationRow = ({
                 fullWidth
               >
                 <EuiFieldText
-                  onChange={handleChange(model, 'template')}
+                  onChange={handleChange('template')}
                   value={model.template}
                   fullWidth
                 />

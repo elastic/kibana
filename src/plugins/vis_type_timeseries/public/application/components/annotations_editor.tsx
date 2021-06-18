@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import uuid from 'uuid';
-import { EuiSpacer, EuiTitle, EuiButton, EuiText, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions } from './lib/collection_actions';
-import type { Query } from '../../../../../plugins/data/public';
+
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+
+interface AnnotationsEditorProps {
+  fields: VisFields;
+  model: Panel;
+  name: keyof Panel;
+  onChange: (partialModel: Partial<Panel>) => void;
+}
 
 export const newAnnotation = () => ({
   id: uuid.v1(),
@@ -27,15 +34,32 @@ export const newAnnotation = () => ({
   ignore_panel_filters: 1,
 });
 
-interface AnnotationsEditorProps {
-  fields: VisFields;
-  model: Panel;
-  name: keyof Panel;
-  onChange: (partialModel: Partial<Panel>) => void;
-}
+const NoContent = ({ handleAdd }: { handleAdd: () => void }) => (
+  <EuiText textAlign="center">
+    <p>
+      <FormattedMessage
+        id="visTypeTimeseries.annotationsEditor.howToCreateAnnotationDataSourceDescription"
+        defaultMessage="Click the button below to create an annotation data source."
+      />
+    </p>
+    <EuiButton fill onClick={handleAdd}>
+      <FormattedMessage
+        id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
+        defaultMessage="Add data source"
+      />
+    </EuiButton>
+  </EuiText>
+);
 
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
+
+  const handleAdd = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
+
+  const handleDelete = useCallback(
+    (annotation) => () => collectionActions.handleDelete(props, annotation),
+    [props]
+  );
 
   const onChange = useCallback(
     (annotation: Annotation) => {
@@ -45,70 +69,33 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
     [props]
   );
 
-  const handleAdd = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
-  const handleDelete = useCallback(
-    (annotation) => () => collectionActions.handleDelete(props, annotation),
-    [props]
-  );
-  const handleChange = useCallback(
-    (annotation: Annotation, name: string) => {
-      return (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) =>
-        collectionActions.handleChange(props, {
-          ...annotation,
-          [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
-        });
-    },
-    [props]
-  );
-  const handleQueryChange = useCallback(
-    (annotation: Annotation, filter: Query) =>
-      collectionActions.handleChange(props, {
-        ...annotation,
-        query_string: filter,
-      }),
-    [props]
-  );
-
-  const content = annotations?.length ? (
-    <div>
-      <EuiTitle size="s">
-        <span>
-          <FormattedMessage
-            id="visTypeTimeseries.annotationsEditor.dataSourcesLabel"
-            defaultMessage="Data sources"
-          />
-        </span>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      {annotations.map((annotation) => (
-        <AnnotationRow
-          key={annotation.id}
-          annotation={annotation}
-          fields={props.fields}
-          onChange={onChange(annotation)}
-          handleAdd={handleAdd}
-          handleDelete={handleDelete(annotation)}
-          handleChange={handleChange}
-          handleQueryChange={handleQueryChange}
-        />
-      ))}
+  return (
+    <div className="tvbAnnotationsEditor__container">
+      {annotations?.length ? (
+        <div>
+          <EuiTitle size="s">
+            <span>
+              <FormattedMessage
+                id="visTypeTimeseries.annotationsEditor.dataSourcesLabel"
+                defaultMessage="Data sources"
+              />
+            </span>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          {annotations.map((annotation) => (
+            <AnnotationRow
+              key={annotation.id}
+              annotation={annotation}
+              fields={props.fields}
+              onChange={onChange(annotation)}
+              handleAdd={handleAdd}
+              handleDelete={handleDelete(annotation)}
+            />
+          ))}
+        </div>
+      ) : (
+        <NoContent handleAdd={handleAdd} />
+      )}
     </div>
-  ) : (
-    <EuiText textAlign="center">
-      <p>
-        <FormattedMessage
-          id="visTypeTimeseries.annotationsEditor.howToCreateAnnotationDataSourceDescription"
-          defaultMessage="Click the button below to create an annotation data source."
-        />
-      </p>
-      <EuiButton fill onClick={handleAdd}>
-        <FormattedMessage
-          id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
-          defaultMessage="Add data source"
-        />
-      </EuiButton>
-    </EuiText>
   );
-
-  return <div className="tvbAnnotationsEditor__container">{content}</div>;
 };
