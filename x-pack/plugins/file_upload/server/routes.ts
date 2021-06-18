@@ -86,7 +86,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    *
    * @api {post} /internal/file_data_visualizer/has_find_file_structure_permission Check permissions for find file structure endpoint
    * @apiName HasFindFileStructurePermission
-   * @apiDescription heck permissions for find file structure endpoint
+   * @apiDescription check permissions for find file structure endpoint
    *
    */
   router.get(

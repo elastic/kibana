@@ -25,7 +25,7 @@ import {
 import { WelcomeContent } from './welcome_content';
 
 interface Props {
-  disabled: boolean | undefined;
+  disabled: boolean;
   onFilePickerChange(files: FileList | null): void;
 }
 

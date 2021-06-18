@@ -159,7 +159,7 @@ export const FindFileStructurePermissionDenied: FC = () => {
         }
         color="danger"
         iconType="cross"
-        data-test-subj="dataVisualizerFileUploadErrorCallout fileCouldNotBeRead"
+        data-test-subj="dataVisualizerFileStructurePermissionDeniedErrorCallout"
       >
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
