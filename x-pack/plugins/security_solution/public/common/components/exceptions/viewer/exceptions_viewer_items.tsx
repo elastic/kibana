@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
-import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
-import { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};

@@ -18,6 +18,7 @@ import type {
   ArchivePackage,
   RegistryPackage,
   EpmPackageAdditions,
+  GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
@@ -27,7 +28,7 @@ import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom, isRequiredPackage } from './index';
+import { createInstallableFrom, isUnremovablePackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -35,7 +36,7 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories(options: Registry.CategoriesParams) {
+export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
@@ -47,7 +48,7 @@ export async function getPackages(
   const { savedObjectsClient, experimental, category } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
-      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
   // get the installed packages
@@ -124,7 +125,8 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: !isRequiredPackage(pkgName),
+    removable: !isUnremovablePackage(pkgName),
+    notice: Registry.getNoticePath(paths || []),
   };
   const updated = { ...packageInfo, ...additions };
 

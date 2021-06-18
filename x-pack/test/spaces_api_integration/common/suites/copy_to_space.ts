@@ -37,7 +37,10 @@ interface CopyToSpaceTests {
     withConflictsResponse: (resp: TestResponse) => Promise<void>;
     noConflictsResponse: (resp: TestResponse) => Promise<void>;
   };
-  multiNamespaceTestCases: (overwrite: boolean) => CopyToSpaceMultiNamespaceTest[];
+  multiNamespaceTestCases: (
+    overwrite: boolean,
+    createNewCopies: boolean
+  ) => CopyToSpaceMultiNamespaceTest[];
 }
 
 interface CopyToSpaceTestDefinition {
@@ -427,7 +430,7 @@ export function copyToSpaceTestSuiteFactory(
   const createMultiNamespaceTestCases = (
     spaceId: string,
     outcome: 'authorized' | 'unauthorizedRead' | 'unauthorizedWrite' | 'noAccess' = 'authorized'
-  ) => (overwrite: boolean): CopyToSpaceMultiNamespaceTest[] => {
+  ) => (overwrite: boolean, createNewCopies: boolean): CopyToSpaceMultiNamespaceTest[] => {
     // the status code of the HTTP response differs depending on the error type
     // a 403 error actually comes back as an HTTP 200 response
     const statusCode = outcome === 'noAccess' ? 403 : 200;
@@ -451,6 +454,17 @@ export function copyToSpaceTestSuiteFactory(
       });
     };
 
+    const expectNewCopyResponse = (response: TestResponse, sourceId: string, title: string) => {
+      const { success, successCount, successResults, errors } = getResult(response);
+      expect(success).to.eql(true);
+      expect(successCount).to.eql(1);
+      const destinationId = successResults![0].destinationId;
+      expect(destinationId).to.match(v4);
+      const meta = { title, icon: 'beaker' };
+      expect(successResults).to.eql([{ type, id: sourceId, meta, destinationId }]);
+      expect(errors).to.be(undefined);
+    };
+
     return [
       {
         testTitle: 'copying with no conflict',
@@ -458,14 +472,10 @@ export function copyToSpaceTestSuiteFactory(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            const { success, successCount, successResults, errors } = getResult(response);
-            expect(success).to.eql(true);
-            expect(successCount).to.eql(1);
-            const destinationId = successResults![0].destinationId;
-            expect(destinationId).to.match(v4);
-            const meta = { title: 'A shared saved-object in one space', icon: 'beaker' };
-            expect(successResults).to.eql([{ type, id: noConflictId, meta, destinationId }]);
-            expect(errors).to.be(undefined);
+            const title = 'A shared saved-object in one space';
+            // It doesn't matter if createNewCopies is enabled or not, a new copy will be created because two objects cannot exist with the same ID.
+            // Note: if createNewCopies is disabled, the new object will have an originId property that matches the source ID, but this is not included in the HTTP response.
+            expectNewCopyResponse(response, noConflictId, title);
           } else if (outcome === 'noAccess') {
             expectRouteForbiddenResponse(response);
           } else {
@@ -479,22 +489,23 @@ export function copyToSpaceTestSuiteFactory(
         objects: [{ type, id: exactMatchId }],
         statusCode,
         response: async (response: TestResponse) => {
-          if (outcome === 'authorized') {
+          if (outcome === 'authorized' || (outcome === 'unauthorizedWrite' && !createNewCopies)) {
+            // If the user is authorized to read in the current space, and is authorized to read in the destination space but not to write
+            // (outcome === 'unauthorizedWrite'), *and* createNewCopies is not enabled, the object will be skipped (because it already
+            // exists in the destination space) and the user will encounter an empty success result.
+            // On the other hand, if the user is authorized to read in the current space but not the destination space (outcome ===
+            // 'unauthorizedRead'), the copy attempt will proceed because they are not aware that the object already exists in the
+            // destination space. In that case, they will encounter a 403 error.
             const { success, successCount, successResults, errors } = getResult(response);
             const title = 'A shared saved-object in the default, space_1, and space_2 spaces';
-            const meta = { title, icon: 'beaker' };
-            if (overwrite) {
-              expect(success).to.eql(true);
-              expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: exactMatchId, meta, overwrite: true }]);
-              expect(errors).to.be(undefined);
+            if (createNewCopies) {
+              expectNewCopyResponse(response, exactMatchId, title);
             } else {
-              expect(success).to.eql(false);
+              // It doesn't matter if overwrite is enabled or not, the object will not be copied because it already exists in the destination space
+              expect(success).to.eql(true);
               expect(successCount).to.eql(0);
               expect(successResults).to.be(undefined);
-              expect(errors).to.eql([
-                { error: { type: 'conflict' }, type, id: exactMatchId, title, meta },
-              ]);
+              expect(errors).to.be(undefined);
             }
           } else if (outcome === 'noAccess') {
             expectRouteForbiddenResponse(response);
@@ -514,7 +525,9 @@ export function copyToSpaceTestSuiteFactory(
             const title = 'A shared saved-object in one space';
             const meta = { title, icon: 'beaker' };
             const destinationId = 'conflict_1_space_2';
-            if (overwrite) {
+            if (createNewCopies) {
+              expectNewCopyResponse(response, inexactMatchId, title);
+            } else if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
               expect(successResults).to.eql([
@@ -550,27 +563,34 @@ export function copyToSpaceTestSuiteFactory(
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
-            const updatedAt = '2017-09-21T18:59:16.270Z';
-            const destinations = [
-              // response should be sorted by updatedAt in descending order
-              { id: 'conflict_2_space_2', title: 'A shared saved-object in one space', updatedAt },
-              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
-            ];
-            expect(success).to.eql(false);
-            expect(successCount).to.eql(0);
-            expect(successResults).to.be(undefined);
-            expect(errors).to.eql([
-              {
-                error: { type: 'ambiguous_conflict', destinations },
-                type,
-                id: ambiguousConflictId,
-                title: 'A shared saved-object in one space',
-                meta: {
+            const title = 'A shared saved-object in one space';
+            if (createNewCopies) {
+              expectNewCopyResponse(response, ambiguousConflictId, title);
+            } else {
+              // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
+              const updatedAt = '2017-09-21T18:59:16.270Z';
+              const destinations = [
+                // response should be sorted by updatedAt in descending order
+                {
+                  id: 'conflict_2_space_2',
                   title: 'A shared saved-object in one space',
-                  icon: 'beaker',
+                  updatedAt,
                 },
-              },
-            ]);
+                { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
+              ];
+              expect(success).to.eql(false);
+              expect(successCount).to.eql(0);
+              expect(successResults).to.be(undefined);
+              expect(errors).to.eql([
+                {
+                  error: { type: 'ambiguous_conflict', destinations },
+                  type,
+                  id: ambiguousConflictId,
+                  title,
+                  meta: { title, icon: 'beaker' },
+                },
+              ]);
+            }
           } else if (outcome === 'noAccess') {
             expectRouteForbiddenResponse(response);
           } else {
@@ -593,8 +613,16 @@ export function copyToSpaceTestSuiteFactory(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
 
@@ -726,15 +754,27 @@ export function copyToSpaceTestSuiteFactory(
         });
       });
 
-      [false, true].forEach((overwrite) => {
+      [
+        [false, false],
+        [false, true], // createNewCopies enabled
+        [true, false], // overwrite enabled
+        // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
+      ].forEach(([overwrite, createNewCopies]) => {
         const spaces = ['space_2'];
         const includeReferences = false;
-        const createNewCopies = false;
-        describe(`multi-namespace types with overwrite=${overwrite}`, () => {
-          before(() => esArchiver.load('saved_objects/spaces'));
-          after(() => esArchiver.unload('saved_objects/spaces'));
+        describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
+          before(() =>
+            esArchiver.load(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
+          after(() =>
+            esArchiver.unload(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
 
-          const testCases = tests.multiNamespaceTestCases(overwrite);
+          const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
           testCases.forEach(({ testTitle, objects, statusCode, response }) => {
             it(`should return ${statusCode} when ${testTitle}`, async () => {
               return supertest

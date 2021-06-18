@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageHeader, EuiToolTip } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
@@ -40,50 +40,42 @@ const removeTooltip = i18n.translate('indexPatternManagement.editIndexPattern.re
   defaultMessage: 'Remove index pattern.',
 });
 
-export function IndexHeader({
+export const IndexHeader: React.FC<IndexHeaderProps> = ({
   defaultIndex,
   indexPattern,
   setDefault,
   deleteIndexPatternClick,
-}: IndexHeaderProps) {
+  children,
+}) => {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>
-        <EuiTitle>
-          <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false}>
-          {defaultIndex !== indexPattern.id && setDefault && (
-            <EuiFlexItem>
-              <EuiToolTip content={setDefaultTooltip}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={setDefault}
-                  iconType="starFilled"
-                  aria-label={setDefaultAriaLabel}
-                  data-test-subj="setDefaultIndexPatternButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
-          {deleteIndexPatternClick && (
-            <EuiFlexItem>
-              <EuiToolTip content={removeTooltip}>
-                <EuiButtonIcon
-                  color="danger"
-                  onClick={deleteIndexPatternClick}
-                  iconType="trash"
-                  aria-label={removeAriaLabel}
-                  data-test-subj="deleteIndexPatternButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPageHeader
+      pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.title}</span>}
+      rightSideItems={[
+        defaultIndex !== indexPattern.id && setDefault && (
+          <EuiToolTip content={setDefaultTooltip}>
+            <EuiButtonIcon
+              color="text"
+              onClick={setDefault}
+              iconType="starFilled"
+              aria-label={setDefaultAriaLabel}
+              data-test-subj="setDefaultIndexPatternButton"
+            />
+          </EuiToolTip>
+        ),
+        deleteIndexPatternClick && (
+          <EuiToolTip content={removeTooltip}>
+            <EuiButtonIcon
+              color="danger"
+              onClick={deleteIndexPatternClick}
+              iconType="trash"
+              aria-label={removeAriaLabel}
+              data-test-subj="deleteIndexPatternButton"
+            />
+          </EuiToolTip>
+        ),
+      ].filter(Boolean)}
+    >
+      {children}
+    </EuiPageHeader>
   );
-}
+};

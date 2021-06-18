@@ -74,12 +74,15 @@ to learn more about using the node scripts we provide for building
 * <<development-functional-tests>>
 * <<development-unit-tests>>
 * <<development-accessibility-tests>>
+* <<development-package-tests>>
 
 include::development-functional-tests.asciidoc[leveloffset=+1]
 
 include::development-unit-tests.asciidoc[leveloffset=+1]
 
 include::development-accessibility-tests.asciidoc[leveloffset=+1]
+
+include::development-package-tests.asciidoc[leveloffset=+1]
 
 [discrete]
 === Cross-browser compatibility

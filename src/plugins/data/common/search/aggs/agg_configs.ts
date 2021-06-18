@@ -6,17 +6,26 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import moment from 'moment';
+import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
+import {
+  IEsSearchResponse,
+  ISearchOptions,
+  ISearchSource,
+  RangeFilter,
+} from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { TimeRange } from '../../../common';
+import { TimeRange, getTime, isRangeFilter } from '../../../common';
+import { IBucketAggConfig } from './buckets';
+import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -48,6 +57,10 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
+export type GenericBucket = estypes.AggregationsBucket & {
+  [property: string]: estypes.AggregationsAggregate;
+};
+
 /**
  * @name AggConfigs
  *
@@ -66,6 +79,7 @@ export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
   public timeFields?: string[];
+  public forceNow?: Date;
   public hierarchical?: boolean = false;
 
   private readonly typesRegistry: AggTypesRegistryStart;
@@ -90,6 +104,10 @@ export class AggConfigs {
 
   setTimeFields(timeFields: string[] | undefined) {
     this.timeFields = timeFields;
+  }
+
+  setForceNow(now: Date | undefined) {
+    this.forceNow = now;
   }
 
   setTimeRange(timeRange: TimeRange) {
@@ -183,7 +201,13 @@ export class AggConfigs {
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
+    const timeShifts = this.getTimeShifts();
+    const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
+
     if (this.hierarchical) {
+      if (hasMultipleTimeShifts) {
+        throw new Error('Multiple time shifts not supported for hierarchical metrics');
+      }
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = this.aggs
         .filter(function (agg) {
@@ -196,52 +220,67 @@ export class AggConfigs {
           };
         });
     }
-    this.getRequestAggs()
-      .filter((config: AggConfig) => !config.type.hasNoDsl)
-      .forEach((config: AggConfig, i: number, list) => {
-        if (!dslLvlCursor) {
-          // start at the top level
-          dslLvlCursor = dslTopLvl;
-        } else {
-          const prevConfig: AggConfig = list[i - 1];
-          const prevDsl = dslLvlCursor[prevConfig.id];
+    const requestAggs = this.getRequestAggs();
+    const aggsWithDsl = requestAggs.filter((agg) => !agg.type.hasNoDsl).length;
+    const timeSplitIndex = this.getAll().findIndex(
+      (config) => 'splitForTimeShift' in config.type && config.type.splitForTimeShift(config, this)
+    );
 
-          // advance the cursor and nest under the previous agg, or
-          // put it on the same level if the previous agg doesn't accept
-          // sub aggs
-          dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
-        }
+    requestAggs.forEach((config: AggConfig, i: number, list) => {
+      if (!dslLvlCursor) {
+        // start at the top level
+        dslLvlCursor = dslTopLvl;
+      } else {
+        const prevConfig: AggConfig = list[i - 1];
+        const prevDsl = dslLvlCursor[prevConfig.id];
 
-        const dsl = config.type.hasNoDslParams
-          ? config.toDsl(this)
-          : (dslLvlCursor[config.id] = config.toDsl(this));
-        let subAggs: any;
+        // advance the cursor and nest under the previous agg, or
+        // put it on the same level if the previous agg doesn't accept
+        // sub aggs
+        dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
+      }
 
-        parseParentAggs(dslLvlCursor, dsl);
+      if (hasMultipleTimeShifts) {
+        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor);
+      }
 
-        if (config.type.type === AggGroupNames.Buckets && i < list.length - 1) {
-          // buckets that are not the last item in the list accept sub-aggs
-          subAggs = dsl.aggs || (dsl.aggs = {});
-        }
+      if (config.type.hasNoDsl) {
+        return;
+      }
 
-        if (subAggs) {
-          _.each(subAggs, (agg) => {
-            parseParentAggs(subAggs, agg);
-          });
-        }
-        if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach((agg: any) => {
-            subAggs[agg.config.id] = agg.dsl;
-            // if a nested metric agg has parent aggs, we have to add them to every level of the tree
-            // to make sure "bucket_path" references in the nested metric agg itself are still working
-            if (agg.dsl.parentAggs) {
-              Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
-                subAggs[parentAggId] = parentAgg;
-              });
-            }
-          });
-        }
-      });
+      const dsl = config.type.hasNoDslParams
+        ? config.toDsl(this)
+        : (dslLvlCursor[config.id] = config.toDsl(this));
+      let subAggs: any;
+
+      parseParentAggs(dslLvlCursor, dsl);
+
+      if (
+        config.type.type === AggGroupNames.Buckets &&
+        (i < aggsWithDsl - 1 || timeSplitIndex > i)
+      ) {
+        // buckets that are not the last item in the list of dsl producing aggs or have a time split coming up accept sub-aggs
+        subAggs = dsl.aggs || (dsl.aggs = {});
+      }
+
+      if (subAggs) {
+        _.each(subAggs, (agg) => {
+          parseParentAggs(subAggs, agg);
+        });
+      }
+      if (subAggs && nestedMetrics) {
+        nestedMetrics.forEach((agg: any) => {
+          subAggs[agg.config.id] = agg.dsl;
+          // if a nested metric agg has parent aggs, we have to add them to every level of the tree
+          // to make sure "bucket_path" references in the nested metric agg itself are still working
+          if (agg.dsl.parentAggs) {
+            Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
+              subAggs[parentAggId] = parentAgg;
+            });
+          }
+        });
+      }
+    });
 
     removeParentAggs(dslTopLvl);
     return dslTopLvl;
@@ -287,6 +326,104 @@ export class AggConfigs {
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
     );
+  }
+
+  getTimeShifts(): Record<string, moment.Duration> {
+    const timeShifts: Record<string, moment.Duration> = {};
+    this.getAll()
+      .filter((agg) => agg.schema === 'metric')
+      .map((agg) => agg.getTimeShift())
+      .forEach((timeShift) => {
+        if (timeShift) {
+          timeShifts[String(timeShift.asMilliseconds())] = timeShift;
+        } else {
+          timeShifts[0] = moment.duration(0);
+        }
+      });
+    return timeShifts;
+  }
+
+  getTimeShiftInterval(): moment.Duration | undefined {
+    const splitAgg = (this.getAll().filter(
+      (agg) => agg.type.type === AggGroupNames.Buckets
+    ) as IBucketAggConfig[]).find((agg) => agg.type.splitForTimeShift(agg, this));
+    return splitAgg?.type.getTimeShiftInterval(splitAgg);
+  }
+
+  hasTimeShifts(): boolean {
+    return this.getAll().some((agg) => agg.hasTimeShift());
+  }
+
+  getSearchSourceTimeFilter(forceNow?: Date) {
+    if (!this.timeFields || !this.timeRange) {
+      return [];
+    }
+    const timeRange = this.timeRange;
+    const timeFields = this.timeFields;
+    const timeShifts = this.getTimeShifts();
+    if (!this.hasTimeShifts()) {
+      return this.timeFields
+        .map((fieldName) => getTime(this.indexPattern, timeRange, { fieldName, forceNow }))
+        .filter(isRangeFilter);
+    }
+    return [
+      {
+        meta: {
+          index: this.indexPattern?.id,
+          params: {},
+          alias: '',
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: Object.entries(timeShifts).map(([, shift]) => {
+              return {
+                bool: {
+                  filter: timeFields
+                    .map(
+                      (fieldName) =>
+                        [
+                          getTime(this.indexPattern, timeRange, { fieldName, forceNow }),
+                          fieldName,
+                        ] as [RangeFilter | undefined, string]
+                    )
+                    .filter(([filter]) => isRangeFilter(filter))
+                    .map(([filter, field]) => ({
+                      range: {
+                        [field]: {
+                          gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
+                          lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                        },
+                      },
+                    })),
+                },
+              };
+            }),
+            minimum_should_match: 1,
+          },
+        },
+      },
+    ];
+  }
+
+  postFlightTransform(response: IEsSearchResponse<any>) {
+    if (!this.hasTimeShifts()) {
+      return response;
+    }
+    const transformedRawResponse = cloneDeep(response.rawResponse);
+    if (!transformedRawResponse.aggregations) {
+      transformedRawResponse.aggregations = {
+        doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
+      };
+    }
+    const aggCursor = transformedRawResponse.aggregations!;
+
+    mergeTimeShifts(this, aggCursor);
+    return {
+      ...response,
+      rawResponse: transformedRawResponse,
+    };
   }
 
   getRequestAggById(id: string) {

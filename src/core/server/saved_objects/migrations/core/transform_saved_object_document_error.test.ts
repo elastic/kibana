@@ -10,51 +10,10 @@ import { TransformSavedObjectDocumentError } from './transform_saved_object_docu
 describe('TransformSavedObjectDocumentError', () => {
   it('is a special error', () => {
     const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'id',
-      'type',
-      'namespace',
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
+    const err = new TransformSavedObjectDocumentError(originalError);
     expect(err).toBeInstanceOf(TransformSavedObjectDocumentError);
-    expect(err.id).toEqual('id');
-    expect(err.namespace).toEqual('namespace');
     expect(err.stack).not.toBeNull();
-  });
-  it('constructs an special error message', () => {
-    const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'id',
-      'type',
-      'namespace',
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
-    expect(err.message).toMatchInlineSnapshot(
-      `
-      "Failed to transform document id. Transform: failedTransform
-      Doc: failedDoc"
-    `
-    );
-  });
-  it('handles undefined namespace', () => {
-    const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'id',
-      'type',
-      undefined,
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
-    expect(err.message).toMatchInlineSnapshot(
-      `
-      "Failed to transform document id. Transform: failedTransform
-      Doc: failedDoc"
-    `
-    );
+    expect(err.originalError).toBe(originalError);
+    expect(err.message).toMatchInlineSnapshot(`"Dang diggity!"`);
   });
 });

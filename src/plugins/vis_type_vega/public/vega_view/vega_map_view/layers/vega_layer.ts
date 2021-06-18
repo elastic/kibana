@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Map, CustomLayerInterface } from 'mapbox-gl';
+import type { Map, CustomLayerInterface } from '@kbn/mapbox-gl';
 import type { View } from 'vega';
 import type { LayerParameters } from './types';
 

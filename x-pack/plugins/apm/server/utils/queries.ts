@@ -13,9 +13,11 @@ import {
 } from '../../common/environment_filter_values';
 export { kqlQuery, rangeQuery } from '../../../observability/server';
 
-type QueryContainer = ESFilter;
+type QueryDslQueryContainer = ESFilter;
 
-export function environmentQuery(environment?: string): QueryContainer[] {
+export function environmentQuery(
+  environment?: string
+): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }

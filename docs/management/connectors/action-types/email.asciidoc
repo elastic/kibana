@@ -25,6 +25,12 @@ Username::  Username for login type authentication.
 Password::  Password for login type authentication.
 
 [float]
+[[email-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[preconfigured-email-configuration]]
 ==== Preconfigured connector type
 

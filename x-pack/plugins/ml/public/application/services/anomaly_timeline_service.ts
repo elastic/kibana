@@ -98,7 +98,8 @@ export class AnomalyTimelineService {
   public async loadOverallData(
     selectedJobs: ExplorerJob[],
     chartWidth?: number,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    overallScore?: number
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -127,7 +128,8 @@ export class AnomalyTimelineService {
       1,
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
-      interval.asSeconds() + 's'
+      interval.asSeconds() + 's',
+      overallScore
     );
     const overallSwimlaneData = this.processOverallResults(
       resp.results,
@@ -161,7 +163,8 @@ export class AnomalyTimelineService {
     fromPage: number,
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    swimLaneSeverity?: number
   ): Promise<SwimlaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
@@ -195,7 +198,8 @@ export class AnomalyTimelineService {
         searchBounds.max.valueOf(),
         intervalMs,
         perPage,
-        fromPage
+        fromPage,
+        swimLaneSeverity
       );
     } else {
       response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
@@ -208,7 +212,8 @@ export class AnomalyTimelineService {
         swimlaneLimit,
         perPage,
         fromPage,
-        influencersFilterQuery
+        influencersFilterQuery,
+        swimLaneSeverity
       );
     }
 

@@ -14,21 +14,18 @@ import {
   entriesArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-  metaOrUndefined,
-  name,
-  osTypeArray,
-  tags,
-  updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
   immutableOrUndefined,
   itemIdOrUndefined,
   list_id,
   list_type,
+  metaOrUndefined,
+  name,
+  osTypeArray,
+  tags,
   tie_breaker_id,
-  versionOrUndefined,
-} from '../../../common/schemas';
+  updated_by,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { versionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
 /**
  * Superset saved object of both lists and list items since they share the same saved object type.

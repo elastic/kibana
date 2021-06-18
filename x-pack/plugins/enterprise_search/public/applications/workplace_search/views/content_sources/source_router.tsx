@@ -55,11 +55,11 @@ export const SourceRouter: React.FC = () => {
 
   useEffect(() => {
     initializeSource(sourceId);
-    return () => {
-      // We only want to reset the state when leaving the source section. Otherwise there is an unwanted flash of UI.
-      if (!pathname.includes(sourceId)) resetSourceState();
-    };
   }, [pathname]);
+
+  useEffect(() => {
+    return resetSourceState;
+  }, []);
 
   if (dataLoading) return <Loading />;
 

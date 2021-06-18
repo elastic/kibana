@@ -306,6 +306,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
+      "canSendTelemetry": [Function],
       "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
@@ -350,6 +351,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "post": [MockFunction],
         "put": [MockFunction],
       },
+      "isScreenshotMode": false,
       "notifications": Object {
         "toasts": Object {
           "add": [MockFunction],

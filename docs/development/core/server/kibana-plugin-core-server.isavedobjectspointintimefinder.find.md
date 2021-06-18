@@ -9,5 +9,5 @@ An async generator which wraps calls to `savedObjectsClient.find` and iterates o
 <b>Signature:</b>
 
 ```typescript
-find: () => AsyncGenerator<SavedObjectsFindResponse>;
+find: () => AsyncGenerator<SavedObjectsFindResponse<T, A>>;
 ```

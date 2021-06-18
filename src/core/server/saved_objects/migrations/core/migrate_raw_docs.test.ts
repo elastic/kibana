@@ -233,34 +233,7 @@ describe('migrateRawDocsSafely', () => {
 
   test('instance of Either.left containing transform errors when the transform function throws a TransformSavedObjectDocument error', async () => {
     const transform = jest.fn<any, any>((doc: any) => {
-      throw new TransformSavedObjectDocumentError(
-        `${doc.id}`,
-        `${doc.type}`,
-        `${doc.namespace}`,
-        `${doc.type}1.2.3`,
-        JSON.stringify(doc),
-        new Error('error during transform')
-      );
-    });
-    const task = migrateRawDocsSafely(
-      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      transform,
-      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }] // this is the raw doc
-    );
-    const result = (await task()) as Either.Left<DocumentsTransformFailed>;
-    expect(transform).toHaveBeenCalledTimes(1);
-    expect(result._tag).toEqual('Left');
-    expect(result.left.corruptDocumentIds.length).toEqual(0);
-    expect(result.left.transformErrors.length).toEqual(1);
-    expect(result.left.transformErrors[0].err.message).toMatchInlineSnapshot(`
-      "Failed to transform document b. Transform: a1.2.3
-      Doc: {\\"type\\":\\"a\\",\\"id\\":\\"b\\",\\"attributes\\":{\\"name\\":\\"AAA\\"},\\"references\\":[],\\"migrationVersion\\":{}}"
-    `);
-  });
-
-  test("instance of Either.left containing errors when the transform function throws an error that isn't a TransformSavedObjectDocument error", async () => {
-    const transform = jest.fn<any, any>((doc: any) => {
-      throw new Error('error during transform');
+      throw new TransformSavedObjectDocumentError(new Error('error during transform'));
     });
     const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),

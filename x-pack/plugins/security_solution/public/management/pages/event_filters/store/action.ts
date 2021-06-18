@@ -6,11 +6,11 @@
  */
 
 import { Action } from 'redux';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 import { EventFiltersListPageState } from '../types';
 

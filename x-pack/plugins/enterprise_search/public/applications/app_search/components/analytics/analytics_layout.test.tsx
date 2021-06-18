@@ -6,16 +6,16 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import '../../../__mocks__/react_router_history.mock';
-import { mockKibanaValues, setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { mockKibanaValues, setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../__mocks__/react_router';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';
+import { rerender } from '../../../test_helpers';
 import { LogRetentionCallout } from '../log_retention';
 
 import { AnalyticsLayout } from './analytics_layout';
@@ -63,7 +63,7 @@ describe('AnalyticsLayout', () => {
 
   describe('data loading', () => {
     it('loads query data for query details pages', () => {
-      (useParams as jest.Mock).mockReturnValueOnce({ query: 'test' });
+      mockUseParams.mockReturnValueOnce({ query: 'test' });
       shallow(<AnalyticsLayout isQueryView title="" />);
 
       expect(actions.loadQueryData).toHaveBeenCalledWith('test');

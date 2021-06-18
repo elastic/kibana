@@ -8,10 +8,18 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { ViewInApp } from './view_in_app';
+import {
+  EuiBadge,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiButtonEmpty,
+  EuiText,
+  EuiPageHeaderProps,
+} from '@elastic/eui';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -73,13 +81,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(
-        <EuiTitle size="m">
-          <h1>
-            <span>{alert.name}</span>
-          </h1>
-        </EuiTitle>
-      )
+      ).find('EuiPageHeader')
     ).toBeTruthy();
   });
 
@@ -101,7 +103,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
+      ).find(<EuiBadge>{alertType.name}</EuiBadge>)
     ).toBeTruthy();
   });
 
@@ -288,7 +290,7 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(<ViewInApp alert={alert} />)
+        ).find('ViewInApp')
       ).toBeTruthy();
     });
 
@@ -307,16 +309,29 @@ describe('alert_details', () => {
         minimumLicenseRequired: 'basic',
         enabledInLicense: true,
       };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        )
-          .find(EuiButtonEmpty)
-          .find('[data-test-subj="openEditAlertFlyoutButton"]')
-          .first()
-          .exists()
-      ).toBeTruthy();
+      const pageHeaderProps = shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+      )
+        .find('EuiPageHeader')
+        .props() as EuiPageHeaderProps;
+      const rightSideItems = pageHeaderProps.rightSideItems;
+      expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+      <React.Fragment>
+        <EuiButtonEmpty
+          data-test-subj="openEditAlertFlyoutButton"
+          disabled={false}
+          iconType="pencil"
+          name="edit"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Edit"
+            id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </React.Fragment>
+    `);
     });
   });
 });
@@ -462,6 +477,74 @@ describe('disable button', () => {
     expect(enableAlert).toHaveBeenCalledTimes(0);
     handler!({} as React.FormEvent);
     expect(enableAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset error banner dismissal after re-enabling the alert', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
+    };
+
+    const disableAlert = jest.fn();
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    // Enable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(enableAlert).toHaveBeenCalled();
+
+    // Ensure error banner is back
+    expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
   });
 });
 
@@ -698,20 +781,34 @@ describe('edit button', () => {
       enabledInLicense: true,
     };
 
-    expect(
-      shallow(
-        <AlertDetails
-          alert={alert}
-          alertType={alertType}
-          actionTypes={actionTypes}
-          {...mockAlertApis}
+    const pageHeaderProps = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    )
+      .find('EuiPageHeader')
+      .props() as EuiPageHeaderProps;
+    const rightSideItems = pageHeaderProps.rightSideItems;
+    expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+    <React.Fragment>
+      <EuiButtonEmpty
+        data-test-subj="openEditAlertFlyoutButton"
+        disabled={false}
+        iconType="pencil"
+        name="edit"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Edit"
+          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+          values={Object {}}
         />
-      )
-        .find(EuiButtonEmpty)
-        .find('[name="edit"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
+      </EuiButtonEmpty>
+    </React.Fragment>
+  `);
   });
 
   it('should not render an edit button when alert editable but actions arent', () => {
@@ -781,20 +878,34 @@ describe('edit button', () => {
       enabledInLicense: true,
     };
 
-    expect(
-      shallow(
-        <AlertDetails
-          alert={alert}
-          alertType={alertType}
-          actionTypes={actionTypes}
-          {...mockAlertApis}
+    const pageHeaderProps = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    )
+      .find('EuiPageHeader')
+      .props() as EuiPageHeaderProps;
+    const rightSideItems = pageHeaderProps.rightSideItems;
+    expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+    <React.Fragment>
+      <EuiButtonEmpty
+        data-test-subj="openEditAlertFlyoutButton"
+        disabled={false}
+        iconType="pencil"
+        name="edit"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Edit"
+          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+          values={Object {}}
         />
-      )
-        .find(EuiButtonEmpty)
-        .find('[name="edit"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
+      </EuiButtonEmpty>
+    </React.Fragment>
+  `);
   });
 });
 
@@ -815,7 +926,7 @@ describe('refresh button', () => {
     };
 
     const requestRefresh = jest.fn();
-    const refreshButton = shallow(
+    const wrapper = mountWithIntl(
       <AlertDetails
         alert={alert}
         alertType={alertType}
@@ -823,10 +934,9 @@ describe('refresh button', () => {
         {...mockAlertApis}
         requestRefresh={requestRefresh}
       />
-    )
-      .find('[data-test-subj="refreshAlertsButton"]')
-      .first();
+    );
 
+    const refreshButton = wrapper.find('[data-test-subj="refreshAlertsButton"]').first();
     expect(refreshButton.exists()).toBeTruthy();
 
     refreshButton.simulate('click');

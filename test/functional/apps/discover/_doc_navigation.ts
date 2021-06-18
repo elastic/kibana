@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('doc link in discover', function contextSize() {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,

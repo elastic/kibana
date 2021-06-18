@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+
 import { ADD, UPDATE } from './constants/operations';
 
 export type TOperation = typeof ADD | typeof UPDATE;
@@ -35,3 +37,6 @@ export interface RoleMapping {
     content: string;
   };
 }
+
+const productNames = [APP_SEARCH_PLUGIN.NAME, WORKPLACE_SEARCH_PLUGIN.NAME] as const;
+export type ProductName = typeof productNames[number];

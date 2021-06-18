@@ -152,7 +152,7 @@ To create dashboard drilldowns, you create or locate the dashboards you want to 
 * *[Logs] Total Requests and Bytes*
 * *[Logs] Visitors by OS*
 +
-If you don’t see the data on a panel, try changing the <<set-time-filter,time filter>>.
+If you don’t see the data on a panel, change the <<set-time-filter,time filter>>.
 
 . Save the dashboard. In the *Title* field, enter `Host Overview`.
 

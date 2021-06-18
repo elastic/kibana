@@ -27,10 +27,12 @@ import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
 import {
   getBaseMapsPerCluster,
+  getGridResolutionsPerCluster,
   getScalingOptionsPerCluster,
   getTelemetryLayerTypesPerCluster,
   getTermJoinsPerCluster,
   TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER,
+  TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER,
   TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
   TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
   TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
@@ -66,6 +68,7 @@ export interface LayersStatsUsage {
   scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
   joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
   basemaps: TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER;
+  resolutions: TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -264,6 +267,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const scalingOptions = getScalingOptionsPerCluster(layerLists);
   const joins = getTermJoinsPerCluster(layerLists);
   const basemaps = getBaseMapsPerCluster(layerLists);
+  const resolutions = getGridResolutionsPerCluster(layerLists);
 
   return {
     // Total count of maps
@@ -274,6 +278,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
     scalingOptions,
     joins,
     basemaps,
+    resolutions,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

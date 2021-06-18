@@ -48,7 +48,7 @@ export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -66,7 +66,7 @@ export function APMSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.apm?.hasData) {
+  if (!hasDataMap.apm?.hasData) {
     return null;
   }
 

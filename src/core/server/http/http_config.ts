@@ -87,11 +87,6 @@ const configSchema = schema.object(
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
-      validate(value) {
-        if (value === '0') {
-          return 'value 0 is not a valid hostname (use "0.0.0.0" to bind to all interfaces)';
-        }
-      },
     }),
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',

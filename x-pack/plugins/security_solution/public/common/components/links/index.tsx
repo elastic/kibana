@@ -20,7 +20,7 @@ import React, { useMemo, useCallback } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -177,9 +177,9 @@ const CaseDetailsLinkComponent: React.FC<{
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
@@ -204,9 +204,9 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCreateCaseUrl(search),
       });
     },

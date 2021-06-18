@@ -15,6 +15,12 @@ export interface SavedObjectExportBaseOptions {
   request: KibanaRequest;
   /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
+  /**
+   * Flag to also include namespace information in the export stream. By default, namespace information is not included in exported objects.
+   * This is only intended to be used internally during copy-to-space operations, and it is not exposed as an option for the external HTTP
+   * route for exports.
+   */
+  includeNamespaces?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
   excludeExportDetails?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */

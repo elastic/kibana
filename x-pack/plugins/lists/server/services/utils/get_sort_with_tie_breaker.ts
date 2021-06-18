@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-
-import { SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
+import { SortFieldOrUndefined, SortOrderOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSortWithTieBreaker = ({
   sortField,
@@ -14,7 +13,7 @@ export const getSortWithTieBreaker = ({
 }: {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}): estypes.SortCombinations[] => {
+}): estypes.SearchSortCombinations[] => {
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
     return [{ [sortField]: ascOrDesc, tie_breaker_id: 'asc' as const }];

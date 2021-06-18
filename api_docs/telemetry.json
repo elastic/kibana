@@ -15,7 +15,7 @@
         ],
         "source": {
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "lineNumber": 82
+          "lineNumber": 90
         },
         "deprecated": false,
         "children": [
@@ -30,7 +30,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 84
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -45,7 +45,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 86
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -60,7 +60,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 88
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -75,7 +75,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 90
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -93,7 +93,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 92
+              "lineNumber": 100
             },
             "deprecated": false
           },
@@ -108,7 +108,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 94
+              "lineNumber": 102
             },
             "deprecated": false
           },
@@ -126,7 +126,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -144,7 +144,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 98
+              "lineNumber": 106
             },
             "deprecated": false
           },
@@ -162,7 +162,7 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 100
+              "lineNumber": 108
             },
             "deprecated": false
           }
@@ -180,7 +180,7 @@
         ],
         "source": {
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -198,9 +198,11 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -213,9 +215,29 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryServicePublicApis.canSendTelemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "canSendTelemetry",
+            "description": [
+              "Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -231,9 +253,11 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 42
+              "lineNumber": 46
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -249,9 +273,11 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 44
+              "lineNumber": 48
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "telemetry",
@@ -267,9 +293,27 @@
             ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 50
+              "lineNumber": 54
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "telemetry",
+                "id": "def-public.optedIn",
+                "type": "boolean",
+                "tags": [],
+                "label": "optedIn",
+                "description": [
+                  "Whether the user is opting-in (`true`) or out (`false`)."
+                ],
+                "source": {
+                  "path": "src/plugins/telemetry/public/plugin.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -289,7 +333,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 64
+        "lineNumber": 68
       },
       "deprecated": false,
       "children": [
@@ -313,7 +357,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 66
+            "lineNumber": 70
           },
           "deprecated": false
         },
@@ -331,7 +375,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 68
+            "lineNumber": 72
           },
           "deprecated": false
         },
@@ -349,7 +393,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 73
+            "lineNumber": 77
           },
           "deprecated": false
         }
@@ -368,7 +412,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 60
       },
       "deprecated": false,
       "children": [
@@ -392,7 +436,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 58
+            "lineNumber": 62
           },
           "deprecated": false
         }
@@ -617,7 +661,7 @@
             "text": "NodeUsage"
           },
           " extends ",
-          "NodeUsageInformation"
+          "NodesUsageNodeUsage"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
@@ -656,7 +700,14 @@
           "\nThe Data Telemetry is reported as an array of {@link DataTelemetryDocument}"
         ],
         "signature": [
-          "DataTelemetryDocument[]"
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryDocument",
+            "text": "DataTelemetryDocument"
+          },
+          "[]"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
@@ -675,7 +726,17 @@
           "\nThe payload structure as composed by the OSS telemetry collection mechanism."
         ],
         "signature": [
-          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<estypes.ClusterStatsResponse, \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: DataTelemetryPayload | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
+          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<",
+          "ClusterStatsResponse",
+          ", \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryPayload",
+            "text": "DataTelemetryPayload"
+          },
+          " | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
@@ -719,7 +780,9 @@
             "path": "src/plugins/telemetry/server/plugin.ts",
             "lineNumber": 56
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -756,7 +819,9 @@
             "path": "src/plugins/telemetry/server/plugin.ts",
             "lineNumber": 68
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "start",

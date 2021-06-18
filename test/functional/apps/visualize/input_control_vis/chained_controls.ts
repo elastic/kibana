@@ -17,10 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  describe('chained controls', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/96997
+  // FLAKY: https://github.com/elastic/kibana/issues/100372
+  describe.skip('chained controls', function () {
     this.tags('includeFirefox');
 
     before(async () => {
+      await PageObjects.visualize.initTests();
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.loadSavedVisualization('chained input control', {
         navigateToVisualize: false,

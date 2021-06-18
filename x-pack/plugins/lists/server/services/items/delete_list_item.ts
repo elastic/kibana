@@ -6,9 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { Id } from '@kbn/securitysolution-io-ts-utils';
-
-import { ListItemSchema } from '../../../common/schemas';
+import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListItem } from '.';
 

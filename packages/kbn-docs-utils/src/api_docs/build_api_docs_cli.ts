@@ -13,19 +13,11 @@ import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, TypeKind } from './types';
+import { ApiDeclaration, ApiStats, MissingApiItemMap, PluginApi, TypeKind } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
 import { writeDeprecationDoc } from './mdx/write_deprecations_doc';
-
-export interface PluginInfo {
-  apiCount: number;
-  apiCountMissingComments: number;
-  id: string;
-  missingApiItems: string[];
-  percentApiMissingComments: number;
-}
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -95,14 +87,13 @@ export function runBuildApiDocsCli() {
 
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        const apiCount = countApiForPlugin(pluginApi);
-        const pluginStats = collectApiStatsForPlugin(pluginApi);
+        const pluginStats = collectApiStatsForPlugin(pluginApi, missingApiItems);
 
         reporter.metrics([
           {
             id,
             group: 'API count',
-            value: apiCount,
+            value: pluginStats.apiCount,
           },
           {
             id,
@@ -202,8 +193,8 @@ export function runBuildApiDocsCli() {
           }
         }
 
-        if (apiCount > 0) {
-          writePluginDocs(outputFolder, pluginApi, log);
+        if (pluginStats.apiCount > 0) {
+          writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
         }
         writeDeprecationDoc(outputFolder, referencedDeprecations, log);
       });
@@ -239,27 +230,27 @@ function getTsProject(repoPath: string) {
   return project;
 }
 
-interface ApiStats {
-  missingComments: ApiDeclaration[];
-  isAnyType: ApiDeclaration[];
-  noReferences: ApiDeclaration[];
-}
-
-function collectApiStatsForPlugin(doc: PluginApi): ApiStats {
-  const stats: ApiStats = { missingComments: [], isAnyType: [], noReferences: [] };
+function collectApiStatsForPlugin(doc: PluginApi, missingApiItems: MissingApiItemMap): ApiStats {
+  const stats: ApiStats = {
+    missingComments: [],
+    isAnyType: [],
+    noReferences: [],
+    apiCount: countApiForPlugin(doc),
+    missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
+  };
   Object.values(doc.client).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
   Object.values(doc.server).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
   Object.values(doc.common).forEach((def) => {
-    collectStatsForApi(def, stats);
+    collectStatsForApi(def, stats, doc);
   });
   return stats;
 }
 
-function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
+function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
   const missingComment = doc.description === undefined || doc.description.length === 0;
   if (missingComment) {
     stats.missingComments.push(doc);
@@ -269,7 +260,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
   }
   if (doc.children) {
     doc.children.forEach((child) => {
-      collectStatsForApi(child, stats);
+      collectStatsForApi(child, stats, pluginApi);
     });
   }
   if (!doc.references || doc.references.length === 0) {

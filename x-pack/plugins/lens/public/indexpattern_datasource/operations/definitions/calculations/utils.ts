@@ -16,10 +16,11 @@ import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,
-  timeScale?: TimeScaleUnit
+  timeScale?: TimeScaleUnit,
+  timeShift?: string
 ) => {
   const rawLabel = ofName(name);
-  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale);
+  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
 };
 
 /**
@@ -125,6 +126,38 @@ export function dateBasedOperationToExpression(
       function: functionName,
       arguments: {
         by: buckets,
+        inputColumnId: [currentColumn.references[0]],
+        outputColumnId: [columnId],
+        outputColumnName: [currentColumn.label],
+        ...additionalArgs,
+      },
+    },
+  ];
+}
+
+/**
+ * Creates an expression ast for a date based operation (cumulative sum, derivative, moving average, counter rate)
+ */
+export function optionallHistogramBasedOperationToExpression(
+  layer: IndexPatternLayer,
+  columnId: string,
+  functionName: string,
+  additionalArgs: Record<string, unknown[]> = {}
+): ExpressionFunctionAST[] {
+  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const nonHistogramColumns = buckets.filter(
+    (colId) =>
+      layer.columns[colId].operationType !== 'date_histogram' &&
+      layer.columns[colId].operationType !== 'range'
+  )!;
+
+  return [
+    {
+      type: 'function',
+      function: functionName,
+      arguments: {
+        by: nonHistogramColumns.length === buckets.length ? [] : nonHistogramColumns,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
         outputColumnName: [currentColumn.label],

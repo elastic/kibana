@@ -14,6 +14,7 @@ import { State } from '../types';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
+import { FillOpacityOption } from './fill_opacity_option';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -74,6 +75,22 @@ describe('Visual options popover', () => {
     expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
   });
 
+  it('should not disable the fill opacity for percentage area charts', () => {
+    const state = testState();
+    const component = shallow(
+      <VisualOptionsPopover
+        datasourceLayers={frame.datasourceLayers}
+        setState={jest.fn()}
+        state={{
+          ...state,
+          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+        }}
+      />
+    );
+
+    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(true);
+  });
+
   it('should not disable the visual options for percentage area charts', () => {
     const state = testState();
     const component = shallow(
@@ -126,6 +143,40 @@ describe('Visual options popover', () => {
     );
 
     expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
+  });
+
+  it('should hide the fill opacity option for bar series', () => {
+    const state = testState();
+    const component = shallow(
+      <VisualOptionsPopover
+        datasourceLayers={frame.datasourceLayers}
+        setState={jest.fn()}
+        state={{
+          ...state,
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          fittingFunction: 'Carry',
+        }}
+      />
+    );
+
+    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(false);
+  });
+
+  it('should hide the fill opacity option for line series', () => {
+    const state = testState();
+    const component = shallow(
+      <VisualOptionsPopover
+        datasourceLayers={frame.datasourceLayers}
+        setState={jest.fn()}
+        state={{
+          ...state,
+          layers: [{ ...state.layers[0], seriesType: 'line' }],
+          fittingFunction: 'Carry',
+        }}
+      />
+    );
+
+    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(false);
   });
 
   it('should show the popover and display field enabled for bar and horizontal_bar series', () => {

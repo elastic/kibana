@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlDashboardJobSelectionTable = ProvidedType<

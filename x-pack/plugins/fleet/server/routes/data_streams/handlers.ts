@@ -33,7 +33,7 @@ interface ESDataStreamInfo {
   };
   status: string;
   template: string;
-  ilm_policy: string;
+  ilm_policy?: string;
   hidden: boolean;
 }
 

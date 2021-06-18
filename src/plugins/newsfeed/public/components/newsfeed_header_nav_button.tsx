@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
-import * as Rx from 'rxjs';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { NewsfeedApi } from '../lib/api';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 
@@ -17,46 +17,44 @@ export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   newsFetchResult: FetchResult | void | null;
 }
+
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
-export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
-
 export interface Props {
-  apiFetchResult: NewsfeedApiFetchResult;
+  newsfeedApi: NewsfeedApi;
 }
 
-export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
-  const [showBadge, setShowBadge] = useState<boolean>(false);
+export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const hasNew = useMemo(() => {
+    return newsFetchResult ? newsFetchResult.hasNew : false;
+  }, [newsFetchResult]);
 
   useEffect(() => {
-    function handleStatusChange(fetchResult: FetchResult | void | null) {
-      if (fetchResult) {
-        setShowBadge(fetchResult.hasNew);
-      }
-      setNewsFetchResult(fetchResult);
-    }
-
-    const subscription = apiFetchResult.subscribe((res) => handleStatusChange(res));
+    const subscription = newsfeedApi.fetchResults$.subscribe((results) => {
+      setNewsFetchResult(results);
+    });
     return () => subscription.unsubscribe();
-  }, [apiFetchResult]);
+  }, [newsfeedApi]);
 
-  function showFlyout() {
-    setShowBadge(false);
+  const showFlyout = useCallback(() => {
+    if (newsFetchResult) {
+      newsfeedApi.markAsRead(newsFetchResult.feedItems.map((item) => item.hash));
+    }
     setFlyoutVisible(!flyoutVisible);
-  }
+  }, [newsfeedApi, newsFetchResult, flyoutVisible]);
 
   return (
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
-      <Fragment>
+      <>
         <EuiHeaderSectionItemButton
           data-test-subj="newsfeed"
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
           aria-label={
-            showBadge
+            hasNew
               ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
                   defaultMessage: 'Newsfeed menu - unread items available',
                 })
@@ -64,13 +62,13 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
                   defaultMessage: 'Newsfeed menu - all items read',
                 })
           }
-          notification={showBadge ? true : null}
+          notification={hasNew ? true : null}
           onClick={showFlyout}
         >
           <EuiIcon type="cheer" size="m" />
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? <NewsfeedFlyout /> : null}
-      </Fragment>
+      </>
     </NewsfeedContext.Provider>
   );
 };

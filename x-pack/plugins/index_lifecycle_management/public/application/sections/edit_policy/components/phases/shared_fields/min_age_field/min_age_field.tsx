@@ -21,12 +21,11 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
+import { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
-
-type PhaseWithMinAgeAction = 'warm' | 'cold' | 'delete';
 
 const i18nTexts = {
   daysOptionLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.daysOptionLabel', {
@@ -77,7 +76,7 @@ const i18nTexts = {
 };
 
 interface Props {
-  phase: PhaseWithMinAgeAction;
+  phase: PhaseWithTiming;
 }
 
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {

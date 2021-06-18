@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
@@ -55,9 +54,6 @@ export function createTestConfig(config: Config) {
     return {
       testFiles: [require.resolve('../tests')],
       servers,
-      esArchiver: {
-        directory: path.resolve(__dirname, './fixtures/es_archiver'),
-      },
       services: {
         ...services,
         supertest: supertestAsApmReadUser,

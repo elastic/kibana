@@ -149,7 +149,7 @@ export class LogRotator {
     if (this.usePolling && !this.shouldUsePolling) {
       this.log(
         ['warning', 'logging:rotate'],
-        'Looks like your current environment support a faster algorithm then polling. You can try to disable `usePolling`'
+        'Looks like your current environment support a faster algorithm than polling. You can try to disable `usePolling`'
       );
     }
 

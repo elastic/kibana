@@ -8,8 +8,11 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '../../actions/server';
 import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 
 import { ConfigType } from './config';
@@ -22,41 +25,51 @@ import {
   caseUserActionSavedObjectType,
   subCaseSavedObjectType,
 } from './saved_object_types';
-import {
-  CaseConfigureService,
-  CaseConfigureServiceSetup,
-  CaseService,
-  CaseServiceSetup,
-  CaseUserActionService,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsService,
-  ConnectorMappingsServiceSetup,
-  AlertService,
-  AlertServiceContract,
-} from './services';
-import { CasesClientHandler, createExternalCasesClient } from './client';
+
+import { CasesClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
+import { CasesClientFactory } from './client/factory';
+import { SpacesPluginStart } from '../../spaces/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
 }
 
 export interface PluginsSetup {
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
+}
+
+export interface PluginsStart {
+  security?: SecurityPluginStart;
+  features: FeaturesPluginStart;
+  spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
+}
+
+/**
+ * Cases server exposed contract for interacting with cases entities.
+ */
+export interface PluginStartContract {
+  /**
+   * Returns a client which can be used to interact with the cases backend entities.
+   *
+   * @param request a KibanaRequest
+   * @returns a {@link CasesClient}
+   */
+  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
 }
 
 export class CasePlugin {
   private readonly log: Logger;
-  private caseConfigureService?: CaseConfigureServiceSetup;
-  private caseService?: CaseServiceSetup;
-  private connectorMappingsService?: ConnectorMappingsServiceSetup;
-  private userActionService?: CaseUserActionServiceSetup;
-  private alertsService?: AlertService;
+  private clientFactory: CasesClientFactory;
+  private securityPluginSetup?: SecurityPluginSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
+    this.clientFactory = new CasesClientFactory(this.log);
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -65,6 +78,8 @@ export class CasePlugin {
     if (!config.enabled) {
       return;
     }
+
+    this.securityPluginSetup = plugins.security;
 
     core.savedObjects.registerType(caseCommentSavedObjectType);
     core.savedObjects.registerType(caseConfigureSavedObjectType);
@@ -78,75 +93,54 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    this.caseService = new CaseService(
-      this.log,
-      plugins.security != null ? plugins.security.authc : undefined
-    );
-    this.caseConfigureService = await new CaseConfigureService(this.log).setup();
-    this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
-    this.userActionService = await new CaseUserActionService(this.log).setup();
-    this.alertsService = new AlertService();
-
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
-        caseService: this.caseService,
-        caseConfigureService: this.caseConfigureService,
-        connectorMappingsService: this.connectorMappingsService,
-        userActionService: this.userActionService,
-        alertsService: this.alertsService,
-        logger: this.log,
       })
     );
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     initCaseApi({
       logger: this.log,
-      caseService: this.caseService,
-      caseConfigureService: this.caseConfigureService,
-      connectorMappingsService: this.connectorMappingsService,
-      userActionService: this.userActionService,
       router,
     });
 
     if (ENABLE_CASE_CONNECTOR) {
       core.savedObjects.registerType(subCaseSavedObjectType);
       registerConnectors({
-        actionsRegisterType: plugins.actions.registerType,
+        registerActionType: plugins.actions.registerType,
         logger: this.log,
-        caseService: this.caseService,
-        caseConfigureService: this.caseConfigureService,
-        connectorMappingsService: this.connectorMappingsService,
-        userActionService: this.userActionService,
-        alertsService: this.alertsService,
+        factory: this.clientFactory,
       });
     }
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
     this.log.debug(`Starting Case Workflow`);
 
-    const getCasesClientWithRequestAndContext = async (
-      context: CasesRequestHandlerContext,
-      request: KibanaRequest
-    ) => {
-      const user = await this.caseService!.getUser({ request });
-      return createExternalCasesClient({
-        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-        savedObjectsClient: core.savedObjects.getScopedClient(request),
-        user,
-        caseService: this.caseService!,
-        caseConfigureService: this.caseConfigureService!,
-        connectorMappingsService: this.connectorMappingsService!,
-        userActionService: this.userActionService!,
-        alertsService: this.alertsService!,
-        logger: this.log,
+    this.clientFactory.initialize({
+      securityPluginSetup: this.securityPluginSetup,
+      securityPluginStart: plugins.security,
+      getSpace: async (request: KibanaRequest) => {
+        return plugins.spaces?.spacesService.getActiveSpace(request);
+      },
+      featuresPluginStart: plugins.features,
+      actionsPluginStart: plugins.actions,
+    });
+
+    const client = core.elasticsearch.client;
+
+    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
+      return this.clientFactory.create({
+        request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
+        savedObjectsService: core.savedObjects,
       });
     };
 
     return {
-      getCasesClientWithRequestAndContext,
+      getCasesClientWithRequest,
     };
   }
 
@@ -156,36 +150,18 @@ export class CasePlugin {
 
   private createRouteHandlerContext = ({
     core,
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    logger,
   }: {
     core: CoreSetup;
-    caseService: CaseServiceSetup;
-    caseConfigureService: CaseConfigureServiceSetup;
-    connectorMappingsService: ConnectorMappingsServiceSetup;
-    userActionService: CaseUserActionServiceSetup;
-    alertsService: AlertServiceContract;
-    logger: Logger;
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
-      const [{ savedObjects }] = await core.getStartServices();
-      const user = await caseService.getUser({ request });
       return {
-        getCasesClient: () => {
-          return new CasesClientHandler({
+        getCasesClient: async () => {
+          const [{ savedObjects }] = await core.getStartServices();
+
+          return this.clientFactory.create({
+            request,
             scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-            savedObjectsClient: savedObjects.getScopedClient(request),
-            caseService,
-            caseConfigureService,
-            connectorMappingsService,
-            userActionService,
-            alertsService,
-            user,
-            logger,
+            savedObjectsService: savedObjects,
           });
         },
       };

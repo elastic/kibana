@@ -6,8 +6,9 @@
  */
 
 import {
+  EuiButton,
   EuiCard,
-  EuiCode,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -17,7 +18,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
-  EuiPanel,
+  EuiPopover,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -26,6 +27,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
@@ -37,6 +39,7 @@ interface ReportingExampleAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
@@ -46,8 +49,21 @@ export const ReportingExampleApp = ({
   notifications,
   http,
   reporting,
+  screenshotMode,
 }: ReportingExampleAppDeps) => {
-  const { getDefaultLayoutSelectors, ReportingAPIClient } = reporting;
+  const { getDefaultLayoutSelectors } = reporting;
+
+  // Context Menu
+  const [isPopoverOpen, setPopover] = useState(false);
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  // Async Logos
   const [logos, setLogos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -58,7 +74,7 @@ export const ReportingExampleApp = ({
       });
   });
 
-  const getPDFJobParams = (): JobParamsPDF => {
+  const getPDFJobParamsDefault = (): JobParamsPDF => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
@@ -70,7 +86,40 @@ export const ReportingExampleApp = ({
     };
   };
 
-  // Render the application DOM.
+  const panels = [
+    { id: 0, items: [{ name: 'PDF Reports', icon: 'document', panel: 1 }] },
+    {
+      id: 1,
+      initialFocusedItemIndex: 1,
+      title: 'PDF Reports',
+      items: [
+        { name: 'No Layout Option', icon: 'document', panel: 2 },
+        { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
+      ],
+    },
+    {
+      id: 2,
+      title: 'No Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPDF
+          getJobParams={getPDFJobParamsDefault}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 3,
+      title: 'Canvas Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPDF
+          layoutOption="canvas"
+          getJobParams={getPDFJobParamsDefault}
+          onClose={closePopover}
+        />
+      ),
+    },
+  ];
+
   return (
     <Router basename={basename}>
       <I18nProvider>
@@ -84,33 +133,20 @@ export const ReportingExampleApp = ({
             <EuiPageContent>
               <EuiPageContentBody>
                 <EuiText>
-                  <p>
-                    Use the <EuiCode>ReportingStart.components.ScreenCapturePanel</EuiCode>{' '}
-                    component to add the Reporting panel to your page.
-                  </p>
+                  <p>Example of a Sharing menu using components from Reporting</p>
+
+                  <EuiPopover
+                    id="contextMenuExample"
+                    button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                  </EuiPopover>
 
                   <EuiHorizontalRule />
-
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiPanel>
-                        <reporting.components.ScreenCapturePanel
-                          apiClient={new ReportingAPIClient(http)}
-                          toasts={notifications.toasts}
-                          reportType={constants.PDF_REPORT_TYPE}
-                          getJobParams={getPDFJobParams}
-                          objectId="Visualization:Id:ToEnsure:Visualization:IsSaved"
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-
-                  <EuiHorizontalRule />
-
-                  <p>
-                    The logos below are in a <EuiCode>data-shared-items-container</EuiCode> element
-                    for Reporting.
-                  </p>
 
                   <div data-shared-items-container data-shared-items-count="4">
                     <EuiFlexGroup gutterSize="l">
@@ -125,6 +161,8 @@ export const ReportingExampleApp = ({
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
+
+                    <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
                   </div>
                 </EuiText>
               </EuiPageContentBody>

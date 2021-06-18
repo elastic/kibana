@@ -34,11 +34,11 @@ export function PageLoadDistribution() {
     services: { http },
   } = useKibana();
 
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
 
-  const { serviceName } = uiFilters;
+  const { serviceName } = uxUiFilters;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
@@ -56,7 +56,7 @@ export function PageLoadDistribution() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               urlQuery: searchTerm,
               ...(percentileRange.min && percentileRange.max
                 ? {
@@ -73,7 +73,7 @@ export function PageLoadDistribution() {
     [
       end,
       start,
-      uiFilters,
+      uxUiFilters,
       percentileRange.min,
       percentileRange.max,
       searchTerm,
@@ -89,7 +89,7 @@ export function PageLoadDistribution() {
     {
       [`${serviceName}-page-views`]: {
         dataType: 'ux',
-        reportType: 'pld',
+        reportType: 'dist',
         time: { from: rangeFrom!, to: rangeTo! },
         reportDefinitions: {
           'service.name': serviceName as string[],

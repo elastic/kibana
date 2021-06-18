@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -186,11 +186,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   const areLabelsInvalid =
     errors['subActionParams.incident.labels'] != null &&
+    errors['subActionParams.incident.labels'] !== undefined &&
     errors['subActionParams.incident.labels'].length > 0 &&
     incident.labels !== undefined;
 
   return (
-    <Fragment>
+    <>
       <>
         <EuiFormRow
           fullWidth
@@ -277,6 +278,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             fullWidth
             error={errors['subActionParams.incident.summary']}
             isInvalid={
+              errors['subActionParams.incident.summary'] !== undefined &&
               errors['subActionParams.incident.summary'].length > 0 &&
               incident.summary !== undefined
             }
@@ -376,7 +378,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           />
         </>
       </>
-    </Fragment>
+    </>
   );
 };
 

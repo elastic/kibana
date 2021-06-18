@@ -15,21 +15,21 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('logstash_functional');
-    await esArchiver.loadIfNeeded('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('logstash_functional');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   describe('dashboard app', function () {

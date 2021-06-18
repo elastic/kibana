@@ -14,7 +14,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings } from './types';
+import { ProxySettings, ResponseSettings, TLSSettings } from './types';
+import { getTLSSettingsFromConfig } from './builtin_action_types/lib/get_node_tls_options';
 
 export { AllowedHosts, EnabledActionTypes } from './config';
 
@@ -30,7 +31,7 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
-  isRejectUnauthorizedCertificatesEnabled: () => boolean;
+  getTLSSettings: () => TLSSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -93,7 +94,10 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
+    proxyTLSSettings: getTLSSettingsFromConfig(
+      config.tls?.proxyVerificationMode,
+      config.proxyRejectUnauthorizedCertificates
+    ),
   };
 }
 
@@ -142,8 +146,8 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    // returns the global rejectUnauthorized setting
-    isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
+    getTLSSettings: () =>
+      getTLSSettingsFromConfig(config.tls?.verificationMode, config.rejectUnauthorized),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));

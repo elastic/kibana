@@ -84,7 +84,13 @@
       "label": "SavedObjectTaggingPluginStart",
       "description": [],
       "signature": [
-        "SavedObjectsTaggingApi"
+        {
+          "pluginId": "savedObjectsTaggingOss",
+          "scope": "public",
+          "docId": "kibSavedObjectsTaggingOssPluginApi",
+          "section": "def-public.SavedObjectsTaggingApi",
+          "text": "SavedObjectsTaggingApi"
+        }
       ],
       "source": {
         "path": "x-pack/plugins/saved_objects_tagging/public/types.ts",
@@ -822,7 +828,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              "Partial<Record<\"color\" | \"description\" | \"id\" | \"name\", string | undefined>>"
+              "{ color?: string | undefined; description?: string | undefined; id?: string | undefined; name?: string | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
@@ -933,7 +939,16 @@
         "label": "TagSavedObject",
         "description": [],
         "signature": [
-          "SavedObject<TagAttributes>"
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.TagAttributes",
+            "text": "TagAttributes"
+          },
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
@@ -969,7 +984,14 @@
         "label": "TagWithRelations",
         "description": [],
         "signature": [
-          "Tag & { relationCount: number; }"
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " & { relationCount: number; }"
         ],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",

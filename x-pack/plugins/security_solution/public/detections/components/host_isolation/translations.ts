@@ -8,34 +8,25 @@
 import { i18n } from '@kbn/i18n';
 
 export const ISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolateHost.isolateHost',
+  'xpack.securitySolution.endpoint.hostIsolation.isolateHost',
   {
     defaultMessage: 'Isolate host',
   }
 );
 
-export const COMMENT = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.comment', {
-  defaultMessage: 'Comment',
-});
-
-export const COMMENT_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
-  { defaultMessage: 'You may leave an optional note here.' }
+export const UNISOLATE_HOST = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.unisolateHost',
+  {
+    defaultMessage: 'Unisolate host',
+  }
 );
-
-export const CANCEL = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const CONFIRM = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.confirm', {
-  defaultMessage: 'Confirm',
-});
 
 export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
   i18n.translate(
     'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
     {
-      defaultMessage: ' {caseCount, plural, one {case} other {cases}} associated with the rule ',
+      defaultMessage:
+        '{caseCount} {caseCount, plural, one {case} other {cases}} associated with this host',
       values: { caseCount },
     }
   );

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { getDefaultHotPhasePolicy } from '../constants';
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '../../../../../licensing/public/mocks';
+import { setupEnvironment } from '../../helpers';
+import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
 describe('<EditPolicy /> rollover', () => {
   let testBed: EditPolicyTestBed;
@@ -20,14 +19,7 @@ describe('<EditPolicy /> rollover', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-    httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: {},
-      nodesByAttributes: { test: ['123'] },
-      isUsingDeprecatedDataRoleConfig: false,
-    });
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup({
@@ -48,8 +40,8 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides forcemerge when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
     expect(actions.hot.forceMergeFieldExists()).toBeFalsy();
   });
 
@@ -60,8 +52,8 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides shrink input when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
     expect(actions.hot.shrinkExists()).toBeFalsy();
   });
 
@@ -72,16 +64,16 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides readonly input when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
     expect(actions.hot.readonlyExists()).toBeFalsy();
   });
 
   test('hides and disables searchable snapshot field', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
-    await actions.cold.enable(true);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
+    await actions.togglePhase('cold');
 
     expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
   });
@@ -89,10 +81,10 @@ describe('<EditPolicy /> rollover', () => {
   test('shows rollover tip on minimum age', async () => {
     const { actions } = testBed;
 
-    await actions.warm.enable(true);
-    await actions.cold.enable(true);
-    await actions.frozen.enable(true);
-    await actions.delete.enable(true);
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
+    await actions.togglePhase('frozen');
+    await actions.togglePhase('delete');
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
@@ -102,13 +94,13 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hiding rollover tip on minimum age', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
 
-    await actions.warm.enable(true);
-    await actions.cold.enable(true);
-    await actions.frozen.enable(true);
-    await actions.delete.enable(true);
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
+    await actions.togglePhase('frozen');
+    await actions.togglePhase('delete');
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();

@@ -65,5 +65,14 @@ export function getPointFilterExpression(hasJoins: boolean): unknown[] {
 }
 
 export function getCentroidFilterExpression(hasJoins: boolean): unknown[] {
-  return getFilterExpression(['==', ['get', KBN_IS_CENTROID_FEATURE], true], hasJoins);
+  const filters: unknown[] = [
+    EXCLUDE_TOO_MANY_FEATURES_BOX,
+    ['==', ['get', KBN_IS_CENTROID_FEATURE], true],
+  ];
+
+  if (hasJoins) {
+    filters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
+  }
+
+  return ['all', ...filters];
 }

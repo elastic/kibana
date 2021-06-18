@@ -33,7 +33,6 @@ import {
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface AggregationParams {
   environment?: string;
@@ -50,23 +49,24 @@ export async function getServiceTransactionStats({
   searchAggregatedTransactions,
   maxNumServices,
 }: AggregationParams) {
-  return withApmSpan('get_service_transaction_stats', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation();
 
-    const metrics = {
-      avg_duration: {
-        avg: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
+  const metrics = {
+    avg_duration: {
+      avg: {
+        field: getTransactionDurationFieldForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       },
-      outcomes,
-    };
+    },
+    outcomes,
+  };
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_transaction_stats',
+    {
       apm: {
         events: [
           getProcessorEventForAggregatedTransactions(
@@ -133,64 +133,64 @@ export async function getServiceTransactionStats({
           },
         },
       },
-    });
+    }
+  );
 
-    return (
-      response.aggregations?.services.buckets.map((bucket) => {
-        const topTransactionTypeBucket =
-          bucket.transactionType.buckets.find(
-            ({ key }) =>
-              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-          ) ?? bucket.transactionType.buckets[0];
+  return (
+    response.aggregations?.services.buckets.map((bucket) => {
+      const topTransactionTypeBucket =
+        bucket.transactionType.buckets.find(
+          ({ key }) =>
+            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+        ) ?? bucket.transactionType.buckets[0];
 
-        return {
-          serviceName: bucket.key as string,
-          transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets.map(
-            (environmentBucket) => environmentBucket.key as string
+      return {
+        serviceName: bucket.key as string,
+        transactionType: topTransactionTypeBucket.key as string,
+        environments: topTransactionTypeBucket.environments.buckets.map(
+          (environmentBucket) => environmentBucket.key as string
+        ),
+        agentName: topTransactionTypeBucket.sample.top[0].metrics[
+          AGENT_NAME
+        ] as AgentName,
+        avgResponseTime: {
+          value: topTransactionTypeBucket.avg_duration.value,
+          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
+            (dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.avg_duration.value,
+            })
           ),
-          agentName: topTransactionTypeBucket.sample.top[0].metrics[
-            AGENT_NAME
-          ] as AgentName,
-          avgResponseTime: {
-            value: topTransactionTypeBucket.avg_duration.value,
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.avg_duration.value,
-              })
-            ),
-          },
-          transactionErrorRate: {
-            value: calculateTransactionErrorPercentage(
-              topTransactionTypeBucket.outcomes
-            ),
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: calculateTransactionErrorPercentage(dateBucket.outcomes),
-              })
-            ),
-          },
-          transactionsPerMinute: {
-            value: calculateThroughput({
-              start,
-              end,
-              value: topTransactionTypeBucket.doc_count,
-            }),
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: calculateThroughput({
-                  start,
-                  end,
-                  value: dateBucket.doc_count,
-                }),
-              })
-            ),
-          },
-        };
-      }) ?? []
-    );
-  });
+        },
+        transactionErrorRate: {
+          value: calculateTransactionErrorPercentage(
+            topTransactionTypeBucket.outcomes
+          ),
+          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
+            (dateBucket) => ({
+              x: dateBucket.key,
+              y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+            })
+          ),
+        },
+        transactionsPerMinute: {
+          value: calculateThroughput({
+            start,
+            end,
+            value: topTransactionTypeBucket.doc_count,
+          }),
+          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
+            (dateBucket) => ({
+              x: dateBucket.key,
+              y: calculateThroughput({
+                start,
+                end,
+                value: dateBucket.doc_count,
+              }),
+            })
+          ),
+        },
+      };
+    }) ?? []
+  );
 }

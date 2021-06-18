@@ -228,7 +228,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
-          "lineNumber": 25
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -262,7 +262,25 @@
       "label": "NewsfeedPublicPluginStart",
       "description": [],
       "signature": [
-        "{ createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => Rx.Observable<void | FetchResult | null>; }"
+        "{ createNewsFeed$: (endpoint: ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.NewsfeedApiEndpoint",
+          "text": "NewsfeedApiEndpoint"
+        },
+        ") => ",
+        "Observable",
+        "<void | ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.FetchResult",
+          "text": "FetchResult"
+        },
+        " | null>; }"
       ],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",

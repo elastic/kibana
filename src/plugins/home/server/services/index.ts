@@ -15,7 +15,6 @@ export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials
 export { TutorialsCategory } from './tutorials';
 
 export type {
-  ParamTypes,
   InstructionSetSchema,
   ParamsSchema,
   InstructionsSchema,

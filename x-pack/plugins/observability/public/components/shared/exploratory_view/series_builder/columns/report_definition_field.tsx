@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
@@ -25,7 +25,9 @@ interface Props {
 }
 
 export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { indexPattern } = useAppIndexPatternContext();
 
@@ -65,7 +67,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
         <FieldValueSuggestions
           label={labels[field]}
           sourceField={field}
-          indexPattern={indexPattern}
+          indexPatternTitle={indexPattern.title}
           selectedValue={selectedReportDefinitions?.[field]}
           onChange={(val?: string[]) => onChange(field, val)}
           filters={queryFilters}

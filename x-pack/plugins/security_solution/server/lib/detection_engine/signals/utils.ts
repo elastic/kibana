@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import { isEmpty, partition } from 'lodash';
+import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { SortResults } from '@elastic/elasticsearch/api/types';
+import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -26,8 +29,6 @@ import {
   parseDuration,
 } from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -36,11 +37,10 @@ import {
   Signal,
   WrappedSignalHit,
   RuleRangeTuple,
+  BaseSignalHit,
+  SignalSourceHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
-import { hasLargeValueList } from '../../../../common/detection_engine/utils';
-import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
 import {
@@ -165,8 +165,14 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
+  checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
+
+export const checkPrivilegesFromEsClient = async (
+  esClient: ElasticsearchClient,
+  indices: string[]
+): Promise<Privilege> =>
   (
-    await services.scopedClusterClient.asCurrentUser.transport.request({
+    await esClient.transport.request({
       path: '/_security/user/_has_privileges',
       method: 'POST',
       body: {
@@ -578,30 +584,49 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
     return undefined;
   } else {
     const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    const timestamp = timestampOverride ?? '@timestamp';
-    const timestampValue =
-      lastRecord.fields != null && lastRecord.fields[timestamp] != null
-        ? lastRecord.fields[timestamp][0]
-        : // @ts-expect-error @elastic/elasticsearch _source is optional
-          lastRecord._source[timestamp];
-    const lastTimestamp =
-      typeof timestampValue === 'string' || typeof timestampValue === 'number'
-        ? timestampValue
-        : undefined;
-    if (lastTimestamp != null) {
-      const tempMoment = moment(lastTimestamp);
-      if (tempMoment.isValid()) {
-        return tempMoment.toDate();
-      } else {
-        return undefined;
-      }
+    return getValidDateFromDoc({ doc: lastRecord, timestampOverride });
+  }
+};
+
+/**
+ * Given a search hit this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param timestampOverride The timestamp override to use its values if we have it.
+ */
+export const getValidDateFromDoc = ({
+  doc,
+  timestampOverride,
+}: {
+  doc: BaseSignalHit;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): Date | undefined => {
+  const timestamp = timestampOverride ?? '@timestamp';
+  const timestampValue =
+    doc.fields != null && doc.fields[timestamp] != null
+      ? doc.fields[timestamp][0]
+      : doc._source != null
+      ? (doc._source as { [key: string]: unknown })[timestamp]
+      : undefined;
+  const lastTimestamp =
+    typeof timestampValue === 'string' || typeof timestampValue === 'number'
+      ? timestampValue
+      : undefined;
+  if (lastTimestamp != null) {
+    const tempMoment = moment(lastTimestamp);
+    if (tempMoment.isValid()) {
+      return tempMoment.toDate();
+    } else {
+      return undefined;
     }
   }
 };
@@ -610,7 +635,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: estypes.SearchResponse;
+  searchResult: SignalSearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -639,6 +664,7 @@ export const createSearchAfterReturnType = ({
   createdSignalsCount,
   createdSignals,
   errors,
+  warningMessages,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -646,8 +672,9 @@ export const createSearchAfterReturnType = ({
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
-  createdSignals?: SignalHit[] | undefined;
+  createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -658,10 +685,12 @@ export const createSearchAfterReturnType = ({
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
+    warningMessages: warningMessages ?? [],
   };
 };
 
 export const createSearchResultReturnType = (): SignalSearchResponse => {
+  const hits: SignalSourceHit[] = [];
   return {
     took: 0,
     timed_out: false,
@@ -675,7 +704,7 @@ export const createSearchResultReturnType = (): SignalSearchResponse => {
     hits: {
       total: 0,
       max_score: 0,
-      hits: [],
+      hits,
     },
   };
 };
@@ -693,7 +722,8 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
-    } = prev;
+      warningMessages: existingWarningMessages,
+    }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
       success: newSuccess,
@@ -704,7 +734,8 @@ export const mergeReturns = (
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
-    } = next;
+      warningMessages: newWarningMessages,
+    }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
       success: existingSuccess && newSuccess,
@@ -715,6 +746,7 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
+      warningMessages: [...existingWarningMessages, ...newWarningMessages],
     };
   });
 };
@@ -856,10 +888,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds SortResults | undefined
+ * @param sortIds estypes.SearchSortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
@@ -868,4 +900,17 @@ export const getSafeSortIds = (sortIds: SortResults | undefined) => {
     }
     return sortId;
   });
+};
+
+export const buildChunkedOrFilter = (field: string, values: string[], chunkSize: number = 1024) => {
+  if (values.length === 0) {
+    return undefined;
+  }
+  const chunkedValues = chunk(values, chunkSize);
+  return chunkedValues
+    .map((subArray) => {
+      const joinedValues = subArray.map((value) => `"${value}"`).join(' OR ');
+      return `${field}: (${joinedValues})`;
+    })
+    .join(' OR ');
 };

@@ -29,6 +29,7 @@ const emptyRichDetector: RichDetector = {
   excludeFrequent: null,
   description: null,
   customRules: null,
+  useNull: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
@@ -51,7 +52,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.overField,
         dtr.partitionField,
         dtr.excludeFrequent,
-        dtr.description
+        dtr.description,
+        dtr.useNull
       );
     } else {
       jobCreator.editDetector(
@@ -62,7 +64,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.partitionField,
         dtr.excludeFrequent,
         dtr.description,
-        index
+        index,
+        dtr.useNull
       );
     }
     jobCreatorUpdate();

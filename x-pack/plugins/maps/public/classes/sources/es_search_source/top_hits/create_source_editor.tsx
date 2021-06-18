@@ -19,7 +19,7 @@ import {
   SortDirection,
 } from '../../../../../../../../src/plugins/data/common';
 import { TopHitsForm } from './top_hits_form';
-import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;

@@ -18,7 +18,7 @@ export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 // Regression supports numeric fields. Classification supports categorical, numeric, and boolean.
 export const shouldAddAsDepVarOption = (
   fieldId: string,
-  fieldType: ES_FIELD_TYPES | estypes.RuntimeField['type'],
+  fieldType: ES_FIELD_TYPES | estypes.MappingRuntimeField['type'],
   jobType: AnalyticsJobType
 ) => {
   if (fieldId === EVENT_RATE_FIELD_ID) return false;

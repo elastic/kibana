@@ -18,7 +18,7 @@ export const getFilter = (filter: string | null | undefined) => {
   }
 };
 
-export const findRules = async ({
+export const findRules = ({
   alertsClient,
   perPage,
   page,

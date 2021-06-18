@@ -12,7 +12,7 @@ import { defaultRequestParameters } from './common';
 
 export const createLogEntryCategoryExamplesQuery = (
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,

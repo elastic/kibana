@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType } from '../../common';
+import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import { usePostComment, UsePostComment } from './use_post_comment';
 import { basicCaseId, basicSubCaseId } from './mock';
 import * as api from './api';
@@ -20,6 +20,7 @@ describe('usePostComment', () => {
   const samplePost = {
     comment: 'a comment',
     type: CommentType.user as const,
+    owner: SECURITY_SOLUTION_OWNER,
   };
   const updateCaseCallback = jest.fn();
   beforeEach(() => {

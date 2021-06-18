@@ -11,8 +11,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   describe('test metadata api when ingest manager is not initialized', () => {
-    before(async () => await esArchiver.load('endpoint/metadata/api_feature'));
-    after(async () => await esArchiver.unload('endpoint/metadata/api_feature'));
+    before(
+      async () =>
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature')
+    );
+    after(
+      async () =>
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/metadata/api_feature')
+    );
     it('metadata api should not return results', async () => {
       await supertest.post('/api/endpoint/metadata').set('kbn-xsrf', 'xxx').send().expect(500);
     });

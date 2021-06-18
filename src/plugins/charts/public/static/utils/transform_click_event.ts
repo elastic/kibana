@@ -152,9 +152,9 @@ const rowFindPredicate = (
 ) => (row: Datatable['rows'][number]): boolean =>
   (geometry === null ||
     (xAccessor !== null &&
-      getAccessorValue(row, xAccessor) === geometry.x &&
+      getAccessorValue(row, xAccessor) === getAccessorValue(geometry.datum, xAccessor) &&
       yAccessor !== null &&
-      getAccessorValue(row, yAccessor) === geometry.y &&
+      getAccessorValue(row, yAccessor) === getAccessorValue(geometry.datum, yAccessor) &&
       (splitChartAccessor === undefined ||
         (splitChartValue !== undefined &&
           getAccessorValue(row, splitChartAccessor) === splitChartValue)))) &&

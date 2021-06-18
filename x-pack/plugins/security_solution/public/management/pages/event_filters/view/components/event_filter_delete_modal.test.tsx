@@ -64,7 +64,6 @@ describe('When event filters delete modal is shown', () => {
     };
 
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    mockedContext.setExperimentalFlag({ eventFilteringEnabled: true });
   });
 
   it('should display name of event filter in body message', async () => {

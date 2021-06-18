@@ -12,7 +12,6 @@ import { Logger } from '../../logging';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
   SavedObjectsExportResultDetails,
@@ -22,7 +21,7 @@ import {
   SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
-import { applyExportTransforms } from './apply_export_transforms';
+import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -77,6 +76,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -99,6 +99,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, comparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -111,37 +112,31 @@ export class SavedObjectsExporter {
       request,
       excludeExportDetails = false,
       includeReferencesDeep = false,
+      includeNamespaces = false,
       namespace,
     }: SavedObjectExportBaseOptions
   ) {
     this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
-    let exportedObjects: Array<SavedObject<unknown>>;
-    let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
-    savedObjects = await applyExportTransforms({
-      request,
+    const {
+      objects: collectedObjects,
+      missingRefs: missingReferences,
+    } = await collectExportedObjects({
       objects: savedObjects,
-      transforms: this.#exportTransforms,
-      sortFunction,
+      includeReferences: includeReferencesDeep,
+      namespace,
+      request,
+      exportTransforms: this.#exportTransforms,
+      savedObjectsClient: this.#savedObjectsClient,
     });
 
-    if (includeReferencesDeep) {
-      this.#log.debug(`Fetching saved objects references.`);
-      const fetchResult = await fetchNestedDependencies(
-        savedObjects,
-        this.#savedObjectsClient,
-        namespace
-      );
-      exportedObjects = sortObjects(fetchResult.objects);
-      missingReferences = fetchResult.missingRefs;
-    } else {
-      exportedObjects = sortObjects(savedObjects);
-    }
+    // sort with the provided sort function then with the default export sorting
+    const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
 
     // redact attributes that should not be exported
-    const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
-      ({ namespaces, ...object }) => object
-    );
+    const redactedObjects = includeNamespaces
+      ? exportedObjects
+      : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
 
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,

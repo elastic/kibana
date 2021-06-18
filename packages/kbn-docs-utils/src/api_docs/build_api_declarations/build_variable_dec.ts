@@ -20,6 +20,7 @@ import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { buildCallSignatureDec } from './build_call_signature_dec';
 
 /**
  * Special handling for objects and arrow functions which are variable or property node types.
@@ -45,8 +46,9 @@ export function buildVariableDec(
   captureReferences: boolean
 ): ApiDeclaration {
   const initializer = node.getInitializer();
-  // Recursively list object properties as children.
+
   if (initializer && Node.isObjectLiteralExpression(initializer)) {
+    // Recursively list object properties as children.
     return {
       ...buildBasicApiDeclaration({
         node,
@@ -86,6 +88,23 @@ export function buildVariableDec(
       log,
       captureReferences
     );
+  }
+
+  if (node.getType().getCallSignatures().length > 0) {
+    if (node.getType().getCallSignatures().length > 1) {
+      log.warning(`Not handling more than one call signature for node ${node.getName()}`);
+    } else {
+      return buildCallSignatureDec({
+        signature: node.getType().getCallSignatures()[0],
+        log,
+        captureReferences,
+        plugins,
+        anchorLink,
+        currentPluginId,
+        name: node.getName(),
+        node,
+      });
+    }
   }
 
   return buildBasicApiDeclaration({

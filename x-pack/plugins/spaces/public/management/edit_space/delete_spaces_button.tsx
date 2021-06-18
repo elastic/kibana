@@ -95,44 +95,13 @@ export class DeleteSpacesButton extends Component<Props, State> {
             showConfirmDeleteModal: false,
           });
         }}
-        onConfirm={this.deleteSpaces}
+        onSuccess={() => {
+          this.setState({
+            showConfirmDeleteModal: false,
+          });
+          this.props.onDelete?.();
+        }}
       />
     );
-  };
-
-  public deleteSpaces = async () => {
-    const { spacesManager, space } = this.props;
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
-
-    try {
-      await spacesManager.deleteSpace(space);
-    } catch (error) {
-      const { message: errorMessage = '' } = error.data || error.body || {};
-
-      this.props.notifications.toasts.addDanger(
-        i18n.translate('xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle', {
-          defaultMessage: 'Error deleting space: {errorMessage}',
-          values: { errorMessage },
-        })
-      );
-      return;
-    }
-
-    const message = i18n.translate(
-      'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
-      {
-        defaultMessage: 'Deleted {spaceName} space.',
-        values: { spaceName: space.name },
-      }
-    );
-
-    this.props.notifications.toasts.addSuccess(message);
-
-    if (this.props.onDelete) {
-      this.props.onDelete();
-    }
   };
 }

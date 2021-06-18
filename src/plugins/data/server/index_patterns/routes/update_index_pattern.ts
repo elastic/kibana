@@ -8,7 +8,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from './util/handle_errors';
-import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
+import {
+  fieldSpecSchema,
+  runtimeFieldSpecSchema,
+  serializedFieldFormatSchema,
+} from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
@@ -28,6 +32,7 @@ const indexPatternUpdateSchema = schema.object({
   fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
   allowNoIndex: schema.maybe(schema.boolean()),
+  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
 export const registerUpdateIndexPatternRoute = (
@@ -78,6 +83,7 @@ export const registerUpdateIndexPatternRoute = (
             type,
             typeMeta,
             fields,
+            runtimeFieldMap,
           },
         } = req.body;
 
@@ -129,6 +135,11 @@ export const registerUpdateIndexPatternRoute = (
               searchable: true,
             }))
           );
+        }
+
+        if (runtimeFieldMap !== undefined) {
+          changeCount++;
+          indexPattern.replaceAllRuntimeFields(runtimeFieldMap);
         }
 
         if (changeCount < 1) {

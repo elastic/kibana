@@ -9,7 +9,7 @@ import path from 'path';
 import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
@@ -19,10 +19,11 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  rejectUnauthorized?: boolean;
+  verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostTls?: boolean;
+  rejectUnauthorized?: boolean; // legacy
 }
 
 // test.not-enabled is specifically not enabled
@@ -49,9 +50,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     license = 'trial',
     disabledPlugins = [],
     ssl = false,
-    rejectUnauthorized = true,
+    verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostTls = false,
+    rejectUnauthorized = true, // legacy
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -101,19 +103,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       {
         url: tlsWebhookServers.rejectUnauthorizedFalse,
         tls: {
-          rejectUnauthorized: false,
+          verificationMode: 'none',
         },
       },
       {
         url: tlsWebhookServers.rejectUnauthorizedTrue,
         tls: {
-          rejectUnauthorized: true,
+          verificationMode: 'full',
         },
       },
       {
         url: tlsWebhookServers.caFile,
         tls: {
-          rejectUnauthorized: true,
+          verificationMode: 'certificate',
           certificateAuthoritiesFiles: [CA_CERT_PATH],
         },
       },
@@ -129,7 +131,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Alerting API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -149,8 +150,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.healthCheck.interval="1s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          `--xpack.actions.tls.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           '--xpack.eventLog.logEntries=true',

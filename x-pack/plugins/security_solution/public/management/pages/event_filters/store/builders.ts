@@ -7,7 +7,7 @@
 
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { EventFiltersListPageState } from '../types';
-import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
+import { createUninitialisedResourceState } from '../../../state';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
@@ -28,8 +28,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     active: false,
     forceRefresh: false,
     data: createUninitialisedResourceState(),
-    /** We started off assuming data exists, until we can confirm otherwise */
-    dataExist: createLoadedResourceState(true),
+    dataExist: createUninitialisedResourceState(),
     deletion: {
       item: undefined,
       status: createUninitialisedResourceState(),

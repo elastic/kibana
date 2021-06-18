@@ -73,7 +73,7 @@ const connector = connect(makeMapStateToProps);
 //    this component is rendered in the context of the active timeline. This
 //    behavior enables the 'All events' view by appending the alerts index
 //    to the index pattern.
-interface OwnProps {
+export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   indexPattern: IIndexPattern;
@@ -172,4 +172,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
 
-export const StatefulTopN = connector(React.memo(StatefulTopNComponent));
+export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
+  React.memo(StatefulTopNComponent)
+);

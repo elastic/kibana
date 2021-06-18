@@ -300,7 +300,26 @@
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 251
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.ids",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 251
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -940,7 +959,42 @@
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 196
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "savedObjectsTaggingOss",
@@ -966,7 +1020,42 @@
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 200
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "savedObjectsTaggingOss",
@@ -992,7 +1081,42 @@
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 206
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1083,7 +1207,26 @@
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 234
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.ids",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 234
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1107,7 +1250,14 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ") => boolean"
+          ") => object is ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.TagDecoratedSavedObject",
+            "text": "TagDecoratedSavedObject"
+          }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1124,7 +1274,14 @@
         "label": "TagDecoratedSavedObject",
         "description": [],
         "signature": [
-          "SavedObject & { getTags(): string[]; setTags(tags: string[]): void; }"
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObject",
+            "text": "SavedObject"
+          },
+          " & { getTags(): string[]; setTags(tags: string[]): void; }"
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",

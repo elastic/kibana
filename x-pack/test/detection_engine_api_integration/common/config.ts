@@ -6,7 +6,7 @@
  */
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -53,7 +53,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Detection Engine API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,

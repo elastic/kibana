@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 async function config({ readConfigFile }: FtrConfigProviderContext) {
@@ -20,10 +20,6 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    esArchiver: {
-      directory: resolve(__dirname, 'cypress/fixtures/es_archiver'),
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),

@@ -17,7 +17,7 @@ export class LiteralType<T> extends Type<T> {
   protected handleError(type: string, { value, valids: [expectedValue] }: Record<string, any>) {
     switch (type) {
       case 'any.required':
-      case 'any.allowOnly':
+      case 'any.only':
         return `expected value to equal [${expectedValue}]`;
     }
   }

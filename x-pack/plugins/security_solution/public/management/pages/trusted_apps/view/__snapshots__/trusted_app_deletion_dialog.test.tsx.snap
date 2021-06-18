@@ -29,6 +29,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -55,9 +56,11 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
               >
                 <p>
                   You are removing trusted application "
-                  <strong>
+                  <b
+                    class="eui-textBreakWord"
+                  >
                     trusted app 3
-                  </strong>
+                  </b>
                   ".
                 </p>
                 <p>
@@ -130,6 +133,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -156,9 +160,11 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
               >
                 <p>
                   You are removing trusted application "
-                  <strong>
+                  <b
+                    class="eui-textBreakWord"
+                  >
                     trusted app 3
-                  </strong>
+                  </b>
                   ".
                 </p>
                 <p>
@@ -236,6 +242,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -262,9 +269,11 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
               >
                 <p>
                   You are removing trusted application "
-                  <strong>
+                  <b
+                    class="eui-textBreakWord"
+                  >
                     trusted app 3
-                  </strong>
+                  </b>
                   ".
                 </p>
                 <p>

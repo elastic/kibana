@@ -10,47 +10,48 @@ import {
   App,
   AppNavLinkStatus,
   AppStatus,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
 } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
-  const navLinkStatus =
-    app.navLinkStatus === AppNavLinkStatus.default
-      ? app.status === AppStatus.inaccessible
-        ? AppNavLinkStatus.hidden
-        : AppNavLinkStatus.visible
-      : app.navLinkStatus!;
-  const { updater$, mount, ...infos } = app;
+  const { updater$, mount, navLinkStatus = AppNavLinkStatus.default, ...infos } = app;
   return {
     ...infos,
     status: app.status!,
-    navLinkStatus,
+    navLinkStatus:
+      navLinkStatus === AppNavLinkStatus.default
+        ? app.status === AppStatus.inaccessible
+          ? AppNavLinkStatus.hidden
+          : AppNavLinkStatus.visible
+        : navLinkStatus,
+    searchable:
+      app.searchable ??
+      (navLinkStatus === AppNavLinkStatus.default || navLinkStatus === AppNavLinkStatus.visible),
     appRoute: app.appRoute!,
-    meta: {
-      keywords: app.meta?.keywords ?? [],
-      searchDeepLinks: getSearchDeepLinkInfos(app, app.meta?.searchDeepLinks),
-    },
+    keywords: app.keywords ?? [],
+    deepLinks: getDeepLinkInfos(app.deepLinks),
   };
 }
 
-function getSearchDeepLinkInfos(
-  app: App,
-  searchDeepLinks?: AppSearchDeepLink[]
-): PublicAppSearchDeepLinkInfo[] {
-  if (!searchDeepLinks) {
-    return [];
-  }
+function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
+  if (!deepLinks) return [];
 
-  return searchDeepLinks.map(
-    (rawDeepLink): PublicAppSearchDeepLinkInfo => {
+  return deepLinks.map(
+    ({ navLinkStatus = AppNavLinkStatus.default, ...rawDeepLink }): PublicAppDeepLinkInfo => {
       return {
         id: rawDeepLink.id,
         title: rawDeepLink.title,
         path: rawDeepLink.path,
         keywords: rawDeepLink.keywords ?? [],
-        searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+        navLinkStatus:
+          navLinkStatus === AppNavLinkStatus.default ? AppNavLinkStatus.hidden : navLinkStatus,
+        searchable:
+          rawDeepLink.searchable ??
+          (navLinkStatus === AppNavLinkStatus.default ||
+            navLinkStatus === AppNavLinkStatus.visible),
+        deepLinks: getDeepLinkInfos(rawDeepLink.deepLinks),
       };
     }
   );

@@ -31,6 +31,7 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 
 import { checkAccess } from './lib/check_access';
+import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
@@ -80,6 +81,11 @@ export class EnterpriseSearchPlugin implements Plugin {
   ) {
     const config = this.config;
     const log = this.logger;
+
+    /*
+     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
+     */
+    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control

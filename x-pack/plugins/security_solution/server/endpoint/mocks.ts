@@ -10,7 +10,7 @@ import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../..
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
-import { xpackMocks } from '../../../../mocks';
+import { xpackMocks } from '../fixtures';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
@@ -87,6 +87,9 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
+    cases: {
+      getCasesClientWithRequest: jest.fn(),
+    },
   };
 };
 

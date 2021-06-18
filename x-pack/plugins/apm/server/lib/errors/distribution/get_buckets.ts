@@ -16,7 +16,6 @@ import {
   rangeQuery,
   kqlQuery,
 } from '../../../../server/utils/queries';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
@@ -34,58 +33,59 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_error_distribution_buckets', async () => {
-    const { start, end, apmEventClient } = setup;
-    const filter: ESFilter[] = [
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...rangeQuery(start, end),
-      ...environmentQuery(environment),
-      ...kqlQuery(kuery),
-    ];
+  const { start, end, apmEventClient } = setup;
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
+  ];
 
-    if (groupId) {
-      filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
-    }
+  if (groupId) {
+    filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
+  }
 
-    const params = {
-      apm: {
-        events: [ProcessorEvent.error],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter,
-          },
+  const params = {
+    apm: {
+      events: [ProcessorEvent.error],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter,
         },
-        aggs: {
-          distribution: {
-            histogram: {
-              field: '@timestamp',
-              min_doc_count: 0,
-              interval: bucketSize,
-              extended_bounds: {
-                min: start,
-                max: end,
-              },
+      },
+      aggs: {
+        distribution: {
+          histogram: {
+            field: '@timestamp',
+            min_doc_count: 0,
+            interval: bucketSize,
+            extended_bounds: {
+              min: start,
+              max: end,
             },
           },
         },
       },
-    };
+    },
+  };
 
-    const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_error_distribution_buckets',
+    params
+  );
 
-    const buckets = (resp.aggregations?.distribution.buckets || []).map(
-      (bucket) => ({
-        key: bucket.key,
-        count: bucket.doc_count,
-      })
-    );
+  const buckets = (resp.aggregations?.distribution.buckets || []).map(
+    (bucket) => ({
+      key: bucket.key,
+      count: bucket.doc_count,
+    })
+  );
 
-    return {
-      noHits: resp.hits.total.value === 0,
-      buckets: resp.hits.total.value > 0 ? buckets : [],
-    };
-  });
+  return {
+    noHits: resp.hits.total.value === 0,
+    buckets: resp.hits.total.value > 0 ? buckets : [],
+  };
 }

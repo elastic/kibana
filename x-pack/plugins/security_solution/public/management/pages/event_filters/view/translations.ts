@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ServerApiError } from '../../../../common/types';
 
 export const getCreationSuccessMessage = (
   entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
 ) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.creationSuccessToastTitle', {
-    defaultMessage: '"{name}" has been added to the event exceptions list.',
+    defaultMessage: '"{name}" has been added to the event filters list.',
     values: { name: entry?.name },
   });
 };
@@ -33,21 +33,21 @@ export const getUpdateSuccessMessage = (
 
 export const getCreationErrorMessage = (creationError: ServerApiError) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.create', {
-    defaultMessage: 'There was an error creating the new exception: "{error}"',
+    defaultMessage: 'There was an error creating the new event filter: "{error}"',
     values: { error: creationError.message },
   });
 };
 
 export const getUpdateErrorMessage = (updateError: ServerApiError) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.update', {
-    defaultMessage: 'There was an error updating the exception: "{error}"',
+    defaultMessage: 'There was an error updating the event filter: "{error}"',
     values: { error: updateError.message },
   });
 };
 
 export const getGetErrorMessage = (getError: ServerApiError) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.get', {
-    defaultMessage: 'Unable to edit trusted application: "{error}"',
+    defaultMessage: 'Unable to edit event filter: "{error}"',
     values: { error: getError.message },
   });
 };

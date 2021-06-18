@@ -52,6 +52,7 @@ Array [
         "onSelectionChange": [Function],
       }
     }
+    tableCaption="Reports generated in Kibana applications"
     tableLayout="fixed"
   >
     <div
@@ -219,18 +220,34 @@ Array [
                         }
                       }
                     >
-                      <div
+                      <CellContents
                         className="euiTableCellContent"
+                        showSortMsg={false}
                       >
-                        <EuiInnerText>
-                          <span
-                            className="euiTableCellContent__text"
-                            title="Report"
-                          >
-                            Report
-                          </span>
-                        </EuiInnerText>
-                      </div>
+                        <span
+                          className="euiTableCellContent"
+                        >
+                          <EuiInnerText>
+                            <EuiI18n
+                              default="{innerText}; {description}"
+                              token="euiTableHeaderCell.titleTextWithDesc"
+                              values={
+                                Object {
+                                  "description": undefined,
+                                  "innerText": "Report",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Report"
+                              >
+                                Report
+                              </span>
+                            </EuiI18n>
+                          </EuiInnerText>
+                        </span>
+                      </CellContents>
                     </th>
                   </EuiTableHeaderCell>
                   <EuiTableHeaderCell
@@ -249,18 +266,34 @@ Array [
                         }
                       }
                     >
-                      <div
+                      <CellContents
                         className="euiTableCellContent"
+                        showSortMsg={false}
                       >
-                        <EuiInnerText>
-                          <span
-                            className="euiTableCellContent__text"
-                            title="Created at"
-                          >
-                            Created at
-                          </span>
-                        </EuiInnerText>
-                      </div>
+                        <span
+                          className="euiTableCellContent"
+                        >
+                          <EuiInnerText>
+                            <EuiI18n
+                              default="{innerText}; {description}"
+                              token="euiTableHeaderCell.titleTextWithDesc"
+                              values={
+                                Object {
+                                  "description": undefined,
+                                  "innerText": "Created at",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Created at"
+                              >
+                                Created at
+                              </span>
+                            </EuiI18n>
+                          </EuiInnerText>
+                        </span>
+                      </CellContents>
                     </th>
                   </EuiTableHeaderCell>
                   <EuiTableHeaderCell
@@ -279,18 +312,34 @@ Array [
                         }
                       }
                     >
-                      <div
+                      <CellContents
                         className="euiTableCellContent"
+                        showSortMsg={false}
                       >
-                        <EuiInnerText>
-                          <span
-                            className="euiTableCellContent__text"
-                            title="Status"
-                          >
-                            Status
-                          </span>
-                        </EuiInnerText>
-                      </div>
+                        <span
+                          className="euiTableCellContent"
+                        >
+                          <EuiInnerText>
+                            <EuiI18n
+                              default="{innerText}; {description}"
+                              token="euiTableHeaderCell.titleTextWithDesc"
+                              values={
+                                Object {
+                                  "description": undefined,
+                                  "innerText": "Status",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Status"
+                              >
+                                Status
+                              </span>
+                            </EuiI18n>
+                          </EuiInnerText>
+                        </span>
+                      </CellContents>
                     </th>
                   </EuiTableHeaderCell>
                   <EuiTableHeaderCell
@@ -307,18 +356,34 @@ Array [
                         }
                       }
                     >
-                      <div
+                      <CellContents
                         className="euiTableCellContent euiTableCellContent--alignRight"
+                        showSortMsg={false}
                       >
-                        <EuiInnerText>
-                          <span
-                            className="euiTableCellContent__text"
-                            title="Actions"
-                          >
-                            Actions
-                          </span>
-                        </EuiInnerText>
-                      </div>
+                        <span
+                          className="euiTableCellContent euiTableCellContent--alignRight"
+                        >
+                          <EuiInnerText>
+                            <EuiI18n
+                              default="{innerText}; {description}"
+                              token="euiTableHeaderCell.titleTextWithDesc"
+                              values={
+                                Object {
+                                  "description": undefined,
+                                  "innerText": "Actions",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Actions"
+                              >
+                                Actions
+                              </span>
+                            </EuiI18n>
+                          </EuiInnerText>
+                        </span>
+                      </CellContents>
                     </th>
                   </EuiTableHeaderCell>
                 </tr>
@@ -529,18 +594,34 @@ Array [
                       }
                     }
                   >
-                    <div
+                    <CellContents
                       className="euiTableCellContent"
+                      showSortMsg={false}
                     >
-                      <EuiInnerText>
-                        <span
-                          className="euiTableCellContent__text"
-                          title="Report"
-                        >
-                          Report
-                        </span>
-                      </EuiInnerText>
-                    </div>
+                      <span
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <EuiI18n
+                            default="{innerText}; {description}"
+                            token="euiTableHeaderCell.titleTextWithDesc"
+                            values={
+                              Object {
+                                "description": undefined,
+                                "innerText": "Report",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                              title="Report"
+                            >
+                              Report
+                            </span>
+                          </EuiI18n>
+                        </EuiInnerText>
+                      </span>
+                    </CellContents>
                   </th>
                 </EuiTableHeaderCell>
                 <EuiTableHeaderCell
@@ -559,18 +640,34 @@ Array [
                       }
                     }
                   >
-                    <div
+                    <CellContents
                       className="euiTableCellContent"
+                      showSortMsg={false}
                     >
-                      <EuiInnerText>
-                        <span
-                          className="euiTableCellContent__text"
-                          title="Created at"
-                        >
-                          Created at
-                        </span>
-                      </EuiInnerText>
-                    </div>
+                      <span
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <EuiI18n
+                            default="{innerText}; {description}"
+                            token="euiTableHeaderCell.titleTextWithDesc"
+                            values={
+                              Object {
+                                "description": undefined,
+                                "innerText": "Created at",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                              title="Created at"
+                            >
+                              Created at
+                            </span>
+                          </EuiI18n>
+                        </EuiInnerText>
+                      </span>
+                    </CellContents>
                   </th>
                 </EuiTableHeaderCell>
                 <EuiTableHeaderCell
@@ -589,18 +686,34 @@ Array [
                       }
                     }
                   >
-                    <div
+                    <CellContents
                       className="euiTableCellContent"
+                      showSortMsg={false}
                     >
-                      <EuiInnerText>
-                        <span
-                          className="euiTableCellContent__text"
-                          title="Status"
-                        >
-                          Status
-                        </span>
-                      </EuiInnerText>
-                    </div>
+                      <span
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <EuiI18n
+                            default="{innerText}; {description}"
+                            token="euiTableHeaderCell.titleTextWithDesc"
+                            values={
+                              Object {
+                                "description": undefined,
+                                "innerText": "Status",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                              title="Status"
+                            >
+                              Status
+                            </span>
+                          </EuiI18n>
+                        </EuiInnerText>
+                      </span>
+                    </CellContents>
                   </th>
                 </EuiTableHeaderCell>
                 <EuiTableHeaderCell
@@ -617,18 +730,34 @@ Array [
                       }
                     }
                   >
-                    <div
+                    <CellContents
                       className="euiTableCellContent euiTableCellContent--alignRight"
+                      showSortMsg={false}
                     >
-                      <EuiInnerText>
-                        <span
-                          className="euiTableCellContent__text"
-                          title="Actions"
-                        >
-                          Actions
-                        </span>
-                      </EuiInnerText>
-                    </div>
+                      <span
+                        className="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <EuiInnerText>
+                          <EuiI18n
+                            default="{innerText}; {description}"
+                            token="euiTableHeaderCell.titleTextWithDesc"
+                            values={
+                              Object {
+                                "description": undefined,
+                                "innerText": "Actions",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                              title="Actions"
+                            >
+                              Actions
+                            </span>
+                          </EuiI18n>
+                        </EuiInnerText>
+                      </span>
+                    </CellContents>
                   </th>
                 </EuiTableHeaderCell>
               </tr>

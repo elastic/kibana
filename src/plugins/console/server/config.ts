@@ -15,8 +15,6 @@ export const config = schema.object(
     enabled: schema.boolean({ defaultValue: true }),
     proxyFilter: schema.arrayOf(schema.string(), { defaultValue: ['.*'] }),
     ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
-
-    // This does not actually work, track this issue: https://github.com/elastic/kibana/issues/55576
     proxyConfig: schema.arrayOf(
       schema.object({
         match: schema.object({

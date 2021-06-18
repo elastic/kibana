@@ -5,14 +5,40 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const HostIsolationRequestSchema = {
   body: schema.object({
-    agent_ids: schema.nullable(schema.arrayOf(schema.string())),
-    endpoint_ids: schema.nullable(schema.arrayOf(schema.string())),
-    alert_ids: schema.nullable(schema.arrayOf(schema.string())),
-    case_ids: schema.nullable(schema.arrayOf(schema.string())),
-    comment: schema.nullable(schema.string()),
+    /** A list of Fleet Agent IDs whose hosts will be isolated */
+    agent_ids: schema.maybe(schema.arrayOf(schema.string())),
+    /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
+    endpoint_ids: schema.maybe(schema.arrayOf(schema.string())),
+    /** If defined, any case associated with the given IDs will be updated */
+    alert_ids: schema.maybe(schema.arrayOf(schema.string())),
+    /** Case IDs to be updated */
+    case_ids: schema.maybe(schema.arrayOf(schema.string())),
+    comment: schema.maybe(schema.string()),
+  }),
+};
+
+export const EndpointActionLogRequestSchema = {
+  query: schema.object({
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+  }),
+  params: schema.object({
+    agent_id: schema.string(),
+  }),
+};
+
+export type EndpointActionLogRequestParams = TypeOf<typeof EndpointActionLogRequestSchema.params>;
+export type EndpointActionLogRequestQuery = TypeOf<typeof EndpointActionLogRequestSchema.query>;
+
+export const ActionStatusRequestSchema = {
+  query: schema.object({
+    agent_ids: schema.oneOf([
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+      schema.string({ minLength: 1 }),
+    ]),
   }),
 };

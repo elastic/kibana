@@ -46,9 +46,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
-      await esArchiver.load('empty_kibana', { skipExisting: true });
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana', {
+        skipExisting: true,
+      });
       log.debug('Load shakespeare data');
-      await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
 
       if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({

@@ -183,10 +183,10 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  function getGroups(jobs: Array<{ groups: string[] }>) {
+  function getGroups(jobs: Array<{ groups?: string[] }>) {
     const groupIds: string[] = [];
     jobs.forEach((job) => {
-      const groups = job.groups;
+      const groups = job.groups || [];
       groups.forEach((group) => {
         if (groupIds.indexOf(group) === -1) {
           groupIds.push(group);
@@ -198,7 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('jobs_summary', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

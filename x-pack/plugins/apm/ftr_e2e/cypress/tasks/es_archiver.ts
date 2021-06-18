@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import Path from 'path';
+
+const ES_ARCHIVE_DIR = './cypress/fixtures/es_archiver';
+
 export const esArchiverLoad = (folder: string) => {
+  const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../../scripts/es_archiver load ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js`
+    `node ../../../../scripts/es_archiver load "${path}" --config ../../../test/functional/config.js`
   );
 };
 
 export const esArchiverUnload = (folder: string) => {
+  const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../../scripts/es_archiver unload ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js`
+    `node ../../../../scripts/es_archiver unload "${path}" --config ../../../test/functional/config.js`
   );
 };
 

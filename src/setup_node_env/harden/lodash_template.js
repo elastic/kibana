@@ -10,6 +10,8 @@ var hook = require('require-in-the-middle');
 var isIterateeCall = require('lodash/_isIterateeCall');
 
 hook(['lodash'], function (lodash) {
+  // we use lodash.template here to harden third-party usage of this otherwise banned function.
+  // eslint-disable-next-line no-restricted-properties
   lodash.template = createProxy(lodash.template);
   return lodash;
 });
@@ -52,6 +54,9 @@ function createFpProxy(template) {
       // > Iteratee arguments are capped to avoid gotchas with variadic iteratees.
       // this means that we can't specify the options in the second argument to fp.template because it's ignored.
       // Instead, we're going to use the non-FP _.template with only the first argument which has already been patched
+
+      // we use lodash.template here to harden third-party usage of this otherwise banned function.
+      // eslint-disable-next-line no-restricted-properties
       return _.template(args[0]);
     },
   });

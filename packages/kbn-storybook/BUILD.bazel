@@ -7,6 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/storybook"
 SOURCE_FILES = glob(
   [
     "lib/**/*.ts",
+    "lib/**/*.tsx",
     "*.ts",
   ],
   exclude = ["**/*.test.*"],
@@ -20,9 +21,11 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
+  "preset/package.json",
+  "templates/index.ejs",
   "package.json",
   "README.md",
-  "preset.js"
+  "preset.js",
 ]
 
 SRC_DEPS = [
@@ -54,6 +57,7 @@ ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
+    "//:tsconfig.json",
     "//:tsconfig.base.json",
   ],
 )
@@ -68,7 +72,6 @@ ts_project(
   incremental = True,
   out_dir = "target",
   source_map = True,
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

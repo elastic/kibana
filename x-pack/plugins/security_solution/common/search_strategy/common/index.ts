@@ -70,7 +70,7 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export type DocValueFields = estypes.DocValueField;
+export type DocValueFields = estypes.SearchDocValueField;
 
 export interface Explanation {
   value: number;

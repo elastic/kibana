@@ -7,16 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  first,
-  mergeMap,
-  take,
-  takeUntil,
-  tap,
-  toArray,
-} from 'rxjs/operators';
+import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -66,7 +57,9 @@ export function screenshotsObservableFactory(
 
     return create$.pipe(
       mergeMap(({ driver, exit$ }) => {
-        if (apmCreatePage) apmCreatePage.end();
+        apmCreatePage?.end();
+        exit$.subscribe({ error: () => apmTrans?.end() });
+
         return Rx.from(urls).pipe(
           concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
@@ -151,10 +144,7 @@ export function screenshotsObservableFactory(
           toArray()
         );
       }),
-      first(),
-      tap(() => {
-        if (apmTrans) apmTrans.end();
-      })
+      first()
     );
   };
 }

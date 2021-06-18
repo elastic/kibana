@@ -8,7 +8,8 @@
 import React from 'react';
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 
-import { PAGE_ROUTING_PATHS } from '../../constants';
+import { FLEET_ROUTING_PATHS } from '../../constants';
+import { DefaultLayout } from '../../layouts';
 
 import { DataStreamListPage } from './list_page';
 
@@ -16,8 +17,10 @@ export const DataStreamApp: React.FunctionComponent = () => {
   return (
     <Router>
       <Switch>
-        <Route path={PAGE_ROUTING_PATHS.data_streams}>
-          <DataStreamListPage />
+        <Route path={FLEET_ROUTING_PATHS.data_streams}>
+          <DefaultLayout section="data_streams">
+            <DataStreamListPage />
+          </DefaultLayout>
         </Route>
       </Switch>
     </Router>

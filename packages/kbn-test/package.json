@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "./target/index.js",
-  "types": "./target/types/index.d.ts",
+  "main": "./target",
+  "types": "./target/types",
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --source-maps",
@@ -14,7 +14,6 @@
     "devOnly": true
   },
   "dependencies": {
-    "@kbn/i18n": "link:../kbn-i18n",
     "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

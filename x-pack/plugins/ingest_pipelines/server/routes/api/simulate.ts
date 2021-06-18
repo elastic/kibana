@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SimulatePipelineDocument } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -19,7 +19,6 @@ const bodySchema = schema.object({
 
 export const registerSimulateRoute = ({
   router,
-  license,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.post(
@@ -29,7 +28,7 @@ export const registerSimulateRoute = ({
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
@@ -39,7 +38,7 @@ export const registerSimulateRoute = ({
           verbose,
           body: {
             pipeline,
-            docs: documents as SimulatePipelineDocument[],
+            docs: documents as estypes.IngestSimulatePipelineDocument[],
           },
         });
 
@@ -47,6 +46,6 @@ export const registerSimulateRoute = ({
       } catch (error) {
         return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

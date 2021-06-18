@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/securitysolution-io-ts-utils';
+import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { HttpStart } from '../../../../../src/core/public';
 

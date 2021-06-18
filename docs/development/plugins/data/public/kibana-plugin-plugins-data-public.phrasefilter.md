@@ -12,7 +12,7 @@ export declare type PhraseFilter = Filter & {
     script?: {
         script: {
             source?: any;
-            lang?: string;
+            lang?: estypes.ScriptLanguage;
             params: any;
         };
     };

@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET data_frame/analytics with spaces', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 

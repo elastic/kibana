@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';
 import { pageObjects } from '../functional/page_objects';
 
@@ -76,7 +76,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
     },
     apps: kibanaFunctionalConfig.get('apps'),
-    esArchiver: { directory: resolve(__dirname, 'es_archives') },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

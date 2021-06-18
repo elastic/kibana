@@ -6,9 +6,9 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isNotFoundError } from '../../../../common/utils/api';
-import { useAsync, withOptionalSignal } from '../../../../shared_imports';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';

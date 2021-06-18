@@ -6,7 +6,10 @@
  */
 
 export { Actions } from './actions';
-export { AuthorizationService, AuthorizationServiceSetup } from './authorization_service';
+export {
+  AuthorizationService,
+  AuthorizationServiceSetup,
+  AuthorizationServiceSetupInternal,
+} from './authorization_service';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { featurePrivilegeIterator } from './privileges';
 export { CheckPrivilegesPayload } from './types';

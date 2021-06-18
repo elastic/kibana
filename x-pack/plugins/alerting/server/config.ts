@@ -16,6 +16,7 @@ export const configSchema = schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
     removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
   }),
+  enableImportExport: schema.boolean({ defaultValue: false }),
 });
 
 export type AlertsConfig = TypeOf<typeof configSchema>;

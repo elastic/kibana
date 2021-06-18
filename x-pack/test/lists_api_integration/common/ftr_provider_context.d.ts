@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { GenericFtrProviderContext } from '@kbn/test';
 
 import { services } from './services';
 

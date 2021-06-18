@@ -7,7 +7,6 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
@@ -19,7 +18,6 @@ import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
-  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
@@ -27,7 +25,6 @@ interface Props {
 }
 
 export function TransactionTabs({
-  location,
   transaction,
   urlParams,
   waterfall,
@@ -47,9 +44,9 @@ export function TransactionTabs({
             <EuiTab
               onClick={() => {
                 history.replace({
-                  ...location,
+                  ...history.location,
                   search: fromQuery({
-                    ...toQuery(location.search),
+                    ...toQuery(history.location.search),
                     detailTab: key,
                   }),
                 });
@@ -66,7 +63,6 @@ export function TransactionTabs({
       <EuiSpacer />
 
       <TabContent
-        location={location}
         urlParams={urlParams}
         waterfall={waterfall}
         exceedsMax={exceedsMax}
@@ -101,19 +97,16 @@ const logsTab = {
 };
 
 function TimelineTabContent({
-  location,
   urlParams,
   waterfall,
   exceedsMax,
 }: {
-  location: Location<any>;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }) {
   return (
     <WaterfallContainer
-      location={location}
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={exceedsMax}

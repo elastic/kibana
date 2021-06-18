@@ -280,7 +280,7 @@ describe('ShareToSpaceFlyout', () => {
   it('handles errors thrown from shareSavedObjectsAdd API call', async () => {
     const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
-    mockSpacesManager.shareSavedObjectAdd.mockRejectedValue(
+    mockSpacesManager.updateSavedObjectsSpaces.mockRejectedValue(
       Boom.serverUnavailable('Something bad happened')
     );
 
@@ -303,39 +303,7 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(mockSpacesManager.shareSavedObjectAdd).toHaveBeenCalled();
-    expect(mockSpacesManager.shareSavedObjectRemove).not.toHaveBeenCalled();
-    expect(mockToastNotifications.addError).toHaveBeenCalled();
-  });
-
-  it('handles errors thrown from shareSavedObjectsRemove API call', async () => {
-    const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
-
-    mockSpacesManager.shareSavedObjectRemove.mockRejectedValue(
-      Boom.serverUnavailable('Something bad happened')
-    );
-
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
-
-    // Using props callback instead of simulating clicks,
-    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
-    const spaceSelector = wrapper.find(SelectableSpacesControl);
-    act(() => {
-      spaceSelector.props().onChange(['space-2', 'space-3']);
-    });
-
-    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
-
-    await act(async () => {
-      startButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(mockSpacesManager.shareSavedObjectAdd).toHaveBeenCalled();
-    expect(mockSpacesManager.shareSavedObjectRemove).toHaveBeenCalled();
+    expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
   });
 
@@ -369,9 +337,11 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     const { type, id } = savedObjectToShare;
-    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
-    expect(shareSavedObjectAdd).toHaveBeenCalledWith({ type, id }, ['space-2', 'space-3']);
-    expect(shareSavedObjectRemove).not.toHaveBeenCalled();
+    expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
+      [{ type, id }],
+      ['space-2', 'space-3'],
+      []
+    );
 
     expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
@@ -408,9 +378,11 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     const { type, id } = savedObjectToShare;
-    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
-    expect(shareSavedObjectAdd).not.toHaveBeenCalled();
-    expect(shareSavedObjectRemove).toHaveBeenCalledWith({ type, id }, ['space-1']);
+    expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
+      [{ type, id }],
+      [],
+      ['space-1']
+    );
 
     expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
@@ -447,11 +419,13 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     const { type, id } = savedObjectToShare;
-    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
-    expect(shareSavedObjectAdd).toHaveBeenCalledWith({ type, id }, ['space-2', 'space-3']);
-    expect(shareSavedObjectRemove).toHaveBeenCalledWith({ type, id }, ['space-1']);
+    expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
+      [{ type, id }],
+      ['space-2', 'space-3'],
+      ['space-1']
+    );
 
-    expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(2);
+    expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledTimes(1);
   });

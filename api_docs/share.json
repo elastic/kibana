@@ -124,7 +124,7 @@
         ],
         "source": {
           "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-          "lineNumber": 25
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -140,7 +140,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 30
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [],
@@ -167,7 +167,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 32
+              "lineNumber": 42
             },
             "deprecated": false,
             "children": [
@@ -190,7 +190,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 32
+                  "lineNumber": 42
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -219,7 +219,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 45
+              "lineNumber": 55
             },
             "deprecated": false,
             "children": [
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 45
+                  "lineNumber": 55
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -261,7 +261,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 52
+              "lineNumber": 62
             },
             "deprecated": false,
             "children": [],
@@ -509,7 +509,9 @@
               "path": "src/plugins/share/public/types.ts",
               "lineNumber": 38
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "share",
@@ -549,7 +551,7 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "source": {
           "path": "src/plugins/share/public/types.ts",
@@ -699,7 +701,32 @@
               "path": "src/plugins/share/public/types.ts",
               "lineNumber": 74
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.context",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.ShareContext",
+                    "text": "ShareContext"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/share/public/types.ts",
+                  "lineNumber": 74
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1243,7 +1270,7 @@
         "label": "DownloadableContent",
         "description": [],
         "signature": [
-          "{ content: string; type: string; } | Blob"
+          "Blob | { content: string; type: string; }"
         ],
         "source": {
           "path": "src/plugins/share/public/lib/download_as.ts",
@@ -1287,11 +1314,15 @@
           "section": "def-public.ShareMenuProvider",
           "text": "ShareMenuProvider"
         },
-        ") => void; } & { urlGenerators: UrlGeneratorsSetup; }"
+        ") => void; } & { urlGenerators: ",
+        "UrlGeneratorsSetup",
+        "; url: ",
+        "UrlService",
+        "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 32
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -1313,11 +1344,15 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ") => void; } & { urlGenerators: UrlGeneratorsStart; }"
+        ") => void; } & { urlGenerators: ",
+        "UrlGeneratorsStart",
+        "; url: ",
+        "UrlService",
+        "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 61
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "start",

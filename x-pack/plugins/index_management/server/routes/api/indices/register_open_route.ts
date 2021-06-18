@@ -14,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
+export function registerOpenRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
@@ -40,6 +40,6 @@ export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

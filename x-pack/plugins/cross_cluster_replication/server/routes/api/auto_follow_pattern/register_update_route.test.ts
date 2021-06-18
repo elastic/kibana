@@ -8,9 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError, License } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense } from '../test_lib';
 import { registerUpdateRoute } from './register_update_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -23,12 +22,9 @@ describe('[CCR API] Update auto-follow pattern', () => {
 
     registerUpdateRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -37,8 +33,10 @@ describe('[CCR API] Update auto-follow pattern', () => {
 
   it('should serialize the payload before sending it to Elasticsearch', async () => {
     const routeContextMock = mockRouteContext({
-      // Just echo back what we send so we can inspect it.
-      callAsCurrentUser: jest.fn().mockImplementation((endpoint, payload) => payload),
+      ccr: {
+        // Just echo back what we send so we can inspect it.
+        putAutoFollowPattern: jest.fn().mockImplementation((payload) => ({ body: payload })),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -53,7 +51,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
     const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
 
     expect(response.payload).toEqual({
-      id: 'foo',
+      name: 'foo',
       body: {
         remote_cluster: 'bar1',
         leader_index_patterns: ['bar2'],

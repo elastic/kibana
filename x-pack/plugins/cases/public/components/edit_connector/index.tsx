@@ -202,6 +202,7 @@ export const EditConnector = React.memo(
         payload: true,
       });
     }, [dispatch]);
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
