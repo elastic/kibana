@@ -6,11 +6,29 @@
  */
 
 export {
-  SimpleFieldsContext,
-  SimpleFieldsContextProvider,
-  initialValues as defaultSimpleFields,
-  useSimpleFieldsContext,
-} from './simple_fields_context';
+  MonitorTypeContext,
+  MonitorTypeContextProvider,
+  initialValue as defaultMonitorType,
+  useMonitorTypeContext,
+} from './monitor_type_context';
+export {
+  HTTPSimpleFieldsContext,
+  HTTPSimpleFieldsContextProvider,
+  initialValues as defaultHTTPSimpleFields,
+  useHTTPSimpleFieldsContext,
+} from './http_context';
+export {
+  TCPSimpleFieldsContext,
+  TCPSimpleFieldsContextProvider,
+  initialValues as defaultTCPSimpleFields,
+  useTCPSimpleFieldsContext,
+} from './tcp_context';
+export {
+  ICMPSimpleFieldsContext,
+  ICMPSimpleFieldsContextProvider,
+  initialValues as defaultICMPSimpleFields,
+  useICMPSimpleFieldsContext,
+} from './icmp_context';
 export {
   TCPAdvancedFieldsContext,
   TCPAdvancedFieldsContextProvider,
@@ -29,3 +47,5 @@ export {
   initialValues as defaultTLSFields,
   useTLSFieldsContext,
 } from './tls_fields_context';
+export { HTTPContextProvider } from './http_provider';
+export { TCPContextProvider } from './tcp_provider';

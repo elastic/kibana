@@ -132,7 +132,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       <EuiLink
         className="eui-textTruncate"
         href={getUrlForApp(PLUGIN_ID, {
-          path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
+          path: `#` + pagePathGetters.agent_details({ agentId }),
         })}
         target="_blank"
       >

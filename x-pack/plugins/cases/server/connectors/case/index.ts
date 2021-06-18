@@ -13,7 +13,8 @@ import {
   CasePostRequest,
   CommentRequest,
   CommentType,
-} from '../../../common/api';
+  ENABLE_CASE_CONNECTOR,
+} from '../../../common';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
@@ -24,8 +25,7 @@ import {
 import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
-import { createCaseError } from '../../common/error';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { createCaseError } from '../../common';
 import { CasesClient } from '../../client';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
