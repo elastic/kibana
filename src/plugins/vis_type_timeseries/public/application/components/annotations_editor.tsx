@@ -12,7 +12,7 @@ import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AnnotationRow } from './annotation_row';
-import { collectionActions } from './lib/collection_actions';
+import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
@@ -20,7 +20,6 @@ import type { VisFields } from '../lib/fetch_fields';
 interface AnnotationsEditorProps {
   fields: VisFields;
   model: Panel;
-  name: keyof Panel;
   onChange: (partialModel: Partial<Panel>) => void;
 }
 
@@ -51,20 +50,33 @@ const NoContent = ({ handleAdd }: { handleAdd: () => void }) => (
   </EuiText>
 );
 
+const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
+  ({
+    name: 'annotations',
+    ...props,
+  } as CollectionActionsProps<Panel>);
+
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
 
-  const handleAdd = useCallback(() => collectionActions.handleAdd(props, newAnnotation), [props]);
+  const handleAdd = useCallback(
+    () => collectionActions.handleAdd(getCollectionActionsProps(props), newAnnotation),
+    [props]
+  );
 
   const handleDelete = useCallback(
-    (annotation) => () => collectionActions.handleDelete(props, annotation),
+    (annotation) => () =>
+      collectionActions.handleDelete(getCollectionActionsProps(props), annotation),
     [props]
   );
 
   const onChange = useCallback(
     (annotation: Annotation) => {
       return (part: Partial<Annotation>) =>
-        collectionActions.handleChange(props, { ...annotation, ...part });
+        collectionActions.handleChange(getCollectionActionsProps(props), {
+          ...annotation,
+          ...part,
+        });
     },
     [props]
   );

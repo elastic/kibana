@@ -161,7 +161,6 @@ export class TimeseriesPanelConfig extends Component<
         <AnnotationsEditor
           fields={this.props.fields}
           model={this.props.model}
-          name="annotations"
           onChange={this.props.onChange}
         />
       );
