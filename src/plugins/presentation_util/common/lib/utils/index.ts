@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './utils';
-export * from './test_helpers';
+export * from './dataurl';
+export * from './elastic_logo';
+export * from './elastic_outline';
+export * from './httpurl';
+export * from './missing_asset';
+export * from './resolve_dataurl';
+export * from './url';

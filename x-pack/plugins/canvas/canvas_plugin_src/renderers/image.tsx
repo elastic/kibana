@@ -7,7 +7,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { elasticLogo, isValidUrl } from '../../../../../src/plugins/presentation_util/common';
+import { elasticLogo, isValidUrl } from '../../../../../src/plugins/presentation_util/common/lib';
 import { Return as Arguments } from '../functions/common/image';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';

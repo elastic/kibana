@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { testTable } from './__fixtures__/test_tables';
 import { filterrows } from './filterrows';
 

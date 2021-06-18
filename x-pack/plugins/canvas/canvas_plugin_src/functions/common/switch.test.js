@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { switchFn } from './switch';
 
 describe('switch', () => {

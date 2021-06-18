@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { date } from './date';
 

@@ -6,7 +6,7 @@
  */
 
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
-import { functionWrapper } from '../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../src/plugins/presentation_util/public';
 import {
   fontStyle,
   grayscalePalette,

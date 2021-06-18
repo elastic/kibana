@@ -10,7 +10,7 @@ import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 import {
   elasticLogo,
   resolveWithMissingImage,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 
 export enum ImageMode {
   CONTAIN = 'contain',

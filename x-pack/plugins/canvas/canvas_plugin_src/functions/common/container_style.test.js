@@ -8,7 +8,7 @@
 import {
   elasticLogo,
   functionWrapper,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 

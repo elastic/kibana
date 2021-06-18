@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { lte } from './lte';
 
 describe('lte', () => {

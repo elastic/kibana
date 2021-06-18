@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   elasticLogo,
   elasticOutline,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 // import { image } from './image';
 
 // TODO: the test was not running and is not up to date

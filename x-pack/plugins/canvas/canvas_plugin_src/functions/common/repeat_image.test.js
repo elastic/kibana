@@ -9,7 +9,7 @@ import {
   elasticLogo,
   elasticOutline,
   functionWrapper,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { repeatImage } from './repeat_image';
 
 describe('repeatImage', () => {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { progress } from './progress';
 import { fontStyle } from './__fixtures__/test_styles';

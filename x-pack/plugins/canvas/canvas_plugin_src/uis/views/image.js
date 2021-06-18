@@ -8,7 +8,7 @@
 import {
   elasticLogo,
   resolveFromArgs,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;

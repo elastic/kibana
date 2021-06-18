@@ -5,7 +5,7 @@
   "server": true,
   "ui": true,
   "extraPublicDirs": [
-    "common"
+    "common/lib"
   ],
   "requiredPlugins": [
     "savedObjects"

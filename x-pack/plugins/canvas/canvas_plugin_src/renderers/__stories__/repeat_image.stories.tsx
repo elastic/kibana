@@ -12,7 +12,7 @@ import { Render } from './render';
 import {
   elasticLogo,
   elasticOutline,
-} from '../../../../../../src/plugins/presentation_util/common';
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 
 storiesOf('renderers/repeatImage', module).add('default', () => {
   const config = {
