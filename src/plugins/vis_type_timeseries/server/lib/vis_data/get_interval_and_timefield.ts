@@ -10,13 +10,9 @@ import { AUTO_INTERVAL } from '../../../common/constants';
 import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
 import { validateField } from '../../../common/fields_utils';
 
-export function getIntervalAndTimefield(
-  panel: PanelSchema,
-  series: SeriesItemsSchema,
-  index: FetchedIndexPattern
-) {
+export function getIntervalAndTimefield(panel: PanelSchema, index: FetchedIndexPattern, series?: SeriesItemsSchema) {
   const timeField =
-    (series.override_index_pattern ? series.series_time_field : panel.time_field) ||
+    (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;
 
   if (panel.use_kibana_indexes) {
@@ -26,7 +22,7 @@ export function getIntervalAndTimefield(
   let interval = panel.interval;
   let maxBars = panel.max_bars;
 
-  if (series.override_index_pattern) {
+  if (series?.override_index_pattern) {
     interval = series.series_interval || AUTO_INTERVAL;
     maxBars = series.series_max_bars;
   }

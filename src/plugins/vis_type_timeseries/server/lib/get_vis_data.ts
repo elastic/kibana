@@ -38,10 +38,9 @@ export async function getVisData(
       indexPatternsService,
       uiSettings,
       searchStrategyRegistry: framework.searchStrategyRegistry,
-      cachedIndexPatternFetcher: getCachedIndexPatternFetcher(
-        indexPatternsService,
-        Boolean(panel.use_kibana_indexes)
-      ),
+      cachedIndexPatternFetcher: getCachedIndexPatternFetcher(indexPatternsService, {
+        fetchKibanaIndexForStringIndexes: Boolean(panel.use_kibana_indexes),
+      }),
     };
 
     return panel.type === PANEL_TYPES.TABLE
