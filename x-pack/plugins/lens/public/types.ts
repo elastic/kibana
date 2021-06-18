@@ -7,7 +7,7 @@
 
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import { MutableRefObject } from 'react';
 import { RowClickContext } from '../../../../src/plugins/ui_actions/public';

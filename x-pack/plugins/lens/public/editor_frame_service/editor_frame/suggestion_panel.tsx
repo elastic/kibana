@@ -24,7 +24,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {

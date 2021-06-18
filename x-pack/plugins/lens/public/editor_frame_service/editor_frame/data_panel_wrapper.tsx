@@ -10,10 +10,10 @@ import './data_panel_wrapper.scss';
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { createSelector } from '@reduxjs/toolkit';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { StateSetter, DatasourceDataPanelProps, Datasource } from '../../types';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import {
   switchDatasource,
@@ -22,7 +22,6 @@ import {
   LensState,
   useLensSelector,
 } from '../../state_management';
-import { createSelector } from '@reduxjs/toolkit';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;

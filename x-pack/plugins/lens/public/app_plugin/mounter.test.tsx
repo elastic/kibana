@@ -74,7 +74,6 @@ describe('Mounter', () => {
           persistedDoc: { ...defaultDoc, type: 'lens' },
           query: 'kuery',
           isAppLoading: false,
-          lastKnownDoc: { ...defaultDoc, type: 'lens' },
           activeDatasourceId: 'testDatasource',
           persistedId: '1234',
         }),

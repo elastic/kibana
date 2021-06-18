@@ -6,10 +6,7 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { LensAppState } from './types';
-import { getActiveDatasourceIdFromDoc } from '../utils';
-import { Document } from '../persistence/saved_object_store';
 
 export const initialState: LensAppState = {
   searchSessionId: '',
@@ -235,27 +232,6 @@ export const appSlice = createSlice({
       return {
         ...state,
         stagedPreview: undefined,
-      };
-    },
-    visualizationLoaded: (state, { payload }: { payload: { doc: Document } }) => {
-      return {
-        ...state,
-        datasourceStates: Object.entries(payload.doc.state.datasourceStates).reduce(
-          (stateMap, [datasourceId, datasourceState]) => ({
-            ...stateMap,
-            [datasourceId]: {
-              isLoading: true,
-              state: datasourceState,
-            },
-          }),
-          {}
-        ),
-        activeDatasourceId: getActiveDatasourceIdFromDoc(payload.doc),
-        visualization: {
-          ...state.visualization,
-          activeId: payload.doc.visualizationType,
-          state: payload.doc.state.visualization,
-        },
       };
     },
     switchDatasource: (

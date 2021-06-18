@@ -180,7 +180,7 @@ describe('Lens App', () => {
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
-  //move to mounter
+  // move to mounter
   // it('displays errors from the frame in a toast', async () => {
   //   const { instance, frame, services } = await mountWith({});
   //   const onError = frame.EditorFrameContainer.mock.calls[0][0].onError;
@@ -374,7 +374,6 @@ describe('Lens App', () => {
           lensStore.dispatch(
             setState({
               isSaveable: true,
-              lastKnownDoc: { savedObjectId: initialSavedObjectId, ...lastKnownDoc } as Document,
             })
           );
         });
@@ -401,7 +400,6 @@ describe('Lens App', () => {
         act(() => {
           lensStore.dispatch(
             setState({
-              lastKnownDoc: ({ savedObjectId: 'will save this' } as unknown) as Document,
               isSaveable: true,
             })
           );
@@ -417,7 +415,6 @@ describe('Lens App', () => {
           lensStore.dispatch(
             setState({
               isSaveable: true,
-              lastKnownDoc: ({ savedObjectId: 'will save this' } as unknown) as Document,
             })
           );
         });
@@ -578,24 +575,6 @@ describe('Lens App', () => {
         await act(async () => {
           instance.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
-
-        expect(lensStore.dispatch).toHaveBeenCalledWith({
-          payload: {
-            lastKnownDoc: expect.objectContaining({
-              savedObjectId: defaultSavedObjectId,
-              title: 'hello there',
-            }),
-            persistedDoc: expect.objectContaining({
-              savedObjectId: defaultSavedObjectId,
-              title: 'hello there',
-            }),
-            isLinkedToOriginatingApp: false,
-            title: 'hello there',
-            persistedId: '1234',
-          },
-          type: 'app/setState',
-        });
-
         expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
           "Saved 'hello there'"
         );
@@ -1273,7 +1252,6 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: ({ savedObjectId: undefined, state: {} } as unknown) as Document,
             isSaveable: true,
           })
         );
@@ -1309,7 +1287,6 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            lastKnownDoc: defaultDoc,
             persistedDoc: defaultDoc,
             isSaveable: true,
           })

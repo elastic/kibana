@@ -45,10 +45,7 @@ import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import {
-  UiActionsStart,
-  VisualizeFieldContext,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
@@ -80,7 +77,6 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
-  visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   isFullscreen: boolean;
 }
@@ -134,7 +130,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
-  visualizeTriggerFieldContext,
   suggestionForDraggedField,
   isFullscreen,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
@@ -343,9 +338,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    // we don't want to render the emptyWorkspace on visualizing field from Discover
-    // as it is specific for the drag and drop functionality and can confuse the users
-    if (expression === null && !visualizeTriggerFieldContext) {
+    if (expression === null) {
       return renderEmptyWorkspace();
     }
     return (
@@ -459,8 +452,6 @@ export const VisualizationWrapper = ({
       framePublicAPI.filters,
     ]
   );
-
-
 
   const dispatchLens = useLensDispatch();
 

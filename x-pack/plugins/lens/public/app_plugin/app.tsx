@@ -10,8 +10,6 @@ import './app.scss';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Toast } from 'kibana/public';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
@@ -284,7 +282,7 @@ export function App({
       );
     },
     [
-      incomingState?.originatingApp
+      incomingState?.originatingApp,
       lastKnownDoc,
       appState.persistedDoc,
       getIsByValueMode,
@@ -318,7 +316,6 @@ export function App({
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
-            initialContext={initialContext}
           />
         )}
       </div>
@@ -357,14 +354,10 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
-  initialContext,
 }: {
   editorFrame: EditorFrameInstance;
   showNoDataPopover: () => void;
-  initialContext: VisualizeFieldContext | undefined;
 }) {
   const { EditorFrameContainer } = editorFrame;
-  return (
-    <EditorFrameContainer showNoDataPopover={showNoDataPopover} initialContext={initialContext} />
-  );
+  return <EditorFrameContainer showNoDataPopover={showNoDataPopover} />;
 });

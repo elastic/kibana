@@ -112,7 +112,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   function removeLayers(layerIds: string[]) {
     const activeVisualization =
       visualization.activeId && props.visualizationMap[visualization.activeId];
-      console.log('REMOVE LAYERS 79799')
     if (activeVisualization && activeVisualization.removeLayer && visualization.state) {
       dispatchLens(
         updateVisualizationState({
@@ -216,7 +215,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     }
 
     function addNewLayer() {
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%% yo');
       const newLayerId = generateId();
       dispatchLens(
         updateLayer({

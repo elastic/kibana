@@ -187,7 +187,7 @@ export const LensTopNavMenu = ({
         }
       );
     }
-  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap]);
+  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap, indexPatterns]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -244,14 +244,14 @@ export const LensTopNavMenu = ({
             }
           },
           saveAndReturn: () => {
-            if (savingToDashboardPermitted && title) {
+            if (savingToDashboardPermitted) {
               // disabling the validation on app leave because the document has been saved.
               onAppLeave((actions) => {
                 return actions.default();
               });
               runSave(
                 {
-                  newTitle: title,
+                  newTitle: title || '',
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
@@ -346,8 +346,6 @@ export const LensTopNavMenu = ({
       savedQuery: undefined,
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
-
-  
 
   return (
     <TopNavMenu

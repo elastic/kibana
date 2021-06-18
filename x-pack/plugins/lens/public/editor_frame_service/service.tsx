@@ -130,7 +130,7 @@ export class EditorFrameService {
       const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover, initialContext }) => {
+        EditorFrameContainer: ({ showNoDataPopover }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -138,7 +138,6 @@ export class EditorFrameService {
                 core={core}
                 plugins={plugins}
                 palettes={palettes}
-                initialContext={initialContext}
                 showNoDataPopover={showNoDataPopover}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

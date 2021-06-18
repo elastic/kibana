@@ -16,18 +16,11 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { createDatasourceLayers } from './state_helpers';
-import {
-  getVisualizeFieldSuggestions,
-  getTopSuggestionForField,
-  switchToSuggestion,
-  Suggestion,
-} from './suggestion_helpers';
+import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { useLensSelector, useLensDispatch, LensState } from '../../state_management';
-import { createSelector } from '@reduxjs/toolkit';
+import { useLensSelector, useLensDispatch } from '../../state_management';
 
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
@@ -37,29 +30,15 @@ export interface EditorFrameProps {
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
-  initialContext?: VisualizeFieldContext;
 }
 
-const getFrameApi = createSelector(
-  (state: LensState) => state.app,
-  ({ activeData, resolvedDateRange, query, filters, searchSessionId }) => ({
-    activeData,
-    dateRange: resolvedDateRange,
-    query,
-    filters,
-    searchSessionId,
-  })
-);
-
 export function EditorFrame(props: EditorFrameProps) {
-  const frameApi = useLensSelector(getFrameApi);
   const {
     activeData,
     resolvedDateRange: dateRange,
     query,
     filters,
     searchSessionId,
-    persistedDoc,
     activeDatasourceId,
     visualization,
     datasourceStates,
@@ -68,11 +47,6 @@ export function EditorFrame(props: EditorFrameProps) {
   } = useLensSelector((state) => state.app);
 
   const dispatchLens = useLensDispatch();
-
-  const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
-    props.initialContext
-  );
-
   const allLoaded = Object.values(datasourceStates).every(
     ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
   );
@@ -93,25 +67,6 @@ export function EditorFrame(props: EditorFrameProps) {
     }),
     [activeData, datasourceLayers, dateRange, query, filters, searchSessionId]
   );
-
-  // Get suggestions for visualize field when all datasources are ready
-  useEffect(() => {
-    if (allLoaded && visualizeTriggerFieldContext && !persistedDoc) {
-      const selectedSuggestion = getVisualizeFieldSuggestions({
-        datasourceMap: props.datasourceMap,
-        datasourceStates,
-        visualizationMap: props.visualizationMap,
-        activeVisualizationId: visualization.activeId,
-        visualizationState: visualization.state,
-        visualizeTriggerFieldContext,
-      });
-      if (selectedSuggestion) {
-        switchToSuggestion(dispatchLens, selectedSuggestion, 'SWITCH_VISUALIZATION');
-      }
-      setVisualizeTriggerFieldContext(undefined);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allLoaded]);
 
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
@@ -199,7 +154,6 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
-              visualizeTriggerFieldContext={visualizeTriggerFieldContext}
               getSuggestionForField={getSuggestionForField.current}
             />
           )
