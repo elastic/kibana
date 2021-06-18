@@ -35,7 +35,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
         title={
           <FormattedMessage
             id="xpack.transform.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server."
+            defaultMessage="Error fetching user privileges from the server"
           />
         }
         error={apiError}
