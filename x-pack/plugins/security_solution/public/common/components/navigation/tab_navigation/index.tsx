@@ -49,12 +49,15 @@ const TabNavigationItemComponent = ({
     },
     [history, hrefWithSearch, id, navigateToApp, pageId, urlSearch]
   );
+
+  // TODO: [1101] remove condition and use deepLinkId for all sections when all migrated
   const appHref =
     pageId != null
       ? formatUrl(href)
-      : getUrlForApp(`${APP_ID}:${id}`, {
-          path: urlSearch,
-        });
+      : id === 'overview'
+      ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
+      : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
+
   return (
     <EuiTab
       data-href={appHref}

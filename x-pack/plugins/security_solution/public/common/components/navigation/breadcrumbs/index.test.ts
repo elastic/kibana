@@ -304,7 +304,7 @@ describe('Navigation Breadcrumbs', () => {
         { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Administration',
-          href: 'securitySolutionadministration',
+          href: 'securitySolution:administration',
         },
       ]);
     });

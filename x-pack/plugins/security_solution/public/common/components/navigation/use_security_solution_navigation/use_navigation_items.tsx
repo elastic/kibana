@@ -30,11 +30,21 @@ export const usePrimaryNavigationItems = ({
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
+        // TODO: [1101] remove conditional and use always deepLinkId
+        if (id === 'overview') {
+          navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
+        } else {
+          navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
+        }
         track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
       };
 
-      const appHref = getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch });
+      // TODO: [1101] remove conditional and use always deepLinkId
+      const appHref =
+        id === 'overview'
+          ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
+          : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
+
       return {
         'data-href': appHref,
         'data-test-subj': `navigation-${id}`,

@@ -48,7 +48,10 @@ export const useFormatUrl = (page: SiemNavTabKey) => {
           ? ''
           : `?${pathArr[1]}`
       }`;
-      return getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute });
+      // TODO: [1101] remove conditional and use always deepLinkId
+      return page === 'overview'
+        ? getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute })
+        : getUrlForApp(`${APP_ID}:${page}`, { path: formattedPath, absolute });
     },
     [getUrlForApp, page, search]
   );
