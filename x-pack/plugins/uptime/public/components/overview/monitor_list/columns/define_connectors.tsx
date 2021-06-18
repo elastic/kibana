@@ -14,7 +14,7 @@ import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.defineConnector', {
   defaultMessage: 'Define a default connector',
 });
 
@@ -49,8 +49,7 @@ export const DefineAlertConnectors = () => {
           data-test-subj={'uptimeSettingsLink'}
         >
           {SETTINGS_LINK_TEXT}
-        </ReactRouterEuiLink>
-        {' '}
+        </ReactRouterEuiLink>{' '}
         <FormattedMessage
           id="xpack.uptime.monitorList.defineConnector.description"
           defaultMessage="to receive status alerts."
