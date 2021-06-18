@@ -169,6 +169,7 @@ const redirectToDashboard = ({
   };
 
   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+  stateTransfer.clearEditorState(APP_ID);
   stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
     state,
     path,

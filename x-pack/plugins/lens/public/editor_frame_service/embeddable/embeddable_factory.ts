@@ -68,6 +68,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     });
   }
 
+  public canShareSessionDuringEdit = true;
+
   createFromSavedObject = async (
     savedObjectId: string,
     input: LensEmbeddableInput,

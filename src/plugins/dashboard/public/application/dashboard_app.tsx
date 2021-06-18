@@ -21,6 +21,7 @@ import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -40,6 +41,7 @@ export function DashboardApp({
     embeddable,
     onAppLeave,
     uiSettings,
+    data,
   } = useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
@@ -97,6 +99,20 @@ export function DashboardApp({
       },
     ]);
   }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
+
+  useEffect(() => {
+    return () => {
+      const shareableSessionOnOutgoingPackage = Boolean(
+        embeddable
+          .getStateTransfer()
+          .getEmbeddablePackageTypes()
+          .some((type) => type && embeddable.getEmbeddableFactory(type)?.canShareSessionDuringEdit)
+      );
+      if (!shareableSessionOnOutgoingPackage) {
+        data.search.session.clear();
+      }
+    };
+  }, [data.search.session, embeddable]);
 
   return (
     <>

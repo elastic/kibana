@@ -14,6 +14,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasApp: 'lens',
   name: 'lens',
   promotion: true,
+  embeddableType: 'lens',
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens',
   }),

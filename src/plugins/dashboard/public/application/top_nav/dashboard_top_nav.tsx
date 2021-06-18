@@ -182,6 +182,7 @@ export function DashboardTopNav({
     (visType?: BaseVisType | VisTypeAlias) => () => {
       let path = '';
       let appId = '';
+      let embeddableType: string | undefined;
 
       if (visType) {
         if (trackUiMetric) {
@@ -191,6 +192,7 @@ export function DashboardTopNav({
         if ('aliasPath' in visType) {
           appId = visType.aliasApp;
           path = visType.aliasPath;
+          embeddableType = visType.embeddableType;
         } else {
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
@@ -204,6 +206,7 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
+          type: embeddableType,
         },
       });
     },

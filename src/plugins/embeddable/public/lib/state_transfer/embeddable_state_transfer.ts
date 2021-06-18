@@ -107,6 +107,16 @@ export class EmbeddableStateTransfer {
     );
   }
 
+  public getEmbeddablePackageTypes() {
+    return Object.values(
+      this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[EMBEDDABLE_EDITOR_STATE_KEY] || {}
+    )
+      .filter((transfer) => {
+        return transfer && typeof transfer === 'object' && 'type' in transfer;
+      })
+      .map((editorState) => (editorState as EmbeddableEditorState).type);
+  }
+
   /**
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
    * with {@link EmbeddableEditorState | embeddable editor state}

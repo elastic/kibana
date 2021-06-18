@@ -36,6 +36,7 @@ export interface VisualizationsAppExtension {
 export interface VisTypeAlias {
   aliasPath: string;
   aliasApp: string;
+  embeddableType?: string;
   name: string;
   title: string;
   icon: string;

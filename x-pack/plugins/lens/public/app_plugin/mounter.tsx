@@ -142,6 +142,7 @@ export async function mountApp(
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
+    stateTransfer.clearEditorState(APP_ID);
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
@@ -267,6 +268,12 @@ export async function mountApp(
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
+    const shareableSessionOnOutgoingPackage = Boolean(
+      startDependencies.embeddable.getStateTransfer().getIncomingEmbeddablePackage('dashboards')
+    );
+    if (!shareableSessionOnOutgoingPackage) {
+      data.search.session.clear();
+    }
   };
 }
 

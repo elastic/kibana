@@ -25,6 +25,7 @@ export type EmbeddableFactoryDefinition<
         EmbeddableFactory<I, O, E, T>,
         | 'createFromSavedObject'
         | 'isContainerType'
+        | 'canShareSessionDuringEdit'
         | 'getExplicitInput'
         | 'savedObjectMetaData'
         | 'canCreateNew'

@@ -111,6 +111,7 @@ export class EditPanelAction implements Action<ActionContext> {
           originatingApp: this.currentAppId,
           valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
+          type: embeddable.type,
         };
         return { app, path, state };
       }

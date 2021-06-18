@@ -64,6 +64,11 @@ export interface EmbeddableFactory<
   readonly isContainerType: boolean;
 
   /**
+   * True if search session can be shared when editing an embeddable instance of this factory
+   */
+  readonly canShareSessionDuringEdit?: boolean;
+
+  /**
    * Returns a display name for this type of embeddable. Used in "Create new... " options
    * in the add panel for containers.
    */

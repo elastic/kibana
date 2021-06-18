@@ -23,6 +23,7 @@ export const defaultEmbeddableFactoryProvider = <
 ): EmbeddableFactory<I, O, E, T> => {
   const factory: EmbeddableFactory<I, O, E, T> = {
     isContainerType: def.isContainerType ?? false,
+    canShareSessionDuringEdit: def.canShareSessionDuringEdit ?? false,
     canCreateNew: def.canCreateNew ? def.canCreateNew.bind(def) : () => true,
     getDefaultInput: def.getDefaultInput ? def.getDefaultInput.bind(def) : () => ({}),
     getExplicitInput: def.getExplicitInput

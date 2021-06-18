@@ -18,6 +18,7 @@ export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 export interface EmbeddableEditorState {
   originatingApp: string;
   embeddableId?: string;
+  type?: string;
   valueInput?: EmbeddableInput;
 }
 

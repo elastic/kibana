@@ -366,6 +366,8 @@ export interface EmbeddableEditorState {
     // (undocumented)
     originatingApp: string;
     // (undocumented)
+    type?: string;
+    // (undocumented)
     valueInput?: EmbeddableInput;
 }
 
@@ -376,6 +378,7 @@ export interface EmbeddableEditorState {
 // @public
 export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<TEmbeddableInput, TEmbeddableOutput>, TSavedObjectAttributes extends SavedObjectAttributes_2 = SavedObjectAttributes_2> extends PersistableState<EmbeddableStateWithType> {
     canCreateNew(): boolean;
+    readonly canShareSessionDuringEdit?: boolean;
     create(initialInput: TEmbeddableInput, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
     createFromSavedObject(savedObjectId: string, input: Partial<TEmbeddableInput>, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable>;
     getDefaultInput(partial: Partial<TEmbeddableInput>): Partial<TEmbeddableInput>;
@@ -398,7 +401,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations' | 'grouping' | 'getIconType' | 'getDescription'>>;
+export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'canShareSessionDuringEdit' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations' | 'grouping' | 'getIconType' | 'getDescription'>>;
 
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -598,6 +601,8 @@ export class EmbeddableStateTransfer {
     constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
     clearEditorState(appId?: string): void;
     getAppNameFromId: (appId: string) => string | undefined;
+    // (undocumented)
+    getEmbeddablePackageTypes(): (string | undefined)[];
     getIncomingEditorState(appId: string, removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
     getIncomingEmbeddablePackage(appId: string, removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
     // (undocumented)
