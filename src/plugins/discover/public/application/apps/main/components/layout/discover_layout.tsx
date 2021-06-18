@@ -102,7 +102,9 @@ export function DiscoverLayout({
 
   const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
     fetchStatus: main$.getValue().fetchStatus,
-    fetchCounter: main$.getValue().fetchCounter || 0,
+    fetchCounter:
+      main$.getValue().fetchCounter ||
+      (main$.getValue().fetchStatus === FetchStatus.LOADING ? 1 : 0),
   });
   const [documentState, setDocumentState] = useState<DiscoverLayoutDocumentState>({
     fetchStatus: documents$.getValue().fetchStatus,

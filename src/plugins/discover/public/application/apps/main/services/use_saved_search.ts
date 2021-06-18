@@ -175,12 +175,12 @@ export const useSavedSearch = ({
    * Needed when index pattern is switched or a new runtime field is added
    */
   const sendResetMsg = useCallback(
-    (fetchStatus?: FetchStatus) => {
+    (fetchStatus?: FetchStatus, fetchCounter = 0) => {
       refs.current.fieldCounts = {};
       refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
       data$.next({
         fetchStatus: initialFetchStatus,
-        fetchCounter: 0,
+        fetchCounter,
       });
       dataDocuments$.next({
         fetchStatus: initialFetchStatus,
@@ -209,14 +209,15 @@ export const useSavedSearch = ({
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
       const sessionId = searchSessionManager.getNextSearchSessionId();
+      const fetchCounter = ++refs.current.fetchCounter;
 
       if (reset) {
-        sendResetMsg(FetchStatus.LOADING);
+        sendResetMsg(FetchStatus.LOADING, fetchCounter);
       } else {
         // Let the UI know, data fetching started
         data$.next({
           fetchStatus: FetchStatus.LOADING,
-          fetchCounter: ++refs.current.fetchCounter,
+          fetchCounter,
         });
         dataDocuments$.next({
           fetchStatus: FetchStatus.LOADING,
