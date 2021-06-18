@@ -31,6 +31,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappings } from './components/role_mappings';
+import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -104,6 +105,20 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('ability checks', () => {
+    describe('canViewSettings', () => {
+      it('renders Settings when user canViewSettings is true', () => {
+        setMockValues({ myRole: { canViewSettings: true } });
+        rerender(wrapper);
+        expect(wrapper.find(Settings)).toHaveLength(1);
+      });
+
+      it('does not render Settings when user canViewSettings is false', () => {
+        setMockValues({ myRole: { canViewSettings: false } });
+        rerender(wrapper);
+        expect(wrapper.find(Settings)).toHaveLength(0);
+      });
+    });
+
     describe('canViewRoleMappings', () => {
       it('renders RoleMappings when canViewRoleMappings is true', () => {
         setMockValues({ myRole: { canViewRoleMappings: true } });
