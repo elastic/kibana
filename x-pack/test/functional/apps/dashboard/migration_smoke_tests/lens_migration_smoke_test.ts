@@ -14,7 +14,6 @@ import path from 'path';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -38,11 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to import dashboard with various Lens panels from 7.12.1', async () => {
-      await retry.tryForTime(10000, async () => {
-        const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-        // Kibana always has 1 advanced setting as a saved object
-        await expect(existingSavedObjects).to.be('Export 1 object');
-      });
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', 'lens_dashboard_migration_test_7_12_1.ndjson')
       );
@@ -50,10 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // this will catch cases where there is an error in the migrations.
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
-      const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-
-      // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 7 objects');
     });
 
     it('should render all panels on the dashboard', async () => {
