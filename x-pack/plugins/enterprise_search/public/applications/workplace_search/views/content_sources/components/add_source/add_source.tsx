@@ -103,7 +103,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]} isLoading={dataLoading}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}

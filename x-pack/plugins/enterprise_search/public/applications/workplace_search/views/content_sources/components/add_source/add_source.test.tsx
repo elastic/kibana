@@ -87,6 +87,13 @@ describe('AddSourceList', () => {
     });
   });
 
+  it('renders a breadcrumb fallback while data is loading', () => {
+    setMockValues({ ...mockValues, dataLoading: true, sourceConfigData: {} });
+    const wrapper = shallow(<AddSource sourceIndex={1} />);
+
+    expect(wrapper.prop('pageChrome')).toEqual(['Sources', 'Add Source', '...']);
+  });
+
   it('renders Config Completed step', () => {
     setMockValues({
       ...mockValues,
