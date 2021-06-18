@@ -34,6 +34,9 @@ export const JsonCodeEditorCommon = ({
   hasLineNumbers,
   onEditorDidMount,
 }: JsonCodeEditorCommonProps) => {
+  if (jsonValue === '') {
+    return null;
+  }
   return (
     <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
       <EuiFlexItem>
