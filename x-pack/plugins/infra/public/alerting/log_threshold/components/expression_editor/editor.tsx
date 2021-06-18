@@ -255,6 +255,12 @@ export const Editor: React.FC<
     setHasSetDefaults(true);
   });
 
+  const shouldShowGroupByOptimizationWarning = useMemo(() => {
+    const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
+    const hasSetOptimizableThresholdComparator = alertParams.count.comparator === Comparator.GT;
+    return hasSetGroupBy && !hasSetOptimizableThresholdComparator;
+  }, [alertParams]);
+
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
@@ -298,6 +304,17 @@ export const Editor: React.FC<
       />
 
       {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
+
+      {shouldShowGroupByOptimizationWarning && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiCallOut color="warning">
+            {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
+              defaultMessage: `When setting a group by we highly recommend using the ${Comparator.GT} comparator for your threshold. This can lead to significant performance improvements.`,
+            })}
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer size="l" />
     </>
