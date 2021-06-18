@@ -194,7 +194,7 @@ describe('Log threshold executor', () => {
 
   describe('ES queries', () => {
     describe('Query generation', () => {
-      test('Correctly generates ungrouped queries', () => {
+      it('Correctly generates ungrouped queries', () => {
         const alertParams: AlertParams = {
           ...baseAlertParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
@@ -304,148 +304,283 @@ describe('Log threshold executor', () => {
         });
       });
 
-      test('Correctly generates grouped queries', () => {
-        const alertParams: AlertParams = {
-          ...baseAlertParams,
-          groupBy: ['host.name'],
-          criteria: [...positiveCriteria, ...negativeCriteria],
-        };
-        const query = getGroupedESQuery(
-          alertParams,
-          TIMESTAMP_FIELD,
-          FILEBEAT_INDEX,
-          runtimeMappings
-        );
-        expect(query).toEqual({
-          index: 'filebeat-*',
-          allow_no_indices: true,
-          ignore_unavailable: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.any(Number),
-                        lte: expect.any(Number),
-                        format: 'epoch_millis',
+      describe('Correctly generates grouped queries', () => {
+        it('When using an optimizable threshold comparator', () => {
+          const alertParams: AlertParams = {
+            ...baseAlertParams,
+            groupBy: ['host.name'],
+            criteria: [...positiveCriteria, ...negativeCriteria],
+          };
+          const query = getGroupedESQuery(
+            alertParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings
+          );
+
+          expect(query).toEqual({
+            index: 'filebeat-*',
+            allow_no_indices: true,
+            ignore_unavailable: true,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: expect.any(Number),
+                          lte: expect.any(Number),
+                          format: 'epoch_millis',
+                        },
                       },
                     },
-                  },
-                ],
-              },
-            },
-            aggregations: {
-              groups: {
-                composite: {
-                  size: 40,
-                  sources: [
                     {
-                      'group-0-host.name': {
-                        terms: {
-                          field: 'host.name',
+                      range: {
+                        numericField: {
+                          gt: 10,
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        numericField: {
+                          gte: 10,
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        numericField: {
+                          lt: 10,
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        numericField: {
+                          lte: 10,
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        keywordField: {
+                          value: 'error',
+                        },
+                      },
+                    },
+                    {
+                      match: {
+                        textField: 'Something went wrong',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        textField: 'Something went wrong',
+                      },
+                    },
+                  ],
+                  must_not: [
+                    {
+                      term: {
+                        keywordField: {
+                          value: 'error',
+                        },
+                      },
+                    },
+                    {
+                      match: {
+                        textField: 'Something went wrong',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        textField: 'Something went wrong',
+                      },
+                    },
+                  ],
+                },
+              },
+              aggregations: {
+                groups: {
+                  composite: {
+                    size: 2000,
+                    sources: [
+                      {
+                        'group-0-host.name': {
+                          terms: {
+                            field: 'host.name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              runtime_mappings: {
+                runtime_field: {
+                  type: 'keyword',
+                  script: {
+                    lang: 'painless',
+                    source: 'emit("a runtime value")',
+                  },
+                },
+              },
+              size: 0,
+            },
+          });
+        });
+
+        it('When not using an optimizable threshold comparator', () => {
+          const alertParams: AlertParams = {
+            ...baseAlertParams,
+            count: {
+              ...baseAlertParams.count,
+              comparator: Comparator.LT,
+            },
+            groupBy: ['host.name'],
+            criteria: [...positiveCriteria, ...negativeCriteria],
+          };
+
+          const query = getGroupedESQuery(
+            alertParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings
+          );
+
+          expect(query).toEqual({
+            index: 'filebeat-*',
+            allow_no_indices: true,
+            ignore_unavailable: true,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: expect.any(Number),
+                          lte: expect.any(Number),
+                          format: 'epoch_millis',
                         },
                       },
                     },
                   ],
                 },
-                aggregations: {
-                  filtered_results: {
-                    filter: {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: expect.any(Number),
-                                lte: expect.any(Number),
-                                format: 'epoch_millis',
+              },
+              aggregations: {
+                groups: {
+                  composite: {
+                    size: 2000,
+                    sources: [
+                      {
+                        'group-0-host.name': {
+                          terms: {
+                            field: 'host.name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  aggregations: {
+                    filtered_results: {
+                      filter: {
+                        bool: {
+                          filter: [
+                            {
+                              range: {
+                                '@timestamp': {
+                                  gte: expect.any(Number),
+                                  lte: expect.any(Number),
+                                  format: 'epoch_millis',
+                                },
                               },
                             },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                gt: 10,
+                            {
+                              range: {
+                                numericField: {
+                                  gt: 10,
+                                },
                               },
                             },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                gte: 10,
+                            {
+                              range: {
+                                numericField: {
+                                  gte: 10,
+                                },
                               },
                             },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                lt: 10,
+                            {
+                              range: {
+                                numericField: {
+                                  lt: 10,
+                                },
                               },
                             },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                lte: 10,
+                            {
+                              range: {
+                                numericField: {
+                                  lte: 10,
+                                },
                               },
                             },
-                          },
-                          {
-                            term: {
-                              keywordField: {
-                                value: 'error',
+                            {
+                              term: {
+                                keywordField: {
+                                  value: 'error',
+                                },
                               },
                             },
-                          },
-                          {
-                            match: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                          {
-                            match_phrase: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                        ],
-                        must_not: [
-                          {
-                            term: {
-                              keywordField: {
-                                value: 'error',
+                            {
+                              match: {
+                                textField: 'Something went wrong',
                               },
                             },
-                          },
-                          {
-                            match: {
-                              textField: 'Something went wrong',
+                            {
+                              match_phrase: {
+                                textField: 'Something went wrong',
+                              },
                             },
-                          },
-                          {
-                            match_phrase: {
-                              textField: 'Something went wrong',
+                          ],
+                          must_not: [
+                            {
+                              term: {
+                                keywordField: {
+                                  value: 'error',
+                                },
+                              },
                             },
-                          },
-                        ],
+                            {
+                              match: {
+                                textField: 'Something went wrong',
+                              },
+                            },
+                            {
+                              match_phrase: {
+                                textField: 'Something went wrong',
+                              },
+                            },
+                          ],
+                        },
                       },
                     },
                   },
                 },
               },
-            },
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  lang: 'painless',
-                  source: 'emit("a runtime value")',
+              runtime_mappings: {
+                runtime_field: {
+                  type: 'keyword',
+                  script: {
+                    lang: 'painless',
+                    source: 'emit("a runtime value")',
+                  },
                 },
               },
+              size: 0,
             },
-            size: 0,
-          },
+          });
         });
       });
     });
