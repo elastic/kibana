@@ -29,4 +29,4 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
-export { InferSearchResponseOf, AggregationResultOf, SearchHit };
+export type { InferSearchResponseOf, AggregationResultOf, SearchHit };
