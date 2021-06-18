@@ -48,7 +48,14 @@
 }
 
 .kbnDocViewer__value {
+  display: inline-block;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
   line-height: $euiLineHeight;
+  color: $euiColorFullShade;
+  vertical-align: top;
+  padding-top: $euiSizeXS * 0.5;
 }
 
 .kbnDocViewer__warning {

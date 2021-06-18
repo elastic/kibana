@@ -58,6 +58,7 @@ export function FieldName({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="top"
+            delay="long"
             content={i18n.translate(
               'discover.fieldChooser.discoverField.multiFieldTooltipContent',
               {
