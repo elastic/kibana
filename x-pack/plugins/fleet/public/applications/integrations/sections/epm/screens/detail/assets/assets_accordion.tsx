@@ -45,7 +45,9 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge>
-              <EuiText size="l">{savedObjects.length}</EuiText>
+              <EuiTitle size="xs">
+                <h3>{savedObjects.length}</h3>
+              </EuiTitle>
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
