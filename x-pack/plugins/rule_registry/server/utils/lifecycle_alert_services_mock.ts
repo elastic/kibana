@@ -9,26 +9,30 @@ import { AlertInstanceContext, AlertInstanceState } from '../../../alerting/serv
 import { alertsMock } from '../../../alerting/server/mocks';
 import { LifecycleAlertServices } from './create_lifecycle_rule_type_factory';
 
-class X<
+/**
+ * This wraps the alerts to enable the preservation of the generic type
+ * arguments of the factory function.
+ **/
+class AlertsMockWrapper<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
-  create() {
+  createAlertServices() {
     return alertsMock.createAlertServices<InstanceState, InstanceContext>();
   }
 }
 
-type Y<
+type AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
-> = ReturnType<X<InstanceState, InstanceContext>['create']>;
+> = ReturnType<AlertsMockWrapper<InstanceState, InstanceContext>['createAlertServices']>;
 
 export const createLifecycleAlertServicesMock = <
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
 >(
-  alertServices: Y<InstanceState, InstanceContext>
+  alertServices: AlertServices<InstanceState, InstanceContext>
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({
   alertWithLifecycle: ({ id }) => alertServices.alertInstanceFactory(id),
 });
