@@ -150,7 +150,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService.get(palette.name).getColor(
+          const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
               behindText: categoryDisplay !== 'hide',

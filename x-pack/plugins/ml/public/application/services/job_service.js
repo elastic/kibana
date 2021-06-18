@@ -347,11 +347,6 @@ class JobService {
     return job;
   }
 
-  searchPreview(combinedJob) {
-    const { datafeed_config: datafeed, ...job } = combinedJob;
-    return ml.jobs.datafeedPreview(job, datafeed);
-  }
-
   openJob(jobId) {
     return ml.openJob({ jobId });
   }
@@ -433,10 +428,6 @@ class JobService {
       datafeedId = `datafeed-${jobId}`;
     }
     return datafeedId;
-  }
-
-  getDatafeedPreview(datafeedId) {
-    return ml.datafeedPreview({ datafeedId });
   }
 
   // get the list of job group ids as well as how many jobs are in each group

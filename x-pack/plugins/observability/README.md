@@ -10,12 +10,20 @@ case management.
 If you have:
 
 ```yaml
+xpack.observability.unsafe.cases.enabled: true
+```
+
+In your Kibana configuration, the Cases page will be available.
+
+If you have:
+
+```yaml
 xpack.observability.unsafe.alertingExperience.enabled: true
 ```
 
-In your Kibana configuration, the Alerts and Cases pages will be available.
+In your Kibana configuration, the Alerts page will be available.
 
-This will only enable the UI for these pages. In order to have alert data indexed
+This will only enable the UI for this page when. In order to have alert data indexed
 you'll need to enable writing in the [Rule Registry plugin](../rule_registry/README.md):
 
 ```yaml
@@ -23,6 +31,10 @@ xpack.ruleRegistry.write.enabled: true
 ```
 
 When both of the these are set to `true`, your alerts should show on the alerts page.
+
+## Shared navigation
+
+The Observability plugin maintains a navigation registry for Observability solutions, and exposes a shared page template component. Please refer to the docs in [the component directory](public/components/shared/page_template) for more information on registering your solution's navigation structure, and rendering the navigation via the shared component.
 
 ## Unit testing
 

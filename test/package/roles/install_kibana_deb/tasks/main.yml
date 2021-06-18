@@ -1,0 +1,34 @@
+- name: install dependencies
+  become: yes
+  apt:
+    name:
+      - libnss3
+      - fonts-liberation
+      - libfontconfig
+    state: latest
+
+- name: find deb package
+  find:
+    paths: /packages/
+    patterns: kibana-*-amd64.deb
+  register: kibana_deb
+
+- name: install
+  become: yes
+  apt:
+    deb: "{{ kibana_deb.files[0].path }}"
+    state: present
+
+- name: copy configuration
+  become: yes
+  template:
+    src: templates/kibana.yml
+    dest: /etc/kibana/kibana.yml
+  register: config
+
+- name: start kibana
+  become: yes
+  systemd:
+    state: started
+    name: kibana
+    daemon_reload: yes

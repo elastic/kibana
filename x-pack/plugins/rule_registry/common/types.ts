@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-export type PutIndexTemplateRequest = estypes.PutIndexTemplateRequest & {
+export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };
 };
 
@@ -16,6 +16,6 @@ export interface ClusterPutComponentTemplateBody {
     settings: {
       number_of_shards: number;
     };
-    mappings: estypes.TypeMapping;
+    mappings: estypes.MappingTypeMapping;
   };
 }

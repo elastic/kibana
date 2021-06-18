@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBottomBar, EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -56,6 +63,9 @@ const NewSavedQueryFormComponent = ({ defaultValue, handleSubmit }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
     </Form>
   );
 };

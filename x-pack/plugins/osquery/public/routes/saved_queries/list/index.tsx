@@ -131,8 +131,8 @@ const SavedQueriesPageComponent = () => {
   const columns = useMemo(
     () => [
       {
-        field: 'attributes.name',
-        name: 'Query name',
+        field: 'attributes.id',
+        name: 'Query ID',
         sortable: true,
         truncateText: true,
       },

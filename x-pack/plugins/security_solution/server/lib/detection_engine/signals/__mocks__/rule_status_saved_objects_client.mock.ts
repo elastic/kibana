@@ -9,6 +9,7 @@ import { RuleStatusSavedObjectsClient } from '../rule_status_saved_objects_clien
 
 const createMockRuleStatusSavedObjectsClient = (): jest.Mocked<RuleStatusSavedObjectsClient> => ({
   find: jest.fn(),
+  findBulk: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),

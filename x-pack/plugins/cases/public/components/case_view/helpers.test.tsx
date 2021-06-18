@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssociationType, CommentType } from '../../../common';
+import { AssociationType, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { Comment } from '../../containers/types';
 
 import { getManualAlertIdsWithNoRuleId } from './helpers';
@@ -28,6 +28,7 @@ const comments: Comment[] = [
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     associationType: AssociationType.case,
@@ -46,6 +47,7 @@ const comments: Comment[] = [
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    owner: SECURITY_SOLUTION_OWNER,
   },
 ];
 

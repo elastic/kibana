@@ -14,6 +14,12 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
     type: 'long',
     _meta: { description: 'Number of times the user opened one of the in-product help popovers.' },
   },
+  toggle_fullscreen_formula: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user toggled fullscreen mode on formula.',
+    },
+  },
   indexpattern_field_info_click: { type: 'long' },
   loaded: { type: 'long' },
   app_filters_updated: { type: 'long' },
@@ -162,6 +168,10 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
     type: 'long',
     _meta: { description: 'Number of times the moving average function was selected' },
   },
+  indexpattern_dimension_operation_formula: {
+    type: 'long',
+    _meta: { description: 'Number of times the formula function was selected' },
+  },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
@@ -183,6 +193,12 @@ const savedSchema: MakeSchemaFrom<LensUsage['saved_overall']> = {
   lnsDatatable: { type: 'long' },
   lnsPie: { type: 'long' },
   lnsMetric: { type: 'long' },
+  formula: {
+    type: 'long',
+    _meta: {
+      description: 'Number of saved lens visualizations which are using at least one formula',
+    },
+  },
 };
 
 export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {

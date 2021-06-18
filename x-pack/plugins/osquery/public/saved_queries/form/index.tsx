@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../scheduled_query_groups/queries/constants';
+import { PlatformCheckBoxGroupField } from '../../scheduled_query_groups/queries/platform_checkbox_group_field';
 import { Field, getUseField, UseField } from '../../shared_imports';
 import { CodeEditorField } from './code_editor_field';
 
@@ -15,26 +17,37 @@ export const CommonUseField = getUseField({ component: Field });
 
 const SavedQueryFormComponent = () => (
   <>
-    <CommonUseField path="name" />
+    <CommonUseField path="id" />
     <EuiSpacer />
     <CommonUseField path="description" />
     <EuiSpacer />
     <UseField path="query" component={CodeEditorField} />
     <EuiSpacer />
-    <CommonUseField
-      path="platform"
-      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-      euiFieldProps={{
-        options: [
-          { value: 'darwin', text: 'macOS' },
-          { value: 'linux', text: 'Linux' },
-          { value: 'windows', text: 'Windows' },
-          { value: 'all', text: 'All' },
-        ],
-      }}
-    />
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <CommonUseField
+          path="interval"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          euiFieldProps={{ append: 's' }}
+        />
+        <EuiSpacer />
+        <CommonUseField
+          path="version"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          euiFieldProps={{
+            noSuggestions: false,
+            singleSelection: { asPlainText: true },
+            placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
+            options: ALL_OSQUERY_VERSIONS_OPTIONS,
+            onCreateOption: undefined,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiSpacer />
-    <CommonUseField path="version" />
   </>
 );
 

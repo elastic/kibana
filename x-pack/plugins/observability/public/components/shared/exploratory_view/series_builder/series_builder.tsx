@@ -15,34 +15,23 @@ import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'upd', label: 'Monitor duration' },
-    { id: 'upp', label: 'Pings histogram' },
+    { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
   ],
   ux: [
-    { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
+    { id: 'dist', label: 'Performance distribution' },
+    { id: 'cwv', label: 'Core Web Vitals' },
   ],
-  apm: [
-    { id: 'svl', label: 'Latency' },
-    { id: 'tpt', label: 'Throughput' },
-  ],
-  infra_logs: [
-    {
-      id: 'logs',
-      label: 'Logs Frequency',
-    },
-  ],
-  infra_metrics: [
-    { id: 'cpu', label: 'CPU usage' },
-    { id: 'mem', label: 'Memory usage' },
-    { id: 'nwk', label: 'Network activity' },
-  ],
+  apm: [],
+  infra_logs: [],
+  infra_metrics: [],
 };
 
 export function SeriesBuilder({
@@ -52,7 +41,9 @@ export function SeriesBuilder({
   seriesId: string;
   seriesBuilderRef: RefObject<HTMLDivElement>;
 }) {
-  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const {
     dataType,
@@ -69,7 +60,7 @@ export function SeriesBuilder({
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
-      seriesId,
+      dataType,
       indexPattern,
       reportType: reportType!,
     });
@@ -155,9 +146,8 @@ export function SeriesBuilder({
         reportDefinitions,
       };
 
-      setSeries(newSeriesId, newSeriesN).then(() => {
-        removeSeries(NEW_SERIES_KEY);
-      });
+      setSeries(newSeriesId, newSeriesN);
+      removeSeries(NEW_SERIES_KEY);
     }
   };
 

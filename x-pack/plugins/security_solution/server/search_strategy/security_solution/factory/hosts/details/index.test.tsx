@@ -32,7 +32,7 @@ const mockDeps = {
     experimentalFeatures: {
       trustedAppsByPolicyEnabled: false,
       metricsEntitiesEnabled: false,
-      hostIsolationEnabled: false,
+      ruleRegistryEnabled: false,
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeQuery } from '../../../../server/utils/queries';
@@ -44,7 +44,7 @@ export function anomalySeriesFetcher({
               { term: { partition_field_value: serviceName } },
               { term: { by_field_value: transactionType } },
               ...rangeQuery(start, end, 'timestamp'),
-            ] as QueryContainer[],
+            ] as QueryDslQueryContainer[],
           },
         },
         aggs: {

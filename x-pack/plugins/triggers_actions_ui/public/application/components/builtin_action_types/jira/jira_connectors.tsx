@@ -32,13 +32,17 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
 }) => {
   const { apiUrl, projectKey } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    apiUrl !== undefined && errors.apiUrl !== undefined && errors.apiUrl.length > 0;
 
   const { email, apiToken } = action.secrets;
 
-  const isProjectKeyInvalid: boolean = errors.projectKey.length > 0 && projectKey !== undefined;
-  const isEmailInvalid: boolean = errors.email.length > 0 && email !== undefined;
-  const isApiTokenInvalid: boolean = errors.apiToken.length > 0 && apiToken !== undefined;
+  const isProjectKeyInvalid: boolean =
+    projectKey !== undefined && errors.projectKey !== undefined && errors.projectKey.length > 0;
+  const isEmailInvalid: boolean =
+    email !== undefined && errors.email !== undefined && errors.email.length > 0;
+  const isApiTokenInvalid: boolean =
+    apiToken !== undefined && errors.apiToken !== undefined && errors.apiToken.length > 0;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),

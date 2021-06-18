@@ -19,7 +19,7 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
@@ -53,7 +53,8 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
     };
   });
 
-  const { setSeries, series: urlSeries } = useUrlStorage(seriesId);
+  const { setSeries, getSeries } = useSeriesStorage();
+  const urlSeries = getSeries(seriesId);
 
   const button = (
     <EuiButtonEmpty

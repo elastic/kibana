@@ -9,7 +9,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { validateAndConvertAggregations } from './validation';
 
-type AggsMap = Record<string, estypes.AggregationContainer>;
+type AggsMap = Record<string, estypes.AggregationsAggregationContainer>;
 
 const mockMappings = {
   properties: {
@@ -19,7 +19,9 @@ const mockMappings = {
     references: {
       type: 'nested',
       properties: {
-        id: 'keyword',
+        id: {
+          type: 'keyword',
+        },
       },
     },
     foo: {
@@ -31,7 +33,7 @@ const mockMappings = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -73,7 +75,7 @@ const mockMappings = {
       },
     },
   },
-};
+} as const;
 
 describe('validateAndConvertAggregations', () => {
   it('validates a simple aggregations', () => {

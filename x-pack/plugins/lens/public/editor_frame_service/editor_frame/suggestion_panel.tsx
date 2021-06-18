@@ -7,7 +7,7 @@
 
 import './suggestion_panel.scss';
 
-import _, { camelCase } from 'lodash';
+import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -200,15 +200,16 @@ export function SuggestionPanel({
             visualizationState: currentVisualizationState,
             activeData: frame.activeData,
           })
-            .filter((suggestion) => !suggestion.hide)
             .filter(
               ({
+                hide,
                 visualizationId,
                 visualizationState: suggestionVisualizationState,
                 datasourceState: suggestionDatasourceState,
                 datasourceId: suggetionDatasourceId,
               }) => {
                 return (
+                  !hide &&
                   validateDatasourceAndVisualization(
                     suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
                     suggestionDatasourceState,
@@ -442,7 +443,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = _.pick(
+    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );

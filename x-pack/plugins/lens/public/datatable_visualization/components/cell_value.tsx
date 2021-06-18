@@ -5,30 +5,79 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
+import { ColumnConfig } from './table_basic';
+import { getContrastColor } from '../../shared_components/coloring/utils';
+import { getOriginalId } from '../transpose_helpers';
+import { getNumericValue } from './shared_utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
-  DataContext: React.Context<DataContextType>
-) => ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-  const { table, alignments } = useContext(DataContext);
-  const rowValue = table?.rows[rowIndex][columnId];
-  const content = formatters[columnId]?.convert(rowValue, 'html');
-  const currentAlignment = alignments && alignments[columnId];
-  const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+  columnConfig: ColumnConfig,
+  DataContext: React.Context<DataContextType>,
+  uiSettings: IUiSettingsClient
+) => {
+  // Changing theme requires a full reload of the page, so we can cache here
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+    const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
+    const rowValue = table?.rows[rowIndex][columnId];
+    const content = formatters[columnId]?.convert(rowValue, 'html');
+    const currentAlignment = alignments && alignments[columnId];
+    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
-  return (
-    <div
-      /*
-       * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-       * which is produced in a safe way.
-       */
-      dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
-      data-test-subj="lnsTableCellContent"
-      className={`lnsTableCell ${alignmentClassName}`}
-    />
-  );
+    const { colorMode, palette } =
+      columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
+
+    useEffect(() => {
+      const originalId = getOriginalId(columnId);
+      if (minMaxByColumnId?.[originalId]) {
+        if (colorMode !== 'none' && palette?.params && getColorForValue) {
+          // workout the bucket the value belongs to
+          const color = getColorForValue(
+            getNumericValue(rowValue),
+            palette.params,
+            minMaxByColumnId[originalId]
+          );
+          if (color) {
+            const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
+            if (colorMode === 'cell' && color) {
+              style.color = getContrastColor(color, IS_DARK_THEME);
+            }
+            setCellProps({
+              style,
+            });
+          }
+        }
+      }
+      // make sure to clean it up when something change
+      // this avoids cell's styling to stick forever
+      return () => {
+        if (minMaxByColumnId?.[originalId]) {
+          setCellProps({
+            style: {
+              backgroundColor: undefined,
+              color: undefined,
+            },
+          });
+        }
+      };
+    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, getColorForValue]);
+
+    return (
+      <div
+        /*
+         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
+         * which is produced in a safe way.
+         */
+        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
+        data-test-subj="lnsTableCellContent"
+        className={`lnsTableCell ${alignmentClassName}`}
+      />
+    );
+  };
 };

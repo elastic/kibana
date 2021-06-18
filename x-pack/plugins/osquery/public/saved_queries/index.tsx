@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './add_saved_query_flyout';
+export * from './saved_query_flyout';

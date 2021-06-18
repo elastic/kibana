@@ -8,6 +8,11 @@
 
 import { IndexPattern } from '../../../../data/common';
 
+// We store this outside the function as a constant, so we're not creating a new array every time
+// the function is returning this. A changing array might cause the data grid to think it got
+// new columns, and thus performing worse than using the same array over multiple renders.
+const SOURCE_ONLY = ['_source'];
+
 /**
  * Function to provide fallback when
  * 1) no columns are given
@@ -19,5 +24,5 @@ export function getDisplayedColumns(stateColumns: string[] = [], indexPattern: I
     // check if all columns where removed except the configured timeField (this can't be removed)
     !(stateColumns.length === 1 && stateColumns[0] === indexPattern.timeFieldName)
     ? stateColumns
-    : ['_source'];
+    : SOURCE_ONLY;
 }

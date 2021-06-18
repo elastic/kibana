@@ -1056,7 +1056,9 @@
             "type": "Object",
             "tags": [],
             "label": "stateContainer",
-            "description": [],
+            "description": [
+              "to use for syncing"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1547,7 +1549,9 @@
             "type": "Object",
             "tags": [],
             "label": "kbnUrlStateStorage",
-            "description": [],
+            "description": [
+              "to use for syncing"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -2563,7 +2567,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "first",
-            "description": [],
+            "description": [
+              "The first filter or filter array to compare"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -2595,7 +2601,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "second",
-            "description": [],
+            "description": [
+              "The second filter or filter array to compare"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -2627,7 +2635,9 @@
             "type": "Object",
             "tags": [],
             "label": "comparatorOptions",
-            "description": [],
+            "description": [
+              "Parameters to use for comparison"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -2706,7 +2716,9 @@
             "type": "Array",
             "tags": [],
             "label": "existingFilters",
-            "description": [],
+            "description": [
+              "- The filters to compare to"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -2730,7 +2742,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": [],
+            "description": [
+              "- The filters being added"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -2754,7 +2768,9 @@
             "type": "Object",
             "tags": [],
             "label": "comparatorOptions",
-            "description": [],
+            "description": [
+              "- Parameters to use for comparison"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -3132,7 +3148,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": [],
+            "description": [
+              "The filters to remove duplicates from"
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -3156,7 +3174,9 @@
             "type": "Any",
             "tags": [],
             "label": "comparatorOptions",
-            "description": [],
+            "description": [
+              "- Parameters to use for comparison"
+            ],
             "signature": [
               "any"
             ],

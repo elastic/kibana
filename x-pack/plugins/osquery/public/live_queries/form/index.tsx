@@ -26,7 +26,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
 import { fieldValidators } from '../../shared_imports';
-import { SaveQueryFlyout } from '../../saved_queries';
+import { SavedQueryFlyout } from '../../saved_queries';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -42,10 +42,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [showSaveQueryFlyout, setShowSaveQueryFlyout] = useState(false);
+  const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
 
-  const handleShowSaveQueryFlout = useCallback(() => setShowSaveQueryFlyout(true), []);
-  const handleCloseSaveQueryFlout = useCallback(() => setShowSaveQueryFlyout(false), []);
+  const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
+  const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
   const {
     data,
@@ -216,8 +216,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
       <Form form={form}>
         <EuiSteps steps={formSteps} />
       </Form>
-      {showSaveQueryFlyout ? (
-        <SaveQueryFlyout
+      {showSavedQueryFlyout ? (
+        <SavedQueryFlyout
           onClose={handleCloseSaveQueryFlout}
           defaultValue={flyoutFormDefaultValue}
         />

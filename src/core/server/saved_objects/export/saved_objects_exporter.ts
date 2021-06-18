@@ -12,7 +12,6 @@ import { Logger } from '../../logging';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
   SavedObjectsExportResultDetails,
@@ -22,7 +21,7 @@ import {
   SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
-import { applyExportTransforms } from './apply_export_transforms';
+import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -118,28 +117,21 @@ export class SavedObjectsExporter {
     }: SavedObjectExportBaseOptions
   ) {
     this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
-    let exportedObjects: Array<SavedObject<unknown>>;
-    let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
-    savedObjects = await applyExportTransforms({
-      request,
+    const {
+      objects: collectedObjects,
+      missingRefs: missingReferences,
+    } = await collectExportedObjects({
       objects: savedObjects,
-      transforms: this.#exportTransforms,
-      sortFunction,
+      includeReferences: includeReferencesDeep,
+      namespace,
+      request,
+      exportTransforms: this.#exportTransforms,
+      savedObjectsClient: this.#savedObjectsClient,
     });
 
-    if (includeReferencesDeep) {
-      this.#log.debug(`Fetching saved objects references.`);
-      const fetchResult = await fetchNestedDependencies(
-        savedObjects,
-        this.#savedObjectsClient,
-        namespace
-      );
-      exportedObjects = sortObjects(fetchResult.objects);
-      missingReferences = fetchResult.missingRefs;
-    } else {
-      exportedObjects = sortObjects(savedObjects);
-    }
+    // sort with the provided sort function then with the default export sorting
+    const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
 
     // redact attributes that should not be exported
     const redactedObjects = includeNamespaces

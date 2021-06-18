@@ -12,7 +12,6 @@ import { useValues } from 'kea';
 import { EuiText, EuiBadge, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNavLink, SideNavItem } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
@@ -170,8 +169,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineCrawler && !isMetaEngine && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_CRAWLER_PATH))}
+          to={generateEnginePath(ENGINE_CRAWLER_PATH)}
           data-test-subj="EngineCrawlerLink"
         >
           {CRAWLER_TITLE}

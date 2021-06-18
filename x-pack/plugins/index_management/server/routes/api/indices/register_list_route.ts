@@ -9,26 +9,23 @@ import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerListRoute({ router, license, indexDataEnricher, lib }: RouteDependencies) {
-  router.get(
-    { path: addBasePath('/indices'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      try {
-        const indices = await fetchIndices(
-          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
-          indexDataEnricher
-        );
-        return res.ok({ body: indices });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+export function registerListRoute({ router, indexDataEnricher, lib }: RouteDependencies) {
+  router.get({ path: addBasePath('/indices'), validate: false }, async (ctx, req, res) => {
+    try {
+      const indices = await fetchIndices(
+        ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
+        indexDataEnricher
+      );
+      return res.ok({ body: indices });
+    } catch (e) {
+      if (lib.isEsError(e)) {
+        return res.customError({
+          statusCode: e.statusCode,
+          body: e,
+        });
       }
-    })
-  );
+      // Case: default
+      throw e;
+    }
+  });
 }

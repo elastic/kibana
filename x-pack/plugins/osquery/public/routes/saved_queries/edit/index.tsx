@@ -49,7 +49,7 @@ const EditSavedQueryPageComponent = () => {
     }
   );
 
-  useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.name ?? '' });
+  useBreadcrumbs('saved_query_edit', { savedQueryId: savedQueryDetails?.attributes?.id ?? '' });
 
   const updateSavedQueryMutation = useMutation(
     (payload) =>
@@ -64,9 +64,9 @@ const EditSavedQueryPageComponent = () => {
         navigateToApp('osquery', { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-            defaultMessage: 'Successfully updated "{savedQueryName}" query',
+            defaultMessage: 'Successfully updated "{savedQueryId}" query',
             values: {
-              savedQueryName: payload.attributes?.name ?? '',
+              savedQueryId: payload.attributes?.id ?? '',
             },
           })
         );
@@ -90,9 +90,9 @@ const EditSavedQueryPageComponent = () => {
         navigateToApp('osquery', { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-            defaultMessage: 'Successfully deleted "{savedQueryName}" query',
+            defaultMessage: 'Successfully deleted "{savedQueryId}" query',
             values: {
-              savedQueryName: savedQueryDetails?.attributes?.name ?? '',
+              savedQueryId: savedQueryDetails?.attributes?.id ?? '',
             },
           })
         );
@@ -128,10 +128,10 @@ const EditSavedQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editSavedQuery.pageTitle"
-                defaultMessage={`Edit "{queryName}"`}
+                defaultMessage={`Edit "{savedQueryId}"`}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{
-                  queryName: savedQueryDetails?.attributes?.name ?? '',
+                  savedQueryId: savedQueryDetails?.attributes?.id ?? '',
                 }}
               />
             </h1>
@@ -140,7 +140,7 @@ const EditSavedQueryPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [savedQueryDetails?.attributes?.name, savedQueryListProps]
+    [savedQueryDetails?.attributes?.id, savedQueryListProps]
   );
 
   const RightColumn = useMemo(

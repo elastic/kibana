@@ -35,6 +35,7 @@ describe('getUpgradeAssistantStatus', () => {
     asApiResponse(deprecationsResponse)
   );
 
+  // @ts-expect-error not full interface of response
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {

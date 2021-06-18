@@ -16,7 +16,7 @@ export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };
-        aggs?: Record<string, estypes.AggregationContainer>;
+        aggs?: Record<string, estypes.AggregationsAggregationContainer>;
       };
     };
   };

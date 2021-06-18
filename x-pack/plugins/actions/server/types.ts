@@ -142,10 +142,14 @@ export interface ProxySettings {
   proxyBypassHosts: Set<string> | undefined;
   proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
-  proxyRejectUnauthorizedCertificates: boolean;
+  proxyTLSSettings: TLSSettings;
 }
 
 export interface ResponseSettings {
   maxContentLength: number;
   timeout: number;
+}
+
+export interface TLSSettings {
+  verificationMode?: 'none' | 'certificate' | 'full';
 }

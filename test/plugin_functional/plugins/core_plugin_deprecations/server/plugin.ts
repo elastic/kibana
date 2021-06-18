@@ -18,6 +18,7 @@ async function getDeprecations({
     message: `CorePluginDeprecationsPlugin is a deprecated feature for testing.`,
     documentationUrl: 'test-url',
     level: 'warning',
+    deprecationType: 'feature',
     correctiveActions: {
       manualSteps: ['Step a', 'Step b'],
     },
@@ -28,7 +29,9 @@ async function getDeprecations({
       message: `SavedObject test-deprecations-plugin is still being used.`,
       documentationUrl: 'another-test-url',
       level: 'critical',
-      correctiveActions: {},
+      correctiveActions: {
+        manualSteps: ['Step a', 'Step b'],
+      },
     });
   }
 

@@ -19,14 +19,14 @@ describe('palettes', () => {
       it('should return different colors based on behind text flag', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
             totalSeriesAtDepth: 5,
           },
         ]);
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -44,14 +44,14 @@ describe('palettes', () => {
       it('should return different colors based on rank at current series', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
             totalSeriesAtDepth: 5,
           },
         ]);
-        const color2 = palette.getColor([
+        const color2 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 1,
@@ -64,7 +64,7 @@ describe('palettes', () => {
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor([
+        const color1 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
@@ -76,7 +76,7 @@ describe('palettes', () => {
             totalSeriesAtDepth: 2,
           },
         ]);
-        const color2 = palette.getColor([
+        const color2 = palette.getCategoricalColor([
           {
             name: 'abc',
             rankAtDepth: 0,
@@ -96,7 +96,7 @@ describe('palettes', () => {
       it('should return different colors based on behind text flag', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -108,7 +108,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -127,7 +127,7 @@ describe('palettes', () => {
       it('should return different colors for different keys', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -139,7 +139,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'def',
@@ -157,7 +157,7 @@ describe('palettes', () => {
       it('should return the same color for the same key, irregardless of rank', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'hij',
@@ -169,7 +169,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'hij',
@@ -187,7 +187,7 @@ describe('palettes', () => {
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -204,7 +204,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -227,7 +227,7 @@ describe('palettes', () => {
       it('should return the same index of the behind text palette for same key', () => {
         const palette = palettes.default;
 
-        const color1 = palette.getColor(
+        const color1 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -244,7 +244,7 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        const color2 = palette.getColor(
+        const color2 = palette.getCategoricalColor(
           [
             {
               name: 'klm',
@@ -273,15 +273,15 @@ describe('palettes', () => {
     const palette = palettes.warm;
 
     it('should use the whole gradient', () => {
-      const wholePalette = palette.getColors(10);
-      const color1 = palette.getColor([
+      const wholePalette = palette.getCategoricalColors(10);
+      const color1 = palette.getCategoricalColor([
         {
           name: 'abc',
           rankAtDepth: 0,
           totalSeriesAtDepth: 10,
         },
       ]);
-      const color2 = palette.getColor([
+      const color2 = palette.getCategoricalColor([
         {
           name: 'def',
           rankAtDepth: 9,
@@ -304,7 +304,7 @@ describe('palettes', () => {
 
     describe('syncColors: false', () => {
       it('should not query legacy color service', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -323,7 +323,7 @@ describe('palettes', () => {
       it('should respect the advanced settings color mapping', () => {
         const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
         configColorGetter.mockImplementation(() => 'blue');
-        const result = palette.getColor(
+        const result = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -345,7 +345,7 @@ describe('palettes', () => {
       });
 
       it('should return a color from the legacy palette based on position of first series', () => {
-        const result = palette.getColor(
+        const result = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -368,7 +368,7 @@ describe('palettes', () => {
 
     describe('syncColors: true', () => {
       it('should query legacy color service', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -387,7 +387,7 @@ describe('palettes', () => {
       it('should respect the advanced settings color mapping', () => {
         const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
         configColorGetter.mockImplementation(() => 'blue');
-        const result = palette.getColor(
+        const result = palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -409,7 +409,7 @@ describe('palettes', () => {
       });
 
       it('should always use root series', () => {
-        palette.getColor(
+        palette.getCategoricalColor(
           [
             {
               name: 'abc',
@@ -437,7 +437,7 @@ describe('palettes', () => {
   describe('custom palette', () => {
     const palette = palettes.custom;
     it('should return different colors based on rank at current series', () => {
-      const color1 = palette.getColor(
+      const color1 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -450,7 +450,7 @@ describe('palettes', () => {
           colors: ['#00ff00', '#000000'],
         }
       );
-      const color2 = palette.getColor(
+      const color2 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -467,7 +467,7 @@ describe('palettes', () => {
     });
 
     it('should return the same color for different positions on outer series layers', () => {
-      const color1 = palette.getColor(
+      const color1 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -485,7 +485,7 @@ describe('palettes', () => {
           colors: ['#00ff00', '#000000'],
         }
       );
-      const color2 = palette.getColor(
+      const color2 = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -507,7 +507,7 @@ describe('palettes', () => {
     });
 
     it('should use passed in colors', () => {
-      const color = palette.getColor(
+      const color = palette.getCategoricalColor(
         [
           {
             name: 'abc',
@@ -522,6 +522,57 @@ describe('palettes', () => {
         }
       );
       expect(color).toEqual('#00ff00');
+    });
+
+    // just an integration test here. More in depth tests on the subject can be found on the helper file
+    it('should return a color for the given value with its domain', () => {
+      expect(
+        palette.getColorForValue!(
+          0,
+          { colors: ['red', 'green', 'blue'], stops: [], gradient: false },
+          { min: 0, max: 100 }
+        )
+      ).toBe('red');
+    });
+
+    it('should return a color for the given value with its domain based on custom stops', () => {
+      expect(
+        palette.getColorForValue!(
+          60,
+          {
+            colors: ['red', 'green', 'blue'],
+            stops: [10, 50, 100],
+            range: 'percent',
+            gradient: false,
+            rangeMin: 0,
+            rangeMax: 100,
+          },
+          { min: 0, max: 100 }
+        )
+      ).toBe('blue');
+    });
+
+    // just make sure to not have broken anything
+    it('should work with only legacy arguments, filling with default values the new ones', () => {
+      expect(palette.toExpression({ colors: [], gradient: false })).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'palette',
+            arguments: {
+              color: [],
+              gradient: [false],
+              reverse: [false],
+              continuity: ['above'],
+              stop: [],
+              range: ['percent'],
+              rangeMax: [],
+              rangeMin: [],
+            },
+          },
+        ],
+      });
     });
   });
 });

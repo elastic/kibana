@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CasePostRequest, CaseType, ConnectorTypes } from '../../../common';
+import {
+  CasePostRequest,
+  CaseType,
+  ConnectorTypes,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
@@ -23,6 +28,7 @@ export const sampleData: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 export const sampleConnectorData = { loading: false, connectors: [] };

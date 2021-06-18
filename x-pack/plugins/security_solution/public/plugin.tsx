@@ -42,8 +42,10 @@ import {
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
+  CASES_APP_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
+  DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -273,7 +275,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.case}`,
+      id: CASES_APP_ID,
       title: CASE,
       order: 9002,
       euiIconType: APP_ICON_SOLUTION,
@@ -446,6 +448,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        this.config.enableExperimental || []
+      );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
@@ -474,9 +479,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       let signal: { name: string | null } = { name: null };
       try {
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        // TODO: Once we are past experimental phase this code should be removed
+        // TODO: This currently prevents TGrid from refreshing
+        if (experimentalFeatures.ruleRegistryEnabled) {
+          signal = { name: DEFAULT_ALERTS_INDEX };
+        } else {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -514,7 +525,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
-            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
+            enableExperimental: experimentalFeatures,
           }
         ),
         {

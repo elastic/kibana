@@ -209,6 +209,13 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -222,7 +229,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -280,7 +287,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -365,6 +372,7 @@ export function XYChart({
     hideEndzones,
     yLeftExtent,
     yRightExtent,
+    valuesInLegend,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -602,7 +610,6 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend.position}
-        showLegendExtra={false}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -622,6 +629,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis
@@ -798,7 +806,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,

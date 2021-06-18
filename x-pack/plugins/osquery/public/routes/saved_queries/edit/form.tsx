@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBottomBar, EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -32,7 +39,7 @@ const EditSavedQueryFormComponent = ({ defaultValue, handleSubmit }) => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" {...savedQueryListProps}>
                   <FormattedMessage
-                    id="xpack.osquery.addSavedQuery.form.cancelButtonLabel"
+                    id="xpack.osquery.editSavedQuery.form.cancelButtonLabel"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -47,8 +54,8 @@ const EditSavedQueryFormComponent = ({ defaultValue, handleSubmit }) => {
                   onClick={form.submit}
                 >
                   <FormattedMessage
-                    id="xpack.osquery.addSavedQuery.form.saveQueryButtonLabel"
-                    defaultMessage="Save query"
+                    id="xpack.osquery.editSavedQuery.form.updateQueryButtonLabel"
+                    defaultMessage="Update query"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -56,6 +63,9 @@ const EditSavedQueryFormComponent = ({ defaultValue, handleSubmit }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
     </Form>
   );
 };

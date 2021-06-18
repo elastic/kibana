@@ -13,10 +13,6 @@ import {
 import { PLUGIN_ID } from '../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
-  // register ML for the kibana home screen.
-  // so the file data visualizer appears to allow people to import data
-  home.environment.update({ ml: true });
-
   // register ML so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: PLUGIN_ID,
@@ -36,20 +32,5 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     category: FeatureCatalogueCategory.DATA,
     solutionId: 'kibana',
     order: 500,
-  });
-
-  home.featureCatalogue.register({
-    id: `${PLUGIN_ID}_file_data_visualizer`,
-    title: i18n.translate('xpack.ml.fileDataVisualizerTitle', {
-      defaultMessage: 'Upload a file',
-    }),
-    description: i18n.translate('xpack.ml.fileDataVisualizerDescription', {
-      defaultMessage: 'Import your own CSV, NDJSON, or log file.',
-    }),
-    icon: 'document',
-    path: '/app/ml/filedatavisualizer',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA,
-    order: 520,
   });
 };

@@ -8,9 +8,9 @@
 
 import { mathAgg } from '../series/math';
 
-export function math(bucket, panel, series) {
+export function math(bucket, panel, series, meta, extractFields) {
   return (next) => (results) => {
-    const mathFn = mathAgg({ aggregations: bucket }, panel, series);
+    const mathFn = mathAgg({ aggregations: bucket }, panel, series, meta, extractFields);
     return mathFn(next)(results);
   };
 }

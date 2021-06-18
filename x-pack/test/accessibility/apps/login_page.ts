@@ -17,12 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Security', () => {
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       afterEach(async () => {

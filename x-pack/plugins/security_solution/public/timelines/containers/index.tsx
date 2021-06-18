@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel, KueryFilterQueryKind } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
@@ -197,6 +198,9 @@ export const useTimelineEvents = ({
   });
   const { addError, addWarning } = useAppToasts();
 
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
       if (request == null || pageName === '' || skip) {
@@ -305,7 +309,10 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (
+      skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) ||
+      indexNames.length === 0
+    ) {
       return;
     }
 
@@ -364,7 +371,10 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
+      if (
+        !skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) &&
+        !deepEqual(prevRequest, currentRequest)
+      ) {
         return currentRequest;
       }
       return prevRequest;
@@ -380,6 +390,7 @@ export const useTimelineEvents = ({
     id,
     language,
     limit,
+    ruleRegistryEnabled,
     startDate,
     sort,
     fields,

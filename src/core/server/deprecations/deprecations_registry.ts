@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DeprecationsDetails, RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
+import type {
+  DeprecationsDetails,
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+} from './types';
 
 export class DeprecationsRegistry {
   private readonly deprecationContexts: RegisterDeprecationsConfig[] = [];

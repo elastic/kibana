@@ -17,7 +17,7 @@ import {
 } from 'src/core/public/mocks';
 import { HttpSetup } from 'src/core/public';
 
-import { mockKibanaSemverVersion, UA_READONLY_MODE } from '../../../common/constants';
+import { mockKibanaSemverVersion } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
@@ -40,7 +40,7 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
       prevMajor: mockKibanaSemverVersion.major - 1,
       nextMajor: mockKibanaSemverVersion.major + 1,
     },
-    isReadOnlyMode: UA_READONLY_MODE,
+    isReadOnlyMode: false,
     notifications: notificationServiceMock.createStartContract(),
     api: apiService,
     breadcrumbs: breadcrumbService,

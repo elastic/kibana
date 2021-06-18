@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, rerender } from '../../../__mocks__';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
@@ -13,6 +13,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiBadge, EuiIcon } from '@elastic/eui';
+
+import { rerender } from '../../../test_helpers';
 
 import { EngineNav } from './engine_nav';
 

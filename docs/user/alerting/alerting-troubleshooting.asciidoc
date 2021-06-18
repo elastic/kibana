@@ -1,6 +1,9 @@
 [role="xpack"]
 [[alerting-troubleshooting]]
 == Alerting Troubleshooting
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
 
 This page describes how to resolve common problems you might encounter with Alerting.
 If your problem isn’t described here, please review open issues in the following GitHub repositories:

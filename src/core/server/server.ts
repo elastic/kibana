@@ -193,8 +193,6 @@ export class Server {
 
     const deprecationsSetup = this.deprecations.setup({
       http: httpSetup,
-      elasticsearch: elasticsearchServiceSetup,
-      coreUsageData: coreUsageDataSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
@@ -263,6 +261,7 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
+    this.status.start();
     await this.http.start();
 
     startTransaction?.end();

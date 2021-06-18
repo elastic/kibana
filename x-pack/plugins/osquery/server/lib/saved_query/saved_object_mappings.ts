@@ -14,9 +14,8 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
-    // change to keyword?
-    name: {
-      type: 'text',
+    id: {
+      type: 'keyword',
     },
     query: {
       type: 'text',
@@ -38,6 +37,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     updatedBy: {
       type: 'text',
+    },
+    interval: {
+      type: 'keyword',
     },
   },
 };

@@ -34,6 +34,7 @@ export const getHealth = async (
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (decryptErrorData.length > 0) {
@@ -51,6 +52,7 @@ export const getHealth = async (
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (executeErrorData.length > 0) {
@@ -68,6 +70,7 @@ export const getHealth = async (
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (readErrorData.length > 0) {
@@ -83,6 +86,7 @@ export const getHealth = async (
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
+    namespaces: ['*'],
   });
   const lastExecutionDate =
     noErrorData.length > 0

@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: indexName,
           });
 
+          // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
           const updatedIndexSettings = indexSettingsResponse[indexName].settings.index;
 
           // Verify number_of_shards and number_of_replicas are unchanged

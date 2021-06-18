@@ -41,7 +41,7 @@ const maybeAdd = (to: any[], value: any) => {
   to.push(value);
 };
 
-function getProfilingStats({
+async function getProfilingStats({
   apmEventClient,
   filter,
   valueTypeField,
@@ -50,49 +50,47 @@ function getProfilingStats({
   filter: ESFilter[];
   valueTypeField: string;
 }) {
-  return withApmSpan('get_profiling_stats', async () => {
-    const response = await apmEventClient.search({
-      apm: {
-        events: [ProcessorEvent.profile],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter,
-          },
+  const response = await apmEventClient.search('get_profiling_stats', {
+    apm: {
+      events: [ProcessorEvent.profile],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter,
         },
-        aggs: {
-          stacks: {
-            terms: {
-              field: PROFILE_TOP_ID,
-              size: MAX_STACK_IDS,
-              order: {
-                value: 'desc',
-              },
+      },
+      aggs: {
+        stacks: {
+          terms: {
+            field: PROFILE_TOP_ID,
+            size: MAX_STACK_IDS,
+            order: {
+              value: 'desc',
             },
-            aggs: {
-              value: {
-                sum: {
-                  field: valueTypeField,
-                },
+          },
+          aggs: {
+            value: {
+              sum: {
+                field: valueTypeField,
               },
             },
           },
         },
       },
-    });
-
-    const stacks =
-      response.aggregations?.stacks.buckets.map((stack) => {
-        return {
-          id: stack.key as string,
-          value: stack.value.value!,
-        };
-      }) ?? [];
-
-    return stacks;
+    },
   });
+
+  const stacks =
+    response.aggregations?.stacks.buckets.map((stack) => {
+      return {
+        id: stack.key as string,
+        value: stack.value.value!,
+      };
+    }) ?? [];
+
+  return stacks;
 }
 
 function getProfilesWithStacks({
@@ -103,8 +101,9 @@ function getProfilesWithStacks({
   filter: ESFilter[];
 }) {
   return withApmSpan('get_profiles_with_stacks', async () => {
-    const cardinalityResponse = await withApmSpan('get_top_cardinality', () =>
-      apmEventClient.search({
+    const cardinalityResponse = await apmEventClient.search(
+      'get_top_cardinality',
+      {
         apm: {
           events: [ProcessorEvent.profile],
         },
@@ -121,7 +120,7 @@ function getProfilesWithStacks({
             },
           },
         },
-      })
+      }
     );
 
     const cardinality = cardinalityResponse.aggregations?.top.value ?? 0;
@@ -140,39 +139,37 @@ function getProfilesWithStacks({
     const allResponses = await withApmSpan('get_all_stacks', async () => {
       return Promise.all(
         [...new Array(partitions)].map(async (_, num) => {
-          const response = await withApmSpan('get_partition', () =>
-            apmEventClient.search({
-              apm: {
-                events: [ProcessorEvent.profile],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter,
-                  },
+          const response = await apmEventClient.search('get_partition', {
+            apm: {
+              events: [ProcessorEvent.profile],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter,
                 },
-                aggs: {
-                  top: {
-                    terms: {
-                      field: PROFILE_TOP_ID,
-                      size: Math.max(MAX_STACKS_PER_REQUEST),
-                      include: {
-                        num_partitions: partitions,
-                        partition: num,
-                      },
+              },
+              aggs: {
+                top: {
+                  terms: {
+                    field: PROFILE_TOP_ID,
+                    size: Math.max(MAX_STACKS_PER_REQUEST),
+                    include: {
+                      num_partitions: partitions,
+                      partition: num,
                     },
-                    aggs: {
-                      latest: {
-                        top_hits: {
-                          _source: [PROFILE_TOP_ID, PROFILE_STACK],
-                        },
+                  },
+                  aggs: {
+                    latest: {
+                      top_hits: {
+                        _source: [PROFILE_TOP_ID, PROFILE_STACK],
                       },
                     },
                   },
                 },
               },
-            })
-          );
+            },
+          });
 
           return (
             response.aggregations?.top.buckets.flatMap((bucket) => {

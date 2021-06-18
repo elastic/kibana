@@ -7,10 +7,10 @@
 
 import * as t from 'io-ts';
 
-export const name = t.string;
-export type Name = t.TypeOf<typeof name>;
-export const nameOrUndefined = t.union([name, t.undefined]);
-export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
+export const id = t.string;
+export type Id = t.TypeOf<typeof id>;
+export const idOrUndefined = t.union([id, t.undefined]);
+export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
 export const agentSelection = t.type({
   agents: t.array(t.string),
@@ -42,3 +42,8 @@ export const version = t.string;
 export type Version = t.TypeOf<typeof query>;
 export const versionOrUndefined = t.union([version, t.undefined]);
 export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
+
+export const interval = t.string;
+export type Interval = t.TypeOf<typeof query>;
+export const intervalOrUndefined = t.union([interval, t.undefined]);
+export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;

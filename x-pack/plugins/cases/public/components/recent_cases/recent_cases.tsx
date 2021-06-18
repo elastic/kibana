@@ -32,6 +32,7 @@ export interface RecentCasesProps {
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }
+
 const usePrevious = (value: Partial<FilterOptions>) => {
   const ref = useRef();
   useEffect(() => {
@@ -46,7 +47,9 @@ export const RecentCasesComp = ({
   maxCasesToShow,
 }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({ perPage: maxCasesToShow });
+  const { data, loading, setFilters } = useGetCases({
+    initialQueryParams: { perPage: maxCasesToShow },
+  });
 
   useEffect(() => {
     if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {

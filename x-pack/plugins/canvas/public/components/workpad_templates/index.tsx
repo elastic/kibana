@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useEffect, FunctionComponent } from 'react';
+import React, { useCallback, useState, useEffect, FunctionComponent } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { RouterContext } from '../router';
+import { useHistory } from 'react-router-dom';
+
 import { ComponentStrings } from '../../../i18n/components';
 // @ts-expect-error
 import * as workpadService from '../../lib/workpad_service';
@@ -15,7 +16,7 @@ import { WorkpadTemplates as Component } from './workpad_templates';
 import { CanvasTemplate } from '../../../types';
 import { list } from '../../lib/template_service';
 import { applyTemplateStrings } from '../../../i18n/templates/apply_strings';
-import { useNotifyService } from '../../services';
+import { useNotifyService, useServices } from '../../services';
 
 interface WorkpadTemplatesProps {
   onClose: () => void;
@@ -28,7 +29,9 @@ const Creating: FunctionComponent<{ name: string }> = ({ name }) => (
   </div>
 );
 export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onClose }) => {
-  const router = useContext(RouterContext);
+  const history = useHistory();
+  const services = useServices();
+
   const [templates, setTemplates] = useState<CanvasTemplate[] | undefined>(undefined);
   const [creatingFromTemplateName, setCreatingFromTemplateName] = useState<string | undefined>(
     undefined
@@ -53,20 +56,21 @@ export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onC
     }, {});
   }
 
-  const createFromTemplate = async (template: CanvasTemplate) => {
-    setCreatingFromTemplateName(template.name);
-    try {
-      const result = await workpadService.createFromTemplate(template.id);
-      if (router) {
-        router.navigateTo('loadWorkpad', { id: result.data.id, page: 1 });
+  const createFromTemplate = useCallback(
+    async (template: CanvasTemplate) => {
+      setCreatingFromTemplateName(template.name);
+      try {
+        const result = await services.workpad.createFromTemplate(template.id);
+        history.push(`/workpad/${result.id}/page/1`);
+      } catch (e) {
+        setCreatingFromTemplateName(undefined);
+        error(e, {
+          title: `Couldn't create workpad from template`,
+        });
       }
-    } catch (e) {
-      setCreatingFromTemplateName(undefined);
-      error(e, {
-        title: `Couldn't create workpad from template`,
-      });
-    }
-  };
+    },
+    [services.workpad, error, history]
+  );
 
   if (creatingFromTemplateName) {
     return <Creating name={creatingFromTemplateName} />;

@@ -52,6 +52,7 @@ exports.externals = {
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
+  fflate: '__kbnSharedDeps__.Fflate',
 
   /**
    * runtime deps which don't need to be copied across all bundles

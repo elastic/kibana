@@ -12,6 +12,7 @@ import { generateEncodedPath } from '../utils/encode_path_params';
 export const mockEngineValues = {
   engineName: 'some-engine',
   engine: {} as EngineDetails,
+  searchKey: 'search-abc123',
 };
 
 export const mockEngineActions = {
