@@ -323,6 +323,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             )
           : fromPackageWithoutAgentsAssigned
           ? toMountPoint(
+              // To render the link below we need to mount this JSX in the success toast
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.integrationsContextaddAgentNextNotificationMessage"
                 defaultMessage="Next, {link} to start ingesting data."

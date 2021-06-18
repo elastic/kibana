@@ -7,58 +7,28 @@
 
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import type { SimpleSavedObject } from 'src/core/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiLink,
-  EuiText,
-  EuiAccordion,
-  EuiSpacer,
-  EuiBadge,
-  EuiSplitPanel,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { Loading, Error } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
-import { InstallStatus, KibanaAssetType } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
-import {
-  useGetPackageInstallStatus,
-  useLink,
-  useStartServices,
-  getHrefToObjectInKibanaApp,
-} from '../../../../../hooks';
+import { useGetPackageInstallStatus, useLink, useStartServices } from '../../../../../hooks';
 
-import { AssetTitleMap } from '../../../../../constants';
+import type { AssetSavedObject } from './types';
+import { allowedAssetTypes } from './constants';
+import { AssetsAccordion } from './assets_accordion';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
 
-type AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization
-];
-
-const allowedAssetTypes: AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-];
-
-type AssetSavedObject = SimpleSavedObject<{ title: string; description?: string }>;
-
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const {
     savedObjects: { client: savedObjectsClient },
-    http,
   } = useStartServices();
 
   const { getPath } = useLink();
@@ -115,7 +85,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
     );
   }
 
-  let content: JSX.Element;
+  let content: JSX.Element | Array<JSX.Element | null>;
 
   if (isLoading) {
     content = <Loading />;
@@ -143,85 +113,20 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       </EuiTitle>
     );
   } else {
-    content = (
-      <>
-        {allowedAssetTypes.map((assetType) => {
-          const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
-          if (!sectionAssetSavedObjects.length) {
-            return null;
-          }
+    content = allowedAssetTypes.map((assetType) => {
+      const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
 
-          return (
-            <>
-              <EuiAccordion
-                buttonContent={
-                  <EuiFlexGroup
-                    justifyContent="center"
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="s">
-                        <h3>{AssetTitleMap[assetType]}</h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge>{sectionAssetSavedObjects.length}</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                id={assetType}
-              >
-                <>
-                  <EuiSpacer size="l" />
-                  <EuiSplitPanel.Outer
-                    className="customOuterSplitPanel"
-                    hasBorder
-                    hasShadow={false}
-                  >
-                    {sectionAssetSavedObjects.map(
-                      ({ id, type, attributes: { title, description } }, idx) => {
-                        const pathToObjectInApp = getHrefToObjectInKibanaApp({
-                          http,
-                          id,
-                          type: type as KibanaAssetType,
-                        });
-                        return (
-                          <>
-                            <EuiSplitPanel.Inner grow={false} key={idx}>
-                              <EuiText size="m">
-                                <p>
-                                  {pathToObjectInApp ? (
-                                    <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
-                                  ) : (
-                                    title
-                                  )}
-                                </p>
-                              </EuiText>
-                              <EuiSpacer size="s" />
-                              {description && (
-                                <EuiText size="s" color="subdued">
-                                  <p>{description}</p>
-                                </EuiText>
-                              )}
-                            </EuiSplitPanel.Inner>
-                            {idx + 1 < sectionAssetSavedObjects.length && (
-                              <EuiHorizontalRule margin="none" />
-                            )}
-                          </>
-                        );
-                      }
-                    )}
-                  </EuiSplitPanel.Outer>
-                </>
-              </EuiAccordion>
-              <EuiSpacer size="l" />
-            </>
-          );
-        })}
-      </>
-    );
+      if (!sectionAssetSavedObjects.length) {
+        return null;
+      }
+
+      return (
+        <>
+          <AssetsAccordion savedObjects={sectionAssetSavedObjects} type={assetType} />
+          <EuiSpacer size="l" />
+        </>
+      );
+    });
   }
 
   return (
