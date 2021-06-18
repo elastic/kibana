@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaLocation } from 'src/plugins/share/public';
 import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ApplyGlobalFilterActionContext,
@@ -23,7 +24,6 @@ import {
   AbstractDashboardDrilldownParams,
   AbstractDashboardDrilldownConfig as Config,
 } from '../abstract_dashboard_drilldown';
-import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
 import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
@@ -49,7 +49,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
 
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
-  protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
+  protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
     const state: DashboardUrlGeneratorState = {
       dashboardId: config.dashboardId,
     };
@@ -86,10 +86,9 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       state.timeRange = timeRangeFromEvent;
     }
 
-    const path = await this.urlGenerator.createUrl(state);
-    const url = new KibanaURL(path);
+    const location = await this.locator.getLocation(state as any);
 
-    return url;
+    return location;
   }
 
   public readonly inject = createInject({ drilldownId: this.id });
