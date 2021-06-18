@@ -52,7 +52,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -69,7 +69,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [
+    breakdownFields: [
       SERVICE_NAME,
       USER_AGENT_NAME,
       USER_AGENT_OS,
@@ -77,7 +77,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       USER_AGENT_DEVICE,
       URL_FULL,
     ],
-    filters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],

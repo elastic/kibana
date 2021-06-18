@@ -28,9 +28,9 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
       },
     ],
     hasOperationType: false,
-    defaultFilters: ['observer.geo.name', 'monitor.type', 'tags'],
-    breakdowns: ['observer.geo.name', 'monitor.type'],
-    filters: [...buildExistsFilter('summary.up', indexPattern)],
+    filterFields: ['observer.geo.name', 'monitor.type', 'tags'],
+    breakdownFields: ['observer.geo.name', 'monitor.type'],
+    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
       {

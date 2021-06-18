@@ -54,7 +54,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -67,7 +67,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
     reportDefinitions: [
       {
         field: SERVICE_NAME,
@@ -94,7 +94,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
         ],
       },
     ],
-    filters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],

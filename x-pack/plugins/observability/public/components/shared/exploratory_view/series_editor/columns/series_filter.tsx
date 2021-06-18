@@ -23,8 +23,8 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
-  defaultFilters: SeriesConfig['defaultFilters'];
-  filters: SeriesConfig['filters'];
+  defaultFilters: SeriesConfig['filterFields'];
+  filters: SeriesConfig['baseFilters'];
   seriesConfig: SeriesConfig;
   isNew?: boolean;
   labels?: Record<string, string>;

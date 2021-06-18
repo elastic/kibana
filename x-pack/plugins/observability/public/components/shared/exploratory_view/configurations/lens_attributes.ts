@@ -299,7 +299,7 @@ export class LensAttributes {
       return this.getBreakdownColumn({
         layerId,
         indexPattern: layerConfig.indexPattern,
-        sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdowns[0],
+        sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
       });
     }
 
@@ -457,7 +457,7 @@ export class LensAttributes {
   getLayerFilters(layerConfig: LayerConfig) {
     const {
       filters,
-      seriesConfig: { filters: layerFilters },
+      seriesConfig: { baseFilters: layerFilters },
     } = layerConfig;
     let baseFilters = '';
 

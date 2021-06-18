@@ -54,7 +54,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -67,8 +67,8 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    filters: [
+    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],

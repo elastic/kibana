@@ -28,8 +28,8 @@ export function getSyntheticsDistributionConfig({
       },
     ],
     hasOperationType: false,
-    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
-    breakdowns: [
+    filterFields: ['monitor.type', 'observer.geo.name', 'tags'],
+    breakdownFields: [
       'observer.geo.name',
       'monitor.name',
       'monitor.id',
@@ -37,7 +37,7 @@ export function getSyntheticsDistributionConfig({
       'tags',
       'url.port',
     ],
-    filters: [...buildExistsFilter('summary.up', indexPattern)],
+    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
     reportDefinitions: [
       {
         field: 'monitor.name',

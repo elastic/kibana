@@ -23,9 +23,9 @@ export function getNetworkActivityLensConfig({}: ConfigProps): SeriesConfig {
       },
     ],
     hasOperationType: true,
-    defaultFilters: [],
-    breakdowns: ['host.hostname'],
-    filters: [],
+    filterFields: [],
+    breakdownFields: ['host.hostname'],
+    baseFilters: [],
     labels: { ...FieldLabels, 'host.hostname': 'Host name' },
     reportDefinitions: [
       {

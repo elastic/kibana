@@ -19,7 +19,7 @@ export function ReportBreakdowns({
   return (
     <Breakdowns
       seriesConfig={seriesConfig}
-      breakdowns={seriesConfig.breakdowns ?? []}
+      breakdowns={seriesConfig.breakdownFields ?? []}
       seriesId={seriesId}
     />
   );

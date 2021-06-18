@@ -23,7 +23,7 @@ describe('Breakdowns', function () {
     render(
       <Breakdowns
         seriesId={'series-id'}
-        breakdowns={dataViewSeries.breakdowns}
+        breakdowns={dataViewSeries.breakdownFields}
         seriesConfig={dataViewSeries}
       />
     );
@@ -37,7 +37,7 @@ describe('Breakdowns', function () {
     const { setSeries } = render(
       <Breakdowns
         seriesId={'series-id'}
-        breakdowns={dataViewSeries.breakdowns}
+        breakdowns={dataViewSeries.breakdownFields}
         seriesConfig={dataViewSeries}
       />,
       { initSeries }

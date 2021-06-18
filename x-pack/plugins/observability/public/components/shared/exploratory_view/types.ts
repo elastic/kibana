@@ -56,11 +56,11 @@ export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
+  baseFilters?: PersistableFilter[] | ExistsFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   hasOperationType: boolean;

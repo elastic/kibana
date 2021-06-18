@@ -26,19 +26,19 @@ export function getServiceLatencyLensConfig({ indexPattern }: ConfigProps): Seri
       },
     ],
     hasOperationType: true,
-    defaultFilters: [
+    filterFields: [
       'user_agent.name',
       'user_agent.os.name',
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    breakdowns: [
+    breakdownFields: [
       'user_agent.name',
       'user_agent.os.name',
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
+    baseFilters: buildPhraseFilter('transaction.type', 'request', indexPattern),
     labels: { ...FieldLabels, [TRANSACTION_DURATION]: 'Latency' },
     reportDefinitions: [
       {
