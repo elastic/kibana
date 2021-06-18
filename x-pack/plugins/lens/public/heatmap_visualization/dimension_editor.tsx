@@ -109,6 +109,7 @@ export function HeatmapDimensionEditor(
                 if (newPalette.params && !newPalette.params.stops) {
                   newPalette.params.stops = displayStops;
                 }
+                (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
                 setState({
                   ...state,
                   palette: newPalette as HeatmapVisualizationState['palette'],
