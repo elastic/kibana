@@ -31,7 +31,7 @@ import { SystemEcs } from './system';
 import { ThreatEcs } from './threat';
 import { Ransomware } from './ransomware';
 import { MemoryProtection } from './memory_protection';
-import { Target } from './target';
+import { Target } from './target_type';
 
 export interface Ecs {
   _id: string;
