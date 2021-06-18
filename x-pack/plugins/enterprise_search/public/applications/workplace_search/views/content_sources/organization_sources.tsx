@@ -39,19 +39,23 @@ export const OrganizationSources: React.FC = () => {
     <WorkplaceSearchPageTemplate
       pageChrome={[NAV.SOURCES]}
       pageViewTelemetry="organization_sources"
-      pageHeader={{
-        pageTitle: ORG_SOURCES_HEADER_TITLE,
-        description: ORG_SOURCES_HEADER_DESCRIPTION,
-        rightSideItems: [
-          <EuiButtonTo
-            to={getSourcesPath(ADD_SOURCE_PATH, true)}
-            data-test-subj="AddSourceButton"
-            fill
-          >
-            {ORG_SOURCES_LINK}
-          </EuiButtonTo>,
-        ],
-      }}
+      pageHeader={
+        dataLoading
+          ? undefined
+          : {
+              pageTitle: ORG_SOURCES_HEADER_TITLE,
+              description: ORG_SOURCES_HEADER_DESCRIPTION,
+              rightSideItems: [
+                <EuiButtonTo
+                  to={getSourcesPath(ADD_SOURCE_PATH, true)}
+                  data-test-subj="AddSourceButton"
+                  fill
+                >
+                  {ORG_SOURCES_LINK}
+                </EuiButtonTo>,
+              ],
+            }
+      }
       isLoading={dataLoading}
       isEmptyState={!contentSources.length}
       emptyState={<Redirect to={getSourcesPath(ADD_SOURCE_PATH, true)} />}

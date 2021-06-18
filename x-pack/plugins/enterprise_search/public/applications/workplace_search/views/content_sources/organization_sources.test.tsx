@@ -39,4 +39,11 @@ describe('OrganizationSources', () => {
 
     expect(wrapper.find(SourcesTable)).toHaveLength(1);
   });
+
+  it('does not render a page header when data is loading (to prevent a jump after redirect)', () => {
+    setMockValues({ ...mockValues, dataLoading: true });
+    const wrapper = shallow(<OrganizationSources />);
+
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
+  });
 });
