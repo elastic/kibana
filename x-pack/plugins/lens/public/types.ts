@@ -577,7 +577,7 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
+  initialize: (layerId: string, state?: T, mainPalette?: PaletteOutput) => T;
 
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 

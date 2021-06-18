@@ -380,17 +380,16 @@ export function loadDocument(
             visualization.activeId && visualizationMap[visualization.activeId];
 
           if (visualization.state === null && activeVisualization) {
-            const initialVisualizationState = activeVisualization.initialize(() => {
-              const newLayerId = generateId();
-              lensStore.dispatch(
-                updateLayer({
-                  datasourceId: activeDatasourceId!,
-                  layerId: newLayerId,
-                  updater: datasourceMap[activeDatasourceId!].insertLayer,
-                })
-              );
-              return newLayerId;
-            });
+            const newLayerId = generateId();
+
+            const initialVisualizationState = activeVisualization.initialize(newLayerId);
+            lensStore.dispatch(
+              updateLayer({
+                datasourceId: activeDatasourceId!,
+                layerId: newLayerId,
+                updater: datasourceMap[activeDatasourceId!].insertLayer,
+              })
+            );
             lensStore.dispatch(
               updateVisualizationState({
                 visualizationId: activeVisualization.id,

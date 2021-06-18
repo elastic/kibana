@@ -101,11 +101,11 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
-  initialize(addNewLayer, state) {
+  initialize(layerId, state) {
     return (
       state || {
         columns: [],
-        layerId: addNewLayer(),
+        layerId,
       }
     );
   },

@@ -119,10 +119,10 @@ export const getHeatmapVisualization = ({
     return CHART_NAMES.heatmap;
   },
 
-  initialize(addNewLayer, state, mainPalette) {
+  initialize(layerId, state, mainPalette) {
     return (
       state || {
-        layerId: addNewLayer(),
+        layerId,
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }

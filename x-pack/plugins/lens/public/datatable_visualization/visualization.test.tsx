@@ -21,7 +21,7 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 function mockFrame(): FramePublicAPI {
   return {
     ...createMockFramePublicAPI(),
-    addNewLayer: () => 'aaa',
+    layerId: 'aaa',
     removeLayers: () => {},
     datasourceLayers: {},
     query: { query: '', language: 'lucene' },

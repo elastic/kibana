@@ -232,16 +232,19 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       subVisualizationId,
       dataLoss,
       getVisualizationState: topSuggestion
-        ? () =>
-            switchVisType(
+        ? () => {
+            const layerId = addNewLayer();
+            return switchVisType(
               subVisualizationId,
-              newVisualization.initialize(addNewLayer, topSuggestion.visualizationState)
-            )
+              newVisualization.initialize(layerId, topSuggestion.visualizationState)
+            );
+          }
         : () => {
+            const layerId = addNewLayer();
             return switchVisType(
               subVisualizationId,
               newVisualization.initialize(
-                addNewLayer,
+                layerId,
                 props.visualizationId === newVisualization.id
                   ? props.visualizationState
                   : undefined,

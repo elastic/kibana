@@ -296,7 +296,7 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.initialize).toHaveBeenCalledWith({
         datasourceLayers: {},
-        addNewLayer: expect.any(Function),
+        layerId: expect.any(Function),
         removeLayers: expect.any(Function),
         query: { query: '', language: 'lucene' },
         filters: [],
@@ -350,7 +350,7 @@ describe('editor_frame', () => {
         },
       });
       act(() => {
-        mockVisualization.initialize.mock.calls[0][0].addNewLayer();
+        mockVisualization.initialize.mock.calls[0][0].layerId();
       });
 
       expect(mockDatasource2.insertLayer).toHaveBeenCalledWith(initialState, expect.anything());

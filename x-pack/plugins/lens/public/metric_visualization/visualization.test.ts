@@ -23,7 +23,7 @@ function exampleState(): MetricState {
 function mockFrame(): FramePublicAPI {
   return {
     ...createMockFramePublicAPI(),
-    addNewLayer: () => 'l42',
+    layerId: () => 'l42',
     datasourceLayers: {
       l1: createMockDatasource('l1').publicAPIMock,
       l42: createMockDatasource('l42').publicAPIMock,
