@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { Comparator } from './types';
-import * as mocks from './test_mocks';
-// import { RecoveredActionGroup } from '../../../../../alerting/common';
-import {
-  alertsMock,
-  AlertServicesMock,
-  AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
-import { InfraSources } from '../../sources';
-import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
+// import { RecoveredActionGroup } from '../../../../../alerting/common';
+import {
+  AlertInstanceMock,
+  AlertServicesMock,
+  alertsMock,
+} from '../../../../../alerting/server/mocks';
+import { LifecycleAlertServices } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { InfraSources } from '../../sources';
+import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import * as mocks from './test_mocks';
+import {
+  Aggregators,
+  Comparator,
+  CountMetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from './types';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -62,22 +69,20 @@ describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor(({
+      executor({
+        ...mockOptions,
         services,
         params: {
           sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
             },
           ],
         },
-        /**
-         * TODO: Remove this use of `as` by utilizing a proper type
-         */
-      } as unknown) as MetricThresholdAlertExecutorOptions);
+      });
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
@@ -131,15 +136,16 @@ describe('The metric threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           groupBy: 'something',
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
             },
@@ -175,21 +181,23 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       thresholdA: number[],
       thresholdB: number[],
-      groupBy: string = ''
+      groupBy: string = '',
+      sourceId: string = 'default'
     ) =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           groupBy,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdA,
             },
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdB,
               metric: 'test.metric.2',
@@ -230,19 +238,18 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the count aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseCountCriterion,
               comparator,
               threshold,
-              aggType: 'count',
-              metric: undefined,
-            },
+            } as CountMetricExpressionParams,
           ],
         },
       });
@@ -255,17 +262,18 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the p99 aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p99',
+              aggType: Aggregators.P99,
               metric: 'test.metric.2',
             },
           ],
@@ -280,17 +288,18 @@ describe('The metric threshold alert type', () => {
   });
   describe('querying with the p95 aggregator', () => {
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p95',
+              aggType: Aggregators.P95,
               metric: 'test.metric.1',
             },
           ],
@@ -305,16 +314,17 @@ describe('The metric threshold alert type', () => {
   });
   describe("querying a metric that hasn't reported data", () => {
     const instanceID = '*';
-    const execute = (alertOnNoData: boolean) =>
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
             },
           ],
@@ -333,18 +343,19 @@ describe('The metric threshold alert type', () => {
 
   describe("querying a rate-aggregated metric that hasn't reported data", () => {
     const instanceID = '*';
-    const execute = () =>
+    const execute = (sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
-              aggType: 'rate',
+              aggType: Aggregators.RATE,
             },
           ],
           alertOnNoData: true,
@@ -372,7 +383,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
               threshold,
             },
@@ -419,7 +430,7 @@ describe('The metric threshold alert type', () => {
           sourceId: 'default',
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               metric: 'test.metric.pct',
               comparator: Comparator.GT,
               threshold: [0.75],
@@ -458,7 +469,13 @@ const mockLibs: any = {
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const services: AlertServicesMock = alertsMock.createAlertServices();
+const alertsServices = alertsMock.createAlertServices();
+
+const services: AlertServicesMock &
+  LifecycleAlertServices<AlertInstanceState, AlertInstanceContext, string> = {
+  ...alertsServices,
+  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
+};
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
@@ -528,9 +545,18 @@ function mostRecentAction(id: string) {
   return alertInstances.get(id)!.actionQueue.pop();
 }
 
-const baseCriterion = {
-  aggType: 'avg',
+const baseNonCountCriterion: Pick<
+  NonCountMetricExpressionParams,
+  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
+> = {
+  aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
+  timeSize: 1,
+  timeUnit: 'm',
+};
+
+const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+  aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
 };

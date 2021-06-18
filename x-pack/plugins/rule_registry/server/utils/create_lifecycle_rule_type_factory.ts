@@ -66,7 +66,7 @@ export interface TrackedLifecycleAlertState {
   started: string;
 }
 
-export type WrappedLifecycleRuleState<State> = Record<string, unknown> & {
+export type WrappedLifecycleRuleState<State extends AlertTypeState> = Record<string, unknown> & {
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
@@ -297,7 +297,7 @@ export const createLifecycleRuleTypeFactory = ({
       );
 
       return {
-        wrapped: nextWrappedState ?? {},
+        wrapped: nextWrappedState ?? ({} as State),
         trackedAlerts: nextTrackedAlerts,
       };
     },

@@ -33,12 +33,12 @@ interface BaseMetricExpressionParams {
   warningThreshold?: number[];
 }
 
-interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
+export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Exclude<Aggregators, Aggregators.COUNT>;
   metric: string;
 }
 
-interface CountMetricExpressionParams extends BaseMetricExpressionParams {
+export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
   metric: never;
 }
