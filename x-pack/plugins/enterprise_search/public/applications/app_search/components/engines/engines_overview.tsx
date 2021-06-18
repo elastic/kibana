@@ -12,7 +12,7 @@ import { useValues, useActions } from 'kea';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPanel,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPageContentBody,
@@ -20,14 +20,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
-import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
+import { AppSearchPageTemplate } from '../layout';
 
 import {
   EnginesOverviewHeader,
@@ -77,12 +76,13 @@ export const EnginesOverview: React.FC = () => {
   if (!engines.length) return <EmptyState />;
 
   return (
-    <>
-      <SendTelemetry action="viewed" metric="engines_overview" />
-
+    <AppSearchPageTemplate
+      pageViewTelemetry="engines_overview"
+      pageChrome={[ENGINES_TITLE]}
+      pageHeader={{ children: <EnginesOverviewHeader /> }}
+    >
       <EnginesOverviewHeader />
-      <EuiPageContent hasBorder>
-        <FlashMessages />
+      <EuiPanel hasBorder>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -168,7 +168,7 @@ export const EnginesOverview: React.FC = () => {
             </EuiPageContentBody>
           </>
         )}
-      </EuiPageContent>
-    </>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };
