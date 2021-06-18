@@ -73,6 +73,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
+  // TODO get data here
+
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
   const [isolateAction, setIsolateAction] = useState('isolateHost');
