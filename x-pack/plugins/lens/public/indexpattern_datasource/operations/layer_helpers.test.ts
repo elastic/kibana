@@ -609,7 +609,7 @@ describe('state_helpers', () => {
           op: 'average',
           field: indexPattern.fields[2],
           visualizationGroups: [],
-          incompleteFilters: { filter: { language: 'kuery', query: '' }, timeShift: '3d' },
+          incompleteParams: { filter: { language: 'kuery', query: '' }, timeShift: '3d' },
         })
       ).toEqual(
         expect.objectContaining({

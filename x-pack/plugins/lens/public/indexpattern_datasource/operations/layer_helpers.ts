@@ -31,10 +31,12 @@ import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import { TimeScaleUnit } from '../time_scale';
 
-interface ColumnFilters {
+interface ColumnAdvancedParams {
   filter?: Query | undefined;
   timeShift?: string | undefined;
+  timeScale?: TimeScaleUnit | undefined;
 }
 
 interface ColumnChange {
@@ -46,7 +48,7 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
-  incompleteFilters?: ColumnFilters;
+  incompleteParams?: ColumnAdvancedParams;
 }
 
 interface ColumnCopy {
@@ -149,20 +151,22 @@ export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   return insertNewColumn(args);
 }
 
-export function ensureCompatibleFiltersAreMoved<
-  T extends {
-    operationType: OperationType;
-    filter?: unknown;
-    timeShift?: unknown;
-  }
->(column: T, referencedOperation: GenericOperationDefinition, previousColumn: ColumnFilters) {
+function ensureCompatibleFiltersAreMoved<T extends ColumnAdvancedParams>(
+  column: T,
+  referencedOperation: GenericOperationDefinition,
+  previousColumn: ColumnAdvancedParams
+) {
+  const newColumn = { ...column };
   if (referencedOperation.filterable) {
-    column.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
+    newColumn.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
   }
   if (referencedOperation.shiftable) {
-    column.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
+    newColumn.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
   }
-  return column;
+  if (referencedOperation.timeScalingMode !== 'disabled') {
+    newColumn.timeScale = (previousColumn as ReferenceBasedIndexPatternColumn).timeScale;
+  }
+  return newColumn;
 }
 
 // Insert a column into an empty ID. The field parameter is required when constructing
@@ -176,7 +180,7 @@ export function insertNewColumn({
   visualizationGroups,
   targetGroup,
   shouldResetLabel,
-  incompleteFilters,
+  incompleteParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -190,7 +194,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteFilters, ...layer.columns[columnId] },
+    previousColumn: { ...incompleteParams, ...layer.columns[columnId] },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -555,11 +559,9 @@ export function replaceColumn({
     }
 
     if (!field) {
-      const incompleteColumn: {
+      let incompleteColumn: {
         operationType: OperationType;
-        filter?: unknown;
-        timeShift?: unknown;
-      } = { operationType: op };
+      } & ColumnAdvancedParams = { operationType: op };
       // if no field is available perform a full clean of the column from the layer
       if (previousDefinition.input === 'fullReference') {
         tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
@@ -569,7 +571,11 @@ export function replaceColumn({
         if (referenceColumn) {
           const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
 
-          ensureCompatibleFiltersAreMoved(incompleteColumn, referencedOperation, previousColumn);
+          incompleteColumn = ensureCompatibleFiltersAreMoved(
+            incompleteColumn,
+            referencedOperation,
+            previousColumn
+          );
         }
       }
       return {
