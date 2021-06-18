@@ -109,11 +109,9 @@ export const EndpointActivityLog = memo(
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
                 {(!activityLogLoading || !isPagingDisabled) && <Sentinel ref={fetchMoreSentinel} />}
                 {isPagingDisabled && !activityLogLoading && (
-                  <p>
-                    <EuiText color="subdued" textAlign="center">
-                      {i18.ACTIVITY_LOG.LogEntry.endOfLog}
-                    </EuiText>
-                  </p>
+                  <EuiText color="subdued" textAlign="center">
+                    <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
+                  </EuiText>
                 )}
               </EuiFlexItem>
             </>
