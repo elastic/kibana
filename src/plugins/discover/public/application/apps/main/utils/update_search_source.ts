@@ -47,7 +47,7 @@ export function updateSearchSource(
   if (!persist) {
     const size = uiSettings.get(SAMPLE_SIZE_SETTING);
     searchSource
-      .setField('trackTotalHits', false)
+      .setField('trackTotalHits', true)
       .setField('size', size)
       .setField('sort', usedSort)
       .setField('highlightAll', true)

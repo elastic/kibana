@@ -240,6 +240,35 @@ export const useSavedSearch = ({
         useNewFieldsApi,
       });
 
+      const fetchAndSubscribeDocuments = () => {
+        const documentsSourceFetch$ = fetchDocuments({
+          abortController: refs.current.abortController!,
+          indexPattern,
+          inspectorAdapters,
+          searchSessionId: sessionId,
+          searchSource,
+          services,
+          stateContainer,
+          useNewFieldsApi,
+        });
+
+        documentsSourceFetch$.subscribe((res) => {
+          const documents = res.rawResponse.hits.hits;
+          const fieldCounts = calcFieldCounts(refs.current.fieldCounts, documents, indexPattern);
+          dataDocuments$.next({
+            fetchStatus: FetchStatus.COMPLETE,
+            result: documents,
+            fieldCounts,
+          });
+          refs.current.fieldCounts = fieldCounts;
+          refs.current.fetchStatus = FetchStatus.PARTIAL;
+          data$.next({
+            fetchStatus: FetchStatus.PARTIAL,
+          });
+        });
+        return documentsSourceFetch$;
+      };
+
       const fetchAndSubscribeChart = () => {
         const chartDataFetch$ = fetchChart({
           searchSource,
@@ -263,48 +292,25 @@ export const useSavedSearch = ({
         return chartDataFetch$;
       };
 
-      const totalHitsFetch$ = fetchTotalHits({
-        searchSource,
-        data,
-        abortController: refs.current.abortController,
-        searchSessionId: sessionId,
-        inspectorAdapters,
-      });
-      totalHitsFetch$.subscribe((res) => {
-        const totalHitsNr = res.rawResponse.hits.total as number;
-        dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-        data$.next({ fetchStatus: FetchStatus.PARTIAL });
-      });
-
-      const documentsSourceFetch$ = fetchDocuments({
-        abortController: refs.current.abortController,
-        indexPattern,
-        inspectorAdapters,
-        searchSessionId: sessionId,
-        searchSource,
-        services,
-        stateContainer,
-        useNewFieldsApi,
-      });
-
-      documentsSourceFetch$.subscribe((res) => {
-        const documents = res.rawResponse.hits.hits;
-        const fieldCounts = calcFieldCounts(refs.current.fieldCounts, documents, indexPattern);
-        dataDocuments$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          result: documents,
-          fieldCounts,
+      const fetchAndSubscribeTotalHits = () => {
+        const totalHitsFetch$ = fetchTotalHits({
+          searchSource,
+          data,
+          abortController: refs.current.abortController!,
+          searchSessionId: sessionId,
+          inspectorAdapters,
         });
-        refs.current.fieldCounts = fieldCounts;
-        refs.current.fetchStatus = FetchStatus.PARTIAL;
-        data$.next({
-          fetchStatus: FetchStatus.PARTIAL,
+        totalHitsFetch$.subscribe((res) => {
+          const totalHitsNr = res.rawResponse.hits.total as number;
+          dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
+          data$.next({ fetchStatus: FetchStatus.PARTIAL });
         });
-      });
+        return totalHitsFetch$;
+      };
 
       forkJoin({
-        totalHits: totalHitsFetch$,
-        documents: documentsSourceFetch$,
+        documents: fetchAndSubscribeDocuments(),
+        totalHits: fetchAndSubscribeTotalHits(),
         chart: !hideChart && indexPattern.timeFieldName ? fetchAndSubscribeChart() : of(null),
       }).subscribe(
         () => {

@@ -43,6 +43,7 @@ export const fetchDocuments = ({
     sort: sort as SortOrder[],
     useNewFieldsApi,
   });
+  childSearchSource.setField('trackTotalHits', false);
 
   return childSearchSource
     .fetch$({
