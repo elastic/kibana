@@ -235,7 +235,7 @@ class TutorialDirectoryUi extends React.Component {
   renderNotices = () => {
     const notices = getServices().tutorialService.getDirectoryNotices();
     return notices.length ? (
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup grow={false} direction="column" gutterSize="none">
         {notices.map((DirectoryNotice, index) => (
           <EuiFlexItem key={index}>
             <DirectoryNotice />
@@ -259,26 +259,18 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderHeader = () => {
-    const notices = this.renderNotices();
     const headerLinks = this.renderHeaderLinks();
-
     return (
-      <>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="home.tutorial.addDataToKibanaTitle"
-                  defaultMessage="Add data"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
-        </EuiFlexGroup>
-        {notices}
-      </>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
+      </EuiFlexGroup>
     );
   };
 
@@ -286,11 +278,14 @@ class TutorialDirectoryUi extends React.Component {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-          {this.renderHeader()}
-          <EuiSpacer size="m" />
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-          <EuiSpacer />
-          {this.renderTabContent()}
+          <EuiFlexItem grow={false}>
+            {this.renderHeader()}
+            {this.renderNotices()}
+            <EuiSpacer size="m" />
+            <EuiTabs>{this.renderTabs()}</EuiTabs>
+            <EuiSpacer />
+            {this.renderTabContent()}
+          </EuiFlexItem>
         </EuiPageBody>
       </EuiPage>
     );
