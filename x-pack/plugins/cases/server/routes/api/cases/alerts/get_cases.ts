@@ -32,8 +32,22 @@ export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
         const casesClient = await context.cases.getCasesClient();
         const options = request.query as CasesByAlertIDRequest;
 
+        const caseIds = await casesClient.cases.getCaseIDsByAlertID({ alertID, options });
+
+        const getCaseInfo = async () => {
+          return Promise.all(
+            caseIds.map(async (caseId: string) => {
+              const fullCase = await casesClient.cases.get({ id: caseId });
+              return {
+                id: caseId,
+                title: fullCase.title,
+              };
+            })
+          );
+        };
+
         return response.ok({
-          body: await casesClient.cases.getCaseIDsByAlertID({ alertID, options }),
+          body: await getCaseInfo(),
         });
       } catch (error) {
         logger.error(
