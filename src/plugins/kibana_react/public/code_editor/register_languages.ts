@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { registerLanguage } from '@kbn/monaco';
+import { CssLang, HandlebarsLang, MarkdownLang } from './languages';
 
-import { LangModule as LangModuleType } from '../types';
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+registerLanguage(CssLang);
+registerLanguage(HandlebarsLang);
+registerLanguage(MarkdownLang);
