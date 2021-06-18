@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS, JSON } from './constants';
 
 export const ErrorStrings = {
   actionsElements: {
@@ -97,54 +96,6 @@ export const ErrorStrings = {
     getTooManyFilesErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadDropzone.tooManyFilesErrorMessage', {
         defaultMessage: 'One one file can be uploaded at a time',
-      }),
-  },
-  workpadLoader: {
-    getAcceptJSONOnlyErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
-        defaultMessage: 'Only {JSON} files are accepted',
-        values: {
-          JSON,
-        },
-      }),
-    getMissingPropertiesErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
-        defaultMessage:
-          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
-        values: {
-          CANVAS,
-          JSON,
-        },
-      }),
-    getFileUploadFailureWithoutFileNameErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
-        {
-          defaultMessage: `Couldn't upload file`,
-        }
-      ),
-    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
-      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
-        defaultMessage: `Couldn't upload '{fileName}'`,
-        values: {
-          fileName,
-        },
-      }),
-    getUploadFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.uploadFailureErrorMessage', {
-        defaultMessage: `Couldn't upload workpad`,
-      }),
-    getDeleteFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.deleteFailureErrorMessage', {
-        defaultMessage: `Couldn't delete all workpads`,
-      }),
-    getCloneFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.cloneFailureErrorMessage', {
-        defaultMessage: `Couldn't clone workpad`,
-      }),
-    getFindFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadLoader.findFailureErrorMessage', {
-        defaultMessage: `Couldn't find workpad`,
       }),
   },
   workpadRoutes: {

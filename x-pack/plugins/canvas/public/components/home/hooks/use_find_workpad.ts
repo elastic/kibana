@@ -7,13 +7,11 @@
 
 import { useState, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { i18n } from '@kbn/i18n';
 
 import { WorkpadFindResponse } from '../../../services/workpad';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
-import { ErrorStrings } from '../../../../i18n';
-
-const { workpadLoader: errors } = ErrorStrings;
 const emptyResponse = { total: 0, workpads: [] };
 
 export const useFindWorkpads = () => {
@@ -49,4 +47,11 @@ export const useFindWorkpadsOnMount = (): [boolean, WorkpadFindResponse] => {
   });
 
   return [isMounted, workpadResponse];
+};
+
+const errors = {
+  getFindFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useFindWorkpads.findFailureErrorMessage', {
+      defaultMessage: `Couldn't find workpad`,
+    }),
 };

@@ -24,7 +24,7 @@ export default {
   title: 'Home/Workpad Table',
   argTypes: {},
   decorators: [reduxDecorator()],
-  parameters: [getAddonPanelParameters(), getDisableStoryshotsParameter()],
+  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
 };
 
 export const NoWorkpads = () => {

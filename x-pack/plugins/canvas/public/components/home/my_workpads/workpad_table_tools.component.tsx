@@ -6,13 +6,11 @@
  */
 
 import React, { useState, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { ComponentStrings } from '../../../../i18n';
 import { ConfirmModal } from '../../confirm_modal';
 import { FoundWorkpad } from '../../../services/workpad';
-
-const { WorkpadTableTools: strings } = ComponentStrings;
 
 export interface Props {
   workpads: FoundWorkpad[];
@@ -94,4 +92,69 @@ export const WorkpadTableTools = ({
       {confirmModal}
     </Fragment>
   );
+};
+
+const strings = {
+  getDeleteButtonAriaLabel: (numberOfWorkpads: number) =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteButtonAriaLabel', {
+      defaultMessage: 'Delete {numberOfWorkpads} workpads',
+      values: {
+        numberOfWorkpads,
+      },
+    }),
+  getDeleteButtonLabel: (numberOfWorkpads: number) =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteButtonLabel', {
+      defaultMessage: 'Delete ({numberOfWorkpads})',
+      values: {
+        numberOfWorkpads,
+      },
+    }),
+  getDeleteModalConfirmButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteModalConfirmButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+  getDeleteModalDescription: () =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteModalDescription', {
+      defaultMessage: `You can't recover deleted workpads.`,
+    }),
+  getDeleteMultipleWorkpadModalTitle: (numberOfWorkpads: string) =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteMultipleWorkpadsModalTitle', {
+      defaultMessage: 'Delete {numberOfWorkpads} workpads?',
+      values: {
+        numberOfWorkpads,
+      },
+    }),
+  getDeleteSingleWorkpadModalTitle: (workpadName: string) =>
+    i18n.translate('xpack.canvas.workpadTableTools.deleteSingleWorkpadModalTitle', {
+      defaultMessage: `Delete workpad '{workpadName}'?`,
+      values: {
+        workpadName,
+      },
+    }),
+  getExportButtonAriaLabel: (numberOfWorkpads: number) =>
+    i18n.translate('xpack.canvas.workpadTableTools.exportButtonAriaLabel', {
+      defaultMessage: 'Export {numberOfWorkpads} workpads',
+      values: {
+        numberOfWorkpads,
+      },
+    }),
+  getExportButtonLabel: (numberOfWorkpads: number) =>
+    i18n.translate('xpack.canvas.workpadTableTools.exportButtonLabel', {
+      defaultMessage: 'Export ({numberOfWorkpads})',
+      values: {
+        numberOfWorkpads,
+      },
+    }),
+  getNoPermissionToCreateToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTableTools.noPermissionToCreateToolTip', {
+      defaultMessage: `You don't have permission to create workpads`,
+    }),
+  getNoPermissionToDeleteToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTableTools.noPermissionToDeleteToolTip', {
+      defaultMessage: `You don't have permission to delete workpads`,
+    }),
+  getNoPermissionToUploadToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTableTools.noPermissionToUploadToolTip', {
+      defaultMessage: `You don't have permission to upload workpads`,
+    }),
 };

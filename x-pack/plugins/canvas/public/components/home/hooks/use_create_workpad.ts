@@ -7,15 +7,13 @@
 
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../../state/defaults';
 import { useNotifyService, useWorkpadService } from '../../../services';
-import { ErrorStrings } from '../../../../i18n';
 
 import type { CanvasWorkpad } from '../../../../types';
-
-const { workpadLoader: errors } = ErrorStrings;
 
 export const useCreateWorkpad = () => {
   const workpadService = useWorkpadService();
@@ -38,4 +36,11 @@ export const useCreateWorkpad = () => {
     },
     [notifyService, history, workpadService]
   );
+};
+
+const errors = {
+  getUploadFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useCreateWorkpad.uploadFailureErrorMessage', {
+      defaultMessage: `Couldn't upload workpad`,
+    }),
 };

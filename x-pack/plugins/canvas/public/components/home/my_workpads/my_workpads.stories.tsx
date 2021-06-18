@@ -23,7 +23,7 @@ export default {
   title: 'Home/My Workpads',
   argTypes: {},
   decorators: [reduxDecorator()],
-  parameters: [getAddonPanelParameters(), getDisableStoryshotsParameter()],
+  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
 };
 
 export const NoWorkpads = () => {

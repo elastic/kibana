@@ -7,13 +7,12 @@
 
 import { useCallback } from 'react';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
+import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
 import { useNotifyService } from '../../../services';
-import { ErrorStrings } from '../../../../i18n';
 import { getId } from '../../../lib/get_id';
 import type { CanvasWorkpad } from '../../../../types';
-
-const { workpadLoader: errors } = ErrorStrings;
 
 export const useImportWorkpad = () => {
   const notifyService = useNotifyService();
@@ -65,4 +64,37 @@ export const useImportWorkpad = () => {
     },
     [notifyService]
   );
+};
+
+const errors = {
+  getFileUploadFailureWithoutFileNameErrorMessage: () =>
+    i18n.translate(
+      'xpack.canvas.error.useImportWorkpad.fileUploadFailureWithoutFileNameErrorMessage',
+      {
+        defaultMessage: `Couldn't upload file`,
+      }
+    ),
+  getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
+    i18n.translate('xpack.canvas.errors.useImportWorkpad.fileUploadFileWithFileNameErrorMessage', {
+      defaultMessage: `Couldn't upload '{fileName}'`,
+      values: {
+        fileName,
+      },
+    }),
+  getMissingPropertiesErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useImportWorkpad.missingPropertiesErrorMessage', {
+      defaultMessage:
+        'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
+      values: {
+        CANVAS,
+        JSON: JSONString,
+      },
+    }),
+  getAcceptJSONOnlyErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useImportWorkpad.acceptJSONOnlyErrorMessage', {
+      defaultMessage: 'Only {JSON} files are accepted',
+      values: {
+        JSON: JSONString,
+      },
+    }),
 };

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { uniq } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -16,7 +17,6 @@ import {
 } from '@elastic/eui';
 
 import { CanvasTemplate } from '../../../../types';
-import { ComponentStrings } from '../../../../i18n';
 import { tagsRegistry } from '../../../lib/tags_registry';
 import { TagList } from '../../tag_list';
 
@@ -24,8 +24,6 @@ export interface Props {
   templates: CanvasTemplate[];
   onCreateWorkpad: (template: CanvasTemplate) => void;
 }
-
-const { WorkpadTemplates: strings } = ComponentStrings;
 
 export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
   const columns: Array<EuiBasicTableColumn<CanvasTemplate>> = [
@@ -117,7 +115,43 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
         },
       }}
       pagination={true}
-      data-test-subj="workpadTable"
+      data-test-subj="canvasTemplatesTable"
     />
   );
+};
+
+const strings = {
+  getCloneTemplateLinkAriaLabel: (templateName: string) =>
+    i18n.translate('xpack.canvas.workpadTemplates.cloneTemplateLinkAriaLabel', {
+      defaultMessage: `Clone workpad template '{templateName}'`,
+      values: {
+        templateName,
+      },
+    }),
+  getTableDescriptionColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.table.descriptionColumnTitle', {
+      defaultMessage: 'Description',
+    }),
+  getTableNameColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.table.nameColumnTitle', {
+      defaultMessage: 'Template name',
+    }),
+  getTableTagsColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.table.tagsColumnTitle', {
+      defaultMessage: 'Tags',
+      description:
+        'This column contains relevant tags that indicate what type of template ' +
+        'is displayed. For example: "report", "presentation", etc.',
+    }),
+  getTemplateSearchPlaceholder: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.searchPlaceholder', {
+      defaultMessage: 'Find template',
+    }),
+  getCreatingTemplateLabel: (templateName: string) =>
+    i18n.translate('xpack.canvas.workpadTemplates.creatingTemplateLabel', {
+      defaultMessage: `Creating from template '{templateName}'`,
+      values: {
+        templateName,
+      },
+    }),
 };

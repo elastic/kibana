@@ -6,11 +6,9 @@
  */
 
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
-import { ErrorStrings } from '../../../../i18n';
-
-const { workpadLoader: errors } = ErrorStrings;
 
 export const useDeleteWorkpads = () => {
   const workpadService = useWorkpadService();
@@ -55,4 +53,11 @@ export const useDeleteWorkpads = () => {
     },
     [workpadService, notifyService]
   );
+};
+
+const errors = {
+  getDeleteFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useDeleteWorkpads.deleteFailureErrorMessage', {
+      defaultMessage: `Couldn't delete all workpads`,
+    }),
 };

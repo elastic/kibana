@@ -11,6 +11,7 @@ import {
   reduxDecorator,
   getAddonPanelParameters,
   servicesContextDecorator,
+  getDisableStoryshotsParameter,
 } from '../../../storybook';
 
 import { Home } from './home.component';
@@ -19,7 +20,7 @@ export default {
   title: 'Home/Home Page',
   argTypes: {},
   decorators: [reduxDecorator()],
-  parameters: [getAddonPanelParameters()],
+  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
 };
 
 export const NoContent = () => <Home />;

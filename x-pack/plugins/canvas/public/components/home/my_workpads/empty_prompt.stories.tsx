@@ -8,10 +8,12 @@
 import React from 'react';
 
 import { HomeEmptyPrompt } from './empty_prompt';
+import { getDisableStoryshotsParameter } from '../../../../storybook';
 
 export default {
   title: 'Home/Empty Prompt',
   argTypes: {},
+  parameters: { ...getDisableStoryshotsParameter() },
 };
 
 export const EmptyPrompt = () => <HomeEmptyPrompt />;

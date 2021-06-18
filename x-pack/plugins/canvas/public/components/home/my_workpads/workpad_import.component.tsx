@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFilePicker, EuiFilePickerProps } from '@elastic/eui';
 
-import { ComponentStrings } from '../../../../i18n';
-
-const { WorkpadImport: strings } = ComponentStrings;
-
+import { JSON } from '../../../../i18n/constants';
 export interface Props {
   canUserWrite: boolean;
   onImportWorkpad?: EuiFilePickerProps['onChange'];
@@ -30,3 +28,13 @@ export const WorkpadImport = ({ uniqueKey, canUserWrite, onImportWorkpad = () =>
     disabled={!canUserWrite}
   />
 );
+
+const strings = {
+  getFilePickerPlaceholder: () =>
+    i18n.translate('xpack.canvas.workpadImport.filePickerPlaceholder', {
+      defaultMessage: 'Import workpad {JSON} file',
+      values: {
+        JSON,
+      },
+    }),
+};

@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-import { ComponentStrings } from '../../../i18n';
-
-const { WorkpadCreate: strings } = ComponentStrings;
 
 export interface Props
   extends Omit<EuiButtonPropsForButton, 'iconType' | 'fill' | 'data-test-subj' | 'children'> {
@@ -29,4 +27,11 @@ export const WorkpadCreate = ({ canUserWrite, disabled, ...rest }: Props) => {
       {strings.getWorkpadCreateButtonLabel()}
     </EuiButton>
   );
+};
+
+const strings = {
+  getWorkpadCreateButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadCreate.createButtonLabel', {
+      defaultMessage: 'Create workpad',
+    }),
 };

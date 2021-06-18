@@ -13,6 +13,8 @@ import { WorkpadService } from '../workpad';
 import { getId } from '../../lib/get_id';
 import { CanvasTemplate } from '../../../types';
 
+const TIMEOUT = 500;
+
 const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeout(resolve, time));
 const getName = () => {
   const lorem = 'Lorem ipsum dolor sit amet consectetur adipiscing elit Fusce lobortis aliquet arcu ut turpis duis'.split(
@@ -54,7 +56,7 @@ export const getSomeWorkpads = (count = 3) =>
     name: getName(),
   }));
 
-export const findSomeWorkpads = (count = 3, timeout = 2000) => (_term: string) => {
+export const findSomeWorkpads = (count = 3, timeout = TIMEOUT) => (_term: string) => {
   return Promise.resolve()
     .then(promiseTimeout(timeout))
     .then(() => ({
@@ -63,7 +65,7 @@ export const findSomeWorkpads = (count = 3, timeout = 2000) => (_term: string) =
     }));
 };
 
-export const findNoWorkpads = (timeout = 2000) => (_term: string) => {
+export const findNoWorkpads = (timeout = TIMEOUT) => (_term: string) => {
   return Promise.resolve()
     .then(promiseTimeout(timeout))
     .then(() => ({
@@ -72,13 +74,13 @@ export const findNoWorkpads = (timeout = 2000) => (_term: string) => {
     }));
 };
 
-export const findSomeTemplates = (timeout = 2000) => () => {
+export const findSomeTemplates = (timeout = TIMEOUT) => () => {
   return Promise.resolve()
     .then(promiseTimeout(timeout))
     .then(() => getSomeTemplates());
 };
 
-export const findNoTemplates = (timeout = 2000) => () => {
+export const findNoTemplates = (timeout = TIMEOUT) => () => {
   return Promise.resolve()
     .then(promiseTimeout(timeout))
     .then(() => getNoTemplates());

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
   EuiInMemoryTableProps,
@@ -20,7 +21,6 @@ import {
 import moment from 'moment';
 
 import { RoutingLink } from '../../routing';
-import { ComponentStrings } from '../../../../i18n';
 import { FoundWorkpad } from '../../../services/workpad';
 import { WorkpadTableTools } from './workpad_table_tools';
 import { WorkpadImport } from './workpad_import';
@@ -32,8 +32,6 @@ export interface Props {
   onExportWorkpad: (ids: string) => void;
   onCloneWorkpad: (id: string) => void;
 }
-
-const { WorkpadTable: strings } = ComponentStrings;
 
 const getDisplayName = (name: string, workpadId: string, loadedWorkpadId?: string) => {
   const workpadName = name.length ? <span>{name}</span> : <em>{workpadId}</em>;
@@ -108,7 +106,7 @@ export const WorkpadTable = ({
       dataType: 'string',
       render: (name, workpad) => (
         <RoutingLink
-          data-test-subj="canvasWorkpadLoaderWorkpad"
+          data-test-subj="canvasWorkpadTableWorkpad"
           to={`/workpad/${workpad.id}`}
           aria-label={strings.getLoadWorkpadArialLabel(name.length ? name : workpad.id)}
         >
@@ -150,7 +148,56 @@ export const WorkpadTable = ({
       }}
       pagination={true}
       selection={selection}
-      data-test-subj="workpadTable"
+      data-test-subj="canvasWorkpadTable"
     />
   );
+};
+
+const strings = {
+  getCloneToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTable.cloneTooltip', {
+      defaultMessage: 'Clone workpad',
+    }),
+  getExportToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTable.exportTooltip', {
+      defaultMessage: 'Export workpad',
+    }),
+  getLoadWorkpadArialLabel: (workpadName: string) =>
+    i18n.translate('xpack.canvas.workpadTable.loadWorkpadArialLabel', {
+      defaultMessage: `Load workpad '{workpadName}'`,
+      values: {
+        workpadName,
+      },
+    }),
+  getNoPermissionToCloneToolTip: () =>
+    i18n.translate('xpack.canvas.workpadTable.noPermissionToCloneToolTip', {
+      defaultMessage: `You don't have permission to clone workpads`,
+    }),
+  getNoWorkpadsFoundMessage: () =>
+    i18n.translate('xpack.canvas.workpadTable.noWorkpadsFoundMessage', {
+      defaultMessage: 'No workpads matched your search.',
+    }),
+  getWorkpadSearchPlaceholder: () =>
+    i18n.translate('xpack.canvas.workpadTable.searchPlaceholder', {
+      defaultMessage: 'Find workpad',
+    }),
+  getTableCreatedColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.createdColumnTitle', {
+      defaultMessage: 'Created',
+      description: 'This column in the table contains the date/time the workpad was created.',
+    }),
+  getTableNameColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.nameColumnTitle', {
+      defaultMessage: 'Workpad name',
+    }),
+  getTableUpdatedColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.updatedColumnTitle', {
+      defaultMessage: 'Updated',
+      description: 'This column in the table contains the date/time the workpad was last updated.',
+    }),
+  getTableActionsColumnTitle: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.actionsColumnTitle', {
+      defaultMessage: 'Actions',
+      description: 'This column in the table contains the actions that can be taken on a workpad.',
+    }),
 };

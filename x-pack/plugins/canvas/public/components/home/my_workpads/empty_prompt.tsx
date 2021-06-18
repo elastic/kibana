@@ -6,11 +6,10 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ComponentStrings } from '../../../../i18n';
-
-const { WorkpadUploadPrompt: strings } = ComponentStrings;
+import { CANVAS, JSON } from '../../../../i18n/constants';
 
 export const HomeEmptyPrompt = () => (
   <EuiFlexGroup justifyContent="spaceAround" alignItems="center" style={{ minHeight: 600 }}>
@@ -38,3 +37,29 @@ export const HomeEmptyPrompt = () => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+const strings = {
+  getEmptyPromptGettingStartedDescription: () =>
+    i18n.translate('xpack.canvas.homeEmptyPrompt.emptyPromptGettingStartedDescription', {
+      defaultMessage:
+        'Create a new workpad, start from a template, or import a workpad {JSON} file by dropping it here.',
+      values: {
+        JSON,
+      },
+    }),
+  getEmptyPromptNewUserDescription: () =>
+    i18n.translate('xpack.canvas.homeEmptyPrompt.emptyPromptNewUserDescription', {
+      defaultMessage: 'New to {CANVAS}?',
+      values: {
+        CANVAS,
+      },
+    }),
+  getEmptyPromptTitle: () =>
+    i18n.translate('xpack.canvas.homeEmptyPrompt.emptyPromptTitle', {
+      defaultMessage: 'Add your first workpad',
+    }),
+  getSampleDataLinkLabel: () =>
+    i18n.translate('xpack.canvas.homeEmptyPrompt.sampleDataLinkLabel', {
+      defaultMessage: 'Add your first workpad',
+    }),
+};

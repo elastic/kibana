@@ -6,15 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
 
-import { ComponentStrings } from '../../../i18n';
 import { WorkpadCreate } from './workpad_create';
 import { LazyWorkpadTemplates } from './workpad_templates';
 import { LazyMyWorkpads } from './my_workpads';
-
-const { Home: strings } = ComponentStrings;
 
 export type HomePageTab = 'workpads' | 'templates';
 
@@ -29,10 +27,11 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
   const [tab, setTab] = useState(activeTab);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       pageHeader={{
         pageTitle: 'Canvas',
         rightSideItems: [<WorkpadCreate />],
+        bottomBorder: true,
         tabs: [
           {
             label: strings.getMyWorkpadsTabLabel(),
@@ -51,6 +50,18 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
       }}
     >
       {tab === 'workpads' ? <MyWorkpads /> : <WorkpadTemplates />}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
+};
+
+const strings = {
+  getMyWorkpadsTabLabel: () =>
+    i18n.translate('xpack.canvas.home.myWorkpadsTabLabel', {
+      defaultMessage: 'My workpads',
+    }),
+  getWorkpadTemplatesTabLabel: () =>
+    i18n.translate('xpack.canvas.home.workpadTemplatesTabLabel', {
+      defaultMessage: 'Templates',
+      description: 'The label for the tab that displays a list of designed workpad templates.',
+    }),
 };

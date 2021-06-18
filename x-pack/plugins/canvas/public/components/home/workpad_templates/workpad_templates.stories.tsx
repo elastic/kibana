@@ -13,6 +13,7 @@ import {
   reduxDecorator,
   getAddonPanelParameters,
   servicesContextDecorator,
+  getDisableStoryshotsParameter,
 } from '../../../../storybook';
 import { getSomeTemplates } from '../../../services/stubs/workpad';
 
@@ -23,7 +24,7 @@ export default {
   title: 'Home/Workpad Templates',
   argTypes: {},
   decorators: [reduxDecorator()],
-  parameters: [getAddonPanelParameters()],
+  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
 };
 
 export const NoTemplates = () => {

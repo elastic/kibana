@@ -7,13 +7,10 @@
 
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
-import { ErrorStrings, ComponentStrings } from '../../../../i18n';
 import { getId } from '../../../lib/get_id';
-
-const { workpadLoader: errors } = ErrorStrings;
-const { useCloneWorkpad: strings } = ComponentStrings;
 
 export const useCloneWorkpad = () => {
   const workpadService = useWorkpadService();
@@ -40,4 +37,24 @@ export const useCloneWorkpad = () => {
     },
     [notifyService, workpadService, history]
   );
+};
+
+const strings = {
+  getClonedWorkpadName: (workpadName: string) =>
+    i18n.translate('xpack.canvas.useCloneWorkpad.clonedWorkpadName', {
+      defaultMessage: 'Copy of {workpadName}',
+      values: {
+        workpadName,
+      },
+      description:
+        'This suffix is added to the end of the name of a cloned workpad to indicate that this ' +
+        'new workpad is a copy of the original workpad. Example: "Copy of Sales Pitch"',
+    }),
+};
+
+const errors = {
+  getCloneFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useCloneWorkpad.cloneFailureErrorMessage', {
+      defaultMessage: `Couldn't clone workpad`,
+    }),
 };
