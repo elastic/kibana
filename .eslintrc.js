@@ -876,6 +876,16 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
