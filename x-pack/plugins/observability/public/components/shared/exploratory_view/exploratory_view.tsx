@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -17,10 +18,37 @@ import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesBuilder } from './series_builder/series_builder';
+import { AppDataType, SeriesUrl } from './types';
+
+const combineTimeRanges = (allSeries: Record<string, SeriesUrl>) => {
+  let to: string = '';
+  let from: string = '';
+  const allKeys = Object.keys(allSeries ?? {});
+  allKeys.forEach((seriesId) => {
+    const series = allSeries[seriesId];
+    if (series.dataType && series.reportType && !isEmpty(series.reportDefinitions)) {
+      const seriesTo = new Date(series.time.to);
+      const seriesFrom = new Date(series.time.from);
+      if (!to) {
+        to = series.time.to;
+      } else if (seriesTo > new Date(to)) {
+        to = series.time.to;
+      }
+      if (!from) {
+        from = series.time.from;
+      } else if (seriesFrom < new Date(from)) {
+        from = series.time.from;
+      }
+    }
+  });
+  return { to, from };
+};
 
 export function ExploratoryView({
   saveAttributes,
+  multiSeries,
 }: {
+  multiSeries?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
@@ -32,6 +60,8 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
   const [seriesId, setSeriesId] = useState<string>('');
+
+  const [lastUpdated, setLastUpdated] = useState<number | undefined>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -47,9 +77,7 @@ export function ExploratoryView({
     setSeriesId(firstSeriesId);
   }, [allSeries, firstSeriesId]);
 
-  const lensAttributesT = useLensAttributes({
-    seriesId,
-  });
+  const lensAttributesT = useLensAttributes();
 
   const setHeightOffset = () => {
     if (seriesBuilderRef?.current && wrapperRef.current) {
@@ -59,11 +87,20 @@ export function ExploratoryView({
     }
   };
 
+  const allDataTypes: AppDataType[] = [];
+
+  Object.entries(allSeries).forEach(([_sId, seriesT]) => {
+    allDataTypes.push(seriesT.dataType);
+  });
+
   useEffect(() => {
-    if (series?.dataType) {
-      loadIndexPattern({ dataType: series?.dataType });
-    }
-  }, [series?.dataType, loadIndexPattern]);
+    allDataTypes.forEach((dataTypeT) => {
+      loadIndexPattern({
+        dataType: dataTypeT,
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(allDataTypes), loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
@@ -72,11 +109,13 @@ export function ExploratoryView({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
+  }, [JSON.stringify(lensAttributesT ?? {})]);
 
   useEffect(() => {
     setHeightOffset();
   });
+
+  const timeRange = combineTimeRanges(allSeries);
 
   return (
     <Wrapper>
@@ -84,13 +123,16 @@ export function ExploratoryView({
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
           <LensWrapper ref={wrapperRef} height={height}>
-            {lensAttributes && seriesId && series?.reportType && series?.time ? (
+            {lensAttributes && timeRange.to && timeRange.from ? (
               <LensComponent
                 id="exploratoryView"
-                timeRange={series?.time}
+                timeRange={timeRange}
                 attributes={lensAttributes}
+                onLoad={() => {
+                  setLastUpdated(Date.now());
+                }}
                 onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'dist') {
+                  if (series?.reportType !== 'data-distribution') {
                     setSeries(seriesId, {
                       ...series,
                       time: {
@@ -112,7 +154,11 @@ export function ExploratoryView({
               <EmptyView series={series} loading={loading} height={height} />
             )}
           </LensWrapper>
-          <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />
+          <SeriesBuilder
+            seriesBuilderRef={seriesBuilderRef}
+            lastUpdated={lastUpdated}
+            multiSeries={multiSeries}
+          />
         </>
       ) : (
         <EuiTitle>

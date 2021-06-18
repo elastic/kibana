@@ -15,6 +15,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'ux', label: 'User Experience (RUM)' },
+  { id: 'mobile', label: 'Mobile Experience' },
   // { id: 'infra_logs', label: 'Logs' },
   // { id: 'infra_metrics', label: 'Metrics' },
   // { id: 'apm', label: 'APM' },
@@ -30,7 +31,11 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     if (!dataType) {
       removeSeries(seriesId);
     } else {
-      setSeries(seriesId || `${dataType}-series`, { dataType } as any);
+      setSeries(seriesId || `${dataType}-series`, {
+        dataType,
+        isNew: true,
+        time: series.time,
+      } as any);
     }
   };
 

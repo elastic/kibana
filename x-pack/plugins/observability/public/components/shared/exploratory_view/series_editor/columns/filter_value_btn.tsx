@@ -41,7 +41,7 @@ export function FilterValueButton({
 
   const series = getSeries(seriesId);
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
   const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
 
@@ -97,6 +97,7 @@ export function FilterValueButton({
       button={button}
       label={'Version'}
       indexPatternTitle={indexPattern?.title}
+      indexPattern={indexPatterns[series.dataType]}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}

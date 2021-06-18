@@ -112,4 +112,24 @@ export const routes = {
       }),
     },
   },
+  '/exploratory-view/multi': {
+    handler: () => {
+      return <ExploratoryViewPage multiSeries={true} />;
+    },
+    params: {
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        refreshPaused: jsonRt.pipe(t.boolean),
+        refreshInterval: jsonRt.pipe(t.number),
+      }),
+    },
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+          defaultMessage: 'Analyze data',
+        }),
+      },
+    ],
+  },
 };

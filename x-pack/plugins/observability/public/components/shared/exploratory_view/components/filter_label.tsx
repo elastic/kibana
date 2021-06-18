@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { injectI18n } from '@kbn/i18n/react';
+import { esFilters, Filter, IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
 
@@ -17,6 +19,7 @@ interface Props {
   seriesId: string;
   negate: boolean;
   definitionFilter?: boolean;
+  indexPattern: IndexPattern;
   removeFilter: (field: string, value: string, notVal: boolean) => void;
 }
 
@@ -26,11 +29,10 @@ export function FilterLabel({
   field,
   value,
   negate,
+  indexPattern,
   removeFilter,
   definitionFilter,
 }: Props) {
-  const { indexPattern } = useAppIndexPatternContext();
-
   const { invertFilter } = useSeriesFilters({ seriesId });
 
   return indexPattern ? (
