@@ -44,14 +44,14 @@ describe('searchAfterAndBulkCreate', () => {
   const sampleParams = getQueryRuleParams();
   const ruleSO = sampleRuleSO(getQueryRuleParams());
   sampleParams.maxSignals = 30;
-  let tuples: RuleRangeTuple[];
+  let tuple: RuleRangeTuple;
   beforeEach(() => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createAlertServices();
-    ({ tuples } = getRuleRangeTuples({
+    tuple = getRuleRangeTuples({
       logger: mockLogger,
       previousStartedAt: new Date(),
       from: sampleParams.from,
@@ -59,14 +59,17 @@ describe('searchAfterAndBulkCreate', () => {
       interval: '5m',
       maxSignals: sampleParams.maxSignals,
       buildRuleMessage,
-    }));
+    }).tuples[0];
     bulkCreate = bulkCreateFactory(
       mockLogger,
       mockService.scopedClusterClient.asCurrentUser,
       buildRuleMessage,
       false
     );
-    wrapHits = wrapHitsFactory({ ruleSO, signalsIndex: DEFAULT_SIGNALS_INDEX });
+    wrapHits = wrapHitsFactory({
+      ruleSO,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+    });
   });
 
   test('should return success with number of searches less than max signals', async () => {
@@ -174,7 +177,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      tuples,
+      tuple,
       ruleSO,
       listClient,
       exceptionsList: [exceptionItem],
@@ -279,7 +282,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -357,7 +360,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -416,7 +419,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -495,7 +498,7 @@ describe('searchAfterAndBulkCreate', () => {
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -550,7 +553,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -569,11 +572,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-    // I don't like testing log statements since logs change but this is the best
-    // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[7][0]).toContain(
-      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-    );
   });
 
   test('should return success when no sortId present but search results are in the allowlist', async () => {
@@ -627,7 +625,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -701,7 +699,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -746,7 +744,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      tuples,
+      tuple,
       ruleSO,
       services: mockService,
       logger: mockLogger,
@@ -793,7 +791,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      tuples,
+      tuple,
       ruleSO,
       services: mockService,
       logger: mockLogger,
@@ -854,7 +852,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
-      tuples,
+      tuple,
       ruleSO,
       services: mockService,
       logger: mockLogger,
@@ -979,7 +977,7 @@ describe('searchAfterAndBulkCreate', () => {
       errors,
     } = await searchAfterAndBulkCreate({
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -1075,7 +1073,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
       ruleSO,
-      tuples,
+      tuple,
       listClient,
       exceptionsList: [],
       services: mockService,

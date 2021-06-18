@@ -51,7 +51,7 @@ export class PluginsStatusService {
 
     return this.getPluginStatuses$(dependencies).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(500)
+      debounceTime(25)
     );
   }
 
