@@ -110,7 +110,8 @@ export function ServiceNodeMetrics({
           />
         </EuiCallOut>
       ) : (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} paddingSize={'none'}>
+          <EuiSpacer size={'s'} />
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiStat
@@ -163,6 +164,7 @@ export function ServiceNodeMetrics({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size={'s'} />
         </EuiPanel>
       )}
 
@@ -171,7 +173,7 @@ export function ServiceNodeMetrics({
           <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
-                <EuiPanel>
+                <EuiPanel hasBorder={true}>
                   <MetricsChart
                     start={start}
                     end={end}

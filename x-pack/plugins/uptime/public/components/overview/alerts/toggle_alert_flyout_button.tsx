@@ -124,6 +124,8 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     <EuiPopover
       button={
         <EuiButtonEmpty
+          size="xs"
+          color="text"
           aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
           iconType="arrowDown"

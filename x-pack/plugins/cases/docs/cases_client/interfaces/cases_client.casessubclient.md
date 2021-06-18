@@ -36,7 +36,7 @@ Creates a case.
 
 **Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
 
-Defined in: [cases/client.ts:48](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L48)
+Defined in: [cases/client.ts:48](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L48)
 
 ___
 
@@ -56,7 +56,7 @@ Delete a case and all its comments.
 
 **Returns:** *Promise*<void\>
 
-Defined in: [cases/client.ts:72](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L72)
+Defined in: [cases/client.ts:72](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L72)
 
 ___
 
@@ -76,7 +76,7 @@ If the `owner` field is left empty then all the cases that the user has access t
 
 **Returns:** *Promise*<[*ICasesFindResponse*](typedoc_interfaces.icasesfindresponse.md)\>
 
-Defined in: [cases/client.ts:54](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L54)
+Defined in: [cases/client.ts:54](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L54)
 
 ___
 
@@ -94,7 +94,7 @@ Retrieves a single case with the specified ID.
 
 **Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
 
-Defined in: [cases/client.ts:58](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L58)
+Defined in: [cases/client.ts:58](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L58)
 
 ___
 
@@ -112,7 +112,7 @@ Retrieves the case IDs given a single alert ID
 
 **Returns:** *Promise*<string[]\>
 
-Defined in: [cases/client.ts:84](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L84)
+Defined in: [cases/client.ts:84](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L84)
 
 ___
 
@@ -131,7 +131,7 @@ Retrieves all the reporters across all accessible cases.
 
 **Returns:** *Promise*<{ `email`: *undefined* \| ``null`` \| *string* ; `full_name`: *undefined* \| ``null`` \| *string* ; `username`: *undefined* \| ``null`` \| *string*  }[]\>
 
-Defined in: [cases/client.ts:80](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L80)
+Defined in: [cases/client.ts:80](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L80)
 
 ___
 
@@ -150,7 +150,7 @@ Retrieves all the tags across all cases the user making the request has access t
 
 **Returns:** *Promise*<string[]\>
 
-Defined in: [cases/client.ts:76](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L76)
+Defined in: [cases/client.ts:76](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L76)
 
 ___
 
@@ -168,7 +168,7 @@ Pushes a specific case to an external system.
 
 **Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
 
-Defined in: [cases/client.ts:62](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L62)
+Defined in: [cases/client.ts:62](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L62)
 
 ___
 
@@ -186,4 +186,4 @@ Update the specified cases with the passed in values.
 
 **Returns:** *Promise*<[*ICasesResponse*](typedoc_interfaces.icasesresponse.md)\>
 
-Defined in: [cases/client.ts:66](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/client.ts#L66)
+Defined in: [cases/client.ts:66](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/client.ts#L66)

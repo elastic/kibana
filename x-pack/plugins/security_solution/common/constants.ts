@@ -86,6 +86,7 @@ export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
 
+export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
 export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */

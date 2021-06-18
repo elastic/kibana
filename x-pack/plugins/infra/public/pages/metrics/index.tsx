@@ -84,9 +84,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
                   {setHeaderActionMenu && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-                      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize={'xs'} responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+                          <EuiButtonEmpty size={'xs'} color={'text'} {...settingsLinkProps}>
                             {settingsTabTitle}
                           </EuiButtonEmpty>
                         </EuiFlexItem>

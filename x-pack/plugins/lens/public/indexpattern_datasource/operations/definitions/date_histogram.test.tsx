@@ -87,6 +87,7 @@ const indexPattern2: IndexPattern = {
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultOptions = {
+  layerId: '1',
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
