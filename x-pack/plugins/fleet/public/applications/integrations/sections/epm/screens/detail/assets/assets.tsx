@@ -31,7 +31,7 @@ import {
   useGetPackageInstallStatus,
   useLink,
   useStartServices,
-  getKibanaLink,
+  getHrefToObjectInKibanaApp,
 } from '../../../../../hooks';
 
 import { AssetTitleMap } from '../../../../../constants';
@@ -53,33 +53,6 @@ const allowedAssetTypes: AllowedAssetTypes = [
 ];
 
 type AssetSavedObject = SimpleSavedObject<{ title: string; description?: string }>;
-
-/**
- * TODO: This is a temporary solution for getting links to various assets. It is very risky because:
- *
- * 1. The plugin might not exist/be enabled
- * 2. URLs and paths might not always be supported
- *
- * We should migrate to using the new URL service locators.
- */
-const getPathToObjectInApp = ({
-  type,
-  id,
-}: {
-  type: KibanaAssetType;
-  id: string;
-}): undefined | string => {
-  switch (type) {
-    case KibanaAssetType.dashboard:
-      return `/dashboard/${id}`;
-    case KibanaAssetType.search:
-      return `/discover/${id}`;
-    case KibanaAssetType.visualization:
-      return `/visualize/edit/${id}`;
-    default:
-      return undefined;
-  }
-};
 
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
@@ -112,12 +85,11 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         }
 
         try {
-          const { savedObjects } = await savedObjectsClient.bulkGet(
-            packageAttributes.installed_kibana.map(({ id, type }) => ({
-              id,
-              type,
-            }))
-          );
+          const objectsToGet = packageAttributes.installed_kibana.map(({ id, type }) => ({
+            id,
+            type,
+          }));
+          const { savedObjects } = await savedObjectsClient.bulkGet(objectsToGet);
           setAssetsSavedObjects(savedObjects as AssetSavedObject[]);
         } catch (e) {
           setFetchError(e);
@@ -200,7 +172,8 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                   >
                     {sectionAssetSavedObjects.map(
                       ({ id, type, attributes: { title, description } }, idx) => {
-                        const pathToObjectInApp = getPathToObjectInApp({
+                        const pathToObjectInApp = getHrefToObjectInKibanaApp({
+                          http,
                           id,
                           type: type as KibanaAssetType,
                         });
@@ -210,9 +183,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                               <EuiText size="m">
                                 <p>
                                   {pathToObjectInApp ? (
-                                    <EuiLink href={getKibanaLink(http, pathToObjectInApp)}>
-                                      {title}
-                                    </EuiLink>
+                                    <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
                                   ) : (
                                     title
                                   )}
