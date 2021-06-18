@@ -60,6 +60,7 @@ test('redirects to app using state transfer with by value mode', async () => {
     path: '/123',
     state: {
       originatingApp: 'superCoolCurrentApp',
+      type: 'EDITABLE_EMBEDDABLE',
       embeddableId: '123',
       valueInput: {
         id: '123',
@@ -84,6 +85,7 @@ test('redirects to app using state transfer without by value mode', async () => 
     path: '/123',
     state: {
       originatingApp: 'superCoolCurrentApp',
+      type: 'EDITABLE_EMBEDDABLE',
       embeddableId: '123',
       valueInput: undefined,
     },
