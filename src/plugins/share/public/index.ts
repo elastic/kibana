@@ -7,7 +7,7 @@
  */
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
-export { LocatorDefinition } from '../common/url_service';
+export { LocatorDefinition, LocatorPublic } from '../common/url_service';
 
 export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
