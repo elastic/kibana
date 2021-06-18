@@ -10,18 +10,22 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { CustomReportField } from '../custom_report_field';
-import { DataSeries, URLReportDefinition } from '../../types';
+import { SeriesConfig, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
 import { ReportDefinitionField } from './report_definition_field';
 
-function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
-  const { reportDefinitions } = dataView;
+function getColumnType(seriesConfig: SeriesConfig, selectedDefinition: URLReportDefinition) {
+  const { reportDefinitions } = seriesConfig;
   const customColumn = reportDefinitions.find((item) => item.custom);
   if (customColumn?.field && selectedDefinition[customColumn?.field]) {
-    const { columnType } = parseCustomFieldName(customColumn.field, dataView, selectedDefinition);
+    const { columnType } = parseCustomFieldName(
+      customColumn.field,
+      seriesConfig,
+      selectedDefinition
+    );
 
     return columnType;
   }
@@ -32,7 +36,7 @@ export function ReportDefinitionCol({
   dataViewSeries,
   seriesId,
 }: {
-  dataViewSeries: DataSeries;
+  dataViewSeries: SeriesConfig;
   seriesId: string;
 }) {
   const { getSeries, setSeries } = useSeriesStorage();
@@ -71,7 +75,7 @@ export function ReportDefinitionCol({
           {!custom ? (
             <ReportDefinitionField
               seriesId={seriesId}
-              dataSeries={dataViewSeries}
+              seriesConfig={dataViewSeries}
               field={field}
               onChange={onChange}
             />

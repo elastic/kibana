@@ -52,7 +52,7 @@ export interface ReportDefinition {
   }>;
 }
 
-export interface DataSeries {
+export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;

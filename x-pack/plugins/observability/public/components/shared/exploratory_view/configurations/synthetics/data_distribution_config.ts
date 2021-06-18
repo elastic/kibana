@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
 
-export function getSyntheticsDistributionConfig({ series, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({
+  series,
+  indexPattern,
+}: ConfigProps): SeriesConfig {
   return {
     reportType: 'data-distribution',
     defaultSeriesType: series?.seriesType || 'line',

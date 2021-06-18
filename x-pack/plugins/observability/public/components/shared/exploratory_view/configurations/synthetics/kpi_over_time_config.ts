@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { DOWN_LABEL, MONITORS_DURATION_LABEL, UP_LABEL } from '../constants/labels';
@@ -13,7 +13,7 @@ import { MONITOR_DURATION_US } from '../constants/field_names/synthetics';
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 
-export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'kpi-over-time',
     defaultSeriesType: 'bar_stacked',

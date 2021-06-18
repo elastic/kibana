@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
@@ -39,7 +39,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],

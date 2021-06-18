@@ -24,7 +24,7 @@ describe('Breakdowns', function () {
       <Breakdowns
         seriesId={'series-id'}
         breakdowns={dataViewSeries.breakdowns}
-        reportViewConfig={dataViewSeries}
+        seriesConfig={dataViewSeries}
       />
     );
 
@@ -38,7 +38,7 @@ describe('Breakdowns', function () {
       <Breakdowns
         seriesId={'series-id'}
         breakdowns={dataViewSeries.breakdowns}
-        reportViewConfig={dataViewSeries}
+        seriesConfig={dataViewSeries}
       />,
       { initSeries }
     );

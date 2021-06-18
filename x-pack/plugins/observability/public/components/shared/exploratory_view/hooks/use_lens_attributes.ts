@@ -12,12 +12,12 @@ import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { useSeriesStorage } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { DataSeries, SeriesUrl, UrlFilter } from '../types';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
 
 export const getFiltersFromDefs = (
   reportDefinitions: SeriesUrl['reportDefinitions'],
-  dataViewConfig: DataSeries
+  seriesConfig: SeriesConfig
 ) => {
   const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
     return {
@@ -28,7 +28,7 @@ export const getFiltersFromDefs = (
 
   // let's filter out custom fields
   return rdfFilters.filter(({ field }) => {
-    const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
+    const rdf = seriesConfig.reportDefinitions.find(({ field: fd }) => field === fd);
     return !rdf?.custom;
   });
 };
@@ -62,7 +62,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
         layerConfigs.push({
           filters,
           indexPattern,
-          reportConfig: reportViewConfig,
+          seriesConfig: reportViewConfig,
           breakdown: seriesT.breakdown,
           operationType: seriesT.operationType,
           seriesType: seriesT.seriesType,

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
-import { DataSeries } from '../types';
+import { SeriesConfig } from '../types';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
@@ -19,7 +19,7 @@ import { SeriesActions } from './columns/series_actions';
 import { ChartEditOptions } from './chart_edit_options';
 
 interface EditItem {
-  seriesConfig: DataSeries;
+  seriesConfig: SeriesConfig;
   id: string;
 }
 
@@ -50,7 +50,7 @@ export function SeriesEditor() {
         <SeriesFilter
           defaultFilters={defaultFilters}
           seriesId={id}
-          series={seriesConfig}
+          seriesConfig={seriesConfig}
           filters={seriesConfig.filters}
         />
       ),
@@ -62,7 +62,7 @@ export function SeriesEditor() {
       field: 'breakdowns',
       width: '25%',
       render: (breakdowns: string[], { seriesConfig, id }: EditItem) => (
-        <ChartEditOptions seriesId={id} breakdowns={breakdowns} series={seriesConfig} />
+        <ChartEditOptions seriesId={id} breakdowns={breakdowns} seriesConfig={seriesConfig} />
       ),
     },
     {

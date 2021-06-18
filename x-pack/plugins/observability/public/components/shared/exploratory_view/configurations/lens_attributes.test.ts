@@ -26,7 +26,7 @@ describe('Lens Attribute', () => {
   let lnsAttr: LensAttributes;
 
   const layerConfig: LayerConfig = {
-    reportConfig: reportViewConfig,
+    seriesConfig: reportViewConfig,
     seriesType: 'line',
     operationType: 'count',
     indexPattern: mockIndexPattern,
@@ -91,7 +91,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected field type for custom field with passed value', function () {
     const layerConfig1: LayerConfig = {
-      reportConfig: reportViewConfig,
+      seriesConfig: reportViewConfig,
       seriesType: 'line',
       operationType: 'count',
       indexPattern: mockIndexPattern,
@@ -267,7 +267,7 @@ describe('Lens Attribute', () => {
   describe('Layer breakdowns', function () {
     it('should return breakdown column', function () {
       const layerConfig1: LayerConfig = {
-        reportConfig: reportViewConfig,
+        seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
         indexPattern: mockIndexPattern,
@@ -355,7 +355,7 @@ describe('Lens Attribute', () => {
       );
 
       const layerConfig1: LayerConfig = {
-        reportConfig: reportViewConfig,
+        seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
         indexPattern: mockIndexPattern,

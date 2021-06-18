@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteForStatus } from '@elastic/eui';
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
@@ -27,7 +27,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../constants/elasticsearch_fieldnames';
 
-export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
 
   return {

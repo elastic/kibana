@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'kpi-over-time',
     defaultSeriesType: 'line',

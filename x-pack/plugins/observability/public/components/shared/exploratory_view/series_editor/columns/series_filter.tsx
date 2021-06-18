@@ -16,16 +16,16 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
-  defaultFilters: DataSeries['defaultFilters'];
-  filters: DataSeries['filters'];
-  series: DataSeries;
+  defaultFilters: SeriesConfig['defaultFilters'];
+  filters: SeriesConfig['filters'];
+  seriesConfig: SeriesConfig;
   isNew?: boolean;
   labels?: Record<string, string>;
 }
@@ -38,7 +38,7 @@ export interface Field {
 }
 
 export function SeriesFilter({
-  series,
+  seriesConfig,
   isNew,
   seriesId,
   defaultFilters = [],
@@ -122,7 +122,7 @@ export function SeriesFilter({
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs" alignItems="flexStart">
-      <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />
+      <SelectedFilters seriesId={seriesId} seriesConfig={seriesConfig} isNew={isNew} />
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={button}

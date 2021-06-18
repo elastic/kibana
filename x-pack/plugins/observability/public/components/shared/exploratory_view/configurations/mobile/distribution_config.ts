@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
@@ -19,7 +19,7 @@ import {
 import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'data-distribution',
     defaultSeriesType: 'bar',

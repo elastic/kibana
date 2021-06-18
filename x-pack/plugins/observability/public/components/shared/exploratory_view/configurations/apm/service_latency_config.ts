@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
-export function getServiceLatencyLensConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getServiceLatencyLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'kpi-over-time',
     defaultSeriesType: 'line',

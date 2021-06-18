@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataSeries, ConfigProps } from '../../types';
+import { SeriesConfig, ConfigProps } from '../../types';
 import { FieldLabels } from '../constants';
 
-export function getNetworkActivityLensConfig({}: ConfigProps): DataSeries {
+export function getNetworkActivityLensConfig({}: ConfigProps): SeriesConfig {
   return {
     reportType: 'kpi-over-time',
     defaultSeriesType: 'line',

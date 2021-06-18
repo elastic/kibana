@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
@@ -39,7 +39,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'data-distribution',
     defaultSeriesType: 'line',

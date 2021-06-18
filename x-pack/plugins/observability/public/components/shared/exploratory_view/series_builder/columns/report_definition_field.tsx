@@ -15,16 +15,16 @@ import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 
 interface Props {
   seriesId: string;
   field: string;
-  dataSeries: DataSeries;
+  seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
 }
 
-export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }: Props) {
+export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange }: Props) {
   const { getSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -33,7 +33,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const { labels, filters, reportDefinitions } = dataSeries;
+  const { labels, filters, reportDefinitions } = seriesConfig;
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
