@@ -10,9 +10,8 @@ import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
-import { Maybe } from '../../../../../observability/common/typings';
 
-export const AgentStatus = React.memo(({ hostStatus }: { hostStatus: Maybe<HostStatus> }) => {
+export const AgentStatus = React.memo(({ hostStatus }: { hostStatus: HostStatus }) => {
   return (
     <EuiBadge
       color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}

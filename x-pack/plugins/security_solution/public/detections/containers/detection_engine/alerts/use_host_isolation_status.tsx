@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import { Maybe } from '../../../../../../observability/common/typings';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getHostMetadata } from './api';
 import { ISOLATION_STATUS_FAILURE } from './translations';
@@ -16,8 +15,8 @@ import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
-  isIsolated: Maybe<boolean>;
-  agentStatus: Maybe<HostStatus>;
+  isIsolated: boolean;
+  agentStatus: HostStatus;
 }
 
 /*
@@ -27,8 +26,8 @@ export const useHostIsolationStatus = ({
 }: {
   agentId: string;
 }): HostIsolationStatusResponse => {
-  const [isIsolated, setIsIsolated] = useState<Maybe<boolean>>();
-  const [agentStatus, setAgentStatus] = useState<HostStatus>();
+  const [isIsolated, setIsIsolated] = useState<boolean>(false);
+  const [agentStatus, setAgentStatus] = useState<HostStatus>(HostStatus.UNHEALTHY);
   const [loading, setLoading] = useState(false);
 
   const { addError } = useAppToasts();
