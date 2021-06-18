@@ -86,7 +86,9 @@ export function ChangeIndexPattern({
             const choice = (choices.find(({ checked }) => checked) as unknown) as {
               value: string;
             };
-            onChangeIndexPattern(choice.value);
+            if (choice.value !== indexPatternId) {
+              onChangeIndexPattern(choice.value);
+            }
             setPopoverIsOpen(false);
           }}
           searchProps={{
