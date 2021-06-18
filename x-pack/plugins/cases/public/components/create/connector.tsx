@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, ActionConnector } from '../../../common';
 import {
   UseField,
   useFormData,
@@ -18,7 +18,6 @@ import {
 } from '../../common/shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { ActionConnector } from '../../../common';
 import { FormProps, schema } from './schema';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';

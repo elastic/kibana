@@ -22,24 +22,22 @@ import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
-jest.mock('../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        notifications: {},
-        http: {},
-        triggersActionsUi: {
-          actionTypeRegistry: {
-            get: jest.fn().mockReturnValue({
-              actionTypeTitle: 'test',
-              iconClass: 'logoSecurity',
-            }),
-          },
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {},
+      http: {},
+      triggersActionsUi: {
+        actionTypeRegistry: {
+          get: jest.fn().mockReturnValue({
+            actionTypeTitle: 'test',
+            iconClass: 'logoSecurity',
+          }),
         },
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');

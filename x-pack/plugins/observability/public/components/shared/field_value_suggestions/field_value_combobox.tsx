@@ -15,8 +15,8 @@ import { FieldValueSelectionProps } from './types';
 const formatOptions = (values?: string[]) => {
   const uniqueValues = Array.from(new Set(values));
 
-  return (uniqueValues ?? []).map((val) => ({
-    label: val,
+  return (uniqueValues ?? []).map((label) => ({
+    label,
   }));
 };
 
@@ -28,14 +28,15 @@ export function FieldValueCombobox({
   loading,
   values,
   setQuery,
+  compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<ValueOption[]>(
-    formatOptions(union(values ?? [], selectedValue ?? []))
+    formatOptions(union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []))
   );
 
   useEffect(() => {
-    setOptions(formatOptions(union(values ?? [], selectedValue ?? [])));
+    setOptions(formatOptions(union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? [])));
   }, [selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {
@@ -47,7 +48,7 @@ export function FieldValueCombobox({
       <EuiFormControlLayout fullWidth prepend={label} compressed>
         <EuiComboBox
           fullWidth
-          compressed
+          compressed={compressed}
           placeholder={i18n.translate(
             'xpack.observability.fieldValueSelection.placeholder.search',
             {

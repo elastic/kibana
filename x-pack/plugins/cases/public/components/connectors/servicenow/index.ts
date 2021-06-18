@@ -15,19 +15,15 @@ import {
 } from '../../../../common';
 import * as i18n from './translations';
 
-export const getServiceNowITSMCaseConnector = (): CaseConnector<ServiceNowITSMFieldsType> => {
-  return {
-    id: ConnectorTypes.serviceNowITSM,
-    fieldsComponent: lazy(() => import('./servicenow_itsm_case_fields')),
-  };
-};
+export const getServiceNowITSMCaseConnector = (): CaseConnector<ServiceNowITSMFieldsType> => ({
+  id: ConnectorTypes.serviceNowITSM,
+  fieldsComponent: lazy(() => import('./servicenow_itsm_case_fields')),
+});
 
-export const getServiceNowSIRCaseConnector = (): CaseConnector<ServiceNowSIRFieldsType> => {
-  return {
-    id: ConnectorTypes.serviceNowSIR,
-    fieldsComponent: lazy(() => import('./servicenow_sir_case_fields')),
-  };
-};
+export const getServiceNowSIRCaseConnector = (): CaseConnector<ServiceNowSIRFieldsType> => ({
+  id: ConnectorTypes.serviceNowSIR,
+  fieldsComponent: lazy(() => import('./servicenow_sir_case_fields')),
+});
 
 export const serviceNowITSMFieldLabels = {
   impact: i18n.IMPACT,
