@@ -28,7 +28,7 @@ export function fetchTotalHits({
   searchSessionId: string;
   searchSource: SearchSource;
 }) {
-  const childSearchSource = searchSource.createChild();
+  const childSearchSource = searchSource.createCopy();
   const indexPattern = searchSource.getField('index');
   childSearchSource.setField('trackTotalHits', true);
   childSearchSource.setField(
@@ -42,7 +42,7 @@ export function fetchTotalHits({
       inspector: {
         adapter: inspectorAdapters.requests,
         title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
-          defaultMessage: 'total hits data',
+          defaultMessage: 'Total hits data',
         }),
         description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
           defaultMessage:

@@ -7,42 +7,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import { IndexPattern, ISearchSource } from '../../../../kibana_services';
-import { updateSearchSource } from '../utils/update_search_source';
-import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from './discover_state';
-import { SortOrder } from '../../../../saved_searches/types';
+import { ISearchSource } from '../../../../kibana_services';
 import { Adapters } from '../../../../../../inspector/common';
 import { isCompleteResponse } from '../../../../../../data/common';
 
 export const fetchDocuments = ({
   abortController,
-  indexPattern,
   inspectorAdapters,
   searchSessionId,
   searchSource,
-  services,
-  stateContainer,
-  useNewFieldsApi,
 }: {
   abortController: AbortController;
-  indexPattern: IndexPattern;
   inspectorAdapters: Adapters;
   searchSessionId: string;
   searchSource: ISearchSource;
-  services: DiscoverServices;
-  stateContainer: GetStateReturn;
-  useNewFieldsApi: boolean;
 }) => {
-  const { sort } = stateContainer.appStateContainer.getState();
-  const childSearchSource = searchSource.createChild();
-
-  updateSearchSource(childSearchSource, false, {
-    indexPattern,
-    services,
-    sort: sort as SortOrder[],
-    useNewFieldsApi,
-  });
+  const childSearchSource = searchSource.createCopy();
   childSearchSource.setField('trackTotalHits', false);
 
   return childSearchSource

@@ -35,7 +35,7 @@ export function fetchChart({
   searchSource: SearchSource;
   searchSessionId: string;
 }): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
-  const childSearchSource = searchSource.createChild();
+  const childSearchSource = searchSource.createCopy();
   const indexPattern = searchSource.getField('index')!;
   childSearchSource.setField(
     'filter',

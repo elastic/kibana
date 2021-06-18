@@ -32,19 +32,19 @@ export function updateSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const usedSort = getSortForSearchSource(
-    sort,
-    indexPattern,
-    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-  );
-  const usedSearchSource = persist ? searchSource : searchSource.getParent()!;
+  const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
-  usedSearchSource
+  parentSearchSource
     .setField('index', indexPattern)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 
   if (!persist) {
+    const usedSort = getSortForSearchSource(
+      sort,
+      indexPattern,
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+    );
     const size = uiSettings.get(SAMPLE_SIZE_SETTING);
     searchSource
       .setField('trackTotalHits', true)

@@ -233,7 +233,7 @@ export const useSavedSearch = ({
       }
 
       const { hideChart, interval, sort } = stateContainer.appStateContainer.getState();
-      updateSearchSource(searchSource, true, {
+      updateSearchSource(searchSource, false, {
         indexPattern,
         services,
         sort: sort as SortOrder[],
@@ -243,13 +243,9 @@ export const useSavedSearch = ({
       const fetchAndSubscribeDocuments = () => {
         const documentsSourceFetch$ = fetchDocuments({
           abortController: refs.current.abortController!,
-          indexPattern,
           inspectorAdapters,
           searchSessionId: sessionId,
           searchSource,
-          services,
-          stateContainer,
-          useNewFieldsApi,
         });
 
         documentsSourceFetch$.subscribe((res) => {
