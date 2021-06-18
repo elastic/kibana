@@ -84,7 +84,7 @@ export function EnvironmentConfigurationSelector({
       isOpen={isPopoverOpen}
       closePopover={toggleIsPopoverOpen}
     >
-      <div style={{ width: px(400) }}>
+      <div style={{ width: px(350) }}>
         <EuiSelectable
           searchable
           searchProps={{
