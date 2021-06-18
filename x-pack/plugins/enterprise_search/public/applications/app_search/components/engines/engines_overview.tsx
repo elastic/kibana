@@ -28,12 +28,7 @@ import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
-import {
-  EnginesOverviewHeader,
-  LoadingState,
-  EmptyState,
-  EmptyMetaEnginesState,
-} from './components';
+import { EnginesOverviewHeader, EmptyState, EmptyMetaEnginesState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
@@ -72,14 +67,14 @@ export const EnginesOverview: React.FC = () => {
     if (hasPlatinumLicense) loadMetaEngines();
   }, [hasPlatinumLicense, metaEnginesMeta.page.current]);
 
-  if (dataLoading) return <LoadingState />;
-  if (!engines.length) return <EmptyState />;
-
   return (
     <AppSearchPageTemplate
       pageViewTelemetry="engines_overview"
       pageChrome={[ENGINES_TITLE]}
       pageHeader={{ children: <EnginesOverviewHeader /> }}
+      isLoading={dataLoading}
+      isEmptyState={!engines.length}
+      emptyState={<EmptyState />}
     >
       <EnginesOverviewHeader />
       <EuiPanel hasBorder>
