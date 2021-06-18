@@ -18,13 +18,12 @@ import {
   caseStatuses,
   CasesFindResponseRt,
   excess,
-} from '../../../common/api';
+} from '../../../common';
 
-import { createCaseError } from '../../common/error';
+import { createCaseError, transformCases } from '../../common';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
-import { transformCases } from '../../common';
 import { CasesClientArgs } from '..';
 
 /**
