@@ -100,6 +100,10 @@ export const PAGES_LOADED_LABEL = i18n.translate(
   }
 );
 
+export const PINGS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.pings', {
+  defaultMessage: 'Pings',
+});
+
 export const MONITOR_ID_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.monitorId',
   {
@@ -165,42 +169,6 @@ export const PERF_DIST_LABEL = i18n.translate(
   }
 );
 
-export const MONITOR_DURATION_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.monitorDuration',
-  {
-    defaultMessage: 'Uptime monitor duration',
-  }
-);
-
-export const UPTIME_PINGS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.pings', {
-  defaultMessage: 'Uptime pings',
-});
-
-export const SERVICE_LATENCY_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.serviceLatency',
-  {
-    defaultMessage: 'APM Service latency',
-  }
-);
-
-export const SERVICE_THROUGHPUT_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.serviceThroughput',
-  {
-    defaultMessage: 'APM Service throughput',
-  }
-);
-
-export const CPU_USAGE_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
-  defaultMessage: 'System CPU usage',
-});
-
-export const NETWORK_ACTIVITY_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.networkActivity',
-  {
-    defaultMessage: 'Network activity',
-  }
-);
-
 export const CORE_WEB_VITALS_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.coreWebVitals',
   {
@@ -212,13 +180,6 @@ export const MEMORY_USAGE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.memoryUsage',
   {
     defaultMessage: 'System memory usage',
-  }
-);
-
-export const LOGS_FREQUENCY_LABEL = i18n.translate(
-  'xpack.observability.expView.fieldLabels.logsFrequency',
-  {
-    defaultMessage: 'Logs frequency',
   }
 );
 
@@ -243,10 +204,10 @@ export const WEB_APPLICATION_LABEL = i18n.translate(
   }
 );
 
-export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.up', {
-  defaultMessage: 'Up',
+export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.upPings', {
+  defaultMessage: 'Up Pings',
 });
 
-export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.down', {
-  defaultMessage: 'Down',
+export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.downPings', {
+  defaultMessage: 'Down Pings',
 });

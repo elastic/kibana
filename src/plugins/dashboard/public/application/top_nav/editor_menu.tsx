@@ -51,7 +51,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   const createNewAggsBasedVis = useCallback(

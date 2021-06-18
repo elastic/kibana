@@ -124,8 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('when the hostname is clicked on,', () => {
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
-          await testSubjects.existOrFail('endpointDetailsUpperList');
-          await testSubjects.existOrFail('endpointDetailsLowerList');
+          await testSubjects.existOrFail('endpointDetailsList');
         });
 
         it('updates the details flyout when a new hostname is selected from the list', async () => {

@@ -8,11 +8,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
-
 import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor, Attribution } from '../../../common/descriptor_types';

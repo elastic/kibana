@@ -22,23 +22,23 @@ describe('Series Builder ReportDefinitionCol', function () {
   const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
-    seriesId,
-    reportType: 'pld',
+    reportType: 'dist',
     indexPattern: mockIndexPattern,
+    dataType: 'ux',
   });
 
   const initSeries = {
     data: {
       [seriesId]: {
         dataType: 'ux' as const,
-        reportType: 'pld' as const,
+        reportType: 'dist' as const,
         time: { from: 'now-30d', to: 'now' },
         reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
       },
     },
   };
 
-  mockUseValuesList(['elastic-co']);
+  mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
   it('should render properly', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
@@ -81,7 +81,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'ux',
       reportDefinitions: {},
-      reportType: 'pld',
+      reportType: 'dist',
       time: { from: 'now-30d', to: 'now' },
     });
   });

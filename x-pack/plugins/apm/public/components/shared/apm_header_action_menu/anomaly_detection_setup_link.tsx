@@ -42,14 +42,15 @@ export function AnomalyDetectionSetupLink() {
 
   return (
     <EuiHeaderLink
-      color="primary"
+      size="xs"
+      color="text"
       href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
       {canGetJobs && hasValidLicense ? (
         <MissingJobsAlert environment={environment} />
       ) : (
-        <EuiIcon type="inspect" color="primary" />
+        <EuiIcon size="s" type="inspect" color="text" />
       )}
       <span style={{ marginInlineStart: units.half }}>
         {ANOMALY_DETECTION_LINK_LABEL}
@@ -64,7 +65,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     anomalyDetectionJobsStatus,
   } = useAnomalyDetectionJobsContext();
 
-  const defaultIcon = <EuiIcon type="inspect" color="primary" />;
+  const defaultIcon = <EuiIcon size="s" type="inspect" color="text" />;
 
   if (anomalyDetectionJobsStatus === FETCH_STATUS.LOADING) {
     return <EuiLoadingSpinner />;
@@ -92,7 +93,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
 
   return (
     <EuiToolTip position="bottom" content={getTooltipText(environment)}>
-      <EuiIcon type="alert" color="danger" />
+      <EuiIcon size="s" type="alert" color="danger" />
     </EuiToolTip>
   );
 }

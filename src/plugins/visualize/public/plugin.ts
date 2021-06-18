@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
 import { createHashHistory } from 'history';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
 import {
   AppMountParameters,
   AppUpdater,
@@ -18,29 +19,33 @@ import {
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
-} from 'kibana/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
 
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   Storage,
   createKbnUrlTracker,
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart, SharePluginSetup } from '../../share/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { VisualizationsStart } from '../../visualizations/public';
+
 import { VisualizeConstants } from './application/visualize_constants';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import { DashboardStart } from '../../dashboard/public';
+
+import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import type { SharePluginStart, SharePluginSetup } from '../../share/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
+import type { VisualizationsStart } from '../../visualizations/public';
+import type { VisualizeServices } from './application/types';
+import type { SavedObjectsStart } from '../../saved_objects/public';
+import type { EmbeddableStart } from '../../embeddable/public';
+import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import { setVisEditorsRegistry, setUISettings } from './services';
+import type { UsageCollectionStart } from '../../usage_collection/public';
+
+import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
@@ -54,6 +59,7 @@ export interface VisualizePluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -202,6 +208,7 @@ export class VisualizePlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
+          usageCollection: pluginsStart.usageCollection,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -238,8 +245,12 @@ export class VisualizePlugin
     } as VisualizePluginSetup;
   }
 
-  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+  public start(core: CoreStart, { usageCollection }: VisualizePluginStartDependencies) {
     setVisEditorsRegistry(this.visEditorsRegistry);
+
+    if (usageCollection) {
+      setUsageCollector(usageCollection);
+    }
   }
 
   stop() {

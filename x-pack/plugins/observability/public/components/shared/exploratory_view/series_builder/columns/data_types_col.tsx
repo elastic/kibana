@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { AppDataType } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { ReportToDataTypeMap } from '../../configurations/constants';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
@@ -35,7 +34,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     }
   };
 
-  const selectedDataType = series.dataType ?? ReportToDataTypeMap[series.reportType];
+  const selectedDataType = series.dataType;
 
   return (
     <FlexGroup direction="column" gutterSize="xs">
