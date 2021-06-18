@@ -7,10 +7,11 @@
  */
 
 import { mapValues } from 'lodash';
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
-import { typeSpecs } from '../../../expressions/common';
+import { ExpressionFunctionDefinition } from '../../../expressions';
+import { ExpressionValueBoxed, typeSpecs } from '../../../expressions/common';
 
-type FnType = () => typeof typeSpecs[number];
+type FnType = () => typeof typeSpecs[number] &
+  ExpressionFunctionDefinition<string, any, Record<string, any>, ExpressionValueBoxed<any, any>>;
 
 // It takes a function spec and passes in default args into the spec fn
 export const functionWrapper = (fnSpec: FnType): ReturnType<FnType>['fn'] => {
