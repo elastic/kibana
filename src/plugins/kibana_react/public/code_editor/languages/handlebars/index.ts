@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LangModule as LangModuleType } from '../types';
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
+import { LANG } from './constants';
 
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };

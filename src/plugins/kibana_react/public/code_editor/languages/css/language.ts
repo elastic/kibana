@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LangModule as LangModuleType } from '../types';
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
+/* eslint-disable @kbn/eslint/module_migration */
+import { conf, language } from 'monaco-editor/esm/vs/basic-languages/css/css';
 
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+export { conf as languageConfiguration, language as lexerRules };
