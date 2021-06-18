@@ -29,7 +29,7 @@ export const ActiveLicensePageHeader = ({ license, ...props }) => {
         </span>
       }
       description={
-        <p data-test-subj="licenseSubText">
+        <span data-test-subj="licenseSubText">
           {license.expirationDate ? (
             <FormattedMessage
               id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
@@ -44,7 +44,7 @@ export const ActiveLicensePageHeader = ({ license, ...props }) => {
               defaultMessage="Your license will never expire."
             />
           )}
-        </p>
+        </span>
       }
     />
   );
@@ -66,7 +66,7 @@ export const ExpiredLicensePageHeader = ({ license, ...props }) => {
         </span>
       }
       description={
-        <p data-test-subj="licenseSubText">
+        <span data-test-subj="licenseSubText">
           <FormattedMessage
             id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
             defaultMessage="Your license expired on {licenseExpirationDate}"
@@ -74,7 +74,7 @@ export const ExpiredLicensePageHeader = ({ license, ...props }) => {
               licenseExpirationDate: <strong>{license.expirationDate}</strong>,
             }}
           />
-        </p>
+        </span>
       }
     />
   );
