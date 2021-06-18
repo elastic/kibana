@@ -14,13 +14,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
 
-import type { Panel, Annotation } from '../../../common/types';
+import type { PanelSchema, AnnotationItemsSchema } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 interface AnnotationsEditorProps {
   fields: VisFields;
-  model: Panel;
-  onChange: (partialModel: Partial<Panel>) => void;
+  model: PanelSchema;
+  onChange: (partialModel: Partial<PanelSchema>) => void;
 }
 
 export const newAnnotation = () => ({
@@ -54,7 +54,7 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
   ({
     name: 'annotations',
     ...props,
-  } as CollectionActionsProps<Panel>);
+  } as CollectionActionsProps<PanelSchema>);
 
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
@@ -71,8 +71,8 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   );
 
   const onChange = useCallback(
-    (annotation: Annotation) => {
-      return (part: Partial<Annotation>) =>
+    (annotation: AnnotationItemsSchema) => {
+      return (part: Partial<AnnotationItemsSchema>) =>
         collectionActions.handleChange(getCollectionActionsProps(props), {
           ...annotation,
           ...part,
@@ -94,7 +94,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
             </span>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {annotations.map((annotation) => (
+          {annotations.map((annotation: AnnotationItemsSchema) => (
             <AnnotationRow
               key={annotation.id}
               annotation={annotation}

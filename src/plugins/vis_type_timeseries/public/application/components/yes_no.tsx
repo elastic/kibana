@@ -13,7 +13,7 @@ import { TimeseriesVisParams } from '../../types';
 
 interface YesNoProps {
   name: string;
-  value: TimeseriesVisParams[ParamName];
+  value: boolean | number | undefined;
   disabled?: boolean;
   'data-test-subj'?: string;
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;

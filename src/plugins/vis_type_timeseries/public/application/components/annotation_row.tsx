@@ -35,7 +35,11 @@ import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 // @ts-expect-error not typed yet
 import { IconSelect } from './icon_select/icon_select';
 
-import type { Annotation, FetchedIndexPattern, IndexPatternValue } from '../../../common/types';
+import type {
+  AnnotationItemsSchema,
+  FetchedIndexPattern,
+  IndexPatternValue,
+} from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
@@ -44,9 +48,9 @@ const INDEX_PATTERN_KEY = 'index_pattern';
 const TIME_FIELD_KEY = 'time_field';
 
 export interface AnnotationRowProps {
-  annotation: Annotation;
+  annotation: AnnotationItemsSchema;
   fields: VisFields;
-  onChange: (partialModel: Partial<Annotation>) => void;
+  onChange: (partialModel: Partial<AnnotationItemsSchema>) => void;
   handleAdd: () => void;
   handleDelete: () => void;
 }

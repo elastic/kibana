@@ -48,7 +48,7 @@ export const fieldObject = stringOptionalNullable;
 
 export const annotationsItems = schema.object({
   color: stringOptionalNullable,
-  fields: stringOptionalNullable,
+  fields: schema.string(),
   hidden: schema.maybe(schema.boolean()),
   icon: stringOptionalNullable,
   id: schema.string(),
@@ -56,7 +56,7 @@ export const annotationsItems = schema.object({
   ignore_panel_filters: numberIntegerOptional,
   index_pattern: indexPattern,
   query_string: schema.maybe(queryObject),
-  template: stringOptionalNullable,
+  template: schema.string(),
   time_field: fieldObject,
 });
 
