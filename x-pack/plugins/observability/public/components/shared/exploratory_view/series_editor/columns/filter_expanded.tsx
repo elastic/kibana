@@ -65,12 +65,11 @@ export function FilterExpanded({
 
   const { values, loading } = useValuesList({
     query: value,
-    indexPatternTitle: indexPattern?.title,
     sourceField: field,
     time: series.time,
     keepHistory: true,
     filters: queryFilters,
-    indexPattern: indexPatterns[series.dataType],
+    indexPatternTitle: indexPatterns[series.dataType]?.title,
   });
 
   const filters = series?.filters ?? [];

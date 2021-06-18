@@ -358,7 +358,11 @@ export class LensAttributes {
       });
     }
     if (operationType === 'unique_count') {
-      return this.getCardinalityColumn({ sourceField: fieldName, label: columnLabel || label });
+      return this.getCardinalityColumn({
+        sourceField: fieldName,
+        label: columnLabel || label,
+        reportViewConfig: layerConfig.reportConfig,
+      });
     }
 
     // FIXME review my approach again
@@ -471,9 +475,11 @@ export class LensAttributes {
       if (qFilter.query?.bool?.should) {
         const values: string[] = [];
         let fieldName = '';
-        qFilter.query?.bool.should.forEach((ft) => {
-          fieldName = Object.keys(ft.match_phrase)[0];
-          values.push(ft.match_phrase[fieldName]);
+        qFilter.query?.bool.should.forEach((ft: PersistableFilter['query']['match_phrase']) => {
+          if (ft.match_phrase) {
+            fieldName = Object.keys(ft.match_phrase)[0];
+            values.push(ft.match_phrase[fieldName]);
+          }
         });
 
         const kueryString = `${fieldName}: (${values.join(' or ')})`;

@@ -23,7 +23,7 @@ export const ReportViewTypes = {
   dist: 'data-distribution',
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
-  mdd: 'mobile-device-distribution',
+  mdd: 'device-data-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];

@@ -124,12 +124,5 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Analyze data',
-        }),
-      },
-    ],
   },
 };

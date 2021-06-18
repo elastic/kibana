@@ -13,7 +13,7 @@ import { ReportTypes } from '../series_builder';
 import { DEFAULT_TIME } from '../../configurations/constants';
 
 describe('ReportTypesCol', function () {
-  const seriesId = 'test-series-id';
+  const seriesId = 'performance-distribution';
 
   mockAppIndexPattern();
 

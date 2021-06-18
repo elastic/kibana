@@ -41,7 +41,7 @@ export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props)
       if (reportType === 'data-distribution') {
         return getMobileKPIDistributionConfig({ indexPattern });
       }
-      if (reportType === 'mdd') {
+      if (reportType === 'device-data-distribution') {
         return getMobileDeviceDistributionConfig({ indexPattern });
       }
       return getMobileKPIConfig({ indexPattern });

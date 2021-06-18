@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
 

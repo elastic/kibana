@@ -87,9 +87,9 @@ export const FieldLabels: Record<string, string> = {
 
 export const DataViewLabels: Record<ReportViewType, string> = {
   'data-distribution': PERF_DIST_LABEL,
-  'kpi-over-time': KIP_OVER_TIME_LABEL,
+  'kpi-over-time': KPI_OVER_TIME_LABEL,
   'core-web-vitals': CORE_WEB_VITALS_LABEL,
-  mdd: DEVICE_DISTRIBUTION_LABEL,
+  'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

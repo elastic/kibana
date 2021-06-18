@@ -45,25 +45,18 @@ export interface ReportTypeItem {
 
 export const ReportTypes: Record<AppDataType, ReportTypeItem[]> = {
   synthetics: [
-    { id: 'kpi', reportType: 'kpi-over-time', label: 'KPI over time' },
-    { id: 'dist', reportType: 'data-distribution', label: 'Performance distribution' },
-    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
-    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'kpi', reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', reportType: 'data-distribution', label: PERF_DIST_LABEL },
   ],
   ux: [
-    { id: 'kpi', reportType: 'kpi-over-time', label: 'KPI over time' },
-    { id: 'dist', reportType: 'data-distribution', label: 'Performance distribution' },
-    { id: 'cwv', reportType: 'core-web-vitals', label: 'Core Web Vitals' },
-    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
-    { id: 'dist', label: PERF_DIST_LABEL },
-    { id: 'cwv', label: CORE_WEB_VITALS_LABEL },
+    { id: 'kpi', reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', reportType: 'data-distribution', label: PERF_DIST_LABEL },
+    { id: 'cwv', reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
   ],
   mobile: [
-    { id: 'kpi', reportType: 'kpi-over-time', label: 'KPI over time' },
-    { id: 'dist', reportType: 'data-distribution', label: 'Performance distribution' },
-    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
-    { id: 'dist', label: PERF_DIST_LABEL },
-    { id: 'mdd', label: DEVICE_DISTRIBUTION_LABEL },
+    { id: 'kpi', reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', reportType: 'data-distribution', label: PERF_DIST_LABEL },
+    { id: 'mdd', reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
   ],
   apm: [],
   infra_logs: [],
