@@ -235,7 +235,7 @@ class TutorialDirectoryUi extends React.Component {
   renderNotices = () => {
     const notices = getServices().tutorialService.getDirectoryNotices();
     return notices.length ? (
-      <EuiFlexGroup grow={false} direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="none">
         {notices.map((DirectoryNotice, index) => (
           <EuiFlexItem key={index}>
             <DirectoryNotice />
