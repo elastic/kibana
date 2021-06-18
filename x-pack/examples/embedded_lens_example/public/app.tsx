@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
-import { ViewMode } from 'src/plugins/embeddable/public';
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
