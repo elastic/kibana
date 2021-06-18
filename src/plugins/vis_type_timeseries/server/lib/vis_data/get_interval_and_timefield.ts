@@ -10,7 +10,11 @@ import { AUTO_INTERVAL } from '../../../common/constants';
 import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
 import { validateField } from '../../../common/fields_utils';
 
-export function getIntervalAndTimefield(panel: PanelSchema, index: FetchedIndexPattern, series?: SeriesItemsSchema) {
+export function getIntervalAndTimefield(
+  panel: PanelSchema,
+  index: FetchedIndexPattern,
+  series?: SeriesItemsSchema
+) {
   const timeField =
     (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;

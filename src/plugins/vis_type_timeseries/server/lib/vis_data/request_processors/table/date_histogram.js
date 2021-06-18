@@ -27,7 +27,7 @@ export function dateHistogram(
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { timeField, interval } = await buildSeriesMetaParams();
-  
+
     const meta = {
       timeField,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
