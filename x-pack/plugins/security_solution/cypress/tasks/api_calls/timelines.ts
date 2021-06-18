@@ -123,9 +123,13 @@ export const loadPrepackagedTimelineTemplates = () =>
 export const favoriteTimeline = ({
   timelineId,
   timelineType,
+  templateTimelineId,
+  templateTimelineVersion,
 }: {
   timelineId: string;
   timelineType: string;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }) =>
   cy.request({
     method: 'PATCH',
@@ -133,6 +137,8 @@ export const favoriteTimeline = ({
     body: {
       timelineId,
       timelineType,
+      templateTimelineId: templateTimelineId ?? null,
+      templateTimelineVersion: templateTimelineVersion ?? null,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
