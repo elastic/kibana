@@ -9,9 +9,13 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { revealImageRenderer } from '../';
-import { Render, elasticOutline, elasticLogo } from '../../../../presentation_util/public';
+import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
+
+// This is required only for stories, no need to put it to a bundle
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Render } from '../../../../presentation_util/public/__stories__';
+
 import { Origin } from '../../../common/types/expression_functions';
-import './reveal_image.scss';
 
 storiesOf('renderers/revealImage', module).add('default', () => {
   const config = {

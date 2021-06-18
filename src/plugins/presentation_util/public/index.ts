@@ -20,7 +20,7 @@ export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
 export * from '../common/lib';
 export * from '../common/test_helpers';
-export * from './__stories__';
+// export * from './__stories__';
 
 export {
   LazyLabsBeakerButton,
