@@ -28,10 +28,11 @@ import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
-import { EnginesOverviewHeader, EmptyState, EmptyMetaEnginesState } from './components';
+import { LaunchAppSearchButton, EmptyState, EmptyMetaEnginesState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
+  ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
@@ -71,12 +72,14 @@ export const EnginesOverview: React.FC = () => {
     <AppSearchPageTemplate
       pageViewTelemetry="engines_overview"
       pageChrome={[ENGINES_TITLE]}
-      pageHeader={{ children: <EnginesOverviewHeader /> }}
+      pageHeader={{
+        pageTitle: ENGINES_OVERVIEW_TITLE,
+        rightSideItems: [<LaunchAppSearchButton />],
+      }}
       isLoading={dataLoading}
       isEmptyState={!engines.length}
       emptyState={<EmptyState />}
     >
-      <EnginesOverviewHeader />
       <EuiPanel hasBorder>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
