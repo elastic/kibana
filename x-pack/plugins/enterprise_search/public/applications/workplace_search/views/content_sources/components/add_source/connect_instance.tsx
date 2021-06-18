@@ -167,7 +167,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText color="subdued">
+        <EuiText color="subdued" size="s">
           {!needsPermissions && (
             <span>
               <FormattedMessage

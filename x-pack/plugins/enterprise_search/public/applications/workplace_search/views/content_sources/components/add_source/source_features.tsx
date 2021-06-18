@@ -178,7 +178,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
 
     return (
       <>
-        <EuiTitle size="xs">
+        <EuiTitle size="s">
           <h3>
             <strong>Included features</strong>
           </h3>
