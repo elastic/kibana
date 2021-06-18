@@ -48,6 +48,7 @@ const ConnectorFields = ({
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
   let connector = getConnectorById(connectorId, connectors) ?? null;
+
   if (
     connector &&
     hideConnectorServiceNowSir &&

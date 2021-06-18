@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FieldConfig } from '../common/shared_imports';
+import { ConnectorTypes } from '../../common';
+import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { CaseActionConnector } from './types';
 
@@ -13,6 +14,13 @@ export const getConnectorById = (
   id: string,
   connectors: CaseActionConnector[]
 ): CaseActionConnector | null => connectors.find((c) => c.id === id) ?? null;
+
+const validators: Record<
+  string,
+  (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
+> = {
+  [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
+};
 
 export const getConnectorsFormValidators = ({
   connectors = [],
@@ -27,7 +35,7 @@ export const getConnectorsFormValidators = ({
       validator: ({ value: connectorId }) => {
         const connector = getConnectorById(connectorId as string, connectors);
         if (connector != null) {
-          return swimlaneConnectorValidator(connector);
+          return validators[connector.actionTypeId]?.(connector);
         }
       },
     },
