@@ -131,6 +131,14 @@ export interface DashboardStart {
   getDashboardContainerByValueRenderer: () => ReturnType<
     typeof createDashboardContainerByValueRenderer
   >;
+  /**
+   * @deprecated Use dashboard locator instead. Dashboard locator is available
+   * under `.locator` key. This dashboard URL generator will be removed soon.
+   *
+   * ```ts
+   * plugins.dashboard.locator.getLocation({ ... });
+   * ```
+   */
   dashboardUrlGenerator?: DashboardUrlGenerator;
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
@@ -146,6 +154,9 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
+  /**
+   * @deprecated Use locator instead.
+   */
   private dashboardUrlGenerator?: DashboardUrlGenerator;
   private locator?: DashboardAppLocator;
 
