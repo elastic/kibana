@@ -53,8 +53,6 @@ export function FilterExpanded({
 
   const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
-  const queryFilters: ESFilter[] = [];
-
   defaultFilters?.forEach((qFilter: PersistableFilter | ExistsFilter) => {
     if (qFilter.query) {
       queryFilters.push(qFilter.query);
