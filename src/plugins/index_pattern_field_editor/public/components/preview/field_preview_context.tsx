@@ -125,11 +125,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
 
-  const areAllParamsDefined = Object.entries(params)
-    // We don't need the "format" information for the _execute API
-    .filter(([key]) => key !== 'format')
-    .every(([_, value]) => Boolean(value));
-
   const { documents, currentIdx } = clusterData;
   const currentDocument: Record<string, any> | undefined = useMemo(() => documents[currentIdx], [
     documents,
@@ -144,10 +139,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
+  const allParamsDefined = useCallback(
+    () =>
+      Object.entries(params)
+        // We don't need the "name" or "format" information for the _execute API
+        .filter(([key]) => key !== 'name' && key !== 'format')
+        .every(([_, value]) => Boolean(value)),
+    [params]
+  );
+
   const fetchSampleDocuments = useCallback(
     async (limit = 50) => {
       setIsFetchingDocument(true);
-      setIsLoadingPreview(true);
 
       const response = await search
         .search({
@@ -241,13 +244,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
-    if (fieldTypeToProcess !== 'runtime' || !areAllParamsDefined) {
+    if (fieldTypeToProcess !== 'runtime' || !allParamsDefined()) {
       return;
     }
 
     const currentApiCall = ++previewCount.current;
-
-    setIsLoadingPreview(true);
 
     const response = await getFieldPreview({
       index: currentDocIndex,
@@ -298,7 +299,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }
   }, [
     fieldTypeToProcess,
-    areAllParamsDefined,
+    allParamsDefined,
     params,
     currentDocIndex,
     getFieldPreview,
@@ -324,9 +325,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentIdx, totalDocs]);
 
   const reset = useCallback(() => {
-    // We increase the count of preview calls to discard any inflight
-    // API call response coming in after calling reset()
-    previewCount.current = ++previewCount.current;
+    // By resetting the previewCount we will discard any inflight
+    // API call response coming in after calling reset() was called
+    previewCount.current = 0;
 
     setClusterData({
       documents: [],
@@ -398,6 +399,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   /**
+   * In order to immediately display the "Updating..." state indicator and not have to wait
+   * the 500ms of the debounce, we set the loading state in this effect
+   */
+  useEffect(() => {
+    if (fieldTypeToProcess !== 'runtime' || !allParamsDefined()) {
+      return;
+    }
+
+    setIsLoadingPreview(true);
+  }, [fieldTypeToProcess, allParamsDefined]);
+
+  /**
    * When the component mounts, if we are creating/editing a runtime field
    * we fetch sample documents from the cluster to be able to preview the runtime
    * field along with other document fields
@@ -420,24 +433,22 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentDocument, updateParams]);
 
   useEffect(() => {
-    if (name && document && script === null) {
+    if (document) {
       // We have a field name, a document loaded but no script (the set value toggle is
       // either turned off or we have a blank script). If we have a format then we'll
       // preview the field with the format by reading the value from _source
-      if (format) {
+      if (name && script === null) {
         setPreviewResponse({
           fields: [{ key: name, value: get(document, name) }],
           error: null,
         });
       } else {
-        // We don't have a format yet defined, we reset the preview.
-        // This will display the empty prompt.
-        setPreviewResponse({
-          fields: [],
+        // We immediately update the field preview whenever the name changes
+        setPreviewResponse((prev) => ({
+          fields: [{ key: name ?? '', value: prev.fields[0]?.value }],
           error: null,
-        });
+        }));
       }
-      setIsLoadingPreview(false);
     }
   }, [name, document, script, format]);
 

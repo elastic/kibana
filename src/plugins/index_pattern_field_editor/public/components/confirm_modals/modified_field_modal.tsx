@@ -11,21 +11,15 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('indexPatternFieldEditor.cancelField.confirmationModal.title', {
-    defaultMessage: 'Unsaved changes',
+    defaultMessage: 'Discard changes',
   }),
   description: i18n.translate('indexPatternFieldEditor.cancelField.confirmationModal.description', {
     defaultMessage: `Changes that you've made to your field will be discarded, are you sure you want to continue?`,
   }),
-  confirmButton: i18n.translate(
-    'indexPatternFieldEditor.cancelField.confirmationModal.yesButtonLabel',
-    {
-      defaultMessage: 'Yes',
-    }
-  ),
   cancelButton: i18n.translate(
     'indexPatternFieldEditor.cancelField.confirmationModal.cancelButtonLabel',
     {
-      defaultMessage: 'No',
+      defaultMessage: 'Cancel',
     }
   ),
 };
@@ -41,7 +35,7 @@ export const ModifiedFieldModal: React.FC<Props> = ({ onCancel, onConfirm }) => 
       title={i18nTexts.title}
       data-test-subj="runtimeFieldModifiedFieldConfirmModal"
       cancelButtonText={i18nTexts.cancelButton}
-      confirmButtonText={i18nTexts.confirmButton}
+      confirmButtonText={i18nTexts.title}
       onCancel={onCancel}
       onConfirm={onConfirm}
       maxWidth={600}
