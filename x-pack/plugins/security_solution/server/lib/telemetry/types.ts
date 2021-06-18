@@ -27,8 +27,8 @@ interface EndpointPolicyResponse {
 }
 
 interface EndpointPolicyResponseDetail {
-    configurations: {},
-    diagnostic: {}
+  configurations: {};
+  diagnostic: {};
 }
 
 interface EndpointPolicyResponseArtifacts {
