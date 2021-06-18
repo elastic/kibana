@@ -32,6 +32,7 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
   const pagingOptions =
     action.payload.type === 'LoadedResourceState'
       ? {
+          ...state.endpointDetails.activityLog,
           paging: {
             ...state.endpointDetails.activityLog.paging,
             page: action.payload.data.page,
@@ -159,7 +160,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging: { ...paging },
+          paging,
         },
       },
     };
@@ -175,7 +176,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging: { ...paging },
+          paging,
         },
       },
     };

@@ -409,7 +409,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           query: { page, page_size: pageSize },
         });
 
-        const hasMoreData = activityLog.data.length;
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
         if (lastLoadedLogData !== undefined) {
           const updatedLogDataItems = [
@@ -425,7 +424,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             type: 'endpointDetailsActivityLogChanged',
             payload: createLoadedResourceState<ActivityLog>(updatedLogData),
           });
-          if (!hasMoreData) {
+          if (!activityLog.data.length) {
             dispatch({
               type: 'endpointDetailsActivityLogUpdatePaging',
               payload: {
