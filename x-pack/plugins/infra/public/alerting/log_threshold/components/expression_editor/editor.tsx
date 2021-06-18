@@ -257,7 +257,8 @@ export const Editor: React.FC<
 
   const shouldShowGroupByOptimizationWarning = useMemo(() => {
     const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
-    const hasSetOptimizableThresholdComparator = alertParams.count.comparator === Comparator.GT;
+    const hasSetOptimizableThresholdComparator =
+      alertParams.count && alertParams.count.comparator === Comparator.GT;
     return hasSetGroupBy && !hasSetOptimizableThresholdComparator;
   }, [alertParams]);
 
