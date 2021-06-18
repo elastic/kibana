@@ -60,7 +60,7 @@ export function FrameLayout(props: FrameLayoutProps) {
             </h2>
           </EuiScreenReaderOnly>
           {props.workspacePanel}
-          {/* <div className="lnsFrameLayout__suggestionPanel">{props.suggestionsPanel}</div> */}
+          <div className="lnsFrameLayout__suggestionPanel">{props.suggestionsPanel}</div>
         </section>
         <section
           className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
