@@ -20,6 +20,8 @@ import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionList } from './utils';
 
+import { getExceptionList } from '.';
+
 interface CreateEndpointEventFiltersListOptions {
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
@@ -44,9 +46,17 @@ export const createEndpointEventFiltersList = async ({
   const savedObjectType = getSavedObjectType({ namespaceType: 'agnostic' });
   const dateNow = new Date().toISOString();
   try {
-    const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
-      savedObjectType,
-      {
+    const exceptionList = await getExceptionList({
+      id: undefined,
+      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      namespaceType: 'agnostic',
+      savedObjectsClient,
+    });
+
+    if (exceptionList != null) {
+      return null;
+    } else {
+      const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
         comments: undefined,
         created_at: dateNow,
         created_by: user,
@@ -64,14 +74,10 @@ export const createEndpointEventFiltersList = async ({
         type: 'endpoint_events',
         updated_by: user,
         version,
-      },
-      {
-        // We intentionally hard coding the id so that there can only be one Event Filters list within the space
-        id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-      }
-    );
+      });
 
-    return transformSavedObjectToExceptionList({ savedObject });
+      return transformSavedObjectToExceptionList({ savedObject });
+    }
   } catch (err) {
     if (savedObjectsClient.errors.isConflictError(err)) {
       return null;
