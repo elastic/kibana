@@ -11,9 +11,8 @@ import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
-import { getContrastColor } from '../../shared_components/coloring/utils';
+import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
 import { getOriginalId } from '../transpose_helpers';
-import { getNumericValue } from './shared_utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

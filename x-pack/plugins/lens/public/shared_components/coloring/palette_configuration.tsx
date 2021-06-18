@@ -61,11 +61,13 @@ export function CustomizablePalette({
   activePalette,
   setPalette,
   dataBounds,
+  showContinuity = true,
 }: {
   palettes: PaletteRegistry;
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds: { min: number; max: number };
+  showContinuity?: boolean;
 }) {
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
@@ -114,82 +116,84 @@ export function CustomizablePalette({
             showDynamicColorOnly
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
-                defaultMessage: 'Color continuity',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
-                  {
-                    defaultMessage:
-                      'Specify how colors appear before the first color stop, and after the last color stop.',
-                  }
-                )}
-                position="top"
-                size="s"
-              />
-            </>
-          }
-          display="rowCompressed"
-        >
-          <EuiSuperSelect
-            data-test-subj="lnsDatatable_dynamicColoring_continuity"
-            compressed
-            options={[
-              {
-                value: 'above',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.aboveLabel',
-                  {
-                    defaultMessage: 'Above range',
-                  }
-                ),
-                'data-test-subj': 'continuity-above',
-              },
-              {
-                value: 'below',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.belowLabel',
-                  {
-                    defaultMessage: 'Below range',
-                  }
-                ),
-                'data-test-subj': 'continuity-below',
-              },
-              {
-                value: 'all',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.allLabel',
-                  {
-                    defaultMessage: 'Above and below range',
-                  }
-                ),
-                'data-test-subj': 'continuity-all',
-              },
-              {
-                value: 'none',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.noneLabel',
-                  {
-                    defaultMessage: 'Within range',
-                  }
-                ),
-                'data-test-subj': 'continuity-none',
-              },
-            ]}
-            valueOfSelected={activePalette.params?.continuity || defaultPaletteParams.continuity}
-            onChange={(continuity: Required<CustomPaletteParams>['continuity']) =>
-              setPalette(
-                mergePaletteParams(activePalette, {
-                  continuity,
-                })
-              )
+        {showContinuity && (
+          <EuiFormRow
+            label={
+              <>
+                {i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
+                  defaultMessage: 'Color continuity',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.table.dynamicColoring.customPalette.continuityHelp',
+                    {
+                      defaultMessage:
+                        'Specify how colors appear before the first color stop, and after the last color stop.',
+                    }
+                  )}
+                  position="top"
+                  size="s"
+                />
+              </>
             }
-          />
-        </EuiFormRow>
+            display="rowCompressed"
+          >
+            <EuiSuperSelect
+              data-test-subj="lnsDatatable_dynamicColoring_continuity"
+              compressed
+              options={[
+                {
+                  value: 'above',
+                  inputDisplay: i18n.translate(
+                    'xpack.lens.table.dynamicColoring.continuity.aboveLabel',
+                    {
+                      defaultMessage: 'Above range',
+                    }
+                  ),
+                  'data-test-subj': 'continuity-above',
+                },
+                {
+                  value: 'below',
+                  inputDisplay: i18n.translate(
+                    'xpack.lens.table.dynamicColoring.continuity.belowLabel',
+                    {
+                      defaultMessage: 'Below range',
+                    }
+                  ),
+                  'data-test-subj': 'continuity-below',
+                },
+                {
+                  value: 'all',
+                  inputDisplay: i18n.translate(
+                    'xpack.lens.table.dynamicColoring.continuity.allLabel',
+                    {
+                      defaultMessage: 'Above and below range',
+                    }
+                  ),
+                  'data-test-subj': 'continuity-all',
+                },
+                {
+                  value: 'none',
+                  inputDisplay: i18n.translate(
+                    'xpack.lens.table.dynamicColoring.continuity.noneLabel',
+                    {
+                      defaultMessage: 'Within range',
+                    }
+                  ),
+                  'data-test-subj': 'continuity-none',
+                },
+              ]}
+              valueOfSelected={activePalette.params?.continuity || defaultPaletteParams.continuity}
+              onChange={(continuity: Required<CustomPaletteParams>['continuity']) =>
+                setPalette(
+                  mergePaletteParams(activePalette, {
+                    continuity,
+                  })
+                )
+              }
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           label={
             <>

@@ -18,6 +18,7 @@ import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
   CHART_SHAPES,
+  DEFAULT_PALETTE_NAME,
   FUNCTION_NAME,
   GROUP_ID,
   HEATMAP_GRID_FUNCTION,
@@ -26,13 +27,15 @@ import {
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
+import { CustomPaletteParams, CUSTOM_PALETTE } from '../shared_components';
+import { HeatmapDimensionEditor } from './dimension_editor';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
 });
 
 interface HeatmapVisualizationDeps {
-  paletteService?: PaletteRegistry;
+  paletteService: PaletteRegistry;
 }
 
 function getAxisName(axis: 'x' | 'y') {
@@ -72,6 +75,16 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId'> {
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
     },
+  };
+}
+
+function computePaletteParams(params: CustomPaletteParams) {
+  return {
+    ...params,
+    // rewrite colors and stops as two distinct arguments
+    colors: (params?.stops || []).map(({ color }) => color),
+    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
+    reverse: false, // managed at UI level
   };
 }
 
@@ -170,6 +183,7 @@ export const getHeatmapVisualization = ({
           accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
           filterOperations: isCellValueSupported,
           supportsMoreColumns: !state.valueAccessor,
+          enableDimensionEditor: true,
           required: true,
           dataTestSubj: 'lnsHeatmap_cellPanel',
         },
@@ -210,6 +224,15 @@ export const getHeatmapVisualization = ({
     return update;
   },
 
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <HeatmapDimensionEditor {...props} paletteService={paletteService} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
   renderToolbar(domElement, props) {
     render(
       <I18nProvider>
@@ -228,7 +251,6 @@ export const getHeatmapVisualization = ({
     if (!originalOrder || !state.valueAccessor) {
       return null;
     }
-
     return {
       type: 'expression',
       chain: [
@@ -241,6 +263,15 @@ export const getHeatmapVisualization = ({
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
+            palette: state.palette?.params
+              ? [
+                  paletteService
+                    .get(CUSTOM_PALETTE)
+                    .toExpression(
+                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
+                    ),
+                ]
+              : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
             legend: [
               {
                 type: 'expression',
@@ -335,6 +366,15 @@ export const getHeatmapVisualization = ({
                 ],
               },
             ],
+            palette: state.palette?.params
+              ? [
+                  paletteService
+                    .get(CUSTOM_PALETTE)
+                    .toExpression(
+                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
+                    ),
+                ]
+              : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
             gridConfig: [
               {
                 type: 'expression',

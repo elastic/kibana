@@ -30,9 +30,9 @@ import {
   FIXED_PROGRESSION,
   getStopsForFixedMode,
   useDebouncedValue,
+  PalettePanelContainer,
+  findMinMaxByColumnId,
 } from '../../shared_components/';
-import { PalettePanelContainer } from './palette_panel_container';
-import { findMinMaxByColumnId } from './shared_utils';
 import './dimension_editor.scss';
 import {
   getDefaultSummaryLabel,
@@ -116,7 +116,7 @@ export function TableDimensionEditor(
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
   const currentMinMax = minMaxByColumnId[accessor];
 
   const activePalette = column?.palette || {
