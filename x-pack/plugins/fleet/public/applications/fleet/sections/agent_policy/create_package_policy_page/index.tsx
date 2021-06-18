@@ -93,6 +93,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     queryParams,
   ]);
 
+  /**
+   * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
+   * in the query params (?policyId=foo).
+   *
+   * Either way, we take this as an indication that a user is "coming from" the fleet policy UI
+   * since we link them out to packages (a.k.a. integrations) UI when choosing a new package. It is
+   * no longer possible to choose a package directly in the create package form.
+   *
+   * We may want to deprecate the ability to pass in policyId from URL params since there is no package
+   * creation possible if a user has not chosen one from the packages UI.
+   */
   const from: CreatePackagePolicyFrom =
     'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
 
