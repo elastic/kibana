@@ -118,16 +118,16 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   isolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
@@ -142,16 +142,16 @@ export const createHostIsolation = async ({
  * @throws An error if response is not OK
  */
 export const createHostUnIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   unIsolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
