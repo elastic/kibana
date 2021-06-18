@@ -7,6 +7,7 @@
 
 import { combineReducers } from 'redux';
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { license } from './license';
@@ -147,7 +148,7 @@ export const getLicenseState = createSelector(
     const { isActive, type } = license;
 
     return {
-      type,
+      type: capitalize(type),
       isExpired,
       expirationDate,
       status: isActive

@@ -6,78 +6,78 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { getLicenseState } from '../../../store/reducers/license_management';
 
-const PageTitle = ({ license }) => {
-  const licenseType = capitalize(license.type);
-
+export const ActiveLicensePageHeader = ({ license, ...props }) => {
   return (
-    <>
-      {license.isExpired ? (
-        <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
-          defaultMessage="Your {licenseType} license has expired"
-          values={{
-            licenseType,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
-          defaultMessage="Your {licenseType} license is {status}"
-          values={{
-            licenseType,
-            status: license.status,
-          }}
-        />
-      )}
-    </>
-  );
-};
-
-const PageDescription = ({ license }) => {
-  if (license.isExpired) {
-    return (
-      <FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
-        defaultMessage="Your license expired on {licenseExpirationDate}"
-        values={{
-          licenseExpirationDate: <strong>{license.expirationDate}</strong>,
-        }}
-      />
-    );
-  } else if (license.expirationDate) {
-    return (
-      <FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
-        defaultMessage="Your license will expire on {licenseExpirationDate}"
-        values={{
-          licenseExpirationDate: <strong>{license.expirationDate}</strong>,
-        }}
-      />
-    );
-  }
-
-  return (
-    <FormattedMessage
-      id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
-      defaultMessage="Your license will never expire."
+    <EuiPageHeader
+      {...props}
+      pageTitle={
+        <span data-test-subj="licenseText">
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
+            defaultMessage="Your {licenseType} license is {status}"
+            values={{
+              licenseType: license.type,
+              status: license.status,
+            }}
+          />
+        </span>
+      }
+      description={
+        <p data-test-subj="licenseSubText">
+          {license.expirationDate ? (
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
+              defaultMessage="Your license will expire on {licenseExpirationDate}"
+              values={{
+                licenseExpirationDate: <strong>{license.expirationDate}</strong>,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
+              defaultMessage="Your license will never expire."
+            />
+          )}
+        </p>
+      }
     />
   );
 };
 
-const getHeaderIconConfig = ({ license }) => {
-  return {
-    iconType: license.isExpired ? 'alert' : 'checkInCircleFilled',
-    iconProps: {
-      color: license.isExpired ? 'danger' : 'success',
-    },
-  };
+export const ExpiredLicensePageHeader = ({ license, ...props }) => {
+  return (
+    <EuiPageHeader
+      {...props}
+      pageTitle={
+        <span data-test-subj="licenseText">
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
+            defaultMessage="Your {licenseType} license has expired"
+            values={{
+              licenseType: license.type,
+            }}
+          />
+        </span>
+      }
+      description={
+        <p data-test-subj="licenseSubText">
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
+            defaultMessage="Your license expired on {licenseExpirationDate}"
+            values={{
+              licenseExpirationDate: <strong>{license.expirationDate}</strong>,
+            }}
+          />
+        </p>
+      }
+    />
+  );
 };
 
 export const LicensePageHeader = () => {
@@ -85,13 +85,21 @@ export const LicensePageHeader = () => {
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={<PageTitle license={license} />}
-        description={<PageDescription license={license} />}
-        {...getHeaderIconConfig({ license })}
-      />
-
+      {license.isExpired ? (
+        <ExpiredLicensePageHeader
+          license={license}
+          bottomBorder
+          iconType="alert"
+          iconProps={{ color: 'danger' }}
+        />
+      ) : (
+        <ActiveLicensePageHeader
+          license={license}
+          bottomBorder
+          iconType="checkInCircleFilled"
+          iconProps={{ color: 'success' }}
+        />
+      )}
       <EuiSpacer size="l" />
     </>
   );

@@ -36,19 +36,21 @@ export class App extends Component {
     }
 
     if (permissionsError) {
+      const error = permissionsError?.data?.message;
+
       return (
         <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
           <EuiEmptyPrompt
             iconType="alert"
             title={
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.licenseMgmt.app.checkingPermissionsErrorMessage"
                   defaultMessage="Error checking permissions"
                 />
-              </h2>
+              </h1>
             }
-            body={<p>{permissionsError?.data?.message}</p>}
+            body={error ? <p>{error}</p> : null}
           />
         </EuiPageContent>
       );
@@ -60,12 +62,12 @@ export class App extends Component {
           <EuiEmptyPrompt
             iconType="securityApp"
             title={
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.licenseMgmt.app.deniedPermissionTitle"
                   defaultMessage="Cluster privileges required"
                 />
-              </h2>
+              </h1>
             }
             body={
               <p>
