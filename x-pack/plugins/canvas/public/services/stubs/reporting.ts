@@ -8,5 +8,16 @@
 import { ReportingService } from '../reporting';
 
 export const reportingService: ReportingService = {
-  includeReporting: () => true,
+  start: {
+    usesUiCapabilities: () => true,
+    components: {
+      ReportingPanelPDF: () => (null as unknown) as JSX.Element,
+    },
+    getDefaultLayoutSelectors: () => ({
+      screenshot: 'stub',
+      renderComplete: 'stub',
+      itemsCountAttribute: 'stub',
+      timefilterDurationAttribute: 'stub',
+    }),
+  },
 };

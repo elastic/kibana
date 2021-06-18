@@ -13,6 +13,7 @@ import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
 import { getContrastColor } from '../../shared_components/coloring/utils';
 import { getOriginalId } from '../transpose_helpers';
+import { getNumericValue } from './shared_utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -37,7 +38,11 @@ export const createGridCell = (
       if (minMaxByColumnId?.[originalId]) {
         if (colorMode !== 'none' && palette?.params && getColorForValue) {
           // workout the bucket the value belongs to
-          const color = getColorForValue(rowValue, palette.params, minMaxByColumnId[originalId]);
+          const color = getColorForValue(
+            getNumericValue(rowValue),
+            palette.params,
+            minMaxByColumnId[originalId]
+          );
           if (color) {
             const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
             if (colorMode === 'cell' && color) {

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, defer, of, zip } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, getType } from '../../expression_types';
+import { Datatable, DatatableColumn, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;
   name: string;
-  expression?(datatable: Datatable): Observable<boolean | number | string | null>;
+  expression(datatable: Datatable): Observable<boolean | number | string | null>;
   copyMetaFrom?: string | null;
 }
 
@@ -23,7 +23,7 @@ export const mapColumn: ExpressionFunctionDefinition<
   'mapColumn',
   Datatable,
   MapColumnArguments,
-  Promise<Datatable>
+  Observable<Datatable>
 > = {
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
@@ -80,57 +80,56 @@ export const mapColumn: ExpressionFunctionDefinition<
       default: null,
     },
   },
-  fn: (input, args) => {
-    const expression = (...params: Parameters<Required<MapColumnArguments>['expression']>) =>
-      args
-        .expression?.(...params)
-        .pipe(take(1))
-        .toPromise() ?? Promise.resolve(null);
+  fn(input, args) {
+    const existingColumnIndex = input.columns.findIndex(({ id, name }) =>
+      args.id ? id === args.id : name === args.name
+    );
+    const id = input.columns[existingColumnIndex]?.id ?? args.id ?? args.name;
 
-    const columns = [...input.columns];
-    const existingColumnIndex = columns.findIndex(({ id, name }) => {
-      if (args.id) {
-        return id === args.id;
-      }
-      return name === args.name;
-    });
-    const columnId =
-      existingColumnIndex === -1 ? args.id ?? args.name : columns[existingColumnIndex].id;
+    return defer(() => {
+      const rows$ = input.rows.length
+        ? zip(
+            ...input.rows.map((row) =>
+              args
+                .expression({
+                  type: 'datatable',
+                  columns: [...input.columns],
+                  rows: [row],
+                })
+                .pipe(map((value) => ({ ...row, [id]: value })))
+            )
+          )
+        : of([]);
 
-    const rowPromises = input.rows.map((row) => {
-      return expression({
-        type: 'datatable',
-        columns,
-        rows: [row],
-      }).then((val) => ({
-        ...row,
-        [columnId]: val,
-      }));
-    });
+      return rows$.pipe<Datatable>(
+        map((rows) => {
+          const type = getType(rows[0]?.[id]);
+          const newColumn: DatatableColumn = {
+            id,
+            name: args.name,
+            meta: { type, params: { id: type } },
+          };
+          if (args.copyMetaFrom) {
+            const metaSourceFrom = input.columns.find(
+              ({ id: columnId }) => columnId === args.copyMetaFrom
+            );
+            newColumn.meta = { ...newColumn.meta, ...(metaSourceFrom?.meta ?? {}) };
+          }
 
-    return Promise.all(rowPromises).then((rows) => {
-      const type = rows.length ? getType(rows[0][columnId]) : 'null';
-      const newColumn = {
-        id: columnId,
-        name: args.name,
-        meta: { type },
-      };
-      if (args.copyMetaFrom) {
-        const metaSourceFrom = columns.find(({ id }) => id === args.copyMetaFrom);
-        newColumn.meta = { ...newColumn.meta, ...(metaSourceFrom?.meta || {}) };
-      }
+          const columns = [...input.columns];
+          if (existingColumnIndex === -1) {
+            columns.push(newColumn);
+          } else {
+            columns[existingColumnIndex] = newColumn;
+          }
 
-      if (existingColumnIndex === -1) {
-        columns.push(newColumn);
-      } else {
-        columns[existingColumnIndex] = newColumn;
-      }
-
-      return {
-        type: 'datatable',
-        columns,
-        rows,
-      } as Datatable;
+          return {
+            columns,
+            rows,
+            type: 'datatable',
+          };
+        })
+      );
     });
   },
 };

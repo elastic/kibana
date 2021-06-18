@@ -30,6 +30,7 @@ import {
 } from './utils';
 import { flattenCaseSavedObject } from '../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { casesConnectors } from '../../connectors';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -443,6 +444,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res).toEqual({
@@ -471,6 +473,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -501,6 +504,7 @@ describe('utils', () => {
           },
         ],
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([]);
@@ -531,6 +535,7 @@ describe('utils', () => {
           },
         ],
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -561,6 +566,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res.comments).toEqual([
@@ -595,6 +601,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       });
 
       expect(res).toEqual({
@@ -626,6 +633,7 @@ describe('utils', () => {
         connector,
         mappings,
         alerts: [],
+        casesConnectors,
       }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
@@ -645,6 +653,7 @@ describe('utils', () => {
         connector: { ...connector, actionTypeId: 'not-supported' },
         mappings,
         alerts: [],
+        casesConnectors,
       }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(new Error('Invalid external service'));

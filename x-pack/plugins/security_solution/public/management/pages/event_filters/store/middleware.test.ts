@@ -22,6 +22,11 @@ import { EventFiltersListPageState, EventFiltersService } from '../types';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getListFetchError } from './selector';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
   addEventFilters: jest.fn(),
@@ -195,6 +200,38 @@ describe('Event filters middleware', () => {
 
       store.dispatch({ type: 'eventFiltersCreateStart' });
 
+      await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
+      expect(store.getState()).toStrictEqual({
+        ...initialState,
+        form: {
+          ...store.getState().form,
+          submissionResourceState: {
+            type: 'LoadedResourceState',
+            data: createdEventFilterEntryMock(),
+          },
+        },
+      });
+    });
+
+    it('does submit when entry has empty comments with white spaces', async () => {
+      service.addEventFilters.mockImplementation(
+        async (exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>) => {
+          expect(exception.comments).toStrictEqual(createdEventFilterEntryMock().comments);
+          return createdEventFilterEntryMock();
+        }
+      );
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
+      store.dispatch({
+        type: 'eventFiltersInitForm',
+        payload: { entry },
+      });
+
+      store.dispatch({
+        type: 'eventFiltersChangeForm',
+        payload: { newComment: '   ', entry },
+      });
+
+      store.dispatch({ type: 'eventFiltersCreateStart' });
       await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,

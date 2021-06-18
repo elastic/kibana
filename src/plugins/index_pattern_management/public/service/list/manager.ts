@@ -8,31 +8,35 @@
 
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
+import { once } from 'lodash';
+import { CoreStart } from '../../../../../core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
+import { CONFIG_ROLLUPS } from '../../constants';
+// @ts-ignore
+import { RollupIndexPatternListConfig } from './rollup_list_config';
+
+interface IndexPatternListManagerStart {
+  uiSettings: CoreStart['uiSettings'];
+}
 
 export class IndexPatternListManager {
-  private configs: IndexPatternListConfig[] = [];
+  start({ uiSettings }: IndexPatternListManagerStart) {
+    const getConfigs = once(() => {
+      const configs: IndexPatternListConfig[] = [];
+      configs.push(new IndexPatternListConfig());
 
-  setup() {
-    return {
-      addListConfig: (Config: typeof IndexPatternListConfig) => {
-        const config = new Config();
+      if (uiSettings.isDeclared(CONFIG_ROLLUPS) && uiSettings.get(CONFIG_ROLLUPS)) {
+        configs.push(new RollupIndexPatternListConfig());
+      }
 
-        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
-          throw new Error(`${config.key} exists in IndexPatternListManager.`);
-        }
-        this.configs.push(config);
-      },
-    };
-  }
-
-  start() {
+      return configs;
+    });
     return {
       getIndexPatternTags: (
         indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
         isDefault: boolean
       ) =>
-        this.configs.reduce(
+        getConfigs().reduce(
           (tags: IndexPatternTag[], config) =>
             config.getIndexPatternTags
               ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
@@ -41,14 +45,14 @@ export class IndexPatternListManager {
         ),
 
       getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType): string[] =>
-        this.configs.reduce(
+        getConfigs().reduce(
           (info: string[], config) =>
             config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info,
           []
         ),
 
       areScriptedFieldsEnabled: (indexPattern: IIndexPattern): boolean =>
-        this.configs.every((config) =>
+        getConfigs().every((config) =>
           config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true
         ),
     };

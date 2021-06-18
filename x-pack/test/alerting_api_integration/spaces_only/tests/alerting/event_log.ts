@@ -76,6 +76,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
+            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
             ['execute-action', { equal: 2 }],
             ['new-instance', { equal: 1 }],
@@ -103,12 +104,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(getEventsByAction(events, 'new-instance').length).equal(1);
 
       const executeEvents = getEventsByAction(events, 'execute');
+      const executeStartEvents = getEventsByAction(events, 'execute-start');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
       const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
+      const executeStartTimes = getTimestamps(executeStartEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
       const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
@@ -118,6 +121,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+      expect(executeStartTimes.length === executeTimes.length).to.be(true);
+      executeStartTimes.forEach((est, index) => expect(est === executeTimes[index]).to.be(true));
       expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
@@ -125,6 +130,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeStatuses = ['ok', 'active', 'active'];
       for (const event of events) {
         switch (event?.event?.action) {
+          case 'execute-start':
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `alert execution start: "${alertId}"`,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+              },
+            });
+            break;
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
@@ -134,6 +155,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'execute-action':
@@ -146,16 +175,28 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
+            validateInstanceEvent(
+              event,
+              `active instance: 'instance' in actionGroup: 'default'`,
+              false
+            );
             break;
           // this will get triggered as we add new event actions
           default:
@@ -163,7 +204,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -172,6 +217,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          shouldHaveEventEnd,
+          rule: {
+            id: alertId,
+            category: response.body.rule_type_id,
+            license: 'basic',
+            ruleset: 'alertsFixture',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
+          },
         });
       }
     });
@@ -229,6 +283,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
+            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
             ['execute-action', { equal: 2 }],
             ['new-instance', { equal: 1 }],
@@ -239,12 +294,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       });
 
       const executeEvents = getEventsByAction(events, 'execute');
+      const executeStartEvents = getEventsByAction(events, 'execute-start');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
       const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
+      const executeStartTimes = getTimestamps(executeStartEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
       const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
@@ -254,6 +311,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+      expect(executeStartTimes.length === executeTimes.length).to.be(true);
+      executeStartTimes.forEach((est, index) => expect(est === executeTimes[index]).to.be(true));
       expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
@@ -261,6 +320,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeStatuses = ['ok', 'active', 'active'];
       for (const event of events) {
         switch (event?.event?.action) {
+          case 'execute-start':
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `alert execution start: "${alertId}"`,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+              },
+            });
+            break;
           case 'execute':
             validateEvent(event, {
               spaceId: Spaces.space1.id,
@@ -270,6 +345,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               outcome: 'success',
               message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
               status: executeStatuses[executeCount++],
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'execute-action':
@@ -285,13 +368,21 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
               instanceId: 'instance',
               actionGroupId: 'default',
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                namespace: Spaces.space1.id,
+                name: response.body.name,
+              },
             });
             break;
           case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
+            validateInstanceEvent(event, `created new instance: 'instance'`, false);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`, true);
             break;
           case 'active-instance':
             expect(
@@ -299,7 +390,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ).to.be(true);
             validateInstanceEvent(
               event,
-              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`
+              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+              false
             );
             break;
           // this will get triggered as we add new event actions
@@ -308,7 +400,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         }
       }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+      function validateInstanceEvent(
+        event: IValidatedEvent,
+        subMessage: string,
+        shouldHaveEventEnd: boolean
+      ) {
         validateEvent(event, {
           spaceId: Spaces.space1.id,
           savedObjects: [
@@ -317,6 +413,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
           instanceId: 'instance',
           actionGroupId: 'default',
+          shouldHaveEventEnd,
+          rule: {
+            id: alertId,
+            category: response.body.rule_type_id,
+            license: 'basic',
+            ruleset: 'alertsFixture',
+            namespace: Spaces.space1.id,
+            name: response.body.name,
+          },
         });
       }
     });
@@ -344,14 +449,35 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
+          actions: new Map([
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
+          ]),
         });
       });
 
-      const event = events[0];
-      expect(event).to.be.ok();
+      const startEvent = events[0];
+      const executeEvent = events[1];
 
-      validateEvent(event, {
+      expect(startEvent).to.be.ok();
+      expect(executeEvent).to.be.ok();
+
+      validateEvent(startEvent, {
+        spaceId: Spaces.space1.id,
+        savedObjects: [
+          { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+        ],
+        message: `alert execution start: "${alertId}"`,
+        rule: {
+          id: alertId,
+          category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+          namespace: Spaces.space1.id,
+        },
+      });
+
+      validateEvent(executeEvent, {
         spaceId: Spaces.space1.id,
         savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
         outcome: 'failure',
@@ -359,6 +485,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         errorMessage: 'this alert is intended to fail',
         status: 'error',
         reason: 'execute',
+        rule: {
+          id: alertId,
+          category: response.body.rule_type_id,
+          license: 'basic',
+          ruleset: 'alertsFixture',
+          namespace: Spaces.space1.id,
+        },
       });
     });
   });
@@ -376,16 +509,28 @@ interface ValidateEventLogParams {
   savedObjects: SavedObject[];
   outcome?: string;
   message: string;
+  shouldHaveEventEnd?: boolean;
   errorMessage?: string;
   status?: string;
   actionGroupId?: string;
   instanceId?: string;
   reason?: string;
+  rule: {
+    id: string;
+    name?: string;
+    version?: string;
+    category?: string;
+    reference?: string;
+    author?: string[];
+    license?: string;
+    ruleset?: string;
+    namespace?: string;
+  };
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-  const { spaceId, savedObjects, outcome, message, errorMessage } = params;
-  const { status, actionGroupId, instanceId, reason } = params;
+  const { spaceId, savedObjects, outcome, message, errorMessage, rule } = params;
+  const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
   if (status) {
     expect(event?.kibana?.alerting?.status).to.be(status);
@@ -411,16 +556,23 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   if (duration !== undefined) {
     expect(typeof duration).to.be('number');
     expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    if (shouldHaveEventEnd !== false) {
+      expect(eventEnd).to.be.ok();
 
-    // account for rounding errors
-    expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+      const durationDiff = Math.abs(
+        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      );
+
+      // account for rounding errors
+      expect(durationDiff < 1).to.equal(true);
+      expect(eventStart <= eventEnd).to.equal(true);
+      expect(eventEnd <= dateNow).to.equal(true);
+    }
+
+    if (shouldHaveEventEnd === false) {
+      expect(eventEnd).not.to.be.ok();
+    }
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
@@ -432,6 +584,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.message).to.eql(message);
+
+  expect(event?.rule).to.eql(rule);
 
   if (errorMessage) {
     expect(event?.error?.message).to.eql(errorMessage);

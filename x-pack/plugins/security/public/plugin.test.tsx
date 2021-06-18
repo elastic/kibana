@@ -100,6 +100,12 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        uiApi: {
+          components: {
+            getChangePassword: expect.any(Function),
+            getPersonalInfo: expect.any(Function),
+          },
+        },
         authc: {
           getCurrentUser: expect.any(Function),
           areAPIKeysEnabled: expect.any(Function),

@@ -38,7 +38,7 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  configureCasesNavigation: { onClick, href },
+  configureCasesNavigation: { href },
   connector,
   caseId,
   caseServices,
@@ -82,7 +82,7 @@ export const usePushToService = ({
               id="xpack.cases.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
-                  <LinkAnchor onClick={onClick} href={href} target="_blank">
+                  <LinkAnchor href={href} target="_blank">
                     {i18n.LINK_CONNECTOR_CONFIGURE}
                   </LinkAnchor>
                 ),
@@ -143,8 +143,8 @@ export const usePushToService = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense]);
 
-  const pushToServiceButton = useMemo(() => {
-    return (
+  const pushToServiceButton = useMemo(
+    () => (
       <EuiButton
         data-test-subj="push-to-external-service"
         fill
@@ -159,21 +159,22 @@ export const usePushToService = ({
           ? i18n.UPDATE_THIRD(connector.name)
           : i18n.PUSH_THIRD(connector.name)}
       </EuiButton>
-    );
+    ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    connector,
-    connectors,
-    errorsMsg,
-    handlePushToService,
-    isLoading,
-    loadingLicense,
-    userCanCrud,
-    isValidConnector,
-  ]);
+    [
+      connector,
+      connectors,
+      errorsMsg,
+      handlePushToService,
+      isLoading,
+      loadingLicense,
+      userCanCrud,
+      isValidConnector,
+    ]
+  );
 
-  const objToReturn = useMemo(() => {
-    return {
+  const objToReturn = useMemo(
+    () => ({
       pushButton:
         errorsMsg.length > 0 ? (
           <EuiToolTip
@@ -190,8 +191,9 @@ export const usePushToService = ({
         errorsMsg.length > 0 ? (
           <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
         ) : null,
-    };
-  }, [errorsMsg, pushToServiceButton]);
+    }),
+    [errorsMsg, pushToServiceButton]
+  );
 
   return objToReturn;
 };

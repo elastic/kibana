@@ -3,7 +3,69 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-public.IndexDataVisualizerViewProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexDataVisualizerViewProps",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+          "lineNumber": 119
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.IndexDataVisualizerViewProps.currentIndexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "currentIndexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+              "lineNumber": 120
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.IndexDataVisualizerViewProps.currentSavedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "currentSavedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataVisualizer",
+                "scope": "common",
+                "docId": "kibDataVisualizerPluginApi",
+                "section": "def-common.SavedSearchSavedObject",
+                "text": "SavedSearchSavedObject"
+              },
+              " | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+              "lineNumber": 121
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -15,11 +77,11 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<React.FC<{}>>; getMaxBytesFormatted: () => string; }"
+        "{ getFileDataVisualizerComponent: () => Promise<React.FC<{}>>; getIndexDataVisualizerComponent: () => Promise<React.FC<{}>>; getMaxBytesFormatted: () => string; }"
       ],
       "source": {
         "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
-        "lineNumber": 33
+        "lineNumber": 38
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -46,8 +108,8 @@
         "label": "DataVisualizerTableState",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types.ts",
-          "lineNumber": 14
+          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+          "lineNumber": 19
         },
         "deprecated": false,
         "children": [
@@ -59,8 +121,8 @@
             "label": "pageSize",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 15
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -72,8 +134,8 @@
             "label": "pageIndex",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 16
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -85,8 +147,8 @@
             "label": "sortField",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 17
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -98,8 +160,8 @@
             "label": "sortDirection",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 18
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -114,8 +176,8 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 19
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -130,8 +192,8 @@
               "string[]"
             ],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 20
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -143,8 +205,579 @@
             "label": "showDistributions",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_visualizer/common/types.ts",
-              "lineNumber": 21
+              "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.DocumentCountBuckets",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentCountBuckets",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.DocumentCountBuckets.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.DocumentCounts",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentCounts",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+          "lineNumber": 26
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.DocumentCounts.buckets",
+            "type": "Object",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataVisualizer",
+                "scope": "common",
+                "docId": "kibDataVisualizerPluginApi",
+                "section": "def-common.DocumentCountBuckets",
+                "text": "DocumentCountBuckets"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.DocumentCounts.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.FieldRequestConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldRequestConfig",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldRequestConfig.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldRequestConfig.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldRequestConfig.cardinality",
+            "type": "number",
+            "tags": [],
+            "label": "cardinality",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.FieldVisStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldVisStats",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.cardinality",
+            "type": "number",
+            "tags": [],
+            "label": "cardinality",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.sampleCount",
+            "type": "number",
+            "tags": [],
+            "label": "sampleCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.trueCount",
+            "type": "number",
+            "tags": [],
+            "label": "trueCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.falseCount",
+            "type": "number",
+            "tags": [],
+            "label": "falseCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.earliest",
+            "type": "number",
+            "tags": [],
+            "label": "earliest",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.latest",
+            "type": "number",
+            "tags": [],
+            "label": "latest",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.documentCounts",
+            "type": "Object",
+            "tags": [],
+            "label": "documentCounts",
+            "description": [],
+            "signature": [
+              "{ buckets?: ",
+              {
+                "pluginId": "dataVisualizer",
+                "scope": "common",
+                "docId": "kibDataVisualizerPluginApi",
+                "section": "def-common.DocumentCountBuckets",
+                "text": "DocumentCountBuckets"
+              },
+              " | undefined; interval?: number | undefined; } | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.avg",
+            "type": "number",
+            "tags": [],
+            "label": "avg",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.distribution",
+            "type": "Object",
+            "tags": [],
+            "label": "distribution",
+            "description": [],
+            "signature": [
+              "{ percentiles: ",
+              {
+                "pluginId": "dataVisualizer",
+                "scope": "common",
+                "docId": "kibDataVisualizerPluginApi",
+                "section": "def-common.Percentile",
+                "text": "Percentile"
+              },
+              "[]; maxPercentile: number; minPercentile: 0; } | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.isTopValuesSampled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTopValuesSampled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.median",
+            "type": "number",
+            "tags": [],
+            "label": "median",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 52
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.topValues",
+            "type": "Array",
+            "tags": [],
+            "label": "topValues",
+            "description": [],
+            "signature": [
+              "{ key: React.ReactText; doc_count: number; }[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.topValuesSampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "topValuesSampleSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 55
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.topValuesSamplerShardSize",
+            "type": "number",
+            "tags": [],
+            "label": "topValuesSamplerShardSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 56
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.examples",
+            "type": "Array",
+            "tags": [],
+            "label": "examples",
+            "description": [],
+            "signature": [
+              "(string | object)[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 57
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.timeRangeEarliest",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeEarliest",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.timeRangeLatest",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeLatest",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 59
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.Percentile",
+        "type": "Interface",
+        "tags": [],
+        "label": "Percentile",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.Percentile.percent",
+            "type": "number",
+            "tags": [],
+            "label": "percent",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.Percentile.minValue",
+            "type": "number",
+            "tags": [],
+            "label": "minValue",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.Percentile.maxValue",
+            "type": "number",
+            "tags": [],
+            "label": "maxValue",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+              "lineNumber": 13
             },
             "deprecated": false
           }
@@ -216,8 +849,8 @@
           "any[]"
         ],
         "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types.ts",
-          "lineNumber": 10
+          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+          "lineNumber": 17
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -230,11 +863,11 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\""
+          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\""
         ],
         "source": {
-          "path": "x-pack/plugins/data_visualizer/common/types.ts",
-          "lineNumber": 12
+          "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
+          "lineNumber": 9
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -283,6 +916,47 @@
         "source": {
           "path": "x-pack/plugins/data_visualizer/common/constants.ts",
           "lineNumber": 10
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.OMIT_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "OMIT_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.SavedSearchSavedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearchSavedObject",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SimpleSavedObject",
+            "text": "SimpleSavedObject"
+          },
+          "<any>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+          "lineNumber": 29
         },
         "deprecated": false,
         "initialIsOpen": false

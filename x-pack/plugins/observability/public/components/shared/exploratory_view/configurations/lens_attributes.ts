@@ -55,6 +55,7 @@ export const parseCustomFieldName = (
   let fieldName = sourceField;
   let columnType;
   let columnFilters;
+  let columnLabel;
 
   const rdf = reportViewConfig.reportDefinitions ?? [];
 
@@ -69,15 +70,17 @@ export const parseCustomFieldName = (
         );
         columnType = currField?.columnType;
         columnFilters = currField?.columnFilters;
+        columnLabel = currField?.label;
       }
     } else if (customField.options?.[0].field || customField.options?.[0].id) {
       fieldName = customField.options?.[0].field || customField.options?.[0].id;
       columnType = customField.options?.[0].columnType;
       columnFilters = customField.options?.[0].columnFilters;
+      columnLabel = customField.options?.[0].label;
     }
   }
 
-  return { fieldName, columnType, columnFilters };
+  return { fieldName, columnType, columnFilters, columnLabel };
 };
 
 export class LensAttributes {
@@ -260,12 +263,14 @@ export class LensAttributes {
     label?: string,
     colIndex?: number
   ) {
-    const { fieldMeta, columnType, fieldName, columnFilters } = this.getFieldMeta(sourceField);
+    const { fieldMeta, columnType, fieldName, columnFilters, columnLabel } = this.getFieldMeta(
+      sourceField
+    );
     const { type: fieldType } = fieldMeta ?? {};
 
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
-        label,
+        columnLabel || label,
         colIndex !== undefined ? columnFilters?.[colIndex] : undefined
       );
     }
@@ -274,7 +279,7 @@ export class LensAttributes {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      return this.getNumberColumn(fieldName, columnType, operationType, label);
+      return this.getNumberColumn(fieldName, columnType, operationType, columnLabel || label);
     }
 
     // FIXME review my approach again
@@ -286,11 +291,13 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string) {
-    const { fieldName, columnType, columnFilters } = this.getCustomFieldName(sourceField);
+    const { fieldName, columnType, columnFilters, columnLabel } = this.getCustomFieldName(
+      sourceField
+    );
 
     const fieldMeta = this.indexPattern.getFieldByName(fieldName);
 
-    return { fieldMeta, fieldName, columnType, columnFilters };
+    return { fieldMeta, fieldName, columnType, columnFilters, columnLabel };
   }
 
   getMainYAxis() {

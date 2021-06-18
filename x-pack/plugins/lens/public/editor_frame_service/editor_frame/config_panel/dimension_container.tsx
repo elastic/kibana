@@ -29,26 +29,33 @@ export function DimensionContainer({
   groupLabel,
   handleClose,
   panel,
+  isFullscreen,
   panelRef,
 }: {
   isOpen: boolean;
-  handleClose: () => void;
-  panel: React.ReactElement;
+  handleClose: () => boolean;
+  panel: React.ReactElement | null;
   groupLabel: string;
+  isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = useCallback(() => {
-    handleClose();
-    setFocusTrapIsEnabled(false);
+    const canClose = handleClose();
+    if (canClose) {
+      setFocusTrapIsEnabled(false);
+    }
+    return canClose;
   }, [handleClose]);
 
   const closeOnEscape = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === keys.ESCAPE) {
-        event.preventDefault();
-        closeFlyout();
+        const canClose = closeFlyout();
+        if (canClose) {
+          event.preventDefault();
+        }
       }
     },
     [closeFlyout]
@@ -69,7 +76,15 @@ export function DimensionContainer({
     <div ref={panelRef}>
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
         <EuiWindowEvent event="keydown" handler={closeOnEscape} />
-        <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
+        <EuiOutsideClickDetector
+          onOutsideClick={() => {
+            if (isFullscreen) {
+              return;
+            }
+            closeFlyout();
+          }}
+          isDisabled={!isOpen}
+        >
           <div
             role="dialog"
             aria-labelledby="lnsDimensionContainerTitle"

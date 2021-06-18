@@ -23,6 +23,7 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         host: { name: ['mothra'] },
         event: { kind: 'signal' },
         signal: {
-          _meta: { version: 35 },
+          _meta: { version: SIGNALS_TEMPLATE_VERSION },
           parents: [
             {
               id:

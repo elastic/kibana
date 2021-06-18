@@ -48479,7 +48479,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
     stdio: 'pipe'
   });
 
-  if (offline) {
+  if (offline || !offline) {
     bazelArgs = [...bazelArgs, '--config=offline'];
   }
 

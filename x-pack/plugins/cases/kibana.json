@@ -3,11 +3,15 @@
   "id": "cases",
   "kibanaVersion": "kibana",
   "extraPublicDirs": ["common"],
-  "requiredPlugins": ["actions", "esUiShared", "features", "kibanaReact", "kibanaUtils", "triggersActionsUi"],
-  "optionalPlugins": [
-    "spaces",
-    "security"
+  "requiredPlugins": [
+    "actions",
+    "esUiShared",
+    "features",
+    "kibanaReact",
+    "kibanaUtils",
+    "triggersActionsUi"
   ],
+  "optionalPlugins": ["spaces", "security"],
   "server": true,
   "ui": true,
   "version": "8.0.0"

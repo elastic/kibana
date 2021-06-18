@@ -20,17 +20,9 @@ import { IIndexPattern } from '../../../../../../../src/plugins/data/common/inde
 import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export const ReportViewTypes = {
-  pld: 'page-load-dist',
-  kpi: 'kpi-trends',
+  dist: 'data-distribution',
+  kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
-  upd: 'uptime-duration',
-  upp: 'uptime-pings',
-  svl: 'service-latency',
-  tpt: 'service-throughput',
-  logs: 'logs-frequency',
-  cpu: 'cpu-usage',
-  mem: 'memory-usage',
-  nwk: 'network-activity',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -60,7 +52,6 @@ export interface ReportDefinition {
 
 export interface DataSeries {
   reportType: ReportViewType;
-  id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
 
@@ -100,7 +91,6 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  seriesId: string;
   indexPattern: IIndexPattern;
 }
 
@@ -108,13 +98,14 @@ export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' |
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
   inputFormat: InputFormat;
   outputFormat: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {

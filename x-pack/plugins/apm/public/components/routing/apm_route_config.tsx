@@ -20,6 +20,7 @@ import { AnomalyDetection } from '../app/Settings/anomaly_detection';
 import { ApmIndices } from '../app/Settings/ApmIndices';
 import { CustomizeUI } from '../app/Settings/CustomizeUI';
 import { TraceLink } from '../app/TraceLink';
+import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
 import { enableServiceOverview } from '../../../common/ui_settings_keys';
 import { redirectTo } from './redirect_to';
@@ -496,6 +497,12 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     exact: true,
     path: '/link-to/trace/:traceId',
     component: TraceLink,
+    breadcrumb: null,
+  },
+  {
+    exact: true,
+    path: '/link-to/transaction/:transactionId',
+    component: TransactionLink,
     breadcrumb: null,
   },
 ];
