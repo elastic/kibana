@@ -63,6 +63,7 @@ import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { URL } from 'url';
 import { UserProvidedValues } from 'src/core/server/types';
@@ -95,7 +96,7 @@ export interface Adapters {
 // @public (undocumented)
 export class AddPanelAction implements Action_3<ActionContext_2> {
     // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React_2.ComponentType<any>);
+    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React_2.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
     // (undocumented)
     execute(context: ActionExecutionContext_2<ActionContext_2>): Promise<void>;
     // (undocumented)
@@ -729,6 +730,7 @@ export function openAddPanelFlyout(options: {
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
     showCreateNewMenu?: boolean;
+    reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }): OverlayRef_2;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -890,6 +892,7 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 // Warnings were encountered during analysis:
 //
 // src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx:25:3 - (ae-forgotten-export) The symbol "UsageCollectionStart" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

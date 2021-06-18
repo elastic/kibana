@@ -23,7 +23,7 @@ import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/d
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ScalingForm } from './scaling_form';
+import { ScalingForm } from './util/scaling_form';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
