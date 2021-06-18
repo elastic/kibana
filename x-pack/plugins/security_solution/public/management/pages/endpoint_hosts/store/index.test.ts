@@ -42,6 +42,7 @@ describe('EndpointList store concerns', () => {
         loading: false,
         error: undefined,
         endpointDetails: {
+          flyoutView: undefined,
           activityLog: {
             paging: {
               disabled: false,

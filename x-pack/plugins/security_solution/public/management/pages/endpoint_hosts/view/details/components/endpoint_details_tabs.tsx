@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { useDispatch } from 'react-redux';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
+import { EndpointAction } from '../../../store/action';
+import { useEndpointSelector } from '../../hooks';
+import { getActivityLogDataPaging } from '../../../store/selectors';
 export enum EndpointDetailsTabsTypes {
   overview = 'overview',
   activityLog = 'activity_log',
@@ -47,6 +51,8 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 
 export const EndpointDetailsFlyoutTabs = memo(
   ({ show, tabs }: { show: EndpointIndexUIQueryParams['show']; tabs: EndpointDetailsTabs[] }) => {
+    const dispatch = useDispatch<(action: EndpointAction) => void>();
+    const { pageSize } = useEndpointSelector(getActivityLogDataPaging);
     const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
       return show === 'details'
         ? EndpointDetailsTabsTypes.overview
@@ -54,8 +60,25 @@ export const EndpointDetailsFlyoutTabs = memo(
     });
 
     const handleTabClick = useCallback(
-      (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EndpointDetailsTabsId),
-      [setSelectedTabId]
+      (tab: EuiTabbedContentTab) => {
+        dispatch({
+          type: 'endpointDetailsFlyoutTabChanged',
+          payload: {
+            flyoutView: tab.id as EndpointIndexUIQueryParams['show'],
+          },
+        });
+        if (tab.id === EndpointDetailsTabsTypes.activityLog) {
+          dispatch({
+            type: 'appRequestedEndpointActivityLog',
+            payload: {
+              page: 1,
+              pageSize,
+            },
+          });
+        }
+        return setSelectedTabId(tab.id as EndpointDetailsTabsId);
+      },
+      [dispatch, pageSize, setSelectedTabId]
     );
 
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [

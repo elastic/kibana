@@ -35,6 +35,7 @@ import {
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
+  getEndpointDetailsFlyoutView,
 } from './selectors';
 import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
@@ -61,6 +62,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ServerReturnedEndpointPackageInfo } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -339,6 +341,28 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
       loadEndpointsPendingActions(store);
 
+      // call the policy response api
+      try {
+        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
+          query: { agentId: selectedEndpoint },
+        });
+        dispatch({
+          type: 'serverReturnedEndpointPolicyResponse',
+          payload: policyResponse,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnEndpointPolicyResponse',
+          payload: error,
+        });
+      }
+    }
+
+    if (
+      action.type === 'userChangedUrl' &&
+      hasSelectedEndpoint(getState()) === true &&
+      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+    ) {
       // call the activity log api
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
@@ -363,22 +387,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
           payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-        });
-      }
-
-      // call the policy response api
-      try {
-        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { agentId: selectedEndpoint },
-        });
-        dispatch({
-          type: 'serverReturnedEndpointPolicyResponse',
-          payload: policyResponse,
-        });
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointPolicyResponse',
-          payload: error,
         });
       }
     }

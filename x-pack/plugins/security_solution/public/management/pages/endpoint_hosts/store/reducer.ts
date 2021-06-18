@@ -179,6 +179,14 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
+  } else if (action.type === 'endpointDetailsFlyoutTabChanged') {
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        flyoutView: action.payload.flyoutView,
+      },
+    };
   } else if (action.type === 'endpointDetailsActivityLogChanged') {
     return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'endpointPendingActionsStateChanged') {

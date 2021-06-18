@@ -364,6 +364,10 @@ export const getIsolationRequestError: (
   }
 });
 
+export const getEndpointDetailsFlyoutView = (
+  state: Immutable<EndpointState>
+): EndpointIndexUIQueryParams['show'] => state.endpointDetails.flyoutView;
+
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
 ): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {

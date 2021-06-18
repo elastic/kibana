@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useDispatch } from 'react-redux';
 import React, { useCallback, useEffect, useMemo, memo } from 'react';
 import styled from 'styled-components';
 import {
@@ -59,6 +60,8 @@ import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpo
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
 import { ActionsMenu } from './components/actions_menu';
+import { EndpointIndexUIQueryParams } from '../../types';
+import { EndpointAction } from '../../store/action';
 
 const DetailsFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -76,6 +79,7 @@ const DetailsFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 export const EndpointDetailsFlyout = memo(() => {
+  const dispatch = useDispatch<(action: EndpointAction) => void>();
   const history = useHistory();
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
@@ -92,6 +96,18 @@ export const EndpointDetailsFlyout = memo(() => {
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
+
+  const setFlyoutView = useCallback(
+    (flyoutView: EndpointIndexUIQueryParams['show']) => {
+      dispatch({
+        type: 'endpointDetailsFlyoutTabChanged',
+        payload: {
+          flyoutView,
+        },
+      });
+    },
+    [dispatch]
+  );
 
   const ContentLoadingMarkup = useMemo(
     () => (
@@ -133,9 +149,11 @@ export const EndpointDetailsFlyout = memo(() => {
         ...urlSearchParams,
       })
     );
-  }, [history, queryParamsWithoutSelectedEndpoint]);
+    setFlyoutView(undefined);
+  }, [setFlyoutView, history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
+    setFlyoutView(show);
     if (hostDetailsError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
@@ -146,7 +164,10 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-  }, [hostDetailsError, toasts]);
+    return () => {
+      setFlyoutView(undefined);
+    };
+  }, [hostDetailsError, setFlyoutView, show, toasts]);
 
   return (
     <EuiFlyout

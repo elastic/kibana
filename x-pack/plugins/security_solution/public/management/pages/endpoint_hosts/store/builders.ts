@@ -19,6 +19,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     loading: false,
     error: undefined,
     endpointDetails: {
+      flyoutView: undefined,
       activityLog: {
         paging: {
           disabled: false,
