@@ -118,7 +118,6 @@ export class LensAttributes {
     this.visualization = this.getXyState();
   }
 
-
   getBreakdownColumn({
     sourceField,
     layerId,
@@ -536,8 +535,8 @@ export class LensAttributes {
             filter: { query: columnFilter, language: 'kuery' },
           },
           ...(breakdown && breakdown !== USE_BREAK_DOWN_COLUMN
-            // do nothing since this will be used a x axis source
-            ? {
+            ? // do nothing since this will be used a x axis source
+              {
                 [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
                   layerId,
                   sourceField: breakdown,
