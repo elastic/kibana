@@ -67,6 +67,7 @@ import {
 } from '../schemas/rule_schemas';
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapSequencesFactory } from './wrap_sequences_factory';
 
 export const signalRulesAlertType = ({
   logger,
@@ -233,6 +234,11 @@ export const signalRulesAlertType = ({
           signalsIndex: params.outputIndex,
         });
 
+        const wrapSequences = wrapSequencesFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+        });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           for (const tuple of tuples) {
@@ -313,6 +319,8 @@ export const signalRulesAlertType = ({
               searchAfterSize,
               bulkCreate,
               logger,
+              wrapHits,
+              wrapSequences,
             });
           }
         } else {
