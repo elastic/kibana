@@ -132,18 +132,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
-  /*
-  useWhyDidYouUpdate('StepDefineRuleComponent', {
-    addPadding,
-    defaultValues,
-    descriptionColumns,
-    isReadOnlyView,
-    isLoading,
-    isUpdateView,
-    onSubmit,
-    setForm,
-  });
-  */
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -272,7 +260,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       setForm(RuleStep.defineRule, getData);
     }
     return () => {
-      console.log('unmount step');
       didCancel = true;
     };
   }, [getData, setForm]);
@@ -315,7 +302,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
   );
-  console.log('rendering StepDefineRule');
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -356,7 +342,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepDefineRuleIndices',
                   euiFieldProps: {
                     fullWidth: true,
-                    isDisabled: isLoading,
                     placeholder: '',
                   },
                 }}
@@ -505,35 +490,3 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 
 export const StepDefineRule = memo(StepDefineRuleComponent);
-
-// Hook
-// function useWhyDidYouUpdate(name, props) {
-//   // Get a mutable ref object where we can store props ...
-//   // ... for comparison next time this hook runs.
-//   const previousProps = useRef();
-//   useEffect(() => {
-//     if (previousProps.current) {
-//       // Get all keys from previous and current props
-//       const allKeys = Object.keys({ ...previousProps.current, ...props });
-//       // Use this object to keep track of changed props
-//       const changesObj = {};
-//       // Iterate through keys
-//       allKeys.forEach((key) => {
-//         // If previous is different from current
-//         if (previousProps.current[key] !== props[key]) {
-//           // Add to changesObj
-//           changesObj[key] = {
-//             from: previousProps.current[key],
-//             to: props[key],
-//           };
-//         }
-//       });
-//       // If changesObj not empty then output to console
-//       if (Object.keys(changesObj).length) {
-//         console.log('[why-did-you-update]', name, changesObj);
-//       }
-//     }
-//     // Finally update previousProps with current props for next hook call
-//     previousProps.current = props;
-//   });
-// }
