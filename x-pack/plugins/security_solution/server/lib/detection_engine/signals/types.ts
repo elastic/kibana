@@ -262,11 +262,11 @@ export type WrapHits = (
 ) => Array<BaseHit<{ '@timestamp': string }>>;
 
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
+  };
   ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;

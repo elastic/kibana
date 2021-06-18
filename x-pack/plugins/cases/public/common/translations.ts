@@ -30,13 +30,11 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
-  defaultMessage: 'Delete case',
-});
-
-export const DELETE_CASES = i18n.translate('xpack.cases.confirmDeleteCase.deleteCases', {
-  defaultMessage: 'Delete cases',
-});
+export const DELETE_CASE = (quantity: number = 1) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
+    values: { quantity },
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {cases}}`,
+  });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',

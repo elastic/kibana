@@ -52,6 +52,7 @@ import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
 import { TimelineKPIs } from './kpis';
+import { LineClamp } from '../../../../common/components/line_clamp';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -206,13 +207,13 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
 
-  const content = useMemo(() => (description.length ? description : commonI18n.DESCRIPTION), [
-    description,
-  ]);
-
   return (
     <EuiText size="s" data-test-subj="timeline-description">
-      {content}
+      {description.length ? (
+        <LineClamp key={description.length} content={description} lineClampHeight={4.5} />
+      ) : (
+        commonI18n.DESCRIPTION
+      )}
     </EuiText>
   );
 };

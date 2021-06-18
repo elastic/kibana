@@ -6,9 +6,9 @@
  */
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
-import { OverviewPage } from './overview_page';
+import { AgentsPage } from './agents_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
-  overviewPage: OverviewPage,
+  agentsPage: AgentsPage,
 };

@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let element = await find.byCssSelector('.monaco-editor');
       expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing ')`);
 
+      await PageObjects.common.sleep(100);
       await PageObjects.lens.typeFormula('count(kql=');
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
