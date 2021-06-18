@@ -25,6 +25,7 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypeFields,
+  ENABLE_CASE_CONNECTOR,
   ESCaseAttributes,
   ESCaseConnector,
   ESConnectorFields,
@@ -32,8 +33,7 @@ import {
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
+} from '../../common';
 import { UpdateAlertRequest } from '../client/alerts/client';
 
 /**
