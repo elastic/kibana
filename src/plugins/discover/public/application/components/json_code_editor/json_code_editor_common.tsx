@@ -77,3 +77,7 @@ export const JsonCodeEditorCommon = ({
     </EuiFlexGroup>
   );
 };
+
+export const JSONCodeEditorCommonMemoized = React.memo((props: JsonCodeEditorCommonProps) => {
+  return <JsonCodeEditorCommon {...props} />;
+});

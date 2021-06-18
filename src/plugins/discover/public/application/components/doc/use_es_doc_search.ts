@@ -64,7 +64,7 @@ export function useEsDocSearch({
   index,
   indexPatternId,
   indexPatternService,
-  requestAllFields,
+  requestSource,
 }: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
@@ -82,8 +82,7 @@ export function useEsDocSearch({
           .search({
             params: {
               index,
-              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestAllFields)
-                ?.body,
+              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestSource)?.body,
             },
           })
           .toPromise();
@@ -107,14 +106,6 @@ export function useEsDocSearch({
       }
     }
     requestData();
-  }, [
-    id,
-    index,
-    indexPatternId,
-    indexPatternService,
-    data.search,
-    useNewFieldsApi,
-    requestAllFields,
-  ]);
+  }, [id, index, indexPatternId, indexPatternService, data.search, useNewFieldsApi, requestSource]);
   return [status, hit, indexPattern];
 }

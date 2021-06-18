@@ -72,7 +72,7 @@ describe('Source Viewer component', () => {
     );
     expect(comp).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
-    expect(errorPrompt).not.toBe(null);
+    expect(errorPrompt.length).toBe(1);
   });
 
   test('renders json code editor', () => {

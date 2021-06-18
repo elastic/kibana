@@ -188,7 +188,7 @@ export class DiscoverPlugin
       order: 10,
       component: DocViewTable,
     });
-    this.docViewsRegistry!.addDocView({
+    this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),

@@ -89,7 +89,7 @@ describe('Test of <Doc /> helper / hook', () => {
     `);
   });
 
-  test('buildSearchBody with requestAllFields', () => {
+  test('buildSearchBody with requestSource', () => {
     const indexPattern = ({
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown) as IndexPattern;

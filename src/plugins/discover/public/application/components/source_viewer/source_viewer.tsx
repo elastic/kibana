@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '../doc/use_es_doc_search';
-import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
+import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
 import { ElasticRequestState } from '../doc/elastic_request_state';
 import { getServices } from '../../../../public/kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
@@ -33,17 +34,17 @@ export const SourceViewer = ({
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
   const indexPatternService = getServices().data.indexPatterns;
-  const useNewFieldsApi = getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const [reqState, hit] = useEsDocSearch({
     id,
     index,
     indexPatternId,
     indexPatternService,
-    requestAllFields: useNewFieldsApi,
+    requestSource: useNewFieldsApi,
   });
 
   useEffect(() => {
-    if (reqState === ElasticRequestState.Found) {
+    if (reqState === ElasticRequestState.Found && hit) {
       setJsonValue(JSON.stringify(hit, undefined, 2));
     }
   }, [reqState, hit]);
@@ -70,7 +71,15 @@ export const SourceViewer = ({
     editor.layout();
   }, [editor, jsonValue]);
 
-  const loadingState = <EuiLoadingSpinner size="m" />;
+  const loadingState = (
+    <div className="euiDataGrid__loading">
+      <EuiText size="xs" color="subdued">
+        <EuiLoadingSpinner />
+        <EuiSpacer size="s" />
+        <FormattedMessage id="discover.loadingJSON" defaultMessage="Loading JSON" />
+      </EuiText>
+    </div>
+  );
 
   const errorMessageTitle = (
     <h2>
@@ -82,7 +91,7 @@ export const SourceViewer = ({
   const errorMessage = (
     <p>
       {i18n.translate('discover.sourceViewer.errorMessage', {
-        defaultMessage: 'Could not fetch source at this time. Refresh the tab to try again.',
+        defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
       })}
     </p>
   );
@@ -103,7 +112,7 @@ export const SourceViewer = ({
   }
 
   return (
-    <JsonCodeEditorCommon
+    <JSONCodeEditorCommonMemoized
       jsonValue={jsonValue}
       width={width}
       hasLineNumbers={hasLineNumbers}
