@@ -21,7 +21,7 @@ import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
-import { mockHistory, Router } from '../../../cases/components/__mock__/router';
+import { mockHistory, Router } from '../../../common/mock/router';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

@@ -51,7 +51,6 @@ interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
-
 export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
 };
