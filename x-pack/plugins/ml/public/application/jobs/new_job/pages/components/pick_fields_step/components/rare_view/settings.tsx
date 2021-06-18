@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
@@ -18,7 +18,7 @@ interface Props {
 
 export const RareSettings: FC<Props> = ({ setIsValid }) => {
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <SplitFieldSelector />
@@ -33,6 +33,6 @@ export const RareSettings: FC<Props> = ({ setIsValid }) => {
         </EuiFlexItem>
         <EuiFlexItem />
       </EuiFlexGroup>
-    </Fragment>
+    </>
   );
 };

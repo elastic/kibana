@@ -16,8 +16,6 @@ import { isSparseDataJob } from './util/general';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 
 export class RareJobCreator extends JobCreator {
-  // a multi-metric job has one optional overall partition field
-  // which is the same for all detectors.
   private _rareField: Field | null = null;
   private _populationField: SplitField = null;
   private _splitField: SplitField = null;
@@ -125,37 +123,6 @@ export class RareJobCreator extends JobCreator {
   public get splitField(): SplitField {
     return this._splitField;
   }
-
-  // public addDetector(agg: Aggregation, field: Field) {
-  //   const dtr: Detector = this._createDetector(agg, field);
-  //   this._addDetector(dtr, agg, field);
-  // }
-
-  // public editDetector(agg: Aggregation, field: Field, index: number) {
-  //   const dtr: Detector = this._createDetector(agg, field);
-  //   this._editDetector(dtr, agg, field, index);
-  // }
-
-  // create a new detector object, applying the overall split field
-  // private _createDetector(agg: Aggregation, field: Field) {
-  //   const dtr: Detector = createBasicDetector(agg, field);
-
-  //   if (this._splitField !== null) {
-  //     dtr.partition_field_name = this._splitField.id;
-  //   }
-  //   return dtr;
-  // }
-
-  // public removeDetector(index: number) {
-  //   this._removeDetector(index);
-  // }
-
-  // public get aggFieldPairs(): AggFieldPair[] {
-  //   return this.detectors.map((d, i) => ({
-  //     field: this._fields[i],
-  //     agg: this._aggs[i],
-  //   }));
-  // }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);

@@ -28,7 +28,6 @@ export const RareDetectors: FC<Props> = ({ setIsValid, rareDetectorType, setRare
   const [detectorValid, setDetectorValid] = useState(false);
 
   useEffect(() => {
-    // setRareField(jobCreator.rareField);
     let valid = false;
     if (jobCreator.rareField !== null) {
       if (rareDetectorType === RARE_DETECTOR_TYPE.RARE) {
