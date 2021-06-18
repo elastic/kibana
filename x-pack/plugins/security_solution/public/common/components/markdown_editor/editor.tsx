@@ -37,6 +37,8 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
     []
   );
 
+  console.error('editorId', editorId);
+
   return (
     <EuiMarkdownEditor
       aria-label={ariaLabel}

@@ -7,6 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
 
 import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -45,7 +46,7 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) => {
-  const { application, overlays } = useKibana().services;
+  const { application, overlays, ...rest } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
   const banners$ = overlays.banners.get$();
@@ -56,6 +57,13 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
     const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
     return () => subscription.unsubscribe();
   }, [banners$]); // Only un/re-subscribe if the Observable changes
+
+  console.error(
+    'rest',
+    rest,
+    rest.embeddable.getStateTransfer().getIncomingEmbeddablePackage('securitySolution:case', true)
+  );
+  // console.error('navigateToWithEmbeddablePackage', location);
 
   application.currentAppId$.subscribe((appId) => {
     subPluginId.current = appId ?? '';

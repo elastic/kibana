@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import React from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
 
 import { createGlobalStyle } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { EmbeddableComponentProps } from '../../../../../../../lens/public';
+import { EmbeddableComponentProps, TypedLensByValueInput } from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
@@ -27,6 +27,7 @@ const LensChartTooltipFix = createGlobalStyle`
 `;
 
 interface LensMarkDownRendererProps {
+  attributes: TypedLensByValueInput['attributes'] | null;
   id?: string | null;
   title?: string | null;
   startDate?: string | null;
@@ -35,34 +36,83 @@ interface LensMarkDownRendererProps {
 }
 
 const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
-  id,
+  attributes,
   title,
   startDate,
   endDate,
   onBrushEnd,
 }) => {
-  const kibana = useKibana();
-  const LensComponent = kibana?.services?.lens?.EmbeddableComponent!;
+  const location = useLocation();
+  const {
+    EmbeddableComponent,
+    navigateToPrefilledEditor,
+    canUseEditor,
+  } = useKibana().services.lens;
 
+  console.error('loaa', location);
+
+  console.error('sss', attributes, canUseEditor());
   return (
     <Container>
-      {id ? (
+      {attributes ? (
         <>
-          <EuiText>
-            <h5>{title}</h5>
-          </EuiText>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText>
+                <h5>{title}</h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="lensApp"
+                fullWidth={false}
+                isDisabled={!canUseEditor() || attributes === null}
+                onClick={() => {
+                  if (attributes) {
+                    navigateToPrefilledEditor(
+                      {
+                        id: '',
+                        timeRange: {
+                          from: startDate ?? 'now-5d',
+                          to: endDate ?? 'now',
+                          mode: startDate ? 'absolute' : 'relative',
+                        },
+                        attributes: {
+                          ...attributes.attributes,
+                          references: attributes.references,
+                        },
+                      },
+                      {
+                        originatingApp: 'securitySolution:case',
+                        originatingPath: `${location.pathname}${location.search}`,
+                      }
+                    );
+                  }
+                }}
+              >
+                {`Open in Lens`}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="xs" />
-          <LensComponent
-            id={`${id}-${uuid.v4()}`}
-            style={{ height: LENS_VISUALIZATION_HEIGHT }}
-            timeRange={{
-              from: startDate ?? 'now-5d',
-              to: endDate ?? 'now',
-              mode: startDate ? 'absolute' : 'relative',
-            }}
-            savedObjectId={id}
-            onBrushEnd={onBrushEnd}
-          />
+
+          {attributes ? (
+            <EmbeddableComponent
+              id=""
+              style={{ height: LENS_VISUALIZATION_HEIGHT }}
+              timeRange={{
+                from: startDate ?? 'now-5d',
+                to: endDate ?? 'now',
+                mode: startDate ? 'absolute' : 'relative',
+              }}
+              attributes={{
+                ...attributes.attributes,
+                references: attributes.references,
+              }}
+              onBrushEnd={onBrushEnd}
+            />
+          ) : null}
           <LensChartTooltipFix />
         </>
       ) : null}

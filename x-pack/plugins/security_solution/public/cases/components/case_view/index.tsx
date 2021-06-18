@@ -216,6 +216,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         },
         getCaseDetailHrefWithCommentId,
         lensIntegration: {
+          editor_context: lensMarkdownPlugin.context,
           editor_plugins: {
             parsingPlugin: lensMarkdownPlugin.parser,
             processingPluginRenderer: lensMarkdownPlugin.renderer,

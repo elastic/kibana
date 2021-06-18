@@ -174,6 +174,7 @@ export class EmbeddableStateTransfer {
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
+    console.error('navigateToWithState', appId, options, this.storage);
     await this.navigateToApp(appId, { path: options?.path, openInNewTab: options?.openInNewTab });
   }
 }

@@ -145,7 +145,7 @@ export const UserActionTree = React.memo(
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const [manageMarkdownEditIds, setManangeMarkdownEditIds] = useState<string[]>([]);
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
@@ -154,9 +154,9 @@ export const UserActionTree = React.memo(
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
-          setManangeMardownEditIds([...manageMarkdownEditIds, id]);
+          setManangeMarkdownEditIds([...manageMarkdownEditIds, id]);
         } else {
-          setManangeMardownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
+          setManangeMarkdownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
         }
       },
       [manageMarkdownEditIds]

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { find, omit } from 'lodash';
 import {
   EuiComboBox,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiMarkdownContext,
   EuiMarkdownEditorUiPlugin,
   EuiCodeBlock,
   EuiSpacer,
@@ -22,7 +24,7 @@ import {
   EuiDatePicker,
   EuiDatePickerRange,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import moment, { Moment } from 'moment';
 
@@ -53,8 +55,10 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
   onClosePopover,
   onInsert,
 }) => {
+  const markdownContext = useContext(EuiMarkdownContext);
   const soClient = useKibana().services.savedObjects.client;
   const [lensOptions, setLensOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [lensSavedObjects, setLensSavedObjects] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string; value: string }>>(
     id && title ? [{ value: id, label: title }] : []
   );
@@ -64,6 +68,15 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
   );
   const [endDate, setEndDate] = useState<Moment | null>(
     defaultEndDate ? moment(defaultEndDate) : moment()
+  );
+
+  useEffect(
+    () =>
+      console.error(
+        'textarea',
+        document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea').value
+      ),
+    []
   );
 
   useEffect(() => {
@@ -78,6 +91,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
       }));
 
       setLensOptions(options);
+      setLensSavedObjects(savedObjects.map((so) => omit(so, ['client'])));
     };
     fetchLensSavedObjects();
   }, [soClient]);
@@ -96,19 +110,22 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
 
   const handleAdd = useCallback(() => {
     if (lensSavedObjectId && selectedOptions[0]) {
+      console.error(find(lensSavedObjects, ['id', lensSavedObjectId]));
       onInsert(
         `!{lens${JSON.stringify({
-          id: lensSavedObjectId,
           startDate,
           endDate,
           title: selectedOptions[0].label,
+          attributes: find(lensSavedObjects, ['id', lensSavedObjectId]).attributes,
         })}}`,
         {
           block: true,
         }
       );
     }
-  }, [lensSavedObjectId, selectedOptions, onInsert, startDate, endDate]);
+  }, [lensSavedObjectId, selectedOptions, lensSavedObjects, onInsert, startDate, endDate]);
+
+  console.error('markdownContext', markdownContext);
 
   return (
     <ModalContainer>
@@ -161,7 +178,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
         </EuiFlexGroup>
         <EuiSpacer />
         <LensMarkDownRenderer
-          id={lensSavedObjectId}
+          attributes={find(lensSavedObjects, ['id', lensSavedObjectId])}
           startDate={startDate?.format()}
           endDate={endDate?.format()}
           onBrushEnd={handleLensDateChange}
@@ -190,7 +207,9 @@ export const plugin: EuiMarkdownEditorUiPlugin = {
       {'[title](url)'}
     </EuiCodeBlock>
   ),
-  editor: function editor({ node, onSave, onCancel }) {
+  editor: function editor({ node, onSave, onCancel, ...rest }) {
+    console.error('editorr', node);
+    console.error('ssssssa', rest);
     return (
       <LensEditor
         id={node?.id}

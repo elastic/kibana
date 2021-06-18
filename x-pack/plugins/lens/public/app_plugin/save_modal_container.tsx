@@ -283,6 +283,7 @@ export const runSaveLensVisualization = async (
       onAppLeave?.((actions) => {
         return actions.default();
       });
+      console.error('redirectToOrigin', newInput, saveProps);
       redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
       return;
     } else if (saveProps.dashboardId) {

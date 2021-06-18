@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart, NavigateToAppOptions } from 'kibana/public';
 import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -111,7 +111,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, options?: NavigateToAppOptions) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
@@ -258,20 +258,28 @@ export class LensPlugin {
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
       SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService!),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
+      navigateToPrefilledEditor: (
+        input: LensEmbeddableInput,
+        options?: {
+          openInNewTab?: boolean;
+          originatingApp?: string;
+          originatingPath?: string;
+        }
+      ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
-        if (input.timeRange && !openInNewTab) {
+        if (input.timeRange && !options?.openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
           core.application.navigateToApp,
           core.application.currentAppId$
         );
-        transfer.navigateToEditor('lens', {
-          openInNewTab,
-          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
+        transfer.navigateToEditor(APP_ID, {
+          openInNewTab: options?.openInNewTab ?? false,
+          path: getEditPath(undefined, options?.openInNewTab ? input.timeRange : undefined),
           state: {
-            originatingApp: '',
+            originatingApp: options?.originatingApp ?? '',
+            originatingPath: options?.originatingPath,
             valueInput: input,
           },
         });
