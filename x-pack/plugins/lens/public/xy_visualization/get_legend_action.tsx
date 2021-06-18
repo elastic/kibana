@@ -8,50 +8,66 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { LayerArgs } from './types';
-import type { LensMultiTable, LensFilterEvent } from '../types';
+import type { LensMultiTable, LensFilterEvent, FormatFactory } from '../types';
 import { LegendActionPopover } from '../shared_components';
 
 export const getLegendAction = (
   filteredLayers: LayerArgs[],
   tables: LensMultiTable['tables'],
-  onFilter: (data: LensFilterEvent['data']) => void
-): LegendAction => ({ series: [xySeries], label }) => {
-  const series = xySeries as XYChartSeriesIdentifier;
-  const layer = filteredLayers.find((l) =>
-    series.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
-  );
+  onFilter: (data: LensFilterEvent['data']) => void,
+  formatFactory: FormatFactory,
+  layersAlreadyFormatted: Record<string, boolean>
+): LegendAction =>
+  React.memo(({ series: [xySeries] }) => {
+    const series = xySeries as XYChartSeriesIdentifier;
+    const layer = filteredLayers.find((l) =>
+      series.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+    );
 
-  if (!layer || !layer.splitAccessor) {
-    return null;
-  }
+    if (!layer || !layer.splitAccessor) {
+      return null;
+    }
 
-  let splitLabel = label;
-  const accessor = layer.splitAccessor;
-  const hasMultipleYaxis = layer.accessors.length > 1;
-  if (hasMultipleYaxis) {
-    [splitLabel] = label.split(' - ');
-  }
+    const splitLabel = series.seriesKeys[0] as string;
+    const accessor = layer.splitAccessor;
 
-  const table = tables[layer.layerId];
+    const table = tables[layer.layerId];
+    const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
+    const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
 
-  const rowIndex = table.rows.findIndex((row) => {
-    return row[accessor] === series.seriesKeys[0];
+    const currentSplitFormatter =
+      layersAlreadyFormatted[accessor] && splitColumn
+        ? formatFactory(splitColumn.meta.params)
+        : formatter;
+
+    const rowIndex = table.rows.findIndex((row) => {
+      if (layersAlreadyFormatted[accessor]) {
+        // stringify the value to compare with the chart value
+        return currentSplitFormatter.convert(row[accessor]) === splitLabel;
+      }
+      return row[accessor] === splitLabel;
+    });
+
+    if (rowIndex < 0) return null;
+
+    const data = [
+      {
+        row: rowIndex,
+        column: table.columns.findIndex((col) => col.id === accessor),
+        value: accessor ? table.rows[rowIndex][accessor] : splitLabel,
+        table,
+      },
+    ];
+
+    const context: LensFilterEvent['data'] = {
+      data,
+    };
+
+    return (
+      <LegendActionPopover
+        label={formatter ? formatter.convert(splitLabel) : splitLabel}
+        context={context}
+        onFilter={onFilter}
+      />
+    );
   });
-
-  if (rowIndex < 0) return null;
-
-  const data = [
-    {
-      row: rowIndex,
-      column: table.columns.findIndex((col) => col.id === accessor),
-      value: accessor ? table.rows[rowIndex][accessor] : series.seriesKeys[0],
-      table,
-    },
-  ];
-
-  const context: LensFilterEvent['data'] = {
-    data,
-  };
-
-  return <LegendActionPopover label={splitLabel} context={context} onFilter={onFilter} />;
-};

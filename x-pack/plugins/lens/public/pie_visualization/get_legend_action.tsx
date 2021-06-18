@@ -15,29 +15,30 @@ import { LegendActionPopover } from '../shared_components';
 export const getLegendAction = (
   table: Datatable,
   onFilter: (data: LensFilterEvent['data']) => void
-): LegendAction => ({ series: [pieSeries], label }) => {
-  const data = table.columns.reduce<LensFilterEvent['data']['data']>((acc, { id }, column) => {
-    const value = pieSeries.key;
-    const row = table.rows.findIndex((r) => r[id] === value);
-    if (row > -1) {
-      acc.push({
-        table,
-        column,
-        row,
-        value,
-      });
+): LegendAction =>
+  React.memo(({ series: [pieSeries], label }) => {
+    const data = table.columns.reduce<LensFilterEvent['data']['data']>((acc, { id }, column) => {
+      const value = pieSeries.key;
+      const row = table.rows.findIndex((r) => r[id] === value);
+      if (row > -1) {
+        acc.push({
+          table,
+          column,
+          row,
+          value,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    if (data.length === 0) {
+      return null;
     }
 
-    return acc;
-  }, []);
+    const context: LensFilterEvent['data'] = {
+      data,
+    };
 
-  if (data.length === 0) {
-    return null;
-  }
-
-  const context: LensFilterEvent['data'] = {
-    data,
-  };
-
-  return <LegendActionPopover label={label} context={context} onFilter={onFilter} />;
-};
+    return <LegendActionPopover label={label} context={context} onFilter={onFilter} />;
+  });

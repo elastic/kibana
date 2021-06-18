@@ -168,7 +168,9 @@ describe('getLegendAction', function () {
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     tables,
-    jest.fn()
+    jest.fn(),
+    jest.fn(),
+    {}
   );
   let wrapper: ReactWrapper<LegendActionProps>;
 

@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -219,11 +219,6 @@ export function PieComponent(
     setState({ isReady: true });
   }, []);
 
-  const legendAction = useMemo(() => getLegendAction(firstTable, onClickValue), [
-    firstTable,
-    onClickValue,
-  ]);
-
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
@@ -287,7 +282,7 @@ export function PieComponent(
           onElementClick={
             props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
           }
-          legendAction={legendAction}
+          legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
             ...chartTheme,
             background: {

@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -380,12 +380,6 @@ export function XYChart({
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
-  const legendAction = useMemo(() => getLegendAction(filteredLayers, data.tables, onClickValue), [
-    data.tables,
-    filteredLayers,
-    onClickValue,
-  ]);
-
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
@@ -397,6 +391,7 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
@@ -636,7 +631,13 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
-        legendAction={legendAction}
+        legendAction={getLegendAction(
+          filteredLayers,
+          data.tables,
+          onClickValue,
+          formatFactory,
+          layersAlreadyFormatted
+        )}
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
