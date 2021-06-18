@@ -6,7 +6,7 @@
  */
 
 // @ts-expect-error untyped lib
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
 import { Datatable } from 'src/plugins/expressions';
