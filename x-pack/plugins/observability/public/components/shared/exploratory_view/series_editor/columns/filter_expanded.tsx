@@ -49,6 +49,8 @@ export function FilterExpanded({
 
   const series = getSeries(seriesId);
 
+  const queryFilters: ESFilter[] = [];
+
   const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
   const queryFilters: ESFilter[] = [];
