@@ -12,7 +12,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { getAgentIcon } from '../AgentIcon/get_agent_icon';
+import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
