@@ -16,8 +16,22 @@ import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
-jest.mock('../../../lib/kibana');
 jest.mock('../../link_to');
+jest.mock('../../../lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+        },
+      },
+    }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+  };
+});
 
 const SEARCH_QUERY = '?search=test';
 
@@ -99,9 +113,12 @@ describe('Table Navigation', () => {
   });
   test('it carries the url state in the link', () => {
     const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
     const firstTab = wrapper.find(
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
-    expect(firstTab.props().href).toBe(`/hosts/siem-window/authentications${SEARCH_QUERY}`);
+    expect(firstTab.props().href).toBe(
+      `/app/securitySolution/hosts/siem-window/authentications${SEARCH_QUERY}`
+    );
   });
 });

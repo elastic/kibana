@@ -10,6 +10,8 @@ import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
+import { APP_ID } from '../../../../../common/constants';
+import { useKibana } from '../../../lib/kibana';
 
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
@@ -30,14 +32,20 @@ const TabNavigationItemComponent = ({
     },
     [history, hrefWithSearch, id]
   );
+  const { getUrlForApp } = useKibana().services.application;
+
+  const appHref = getUrlForApp(APP_ID, {
+    path: hrefWithSearch,
+    deepLinkId: id,
+  });
 
   return (
     <EuiTab
-      data-href={hrefWithSearch}
+      data-href={appHref}
       data-test-subj={`navigation-${id}`}
       disabled={disabled}
       isSelected={isSelected}
-      href={hrefWithSearch}
+      href={appHref}
       onClick={handleClick}
     >
       {name}
