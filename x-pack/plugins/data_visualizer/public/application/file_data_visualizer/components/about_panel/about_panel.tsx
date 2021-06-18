@@ -25,10 +25,11 @@ import {
 import { WelcomeContent } from './welcome_content';
 
 interface Props {
+  disabled: boolean | undefined;
   onFilePickerChange(files: FileList | null): void;
 }
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
+export const AboutPanel: FC<Props> = ({ disabled, onFilePickerChange }) => {
   return (
     <EuiPage restrictWidth={1000} data-test-subj="dataVisualizerPageFileUpload">
       <EuiPageBody>
@@ -41,6 +42,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
 
               <div style={{ textAlign: 'center' }}>
                 <EuiFilePicker
+                  disabled={disabled}
                   id="filePicker"
                   initialPromptText={i18n.translate(
                     'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',

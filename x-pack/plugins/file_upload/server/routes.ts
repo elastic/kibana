@@ -28,7 +28,7 @@ import {
   runtimeMappingsSchema,
 } from './schemas';
 import { StartDeps } from './types';
-import { checkFileUploadPrivileges } from './check_privileges';
+import { checkFileUploadPrivileges, checkFindFileStructurePrivileges } from './check_privileges';
 
 function importData(
   client: IScopedClusterClient,
@@ -77,6 +77,36 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       } catch (e) {
         logger.warn(`Unable to check import permission, error: ${e.message}`);
         return response.ok({ body: { hasImportPermission: false } });
+      }
+    }
+  );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_data_visualizer/has_find_file_structure_permission Check permissions for find file structure endpoint
+   * @apiName HasFindFileStructurePermission
+   * @apiDescription heck permissions for find file structure endpoint
+   *
+   */
+  router.get(
+    {
+      path: '/internal/file_data_visualizer/has_find_file_structure_permission',
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const [, pluginsStart] = await coreSetup.getStartServices();
+
+        const { hasFindFileStructurePermission } = await checkFindFileStructurePrivileges({
+          authorization: pluginsStart.security?.authz,
+          request,
+        });
+
+        return response.ok({ body: { hasFindFileStructurePermission } });
+      } catch (e) {
+        logger.warn(`Unable to check import permission, error: ${e.message}`);
+        return response.ok({ body: { hasFindFileStructurePermission: false } });
       }
     }
   );

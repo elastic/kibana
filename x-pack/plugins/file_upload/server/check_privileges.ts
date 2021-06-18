@@ -8,12 +8,15 @@
 import { KibanaRequest } from 'kibana/server';
 import { AuthorizationServiceSetup, CheckPrivilegesPayload } from '../../security/server';
 
-interface Deps {
+interface BasicDeps {
   request: KibanaRequest;
   authorization?: Pick<
     AuthorizationServiceSetup,
     'mode' | 'actions' | 'checkPrivilegesDynamicallyWithRequest'
   >;
+}
+
+interface FileUploadDeps extends BasicDeps {
   checkHasManagePipeline: boolean;
   checkCreateIndexPattern: boolean;
   indexName?: string;
@@ -25,7 +28,7 @@ export const checkFileUploadPrivileges = async ({
   checkHasManagePipeline,
   checkCreateIndexPattern,
   indexName,
-}: Deps) => {
+}: FileUploadDeps) => {
   const requiresAuthz = authorization?.mode.useRbacForRequest(request) ?? false;
 
   if (!authorization || !requiresAuthz) {
@@ -52,4 +55,32 @@ export const checkFileUploadPrivileges = async ({
   const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
 
   return { hasImportPermission: checkPrivilegesResp.hasAllRequested };
+};
+
+export const checkFindFileStructurePrivileges = async ({ request, authorization }: BasicDeps) => {
+  const requiresAuthz = authorization?.mode.useRbacForRequest(request) ?? false;
+
+  if (!authorization || !requiresAuthz) {
+    return { hasFindFileStructurePermission: true };
+  }
+
+  if (!request.auth.isAuthenticated) {
+    return { hasFindFileStructurePermission: false };
+  }
+
+  const checkPrivilegesPayload: CheckPrivilegesPayload = {
+    elasticsearch: {
+      cluster: ['monitor', 'monitor_text_structure'],
+      index: {},
+    },
+  };
+
+  const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(request);
+  const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
+
+  const hasFindFileStructurePermission = checkPrivilegesResp.privileges.elasticsearch.cluster.some(
+    ({ authorized }) => authorized
+  );
+
+  return { hasFindFileStructurePermission };
 };
