@@ -31,6 +31,8 @@ export function Instruction({
   textPre,
   replaceTemplateStrings,
   customComponentName,
+  variantId,
+  isCloudEnabled,
 }) {
   const { tutorialService, http, uiSettings, getBasePath } = getServices();
 
@@ -96,17 +98,19 @@ export function Instruction({
 
       {commandBlock}
 
-      {post}
-
       {LazyCustomComponent && (
         <Suspense fallback={<EuiLoadingSpinner />}>
           <LazyCustomComponent
             basePath={getBasePath()}
             isDarkTheme={uiSettings.get('theme:darkMode')}
             http={http}
+            variantId={variantId}
+            isCloudEnabled={isCloudEnabled}
           />
         </Suspense>
       )}
+
+      {post}
 
       <EuiSpacer />
     </div>
@@ -120,4 +124,6 @@ Instruction.propTypes = {
   textPre: PropTypes.string,
   replaceTemplateStrings: PropTypes.func.isRequired,
   customComponentName: PropTypes.string,
+  variantId: PropTypes.string,
+  isCloudEnabled: PropTypes.bool.isRequired,
 };
