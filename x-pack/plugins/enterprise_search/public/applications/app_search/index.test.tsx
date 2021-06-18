@@ -24,6 +24,7 @@ import { rerender } from '../test_helpers';
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
 
+import { Credentials } from './components/credentials';
 import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
@@ -116,6 +117,20 @@ describe('AppSearchConfigured', () => {
         setMockValues({ myRole: { canViewSettings: false } });
         rerender(wrapper);
         expect(wrapper.find(Settings)).toHaveLength(0);
+      });
+    });
+
+    describe('canViewAccountCredentials', () => {
+      it('renders Credentials when user canViewAccountCredentials is true', () => {
+        setMockValues({ myRole: { canViewAccountCredentials: true } });
+        rerender(wrapper);
+        expect(wrapper.find(Credentials)).toHaveLength(1);
+      });
+
+      it('does not render Credentials when user canViewAccountCredentials is false', () => {
+        setMockValues({ myRole: { canViewAccountCredentials: false } });
+        rerender(wrapper);
+        expect(wrapper.find(Credentials)).toHaveLength(0);
       });
     });
 

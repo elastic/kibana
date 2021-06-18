@@ -76,7 +76,13 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
-    myRole: { canManageEngines, canManageMetaEngines, canViewSettings, canViewRoleMappings },
+    myRole: {
+      canManageEngines,
+      canManageMetaEngines,
+      canViewSettings,
+      canViewAccountCredentials,
+      canViewRoleMappings,
+    },
   } = useValues(AppLogic(props));
   const { renderHeaderActions } = useValues(KibanaLogic);
   const { readOnlyMode } = useValues(HttpLogic);
@@ -97,6 +103,11 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Settings />
         </Route>
       )}
+      {canViewAccountCredentials && (
+        <Route exact path={CREDENTIALS_PATH}>
+          <Credentials />
+        </Route>
+      )}
       {canViewRoleMappings && (
         <Route path={ROLE_MAPPINGS_PATH}>
           <RoleMappings />
@@ -113,9 +124,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             </Route>
             <Route path={ENGINE_PATH}>
               <EngineRouter />
-            </Route>
-            <Route exact path={CREDENTIALS_PATH}>
-              <Credentials />
             </Route>
             {canManageEngines && (
               <Route exact path={ENGINE_CREATION_PATH}>
