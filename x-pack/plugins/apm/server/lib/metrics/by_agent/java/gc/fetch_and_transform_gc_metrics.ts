@@ -21,6 +21,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -65,7 +66,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [AGENT_NAME]: 'java' } },
+            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
       },
