@@ -201,7 +201,7 @@ export default ({ getService, getPageObjects }) => {
     it('should add a phrases filter', async function () {
       // https://github.com/elastic/kibana/issues/102587
       // don't reselect the index pattern.  It will hang forever
-      // await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      // await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
       const hitCountNumber = await PageObjects.discover.getHitCount();
       const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
       await filterBar.addFilter('extension.keyword', 'is', 'jpg');
