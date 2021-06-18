@@ -389,7 +389,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async loadIsEditable(): Promise<boolean> {
+  async supportsFeatureEditing(): Promise<boolean> {
     if (!getMapAppConfig().enableDrawingFeature) {
       return false;
     }
