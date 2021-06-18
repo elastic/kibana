@@ -18,7 +18,7 @@ node scripts/build --debug --oss
 echo " -> shipping metrics from build to ci-stats"
 node scripts/ship_ci_stats \
   --metrics target/optimizer_bundle_metrics.json \
-  --metrics packages/kbn-ui-shared-deps/target/metrics.json
+  --metrics node_modules/@kbn/ui-shared-deps/shared_built_assets/metrics.json
 
 mkdir -p "$WORKSPACE/kibana-build-oss"
 cp -pR build/oss/kibana-*-SNAPSHOT-linux-x86_64/. $WORKSPACE/kibana-build-oss/
