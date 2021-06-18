@@ -24,13 +24,22 @@ import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { PLUGIN_ID } from '../../../common';
+import { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
   AgentPolicy,
-  PackagePolicy,
   PackagePolicyPackage,
   packagePolicyRouteService,
 } from '../../../../fleet/common';
-import { Form, useForm, useFormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
+import {
+  Form,
+  useForm,
+  useFormData,
+  getUseField,
+  Field,
+  FIELD_TYPES,
+  fieldValidators,
+} from '../../shared_imports';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -44,7 +53,7 @@ const FORM_ID = 'scheduledQueryForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface ScheduledQueryGroupFormProps {
-  defaultValue?: PackagePolicy;
+  defaultValue?: OsqueryManagerPackagePolicy;
   packageInfo?: PackagePolicyPackage;
   editMode?: boolean;
 }
@@ -89,7 +98,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     {
       onSuccess: (data) => {
         if (!editMode) {
-          navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
+          navigateToApp(PLUGIN_ID, { path: `scheduled_query_groups/${data.item.id}` });
           toasts.addSuccess(
             i18n.translate('xpack.osquery.scheduledQueryGroup.form.createSuccessToastMessageText', {
               defaultMessage: 'Successfully scheduled {scheduledQueryGroupName}',
@@ -101,7 +110,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           return;
         }
 
-        navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
+        navigateToApp(PLUGIN_ID, { path: `scheduled_query_groups/${data.item.id}` });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.scheduledQueryGroup.form.updateSuccessToastMessageText', {
             defaultMessage: 'Successfully updated {scheduledQueryGroupName}',
@@ -118,7 +127,15 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     }
   );
 
-  const { form } = useForm({
+  const { form } = useForm<
+    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
+      policy_id: string;
+    },
+    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id' | 'namespace'> & {
+      policy_id: string[];
+      namespace: string[];
+    }
+  >({
     id: FORM_ID,
     schema: {
       name: {
@@ -126,6 +143,18 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
         label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.nameFieldLabel', {
           defaultMessage: 'Name',
         }),
+        validations: [
+          {
+            validator: fieldValidators.emptyField(
+              i18n.translate(
+                'xpack.osquery.scheduledQueryGroup.form.nameFieldRequiredErrorMessage',
+                {
+                  defaultMessage: 'Name is a required field',
+                }
+              )
+            ),
+          },
+        ],
       },
       description: {
         type: FIELD_TYPES.TEXT,
@@ -144,19 +173,35 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
         label: i18n.translate('xpack.osquery.scheduledQueryGroup.form.agentPolicyFieldLabel', {
           defaultMessage: 'Agent policy',
         }),
+        validations: [
+          {
+            validator: fieldValidators.emptyField(
+              i18n.translate(
+                'xpack.osquery.scheduledQueryGroup.form.policyIdFieldRequiredErrorMessage',
+                {
+                  defaultMessage: 'Agent policy is a required field',
+                }
+              )
+            ),
+          },
+        ],
       },
     },
-    onSubmit: (payload) => {
+    onSubmit: (payload, isValid) => {
+      if (!isValid) return Promise.resolve();
       const formData = produce(payload, (draft) => {
-        // @ts-expect-error update types
-        draft.inputs[0].streams.forEach((stream) => {
-          delete stream.compiled_stream;
+        if (draft.inputs?.length) {
+          draft.inputs[0].streams?.forEach((stream) => {
+            delete stream.compiled_stream;
 
-          // we don't want to send id as null when creating the policy
-          if (stream.id == null) {
-            delete stream.id;
-          }
-        });
+            // we don't want to send id as null when creating the policy
+            if (stream.id == null) {
+              // @ts-expect-error update types
+              delete stream.id;
+            }
+          });
+        }
+
         return draft;
       });
       return mutateAsync(formData);
@@ -164,7 +209,6 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     options: {
       stripEmptyFields: false,
     },
-    // @ts-expect-error update types
     deserializer: (payload) => ({
       ...payload,
       policy_id: payload.policy_id.length ? [payload.policy_id] : [],
@@ -172,9 +216,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     }),
     serializer: (payload) => ({
       ...payload,
-      // @ts-expect-error update types
       policy_id: payload.policy_id[0],
-      // @ts-expect-error update types
       namespace: payload.namespace[0],
     }),
     defaultValue: merge(
@@ -182,10 +224,11 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
         name: '',
         description: '',
         enabled: true,
-        policy_id: [],
+        policy_id: '',
         namespace: 'default',
         output_id: '',
-        package: packageInfo,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        package: packageInfo!,
         inputs: [
           {
             type: 'osquery',
@@ -205,7 +248,15 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     [defaultValue, agentPolicyOptions]
   );
 
-  const [{ policy_id: policyId }] = useFormData({ form, watch: ['policy_id'] });
+  const [
+    {
+      package: { version: integrationPackageVersion } = { version: undefined },
+      policy_id: policyId,
+    },
+  ] = useFormData({
+    form,
+    watch: ['package', 'policy_id'],
+  });
 
   const currentPolicy = useMemo(() => {
     if (!policyId) {
@@ -288,6 +339,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           path="inputs"
           component={QueriesField}
           scheduledQueryGroupId={defaultValue?.id ?? null}
+          integrationPackageVersion={integrationPackageVersion}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />

@@ -37,13 +37,13 @@ export function TransactionCharts() {
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
-              <EuiPanel>
+              <EuiPanel hasBorder={true}>
                 <LatencyChart />
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
-              <EuiPanel>
+              <EuiPanel hasBorder={true}>
                 <EuiTitle size="xs">
                   <span>
                     {i18n.translate(
