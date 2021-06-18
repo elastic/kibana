@@ -41,7 +41,10 @@ export class EphemeralTaskLifecycle {
   private lifecycleEvent: Observable<TaskLifecycleEvent>;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
-  private ephemeralTaskQueue = new Set<EphemeralTaskInstanceRequest>();
+  private ephemeralTaskQueue = new Set<{
+    task: EphemeralTaskInstanceRequest;
+    enqueuedAt: number;
+  }>();
   private logger: Logger;
   private config: TaskManagerConfig;
   private middleware: Middleware;
@@ -90,27 +93,27 @@ export class EphemeralTaskLifecycle {
           let overallCapacity = this.getCapacity();
           const capacityByType = new Map<string, number>();
           const tasksWithinCapacity = [...this.ephemeralTaskQueue]
-            .filter((ephemeralTask) => {
+            .filter(({ task }) => {
               if (overallCapacity > 0) {
-                if (!capacityByType.has(ephemeralTask.taskType)) {
-                  capacityByType.set(
-                    ephemeralTask.taskType,
-                    this.getCapacity(ephemeralTask.taskType)
-                  );
+                if (!capacityByType.has(task.taskType)) {
+                  capacityByType.set(task.taskType, this.getCapacity(task.taskType));
                 }
-                if (capacityByType.get(ephemeralTask.taskType)! > 0) {
+                if (capacityByType.get(task.taskType)! > 0) {
                   overallCapacity--;
-                  capacityByType.set(
-                    ephemeralTask.taskType,
-                    capacityByType.get(ephemeralTask.taskType)! - 1
-                  );
+                  capacityByType.set(task.taskType, capacityByType.get(task.taskType)! - 1);
                   return true;
                 }
               }
             })
-            .map((taskToRun) => {
-              this.ephemeralTaskQueue.delete(taskToRun);
-              return this.createTaskRunnerForTask(taskToRun);
+            .map((ephemeralTask) => {
+              this.ephemeralTaskQueue.delete(ephemeralTask);
+              this.emitEvent(
+                asTaskManagerStatEvent(
+                  'ephemeralTaskDelay',
+                  asOk(Date.now() - ephemeralTask.enqueuedAt)
+                )
+              );
+              return this.createTaskRunnerForTask(ephemeralTask.task);
             });
 
           if (tasksWithinCapacity.length) {
@@ -157,7 +160,11 @@ export class EphemeralTaskLifecycle {
     if (this.lifecycleSubscription.closed) {
       return asErr(task);
     }
-    return pushIntoSet(this.ephemeralTaskQueue, this.config.ephemeral_tasks.request_capacity, task);
+    return pushIntoSetWithTimestamp(
+      this.ephemeralTaskQueue,
+      this.config.ephemeral_tasks.request_capacity,
+      task
+    );
   }
 
   public get queuedTasks() {
@@ -187,10 +194,17 @@ export class EphemeralTaskLifecycle {
  * @param maxCapacity How many values are we allowed to push into the set
  * @param value A value T to push into the set if it is there
  */
-function pushIntoSet<T>(set: Set<T>, maxCapacity: number, value: T): Result<T, T> {
+function pushIntoSetWithTimestamp(
+  set: Set<{
+    task: EphemeralTaskInstanceRequest;
+    enqueuedAt: number;
+  }>,
+  maxCapacity: number,
+  task: EphemeralTaskInstanceRequest
+): Result<EphemeralTaskInstanceRequest, EphemeralTaskInstanceRequest> {
   if (set.size >= maxCapacity) {
-    return asErr(value);
+    return asErr(task);
   }
-  set.add(value);
-  return asOk(value);
+  set.add({ task, enqueuedAt: Date.now() });
+  return asOk(task);
 }

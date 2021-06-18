@@ -527,6 +527,7 @@ function mockHealthStats(overrides = {}) {
           load: [],
           executionsPerCycle: [],
           queuedTasks: [],
+          delay: [],
         },
       },
     },

@@ -293,6 +293,65 @@ test('returns the average load added per polling cycle cycle by ephemeral tasks 
   });
 });
 
+test('returns the average delay experienced by tasks in the ephemeral queue', async () => {
+  const taskDelays = [100, 150, 500, 100, 100, 200, 2000, 10000, 20000, 100];
+
+  const events$ = new Subject<TaskLifecycleEvent>();
+  const getQueuedTasks = jest.fn();
+  const ephemeralTaskLifecycle = ephemeralTaskLifecycleMock.create({
+    events$: events$ as Observable<TaskLifecycleEvent>,
+    getQueuedTasks,
+  });
+
+  const runningAverageWindowSize = 5;
+  const ephemeralTaskAggregator = createEphemeralTaskAggregator(
+    ephemeralTaskLifecycle,
+    runningAverageWindowSize,
+    10
+  );
+
+  function expectWindowEqualsUpdate(
+    taskStat: AggregatedStat<SummarizedEphemeralTaskStat>,
+    window: number[]
+  ) {
+    expect(taskStat.value.delay).toMatchObject({
+      p50: stats.percentile(window, 0.5),
+      p90: stats.percentile(window, 0.9),
+      p95: stats.percentile(window, 0.95),
+      p99: stats.percentile(window, 0.99),
+    });
+  }
+
+  return new Promise<void>((resolve) => {
+    ephemeralTaskAggregator
+      .pipe(
+        // skip initial stat which is just initialized data which
+        // ensures we don't stall on combineLatest
+        skip(1),
+        // Use 'summarizeEphemeralStat' to receive summarize stats
+        map(({ key, value }: AggregatedStat<EphemeralTaskStat>) => ({
+          key,
+          value: summarizeEphemeralStat(value).value,
+        })),
+        take(taskDelays.length),
+        bufferCount(taskDelays.length)
+      )
+      .subscribe((taskStats: Array<AggregatedStat<SummarizedEphemeralTaskStat>>) => {
+        taskStats.forEach((taskStat, index) => {
+          expectWindowEqualsUpdate(
+            taskStat,
+            takeRight(takeLeft(taskDelays, index + 1), runningAverageWindowSize)
+          );
+        });
+        resolve();
+      });
+
+    for (const delay of taskDelays) {
+      events$.next(asTaskManagerStatEvent('ephemeralTaskDelay', asOk(delay)));
+    }
+  });
+});
+
 const mockTaskRunEvent = (
   overrides: Partial<ConcreteTaskInstance> = {},
   timing: TaskTiming = {

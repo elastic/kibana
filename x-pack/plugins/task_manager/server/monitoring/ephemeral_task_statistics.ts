@@ -7,7 +7,7 @@
 
 import { map, filter, startWith, buffer, share } from 'rxjs/operators';
 import { JsonObject } from '@kbn/common-utils';
-import { Observable, zip } from 'rxjs';
+import { combineLatest, Observable, zip } from 'rxjs';
 import { isOk, Ok } from '../lib/result_type';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
@@ -24,6 +24,7 @@ export interface EphemeralTaskStat extends JsonObject {
   queuedTasks: number[];
   executionsPerCycle: number[];
   load: number[];
+  delay: number[];
 }
 
 export interface SummarizedEphemeralTaskStat extends JsonObject {
@@ -60,35 +61,47 @@ export function createEphemeralTaskAggregator(
   );
   const ephemeralQueuedTasksQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const ephemeralTaskLoadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  return zip(
+  const ephemeralPollingCycleBasedStats$ = zip(
     ephemeralTaskRunEvents$.pipe(
       buffer(ephemeralQueueSizeEvents$),
       map((taskEvents: TaskLifecycleEvent[]) => taskEvents.length)
     ),
     ephemeralQueueSizeEvents$
-  )
-    .pipe(
-      map(([tasksRanSincePreviousQueueSize, ephemeralQueueSize]) => ({
-        queuedTasks: ephemeralQueuedTasksQueue(ephemeralQueueSize),
-        executionsPerCycle: ephemeralQueueExecutionsPerCycleQueue(tasksRanSincePreviousQueueSize),
-        load: ephemeralTaskLoadQueue(
-          calculateWorkerLoad(maxWorkers, tasksRanSincePreviousQueueSize)
-        ),
-      }))
-    )
-    .pipe(
-      startWith({
-        queuedTasks: [],
-        executionsPerCycle: [],
-        load: [],
-      }),
-      map((stats: EphemeralTaskStat) => {
-        return {
-          key: 'ephemeral',
-          value: stats,
-        } as AggregatedStat<EphemeralTaskStat>;
-      })
-    );
+  ).pipe(
+    map(([tasksRanSincePreviousQueueSize, ephemeralQueueSize]) => ({
+      queuedTasks: ephemeralQueuedTasksQueue(ephemeralQueueSize),
+      executionsPerCycle: ephemeralQueueExecutionsPerCycleQueue(tasksRanSincePreviousQueueSize),
+      load: ephemeralTaskLoadQueue(calculateWorkerLoad(maxWorkers, tasksRanSincePreviousQueueSize)),
+    })),
+    startWith({
+      queuedTasks: [],
+      executionsPerCycle: [],
+      load: [],
+    })
+  );
+
+  const ephemeralTaskDelayQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const ephemeralTaskDelayEvents$: Observable<number[]> = ephemeralTaskLifecycle.events.pipe(
+    filter(
+      (taskEvent: TaskLifecycleEvent) =>
+        isTaskManagerStatEvent(taskEvent) &&
+        taskEvent.id === 'ephemeralTaskDelay' &&
+        isOk<number, never>(taskEvent.event)
+    ),
+    map<TaskLifecycleEvent, number[]>((taskEvent: TaskLifecycleEvent) => {
+      return ephemeralTaskDelayQueue(((taskEvent.event as unknown) as Ok<number>).value);
+    }),
+    startWith([])
+  );
+
+  return combineLatest([ephemeralPollingCycleBasedStats$, ephemeralTaskDelayEvents$]).pipe(
+    map(([stats, delay]: [Omit<EphemeralTaskStat, 'delay'>, EphemeralTaskStat['delay']]) => {
+      return {
+        key: 'ephemeral',
+        value: { ...stats, delay },
+      } as AggregatedStat<EphemeralTaskStat>;
+    })
+  );
 }
 
 function calculateWorkerLoad(maxWorkers: number, tasksExecuted: number) {
@@ -99,6 +112,7 @@ export function summarizeEphemeralStat({
   queuedTasks,
   executionsPerCycle,
   load,
+  delay,
 }: EphemeralTaskStat): { value: SummarizedEphemeralTaskStat; status: HealthStatus } {
   return {
     value: {
@@ -107,6 +121,7 @@ export function summarizeEphemeralStat({
       executionsPerCycle: calculateRunningAverage(
         executionsPerCycle.length ? executionsPerCycle : [0]
       ),
+      delay: calculateRunningAverage(delay.length ? delay : [0]),
     },
     status: HealthStatus.OK,
   };
