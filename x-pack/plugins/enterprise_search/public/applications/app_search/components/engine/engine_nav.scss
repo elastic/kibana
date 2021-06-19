@@ -6,21 +6,15 @@
  */
 
 .appSearchNavEngineLabel {
-  padding-top: $euiSizeS;
+  margin-left: $euiSizeS;
+  padding-top: $euiSizeXS;
   padding-bottom: $euiSizeS;
 
-  .euiText {
-    font-weight: $euiFontWeightMedium;
-  }
   .euiBadge {
     margin-top: $euiSizeXS;
   }
 }
 
-.appSearchNavIcons {
-  // EUI override
-  &.euiFlexItem {
-    flex-grow: 0;
-    flex-direction: row;
-  }
+.appSearchNavIcon {
+  order: 1;
 }
