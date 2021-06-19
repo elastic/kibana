@@ -92,6 +92,9 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
+      <Route path={ENGINE_PATH}>
+        <EngineRouter />
+      </Route>
       {canViewRoleMappings && (
         <Route path={ROLE_MAPPINGS_PATH}>
           <RoleMappings />
@@ -105,9 +108,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
             </Route>
             <Route exact path={ENGINES_PATH}>
               <EnginesOverview />
-            </Route>
-            <Route path={ENGINE_PATH}>
-              <EngineRouter />
             </Route>
             <Route exact path={SETTINGS_PATH}>
               <Settings />
