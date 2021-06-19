@@ -120,10 +120,12 @@ export const EnginesOverview: React.FC = () => {
             onChange={handlePageChange(onEnginesPagination)}
           />
         </EuiPageContentBody>
+      </EuiPanel>
 
-        {hasPlatinumLicense && (
-          <>
-            <EuiSpacer size="xxl" />
+      {hasPlatinumLicense && (
+        <>
+          <EuiSpacer size="xxl" />
+          <EuiPanel>
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -164,9 +166,9 @@ export const EnginesOverview: React.FC = () => {
                 onChange={handlePageChange(onMetaEnginesPagination)}
               />
             </EuiPageContentBody>
-          </>
-        )}
-      </EuiPanel>
+          </EuiPanel>
+        </>
+      )}
     </AppSearchPageTemplate>
   );
 };
