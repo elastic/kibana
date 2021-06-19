@@ -6,7 +6,7 @@
  */
 
 import type { KibanaLocation } from 'src/plugins/share/public';
-import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
+import { DashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
@@ -50,25 +50,25 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
   protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
-    const state: DashboardUrlGeneratorState = {
+    const params: DashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
     };
 
     if (context.embeddable) {
       const embeddable = context.embeddable as IEmbeddable<EmbeddableQueryInput>;
       const input = embeddable.getInput();
-      if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
+      if (isQuery(input.query) && config.useCurrentFilters) params.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range
       // if undefined is passed, then destination dashboard will figure out time range itself
       // for brush event this time range would be overwritten
       if (isTimeRange(input.timeRange) && config.useCurrentDateRange)
-        state.timeRange = input.timeRange;
+        params.timeRange = input.timeRange;
 
       // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
       // otherwise preserve only pinned
       if (isFilters(input.filters))
-        state.filters = config.useCurrentFilters
+        params.filters = config.useCurrentFilters
           ? input.filters
           : input.filters?.filter((f) => esFilters.isFilterPinned(f));
     }
@@ -79,14 +79,14 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     } = esFilters.extractTimeRange(context.filters, context.timeFieldName);
 
     if (filtersFromEvent) {
-      state.filters = [...(state.filters ?? []), ...filtersFromEvent];
+      params.filters = [...(params.filters ?? []), ...filtersFromEvent];
     }
 
     if (timeRangeFromEvent) {
-      state.timeRange = timeRangeFromEvent;
+      params.timeRange = timeRangeFromEvent;
     }
 
-    const location = await this.locator.getLocation(state as any);
+    const location = await this.locator.getLocation(params);
 
     return location;
   }
