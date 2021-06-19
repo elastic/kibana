@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiTitleProps,
 } from '@elastic/eui';
 
 import { LoadingOverlay } from '../../../shared/loading';
@@ -26,6 +27,7 @@ import './data_panel.scss';
 
 interface Props {
   title: React.ReactElement; // e.g., h2 tag
+  titleSize?: EuiTitleProps['size'];
   subtitle?: string;
   iconType?: EuiIconProps['type'];
   action?: React.ReactNode;
@@ -37,6 +39,7 @@ interface Props {
 
 export const DataPanel: React.FC<Props> = ({
   title,
+  titleSize = 'xs',
   subtitle,
   iconType,
   action,
@@ -69,7 +72,7 @@ export const DataPanel: React.FC<Props> = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiTitle size="xs">{title}</EuiTitle>
+              <EuiTitle size={titleSize}>{title}</EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
           {subtitle && (

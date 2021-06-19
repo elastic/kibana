@@ -76,6 +76,7 @@ export const EnginesOverview: React.FC = () => {
         hasBorder
         iconType={EngineIcon}
         title={<h2>{ENGINES_TITLE}</h2>}
+        titleSize="s"
         action={
           canManageEngines && (
             <EuiButtonTo
@@ -109,6 +110,7 @@ export const EnginesOverview: React.FC = () => {
             hasBorder
             iconType={MetaEngineIcon}
             title={<h2>{META_ENGINES_TITLE}</h2>}
+            titleSize="s"
             action={
               canManageEngines && (
                 <EuiButtonTo

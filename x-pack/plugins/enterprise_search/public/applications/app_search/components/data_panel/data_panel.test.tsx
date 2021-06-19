@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiIcon, EuiButton } from '@elastic/eui';
+import { EuiIcon, EuiButton, EuiTitle } from '@elastic/eui';
 
 import { LoadingOverlay } from '../../../shared/loading';
 
@@ -70,6 +70,16 @@ describe('DataPanel', () => {
   });
 
   describe('props', () => {
+    it('passes titleSize to the title', () => {
+      const wrapper = shallow(<DataPanel title={<h2>Test</h2>} />);
+
+      expect(wrapper.find(EuiTitle).prop('size')).toEqual('xs'); // Default
+
+      wrapper.setProps({ titleSize: 's' });
+
+      expect(wrapper.find(EuiTitle).prop('size')).toEqual('s');
+    });
+
     it('renders panel color based on filled flag', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
