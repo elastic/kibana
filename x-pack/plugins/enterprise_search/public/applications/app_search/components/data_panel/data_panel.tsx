@@ -28,9 +28,10 @@ import './data_panel.scss';
 interface Props {
   title: React.ReactElement; // e.g., h2 tag
   titleSize?: EuiTitleProps['size'];
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   iconType?: EuiIconProps['type'];
   action?: React.ReactNode;
+  responsive?: boolean;
   filled?: boolean;
   hasBorder?: boolean;
   isLoading?: boolean;
@@ -43,6 +44,7 @@ export const DataPanel: React.FC<Props> = ({
   subtitle,
   iconType,
   action,
+  responsive = false,
   filled,
   hasBorder,
   isLoading,
@@ -63,7 +65,7 @@ export const DataPanel: React.FC<Props> = ({
       hasShadow={false}
       aria-busy={isLoading}
     >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={responsive}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {iconType && (
@@ -83,8 +85,12 @@ export const DataPanel: React.FC<Props> = ({
         </EuiFlexItem>
         {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
       </EuiFlexGroup>
-      <EuiSpacer />
-      {children}
+      {children && (
+        <>
+          <EuiSpacer />
+          {children}
+        </>
+      )}
       {isLoading && <LoadingOverlay />}
     </EuiPanel>
   );

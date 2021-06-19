@@ -11,7 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../shared/licensing';
+import { LicensingLogic, ManageLicenseButton } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { AppLogic } from '../../app_logic';
@@ -29,6 +29,7 @@ import {
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
   META_ENGINES_TITLE,
+  META_ENGINES_DESCRIPTION,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
 
@@ -102,42 +103,50 @@ export const EnginesOverview: React.FC = () => {
           onChange={handlePageChange(onEnginesPagination)}
         />
       </DataPanel>
-
-      {hasPlatinumLicense && (
-        <>
-          <EuiSpacer size="xxl" />
-          <DataPanel
-            hasBorder
-            iconType={MetaEngineIcon}
-            title={<h2>{META_ENGINES_TITLE}</h2>}
-            titleSize="s"
-            action={
-              canManageEngines && (
-                <EuiButtonTo
-                  color="secondary"
-                  size="s"
-                  iconType="plusInCircle"
-                  data-test-subj="appSearchEnginesMetaEngineCreationButton"
-                  to={META_ENGINE_CREATION_PATH}
-                >
-                  {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                </EuiButtonTo>
-              )
-            }
-            data-test-subj="appSearchMetaEngines"
-          >
-            <MetaEnginesTable
-              items={metaEngines}
-              loading={metaEnginesLoading}
-              pagination={{
-                ...convertMetaToPagination(metaEnginesMeta),
-                hidePerPageOptions: true,
-              }}
-              noItemsMessage={<EmptyMetaEnginesState />}
-              onChange={handlePageChange(onMetaEnginesPagination)}
-            />
-          </DataPanel>
-        </>
+      <EuiSpacer size="xxl" />
+      {hasPlatinumLicense ? (
+        <DataPanel
+          hasBorder
+          iconType={MetaEngineIcon}
+          title={<h2>{META_ENGINES_TITLE}</h2>}
+          titleSize="s"
+          action={
+            canManageEngines && (
+              <EuiButtonTo
+                color="secondary"
+                size="s"
+                iconType="plusInCircle"
+                data-test-subj="appSearchEnginesMetaEngineCreationButton"
+                to={META_ENGINE_CREATION_PATH}
+              >
+                {CREATE_A_META_ENGINE_BUTTON_LABEL}
+              </EuiButtonTo>
+            )
+          }
+          data-test-subj="appSearchMetaEngines"
+        >
+          <MetaEnginesTable
+            items={metaEngines}
+            loading={metaEnginesLoading}
+            pagination={{
+              ...convertMetaToPagination(metaEnginesMeta),
+              hidePerPageOptions: true,
+            }}
+            noItemsMessage={<EmptyMetaEnginesState />}
+            onChange={handlePageChange(onMetaEnginesPagination)}
+          />
+        </DataPanel>
+      ) : (
+        <DataPanel
+          hasBorder
+          responsive
+          iconType={MetaEngineIcon}
+          title={<h2>{META_ENGINES_TITLE}</h2>}
+          titleSize="s"
+          subtitle={META_ENGINES_DESCRIPTION}
+          action={<ManageLicenseButton />}
+          data-test-subj="metaEnginesLicenseCTA"
+        />
       )}
     </AppSearchPageTemplate>
   );
