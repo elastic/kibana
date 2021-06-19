@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconProps,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -26,7 +27,7 @@ import './data_panel.scss';
 interface Props {
   title: React.ReactElement; // e.g., h2 tag
   subtitle?: string;
-  iconType?: string;
+  iconType?: EuiIconProps['type'];
   action?: React.ReactNode;
   filled?: boolean;
   hasBorder?: boolean;
