@@ -36,7 +36,7 @@ import { EnginesLogic } from './engines_logic';
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const {
-    myRole: { canManageEngines },
+    myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);
 
   const {
@@ -111,7 +111,7 @@ export const EnginesOverview: React.FC = () => {
           title={<h2>{META_ENGINES_TITLE}</h2>}
           titleSize="s"
           action={
-            canManageEngines && (
+            canManageMetaEngines && (
               <EuiButtonTo
                 color="secondary"
                 size="s"

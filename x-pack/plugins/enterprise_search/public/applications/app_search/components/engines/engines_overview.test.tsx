@@ -42,7 +42,7 @@ describe('EnginesOverview', () => {
     metaEnginesLoading: false,
     hasPlatinumLicense: false,
     // AppLogic
-    myRole: { canManageEngines: false },
+    myRole: { canManageEngines: false, canManageMetaEngines: false },
     // MetaEnginesTableLogic
     expandedSourceEngines: {},
     conflictingEnginesSets: {},
@@ -124,7 +124,7 @@ describe('EnginesOverview', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
-          myRole: { canManageEngines: true },
+          myRole: { canManageMetaEngines: true },
         });
         const wrapper = shallow(<EnginesOverview />);
 
@@ -135,7 +135,7 @@ describe('EnginesOverview', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
-          myRole: { canManageEngines: false },
+          myRole: { canManageMetaEngines: false },
         });
         const wrapper = shallow(<EnginesOverview />);
 
