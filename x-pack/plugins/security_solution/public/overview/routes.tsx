@@ -12,7 +12,7 @@ import { SecuritySubPluginRoutes } from '../app/types';
 
 import { Overview } from './pages';
 
-export const OverviewRoutes = () => (
+const OverviewRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.overview}>
     <Overview />
   </TrackApplicationView>

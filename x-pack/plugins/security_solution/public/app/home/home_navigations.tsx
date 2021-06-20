@@ -16,6 +16,9 @@ import {
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
+  APP_ENDPOINTS_PATH,
+  APP_TRUSTED_APPS_PATH,
+  APP_EVENT_FILTERS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -65,6 +68,28 @@ export const navTabs: SiemNavTab = {
     id: SecurityPageName.administration,
     name: i18n.ADMINISTRATION,
     href: APP_MANAGEMENT_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
+  // TODO: [1101] i18n names
+  [SecurityPageName.endpoints]: {
+    id: SecurityPageName.endpoints,
+    name: 'Endpoints',
+    href: APP_ENDPOINTS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
+  [SecurityPageName.trustedApps]: {
+    id: SecurityPageName.trustedApps,
+    name: 'Trusted Applications',
+    href: APP_TRUSTED_APPS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
+  [SecurityPageName.eventFilters]: {
+    id: SecurityPageName.eventFilters,
+    name: 'Event Filters',
+    href: APP_EVENT_FILTERS_PATH,
     disabled: false,
     urlKey: SecurityPageName.administration,
   },
