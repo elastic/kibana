@@ -13,7 +13,7 @@
 
 import { monaco } from '@kbn/monaco';
 
-export const conf: monaco.languages.LanguageConfiguration = {
+export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\@\$\^\&\*\(\)\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\s]+)/g,
 
   comments: {
@@ -42,7 +42,7 @@ export const conf: monaco.languages.LanguageConfiguration = {
   ],
 };
 
-export const language: monaco.languages.IMonarchLanguage = {
+export const lexerRules: monaco.languages.IMonarchLanguage = {
   // Set defaultToken to invalid to see what you do not tokenize yet.
   defaultToken: 'invalid',
   tokenPostfix: '',
