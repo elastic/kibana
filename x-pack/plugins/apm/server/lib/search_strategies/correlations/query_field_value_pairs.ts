@@ -24,9 +24,10 @@ interface FieldValuePair {
 }
 type FieldValuePairs = FieldValuePair[];
 
+export type Field = string;
 export const getTermsAggRequest = (
   params: SearchServiceParams,
-  field: string
+  fieldName: string
 ): estypes.SearchRequest => ({
   index: params.index,
   body: {
@@ -34,7 +35,10 @@ export const getTermsAggRequest = (
     size: 0,
     aggs: {
       attribute_terms: {
-        terms: { field, size: TERMS_SIZE },
+        terms: {
+          field: fieldName,
+          size: TERMS_SIZE,
+        },
       },
     },
   },
@@ -43,42 +47,43 @@ export const getTermsAggRequest = (
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  fieldCandidates: string[],
+  fieldCandidates: Field[],
   progress: AsyncSearchProviderProgress
 ): Promise<FieldValuePairs> => {
   const fieldValuePairs: FieldValuePairs = [];
 
   let fieldValuePairsProgress = 0;
-  for (const fieldCandidate of fieldCandidates) {
+
+  for (let i = 0; i < fieldCandidates.length; i++) {
+    const fieldName = fieldCandidates[i];
     // mutate progress
     progress.loadedFieldValuePairs =
       fieldValuePairsProgress / fieldCandidates.length;
 
-    const resp = await esClient.search(
-      getTermsAggRequest(params, fieldCandidate)
-    );
+    try {
+      const resp = await esClient.search(getTermsAggRequest(params, fieldName));
+      if (resp.body.aggregations === undefined) {
+        fieldValuePairsProgress++;
+        continue;
+      }
+      const buckets = (resp.body.aggregations
+        .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
+        key: string;
+      }>)?.buckets;
+      if (buckets.length > 1) {
+        fieldValuePairs.push(
+          ...buckets.map((d) => ({
+            field: fieldName,
+            value: d.key,
+          }))
+        );
+      }
 
-    if (resp.body.aggregations === undefined) {
-      throw new Error(
-        'fetchTransactionDurationFieldValuePairs failed, did not return aggregations.'
-      );
+      fieldValuePairsProgress++;
+    } catch (e) {
+      fieldValuePairsProgress++;
+      console.error(e);
     }
-
-    const buckets = (resp.body.aggregations
-      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
-      key: string;
-    }>).buckets;
-
-    if (buckets.length > 1) {
-      fieldValuePairs.push(
-        ...buckets.map((d) => ({
-          field: fieldCandidate,
-          value: d.key,
-        }))
-      );
-    }
-
-    fieldValuePairsProgress++;
   }
 
   return fieldValuePairs;

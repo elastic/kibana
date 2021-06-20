@@ -12,10 +12,45 @@ import type { ElasticsearchClient } from 'src/core/server';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { Field } from './query_field_value_pairs';
 
-const fieldCandidatesFilter = ['parent.id', 'trace.id', 'transaction.id'];
+const fieldCandidatesFilter = [
+  'parent.id',
+  'trace.id',
+  'transaction.id',
+  '@timestamp',
+  'transaction.duration.us',
+  'duration_sla_pct',
+  'timestamp.us',
+  'transaction.marks.agent.firstContentfulPaint',
+  'transaction.marks.agent.domInteractive',
+  'transaction.marks.agent.domComplete',
+  'transaction.marks.agent.largestContentfulPaint',
+  'transaction.marks.agent.timeToFirstByte',
+  'transaction.marks.navigationTiming.responseEnd',
+  'transaction.marks.navigationTiming.responseStart',
+  'transaction.marks.navigationTiming.domInteractive',
+  'transaction.marks.navigationTiming.domainLookupEnd',
+  'transaction.marks.navigationTiming.domContentLoadedEventStart',
+  'transaction.marks.navigationTiming.domComplete',
+  'transaction.marks.navigationTiming.domainLookupStart',
+  'transaction.marks.navigationTiming.connectEnd',
+  'transaction.marks.navigationTiming.connectStart',
+  'transaction.marks.navigationTiming.loadEventStart',
+  'transaction.marks.navigationTiming.requestStart',
+  'transaction.marks.navigationTiming.fetchStart',
+  'transaction.marks.navigationTiming.domContentLoadedEventEnd',
+  'transaction.marks.navigationTiming.loadEventEnd',
+  'transaction.marks.navigationTiming.domLoading',
+  'transaction.experience.tbt',
+  'transaction.experience.cls',
+  'transaction.experience.fid',
+  'transaction.experience.longtask.max',
+  'transaction.experience.longtask.sum',
+  'amount_f',
+];
 
-const POPULATED_DOC_COUNT_SAMPLE_SIZE = 500;
+const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
 
 export const getRandomDocsRequest = (
   params: SearchServiceParams
@@ -40,15 +75,19 @@ export const getRandomDocsRequest = (
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
-): Promise<{ fieldCandidates: string[]; totalHits: number }> => {
+): Promise<{ fieldCandidates: Field[]; totalHits: number }> => {
   const { index } = params;
   // Get all fields with keyword mapping
-  const respMapping = await esClient.fieldCaps({ index, fields: '*' });
+  const respMapping = await esClient.fieldCaps({
+    index,
+    fields: '*',
+  });
+
   const keywordFields = Object.entries(respMapping.body.fields)
-    .filter(([key, value]) => {
-      return Object.keys(value)[0] === 'keyword';
+    .filter(([, value]) => {
+      return Object.keys(value).includes('keyword');
     })
-    .map(([key]) => key);
+    .map(([key, value]) => ({ key, types: Object.keys(value) }));
 
   const resp = await esClient.search(getRandomDocsRequest(params));
   const docs = resp.body.hits.hits.map((d) => d.fields ?? {});
@@ -56,11 +95,16 @@ export const fetchTransactionDurationFieldCandidates = async (
   // Get all field names for each returned doc and flatten it
   // to a list of unique field names used across all docs
   // and filter by fields of type keyword and some APM specific unique fields.
-  const fieldCandidates = [...new Set(docs.map(Object.keys).flat(1))]
-    .filter(
-      (d) => keywordFields.includes(d) && !fieldCandidatesFilter.includes(d)
-    )
-    .sort();
+  const fieldCandidates = [...new Set(docs.map(Object.keys).flat(1))];
+
+  const filteredFieldCandidates = [];
+
+  fieldCandidates.forEach((d) => {
+    const foundIdx = keywordFields.findIndex((k) => k.key === d);
+    if (foundIdx > -1 && !fieldCandidatesFilter.includes(d)) {
+      filteredFieldCandidates.push(keywordFields[foundIdx]);
+    }
+  });
 
   return {
     fieldCandidates,
