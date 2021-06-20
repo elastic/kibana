@@ -163,17 +163,7 @@ export function MlCorrelations({ onClose }: Props) {
         { defaultMessage: 'Correlation' }
       ),
       render: (_: any, term: MlCorrelationsTerms) => {
-        return <div>{roundToDecimalPlace(term.correlation, 4)}</div>;
-      },
-    },
-    {
-      field: 'ksTest',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.mlKsTestLabel',
-        { defaultMessage: 'KS Test' }
-      ),
-      render: (_: any, term: MlCorrelationsTerms) => {
-        return <div>{term.ksTest.toExponential(2)}</div>;
+        return <div>{roundToDecimalPlace(term.correlation, 2)}</div>;
       },
     },
     {
