@@ -7,8 +7,7 @@
 
 import React, { memo, useEffect, useState, useCallback } from 'react';
 import { PluggableList } from 'unified';
-import { EuiMarkdownEditor } from '@elastic/eui';
-import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
 
 interface MarkdownEditorProps {

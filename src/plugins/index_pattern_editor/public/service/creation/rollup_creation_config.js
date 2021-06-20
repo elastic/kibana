@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { RollupPrompt } from './components/rollup_prompt';
 import { IndexPatternCreationConfig } from '.';
 
 const rollupIndexPatternTypeName = i18n.translate(
@@ -146,10 +143,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
           },
         }
       : {};
-  };
-
-  renderPrompt = () => {
-    return <RollupPrompt />;
   };
 
   getFetchForWildcardOptions = () => {
