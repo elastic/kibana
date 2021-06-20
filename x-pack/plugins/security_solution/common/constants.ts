@@ -68,6 +68,9 @@ export enum SecurityPageName {
   timelines = 'timelines',
   case = 'case',
   administration = 'administration',
+  endpoints = 'endpoints',
+  trustedApps = 'trusted_apps',
+  eventFilters = 'event_filters',
 }
 
 export enum SecurityPageGroupName {
@@ -78,13 +81,21 @@ export enum SecurityPageGroupName {
 }
 
 export const OVERVIEW_PATH = '/overview';
+export const MANAGEMENT_PATH = '/administration';
+export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
+export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
+export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
+
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
 export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
+export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
+export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
+export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
 
 export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
 export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;

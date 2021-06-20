@@ -68,14 +68,21 @@ export type SecuritySubPluginKeyStore =
   | 'alertList'
   | 'management';
 
-export type SecuritySubPluginNames = keyof typeof SecurityPageName;
+export type SecurityDeepLinkName =
+  | SecurityPageName.detections
+  | SecurityPageName.overview
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.administration;
 
 interface SecurityDeepLink {
   base: AppDeepLink[];
   premium?: AppDeepLink[];
 }
 
-export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };
+export type SecurityDeepLinks = { [key in SecurityDeepLinkName]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.

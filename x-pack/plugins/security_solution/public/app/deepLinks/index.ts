@@ -6,14 +6,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
 
-import { AppUpdater } from 'src/core/public';
 import { LicenseType } from '../../../../licensing/common/types';
-import { SecuritySubPluginNames, SecurityDeepLinks } from '../types';
-import { App } from '../../../../../../src/core/public';
+import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
+import { App, AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
+import { ADMINISTRATION, OVERVIEW } from '../translations';
+import {
+  APP_ICON_SOLUTION,
+  ENDPOINTS_PATH,
+  OVERVIEW_PATH,
+  TRUSTED_APPS_PATH,
+  EVENT_FILTERS_PATH,
+} from '../../../common/constants';
 
-const securityDeepLinks: SecurityDeepLinks = {
+export const topDeepLinks: AppDeepLink[] = [
+  {
+    id: SecurityPageName.overview,
+    title: OVERVIEW,
+    path: OVERVIEW_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9000,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.administration,
+    title: ADMINISTRATION,
+    path: ENDPOINTS_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9002,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+];
+
+const nestedDeepLinks: SecurityDeepLinks = {
+  [SecurityPageName.overview]: {
+    base: [],
+  },
   detections: {
     base: [
       {
@@ -119,9 +147,6 @@ const securityDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  overview: {
-    base: [],
-  },
   case: {
     base: [
       {
@@ -145,17 +170,36 @@ const securityDeepLinks: SecurityDeepLinks = {
   administration: {
     base: [
       {
-        id: 'trustApplications',
-        title: i18n.translate('xpack.securitySolution.search.administration.trustedApps', {
+        id: SecurityPageName.endpoints,
+        title: i18n.translate('xpack.securitySolution.search.administration.endpoints', {
+          defaultMessage: 'Endpoints',
+        }),
+        path: ENDPOINTS_PATH,
+      },
+      {
+        id: SecurityPageName.trustedApps,
+        title: i18n.translate('xpack.securitySolution.search.administration.trusted_apps', {
           defaultMessage: 'Trusted Applications',
         }),
-        path: '/trusted_apps',
+        path: TRUSTED_APPS_PATH,
+      },
+      {
+        id: SecurityPageName.eventFilters,
+        title: i18n.translate('xpack.securitySolution.search.administration.event_filters', {
+          defaultMessage: 'Event Filters',
+        }),
+        path: EVENT_FILTERS_PATH,
       },
     ],
   },
 };
 
-const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
+const deepLinkKeywords: { [key in SecurityDeepLinkName]: string[] } = {
+  [SecurityPageName.overview]: [
+    i18n.translate('xpack.securitySolution.search.overview', {
+      defaultMessage: 'Overview',
+    }),
+  ],
   detections: [
     i18n.translate('xpack.securitySolution.search.detections', {
       defaultMessage: 'Detections',
@@ -176,65 +220,82 @@ const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
       defaultMessage: 'Timelines',
     }),
   ],
-  overview: [
-    i18n.translate('xpack.securitySolution.search.overview', {
-      defaultMessage: 'Overview',
-    }),
-  ],
   case: [
     i18n.translate('xpack.securitySolution.search.cases', {
       defaultMessage: 'Cases',
     }),
   ],
-  administration: [
+  [SecurityPageName.administration]: [
     i18n.translate('xpack.securitySolution.search.administration', {
-      defaultMessage: 'Endpoint Administration',
+      defaultMessage: 'Administration',
     }),
   ],
 };
 
 /**
+ * TODO: [1101] remove function
  * A function that generates a subPlugin's meta tag
  * @param subPluginName SubPluginName of the app to retrieve meta information for.
  * @param licenseType optional string for license level, if not provided basic is assumed.
  */
 export function getDeepLinksAndKeywords(
-  subPluginName: SecuritySubPluginNames,
+  subPluginName: SecurityDeepLinkName,
   licenseType?: LicenseType
 ): Pick<App, 'deepLinks' | 'keywords'> {
-  const baseRoutes = [...securityDeepLinks[subPluginName].base];
+  const baseRoutes = [...nestedDeepLinks[subPluginName].base];
   if (
     licenseType === 'gold' ||
     licenseType === 'platinum' ||
     licenseType === 'enterprise' ||
     licenseType === 'trial'
   ) {
-    const premiumRoutes =
-      securityDeepLinks[subPluginName] && securityDeepLinks[subPluginName].premium;
+    const premiumRoutes = nestedDeepLinks[subPluginName] && nestedDeepLinks[subPluginName].premium;
     if (premiumRoutes !== undefined) {
       return {
-        keywords: subpluginKeywords[subPluginName],
+        keywords: deepLinkKeywords[subPluginName],
         deepLinks: [...baseRoutes, ...premiumRoutes],
       };
     }
   }
   return {
-    keywords: subpluginKeywords[subPluginName],
+    keywords: deepLinkKeywords[subPluginName],
     deepLinks: baseRoutes,
   };
 }
+
 /**
- * A function that updates a subplugin's meta property as appropriate when license level changes.
- * @param subPluginName SubPluginName of the app to register deepLinks for
- * @param appUpdater an instance of appUpdater$ observable to update search links when needed.
- * @param licenseType A string representing the current license level.
+ * A function that generates the plugin deepLinks
+ * @param licenseType optional string for license level, if not provided basic is assumed.
  */
-export function registerDeepLinks(
-  subPluginName: SecuritySubPluginNames,
-  appUpdater?: Subject<AppUpdater>,
-  licenseType?: LicenseType
-) {
-  if (appUpdater !== undefined) {
-    appUpdater.next(() => ({ ...getDeepLinksAndKeywords(subPluginName, licenseType) }));
-  }
+export function getDeepLinks(licenseType?: LicenseType): AppDeepLink[] {
+  return topDeepLinks.map((deepLink) => {
+    const deepLinkId = deepLink.id as SecurityDeepLinkName;
+    const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
+    const baseDeepLinks = [...subPluginDeepLinks.base];
+    if (isPremiumLicense(licenseType)) {
+      const premiumDeepLinks = subPluginDeepLinks && subPluginDeepLinks.premium;
+      if (premiumDeepLinks !== undefined) {
+        return {
+          ...deepLink,
+          keywords: deepLinkKeywords[deepLinkId],
+          deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
+        };
+      }
+    }
+    return {
+      ...deepLink,
+      keywords: deepLinkKeywords[deepLinkId],
+      deepLinks: baseDeepLinks,
+    };
+  });
+}
+
+export function isPremiumLicense(licenseType?: LicenseType): boolean {
+  return (
+    licenseType !== undefined &&
+    (licenseType === 'gold' ||
+      licenseType === 'platinum' ||
+      licenseType === 'enterprise' ||
+      licenseType === 'trial')
+  );
 }

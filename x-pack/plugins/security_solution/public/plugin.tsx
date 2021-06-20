@@ -40,28 +40,18 @@ import {
   APP_OVERVIEW_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
-  APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
   CASES_APP_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
-  OVERVIEW_PATH,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
-import { registerDeepLinks, getDeepLinksAndKeywords } from './app/search';
+import { getDeepLinks, getDeepLinksAndKeywords } from './app/deepLinks';
 import { manageOldSiemRoutes } from './helpers';
-import {
-  OVERVIEW,
-  HOSTS,
-  NETWORK,
-  TIMELINES,
-  DETECTION_ENGINE,
-  CASE,
-  ADMINISTRATION,
-} from './app/translations';
+import { HOSTS, NETWORK, TIMELINES, DETECTION_ENGINE, CASE } from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -87,6 +77,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private hostsUpdater$ = new Subject<AppUpdater>();
   private networkUpdater$ = new Subject<AppUpdater>();
   private caseUpdater$ = new Subject<AppUpdater>();
+  // TODO: [1101] remove all previous updaters and use only appUpdater$
+  private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
   private licensingSubscription: Subscription | null = null;
@@ -264,43 +256,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.administration}`,
-      title: ADMINISTRATION,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_MANAGEMENT_PATH,
-      ...getDeepLinksAndKeywords(SecurityPageName.administration),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: APP_ID,
       title: APP_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       defaultPath: APP_OVERVIEW_PATH,
-      deepLinks: [
-        {
-          id: SecurityPageName.overview,
-          title: OVERVIEW,
-          path: OVERVIEW_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9000,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-      ],
+      updater$: this.appUpdater$,
+      deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
@@ -372,14 +335,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          registerDeepLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
-          registerDeepLinks(
-            SecurityPageName.detections,
-            this.detectionsUpdater$,
-            currentLicense.type
-          );
-          registerDeepLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
-          registerDeepLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
+          this.appUpdater$.next(() => ({ deepLinks: getDeepLinks(currentLicense.type) }));
         }
       });
     }

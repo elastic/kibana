@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
 import { navTabGroups } from '../../../../app/home/home_navigations';
 import { APP_ID } from '../../../../../common/constants';
@@ -18,7 +18,7 @@ import { NavTab } from '../types';
 export const usePrimaryNavigationItems = ({
   navTabs,
   selectedTabId,
-  ...props
+  ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
@@ -26,12 +26,17 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, props);
+      const urlSearch = getSearch(tab, urlStateProps);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
         // TODO: [1101] remove conditional and use always deepLinkId
-        if (id === 'overview') {
+        if (
+          id === 'overview' ||
+          id === 'endpoints' ||
+          id === 'trusted_apps' ||
+          id === 'event_filters'
+        ) {
           navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         } else {
           navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
@@ -41,7 +46,7 @@ export const usePrimaryNavigationItems = ({
 
       // TODO: [1101] remove conditional and use always deepLinkId
       const appHref =
-        id === 'overview'
+        id === 'overview' || id === 'endpoints' || id === 'trusted_apps' || id === 'event_filters'
           ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
           : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
 
@@ -56,43 +61,51 @@ export const usePrimaryNavigationItems = ({
         onClick: handleClick,
       };
     },
-    [getUrlForApp, navigateToApp, selectedTabId, props]
+    [getUrlForApp, navigateToApp, selectedTabId, urlStateProps]
   );
 
-  return [
-    {
-      id: APP_ID,
-      name: '',
-      items: [
-        getSideNav(navTabs.overview),
-        // TODO: [1101] Move the following nav items to its group
-        getSideNav(navTabs.detections),
-        getSideNav(navTabs.hosts),
-        getSideNav(navTabs.network),
-        getSideNav(navTabs.timelines),
-        getSideNav(navTabs.case),
-        getSideNav(navTabs.administration),
-      ],
-    },
-    {
-      ...navTabGroups.detect,
-      items: [
-        //     getSideNav(navTabs.alert),
-        //     getSideNav(navTabs.rule),
-        //     getSideNav(navTabs.exception),
-      ],
-    },
-    {
-      ...navTabGroups.explore,
-      items: [],
-    },
-    {
-      ...navTabGroups.investigate,
-      items: [],
-    },
-    {
-      ...navTabGroups.manage,
-      items: [],
-    },
-  ];
+  const primaryNavigationItems = useMemo(
+    () => [
+      {
+        id: APP_ID,
+        name: '',
+        items: [
+          getSideNav(navTabs.overview),
+          // TODO: [1101] Move the following nav items to its group
+          getSideNav(navTabs.detections),
+          getSideNav(navTabs.hosts),
+          getSideNav(navTabs.network),
+          getSideNav(navTabs.timelines),
+          getSideNav(navTabs.case),
+        ],
+      },
+      {
+        ...navTabGroups.detect,
+        items: [
+          //     getSideNav(navTabs.alert),
+          //     getSideNav(navTabs.rule),
+          //     getSideNav(navTabs.exception),
+        ],
+      },
+      {
+        ...navTabGroups.explore,
+        items: [],
+      },
+      {
+        ...navTabGroups.investigate,
+        items: [],
+      },
+      {
+        ...navTabGroups.manage,
+        items: [
+          getSideNav(navTabs.endpoints),
+          getSideNav(navTabs.trusted_apps),
+          getSideNav(navTabs.event_filters),
+        ],
+      },
+    ],
+    [getSideNav, navTabs]
+  );
+
+  return primaryNavigationItems;
 };

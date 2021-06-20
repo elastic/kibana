@@ -18,6 +18,7 @@ import { TabNavigationProps, TabNavigationItemProps } from './types';
 import { useKibana } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../link_to';
+import { SiemNavTabKey } from '../types';
 
 const TabNavigationItemComponent = ({
   disabled,
@@ -31,13 +32,18 @@ const TabNavigationItemComponent = ({
 }: TabNavigationItemProps) => {
   const history = useHistory();
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
-  const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SecurityPageName);
+  const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SiemNavTabKey);
   const handleClick = useCallback(
     (ev) => {
       ev.preventDefault();
       if (id in SecurityPageName && pageId == null) {
         // TODO: [1101] remove condition and use deepLinkId for all sections when all migrated
-        if (id === 'overview') {
+        if (
+          id === 'overview' ||
+          id === 'endpoints' ||
+          id === 'trusted_apps' ||
+          id === 'event_filters'
+        ) {
           navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         } else {
           navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
@@ -54,7 +60,7 @@ const TabNavigationItemComponent = ({
   const appHref =
     pageId != null
       ? formatUrl(href)
-      : id === 'overview'
+      : id === 'overview' || id === 'endpoints' || id === 'trusted_apps' || id === 'event_filters'
       ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
       : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
 
