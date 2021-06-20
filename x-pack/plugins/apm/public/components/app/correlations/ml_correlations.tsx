@@ -136,106 +136,109 @@ export function MlCorrelations({ onClose }: Props) {
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const mlCorrelationcolumns: Array<
+  const mlCorrelationColumns: Array<
     EuiBasicTableColumn<MlCorrelationsTerms>
-  > = [
-    {
-      width: '116px',
-      field: 'correlation',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.mlCorrelationLabel',
-        { defaultMessage: 'Correlation' }
-      ),
-      render: (_: any, term: MlCorrelationsTerms) => {
-        return <div>{roundToDecimalPlace(term.correlation, 2)}</div>;
+  > = useMemo(
+    () => [
+      {
+        width: '116px',
+        field: 'correlation',
+        name: i18n.translate(
+          'xpack.apm.correlations.correlationsTable.mlCorrelationLabel',
+          { defaultMessage: 'Correlation' }
+        ),
+        render: (_: any, term: MlCorrelationsTerms) => {
+          return <div>{roundToDecimalPlace(term.correlation, 2)}</div>;
+        },
       },
-    },
-    {
-      field: 'fieldName',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.fieldNameLabel',
-        { defaultMessage: 'Field name' }
-      ),
-    },
-    {
-      field: 'fieldValue',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.fieldValueLabel',
-        { defaultMessage: 'Field value' }
-      ),
-      render: (_: any, term: MlCorrelationsTerms) =>
-        String(term.fieldValue).slice(0, 50),
-    },
-    {
-      width: '100px',
-      actions: [
-        {
-          name: FILTER_LABEL,
-          description: FILTER_DESCRIPTION,
-          icon: 'plusInCircle',
-          type: 'icon',
-          onClick: (term: MlCorrelationsTerms) => {
-            push(history, {
-              query: {
-                kuery: `${term.fieldName}:"${encodeURIComponent(
-                  term.fieldValue
-                )}"`,
-              },
-            });
-            onClose();
-            trackApmEvent({ metric: 'correlations_term_include_filter' });
-          },
-        },
-        {
-          name: EXCLUDE_ACTION_LABEL,
-          description: EXCLUDE_ACTION_DESCRIPTION,
-          icon: 'minusInCircle',
-          type: 'icon',
-          onClick: (term: MlCorrelationsTerms) => {
-            push(history, {
-              query: {
-                kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                  term.fieldValue
-                )}"`,
-              },
-            });
-            onClose();
-            trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-          },
-        },
-      ],
-      name: FILTER_ACTION_LABEL,
-      render: (_: any, term: MlCorrelationsTerms) => {
-        return (
-          <>
-            <EuiLink
-              href={createHref(history, {
+      {
+        field: 'fieldName',
+        name: i18n.translate(
+          'xpack.apm.correlations.correlationsTable.fieldNameLabel',
+          { defaultMessage: 'Field name' }
+        ),
+      },
+      {
+        field: 'fieldValue',
+        name: i18n.translate(
+          'xpack.apm.correlations.correlationsTable.fieldValueLabel',
+          { defaultMessage: 'Field value' }
+        ),
+        render: (_: any, term: MlCorrelationsTerms) =>
+          String(term.fieldValue).slice(0, 50),
+      },
+      {
+        width: '100px',
+        actions: [
+          {
+            name: FILTER_LABEL,
+            description: FILTER_DESCRIPTION,
+            icon: 'plusInCircle',
+            type: 'icon',
+            onClick: (term: MlCorrelationsTerms) => {
+              push(history, {
                 query: {
                   kuery: `${term.fieldName}:"${encodeURIComponent(
                     term.fieldValue
                   )}"`,
                 },
-              })}
-            >
-              <EuiIcon type="magnifyWithPlus" />
-            </EuiLink>
-            &nbsp;/&nbsp;
-            <EuiLink
-              href={createHref(history, {
+              });
+              onClose();
+              trackApmEvent({ metric: 'correlations_term_include_filter' });
+            },
+          },
+          {
+            name: EXCLUDE_ACTION_LABEL,
+            description: EXCLUDE_ACTION_DESCRIPTION,
+            icon: 'minusInCircle',
+            type: 'icon',
+            onClick: (term: MlCorrelationsTerms) => {
+              push(history, {
                 query: {
                   kuery: `not ${term.fieldName}:"${encodeURIComponent(
                     term.fieldValue
                   )}"`,
                 },
-              })}
-            >
-              <EuiIcon type="magnifyWithMinus" />
-            </EuiLink>
-          </>
-        );
+              });
+              onClose();
+              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+            },
+          },
+        ],
+        name: FILTER_ACTION_LABEL,
+        render: (_: any, term: MlCorrelationsTerms) => {
+          return (
+            <>
+              <EuiLink
+                href={createHref(history, {
+                  query: {
+                    kuery: `${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                })}
+              >
+                <EuiIcon type="magnifyWithPlus" />
+              </EuiLink>
+              &nbsp;/&nbsp;
+              <EuiLink
+                href={createHref(history, {
+                  query: {
+                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                })}
+              >
+                <EuiIcon type="magnifyWithMinus" />
+              </EuiLink>
+            </>
+          );
+        },
       },
-    },
-  ];
+    ],
+    [history, onClose, trackApmEvent]
+  );
 
   const histogramTerms = useMemo(() => {
     return histograms.map((d) => {
@@ -352,7 +355,7 @@ export function MlCorrelations({ onClose }: Props) {
       {histograms.length > 0 && selectedHistogram !== undefined && (
         <>
           <CorrelationsTable
-            columns={mlCorrelationcolumns}
+            columns={mlCorrelationColumns}
             significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
