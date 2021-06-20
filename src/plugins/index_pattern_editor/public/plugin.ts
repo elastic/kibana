@@ -10,9 +10,11 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getEditorOpener } from './open_editor';
+import { IndexPatternManagementService } from './service';
 
 export class IndexPatternEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
+  private readonly indexPatternManagementService = new IndexPatternManagementService();
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     return {};
   }
@@ -23,16 +25,23 @@ export class IndexPatternEditorPlugin
     } = core;
     const { data } = plugins;
 
+    const ipMgmtService = this.indexPatternManagementService.start({
+      httpClient: core.http,
+      uiSettings: core.uiSettings,
+    });
+
     return {
       openEditor: getEditorOpener({
         core,
         indexPatternService: data.indexPatterns,
+        indexPatternCreateService: ipMgmtService,
       }),
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;
         },
       },
+      indexPatternCreateService: ipMgmtService,
     };
   }
 

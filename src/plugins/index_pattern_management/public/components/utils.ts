@@ -7,11 +7,27 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IndexPatternManagementStart } from '../plugin';
+import { IIndexPattern, IndexPattern, IFieldType } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
+
+const defaultIndexPatternListName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
+const isRollup = (indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>) => {
+  return (
+    indexPattern.type === 'rollup' ||
+    ((indexPattern as SimpleSavedObject<IIndexPattern>).get &&
+      (indexPattern as SimpleSavedObject<IIndexPattern>).get('type') === 'rollup')
+  );
+};
 
 export async function getIndexPatterns(
   defaultIndex: string,
-  indexPatternManagementStart: IndexPatternManagementStart,
   indexPatternsService: IndexPatternsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
@@ -19,10 +35,7 @@ export async function getIndexPatterns(
     existingIndexPatterns.map(async ({ id, title }) => {
       const isDefault = defaultIndex === id;
       const pattern = await indexPatternsService.get(id);
-      const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-        pattern,
-        isDefault
-      );
+      const tags = getTags(pattern, isDefault);
 
       return {
         id,
@@ -49,3 +62,59 @@ export async function getIndexPatterns(
     }) || []
   );
 }
+
+export const getTags = (
+  // todo might be able to tighten types
+  indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
+  isDefault: boolean
+) => {
+  const tags = [];
+  if (isDefault) {
+    tags.push({
+      key: 'default',
+      name: defaultIndexPatternListName,
+    });
+  }
+  if (isRollup(indexPattern)) {
+    tags.push({
+      key: 'rollup',
+      name: 'Rollup', // todo localize
+    });
+  }
+  return tags;
+};
+
+export const areScriptedFieldsEnabled = (
+  indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>
+) => {
+  return !isRollup(indexPattern);
+};
+
+export const getFieldInfo = (indexPattern: IndexPattern, field: IFieldType) => {
+  if (!isRollup(indexPattern)) {
+    return [];
+  }
+
+  const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
+  const fieldAggs = allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
+
+  if (!fieldAggs || !fieldAggs.length) {
+    return [];
+  }
+
+  return ['Rollup aggregations:'].concat(
+    fieldAggs.map((aggName) => {
+      const agg = allAggs![aggName][field.name];
+      switch (aggName) {
+        case 'date_histogram':
+          return `${aggName} (interval: ${agg.fixed_interval}, ${
+            agg.delay ? `delay: ${agg.delay},` : ''
+          } ${agg.time_zone})`;
+        case 'histogram':
+          return `${aggName} (interval: ${agg.fixed_interval})`;
+        default:
+          return aggName;
+      }
+    })
+  );
+};

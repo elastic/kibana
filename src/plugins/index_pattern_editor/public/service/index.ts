@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { IndexPatternListConfig } from './config';
-export { IndexPatternListManager } from './manager';
-// @ts-ignore
-export { RollupIndexPatternListConfig } from './rollup_list_config';
+export * from './index_pattern_management_service';
+export { IndexPatternCreationConfig, IndexPatternCreationOption } from './creation';

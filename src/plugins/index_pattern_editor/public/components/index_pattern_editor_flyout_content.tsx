@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -19,13 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import {
-  ensureMinimumTime,
-  getIndices,
-  extractTimeFields,
-  getMatchedIndices,
-  canAppendWildcard,
-} from '../lib';
+import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
 
 import {
@@ -47,9 +41,10 @@ import {
 } from '../types';
 
 import { schema } from './form_schema';
-import { TimestampField } from './form_fields';
+import { TimestampField, TypeField, TitleField } from './form_fields';
 import { EmptyState } from './empty_state';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+import { IndexPatternCreationConfig } from '../service';
 
 export interface Props {
   /**
@@ -71,6 +66,7 @@ export interface IndexPatternConfig {
   timestampField?: string; // TimestampOption;
   allowHidden: boolean;
   id?: string;
+  type: string;
 }
 export interface TimestampOption {
   display: string;
@@ -95,7 +91,7 @@ const geti18nTexts = () => {
 
 const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }: Props) => {
   const {
-    services: { http, indexPatternService },
+    services: { http, indexPatternService, uiSettings, indexPatternCreateService },
   } = useKibana<IndexPatternEditorContext>();
   const i18nTexts = geti18nTexts();
 
@@ -105,7 +101,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     schema,
   });
 
-  const [{ title, allowHidden }] = useFormData<FormInternal>({ form });
+  const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
   const [formState, setFormState] = useState<{ isSubmitted: boolean; isValid: boolean }>({
@@ -125,8 +121,12 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [goToForm, setGoToForm] = useState<boolean>(false);
-  const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
+
   // const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
+  const [
+    indexPatternCreationType,
+    setIndexPatternCreationType,
+  ] = useState<IndexPatternCreationConfig>(indexPatternCreateService.creation.getType('default'));
 
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
 
@@ -181,6 +181,11 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   */
 
   useEffect(() => {
+    const updatedCreationType = indexPatternCreateService.creation.getType(type);
+    setIndexPatternCreationType(updatedCreationType);
+  }, [type, indexPatternCreateService.creation]);
+
+  useEffect(() => {
     const fetchIndices = async (query: string = '') => {
       if (!query) {
         setExactMatchedIndices([]);
@@ -196,7 +201,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
       if (query?.endsWith('*')) {
         const exactMatchedQuery = getIndices(
           http,
-          (indexName: string) => [], // indexPatternCreationType.getIndexTags(indexName),
+          (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
           query,
           allowHidden
         );
@@ -205,13 +210,13 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
       } else {
         const exactMatchQuery = getIndices(
           http,
-          (indexName: string) => [], // (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
+          (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
           query,
           allowHidden
         );
         const partialMatchQuery = getIndices(
           http,
-          (indexName: string) => [], // (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
+          (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
           `${query}*`,
           allowHidden
         );
@@ -273,15 +278,26 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     setLastTitle(title);
 
     fetchIndices(title);
-  }, [title, existingIndexPatterns, http, indexPatternService, allowHidden, lastTitle]);
+  }, [
+    title,
+    existingIndexPatterns,
+    http,
+    indexPatternService,
+    allowHidden,
+    lastTitle,
+    indexPatternCreationType,
+  ]);
 
   const { isValid } = formState;
   const onClickSave = async () => {
+    // todo display result
+    indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices);
     const formData = form.getFormData();
     await onSave({
       title: formData.title,
       timeFieldName: formData.timestampField,
       id: formData.id,
+      ...indexPatternCreationType.getIndexPatternMappings(),
     });
   };
 
@@ -309,6 +325,20 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     }
   }
 
+  const showIndexPatternTypeSelect = () =>
+    uiSettings.isDeclared('rollups:enableIndexPatterns') &&
+    uiSettings.get('rollups:enableIndexPatterns');
+
+  const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <TypeField />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <></>
+  );
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -322,80 +352,21 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
           possibly break out into own component
         */}
         <Form form={form} className="indexPatternEditor__form">
+          {indexPatternTypeSelect}
           <EuiFlexGroup>
             {/* Name */}
             <EuiFlexItem>
-              <UseField<string, IndexPatternConfig>
-                path="title"
-                // config={nameFieldConfig}
-                component={TextField}
-                data-test-subj="createIndexPatternNameInput"
-                componentProps={{
-                  onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                    e.persist();
-                    let query = e.target.value;
-                    if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
-                      query += '*';
-                      setAppendedWildcard(true);
-                      form.setFieldValue('title', query);
-                      setTimeout(() => e.target.setSelectionRange(1, 1));
-                    } else {
-                      if (['', '*'].includes(query) && appendedWildcard) {
-                        query = '';
-                        // this.setState({ appendedWildcard: false });
-                        setAppendedWildcard(false);
-                        form.setFieldValue('title', query);
-                      }
-                    }
-                    setLastTitle(query);
-                    /*
-                    console.log('changed', e.target.value);
-                    form.setFieldValue('title', e.target.value + '*');
-                    */
-                  },
-                  euiFieldProps: {
-                    'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
-                      defaultMessage: 'Title field',
-                    }),
-                  },
-                }}
-              />
+              <TitleField />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              {/* disable when no time fields */}
-              <UseField<TimestampOption, IndexPatternConfig>
-                path="timestampField"
-                // config={{ options: timestampFields }}
-                options={timestampFields}
-                component={TimestampField}
-                data-test-subj="timestampField"
-                componentProps={{
-                  euiFieldProps: {
-                    'aria-label': i18n.translate('indexPatternEditor.form.timestampAriaLabel', {
-                      defaultMessage: 'Timestamp field',
-                    }),
-                  },
-                }}
-              />
+              <TimestampField options={timestampFields} />
             </EuiFlexItem>
           </EuiFlexGroup>
 
           <div>{exactMatchedIndices.map((item) => item.name).join(', ')}</div>
           <AdvancedParametersSection>
-            {/*
-          <FormRow
-            title={'row title'}
-            // title={i18nTexts.popularity.title}
-            // description={i18nTexts.popularity.description}
-            formFieldPath="__meta__.isPopularityVisible"
-            data-test-subj="popularityRow"
-            withDividerRule
-          >
-            hi
-            {/* <PopularityField />}
-          </FormRow> */}
             <EuiFlexGroup>
               <EuiFlexItem>
                 <UseField<boolean, IndexPatternConfig>

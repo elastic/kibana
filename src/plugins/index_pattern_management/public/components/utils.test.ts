@@ -7,7 +7,6 @@
  */
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { getIndexPatterns } from './utils';
-import { mockManagementPlugin } from '../mocks';
 
 const indexPatternContractMock = ({
   getIdsWithTitle: jest.fn().mockReturnValue(
@@ -25,13 +24,7 @@ const indexPatternContractMock = ({
   get: jest.fn().mockReturnValue(Promise.resolve({})),
 } as unknown) as jest.Mocked<IndexPatternsContract>;
 
-const mockManagementPluginStart = mockManagementPlugin.createStartContract();
-
 test('getting index patterns', async () => {
-  const indexPatterns = await getIndexPatterns(
-    'test',
-    mockManagementPluginStart,
-    indexPatternContractMock
-  );
+  const indexPatterns = await getIndexPatterns('test', indexPatternContractMock);
   expect(indexPatterns).toMatchSnapshot();
 });

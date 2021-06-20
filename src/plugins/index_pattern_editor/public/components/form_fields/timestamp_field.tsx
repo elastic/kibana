@@ -16,11 +16,10 @@ import { UseField } from '../../shared_imports';
 import { TimestampOption } from '../index_pattern_editor_flyout_content';
 
 interface Props {
-  isDisabled?: boolean;
   options: TimestampOption[];
 }
 
-export const TimestampField = ({ isDisabled = false, options = [] }: Props) => {
+export const TimestampField = ({ options = [] }: Props) => {
   const optionsAsComboBoxOptions = options.map(({ display, fieldName }) => ({
     label: display,
     value: fieldName,
@@ -54,7 +53,7 @@ export const TimestampField = ({ isDisabled = false, options = [] }: Props) => {
                   setValue(newValue[0].label);
                 }}
                 isClearable={false}
-                isDisabled={isDisabled}
+                isDisabled={!optionsAsComboBoxOptions.length}
                 data-test-subj="timestampField"
                 aria-label={i18n.translate('indexPatternEditor.editor.form.typeSelectAriaLabel', {
                   defaultMessage: 'Timestamp field',

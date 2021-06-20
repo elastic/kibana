@@ -16,6 +16,7 @@ import {
 
 import { DataPublicPluginStart } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
+import { IndexPatternManagementServiceStart } from './service';
 
 export interface IndexPatternEditorContext {
   uiSettings: IUiSettingsClient;
@@ -24,6 +25,7 @@ export interface IndexPatternEditorContext {
   notifications: NotificationsStart;
   application: ApplicationStart;
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  indexPatternCreateService: IndexPatternManagementServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -34,6 +36,7 @@ export interface PluginStart {
   userPermissions: {
     editIndexPattern: () => boolean;
   };
+  indexPatternCreateService: IndexPatternManagementServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -85,13 +88,6 @@ export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem 
   data_stream?: string;
 }
 
-export enum ResolveIndexResponseItemIndexAttrs {
-  OPEN = 'open',
-  CLOSED = 'closed',
-  HIDDEN = 'hidden',
-  FROZEN = 'frozen',
-}
-
 export interface Tag {
   name: string;
   key: string;
@@ -105,4 +101,57 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
+}
+
+// copied from index pattern management, needs review
+export interface MatchedItem {
+  name: string;
+  tags: Tag[];
+  item: {
+    name: string;
+    backing_indices?: string[];
+    timestamp_field?: string;
+    indices?: string[];
+    aliases?: string[];
+    attributes?: ResolveIndexResponseItemIndexAttrs[];
+    data_stream?: string;
+  };
+}
+
+export interface ResolveIndexResponse {
+  indices?: ResolveIndexResponseItemIndex[];
+  aliases?: ResolveIndexResponseItemAlias[];
+  data_streams?: ResolveIndexResponseItemDataStream[];
+}
+
+export interface ResolveIndexResponseItem {
+  name: string;
+}
+
+export interface ResolveIndexResponseItemDataStream extends ResolveIndexResponseItem {
+  backing_indices: string[];
+  timestamp_field: string;
+}
+
+export interface ResolveIndexResponseItemAlias extends ResolveIndexResponseItem {
+  indices: string[];
+}
+
+export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem {
+  aliases?: string[];
+  attributes?: ResolveIndexResponseItemIndexAttrs[];
+  data_stream?: string;
+}
+
+export enum ResolveIndexResponseItemIndexAttrs {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  HIDDEN = 'hidden',
+  FROZEN = 'frozen',
+}
+
+export interface Tag {
+  name: string;
+  key: string;
+  color: string;
 }

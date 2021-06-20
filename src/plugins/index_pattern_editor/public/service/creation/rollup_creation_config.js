@@ -17,6 +17,7 @@ const rollupIndexPatternTypeName = i18n.translate(
   { defaultMessage: 'rollup index pattern' }
 );
 
+/*
 const rollupIndexPatternButtonText = i18n.translate(
   'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Rollup index pattern' }
@@ -26,7 +27,7 @@ const rollupIndexPatternButtonDescription = i18n.translate(
   'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform limited aggregations against summarized data' }
 );
-
+*/
 const rollupIndexPatternNoMatchError = i18n.translate(
   'indexPatternManagement.editRollupIndexPattern.createIndex.noMatchError',
   { defaultMessage: 'Rollup index pattern error: must match one rollup index' }
@@ -58,6 +59,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     this.rollupJobs = [];
     this.rollupIndicesCapabilities = {};
     this.rollupIndices = [];
+    this.setRollupIndices();
   }
 
   async setRollupIndices() {
@@ -76,7 +78,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       // Silently swallow failure responses such as expired trials
     }
   }
-
+  /*
   async getIndexPatternCreationOption(urlHandler) {
     await this.setRollupIndices();
     return this.rollupIndices && this.rollupIndices.length
@@ -91,23 +93,13 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
         }
       : null;
   }
+  */
 
   isRollupIndex = (indexName) => {
     return this.rollupIndices.includes(indexName);
   };
 
-  getIndexTags(indexName) {
-    return this.isRollupIndex(indexName)
-      ? [
-          {
-            key: this.type,
-            name: rollupIndexPatternIndexLabel,
-            color: 'primary',
-          },
-        ]
-      : [];
-  }
-
+  // this is stateful!
   checkIndicesForErrors = (indices) => {
     this.rollupIndex = null;
 
@@ -166,4 +158,16 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       rollupIndex: this.rollupIndex,
     };
   };
+
+  getIndexTags(indexName) {
+    return this.isRollupIndex(indexName)
+      ? [
+          {
+            key: this.type,
+            name: rollupIndexPatternIndexLabel,
+            color: 'primary',
+          },
+        ]
+      : [];
+  }
 }

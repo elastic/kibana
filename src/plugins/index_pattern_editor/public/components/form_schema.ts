@@ -63,13 +63,13 @@ export const schema = {
     helpText:
       'Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one.',
   },
-  /*
   type: {
-    label: i18n.translate('indexPatternFieldEditor.editor.form.runtimeTypeLabel', {
-      defaultMessage: 'Type',
+    label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
+      defaultMessage: 'Index pattern type',
     }),
-    defaultValue: [RUNTIME_FIELD_OPTIONS[0]],
+    defaultValue: 'default',
   },
+  /*
   script: {
     source: {
       label: i18n.translate('indexPatternFieldEditor.editor.form.defineFieldLabel', {

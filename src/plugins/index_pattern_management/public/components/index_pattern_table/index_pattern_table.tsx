@@ -21,7 +21,6 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { CreateButton } from '../create_button';
 import { IndexPatternCreationOption, IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -72,6 +71,7 @@ export const IndexPatternTable = ({
     http,
     notifications,
     application,
+    indexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
@@ -82,7 +82,6 @@ export const IndexPatternTable = ({
     (async function () {
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         uiSettings.get('defaultIndex'),
-        indexPatternManagementStart,
         data.indexPatterns
       );
       setIndexPatterns(gettedIndexPatterns);
@@ -141,26 +140,6 @@ export const IndexPatternTable = ({
   */
 
   const createButton = canSave ? (
-    /*
-    <EuiButton
-      fill={true}
-      iconType="plusInCircle"
-      onClick={() =>
-        indexPatternEditor.openEditor({
-          onSave: async () => {
-            // todo dedup from useEffect code
-            const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-              uiSettings.get('defaultIndex'),
-              indexPatternManagementStart,
-              data.indexPatterns
-            );
-            setIsLoadingIndexPatterns(false);
-            setIndexPatterns(gettedIndexPatterns);
-          },
-        })
-      }
-    >
-    */
     <EuiButton
       fill={true}
       iconType="plusInCircle"
@@ -193,6 +172,7 @@ export const IndexPatternTable = ({
         notifications,
         application,
         indexPatternService: data.indexPatterns,
+        indexPatternCreateService: indexPatternEditor.indexPatternCreateService,
       }}
     />
   ) : (

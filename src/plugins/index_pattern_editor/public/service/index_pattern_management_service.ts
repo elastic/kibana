@@ -8,7 +8,6 @@
 
 import { HttpStart, CoreStart } from '../../../../core/public';
 import { IndexPatternCreationManager } from './creation';
-import { IndexPatternListManager } from './list';
 
 interface StartDependencies {
   httpClient: HttpStart;
@@ -22,11 +21,9 @@ interface StartDependencies {
  */
 export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
-  indexPatternListConfig: IndexPatternListManager;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
-    this.indexPatternListConfig = new IndexPatternListManager();
   }
 
   public setup() {}
@@ -34,7 +31,6 @@ export class IndexPatternManagementService {
   public start({ httpClient, uiSettings }: StartDependencies) {
     return {
       creation: this.indexPatternCreationManager.start({ httpClient, uiSettings }),
-      list: this.indexPatternListConfig.start({ uiSettings }),
     };
   }
 

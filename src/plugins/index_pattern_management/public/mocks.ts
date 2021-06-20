@@ -27,7 +27,6 @@ const createStartContract = (): IndexPatternManagementStart => ({
     getIndexPatternCreationOptions: jest.fn(),
   } as any,
   list: {
-    getIndexPatternTags: jest.fn(),
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
   } as any,
