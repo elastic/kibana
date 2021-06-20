@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { LatencyCorrelations } from './latency_correlations';
 import { MlCorrelations } from './ml_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -38,13 +37,6 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { LicensePrompt } from '../../shared/license_prompt';
 import { IUrlParams } from '../../../context/url_params_context/types';
 
-const latencyTab = {
-  key: 'latency',
-  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
-    defaultMessage: 'Latency',
-  }),
-  component: LatencyCorrelations,
-};
 const errorRateTab = {
   key: 'errorRate',
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
@@ -62,7 +54,7 @@ const latencyCorrelationsTab = {
   ),
   component: MlCorrelations,
 };
-const tabs = [latencyTab, errorRateTab, latencyCorrelationsTab];
+const tabs = [latencyCorrelationsTab, errorRateTab];
 
 export function Correlations() {
   const license = useLicenseContext();
@@ -70,9 +62,9 @@ export function Correlations() {
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [currentTab, setCurrentTab] = useState(latencyTab.key);
+  const [currentTab, setCurrentTab] = useState(latencyCorrelationsTab.key);
   const { component: TabContent } =
-    tabs.find((tab) => tab.key === currentTab) ?? latencyTab;
+    tabs.find((tab) => tab.key === currentTab) ?? latencyCorrelationsTab;
   const metric = {
     app: 'apm' as const,
     metric: hasActivePlatinumLicense
