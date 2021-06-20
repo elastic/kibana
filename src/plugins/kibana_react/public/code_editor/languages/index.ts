@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LangModule as LangModuleType } from '../types';
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
+import { Lang as CssLang } from './css';
+import { Lang as HandlebarsLang } from './handlebars';
+import { Lang as MarkdownLang } from './markdown';
 
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+export { CssLang, HandlebarsLang, MarkdownLang };
