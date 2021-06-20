@@ -310,12 +310,22 @@ export function MlCorrelations({ onClose }: Props) {
         <EuiFlexItem grow={false}>
           {!isRunning && (
             <EuiButton size="s" onClick={startFetch}>
-              Reload
+              <FormattedMessage
+                id={
+                  'xpack.apm.correlations.latencyCorrelations.refreshButtonTitle'
+                }
+                defaultMessage={'Refresh'}
+              />
             </EuiButton>
           )}
           {isRunning && (
             <EuiButton size="s" onClick={cancelFetch}>
-              Cancel
+              <FormattedMessage
+                id={
+                  'xpack.apm.correlations.latencyCorrelations.cancelButtonTitle'
+                }
+                defaultMessage={'Cancel'}
+              />
             </EuiButton>
           )}
         </EuiFlexItem>
@@ -323,11 +333,21 @@ export function MlCorrelations({ onClose }: Props) {
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                Progress: {Math.round(progress * 100)}%
+                <FormattedMessage
+                  id={
+                    'xpack.apm.correlations.latencyCorrelations.progressTitle'
+                  }
+                  defaultMessage={'Progress: {progress}%'}
+                  values={{ progress: Math.round(progress * 100) }}
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiProgress
+                aria-label={i18n.translate(
+                  'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
+                  { defaultMessage: 'Progress' }
+                )}
                 value={Math.round(progress * 100)}
                 max={100}
                 size="m"
@@ -363,10 +383,6 @@ export function MlCorrelations({ onClose }: Props) {
         <>
           <CorrelationsTable
             columns={mlCorrelationcolumns}
-            percentageColumnName={i18n.translate(
-              'xpack.apm.correlations.latency.ksTestColumnName',
-              { defaultMessage: 'KS test p value' }
-            )}
             significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}

@@ -37,7 +37,7 @@ export type SelectedSignificantTerm = Pick<
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
-  percentageColumnName: string;
+  percentageColumnName?: string;
   setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
   onFilter: () => void;
   columns?: Array<EuiBasicTableColumn<T>>;
@@ -75,7 +75,12 @@ export function CorrelationsTable<T extends SignificantTerm>({
     },
     {
       field: 'percentage',
-      name: percentageColumnName,
+      name:
+        percentageColumnName ??
+        i18n.translate(
+          'xpack.apm.correlations.correlationsTable.percentageLabel',
+          { defaultMessage: 'Percentage' }
+        ),
       render: (_: any, term: T) => {
         return (
           <EuiToolTip
