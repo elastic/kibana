@@ -15,90 +15,27 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
-import { pagePathGetters } from '../../../common/page_paths';
 import { EditSavedQueryForm } from './form';
+import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
 const EditSavedQueryPageComponent = () => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const queryClient = useQueryClient();
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
-  const {
-    application: { navigateToApp },
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { isLoading, data: savedQueryDetails } = useSavedQuery({ savedQueryId });
+  const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
+  const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
-  const { isLoading, data: savedQueryDetails } = useQuery(
-    ['savedQuery', { savedQueryId }],
-    () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
-    {
-      onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
-      },
-    }
-  );
+  console.error('savedQueryDetails', savedQueryDetails);
 
   useBreadcrumbs('saved_query_edit', { savedQueryId: savedQueryDetails?.attributes?.id ?? '' });
-
-  const updateSavedQueryMutation = useMutation(
-    (payload) =>
-      http.put(`/internal/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) }),
-    {
-      onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
-      },
-      onSuccess: (payload) => {
-        queryClient.invalidateQueries('savedQueryList');
-        navigateToApp('osquery', { path: pagePathGetters.saved_queries() });
-        toasts.addSuccess(
-          i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-            defaultMessage: 'Successfully updated "{savedQueryId}" query',
-            values: {
-              savedQueryId: payload.attributes?.id ?? '',
-            },
-          })
-        );
-      },
-    }
-  );
-
-  const deleteSavedQueriesMutation = useMutation(
-    () =>
-      http.delete(`/internal/osquery/saved_query`, {
-        body: JSON.stringify({ savedQueryIds: [savedQueryId] }),
-      }),
-    {
-      onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
-      },
-      onSuccess: () => {
-        handleCloseDeleteConfirmationModal();
-        queryClient.invalidateQueries('savedQueryList');
-        navigateToApp('osquery', { path: pagePathGetters.saved_queries() });
-        toasts.addSuccess(
-          i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-            defaultMessage: 'Successfully deleted "{savedQueryId}" query',
-            values: {
-              savedQueryId: savedQueryDetails?.attributes?.id ?? '',
-            },
-          })
-        );
-      },
-    }
-  );
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -109,8 +46,10 @@ const EditSavedQueryPageComponent = () => {
   }, []);
 
   const handleDeleteConfirmClick = useCallback(() => {
-    deleteSavedQueriesMutation.mutate();
-  }, [deleteSavedQueriesMutation]);
+    deleteSavedQueryMutation.mutate().then(() => {
+      handleCloseDeleteConfirmationModal();
+    });
+  }, [deleteSavedQueryMutation]);
 
   const LeftColumn = useMemo(
     () => (

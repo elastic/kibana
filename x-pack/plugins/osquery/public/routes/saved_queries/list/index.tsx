@@ -5,29 +5,31 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
-  // EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  // RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
-// import { useHistory } from 'react-router-dom';
-// import qs from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SavedObject } from 'kibana/public';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
-const EditButton = ({ savedQueryId, savedQueryName }) => {
+interface EditButtonProps {
+  savedQueryId: string;
+  savedQueryName: string;
+}
+
+const EditButtonComponent: React.FC<EditButtonProps> = ({ savedQueryId, savedQueryName }) => {
   const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
 
   return (
@@ -36,74 +38,26 @@ const EditButton = ({ savedQueryId, savedQueryName }) => {
       {...buttonProps}
       iconType="pencil"
       aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
-        defaultMessage: 'Edit {queryName}',
+        defaultMessage: 'Edit {savedQueryName}',
         values: {
-          queryName: savedQueryName,
+          savedQueryName,
         },
       })}
     />
   );
 };
 
+const EditButton = React.memo(EditButtonComponent);
+
 const SavedQueriesPageComponent = () => {
-  const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   useBreadcrumbs('saved_queries');
-  // const { push } = useHistory();
+  const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState('desc');
-  // const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
-  const { http } = useKibana().services;
 
-  const { data = {} } = useQuery(
-    ['savedQueryList', { pageIndex, pageSize, sortField, sortDirection }],
-    () =>
-      http.get('/internal/osquery/saved_query', {
-        query: {
-          pageIndex,
-          pageSize,
-          sortField,
-          sortDirection,
-        },
-      }),
-    {
-      keepPreviousData: true,
-      // Refetch the data every 10 seconds
-      refetchInterval: 5000,
-    }
-  );
-  const { total = 0, saved_objects: savedQueries } = data;
-
-  // const toggleDetails = useCallback(
-  //   (item) => () => {
-  //     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-  //     if (itemIdToExpandedRowMapValues[item.id]) {
-  //       delete itemIdToExpandedRowMapValues[item.id];
-  //     } else {
-  //       itemIdToExpandedRowMapValues[item.id] = (
-  //         <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-  //           {item.attributes.query}
-  //         </EuiCodeBlock>
-  //       );
-  //     }
-  //     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  //   },
-  //   [itemIdToExpandedRowMap]
-  // );
-
-  // const renderExtendedItemToggle = useCallback(
-  //   (item) => (
-  //     <EuiButtonIcon
-  //       onClick={toggleDetails(item)}
-  //       aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-  //       iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-  //     />
-  //   ),
-  //   [itemIdToExpandedRowMap, toggleDetails]
-  // );
-
-  // const handleEditClick = useCallback((item) => onEditClick(item.id), [onEditClick]);
+  const { data } = useSavedQueries({ isLive: true });
 
   // const handlePlayClick = useCallback(
   //   (item) =>
@@ -128,6 +82,16 @@ const SavedQueriesPageComponent = () => {
     []
   );
 
+  const renderUpdatedAt = useCallback((updatedAt, item) => {
+    if (!updatedAt) return '-';
+
+    const updatedBy =
+      item.attributes.updated_by !== item.attributes.created_by
+        ? ` @ ${item.attributes.updated_by}`
+        : '';
+    return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
+  }, []);
+
   const columns = useMemo(
     () => [
       {
@@ -143,10 +107,18 @@ const SavedQueriesPageComponent = () => {
         truncateText: true,
       },
       {
-        field: 'updated_at',
-        name: 'Last updated at',
+        field: 'attributes.created_by',
+        name: 'Created by',
         sortable: true,
         truncateText: true,
+      },
+      {
+        field: 'attributes.updated_at',
+        name: 'Last updated at',
+        sortable: (item) =>
+          item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
+        truncateText: true,
+        render: renderUpdatedAt,
       },
       {
         name: 'Actions',
@@ -161,14 +133,8 @@ const SavedQueriesPageComponent = () => {
           { render: renderEditAction },
         ],
       },
-      // {
-      //   align: RIGHT_ALIGNMENT,
-      //   width: '40px',
-      //   isExpander: true,
-      //   render: renderExtendedItemToggle,
-      // },
     ],
-    [renderEditAction]
+    [renderEditAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {
@@ -182,10 +148,10 @@ const SavedQueriesPageComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: total,
-      pageSizeOptions: [3, 5, 8],
+      totalItemCount: data?.total ?? 0,
+      pageSizeOptions: [10, 20, 50, 100],
     }),
-    [total, pageIndex, pageSize]
+    [pageIndex, pageSize, data?.total]
   );
 
   const sorting = useMemo(
@@ -231,17 +197,15 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {savedQueries && (
-        <EuiBasicTable
-          items={savedQueries}
+      {data?.savedObjects && (
+        <EuiInMemoryTable
+          items={data?.savedObjects}
           itemId="id"
           columns={columns}
           pagination={pagination}
           // @ts-expect-error update types
           sorting={sorting}
           onChange={onTableChange}
-          // // @ts-expect-error update types
-          // itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           rowHeader="id"
         />
       )}

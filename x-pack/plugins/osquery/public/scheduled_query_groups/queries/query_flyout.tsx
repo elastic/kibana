@@ -19,7 +19,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { satisfies } from 'semver';
 
@@ -50,6 +50,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
+  const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
     defaultValue,
     handleSubmit: (payload, isValid) =>
@@ -84,7 +85,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       }
 
       if (isFieldSupported && savedQuery.platform) {
-        setFieldValue('platform', savedQuery.platform.split(','));
+        setFieldValue('platform', savedQuery.platform);
       }
 
       if (isFieldSupported && savedQuery.version) {
@@ -100,7 +101,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
-              {defaultValue ? (
+              {isEditMode ? (
                 <FormattedMessage
                   id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
                   defaultMessage="Edit query"
@@ -116,8 +117,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
-            <SavedQueriesDropdown onChange={handleSetQueryValue} />
-            <EuiSpacer />
+            {!isEditMode ? (
+              <>
+                <SavedQueriesDropdown onChange={handleSetQueryValue} />
+                <EuiSpacer />
+              </>
+            ) : null}
             <CommonUseField path="id" />
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />

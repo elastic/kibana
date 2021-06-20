@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, pickBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import field from 'src/plugins/advanced_settings/public/management_app/components/field';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { PlatformIcon } from './platforms/platform_icon';
 
@@ -112,6 +113,15 @@ export const PlatformCheckBoxGroupField = ({
   );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+
+  useEffect(() => {
+    setCheckboxIdToSelectedMap(() =>
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+        return acc;
+      }, {} as Record<string, boolean>)
+    );
+  }, [field.value]);
 
   return (
     <EuiFormRow

@@ -17,63 +17,32 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React from 'react';
-import { useMutation, useQueryClient } from 'react-query';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../common/lib/kibana';
 import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';
 import { SavedQueryForm } from './form';
+import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {
   defaultValue: any;
   onClose: () => void;
-  onSave?: () => void;
 }
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
-  defaultValue,
-  onSave,
-  onClose,
-}) => {
-  const queryClient = useQueryClient();
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
+  const createSavedQueryMutation = useCreateSavedQuery();
 
-  const createSavedQueryMutation = useMutation(
-    (payload) => http.post(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
-    {
-      onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
-      },
-      onSuccess: (payload) => {
-        queryClient.invalidateQueries('savedQueryList');
-        toasts.addSuccess(
-          i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
-            defaultMessage: 'Successfully saved "{savedQueryName}" query',
-            values: {
-              savedQueryName: payload.attributes?.name ?? '',
-            },
-          })
-        );
-
-        if (onSave) {
-          onSave();
-        }
-
-        onClose();
-      },
-    }
+  const handleSubmit = useCallback(
+    (payload) => {
+      createSavedQueryMutation.mutateAsync(payload).then(() => onClose());
+    },
+    [createSavedQueryMutation, onClose]
   );
 
   const { form } = useSavedQueryForm({
     defaultValue,
-    handleSubmit: createSavedQueryMutation.mutateAsync,
+    handleSubmit,
   });
 
   return (

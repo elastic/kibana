@@ -20,10 +20,10 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     query: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
+    created_by: {
       type: 'text',
     },
     platform: {
@@ -32,10 +32,10 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'keyword',
     },
-    updated: {
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
+    updated_by: {
       type: 'text',
     },
     interval: {
@@ -59,16 +59,16 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     name: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
+    created_by: {
       type: 'text',
     },
-    updated: {
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
+    updated_by: {
       type: 'text',
     },
     queries: {

@@ -7,48 +7,20 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { pagePathGetters } from '../../../common/page_paths';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { NewSavedQueryForm } from './form';
+import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
 
 const NewSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_new');
-  const queryClient = useQueryClient();
   const savedQueryListProps = useRouterNavigate('saved_queries');
-  const {
-    application: { navigateToApp },
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
 
-  const createSavedQueryMutation = useMutation(
-    (payload) => http.post(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
-    {
-      onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
-      },
-      onSuccess: (payload) => {
-        queryClient.invalidateQueries('savedQueryList');
-        navigateToApp('osquery', { path: pagePathGetters.saved_queries() });
-        toasts.addSuccess(
-          i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
-            defaultMessage: 'Successfully saved "{savedQueryName}" query',
-            values: {
-              savedQueryName: payload.attributes?.name ?? '',
-            },
-          })
-        );
-      },
-    }
-  );
+  const createSavedQueryMutation = useCreateSavedQuery();
 
   const LeftColumn = useMemo(
     () => (

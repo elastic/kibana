@@ -6,11 +6,10 @@
  */
 
 import { find } from 'lodash/fp';
-import { EuiCodeBlock, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { useQuery } from 'react-query';
 
-import { useKibana } from '../common/lib/kibana';
+import { useSavedQueries } from './use_saved_queries';
 
 interface SavedQueriesDropdownProps {
   disabled?: boolean;
@@ -21,57 +20,64 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
-  const [selectedSavedQueryId, setSelectedSavedQueryId] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const { http } = useKibana().services;
-  const { data } = useQuery('savedQueryList', () =>
-    http.get('/internal/osquery/saved_query', {
-      query: {
-        pageIndex: 0,
-        pageSize: 100,
-        sortField: 'updated_at',
-        sortDirection: 'desc',
-      },
-    })
-  );
+  const { data } = useSavedQueries({});
 
   const queryOptions =
-    // @ts-expect-error update types
-    data?.saved_objects.map((savedQuery) => ({
-      value: savedQuery,
-      inputDisplay: savedQuery.attributes.name,
-      dropdownDisplay: (
-        <>
-          <strong>{savedQuery.attributes.name}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
-          </EuiText>
-          <EuiCodeBlock language="sql" fontSize="s" paddingSize="s">
-            {savedQuery.attributes.query}
-          </EuiCodeBlock>
-        </>
-      ),
+    data?.savedObjects?.map((savedQuery) => ({
+      label: savedQuery.attributes.id ?? '',
+      value: {
+        id: savedQuery.attributes.id,
+        description: savedQuery.attributes.description,
+        query: savedQuery.attributes.query,
+      },
     })) ?? [];
 
   const handleSavedQueryChange = useCallback(
-    (newValue) => {
-      onChange({
-        id: newValue.id,
-        ...newValue.attributes,
-      });
-      setSelectedSavedQueryId(newValue.id);
+    (selectedOptions) => {
+      const selectedSavedQuery = find(
+        ['attributes.id', selectedOptions[0].value.id],
+        data?.savedObjects
+      );
+
+      if (selectedSavedQuery) {
+        onChange(selectedSavedQuery.attributes);
+      }
+      setSelectedOptions(selectedOptions);
     },
-    [onChange]
+    [data?.savedObjects, onChange]
+  );
+
+  const renderOption = useCallback(
+    ({ value }) => (
+      <>
+        <strong>{value.id}</strong>
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">{value.description}</p>
+        </EuiText>
+        <EuiCodeBlock language="sql" fontSize="m" paddingSize="s">
+          {value.query}
+        </EuiCodeBlock>
+      </>
+    ),
+    []
   );
 
   return (
-    <EuiSuperSelect
-      disabled={disabled}
-      fullWidth
-      valueOfSelected={find(['id', selectedSavedQueryId], data?.saved_objects)}
-      options={queryOptions}
-      onChange={handleSavedQueryChange}
-    />
+    <EuiFormRow label="Build from a saved query (optional)" fullWidth>
+      <EuiComboBox
+        fullWidth
+        placeholder="Select a single option"
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        singleSelection={{ asPlainText: true }}
+        options={queryOptions}
+        selectedOptions={selectedOptions}
+        onChange={handleSavedQueryChange}
+        renderOption={renderOption}
+        rowHeight={90}
+      />
+    </EuiFormRow>
   );
 };
 
