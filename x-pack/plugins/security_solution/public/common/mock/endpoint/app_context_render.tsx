@@ -21,10 +21,10 @@ import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
+import { navTabs } from '../../../app/home/home_navigations';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -170,14 +170,13 @@ const createCoreStartMock = (): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
-  coreStart.application.getUrlForApp.mockImplementation((appId) => {
+  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
+    const pageId = deepLinkId as SecurityPageName;
     switch (appId) {
       case PLUGIN_ID:
         return '/app/fleet';
       case APP_ID:
-        return '/app/security';
-      case MANAGEMENT_APP_ID:
-        return '/app/security/administration';
+        return `/app/security${pageId && navTabs[pageId] ? navTabs[pageId].href : ''}${path ?? ''}`;
       default:
         return `${appId} not mocked!`;
     }

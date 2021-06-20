@@ -45,7 +45,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     act(() => {
       mockedContext.history.push(
-        '/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee'
+        '/administration/endpoints?selected_endpoint=5fe11314-678c-413e-87a2-b4a3461878ee'
       );
     });
 
