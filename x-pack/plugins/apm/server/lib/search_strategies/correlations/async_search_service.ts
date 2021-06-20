@@ -216,10 +216,15 @@ export const asyncSearchServiceProvider = (
         );
       });
     };
+
+    // Remove duplicates
     const uniqueValues = uniqWith(
       values.sort((a, b) => b.correlation - a.correlation),
       (a, b) => {
-        const isDuplicate =
+        // Row/value is considered duplicates of others
+        // if they both have roughly same pearson correlation and ks test values
+        // And the histograms are the same
+        return (
           isEqual(
             roundToDecimalPlace(b.correlation, SIGNIFICANT_FRACTION),
             roundToDecimalPlace(a.correlation, SIGNIFICANT_FRACTION)
@@ -228,12 +233,14 @@ export const asyncSearchServiceProvider = (
             roundToDecimalPlace(b.ksTest, SIGNIFICANT_FRACTION),
             roundToDecimalPlace(a.ksTest, SIGNIFICANT_FRACTION)
           ) &&
-          isHistogramRoughlyEqual(b.histogram, a.histogram);
-        return isDuplicate;
+          // Here we only check if they are roughly equal by comparing 10 random bins
+          // because it's computation intensive to check all bin
+          isHistogramRoughlyEqual(b.histogram, a.histogram)
+        );
       }
     )
       .sort((a, b) => b.correlation - a.correlation)
-      .slice(0, 15);
+      .slice(0, 20);
 
     return {
       error,
