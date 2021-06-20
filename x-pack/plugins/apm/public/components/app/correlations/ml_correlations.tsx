@@ -363,7 +363,11 @@ export function MlCorrelations({ onClose }: Props) {
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('xpack.apm.correlations.latency.chart.title', {
-                defaultMessage: 'Latency distribution',
+                defaultMessage: 'Latency distribution for {name}',
+                values: {
+                  name:
+                    fetchOptions.transactionName ?? fetchOptions.serviceName,
+                },
               })}
             </h4>
           </EuiTitle>
