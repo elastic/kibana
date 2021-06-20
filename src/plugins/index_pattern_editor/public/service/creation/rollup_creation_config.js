@@ -10,33 +10,33 @@ import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '.';
 
 const rollupIndexPatternTypeName = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultTypeName',
+  'indexPatternEditor.rollupIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'rollup index pattern' }
 );
 
 /*
 const rollupIndexPatternButtonText = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonText',
+  'indexPatternEditor.rollupIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Rollup index pattern' }
 );
 
 const rollupIndexPatternButtonDescription = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.defaultButtonDescription',
+  'indexPatternEditor.rollupIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform limited aggregations against summarized data' }
 );
 */
 const rollupIndexPatternNoMatchError = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.noMatchError',
+  'indexPatternEditor.rollupIndexPattern.createIndex.noMatchError',
   { defaultMessage: 'Rollup index pattern error: must match one rollup index' }
 );
 
 const rollupIndexPatternTooManyMatchesError = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.tooManyMatchesError',
+  'indexPatternEditor.rollupIndexPattern.createIndex.tooManyMatchesError',
   { defaultMessage: 'Rollup index pattern error: can only match one rollup index' }
 );
 
 const rollupIndexPatternIndexLabel = i18n.translate(
-  'indexPatternManagement.editRollupIndexPattern.createIndex.indexLabel',
+  'indexPatternEditor.rollupIndexPattern.createIndex.indexLabel',
   { defaultMessage: 'Rollup' }
 );
 
@@ -117,7 +117,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
     if (error) {
       const errorMessage = i18n.translate(
-        'indexPatternManagement.editRollupIndexPattern.createIndex.uncaughtError',
+        'indexPatternEditor.rollupIndexPattern.createIndex.uncaughtError',
         {
           defaultMessage: 'Rollup index pattern error: {error}',
           values: {

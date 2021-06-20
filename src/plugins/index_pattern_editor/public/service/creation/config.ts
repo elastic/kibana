@@ -9,18 +9,16 @@
 import { i18n } from '@kbn/i18n';
 import { MatchedItem } from '../../types';
 
-const indexPatternTypeName = i18n.translate(
-  'indexPatternManagement.editIndexPattern.createIndex.defaultTypeName',
-  { defaultMessage: 'index pattern' }
-);
+const indexPatternTypeName = i18n.translate('indexPatternEditor.createIndex.defaultTypeName', {
+  defaultMessage: 'index pattern',
+});
 
-const indexPatternButtonText = i18n.translate(
-  'indexPatternManagement.editIndexPattern.createIndex.defaultButtonText',
-  { defaultMessage: 'Standard index pattern' }
-);
+const indexPatternButtonText = i18n.translate('indexPatternEditor.createIndex.defaultButtonText', {
+  defaultMessage: 'Standard index pattern',
+});
 
 const indexPatternButtonDescription = i18n.translate(
-  'indexPatternManagement.editIndexPattern.createIndex.defaultButtonDescription',
+  'indexPatternEditor.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform full aggregations against any data' }
 );
 
