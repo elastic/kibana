@@ -23,6 +23,31 @@ import { createHref, push } from '../../shared/Links/url_helpers';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 
+export const FILTER_LABEL = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.filterLabel',
+  { defaultMessage: 'Filter' }
+);
+
+export const FILTER_DESCRIPTION = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.filterDescription',
+  { defaultMessage: 'Filter by value' }
+);
+
+export const FILTER_ACTION_LABEL = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.actionsLabel',
+  { defaultMessage: 'Filter' }
+);
+
+export const EXCLUDE_ACTION_LABEL = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.excludeLabel',
+  { defaultMessage: 'Exclude' }
+);
+
+export const EXCLUDE_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.excludeDescription',
+  { defaultMessage: 'Filter out value' }
+);
+
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
@@ -113,14 +138,8 @@ export function CorrelationsTable<T extends SignificantTerm>({
       width: '100px',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterLabel',
-            { defaultMessage: 'Filter' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterDescription',
-            { defaultMessage: 'Filter by value' }
-          ),
+          name: FILTER_LABEL,
+          description: FILTER_DESCRIPTION,
           icon: 'plusInCircle',
           type: 'icon',
           onClick: (term: T) => {
@@ -136,14 +155,8 @@ export function CorrelationsTable<T extends SignificantTerm>({
           },
         },
         {
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeLabel',
-            { defaultMessage: 'Exclude' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeDescription',
-            { defaultMessage: 'Filter out value' }
-          ),
+          name: EXCLUDE_ACTION_LABEL,
+          description: EXCLUDE_ACTION_DESCRIPTION,
           icon: 'minusInCircle',
           type: 'icon',
           onClick: (term: T) => {
@@ -159,10 +172,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
           },
         },
       ],
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.actionsLabel',
-        { defaultMessage: 'Filter' }
-      ),
+      name: FILTER_ACTION_LABEL,
       render: (_: any, term: T) => {
         return (
           <>

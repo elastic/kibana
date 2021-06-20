@@ -32,8 +32,13 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 import { CorrelationsChart } from './correlations_chart';
 import {
+  FILTER_ACTION_LABEL,
   CorrelationsTable,
   SelectedSignificantTerm,
+  EXCLUDE_ACTION_LABEL,
+  EXCLUDE_ACTION_DESCRIPTION,
+  FILTER_LABEL,
+  FILTER_DESCRIPTION,
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
@@ -186,14 +191,8 @@ export function MlCorrelations({ onClose }: Props) {
       width: '100px',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterLabel',
-            { defaultMessage: 'Filter' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterDescription',
-            { defaultMessage: 'Filter by value' }
-          ),
+          name: FILTER_LABEL,
+          description: FILTER_DESCRIPTION,
           icon: 'plusInCircle',
           type: 'icon',
           onClick: (term: MlCorrelationsTerms) => {
@@ -209,14 +208,8 @@ export function MlCorrelations({ onClose }: Props) {
           },
         },
         {
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeLabel',
-            { defaultMessage: 'Exclude' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeDescription',
-            { defaultMessage: 'Filter out value' }
-          ),
+          name: EXCLUDE_ACTION_LABEL,
+          description: EXCLUDE_ACTION_DESCRIPTION,
           icon: 'minusInCircle',
           type: 'icon',
           onClick: (term: MlCorrelationsTerms) => {
@@ -232,10 +225,7 @@ export function MlCorrelations({ onClose }: Props) {
           },
         },
       ],
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.actionsLabel',
-        { defaultMessage: 'Filter' }
-      ),
+      name: FILTER_ACTION_LABEL,
       render: (_: any, term: MlCorrelationsTerms) => {
         return (
           <>
@@ -297,10 +287,13 @@ export function MlCorrelations({ onClose }: Props) {
     <>
       <EuiText size="s" color="subdued">
         <p>
-          {i18n.translate('xpack.apm.correlations.description', {
-            defaultMessage:
-              'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data.',
-          })}
+          {i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.description',
+            {
+              defaultMessage:
+                'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data.',
+            }
+          )}
         </p>
       </EuiText>
 
@@ -311,9 +304,7 @@ export function MlCorrelations({ onClose }: Props) {
           {!isRunning && (
             <EuiButton size="s" onClick={startFetch}>
               <FormattedMessage
-                id={
-                  'xpack.apm.correlations.latencyCorrelations.refreshButtonTitle'
-                }
+                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
                 defaultMessage={'Refresh'}
               />
             </EuiButton>
@@ -321,9 +312,7 @@ export function MlCorrelations({ onClose }: Props) {
           {isRunning && (
             <EuiButton size="s" onClick={cancelFetch}>
               <FormattedMessage
-                id={
-                  'xpack.apm.correlations.latencyCorrelations.cancelButtonTitle'
-                }
+                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
                 defaultMessage={'Cancel'}
               />
             </EuiButton>
@@ -334,9 +323,7 @@ export function MlCorrelations({ onClose }: Props) {
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id={
-                    'xpack.apm.correlations.latencyCorrelations.progressTitle'
-                  }
+                  id="xpack.apm.correlations.latencyCorrelations.progressTitle"
                   defaultMessage={'Progress: {progress}%'}
                   values={{ progress: Math.round(progress * 100) }}
                 />
