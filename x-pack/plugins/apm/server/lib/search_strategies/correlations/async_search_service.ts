@@ -22,27 +22,11 @@ import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
 import { getRandomInt, range } from './utils';
+import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 const SIGNIFICANT_FRACTION = 3;
-
-export function roundToDecimalPlace(
-  num?: number,
-  dp: number = 2
-): number | string {
-  if (num === undefined) return '';
-  if (num % 1 === 0) {
-    // no decimal place
-    return num;
-  }
-
-  if (Math.abs(num) < Math.pow(10, -dp)) {
-    return Number.parseFloat(String(num)).toExponential(2);
-  }
-  const m = Math.pow(10, dp);
-  return Math.round(num * m) / m;
-}
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,

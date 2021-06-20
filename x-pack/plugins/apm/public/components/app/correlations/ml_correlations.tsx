@@ -6,11 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-
 import { useHistory, useParams } from 'react-router-dom';
-
 import { sum } from 'd3-array';
-
 import {
   EuiIcon,
   EuiLink,
@@ -23,13 +20,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-
 import { CorrelationsChart } from './correlations_chart';
 import {
   FILTER_ACTION_LABEL,
@@ -43,23 +38,7 @@ import {
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
-
-export function roundToDecimalPlace(
-  num?: number,
-  dp: number = 2
-): number | string {
-  if (num === undefined) return '';
-  if (num % 1 === 0) {
-    // no decimal place
-    return num;
-  }
-
-  if (Math.abs(num) < Math.pow(10, -dp)) {
-    return Number.parseFloat(String(num)).toExponential(2);
-  }
-  const m = Math.pow(10, dp);
-  return Math.round(num * m) / m;
-}
+import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 
 const isErrorMessage = (arg: unknown): arg is Error => {
   return arg instanceof Error;
