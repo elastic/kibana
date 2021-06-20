@@ -42,7 +42,6 @@ export function AnomalyDetectionSetupLink() {
 
   return (
     <EuiHeaderLink
-      size="xs"
       color="text"
       href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
