@@ -211,50 +211,6 @@ export const asyncSearchServiceProvider = (
   fetchCorrelations();
 
   return () => {
-    // group duplicates
-    // const hashTable: Record<
-    //   string,
-    //   Record<string, { histogram: HistogramItem[]; duplicates: Set<string> }>
-    // > = {};
-    // values.forEach((val) => {
-    //   const key = `${roundToDecimalPlace(
-    //     val.correlation,
-    //     4
-    //   )}-${roundToDecimalPlace(val.ksTest, 5)}`;
-    //   // If table already has something with same pearson correlation & ks test value
-    //   // check if distribution also the same
-    //   if (hashTable.hasOwnProperty(key)) {
-    //     const hashedArr = Object.values(hashTable[key]);
-    //     const firstDuplicateIdx = hashedArr.findIndex((hashedVal) =>
-    //       isEqual(hashedVal.histogram, val.histogram)
-    //     );
-    //
-    //     // If has same score but different histogram
-    //     if (firstDuplicateIdx === -1) {
-    //       hashTable[key] = {
-    //         [val.value]: {
-    //           histogram: val.histogram,
-    //           duplicates: new Set([val.value]),
-    //         },
-    //       };
-    //     } else {
-    //       // If both pearson and ks tests values and histogram are the same
-    //       hashedArr[firstDuplicateIdx].duplicates.add(val.value);
-    //       // hashTable[key][values .duplicateCount = hashTable[key].duplicateCount + 1;
-    //     }
-    //   } else {
-    //     hashTable[key] = {
-    //       [val.value]: {
-    //         histogram: val.histogram,
-    //         duplicates: new Set([val.value]),
-    //       },
-    //     };
-    //   }
-    // });
-    //
-    // console.log('---HASHTABLE---');
-    // console.log(JSON.stringify(hashTable));
-
     // Roughly compare histograms by sampling random bins
     // And rounding up histogram count to account for different floating points
     const isHistogramRoughlyEqual = (
