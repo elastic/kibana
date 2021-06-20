@@ -183,7 +183,10 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   useEffect(() => {
     const updatedCreationType = indexPatternCreateService.creation.getType(type);
     setIndexPatternCreationType(updatedCreationType);
-  }, [type, indexPatternCreateService.creation]);
+    if (type === 'rollup') {
+      form.setFieldValue('allowHidden', false);
+    }
+  }, [type, indexPatternCreateService.creation, form]);
 
   useEffect(() => {
     const fetchIndices = async (query: string = '') => {
@@ -263,7 +266,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
         const fields = await ensureMinimumTime(
           indexPatternService.getFieldsForWildcard({
             pattern: query,
-            // ...getFetchForWildcardOptions(),
+            ...indexPatternCreationType.getFetchForWildcardOptions(),
           })
         );
         const timeFields = extractTimeFields(fields);
@@ -425,7 +428,11 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
               onClick={onClickSave}
               data-test-subj="saveIndexPatternButton"
               fill
-              disabled={!isValid || !exactMatchedIndices.length}
+              disabled={
+                !isValid ||
+                !exactMatchedIndices.length ||
+                !!indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices) // todo display errors
+              }
               // isLoading={isSavingField || isValidating}
             >
               {i18nTexts.saveButtonLabel}

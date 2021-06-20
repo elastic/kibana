@@ -62,7 +62,7 @@ export const TitleField = () => {
               }}
               isLoading={field.isValidating}
               fullWidth
-              data-test-subj="input"
+              data-test-subj="createIndexPatternNameInput"
             />
           </EuiFormRow>
         );

@@ -122,8 +122,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    const wrapperElement = await this.testSubjects.find('createIndexPatternNameInput');
-    return wrapperElement.findByTestSubject('input');
+    return this.testSubjects.find('createIndexPatternNameInput');
   }
 
   async getTimeFieldNameField() {

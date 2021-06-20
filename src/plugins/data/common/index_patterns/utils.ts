@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientCommon } from '../types';
 import type { IndexPatternSavedObjectAttrs } from './index_patterns';
+import type { SavedObjectsClientCommon } from '../types';
 
 /**
  * Returns an object matching a given title
