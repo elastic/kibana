@@ -111,9 +111,12 @@ export function MlCorrelations({ onClose }: Props) {
   useEffect(() => {
     if (isErrorMessage(error)) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.apm.correlations.error.title', {
-          defaultMessage: 'An error occurred fetching correlations',
-        }),
+        title: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.errorTitle',
+          {
+            defaultMessage: 'An error occurred fetching correlations',
+          }
+        ),
         text: error.toString(),
       });
     }
@@ -144,7 +147,7 @@ export function MlCorrelations({ onClose }: Props) {
         width: '116px',
         field: 'correlation',
         name: i18n.translate(
-          'xpack.apm.correlations.correlationsTable.mlCorrelationLabel',
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
           { defaultMessage: 'Correlation' }
         ),
         render: (_: any, term: MlCorrelationsTerms) => {
@@ -154,14 +157,14 @@ export function MlCorrelations({ onClose }: Props) {
       {
         field: 'fieldName',
         name: i18n.translate(
-          'xpack.apm.correlations.correlationsTable.fieldNameLabel',
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
       },
       {
         field: 'fieldValue',
         name: i18n.translate(
-          'xpack.apm.correlations.correlationsTable.fieldValueLabel',
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
         render: (_: any, term: MlCorrelationsTerms) =>
@@ -287,7 +290,7 @@ export function MlCorrelations({ onClose }: Props) {
             <EuiButton size="s" onClick={startFetch}>
               <FormattedMessage
                 id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
-                defaultMessage={'Refresh'}
+                defaultMessage="Refresh"
               />
             </EuiButton>
           )}
@@ -295,7 +298,7 @@ export function MlCorrelations({ onClose }: Props) {
             <EuiButton size="s" onClick={cancelFetch}>
               <FormattedMessage
                 id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
-                defaultMessage={'Cancel'}
+                defaultMessage="Cancel"
               />
             </EuiButton>
           )}
@@ -306,7 +309,7 @@ export function MlCorrelations({ onClose }: Props) {
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="xpack.apm.correlations.latencyCorrelations.progressTitle"
-                  defaultMessage={'Progress: {progress}%'}
+                  defaultMessage="Progress: {progress}%"
                   values={{ progress: Math.round(progress * 100) }}
                 />
               </EuiText>
@@ -331,13 +334,16 @@ export function MlCorrelations({ onClose }: Props) {
         <>
           <EuiTitle size="xxs">
             <h4>
-              {i18n.translate('xpack.apm.correlations.latency.chart.title', {
-                defaultMessage: 'Latency distribution for {name}',
-                values: {
-                  name:
-                    fetchOptions.transactionName ?? fetchOptions.serviceName,
-                },
-              })}
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                {
+                  defaultMessage: 'Latency distribution for {name}',
+                  values: {
+                    name:
+                      fetchOptions.transactionName ?? fetchOptions.serviceName,
+                  },
+                }
+              )}
             </h4>
           </EuiTitle>
 
@@ -368,7 +374,7 @@ export function MlCorrelations({ onClose }: Props) {
           <EuiSpacer size="m" />
           <EuiText textAlign="center">
             <FormattedMessage
-              id="xpack.apm.correlations.latency.noCorrelationsMsg"
+              id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
               defaultMessage="No significant correlations found"
             />
           </EuiText>

@@ -46,12 +46,9 @@ const errorRateTab = {
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
-  label: i18n.translate(
-    'xpack.apm.correlations.tabs.latencyCorrelationsLabel',
-    {
-      defaultMessage: 'Latency correlations',
-    }
-  ),
+  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
+    defaultMessage: 'Latency',
+  }),
   component: MlCorrelations,
 };
 const tabs = [latencyCorrelationsTab, errorRateTab];
