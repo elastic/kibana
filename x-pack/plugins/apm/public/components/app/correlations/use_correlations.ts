@@ -54,6 +54,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   const searchSubscription$ = useRef<Subscription>();
 
   function setResponse(response: IKibanaSearchResponse<RawResponse>) {
+    // @TODO: optimize rawResponse.overallHistogram if histogram is the same
     setIsRunning(response.isRunning || false);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);

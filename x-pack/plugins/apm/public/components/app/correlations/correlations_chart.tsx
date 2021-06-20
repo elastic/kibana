@@ -73,6 +73,11 @@ const chartTheme: PartialTheme = {
   },
 };
 
+// Default axis to start at 0 for latency correlations chart
+const xAxisDomain = {
+  min: 0,
+};
+
 interface CorrelationsChartProps {
   field?: string;
   value?: string;
@@ -114,6 +119,7 @@ export function CorrelationsChart({
 
   const xMax = max(overallHistogram.map((d) => d.key)) ?? 0;
   const durationFormatter = getDurationFormatter(xMax);
+
   return (
     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
       <Chart
@@ -126,6 +132,7 @@ export function CorrelationsChart({
           theme={chartTheme}
           showLegend
           legendPosition={Position.Bottom}
+          xDomain={xAxisDomain}
         />
 
         <LineAnnotation
