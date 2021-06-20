@@ -380,7 +380,7 @@ export function MlCorrelations({ onClose }: Props) {
           <EuiText textAlign="center">
             <FormattedMessage
               id="xpack.apm.correlations.latency.noCorrelationsMsg"
-              defaultMessage="No correlations found"
+              defaultMessage="No significant correlations found"
             />
           </EuiText>
         </>
