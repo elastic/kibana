@@ -27,6 +27,7 @@ import { roundToDecimalPlace } from '../../../../common/search_strategies/correl
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 const SIGNIFICANT_FRACTION = 3;
+const MAX_CORRELATIONS_TO_SHOW = 15;
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -240,7 +241,7 @@ export const asyncSearchServiceProvider = (
       }
     )
       .sort((a, b) => b.correlation - a.correlation)
-      .slice(0, 20);
+      .slice(0, MAX_CORRELATIONS_TO_SHOW);
 
     return {
       error,
