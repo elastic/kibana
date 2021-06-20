@@ -142,12 +142,6 @@ export function MlCorrelations({ onClose }: Props) {
 
   let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
 
-  // console.log(
-  //   'selectedHistogram',
-  //   selectedHistogram,
-  //   'selectedHistogram',
-  //   overallHistogram
-  // );
   if (histograms.length > 0 && selectedSignificantTerm !== null) {
     selectedHistogram = histograms.find(
       (h) =>

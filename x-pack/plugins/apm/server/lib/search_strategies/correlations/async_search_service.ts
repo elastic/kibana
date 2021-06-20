@@ -181,20 +181,6 @@ export const asyncSearchServiceProvider = (
               item.value
             );
 
-            // @todo: double check if this is neccessary
-            // const fullHistogram = overallLogHistogramChartData.map((h) => {
-            //   const histogramItem = logHistogram.find((di) => di.key === h.key);
-            //   const docCount =
-            //     item !== undefined && histogramItem !== undefined
-            //       ? histogramItem.doc_count
-            //       : 0;
-            //   return {
-            //     key: h.key,
-            //     // doc_count_full: h.doc_count,
-            //     doc_count: docCount,
-            //   };
-            // });
-
             yield {
               ...item,
               correlation,
