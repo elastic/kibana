@@ -22,15 +22,7 @@ describe('when in the Admistration tab', () => {
     const mockedContext = createAppRootMockRenderer();
     coreStart = mockedContext.coreStart;
     render = () => mockedContext.render(<ManagementContainer />);
-    coreStart.http.get.mockImplementation(() =>
-      Promise.resolve({
-        response: [
-          {
-            name: 'endpoint',
-          },
-        ],
-      })
-    );
+    mockedContext.history.push('/administration/endpoints');
   });
 
   it('should display the No Permissions view when Ingest is OFF', async () => {

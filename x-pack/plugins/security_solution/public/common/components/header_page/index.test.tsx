@@ -15,13 +15,14 @@ import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
+jest.mock('../../lib/kibana', () => {
   return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
     }),
   };
 });

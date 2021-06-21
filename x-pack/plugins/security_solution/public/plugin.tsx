@@ -49,7 +49,7 @@ import {
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
-import { getDeepLinks, getDeepLinksAndKeywords } from './app/deepLinks';
+import { getDeepLinks, getDeepLinksAndKeywords } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
 import { HOSTS, NETWORK, TIMELINES, DETECTION_ENGINE, CASE } from './app/translations';
 import {
