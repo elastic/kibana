@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './locator';
-export * from './locator_client';
-export { useLocatorUrl } from './use_locator_url';
+export { ManagementAppLocator } from './locator';

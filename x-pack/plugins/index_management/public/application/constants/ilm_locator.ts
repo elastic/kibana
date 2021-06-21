@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const ILM_URL_GENERATOR_ID = 'ILM_URL_GENERATOR_ID';
+export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
 export const ILM_PAGES_POLICY_EDIT = 'policy_edit';
