@@ -72,6 +72,7 @@ export interface IInterpreterRenderHandlers {
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   isSyncColorsEnabled: () => boolean;
+  on: (event: any, fn: (...args: any) => void) => void;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.

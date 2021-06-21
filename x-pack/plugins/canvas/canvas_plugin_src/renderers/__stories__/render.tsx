@@ -16,8 +16,8 @@ export const defaultHandlers: RendererHandlers = {
   getRenderMode: () => 'display',
   isSyncColorsEnabled: () => false,
   onComplete: (fn) => undefined,
-  onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
-  onEmbeddableInputChange: action('onEmbeddableInputChange'),
+  embeddableInputChange: action('embeddableInputChange'),
+  embeddableDestroyed: action('embeddableDestroyed'),
   onResize: action('onResize'),
   resize: action('resize'),
   setFilter: action('setFilter'),
@@ -26,6 +26,7 @@ export const defaultHandlers: RendererHandlers = {
   reload: action('reload'),
   update: action('update'),
   event: action('event'),
+  on: action('on'),
 };
 
 /*

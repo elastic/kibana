@@ -90,7 +90,7 @@ export const embeddableRendererFactory = (
           );
 
           if (updatedExpression) {
-            handlers.onEmbeddableInputChange(updatedExpression);
+            handlers.embeddableInputChange(updatedExpression);
           }
         });
 
@@ -106,7 +106,7 @@ export const embeddableRendererFactory = (
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
-          handlers.onEmbeddableDestroyed();
+          handlers.embeddableDestroyed();
 
           delete embeddablesRegistry[uniqueId];
 

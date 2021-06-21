@@ -27,7 +27,22 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   onDestroy() {},
   getRenderMode: () => 'display',
   isSyncColorsEnabled: () => false,
+  on: (event: any, fn: (...args: any) => void) => {},
 });
+
+interface RenderEmitters {
+  done: () => boolean | void;
+  resize: (_size: { height: number; width: number }) => boolean | void;
+  embeddableDestroyed: () => boolean | void;
+  embeddableInputChange: (embeddableExpression: string) => boolean | void;
+}
+
+interface RenderListeners {
+  complete: Pick<RenderEmitters, 'done'>;
+  resize: Pick<RenderEmitters, 'resize'>;
+  embeddableDestroyed: Pick<RenderEmitters, 'embeddableDestroyed'>;
+  embeddableInputChange: Pick<RenderEmitters, 'embeddableInputChange'>;
+}
 
 export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHandlers => ({
   ...baseHandlers,
@@ -44,13 +59,12 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
     this.done = fn;
   },
 
-  // TODO: these functions do not match the `onXYZ` and `xyz` pattern elsewhere.
-  onEmbeddableDestroyed() {},
-  onEmbeddableInputChange() {},
   onResize(fn: (size: { height: number; width: number }) => void) {
     this.resize = fn;
   },
 
+  embeddableDestroyed() {},
+  embeddableInputChange() {},
   resize(_size: { height: number; width: number }) {},
   setFilter() {},
 });
@@ -64,7 +78,6 @@ export const createDispatchedHandlerFactory = (
 ): ((element: CanvasElement) => RendererHandlers) => {
   let isComplete = false;
   let oldElement: CanvasElement | undefined;
-  let completeFn = () => {};
 
   return (element: CanvasElement) => {
     // reset isComplete when element changes
@@ -76,30 +89,49 @@ export const createDispatchedHandlerFactory = (
     const handlers: RendererHandlers & {
       event: IInterpreterRenderHandlers['event'];
       done: IInterpreterRenderHandlers['done'];
-    } = {
+    } & RenderEmitters = {
       ...createHandlers(),
       event(event: ExpressionRendererEvent) {
         switch (event.name) {
           case 'embeddableInputChange':
-            this.onEmbeddableInputChange(event.data);
+            this.embeddableInputChange(event.data);
             break;
           case 'setFilter':
             this.setFilter(event.data);
             break;
-          case 'onComplete':
-            this.onComplete(event.data);
-            break;
           case 'embeddableDestroyed':
-            this.onEmbeddableDestroyed();
+            this.embeddableDestroyed();
             break;
           case 'resize':
             this.resize(event.data);
             break;
-          case 'onResize':
-            this.onResize(event.data);
-            break;
         }
       },
+      on(event: keyof RenderListeners, fn: (...args: any[]) => void) {
+        const listenerToEvent: { [k in keyof RenderListeners]: keyof RenderEmitters } = {
+          complete: 'done',
+          resize: 'resize',
+          embeddableDestroyed: 'embeddableDestroyed',
+          embeddableInputChange: 'embeddableInputChange',
+        };
+
+        if (listenerToEvent[event]) {
+          const eventCall: ((...args: any[]) => boolean | void) | null =
+            typeof this[listenerToEvent[event]] === 'function'
+              ? this[listenerToEvent[event]]
+              : null;
+
+          if (!eventCall) return true;
+
+          this[listenerToEvent[event]] = (...args: any[]) => {
+            const preventFromCallingListener: void | boolean = eventCall(...args);
+            if (fn && typeof fn === 'function' && !preventFromCallingListener) {
+              fn(...args);
+            }
+          };
+        }
+      },
+
       setFilter(text: string) {
         dispatch(setFilter(text, element.id, true));
       },
@@ -108,30 +140,34 @@ export const createDispatchedHandlerFactory = (
         return element.filter;
       },
 
-      onComplete(fn: () => void) {
-        completeFn = fn;
+      onComplete(fn: () => void | boolean) {
+        this.on('complete', fn);
       },
 
       getElementId: () => element.id,
 
-      onEmbeddableInputChange(embeddableExpression: string) {
+      embeddableInputChange(embeddableExpression: string) {
         dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
       },
 
-      onEmbeddableDestroyed() {
+      embeddableDestroyed() {
         dispatch(fetchEmbeddableRenderable(element.id));
       },
 
       done() {
         // don't emit if the element is already done
-        if (isComplete) {
-          return;
-        }
+        if (isComplete) return true;
 
         isComplete = true;
-        completeFn();
       },
     };
+
+    Object.keys(handlers).forEach((value: string) => {
+      const key = value as keyof typeof handlers;
+      if (handlers[key] && typeof handlers[key] === 'function') {
+        handlers[key] = (handlers[key] as Function).bind(handlers);
+      }
+    });
 
     return handlers;
   };

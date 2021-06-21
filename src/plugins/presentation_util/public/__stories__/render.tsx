@@ -18,6 +18,7 @@ export const defaultHandlers: IInterpreterRenderHandlers = {
   reload: action('reload'),
   update: action('update'),
   event: action('event'),
+  on: action('on'),
 };
 
 /*

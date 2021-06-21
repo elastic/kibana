@@ -59,7 +59,7 @@ function RevealImageComponent({
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    handlers.event({ name: 'onResize', data: updateImageView });
+    handlers.on('resize', updateImageView);
     return () => {
       handlers.event({ name: 'destroy' });
     };
