@@ -85,7 +85,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
-  onClose?: () => void | boolean;
+  onClose?: (flyout: OverlayRef) => void;
 }
 
 interface StartDeps {
@@ -122,12 +122,10 @@ export class FlyoutService {
 
         const onCloseFlyout = () => {
           if (options.onClose) {
-            const canClose = options.onClose();
-            if (!canClose) {
-              return;
-            }
+            options.onClose(flyout);
+          } else {
+            flyout.close();
           }
-          flyout.close();
         };
 
         render(

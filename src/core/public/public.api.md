@@ -974,7 +974,7 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     // (undocumented)
-    onClose?: () => void | boolean;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-onClose?: () => void | boolean;
+onClose?: (flyout: OverlayRef) => void;
 ```

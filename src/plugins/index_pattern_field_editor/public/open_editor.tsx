@@ -132,8 +132,11 @@ export const getFieldEditorOpener = ({
         size: 'l',
         ownFocus: true,
         hideCloseButton: true,
-        onClose: () => {
-          return canCloseValidator.current();
+        onClose: (flyout) => {
+          const canClose = canCloseValidator.current();
+          if (canClose) {
+            flyout.close();
+          }
         },
       }
     );
