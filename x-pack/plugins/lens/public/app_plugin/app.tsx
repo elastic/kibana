@@ -222,6 +222,7 @@ export function App({
         persistedDoc: appState.persistedDoc,
         onAppLeave,
         redirectTo,
+        originatingApp: incomingState?.originatingApp,
         ...lensAppServices,
       },
       saveProps,

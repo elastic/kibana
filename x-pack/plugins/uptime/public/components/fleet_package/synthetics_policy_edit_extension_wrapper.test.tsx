@@ -11,24 +11,12 @@ import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
-import {
-  defaultSimpleFields,
-  defaultTLSFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPAdvancedFields,
-} from './contexts';
+import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
-
-const defaultConfig = {
-  ...defaultSimpleFields,
-  ...defaultTLSFields,
-  ...defaultHTTPAdvancedFields,
-  ...defaultTCPAdvancedFields,
-};
 
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
@@ -277,6 +265,10 @@ const defaultCurrentPolicy: any = {
   created_by: '',
 };
 
+const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
+const defaultICMPConfig = defaultConfig[DataStream.ICMP];
+const defaultTCPConfig = defaultConfig[DataStream.TCP];
+
 describe('<SyntheticsPolicyEditExtension />', () => {
   const onChange = jest.fn();
   const WrappedComponent = ({ policy = defaultCurrentPolicy, newPolicy = defaultNewPolicy }) => {
@@ -301,24 +293,24 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
     const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
     // expect TLS settings to be in the document when at least one tls key is populated
     expect(enableTLSConfig.checked).toBe(true);
     expect(verificationMode).toBeInTheDocument();
     expect(verificationMode.value).toEqual(
-      `${defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value}`
+      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value}`
     );
 
     // ensure other monitor type options are not in the DOM
@@ -651,15 +643,21 @@ describe('<SyntheticsPolicyEditExtension />', () => {
           streams: [
             {
               ...defaultNewPolicy.inputs[0].streams[0],
-              vars: Object.keys(httpVars || []).reduce<
-                Record<string, { value: undefined; type: string }>
-              >((acc, key) => {
-                acc[key] = {
-                  value: undefined,
-                  type: `${httpVars?.[key].type}`,
-                };
-                return acc;
-              }, {}),
+              vars: {
+                ...Object.keys(httpVars || []).reduce<
+                  Record<string, { value: undefined; type: string }>
+                >((acc, key) => {
+                  acc[key] = {
+                    value: undefined,
+                    type: `${httpVars?.[key].type}`,
+                  };
+                  return acc;
+                }, {}),
+                [ConfigKeys.MONITOR_TYPE]: {
+                  value: 'http',
+                  type: 'text',
+                },
+              },
             },
           ],
         },
@@ -680,19 +678,19 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
 
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
 
     /* expect TLS settings not to be in the document when and Enable TLS settings not to be checked
      * when all TLS values are falsey */
@@ -709,7 +707,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       const requestMethod = getByLabelText('Request method') as HTMLInputElement;
       expect(requestMethod).toBeInTheDocument();
-      expect(requestMethod.value).toEqual(`${defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK]}`);
+      expect(requestMethod.value).toEqual(`${defaultHTTPConfig[ConfigKeys.REQUEST_METHOD_CHECK]}`);
     });
   });
 
@@ -752,24 +750,24 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
       <WrappedComponent policy={currentPolicy} />
     );
-    const url = getByLabelText('Host:Port') as HTMLInputElement;
+    const host = getByLabelText('Host:Port') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
-    expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(host).toBeInTheDocument();
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultTCPConfig[ConfigKeys.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultTCPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultTCPConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultTCPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultTCPConfig[ConfigKeys.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
@@ -825,24 +823,24 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const { getByLabelText, queryByLabelText } = render(
       <WrappedComponent policy={currentPolicy} />
     );
-    const url = getByLabelText('Host') as HTMLInputElement;
+    const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
-    expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(host).toBeInTheDocument();
+    expect(host.value).toEqual(defaultICMPConfig[ConfigKeys.HOSTS]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultICMPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultICMPConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultICMPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultICMPConfig[ConfigKeys.TIMEOUT]}`);
     expect(wait).toBeInTheDocument();
-    expect(wait.value).toEqual(`${defaultConfig[ConfigKeys.WAIT]}`);
+    expect(wait.value).toEqual(`${defaultICMPConfig[ConfigKeys.WAIT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();

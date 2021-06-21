@@ -194,14 +194,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    [
+  getErrorMessage: (layer, columnId, indexPattern) => {
+    const messages = [
       ...(getInvalidFieldMessage(
         layer.columns[columnId] as FieldBasedIndexPatternColumn,
         indexPattern
       ) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
-    ].filter(Boolean),
+    ].filter(Boolean);
+    return messages.length ? messages : undefined;
+  },
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
