@@ -254,26 +254,18 @@ class TutorialDirectoryUi extends React.Component {
     ) : null;
   };
 
-  renderHeader = () => {
+  render() {
     const headerLinks = this.renderHeaderLinks();
     return (
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
-      </EuiFlexGroup>
-    );
-  };
-
-  render() {
-    return (
-      <KibanaPageTemplate restrictWidth={1200}>
-        {this.renderHeader()}
+      <KibanaPageTemplate
+        restrictWidth={1200}
+        pageHeader={{
+          pageTitle: (
+            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+          ),
+          rightSideItems: headerLinks ? [headerLinks] : [],
+        }}
+      >
         {this.renderNotices()}
         <EuiSpacer size="m" />
         <EuiTabs>{this.renderTabs()}</EuiTabs>
