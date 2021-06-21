@@ -1146,8 +1146,8 @@ export default ({ getService }: FtrProviderContext) => {
             if (testData.requestBody.startDatafeed === true) {
               await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
             }
-            await ml.api.waitForJobState(job.jobId, job.jobState);
-            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
+            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState, 4 * 60 * 1000);
+            await ml.api.waitForJobState(job.jobId, job.jobState, 4 * 60 * 1000);
 
             // model memory limit should be <= 99mb
             const {
