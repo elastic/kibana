@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { Router, mockHistory } from '../__mock__/router';
 import { UserActionMarkdown } from './user_action_markdown';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
@@ -31,9 +30,7 @@ describe('UserActionMarkdown ', () => {
   it('Renders markdown correctly when not in edit mode', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />
-        </Router>
+        <UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />
       </TestProviders>
     );
 
@@ -43,9 +40,7 @@ describe('UserActionMarkdown ', () => {
   it('Save button click calls onSaveContent and onChangeEditable', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionMarkdown {...defaultProps} />
-        </Router>
+        <UserActionMarkdown {...defaultProps} />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
@@ -58,9 +53,7 @@ describe('UserActionMarkdown ', () => {
   it('Cancel button click calls only onChangeEditable', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <UserActionMarkdown {...defaultProps} />
-        </Router>
+        <UserActionMarkdown {...defaultProps} />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="user-action-cancel-markdown"]`).first().simulate('click');
