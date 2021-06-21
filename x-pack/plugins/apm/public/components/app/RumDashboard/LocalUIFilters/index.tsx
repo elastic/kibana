@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ESFilter } from 'typings/elasticsearch';
+import { ESFilter } from 'src/core/types/elasticsearch';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import {
   uxFiltersByName,
