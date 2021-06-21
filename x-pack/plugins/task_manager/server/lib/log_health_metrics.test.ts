@@ -10,7 +10,7 @@ import { configSchema, TaskManagerConfig } from '../config';
 import { HealthStatus } from '../monitoring';
 import { TaskPersistence } from '../monitoring/task_run_statistics';
 import { MonitoredHealth } from '../routes/health';
-import { logHealthMetrics } from './log_health_metrics';
+import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
 import { Logger } from '../../../../../src/core/server';
 
 jest.mock('./calculate_health_status', () => ({
@@ -20,12 +20,92 @@ jest.mock('./calculate_health_status', () => ({
 describe('logHealthMetrics', () => {
   afterEach(() => {
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    // Reset the last state by running through this as OK
+    // (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    resetLastLogLevel();
     (calculateHealthStatus as jest.Mock<HealthStatus>).mockReset();
   });
+
+  it('should log a warning message to enable verbose logging when the status goes from OK to Warning/Error', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+
+    // We must change from OK to Warning
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    logHealthMetrics(health, logger, config);
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
+      () => HealthStatus.Warning
+    );
+    logHealthMetrics(health, logger, config);
+    // We must change from OK to Error
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    logHealthMetrics(health, logger, config);
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    logHealthMetrics(health, logger, config);
+
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
+      `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
+    );
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).toBe(
+      `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
+    );
+  });
+
+  it('should not log a warning message to enable verbose logging when the status goes from Warning to OK', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+
+    // We must change from Warning to OK
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
+      () => HealthStatus.Warning
+    );
+    logHealthMetrics(health, logger, config);
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    logHealthMetrics(health, logger, config);
+    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+  });
+
+  it('should not log a warning message to enable verbose logging when the status goes from Error to OK', () => {
+    // console.log('start', getLastLogLevel());
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+
+    // We must change from Error to OK
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    logHealthMetrics(health, logger, config);
+    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    logHealthMetrics(health, logger, config);
+    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+  });
+
   it('should log as debug if status is OK', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = getMockMonitoredHealth();
 
@@ -40,7 +120,10 @@ describe('logHealthMetrics', () => {
   it('should log as warn if status is Warn', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
@@ -62,7 +145,10 @@ describe('logHealthMetrics', () => {
   it('should log as error if status is Error', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
@@ -82,7 +168,10 @@ describe('logHealthMetrics', () => {
   it('should log as warn if drift exceeds the threshold', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = getMockMonitoredHealth({
       stats: {
@@ -114,7 +203,10 @@ describe('logHealthMetrics', () => {
   it('should log as debug if there are no stats', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = {
       id: '1',
@@ -135,7 +227,10 @@ describe('logHealthMetrics', () => {
   it('should ignore capacity estimation status', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
-      monitored_stats_warn_delayed_task_start_in_seconds: 60,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
     });
     const health = getMockMonitoredHealth({
       stats: {
