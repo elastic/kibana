@@ -20,8 +20,6 @@ import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { Agent } from '../../../../fleet/common/types/models/agent';
-import { AgentPolicy } from '../../../../fleet/common/types/models/agent_policy';
 import { EndpointMetricsPolicyResponse } from './types';
 
 type BaseSearchTypes = string | number | boolean | object;
