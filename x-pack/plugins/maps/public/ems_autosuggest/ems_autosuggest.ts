@@ -19,14 +19,9 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
-export interface EMSConfig {
-  layerId: string;
-  field: string;
-}
-
 export interface EMSMatch {
   regex: RegExp;
-  emsConfig: EMSConfig;
+  emsConfig: EMSTermJoinConfig;
   emsField: FileLayerField;
 }
 
@@ -37,15 +32,16 @@ interface UniqueMatch {
 
 type SampleValues = Array<string | number>;
 
+let isMetaLoaded = false;
 let wellKnownColumnNames: EMSMatch[];
 let wellKnownColumnFormats: EMSMatch[];
-let wellKnownIdFields: Array<{
-  emsConfig: EMSConfig;
-  emsField: FileLayerField;
+let wellKnownIds: Array<{
+  emsConfig: EMSTermJoinConfig;
+  values: string[];
 }>;
 
 async function loadMeta() {
-  if (wellKnownColumnFormats && wellKnownColumnNames) {
+  if (isMetaLoaded) {
     return;
   }
 
@@ -53,10 +49,11 @@ async function loadMeta() {
 
   wellKnownColumnNames = [];
   wellKnownColumnFormats = [];
+  wellKnownIds = [];
 
-  fileLayers.forEach((fileLayer) => {
-    const emsFields = fileLayer.getFields();
-    emsFields.forEach((emsField) => {
+  fileLayers.forEach((fileLayer: FileLayer) => {
+    const emsFields: FileLayerField[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerField) => {
       const emsConfig = {
         layerId: fileLayer.getId(),
         field: emsField.id,
@@ -71,7 +68,7 @@ async function loadMeta() {
       }
 
       if (emsField.alias && emsField.alias.length) {
-        emsField.alias.forEach((alias) => {
+        emsField.alias.forEach((alias: string) => {
           wellKnownColumnNames.push({
             regex: new RegExp(alias, 'i'),
             emsConfig,
@@ -79,11 +76,18 @@ async function loadMeta() {
           });
         });
       }
+
+      if (emsField.values) {
+        wellKnownIds.push({
+          emsConfig,
+          values: emsField.values,
+        });
+      }
     });
   });
-}
 
-function idValuesMatch() {}
+  isMetaLoaded = true;
+}
 
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
@@ -98,6 +102,10 @@ export async function suggestEMSTermJoinConfig(
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
+    // Only looks at id-values in main manifest
+    matches.push(...suggestByIdValues(sampleValuesConfig.sampleValues));
+
+    // Looks at _all_ columns for EMS-layers.
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       matches.push(
         ...(await suggestsByAllEMSColumns(
@@ -105,8 +113,6 @@ export async function suggestEMSTermJoinConfig(
           sampleValuesConfig.sampleValues
         ))
       );
-    } else {
-      matches.push(...suggestByFormats(sampleValuesConfig.sampleValues));
     }
   }
 
@@ -136,7 +142,11 @@ export async function suggestEMSTermJoinConfig(
 
 function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
-    return columnName.match(wellknown.regex);
+    const nameMatchesAlias = columnName.match(wellknown.regex);
+    // Check if there is matching known id-values
+    return sampleValues
+      ? nameMatchesAlias && !violatesIdValues(sampleValues, wellknown.emsConfig)
+      : nameMatchesAlias;
   });
 
   return matches.map((m) => {
@@ -144,22 +154,45 @@ function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTerm
   });
 }
 
-function suggestByIdValues(values: SampleValues): EMSTermJoinConfig[] {}
-
-function suggestByFormats(values: SampleValues): EMSTermJoinConfig[] {
-  const matches = wellKnownColumnFormats.filter((wellknown) => {
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i].toString();
-      if (!value.match(wellknown.regex)) {
-        return false;
-      }
+function allSamplesMatch(sampleValues: SampleValues, values: string[]) {
+  for (let j = 0; j < sampleValues.length; j++) {
+    const sampleValue = sampleValues[j].toString();
+    if (!existInIdValues(sampleValue, values)) {
+      return false;
     }
-    return true;
-  });
+  }
+  return true;
+}
 
-  return matches.map((m) => {
-    return m.emsConfig;
+function existInIdValues(sampleValue: string, values: string[]): boolean {
+  for (let i = 0; i < values.length; i++) {
+    if (values[i] === sampleValue) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function violatesIdValues(sampleValues: SampleValues, termConfig: EMSTermJoinConfig) {
+  for (let i = 0; i < wellKnownIds.length; i++) {
+    if (
+      wellKnownIds[i].emsConfig.field === termConfig.field &&
+      wellKnownIds[i].emsConfig.layerId === termConfig.layerId
+    ) {
+      return !allSamplesMatch(sampleValues, wellKnownIds[i].values);
+    }
+  }
+  return false;
+}
+
+function suggestByIdValues(sampleValues: SampleValues): EMSTermJoinConfig[] {
+  const matches: EMSTermJoinConfig[] = [];
+  wellKnownIds.forEach((wellKnownId) => {
+    if (allSamplesMatch(sampleValues, wellKnownId.values)) {
+      matches.push(wellKnownId.emsConfig);
+    }
   });
+  return matches;
 }
 
 function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boolean {
