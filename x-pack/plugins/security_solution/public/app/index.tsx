@@ -65,6 +65,12 @@ export const renderApp = ({
         {subPlugins.alerts.routes!.map((route, index) => (
           <Route key={`subpligin-alerts-route-${index}`} {...route} />
         ))}
+        {subPlugins.rules.routes!.map((route, index) => (
+          <Route key={`subpligin-rules-route-${index}`} {...route} />
+        ))}
+        {subPlugins.exceptions.routes!.map((route, index) => (
+          <Route key={`subpligin-exceptions-route-${index}`} {...route} />
+        ))}
 
         <Route>
           <NotFoundPage />

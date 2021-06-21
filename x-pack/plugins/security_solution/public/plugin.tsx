@@ -434,8 +434,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
         alerts: new subPluginClasses.Detections(),
-        rules: new subPluginClasses.Detections(),
-        exceptions: new subPluginClasses.Detections(),
+        rules: new subPluginClasses.Rules(),
+        exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
