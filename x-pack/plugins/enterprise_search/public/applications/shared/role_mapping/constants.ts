@@ -236,6 +236,28 @@ export const ENABLE_ROLES_LINK = i18n.translate(
   { defaultMessage: 'Learn more about role-based access' }
 );
 
+export const INVITATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.invitationDescription',
+  {
+    defaultMessage:
+      'This URL can be shared with the user, allowing them to accept the Enterprise Search invitation and set a new password',
+  }
+);
+
+export const NEW_INVITATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.newInvitationLabel',
+  { defaultMessage: 'Invitation URL' }
+);
+
+export const EXISTING_INVITATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.existingInvitationLabel',
+  { defaultMessage: 'The user has not yet accepted the invitation.' }
+);
+
+export const INVITATION_LINK = i18n.translate('xpack.enterpriseSearch.roleMapping.invitationLink', {
+  defaultMessage: 'Enterprise Search Invitation Link',
+});
+
 export const NO_USERS_TITLE = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersTitle', {
   defaultMessage: 'No user added',
 });
