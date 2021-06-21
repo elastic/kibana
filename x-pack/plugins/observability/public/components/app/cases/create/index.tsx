@@ -15,18 +15,17 @@ import { CASES_APP_ID, CASES_OWNER } from '../constants';
 export const Create = React.memo(() => {
   const {
     cases,
-    application: { getUrlForApp, navigateToUrl },
+    application: { navigateToApp },
   } = useKibana().services;
-  const casesUrl = getUrlForApp(CASES_APP_ID);
   const onSuccess = useCallback(
-    async ({ id }) => navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id })}`),
-    [casesUrl, navigateToUrl]
+    async ({ id }) =>
+      navigateToApp(`${CASES_APP_ID}`, {
+        path: getCaseDetailsUrl({ id }),
+      }),
+    [navigateToApp]
   );
 
-  const handleSetIsCancel = useCallback(() => navigateToUrl(`${casesUrl}`), [
-    casesUrl,
-    navigateToUrl,
-  ]);
+  const handleSetIsCancel = useCallback(() => navigateToApp(`${CASES_APP_ID}`), [navigateToApp]);
 
   return (
     <EuiPanel>

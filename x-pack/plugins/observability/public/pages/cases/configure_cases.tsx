@@ -23,23 +23,22 @@ const ButtonEmpty = styled(EuiButtonEmpty)`
 function ConfigureCasesPageComponent() {
   const {
     cases,
-    application: { getUrlForApp, navigateToUrl },
+    application: { navigateToApp },
   } = useKibana().services;
-  const casesUrl = getUrlForApp(CASES_APP_ID);
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const onClickGoToCases = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToUrl(casesUrl);
+      return navigateToApp(`${CASES_APP_ID}`);
     },
-    [casesUrl, navigateToUrl]
+    [navigateToApp]
   );
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.configure]);
   if (userPermissions != null && !userPermissions.read) {
-    navigateToUrl(casesUrl);
+    navigateToApp(`${CASES_APP_ID}`);
     return null;
   }
 
