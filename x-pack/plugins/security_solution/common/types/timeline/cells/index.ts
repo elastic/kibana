@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { TimelineNonEcsData } from '../../../search_strategy';
-import { ColumnHeaderOptions } from '../columns';
-
-/** The following props are provided to the function called by `renderCellValue` */
-export type CellValueElementProps = EuiDataGridCellValueElementProps & {
-  data: TimelineNonEcsData[];
-  eventId: string; // _id
-  header: ColumnHeaderOptions;
-  linkValues: string[] | undefined;
-  timelineId: string;
-};
+export type { CellValueElementProps } from '../../../../../timelines/common';

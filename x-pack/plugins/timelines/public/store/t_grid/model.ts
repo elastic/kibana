@@ -32,7 +32,6 @@ export interface TGridModelSettings {
   queryFields: string[];
   selectAll: boolean;
   title: string;
-  unit?: (n: number) => string;
 }
 export interface TGridModel extends TGridModelSettings {
   /** The columns displayed in the timeline */

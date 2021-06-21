@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { JsonObject } from '@kbn/common-utils';
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-
-import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
 
 export type ESQuery =
   | ESRangeQuery

@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, isString, flow } from 'lodash/fp';
+import { JsonObject } from '@kbn/common-utils';
 
 import {
   EsQueryConfig,
@@ -15,7 +16,6 @@ import {
   esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

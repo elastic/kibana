@@ -147,9 +147,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
     title,
-    unit,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
-
+  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
   useEffect(() => {
     dispatch(tGridActions.setTGridIsLoading({ id: STANDALONE_ID, isTGridLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
