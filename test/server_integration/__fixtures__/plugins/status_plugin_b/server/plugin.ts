@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CorePluginAPlugin } from './plugin';
+import { Plugin } from 'kibana/server';
 
-export const plugin = () => new CorePluginAPlugin();
+export class StatusPluginBPlugin implements Plugin {
+  public setup() {}
+  public start() {}
+  public stop() {}
+}

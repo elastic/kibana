@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CorePluginBPlugin } from './plugin';
+import { StatusPluginAPlugin } from './plugin';
 
-export const plugin = () => new CorePluginBPlugin();
+export const plugin = () => new StatusPluginAPlugin();

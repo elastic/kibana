@@ -25,20 +25,20 @@ export default function ({ getService }: FtrProviderContext) {
 
   const setStatus = async <T extends keyof typeof ServiceStatusLevels>(level: T) =>
     supertest
-      .post(`/internal/core_plugin_a/status/set?level=${level}`)
+      .post(`/internal/status_plugin_a/status/set?level=${level}`)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
 
   describe('status service', () => {
     // This test must comes first because the timeout only applies to the initial emission
     it("returns a timeout for status check that doesn't emit after 30s", async () => {
-      let aStatus = await getStatus('corePluginA');
+      let aStatus = await getStatus('statusPluginA');
       expect(aStatus.level).to.eql('unavailable');
 
       // Status will remain in unavailable until the custom status check times out
       // Keep polling until that condition ends, up to a timeout
       await retry.waitForWithTimeout(`Status check to timeout`, 40_000, async () => {
-        aStatus = await getStatus('corePluginA');
+        aStatus = await getStatus('statusPluginA');
         return aStatus.summary === 'Status check timed out after 30s';
       });
 
@@ -49,21 +49,21 @@ export default function ({ getService }: FtrProviderContext) {
     it('propagates status issues to dependencies', async () => {
       await setStatus('degraded');
       await retry.waitForWithTimeout(
-        `corePluginA status to update`,
+        `statusPluginA status to update`,
         5_000,
-        async () => (await getStatus('corePluginA')).level === 'degraded'
+        async () => (await getStatus('statusPluginA')).level === 'degraded'
       );
-      expect((await getStatus('corePluginA')).level).to.eql('degraded');
-      expect((await getStatus('corePluginB')).level).to.eql('degraded');
+      expect((await getStatus('statusPluginA')).level).to.eql('degraded');
+      expect((await getStatus('statusPluginB')).level).to.eql('degraded');
 
       await setStatus('available');
       await retry.waitForWithTimeout(
-        `corePluginA status to update`,
+        `statusPluginA status to update`,
         5_000,
-        async () => (await getStatus('corePluginA')).level === 'available'
+        async () => (await getStatus('statusPluginA')).level === 'available'
       );
-      expect((await getStatus('corePluginA')).level).to.eql('available');
-      expect((await getStatus('corePluginB')).level).to.eql('available');
+      expect((await getStatus('statusPluginA')).level).to.eql('available');
+      expect((await getStatus('statusPluginB')).level).to.eql('available');
     });
   });
 }

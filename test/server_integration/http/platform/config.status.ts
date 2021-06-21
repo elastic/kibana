@@ -25,7 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   // Find all folders in __fixtures__/plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, '../../__fixtures__/plugins'));
   const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
+    fs.statSync(path.resolve(__dirname, '../../__fixtures__/plugins', file)).isDirectory()
   );
 
   return {
@@ -44,7 +44,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
         ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) =>
+            `--plugin-path=${path.resolve(__dirname, '../../__fixtures__/plugins', pluginDir)}`
         ),
       ],
       runOptions: {

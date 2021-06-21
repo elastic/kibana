@@ -57,7 +57,7 @@
     { "path": "../src/plugins/visualize/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_app_status/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_provider_plugin/tsconfig.json" },
-    { "path": "server_integration/__fixtures__/plugins/core_plugin_a/tsconfig.json" },
-    { "path": "server_integration/__fixtures__/plugins/core_plugin_b/tsconfig.json" },
+    { "path": "server_integration/__fixtures__/plugins/status_plugin_a/tsconfig.json" },
+    { "path": "server_integration/__fixtures__/plugins/status_plugin_b/tsconfig.json" },
   ]
 }

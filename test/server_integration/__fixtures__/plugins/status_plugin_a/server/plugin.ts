@@ -15,7 +15,7 @@ import {
   ServiceStatusLevels,
 } from '../../../../../../src/core/server';
 
-export class CorePluginAPlugin implements Plugin {
+export class StatusPluginAPlugin implements Plugin {
   private status$ = new Subject<ServiceStatus>();
 
   public setup(core: CoreSetup, deps: {}) {
@@ -26,7 +26,7 @@ export class CorePluginAPlugin implements Plugin {
 
     router.post(
       {
-        path: '/internal/core_plugin_a/status/set',
+        path: '/internal/status_plugin_a/status/set',
         validate: {
           query: schema.object({
             level: schema.oneOf([
@@ -43,7 +43,7 @@ export class CorePluginAPlugin implements Plugin {
 
         this.status$.next({
           level: ServiceStatusLevels[level],
-          summary: `corePluginA is ${level}`,
+          summary: `statusPluginA is ${level}`,
         });
 
         return res.ok();
