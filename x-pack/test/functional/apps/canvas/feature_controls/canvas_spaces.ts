@@ -15,13 +15,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const {
-    importExport: { load, unload },
-  } = kibanaServer;
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
+
+    const { importExport: { load, unload } } = kibanaServer;
+    const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
