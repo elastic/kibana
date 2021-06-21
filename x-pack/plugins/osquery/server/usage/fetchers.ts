@@ -134,7 +134,9 @@ export async function getLiveQueryUsage(
   return result;
 }
 
-export function extractBeatUsageMetrics(metricResponse: SearchResponse<unknown>) {
+export function extractBeatUsageMetrics(
+  metricResponse: Pick<SearchResponse<unknown>, 'aggregations'>
+) {
   const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
   const result: BeatMetricsUsage = {
     memory: {
@@ -169,6 +171,7 @@ export function extractBeatUsageMetrics(metricResponse: SearchResponse<unknown>)
       }
     }
   }
+  return result;
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
