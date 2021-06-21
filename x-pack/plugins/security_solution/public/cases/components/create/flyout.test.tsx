@@ -16,7 +16,7 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       cases: {
-        getCreateCase: jest.fn(),
+        getCreateCase: () => {},
       },
     },
   }),

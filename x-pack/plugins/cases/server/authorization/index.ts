@@ -11,7 +11,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../common/constants';
+} from '../../common';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -183,6 +183,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetAlertsAttachedToCase]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_alerts_attach_to_case',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
   // comments operations
   [WriteOperations.CreateComment]: {

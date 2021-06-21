@@ -49,23 +49,9 @@ export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
     defaultMessage: `{totalCount} {totalCount, plural, =1 {alert} other {alerts}}`,
   });
 
-export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
-  'xpack.cases.caseView.alertRuleDeletedLabelTitle',
-  {
-    defaultMessage: 'added an alert',
-  }
-);
-
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
   defaultMessage: 'Show alert details',
 });
-
-export const SEND_ALERT_TO_TIMELINE = i18n.translate(
-  'xpack.cases.caseView.sendAlertToTimelineTooltip',
-  {
-    defaultMessage: 'Investigate in timeline',
-  }
-);
 
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',

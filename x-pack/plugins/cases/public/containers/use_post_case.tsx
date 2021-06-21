@@ -80,11 +80,12 @@ export const usePostCase = (): UsePostCase => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
   return { ...state, postCase: postMyCase };
 };
