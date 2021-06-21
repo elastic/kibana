@@ -17,6 +17,21 @@ const roleMappingBaseSchema = {
   authProvider: schema.arrayOf(schema.string()),
 };
 
+export function registerEnableRoleMappingsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/app_search/role_mappings/enable_role_based_access',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/role_mappings/enable_role_based_access',
+    })
+  );
+}
+
 export function registerRoleMappingsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -79,6 +94,7 @@ export function registerRoleMappingRoute({
 }
 
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
+  registerEnableRoleMappingsRoute(dependencies);
   registerRoleMappingsRoute(dependencies);
   registerRoleMappingRoute(dependencies);
 };
