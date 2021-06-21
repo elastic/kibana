@@ -10,15 +10,15 @@ import pMap from 'p-map';
 
 import { SavedObject } from 'kibana/public';
 import {
+  AssociationType,
   CASE_SAVED_OBJECT,
+  CommentAttributes,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
-import { AssociationType, CommentAttributes } from '../../../common/api';
+} from '../../../common';
 import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common';
+import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
 import { Operations } from '../../authorization';
 
 /**
