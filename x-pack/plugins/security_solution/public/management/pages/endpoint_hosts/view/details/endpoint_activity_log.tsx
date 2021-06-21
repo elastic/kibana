@@ -89,6 +89,7 @@ export const EndpointActivityLog = memo(
                 titleSize="s"
                 title={<h2>{i18.ACTIVITY_LOG.LogEntry.emptyState.title}</h2>}
                 body={<p>{i18.ACTIVITY_LOG.LogEntry.emptyState.body}</p>}
+                data-test-subj="activityLogEmpty"
               />
             </EuiFlexItem>
           ) : (

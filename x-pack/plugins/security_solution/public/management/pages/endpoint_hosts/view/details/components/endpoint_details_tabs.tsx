@@ -87,6 +87,7 @@ export const EndpointDetailsFlyoutTabs = memo(
         onClick={() => handleTabClick(tab)}
         isSelected={tab.id === selectedTabId}
         key={tab.id}
+        data-test-subj={tab.id}
       >
         {tab.name}
       </EuiTab>
