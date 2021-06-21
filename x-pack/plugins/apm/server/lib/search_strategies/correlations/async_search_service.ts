@@ -21,7 +21,7 @@ import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
-import { getRandomInt, range } from './utils';
+import { isHistogramRoughlyEqual, range } from './utils';
 import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 
 const CORRELATION_THRESHOLD = 0.3;
@@ -196,28 +196,6 @@ export const asyncSearchServiceProvider = (
   fetchCorrelations();
 
   return () => {
-    // Roughly compare histograms by sampling random bins
-    // And rounding up histogram count to account for different floating points
-    const isHistogramRoughlyEqual = (
-      a: HistogramItem[],
-      b: HistogramItem[],
-      numBinsToSample = 10
-    ) => {
-      if (a.length !== b.length) return false;
-
-      const sampledIndices = Array.from(Array(numBinsToSample).keys()).map(() =>
-        getRandomInt(0, a.length - 1)
-      );
-      return !sampledIndices.some((idx) => {
-        return (
-          roundToDecimalPlace(a[idx].key, SIGNIFICANT_FRACTION) !==
-            roundToDecimalPlace(b[idx].key, SIGNIFICANT_FRACTION) &&
-          roundToDecimalPlace(a[idx].doc_count, SIGNIFICANT_FRACTION) !==
-            roundToDecimalPlace(b[idx].doc_count, SIGNIFICANT_FRACTION)
-        );
-      });
-    };
-
     // Remove duplicates
     const uniqueValues = uniqWith(
       values.sort((a, b) => b.correlation - a.correlation),
@@ -236,7 +214,9 @@ export const asyncSearchServiceProvider = (
           ) &&
           // Here we only check if they are roughly equal by comparing 10 random bins
           // because it's computation intensive to check all bin
-          isHistogramRoughlyEqual(b.histogram, a.histogram)
+          isHistogramRoughlyEqual(b.histogram, a.histogram, {
+            significantFraction: SIGNIFICANT_FRACTION,
+          })
         );
       }
     )
