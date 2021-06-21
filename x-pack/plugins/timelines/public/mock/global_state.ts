@@ -49,6 +49,7 @@ export const mockGlobalState: TimelineState = {
       queryFields: [],
       selectAll: false,
       title: 'Events',
+      unit: (n: number) => String(n),
     },
   },
 };
