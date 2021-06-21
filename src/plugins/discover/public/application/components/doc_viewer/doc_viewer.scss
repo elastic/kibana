@@ -42,6 +42,9 @@
 
 .kbnDocViewer__fieldIcon {
   padding: $euiSizeS;
+  @include euiBreakpoint('m') {
+    align-self: flex-start;
+  }
 }
 
 .kbnDocViewer__multiFieldBadge {
