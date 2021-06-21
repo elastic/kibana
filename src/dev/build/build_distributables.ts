@@ -25,6 +25,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  buildExamplePlugins: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
@@ -47,6 +48,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
       options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
     );
     await run(Tasks.ExtractNodeBuilds);
+  }
+
+  /**
+   * build example plugins
+   */
+  if (options.buildExamplePlugins) {
+    await run(Tasks.BuildKibanaExamplePlugins);
   }
 
   /**
