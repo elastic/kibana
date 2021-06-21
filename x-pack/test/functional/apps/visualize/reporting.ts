@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -25,14 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.loadIfNeeded(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
-      );
+      await kibanaServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json');
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
