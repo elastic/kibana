@@ -21,7 +21,7 @@ Parameters for finding cases IDs using an alert ID
 
 The alert ID to search for
 
-Defined in: [cases/get.ts:47](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/get.ts#L47)
+Defined in: [cases/get.ts:42](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L42)
 
 ___
 
@@ -37,4 +37,4 @@ The filtering options when searching for associated cases.
 | :------ | :------ |
 | `owner` | *undefined* \| *string* \| *string*[] |
 
-Defined in: [cases/get.ts:51](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/get.ts#L51)
+Defined in: [cases/get.ts:46](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L46)

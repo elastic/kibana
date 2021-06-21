@@ -67,8 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  // Failing: See https://github.com/elastic/kibana/issues/102012
-  describe.skip('anomaly detection alert', function () {
+  describe('anomaly detection alert', function () {
     this.tags('ciGroup13');
 
     before(async () => {
@@ -119,11 +118,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);
-        await ml.alerting.setTestInterval('2y');
+        await ml.alerting.setTestInterval('5y');
         await ml.alerting.assertPreviewButtonState(true);
 
         // don't check the exact number provided by the backend, just make sure it's > 0
-        await ml.alerting.checkPreview(/Found [1-9]\d* anomalies in the last 2y/);
+        await ml.alerting.checkPreview(/Found [1-9]\d* anomal(y|ies) in the last 5y/);
 
         await ml.testExecution.logTestStep('should create an alert');
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
