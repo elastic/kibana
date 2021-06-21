@@ -13,6 +13,7 @@ import { EuiTable, EuiTableBody, EuiTablePagination } from '@elastic/eui';
 import { Pager } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { USERNAME_LABEL, EMAIL_LABEL } from '../../../../shared/constants';
 import { TableHeader } from '../../../../shared/table_header';
 import { AppLogic } from '../../../app_logic';
 import { UserRow } from '../../../components/shared/user_row';
@@ -20,18 +21,6 @@ import { User } from '../../../types';
 import { GroupLogic } from '../group_logic';
 
 const USERS_PER_PAGE = 10;
-const USERNAME_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsUsersTable.usernameTableHeader',
-  {
-    defaultMessage: 'Username',
-  }
-);
-const EMAIL_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsUsersTable.emailTableHeader',
-  {
-    defaultMessage: 'Email',
-  }
-);
 
 export const GroupUsersTable: React.FC = () => {
   const { isFederatedAuth } = useValues(AppLogic);
