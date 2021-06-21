@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-list-hooks';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { getJobs } from '../api/get_jobs';
 import { CombinedJobWithStats } from '../../../../../../ml/common/types/anomaly_detection_jobs';
 
