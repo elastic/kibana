@@ -141,7 +141,7 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: (type: SavedObjectsType) => void;
+  registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
 }
 
 /**
