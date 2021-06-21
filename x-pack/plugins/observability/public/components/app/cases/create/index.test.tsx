@@ -20,8 +20,7 @@ jest.mock('../../../../utils/kibana_react');
 
 describe('Create case', () => {
   const mockCreateCase = jest.fn();
-  const mockNavigateToUrl = jest.fn();
-  const mockCasesUrl = 'https://elastic.co/app/observability/cases';
+  const mockNavigateToApp = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
@@ -29,7 +28,7 @@ describe('Create case', () => {
         cases: {
           getCreateCase: mockCreateCase,
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
   });
@@ -53,7 +52,7 @@ describe('Create case', () => {
             onCancel();
           },
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
@@ -62,7 +61,7 @@ describe('Create case', () => {
       </EuiThemeProvider>
     );
 
-    await waitFor(() => expect(mockNavigateToUrl).toHaveBeenCalledWith(`${mockCasesUrl}`));
+    await waitFor(() => expect(mockNavigateToApp).toHaveBeenCalledWith(`${CASES_APP_ID}`));
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -73,7 +72,7 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
@@ -83,10 +82,9 @@ describe('Create case', () => {
     );
 
     await waitFor(() =>
-      expect(mockNavigateToUrl).toHaveBeenNthCalledWith(
-        1,
-        `${mockCasesUrl}${getCaseDetailsUrl({ id: basicCase.id })}`
-      )
+      expect(mockNavigateToApp).toHaveBeenNthCalledWith(1, `${CASES_APP_ID}`, {
+        path: getCaseDetailsUrl({ id: basicCase.id }),
+      })
     );
   });
 });
