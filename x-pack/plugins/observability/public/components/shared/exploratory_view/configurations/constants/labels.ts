@@ -165,7 +165,7 @@ export const KPI_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
 export const PERF_DIST_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.performanceDistribution',
   {
-    defaultMessage: 'Performance Distribution',
+    defaultMessage: 'Performance distribution',
   }
 );
 
@@ -176,6 +176,20 @@ export const CORE_WEB_VITALS_LABEL = i18n.translate(
   }
 );
 
+export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.deviceDistribution',
+  {
+    defaultMessage: 'Device distribution',
+  }
+);
+
+export const MOBILE_RESPONSE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.mobileResponse',
+  {
+    defaultMessage: 'Mobile response',
+  }
+);
+
 export const MEMORY_USAGE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.memoryUsage',
   {
@@ -183,7 +197,7 @@ export const MEMORY_USAGE_LABEL = i18n.translate(
   }
 );
 
-export const KIP_OVER_TIME_LABEL = i18n.translate(
+export const KPI_OVER_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.kpiOverTime',
   {
     defaultMessage: 'KPI over time',
@@ -211,3 +225,82 @@ export const UP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.
 export const DOWN_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.downPings', {
   defaultMessage: 'Down Pings',
 });
+
+export const CARRIER_NAME = i18n.translate('xpack.observability.expView.fieldLabels.carrierName', {
+  defaultMessage: 'Carrier Name',
+});
+
+export const REQUEST_METHOD = i18n.translate(
+  'xpack.observability.expView.fieldLabels.requestMethod',
+  {
+    defaultMessage: 'Request Method',
+  }
+);
+
+export const CONNECTION_TYPE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.connectionType',
+  {
+    defaultMessage: 'Connection Type',
+  }
+);
+export const HOST_OS = i18n.translate('xpack.observability.expView.fieldLabels.hostOS', {
+  defaultMessage: 'Host OS',
+});
+
+export const SERVICE_VERSION = i18n.translate(
+  'xpack.observability.expView.fieldLabels.serviceVersion',
+  {
+    defaultMessage: 'Service Version',
+  }
+);
+
+export const OS_PLATFORM = i18n.translate('xpack.observability.expView.fieldLabels.osPlatform', {
+  defaultMessage: 'OS Platform',
+});
+
+export const DEVICE_MODEL = i18n.translate('xpack.observability.expView.fieldLabels.deviceModel', {
+  defaultMessage: 'Device Model',
+});
+
+export const CARRIER_LOCATION = i18n.translate(
+  'xpack.observability.expView.fieldLabels.carrierLocation',
+  {
+    defaultMessage: 'Carrier Location',
+  }
+);
+
+export const RESPONSE_LATENCY = i18n.translate(
+  'xpack.observability.expView.fieldLabels.responseLatency',
+  {
+    defaultMessage: 'Response latency',
+  }
+);
+
+export const MOBILE_APP = i18n.translate('xpack.observability.expView.fieldLabels.mobileApp', {
+  defaultMessage: 'Mobile App',
+});
+
+export const MEMORY_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.mobile.memoryUsage',
+  {
+    defaultMessage: 'Memory Usage',
+  }
+);
+
+export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
+  defaultMessage: 'CPU Usage',
+});
+
+export const TRANSACTIONS_PER_MINUTE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.transactionPerMinute',
+  {
+    defaultMessage: 'Transactions per minute',
+  }
+);
+
+export const NUMBER_OF_DEVICES = i18n.translate(
+  'xpack.observability.expView.fieldLabels.numberOfDevices',
+  {
+    defaultMessage: 'Number of Devices',
+  }
+);

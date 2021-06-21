@@ -14,20 +14,18 @@ interface TagsProps {
   gutterSize?: EuiBadgeGroupProps['gutterSize'];
 }
 
-const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => {
-  return (
-    <>
-      {tags.length > 0 && (
-        <EuiBadgeGroup gutterSize={gutterSize}>
-          {tags.map((tag) => (
-            <EuiBadge data-test-subj={`tag-${tag}`} color={color} key={tag}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      )}
-    </>
-  );
-};
+const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => (
+  <>
+    {tags.length > 0 && (
+      <EuiBadgeGroup gutterSize={gutterSize}>
+        {tags.map((tag) => (
+          <EuiBadge data-test-subj={`tag-${tag}`} color={color} key={tag}>
+            {tag}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    )}
+  </>
+);
 
 export const Tags = memo(TagsComponent);
