@@ -17,5 +17,6 @@ export { UserFlyout } from './user_flyout';
 export { UsersHeading } from './users_heading';
 export { UserInvitationCallout } from './user_invitation_callout';
 export { UserSelector } from './user_selector';
+export { UsersTable } from './users_table';
 export { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 export { UsersEmptyPrompt } from './users_empty_prompt';

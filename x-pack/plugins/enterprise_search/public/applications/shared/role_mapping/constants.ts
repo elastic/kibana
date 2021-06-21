@@ -356,6 +356,14 @@ export const UPDATE_USER_DESCRIPTION = i18n.translate(
     defaultMessage: 'Manage granular access and permissions',
   }
 );
+
+export const INVITATION_PENDING_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.invitationPendingLabel',
+  {
+    defaultMessage: 'Invitation pending',
+  }
+);
+
 export const ROLE_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.roleModalText', {
   defaultMessage:
     'Removing a role mapping revokes access to any user corresponding to the mapping attributes, but may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
@@ -370,3 +378,4 @@ export const USER_MODAL_TITLE = (username: string) =>
 export const USER_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.userModalText', {
   defaultMessage:
     'Removing a user immediately revokes access to the experience, unless this user’s attributes also corresponds to a role mapping for native and SAML-governed authentication, in which case associated role mappings should also be reviewed and adjusted, as needed.',
+});
