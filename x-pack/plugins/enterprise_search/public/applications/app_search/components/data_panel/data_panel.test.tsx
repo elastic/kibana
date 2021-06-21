@@ -27,7 +27,7 @@ describe('DataPanel', () => {
     expect(wrapper.find('[data-test-subj="children"]').text()).toEqual('Look at this graph');
   });
 
-  it('conditionally a spacer between the header and children', () => {
+  it('conditionally renders a spacer between the header and children', () => {
     const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
     expect(wrapper.find(EuiSpacer)).toHaveLength(0);

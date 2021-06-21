@@ -120,7 +120,7 @@ describe('EnginesOverview', () => {
     });
 
     describe('meta engine creation', () => {
-      it('renders a create engine meta action when the user can create meta engines', () => {
+      it('renders a create meta engine action when the user can create meta engines', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
