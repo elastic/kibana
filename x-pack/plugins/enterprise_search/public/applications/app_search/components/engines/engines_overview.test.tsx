@@ -42,7 +42,7 @@ describe('EnginesOverview', () => {
     metaEnginesLoading: false,
     hasPlatinumLicense: false,
     // AppLogic
-    myRole: { canManageEngines: false },
+    myRole: { canManageEngines: false, canManageMetaEngines: false },
     // MetaEnginesTableLogic
     expandedSourceEngines: {},
     conflictingEnginesSets: {},
@@ -85,17 +85,25 @@ describe('EnginesOverview', () => {
     expect(actions.loadEngines).toHaveBeenCalled();
   });
 
-  describe('when the user can manage/create engines', () => {
-    it('renders a create engine button which takes users to the create engine page', () => {
+  describe('engine creation', () => {
+    it('renders a create engine action when the users can create engines', () => {
       setMockValues({
         ...valuesWithEngines,
         myRole: { canManageEngines: true },
       });
       const wrapper = shallow(<EnginesOverview />);
 
-      expect(
-        wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
-      ).toEqual('/engine_creation');
+      expect(wrapper.find('[data-test-subj="appSearchEngines"]').prop('action')).toBeTruthy();
+    });
+
+    it('does not render a create engine action if the user cannot create engines', () => {
+      setMockValues({
+        ...valuesWithEngines,
+        myRole: { canManageEngines: false },
+      });
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(wrapper.find('[data-test-subj="appSearchEngines"]').prop('action')).toBeFalsy();
     });
   });
 
@@ -111,19 +119,41 @@ describe('EnginesOverview', () => {
       expect(actions.loadMetaEngines).toHaveBeenCalled();
     });
 
-    describe('when the user can manage/create engines', () => {
-      it('renders a create engine button which takes users to the create meta engine page', () => {
+    describe('meta engine creation', () => {
+      it('renders a create meta engine action when the user can create meta engines', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
-          myRole: { canManageEngines: true },
+          myRole: { canManageMetaEngines: true },
         });
         const wrapper = shallow(<EnginesOverview />);
 
-        expect(
-          wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
-        ).toEqual('/meta_engine_creation');
+        expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]').prop('action')).toBeTruthy();
       });
+
+      it('does not render a create meta engine action if user cannot create meta engines', () => {
+        setMockValues({
+          ...valuesWithEngines,
+          hasPlatinumLicense: true,
+          myRole: { canManageMetaEngines: false },
+        });
+        const wrapper = shallow(<EnginesOverview />);
+
+        expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]').prop('action')).toBeFalsy();
+      });
+    });
+  });
+
+  describe('when an account does not have a platinum license', () => {
+    it('renders a license call to action in place of the meta engines table', () => {
+      setMockValues({
+        ...valuesWithEngines,
+        hasPlatinumLicense: false,
+      });
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(wrapper.find('[data-test-subj="metaEnginesLicenseCTA"]')).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]')).toHaveLength(0);
     });
   });
 
