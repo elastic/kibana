@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
           'metricbeat_dashboard',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.01);
+        expect(percentDifference).to.be.lessThan(0.017);
       } finally {
         log.debug('### Screenshot taken');
       }
