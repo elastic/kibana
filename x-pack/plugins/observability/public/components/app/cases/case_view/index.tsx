@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  casesBreadcrumbs,
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
   getCaseUrl,
@@ -17,7 +18,7 @@ import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CASES_APP_ID } from '../constants';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 
 interface Props {
   caseId: string;

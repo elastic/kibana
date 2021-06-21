@@ -6,6 +6,8 @@
  */
 
 import { maybe } from '../../../../common/utils/maybe';
+import awsIcon from './icons/aws.svg';
+import azureIcon from './icons/azure.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIcon from './icons/default.svg';
@@ -21,9 +23,9 @@ import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
 import websocketIcon from './icons/websocket.svg';
-import javaIcon from '../../shared/AgentIcon/icons/java.svg';
+import javaIcon from '../../shared/agent_icon/icons/java.svg';
 
-const defaultTypeIcons: { [key: string]: string } = {
+const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
   ext: globeIcon,
@@ -32,14 +34,16 @@ const defaultTypeIcons: { [key: string]: string } = {
   resource: globeIcon,
 };
 
-export const typeIcons: { [type: string]: { [subType: string]: string } } = {
+export const spanTypeIcons: {
+  [type: string]: { [subType: string]: string };
+} = {
   aws: {
-    servicename: 'logoAWS',
+    servicename: awsIcon,
   },
   db: {
     cassandra: cassandraIcon,
-    cosmosdb: 'logoAzure',
-    dynamodb: 'logoAWS',
+    cosmosdb: azureIcon,
+    dynamodb: awsIcon,
     elasticsearch: elasticsearchIcon,
     mongodb: mongodbIcon,
     mysql: mysqlIcon,
@@ -52,18 +56,18 @@ export const typeIcons: { [type: string]: { [subType: string]: string } } = {
     websocket: websocketIcon,
   },
   messaging: {
-    azurequeue: 'logoAzure',
-    azureservicebus: 'logoAzure',
+    azurequeue: azureIcon,
+    azureservicebus: azureIcon,
     jms: javaIcon,
     kafka: kafkaIcon,
-    sns: 'logoAWS',
-    sqs: 'logoAWS',
+    sns: awsIcon,
+    sqs: awsIcon,
   },
   storage: {
-    azureblob: 'logoAzure',
-    azurefile: 'logoAzure',
-    azuretable: 'logoAzure',
-    s3: 'logoAWS',
+    azureblob: azureIcon,
+    azurefile: azureIcon,
+    azuretable: azureIcon,
+    s3: awsIcon,
   },
   template: {
     handlebars: handlebarsIcon,
@@ -75,10 +79,10 @@ export function getSpanIcon(type?: string, subtype?: string) {
     return defaultIcon;
   }
 
-  const types = maybe(typeIcons[type]);
+  const types = maybe(spanTypeIcons[type]);
 
   if (subtype && types && subtype in types) {
     return types[subtype];
   }
-  return defaultTypeIcons[type] || defaultIcon;
+  return defaultSpanTypeIcons[type] || defaultIcon;
 }

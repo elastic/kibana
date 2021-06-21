@@ -8,6 +8,7 @@
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 
 const createRuleTypeRegistryMock = () => ({
+  getFormatter: () => () => 'a reason',
   registerFormatter: () => {},
 });
 

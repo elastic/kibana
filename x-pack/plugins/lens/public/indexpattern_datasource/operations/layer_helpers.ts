@@ -627,7 +627,7 @@ export function canTransition({
       Boolean(newColumn) &&
       !newLayer.incompleteColumns?.[columnId] &&
       filterOperations(newColumn) &&
-      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)?.length
     );
   } catch (e) {
     return false;
