@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
-
 import {
   EuiLink,
   EuiButton,
@@ -22,55 +20,10 @@ import {
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { HttpLogic } from '../http';
-import { KibanaLogic } from '../kibana';
-
-import { letBrowserHandleEvent, createHref } from './';
+import { generateReactRouterProps, ReactRouterProps } from './';
 
 /**
- * Generates EUI components with React-Router-ified links
- *
- * Based off of EUI's recommendations for handling React Router:
- * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
- */
-
-interface ReactRouterProps {
-  to: string;
-  onClick?(): void;
-  // Used to navigate outside of the React Router plugin basename but still within Kibana,
-  // e.g. if we need to go from Enterprise Search to App Search
-  shouldNotCreateHref?: boolean;
-}
-
-export const ReactRouterHelper: React.FC<ReactRouterProps> = ({
-  to,
-  onClick,
-  shouldNotCreateHref,
-  children,
-}) => {
-  const { navigateToUrl, history } = useValues(KibanaLogic);
-  const { http } = useValues(HttpLogic);
-
-  // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(to, { history, http }, { shouldNotCreateHref });
-
-  const reactRouterLinkClick = (event: React.MouseEvent) => {
-    if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
-    if (letBrowserHandleEvent(event)) return; // Return early if the link behavior shouldn't be handled by React Router
-
-    // Prevent regular link behavior, which causes a browser refresh.
-    event.preventDefault();
-
-    // Perform SPA navigation.
-    navigateToUrl(to, { shouldNotCreateHref });
-  };
-
-  const reactRouterProps = { href, onClick: reactRouterLinkClick };
-  return React.cloneElement(children as React.ReactElement, reactRouterProps);
-};
-
-/**
- * Component helpers
+ * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
  */
 
 type ReactRouterEuiLinkProps = ReactRouterProps & EuiLinkAnchorProps;
@@ -79,11 +32,7 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
-    <EuiLink {...rest} />
-  </ReactRouterHelper>
-);
+}) => <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
 
 type ReactRouterEuiButtonProps = ReactRouterProps & EuiButtonProps;
 export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
@@ -91,11 +40,7 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
-    <EuiButton {...rest} />
-  </ReactRouterHelper>
-);
+}) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
 export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
@@ -104,9 +49,7 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   shouldNotCreateHref,
   ...rest
 }) => (
-  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
-    <EuiButtonEmpty {...rest} />
-  </ReactRouterHelper>
+  <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
@@ -115,11 +58,7 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
-    <EuiPanel {...rest} />
-  </ReactRouterHelper>
-);
+}) => <EuiPanel {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
 
 type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
 export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
@@ -127,8 +66,4 @@ export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
-    <EuiCard {...rest} />
-  </ReactRouterHelper>
-);
+}) => <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;

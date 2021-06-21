@@ -7,7 +7,7 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
-jest.mock('./load_index_settings', () => ({
+jest.mock('./util/load_index_settings', () => ({
   loadIndexSettings: async () => {
     return { maxInnerResultWindow: 100 };
   },

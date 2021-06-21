@@ -18,6 +18,7 @@ import {
   ExpressionFunctionCumulativeSum,
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
+  ExpressionFunctionOverallMetric,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 import { PersistableStateDefinition } from '../../../kibana_utils/common';
@@ -119,6 +120,7 @@ export interface ExpressionFunctionDefinitions {
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
   cumulative_sum: ExpressionFunctionCumulativeSum;
+  overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
 }

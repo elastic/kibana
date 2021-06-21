@@ -15,6 +15,8 @@ const ARCHIVE = resolve(INTEGRATION_TEST_ROOT, 'test/es_archives/metricbeat');
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
+  const find = getService('find');
+  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
@@ -28,7 +30,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
         'dashboard',
         'view/Metricbeat-system-overview-ecs?_g=(filters:!(),refreshInterval:(pause:!t,value:0),' +
           'time:(from:%272020-09-29T19:02:37.902Z%27,to:%272020-09-29T19:06:43.218Z%27))&_a=' +
-          '(description:%27Overview%20of%20system%20metrics%27,filters:!(),fullScreenMode:!t,' +
+          '(description:%27Overview%20of%20system%20metrics%27,filters:!(),' +
           'options:(darkTheme:!f),query:(language:kuery,query:%27%27),timeRestore:!f,' +
           'title:%27%5BMetricbeat%20System%5D%20Overview%20ECS%27,viewMode:view)',
         {
@@ -45,6 +47,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       // await PageObjects.dashboard.clickFullScreenMode();
 
       await PageObjects.common.sleep(2000);
+      await find.clickByButtonText('Dismiss');
       await PageObjects.dashboard.waitForRenderComplete();
       await browser.setScreenshotSize(1000, 1000);
     });
@@ -61,7 +64,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
         );
         expect(percentDifference).to.be.lessThan(0.01);
       } finally {
-        await PageObjects.dashboard.clickExitFullScreenLogoButton();
+        log.debug('### Screenshot taken');
       }
     });
   });

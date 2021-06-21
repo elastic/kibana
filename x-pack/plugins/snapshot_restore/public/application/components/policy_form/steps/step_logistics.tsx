@@ -30,7 +30,7 @@ import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { SectionLoading } from '../../';
+import { InlineLoading } from '../../';
 import { StepProps } from './';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -174,12 +174,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const renderRepositorySelect = () => {
     if (isLoadingRepositories) {
       return (
-        <SectionLoading inline={true}>
+        <InlineLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.loadingRepositoriesDescription"
             defaultMessage="Loading repositories…"
           />
-        </SectionLoading>
+        </InlineLoading>
       );
     }
 

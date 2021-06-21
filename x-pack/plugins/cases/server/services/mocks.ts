@@ -104,6 +104,7 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     create: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    getAllAlertsAttachToCase: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

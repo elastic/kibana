@@ -48,20 +48,6 @@ export function registerRoleMappingRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/app_search/role_mappings/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/:id',
-    })
-  );
-
   router.put(
     {
       path: '/api/app_search/role_mappings/{id}',
@@ -92,23 +78,7 @@ export function registerRoleMappingRoute({
   );
 }
 
-export function registerNewRoleMappingRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/app_search/role_mappings/new',
-      validate: false,
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/new',
-    })
-  );
-}
-
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
   registerRoleMappingsRoute(dependencies);
   registerRoleMappingRoute(dependencies);
-  registerNewRoleMappingRoute(dependencies);
 };
