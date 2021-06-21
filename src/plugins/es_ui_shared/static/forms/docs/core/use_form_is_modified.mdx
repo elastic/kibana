@@ -13,6 +13,8 @@ There might be cases where you need to know if the form has been modified by the
 
 For that you can use the `useFormIsModified` hook which will update each time any of the field value changes. If the user makes a change and then undoes the change and puts the initial value back, the form **won't be marked** as modified.
 
+**Important:** If you form dynamically adds and removes fields, the `isModified` state will be set to `true` when a field is removed from the DOM **only** if it was declared in the form initial `defaultValue` object.
+
 ## Options
 
 ### form

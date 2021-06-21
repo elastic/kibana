@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { useMemo } from 'react';
+import { get } from 'lodash';
+
 import { FieldHook, FormHook } from '../types';
 import { useFormContext } from '../form_context';
 import { useFormData } from './use_form_data';
@@ -43,7 +45,7 @@ export const useFormIsModified = ({
     );
   }
 
-  const { getFields, __getFieldsRemoved } = form;
+  const { getFields, __getFieldsRemoved, __getFormDefaultValue } = form;
 
   const discardToString = JSON.stringify(discard);
 
@@ -69,7 +71,7 @@ export const useFormIsModified = ({
     predicate = ([path]) => fieldsToDiscard[path] === undefined;
   }
 
-  const isModified = Object.entries(getFields())
+  let isModified = Object.entries(getFields())
     .filter(predicate)
     .some(([_, field]) => field.isModified);
 
@@ -78,13 +80,18 @@ export const useFormIsModified = ({
   }
 
   // Check if any field has been removed.
-  // If somme field has been removed then the form has been modified.
-  if (fieldsToDiscard) {
-    return (
-      Object.keys(__getFieldsRemoved()).filter((path) => fieldsToDiscard[path] === undefined)
-        .length > 0
-    );
-  }
+  // If somme field has been removed **and** they were originaly present on the
+  // form "defaultValue" then the form has been modified.
+  const formDefaultValue = __getFormDefaultValue();
+  const fieldOnFormDefaultValue = (path: string) => Boolean(get(formDefaultValue, path));
 
-  return Object.keys(__getFieldsRemoved()).length > 0;
+  const fieldsRemovedFromDOM: string[] = fieldsToDiscard
+    ? Object.keys(__getFieldsRemoved())
+        .filter((path) => fieldsToDiscard[path] === undefined)
+        .filter(fieldOnFormDefaultValue)
+    : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
+
+  isModified = fieldsRemovedFromDOM.length > 0;
+
+  return isModified;
 };

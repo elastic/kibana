@@ -263,6 +263,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [getFormData$, updateFormData$, fieldsToArray]
   );
 
+  const getFormDefaultValue: FormHook<T, I>['__getFormDefaultValue'] = useCallback(
+    () => defaultValueDeserialized.current,
+    []
+  );
+
   const getFieldDefaultValue: FormHook<T, I>['__getFieldDefaultValue'] = useCallback(
     (fieldName) => get(defaultValueDeserialized.current, fieldName),
     []
@@ -449,6 +454,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
+      __getFormDefaultValue: getFormDefaultValue,
       __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
@@ -468,6 +474,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     getFieldsRemoved,
     getFormData,
     getErrors,
+    getFormDefaultValue,
     getFieldDefaultValue,
     reset,
     formOptions,

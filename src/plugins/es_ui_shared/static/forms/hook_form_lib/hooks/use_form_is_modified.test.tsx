@@ -20,29 +20,47 @@ describe('useFormIsModified()', () => {
     discard?: string[];
   }
 
+  // We don't add the "lastName" field on purpose to test that we don't set the
+  // form "isModified" to true for fields that are not declared in the
+  // and that we remove from the DOM
+  const formDefaultValue = {
+    user: {
+      name: 'initialValue',
+    },
+    toDiscard: 'initialValue',
+  };
+
   const TestComp = ({ onIsModifiedChange, discard = [] }: Props) => {
-    const { form } = useForm();
+    const { form } = useForm({ defaultValue: formDefaultValue });
     const isModified = useFormIsModified({ form, discard });
     const [isNameVisible, setIsNameVisible] = useState(true);
+    const [isLastNameVisible, setIsLastNameVisible] = useState(true);
 
     // Call our jest.spy() with the latest hook value
     onIsModifiedChange(isModified);
 
     return (
       <Form form={form}>
-        {isNameVisible && (
-          <UseField path="name" defaultValue="initialValue" data-test-subj="nameField" />
-        )}
-        <UseField path="toDiscard" defaultValue="initialValue" data-test-subj="toDiscardField" />
-        <button data-test-subj="hideNameButton" onClick={() => setIsNameVisible(false)}>
-          Hide name
+        {isNameVisible && <UseField path="user.name" data-test-subj="nameField" />}
+        {isLastNameVisible && <UseField path="user.lastName" data-test-subj="lastNameField" />}
+
+        <UseField path="toDiscard" data-test-subj="toDiscardField" />
+
+        <button data-test-subj="hideNameButton" onClick={() => setIsNameVisible((prev) => !prev)}>
+          Toggle show/hide name
+        </button>
+        <button
+          data-test-subj="hideLastNameButton"
+          onClick={() => setIsLastNameVisible((prev) => !prev)}
+        >
+          Toggle show/hide lastname
         </button>
       </Form>
     );
   };
 
   const onIsModifiedChange = jest.fn();
-  const lastValue = () =>
+  const isFormModified = () =>
     onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
 
   const setup = registerTestBed(TestComp, {
@@ -53,44 +71,55 @@ describe('useFormIsModified()', () => {
   test('should return true **only** when the field value differs from its initial value', async () => {
     const { form } = await setup();
 
-    expect(lastValue()).toBe(false);
+    expect(isFormModified()).toBe(false);
 
     await act(async () => {
       form.setInputValue('nameField', 'changed');
     });
 
-    expect(lastValue()).toBe(true);
+    expect(isFormModified()).toBe(true);
 
     // Put back to the initial value --> isModified should be false
     await act(async () => {
       form.setInputValue('nameField', 'initialValue');
     });
-    expect(lastValue()).toBe(false);
+    expect(isFormModified()).toBe(false);
   });
 
   test('should accepts a list of field to discard', async () => {
     const { form } = await setup({ discard: ['toDiscard'] });
 
-    expect(lastValue()).toBe(false);
+    expect(isFormModified()).toBe(false);
 
     await act(async () => {
       form.setInputValue('toDiscardField', 'changed');
     });
 
     // It should still not be modififed
-    expect(lastValue()).toBe(false);
+    expect(isFormModified()).toBe(false);
   });
 
-  test('should take into account if a field is removed from the DOM', async () => {
-    const { component, find } = await setup();
+  test('should take into account if a field is removed from the DOM **and** it existed on the form "defaultValue"', async () => {
+    const { find } = await setup();
 
-    expect(lastValue()).toBe(false);
+    expect(isFormModified()).toBe(false);
 
     await act(async () => {
       find('hideNameButton').simulate('click');
     });
-    component.update();
+    expect(isFormModified()).toBe(true);
 
-    expect(lastValue()).toBe(true);
+    // Put back the name
+    await act(async () => {
+      find('hideNameButton').simulate('click');
+    });
+    expect(isFormModified()).toBe(false);
+
+    // Hide the lastname which is **not** in the form defaultValue
+    // this it won't set the form isModified to true
+    await act(async () => {
+      find('hideLastNameButton').simulate('click');
+    });
+    expect(isFormModified()).toBe(false);
   });
 });
