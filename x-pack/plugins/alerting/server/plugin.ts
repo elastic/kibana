@@ -76,7 +76,6 @@ export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeStart: 'execute-start',
   executeAction: 'execute-action',
-  executeActionStart: 'execute-action-start',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
