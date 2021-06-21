@@ -9,14 +9,17 @@ import { pick } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
-import { checkEnabledCaseConnectorOrThrow, CommentableCase } from '../../common';
+import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+  CaseResponse,
+  CommentPatchRequest,
+} from '../../../common';
 import { AttachmentService, CasesService } from '../../services';
-import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
-import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
 /**

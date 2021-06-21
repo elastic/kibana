@@ -10,8 +10,6 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
-import * as i18 from '../translations';
-import { SearchBar } from '../../../../components/search_bar';
 import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
 import { useEndpointSelector } from '../hooks';
@@ -32,8 +30,6 @@ export const EndpointActivityLog = memo(
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(a: EndpointAction) => void>();
     const { page, pageSize } = useEndpointSelector(getActivityLogDataPaging);
-    // TODO
-    const onSearch = useCallback(() => {}, []);
 
     const getActivityLog = useCallback(() => {
       dispatch({
@@ -57,7 +53,6 @@ export const EndpointActivityLog = memo(
           />
         ) : (
           <>
-            <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
             {activityLogLoading ? (
               <EuiLoadingContent lines={3} />
