@@ -164,7 +164,6 @@ export const applicationUsageSchema = {
   'securitySolution:network': commonSchema,
   'securitySolution:timelines': commonSchema,
   'securitySolution:case': commonSchema,
-  'securitySolution:administration': commonSchema,
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

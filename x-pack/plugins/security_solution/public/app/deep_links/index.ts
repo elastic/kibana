@@ -178,14 +178,14 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
       {
         id: SecurityPageName.trustedApps,
-        title: i18n.translate('xpack.securitySolution.search.administration.trusted_apps', {
+        title: i18n.translate('xpack.securitySolution.search.administration.trustedApps', {
           defaultMessage: 'Trusted Applications',
         }),
         path: TRUSTED_APPS_PATH,
       },
       {
         id: SecurityPageName.eventFilters,
-        title: i18n.translate('xpack.securitySolution.search.administration.event_filters', {
+        title: i18n.translate('xpack.securitySolution.search.administration.eventFilters', {
           defaultMessage: 'Event Filters',
         }),
         path: EVENT_FILTERS_PATH,

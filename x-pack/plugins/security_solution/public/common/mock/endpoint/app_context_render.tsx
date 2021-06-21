@@ -197,6 +197,11 @@ const createCoreStartMock = (
     return Promise.resolve();
   });
 
+  coreStart.application.navigateToUrl.mockImplementation((url) => {
+    history.push(url.replace(APP_PATH, ''));
+    return Promise.resolve();
+  });
+
   return coreStart;
 };
 
