@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useLink } from '../../../hooks';
+import { i18n } from '@kbn/i18n';
+
+import styled from 'styled-components';
+
+import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
 
-import { HeroImage } from '../sections/epm/screens/home/header';
+import { useLinks } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -19,6 +23,30 @@ interface Props {
   section?: Section;
   children?: React.ReactNode;
 }
+
+const Illustration = styled(EuiImage)`
+  margin-bottom: -68px;
+  width: 80%;
+`;
+
+const HeroImage = memo(() => {
+  const { toAssets } = useLinks();
+  const { uiSettings } = useStartServices();
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  return (
+    <Illustration
+      alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
+        defaultMessage: 'Illustration of an integration',
+      })}
+      url={
+        IS_DARK_THEME
+          ? toAssets('illustration_integrations_darkmode.svg')
+          : toAssets('illustration_integrations_lightmode.svg')
+      }
+    />
+  );
+});
 
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
