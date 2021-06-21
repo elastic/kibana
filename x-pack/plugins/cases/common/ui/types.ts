@@ -153,7 +153,7 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   type: CaseType | null;
-  title?: string;
+  title: string;
 }
 
 export interface FieldMappings {

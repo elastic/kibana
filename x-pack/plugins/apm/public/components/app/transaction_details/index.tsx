@@ -76,11 +76,13 @@ export function TransactionDetails() {
 
   return (
     <>
+      <EuiSpacer size="s" />
+
       <EuiTitle>
         <h2>{transactionName}</h2>
       </EuiTitle>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
         <TransactionCharts />
@@ -88,7 +90,7 @@ export function TransactionDetails() {
 
       <EuiHorizontalRule size="full" margin="l" />
 
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <TransactionDistribution
           distribution={distributionData}
           fetchStatus={distributionStatus}
