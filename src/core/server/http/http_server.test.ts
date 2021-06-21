@@ -1427,7 +1427,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some-image.png')
+        .get('/static/some_image.png')
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('must-revalidate');
@@ -1441,7 +1441,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/compression-available.png')
+        .get('/static/compression_available.png')
         .set('accept-encoding', 'gzip')
         .expect(200);
 
@@ -1457,7 +1457,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some-image.png')
+        .get('/static/some_image.png')
         .set('accept-encoding', 'gzip')
         .expect(200);
 
@@ -1473,14 +1473,14 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some-image.png')
+        .get('/static/some_image.png')
         .expect(200);
 
       const etag = response.get('etag');
       expect(etag).not.toBeUndefined();
 
       await supertest(innerServer.listener)
-        .get('/static/some-image.png')
+        .get('/static/some_image.png')
         .set('If-None-Match', etag)
         .expect(304);
     });
@@ -1493,7 +1493,7 @@ describe('setup contract', () => {
       await server.start();
 
       await supertest(innerServer.listener)
-        .get('/static/some-image.png')
+        .get('/static/some_image.png')
         .set('If-None-Match', `"definitely not a valid etag"`)
         .expect(200);
     });
