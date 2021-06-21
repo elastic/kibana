@@ -71,6 +71,11 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import {
+  MapsAppLocatorDefinition,
+  MapsAppRegionMapLocatorDefinition,
+  MapsAppTileMapLocatorDefinition,
+} from './locators';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -144,6 +149,22 @@ export class MapsPlugin
     plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
     plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
     plugins.share.urlGenerators.registerUrlGenerator(createRegionMapUrlGenerator(getStartServices));
+
+    const locator = plugins.share.url.locators.create(
+      new MapsAppLocatorDefinition({
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppTileMapLocatorDefinition({
+        locator,
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppRegionMapLocatorDefinition({
+        locator,
+      })
+    );
 
     plugins.inspector.registerView(MapView);
     if (plugins.home) {
