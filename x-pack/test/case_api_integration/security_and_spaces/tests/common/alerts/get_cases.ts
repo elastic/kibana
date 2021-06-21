@@ -13,7 +13,7 @@ import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/
 import {
   createCase,
   createComment,
-  getCaseIDsByAlert,
+  getCasesByAlert,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 import { CaseResponse, CasesByAlertId } from '../../../../../../plugins/cases/common';
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
         createComment({ supertest, caseId: case3.id, params: postCommentAlertReq }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({ supertest, alertID: 'test-id' });
+      const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(3);
       validateResponse(caseIDsWithAlert, [case1, case2, case3]);
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await Promise.all(commentPromises);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({ supertest, alertID: 'test-id' });
+      const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
         createComment({ supertest, caseId: case3.id, params: postCommentAlertReq }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({ supertest, alertID: 'test-id100' });
+      const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id100' });
 
       expect(caseIDsWithAlert.length).to.eql(0);
     });
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         createComment({ supertest, caseId: case3.id, params: postCommentAlertReq }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({
+      const caseIDsWithAlert = await getCasesByAlert({
         supertest,
         alertID: 'test-id',
         query: { owner: 'not-real' },
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext): void => {
             cases: [case1, case2, case3],
           },
         ]) {
-          const res = await getCaseIDsByAlert({
+          const res = await getCasesByAlert({
             supertest: supertestWithoutAuth,
             // cast because the official type is string | string[] but the ids will always be a single value in the tests
             alertID: postCommentAlertReq.alertId as string,
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: scenario.space },
           });
 
-          await getCaseIDsByAlert({
+          await getCasesByAlert({
             supertest: supertestWithoutAuth,
             alertID: postCommentAlertReq.alertId as string,
             auth: { user: scenario.user, space: scenario.space },
@@ -272,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const res = await getCaseIDsByAlert({
+        const res = await getCasesByAlert({
           supertest: supertestWithoutAuth,
           alertID: postCommentAlertReq.alertId as string,
           auth,
@@ -309,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const res = await getCaseIDsByAlert({
+        const res = await getCasesByAlert({
           supertest: supertestWithoutAuth,
           alertID: postCommentAlertReq.alertId as string,
           auth: { user: secOnly, space: 'space1' },
