@@ -235,3 +235,20 @@ export const ENABLE_ROLES_LINK = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.enableRolesLink',
   { defaultMessage: 'Learn more about role-based access' }
 );
+
+export const NO_USERS_TITLE = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersTitle', {
+  defaultMessage: 'No user added',
+});
+
+export const NO_USERS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.noUsersDescription',
+  {
+    defaultMessage:
+      'Users can be added individually, for flexibility. Role mappings provide a broader interface for adding large number of users using user attributes.',
+  }
+);
+
+export const ENABLE_USERS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableUsersLink',
+  { defaultMessage: 'Learn more about user management' }
+);

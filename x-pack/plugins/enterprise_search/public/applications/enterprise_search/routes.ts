@@ -5,5 +5,10 @@
  * 2.0.
  */
 
+import { docLinks } from '../shared/doc_links';
+
+export const DOCS_PREFIX = docLinks.enterpriseSearchBase;
+export const USERS_DOCS_URL = `${DOCS_PREFIX}/users-access.html`;
+
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
