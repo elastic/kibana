@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const LANG = 'handlebars_url';
+export const LANG = 'handlebars';
