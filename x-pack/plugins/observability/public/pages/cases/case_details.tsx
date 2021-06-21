@@ -16,8 +16,9 @@ import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
@@ -27,9 +28,9 @@ export const CaseDetailsPage = React.memo(() => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(`${CASES_APP_ID}`);
+      navigateToUrl(casesUrl);
     }
-  }, [navigateToApp, userPermissions]);
+  }, [casesUrl, navigateToUrl, userPermissions]);
 
   return caseId != null ? (
     <CaseView caseId={caseId} subCaseId={subCaseId} userCanCrud={userPermissions?.crud ?? false} />
