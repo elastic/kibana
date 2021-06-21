@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(2000);
+      await PageObjects.common.dismissBanner();
       await browser.setScreenshotSize(1000, 1337);
       await PageObjects.common.sleep(2000);
     });
