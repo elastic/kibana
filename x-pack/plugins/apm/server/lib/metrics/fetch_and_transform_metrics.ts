@@ -45,6 +45,9 @@ interface Filter {
   term?: {
     [key: string]: string;
   };
+  terms?: {
+    [key: string]: string[];
+  };
 }
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({

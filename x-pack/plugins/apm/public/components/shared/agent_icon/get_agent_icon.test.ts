@@ -12,27 +12,31 @@ const examples = {
   dotnet: 'dotnet',
   erlang: 'erlang',
   go: 'go',
-  java: 'java',
-  'js-base': 'rum',
   nodejs: 'nodejs',
   ocaml: 'ocaml',
   'opentelemetry/cpp': 'opentelemetry',
   'opentelemetry/dotnet': 'dotnet',
   'opentelemetry/erlang': 'erlang',
   'opentelemetry/go': 'go',
-  'opentelemetry/java': 'java',
   'opentelemetry/nodejs': 'nodejs',
   'opentelemetry/php': 'php',
   'opentelemetry/python': 'python',
   'opentelemetry/ruby': 'ruby',
-  'opentelemetry/webjs': 'rum',
   otlp: 'opentelemetry',
   php: 'php',
   python: 'python',
   ruby: 'ruby',
-  'rum-js': 'rum',
   rust: 'rust',
   'something else': undefined,
+
+  // Java agents
+  java: 'java',
+  'opentelemetry/java': 'java',
+
+  // RUM agents
+  'js-base': 'rum',
+  'opentelemetry/webjs': 'rum',
+  'rum-js': 'rum',
 };
 
 describe('getAgentIconKey', () => {
