@@ -40,7 +40,7 @@ interface Props {
 
 export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClose }) => {
   const { getAssetsPath } = useLink();
-  const { notifications, cloud } = useStartServices();
+  const { notifications, cloud, docLinks } = useStartServices();
 
   const isCloud = !!cloud?.cloudId;
 
@@ -163,7 +163,11 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
                   </strong>
                 ),
                 link: (
-                  <EuiLink href="https://ela.st/add-fleet-server" external={true} target="_blank">
+                  <EuiLink
+                    href={docLinks.links.fleet.upgradeElasticAgent712lower}
+                    external={true}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.fleet.fleetServerUpgradeModal.fleetServerMigrationGuide"
                       defaultMessage="Fleet Server migration guide"
