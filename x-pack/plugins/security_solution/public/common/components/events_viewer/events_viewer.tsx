@@ -175,9 +175,11 @@ const EventsViewerComponent: React.FC<Props> = ({
   }, [id, isQueryLoading]);
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { queryFields, title, unit } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id)
-  );
+  const {
+    queryFields,
+    title = i18n.EVENTS,
+    unit = (n: number) => i18n.UNIT(n),
+  } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
