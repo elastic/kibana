@@ -137,8 +137,8 @@ export const favoriteTimeline = ({
     body: {
       timelineId,
       timelineType,
-      templateTimelineId: templateTimelineId ?? null,
-      templateTimelineVersion: templateTimelineVersion ?? null,
+      templateTimelineId: templateTimelineId || null,
+      templateTimelineVersion: templateTimelineVersion || null,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
