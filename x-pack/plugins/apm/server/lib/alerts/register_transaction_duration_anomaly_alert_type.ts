@@ -14,7 +14,7 @@ import {
   ALERT_SEVERITY_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { compact } from 'lodash';
-import { ESSearchResponse } from 'typings/elasticsearch';
+import { ESSearchResponse } from 'src/core/types/elasticsearch';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
   AlertInstanceContext,
@@ -34,7 +34,6 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
