@@ -10,9 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
-import { useLink, useStartServices } from '../../../hooks';
+import type { EuiTheme } from 'src/plugins/kibana_react/common';
+
+import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
 import { useLinks } from '../hooks';
@@ -31,8 +33,8 @@ const Illustration = styled(EuiImage)`
 
 const HeroImage = memo(() => {
   const { toAssets } = useLinks();
-  const { uiSettings } = useStartServices();
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const theme = useTheme() as EuiTheme;
+  const IS_DARK_THEME = theme.darkMode;
 
   return (
     <Illustration
