@@ -12,7 +12,7 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError } from '../../utils';
 import { CASE_ALERTS_URL, CasesByAlertIDRequest } from '../../../../../common';
 
-export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
+export function initGetCasesByAlertIdApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_ALERTS_URL,
@@ -32,22 +32,8 @@ export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
         const casesClient = await context.cases.getCasesClient();
         const options = request.query as CasesByAlertIDRequest;
 
-        const caseIds = await casesClient.cases.getCaseIDsByAlertID({ alertID, options });
-
-        const getCaseInfo = async () => {
-          return Promise.all(
-            caseIds.map(async (caseId: string) => {
-              const fullCase = await casesClient.cases.get({ id: caseId });
-              return {
-                id: caseId,
-                title: fullCase.title,
-              };
-            })
-          );
-        };
-
         return response.ok({
-          body: await getCaseInfo(),
+          body: await casesClient.cases.getCasesByAlertID({ alertID, options }),
         });
       } catch (error) {
         logger.error(

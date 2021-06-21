@@ -16,7 +16,7 @@ import {
   getCaseIDsByAlert,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
-import { CaseResponse } from '../../../../../../plugins/cases/common';
+import { CaseResponse, CasesByAlertId } from '../../../../../../plugins/cases/common';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -28,6 +28,23 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+
+/**
+ * Ensure that the result of the API request matches with the cases created for the test.
+ */
+function validateResponse(
+  casesFromAPIResponse: CasesByAlertId,
+  createdCasesForTest: CaseResponse[]
+) {
+  const idToTitle = new Map<string, string>(
+    createdCasesForTest.map((caseInfo) => [caseInfo.id, caseInfo.title])
+  );
+
+  for (const apiResCase of casesFromAPIResponse) {
+    // check that the title in the api response matches the title in the map from the created cases
+    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id));
+  }
+}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -41,9 +58,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return all cases with the same alert ID attached to them', async () => {
       const [case1, case2, case3] = await Promise.all([
-        createCase(supertest, getPostCaseRequest()),
-        createCase(supertest, getPostCaseRequest()),
-        createCase(supertest, getPostCaseRequest()),
+        createCase(supertest, getPostCaseRequest({ title: 'a' })),
+        createCase(supertest, getPostCaseRequest({ title: 'b' })),
+        createCase(supertest, getPostCaseRequest({ title: 'c' })),
       ]);
 
       await Promise.all([
@@ -55,9 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const caseIDsWithAlert = await getCaseIDsByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(3);
-      expect(caseIDsWithAlert).to.contain(case1.id);
-      expect(caseIDsWithAlert).to.contain(case2.id);
-      expect(caseIDsWithAlert).to.contain(case3.id);
+      validateResponse(caseIDsWithAlert, [case1, case2, case3]);
     });
 
     it('should return all cases with the same alert ID when more than 100 cases', async () => {
@@ -84,9 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
-      for (const caseInfo of cases) {
-        expect(caseIDsWithAlert).to.contain(caseInfo.id);
-      }
+      validateResponse(caseIDsWithAlert, cases);
     });
 
     it('should return no cases when the alert ID is not found', async () => {
@@ -176,17 +189,17 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            caseIDs: [case1.id, case2.id, case3.id],
+            cases: [case1, case2, case3],
           },
           {
             user: superUser,
-            caseIDs: [case1.id, case2.id, case3.id],
+            cases: [case1, case2, case3],
           },
-          { user: secOnlyRead, caseIDs: [case1.id, case2.id] },
-          { user: obsOnlyRead, caseIDs: [case3.id] },
+          { user: secOnlyRead, cases: [case1, case2] },
+          { user: obsOnlyRead, cases: [case3] },
           {
             user: obsSecRead,
-            caseIDs: [case1.id, case2.id, case3.id],
+            cases: [case1, case2, case3],
           },
         ]) {
           const res = await getCaseIDsByAlert({
@@ -198,10 +211,9 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             },
           });
-          expect(res.length).to.eql(scenario.caseIDs.length);
-          for (const caseID of scenario.caseIDs) {
-            expect(res).to.contain(caseID);
-          }
+          expect(res.length).to.eql(scenario.cases.length);
+
+          validateResponse(res, scenario.cases);
         }
       });
 
@@ -267,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: 'securitySolutionFixture' },
         });
 
-        expect(res).to.eql([case1.id]);
+        expect(res).to.eql([{ id: case1.id, title: case1.title }]);
       });
 
       it('should return the correct case IDs when the owner query parameter contains unprivileged values', async () => {
@@ -305,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
         });
 
-        expect(res).to.eql([case1.id]);
+        expect(res).to.eql([{ id: case1.id, title: case1.title }]);
       });
     });
   });
