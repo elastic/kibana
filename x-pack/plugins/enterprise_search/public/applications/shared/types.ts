@@ -47,7 +47,7 @@ export interface Invitation {
 }
 
 export interface ElasticsearchUser {
-  email: string;
+  email: string | null;
   username: string;
 }
 

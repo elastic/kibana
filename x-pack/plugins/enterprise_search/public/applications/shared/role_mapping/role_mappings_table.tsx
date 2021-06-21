@@ -143,6 +143,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const pagination = {
     hidePerPageOptions: true,
+    pageSize: 10,
   };
 
   const search = {
