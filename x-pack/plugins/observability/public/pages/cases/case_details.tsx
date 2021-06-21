@@ -17,7 +17,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const userPermissions = useGetUserCasesPermissions();
@@ -26,8 +26,9 @@ export const CaseDetailsPage = React.memo(() => {
     subCaseId?: string;
   }>();
 
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
+    navigateToUrl(casesUrl);
     return null;
   }
 
