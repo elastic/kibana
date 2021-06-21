@@ -98,7 +98,6 @@ export function CorrelationsTable<T extends SignificantTerm>({
       pageSize,
       totalItemCount: itemCount,
       pageSizeOptions: PAGINATION_SIZE_OPTIONS,
-      hidePerPageOptions: itemCount > PAGINATION_SIZE_OPTIONS[0],
     };
   }, [pageIndex, pageSize, significantTerms]);
 
