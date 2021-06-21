@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SubCasesPatchRequest } from '../../../../common/api';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../common/constants';
+import { SubCasesPatchRequest, SUB_CASES_PATCH_DEL_URL } from '../../../../common';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 

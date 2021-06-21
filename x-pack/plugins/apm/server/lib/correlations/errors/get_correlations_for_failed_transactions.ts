@@ -11,8 +11,8 @@ import {
   processSignificantTermAggs,
   TopSigTerm,
 } from '../process_significant_term_aggs';
-import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
