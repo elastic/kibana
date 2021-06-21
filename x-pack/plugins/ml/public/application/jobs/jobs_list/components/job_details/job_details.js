@@ -84,15 +84,15 @@ export class JobDetailsUI extends Component {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.ml.jobDetails.viewDatafeedTooltipText"
-              defaultMessage="View datafeed"
+              id="xpack.ml.jobDetails.datafeedChartTooltipText"
+              defaultMessage="Datafeed chart"
             />
           }
         >
           <EuiButtonIcon
             size="xs"
-            aria-label={i18n.translate('xpack.ml.jobDetails.viewDatafeedAriaLabel', {
-              defaultMessage: 'View datafeed',
+            aria-label={i18n.translate('xpack.ml.jobDetails.datafeedChartAriaLabel', {
+              defaultMessage: 'Datafeed chart',
             })}
             iconType="visAreaStacked"
             onClick={() =>

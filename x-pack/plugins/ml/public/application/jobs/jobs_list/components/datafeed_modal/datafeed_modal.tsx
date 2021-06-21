@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingChart,
   EuiModal,
   EuiModalHeader,
@@ -24,6 +25,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -200,13 +202,33 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       <EuiModalHeader>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.jobsList.datafeedModal.header"
-              defaultMessage="{jobId}"
-              values={{
-                jobId,
-              }}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  color="primary"
+                  type="help"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.headerTooltipContent"
+                      defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.header"
+                      defaultMessage="Datafeed chart for {jobId}"
+                      values={{
+                        jobId,
+                      }}
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiDatePicker
