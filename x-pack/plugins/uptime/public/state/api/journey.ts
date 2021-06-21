@@ -77,11 +77,10 @@ export async function getJourneyScreenshot(
         ref: await response.json(),
       };
     } else {
-      const imgBlob = await response.blob();
       return {
         stepName,
         maxSteps,
-        src: URL.createObjectURL(imgBlob),
+        src: URL.createObjectURL(await response.blob()),
       };
     }
   } catch (e) {

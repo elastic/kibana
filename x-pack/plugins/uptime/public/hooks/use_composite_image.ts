@@ -13,7 +13,7 @@ export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
   callback: React.Dispatch<string | undefined>,
   url?: string
-) => {
+) =>
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
 
@@ -30,4 +30,3 @@ export const useCompositeImage = (
       canvas.parentElement?.removeChild(canvas);
     };
   }, [imgRef, callback, url]);
-};
