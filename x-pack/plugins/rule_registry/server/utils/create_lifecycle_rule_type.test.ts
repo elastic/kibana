@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { castArray, omit, mapValues } from 'lodash';
+import { AlertInstanceContext, AlertInstanceState, AlertTypeState } from '../../../alerting/server';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';
-import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import {
+  createLifecycleRuleTypeFactory,
+  WrappedLifecycleRuleState,
+} from './create_lifecycle_rule_type_factory';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -24,7 +28,15 @@ function createRule() {
 
   let nextAlerts: Array<{ id: string; fields: Record<string, any> }> = [];
 
-  const type = factory({
+  const paramsSchema = schema.object({}, { unknowns: 'allow' });
+
+  const type = factory<
+    TypeOf<typeof paramsSchema>,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'warning'
+  >({
     actionGroups: [
       {
         id: 'warning',
@@ -48,11 +60,15 @@ function createRule() {
       state: [],
     },
     validate: {
-      params: schema.object({}, { unknowns: 'allow' }),
+      params: paramsSchema,
     },
   });
 
-  let state: Record<string, any> = {};
+  const defaultState: WrappedLifecycleRuleState<AlertTypeState> = {
+    wrapped: {},
+    trackedAlerts: {},
+  };
+  let state = defaultState;
   let previousStartedAt: Date | null;
   const createdAt = new Date('2021-06-16T09:00:00.000Z');
 
@@ -72,43 +88,44 @@ function createRule() {
 
       scheduleActions.mockClear();
 
-      state = await type.executor({
-        alertId: 'alertId',
-        createdBy: 'createdBy',
-        name: 'name',
-        params: {},
-        previousStartedAt,
-        startedAt,
-        rule: {
-          actions: [],
-          consumer: 'consumer',
-          createdAt,
+      state =
+        (await type.executor({
+          alertId: 'alertId',
           createdBy: 'createdBy',
-          enabled: true,
           name: 'name',
-          notifyWhen: 'onActionGroupChange',
-          producer: 'producer',
-          ruleTypeId: 'ruleTypeId',
-          ruleTypeName: 'ruleTypeName',
-          schedule: {
-            interval: '1m',
+          params: {},
+          previousStartedAt,
+          startedAt,
+          rule: {
+            actions: [],
+            consumer: 'consumer',
+            createdAt,
+            createdBy: 'createdBy',
+            enabled: true,
+            name: 'name',
+            notifyWhen: 'onActionGroupChange',
+            producer: 'producer',
+            ruleTypeId: 'ruleTypeId',
+            ruleTypeName: 'ruleTypeName',
+            schedule: {
+              interval: '1m',
+            },
+            tags: ['tags'],
+            throttle: null,
+            updatedAt: createdAt,
+            updatedBy: 'updatedBy',
           },
+          services: {
+            alertInstanceFactory,
+            savedObjectsClient: {} as any,
+            scopedClusterClient: {} as any,
+          },
+          spaceId: 'spaceId',
+          state,
           tags: ['tags'],
-          throttle: null,
-          updatedAt: createdAt,
           updatedBy: 'updatedBy',
-        },
-        services: {
-          alertInstanceFactory,
-          savedObjectsClient: {} as any,
-          scopedClusterClient: {} as any,
-        },
-        spaceId: 'spaceId',
-        state,
-        tags: ['tags'],
-        updatedBy: 'updatedBy',
-        namespace: 'namespace',
-      });
+          namespace: 'namespace',
+        })) || defaultState;
 
       previousStartedAt = startedAt;
     },

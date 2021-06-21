@@ -6,6 +6,8 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { getOrElse } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { Mutable } from 'utility-types';
 import v4 from 'uuid/v4';
 import { RuleDataClient } from '..';
@@ -60,12 +62,28 @@ export type LifecycleRuleExecutor<
   LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
 >;
 
-export interface TrackedLifecycleAlertState {
-  alertId: string;
-  alertUuid: string;
-  started: string;
-}
+const trackedAlertStateRt = t.type({
+  alertId: t.string,
+  alertUuid: t.string,
+  started: t.string,
+});
 
+export type TrackedLifecycleAlertState = t.TypeOf<typeof trackedAlertStateRt>;
+
+const alertTypeStateRt = <State extends AlertTypeState>() =>
+  t.record(t.string, t.unknown) as t.Type<State, State, unknown>;
+
+const wrappedStateRt = <State extends AlertTypeState>() =>
+  t.type({
+    wrapped: alertTypeStateRt<State>(),
+    trackedAlerts: t.record(t.string, trackedAlertStateRt),
+  });
+
+/**
+ * This is redefined instead of derived from above `wrappedStateRt` because
+ * there's no easy way to instantiate generic values such as the runtime type
+ * factory function.
+ */
 export type WrappedLifecycleRuleState<State extends AlertTypeState> = Record<string, unknown> & {
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
@@ -115,10 +133,12 @@ export const createLifecycleRuleTypeFactory = ({
 
       const ruleExecutorData = getRuleExecutorData(type, options);
 
-      const state: WrappedLifecycleRuleState<State> = previousState ?? {
-        wrapped: {},
-        trackedAlerts: {},
-      };
+      const state = getOrElse(
+        (): WrappedLifecycleRuleState<State> => ({
+          wrapped: previousState as State,
+          trackedAlerts: {},
+        })
+      )(wrappedStateRt<State>().decode(previousState));
 
       const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
 
