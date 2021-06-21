@@ -7,28 +7,29 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { ApplicationStart, CoreStart } from 'kibana/public';
 import { RedirectAppLinks } from '../../app_links';
-import { useKibana } from '../../context';
 
 interface Props {
   addBasePath: (path: string) => string;
+  application: ApplicationStart;
   hidden?: boolean;
   showDevToolsLink?: boolean;
   showManagementLink?: boolean;
 }
 
-export const OverviewPageActions = ({
+export const overviewPageActions = ({
   addBasePath,
+  application,
   hidden,
   showDevToolsLink,
   showManagementLink,
 }: Props) => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
+  // const {
+  //   services: { application },
+  // } = useKibana<CoreStart>();
 
   const {
     management: isManagementEnabled,
@@ -53,40 +54,36 @@ export const OverviewPageActions = ({
 
   const actionStackManagement =
     showManagementLink && isManagementEnabled ? (
-      <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
-        <RedirectAppLinks application={application}>
-          <EuiButtonEmpty
-            data-test-subj="homeManage"
-            className="kbnOverviewPageHeader__actionButton"
-            flush="both"
-            iconType="gear"
-            href={addBasePath('/app/management')}
-          >
-            {i18n.translate('kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel', {
-              defaultMessage: 'Manage',
-            })}
-          </EuiButtonEmpty>
-        </RedirectAppLinks>
-      </EuiFlexItem>
+      <RedirectAppLinks application={application}>
+        <EuiButtonEmpty
+          data-test-subj="homeManage"
+          className="kbnOverviewPageHeader__actionButton"
+          flush="both"
+          iconType="gear"
+          href={addBasePath('/app/management')}
+        >
+          {i18n.translate('kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel', {
+            defaultMessage: 'Manage',
+          })}
+        </EuiButtonEmpty>
+      </RedirectAppLinks>
     ) : null;
 
   const actionDevTools =
     showDevToolsLink && isDevToolsEnabled ? (
-      <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
-        <RedirectAppLinks application={application}>
-          <EuiButtonEmpty
-            data-test-subj="homeDevTools"
-            className="kbnOverviewPageHeader__actionButton"
-            flush="both"
-            iconType="wrench"
-            href={addBasePath('/app/dev_tools#/console')}
-          >
-            {i18n.translate('kibana-react.kbnOverviewPageHeader.devToolsButtonLabel', {
-              defaultMessage: 'Dev tools',
-            })}
-          </EuiButtonEmpty>
-        </RedirectAppLinks>
-      </EuiFlexItem>
+      <RedirectAppLinks application={application}>
+        <EuiButtonEmpty
+          data-test-subj="homeDevTools"
+          className="kbnOverviewPageHeader__actionButton"
+          flush="both"
+          iconType="wrench"
+          href={addBasePath('/app/dev_tools#/console')}
+        >
+          {i18n.translate('kibana-react.kbnOverviewPageHeader.devToolsButtonLabel', {
+            defaultMessage: 'Dev tools',
+          })}
+        </EuiButtonEmpty>
+      </RedirectAppLinks>
     ) : null;
 
   return !hidden ? [actionAddData, actionStackManagement, actionDevTools] : [];

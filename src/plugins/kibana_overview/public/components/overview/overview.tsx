@@ -24,7 +24,7 @@ import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
   useKibana,
-  OverviewPageActions,
+  overviewPageActions,
   OverviewPageFooter,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
@@ -119,9 +119,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   return (
     <EuiPageTemplate
       pageHeader={{
+        className: 'kbnPageHeader',
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />,
-        rightSideItems: OverviewPageActions({ addBasePath, hidden: isNewKibanaInstance }),
+        rightSideItems: overviewPageActions({
+          addBasePath,
+          application,
+          hidden: isNewKibanaInstance,
+        }),
       }}
     >
       {isNewKibanaInstance ? (
