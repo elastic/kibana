@@ -32,7 +32,6 @@ import {
   detailsError,
   detailsLoading,
   getActivityLogData,
-  getActivityLogError,
   showView,
   policyResponseConfigurations,
   policyResponseActions,
@@ -86,7 +85,6 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
 
   const activityLog = useEndpointSelector(getActivityLogData);
-  const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
   const hostDetailsError = useEndpointSelector(detailsError);
@@ -148,17 +146,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-    if (activityError !== undefined) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorTitle', {
-          defaultMessage: 'Could not find activity log for host',
-        }),
-        text: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorBody', {
-          defaultMessage: 'Please exit the flyout and select another host with actions.',
-        }),
-      });
-    }
-  }, [hostDetailsError, activityError, toasts]);
+  }, [hostDetailsError, toasts]);
 
   return (
     <EuiFlyout
