@@ -128,7 +128,6 @@ describe('migration v2', () => {
       settings: {
         es: {
           license: 'basic',
-          port: 9220,
           clusterName: 'es-test-cluster',
           nodes: [
             {

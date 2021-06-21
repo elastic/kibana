@@ -86,10 +86,11 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
   def kibanaPort = "61${parallelId}1"
   def esPort = "61${parallelId}2"
-  def esTransportPort = "61${parallelId}3"
-  def fleetPackageRegistryPort = "61${parallelId}4"
-  def alertingProxyPort = "61${parallelId}5"
-  def corsTestServerPort = "61${parallelId}6"
+  // Keep 6x03 open for multi-node clusters
+  def esTransportPort = "61${parallelId}4-61${parallelId}5"
+  def fleetPackageRegistryPort = "61${parallelId}6"
+  def alertingProxyPort = "61${parallelId}7"
+  def corsTestServerPort = "61${parallelId}8"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
