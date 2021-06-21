@@ -75,55 +75,61 @@ const createTrustedAppsListResourceStateChangedAction = (
   payload: { newState },
 });
 
+const refreshList = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService,
+  query?: string
+) => {
+  store.dispatch(
+    createTrustedAppsListResourceStateChangedAction({
+      type: 'LoadingResourceState',
+      // need to think on how to avoid the casting
+      previousState: getListResourceState(store.getState()) as Immutable<
+        StaleResourceState<TrustedAppsListData>
+      >,
+    })
+  );
+
+  try {
+    const pageIndex = getCurrentLocationPageIndex(store.getState());
+    const pageSize = getCurrentLocationPageSize(store.getState());
+    const filter = query !== undefined ? query : getCurrentLocationFilter(store.getState());
+
+    const response = await trustedAppsService.getTrustedAppsList({
+      page: pageIndex + 1,
+      per_page: pageSize,
+      kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
+    });
+
+    store.dispatch(
+      createTrustedAppsListResourceStateChangedAction({
+        type: 'LoadedResourceState',
+        data: {
+          items: response.data,
+          pageIndex,
+          pageSize,
+          totalItemsCount: response.total,
+          timestamp: Date.now(),
+          filter,
+        },
+      })
+    );
+  } catch (error) {
+    store.dispatch(
+      createTrustedAppsListResourceStateChangedAction({
+        type: 'FailedResourceState',
+        error: error.body,
+        lastLoadedState: getLastLoadedListResourceState(store.getState()),
+      })
+    );
+  }
+};
+
 const refreshListIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  if (needsRefreshOfListData(store.getState())) {
-    store.dispatch(
-      createTrustedAppsListResourceStateChangedAction({
-        type: 'LoadingResourceState',
-        // need to think on how to avoid the casting
-        previousState: getListResourceState(store.getState()) as Immutable<
-          StaleResourceState<TrustedAppsListData>
-        >,
-      })
-    );
-
-    try {
-      const pageIndex = getCurrentLocationPageIndex(store.getState());
-      const pageSize = getCurrentLocationPageSize(store.getState());
-      const filter = getCurrentLocationFilter(store.getState());
-
-      const response = await trustedAppsService.getTrustedAppsList({
-        page: pageIndex + 1,
-        per_page: pageSize,
-        kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
-      });
-
-      store.dispatch(
-        createTrustedAppsListResourceStateChangedAction({
-          type: 'LoadedResourceState',
-          data: {
-            items: response.data,
-            pageIndex,
-            pageSize,
-            totalItemsCount: response.total,
-            timestamp: Date.now(),
-            filter,
-          },
-        })
-      );
-    } catch (error) {
-      store.dispatch(
-        createTrustedAppsListResourceStateChangedAction({
-          type: 'FailedResourceState',
-          error: error.body,
-          lastLoadedState: getLastLoadedListResourceState(store.getState()),
-        })
-      );
-    }
-  }
+  if (needsRefreshOfListData(store.getState())) refreshList(store, trustedAppsService);
 };
 
 const updateCreationDialogIfNeeded = (
@@ -395,11 +401,11 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            type: 'LoadingResourceState',
             // No easy way to get around this that I can see. `previousState` does not
             // seem to allow everything that `editItem` state can hold, so not even sure if using
             // type guards would work here
             // @ts-ignore
+            type: 'LoadingResourceState',
             previousState: editItemState(currentState)!,
           },
         });
@@ -458,6 +464,10 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'trustedAppDeletionDialogConfirmed') {
       await submitDeletionIfNeeded(store, trustedAppsService);
+    }
+
+    if (action.type === 'trustedAppRefreshList') {
+      await refreshList(store, trustedAppsService, action.payload.query);
     }
   };
 };

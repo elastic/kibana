@@ -36,8 +36,7 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
       return (
         data.pageIndex === location.page_index &&
         data.pageSize === location.page_size &&
-        data.timestamp >= freshDataTimestamp &&
-        data.filter === location.filter
+        data.timestamp >= freshDataTimestamp
       );
     })
   );
