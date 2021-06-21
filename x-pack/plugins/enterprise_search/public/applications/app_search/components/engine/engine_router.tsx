@@ -103,7 +103,7 @@ export const EngineRouter: React.FC = () => {
         <Route path={ENGINE_DOCUMENTS_PATH}>
           <Documents />
         </Route>
-      })
+      )}
       {canManageEngineSearchUi && (
         <Route path={ENGINE_SEARCH_UI_PATH}>
           <SearchUI />
