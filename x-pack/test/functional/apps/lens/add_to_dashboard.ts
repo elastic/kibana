@@ -62,7 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
   };
 
-  describe('lens add-to-dashboards tests', () => {
+  // flaky https://github.com/elastic/kibana/issues/102332
+  describe.skip('lens add-to-dashboards tests', () => {
     it('should allow new lens to be added by value to a new dashboard', async () => {
       await createNewLens();
       await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
