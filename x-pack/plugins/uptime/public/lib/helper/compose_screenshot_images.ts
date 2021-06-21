@@ -27,24 +27,26 @@ export async function composeScreenshotRef(
   const ctx = canvas.getContext('2d', { alpha: false });
 
   /**
-   * We need to treat each operation as an async task, otherwise we will race to draw
-   * and extract a data URL from the canvas, and the image will be blank or incomplete.
+   * We need to treat each operation as an async task, otherwise we will race between drawing image
+   * chunks and extracting the final data URL from the canvas; without this, the image could be blank or incomplete.
    */
   const drawOperations: Array<Promise<void>> = [];
 
   for (const block of screenshotRef.screenshot_ref.blocks) {
     drawOperations.push(
-      new Promise<void>((r) => {
+      new Promise<void>((resolve, reject) => {
         const img = new Image();
         const { top, left, width, height, hash } = block;
         const blob = blocks.find((b) => b.id === hash);
-        if (!blob)
-          throw Error(`Error processing image. Expected image data with hash ${hash} is missing`);
-        img.onload = () => {
-          ctx?.drawImage(img, left, top, width, height);
-          r();
-        };
-        img.src = `data:image/jpg;base64,${blob.synthetics.blob}`;
+        if (!blob) {
+          reject(Error(`Error processing image. Expected image data with hash ${hash} is missing`));
+        } else {
+          img.onload = () => {
+            ctx?.drawImage(img, left, top, width, height);
+            resolve();
+          };
+          img.src = `data:image/jpg;base64,${blob.synthetics.blob}`;
+        }
       })
     );
   }
