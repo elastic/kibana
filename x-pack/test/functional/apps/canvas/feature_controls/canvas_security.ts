@@ -9,22 +9,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const { importExport: { load, unload } } = kibanaServer;
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
-    });
+    before(async () => await load(archive));
 
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
-    });
+    after(async () => await unload(archive));
 
     describe('global canvas all privileges', () => {
       before(async () => {
