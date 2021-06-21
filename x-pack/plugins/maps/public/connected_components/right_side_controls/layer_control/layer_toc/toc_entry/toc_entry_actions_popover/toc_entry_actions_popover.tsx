@@ -41,11 +41,15 @@ export interface Props {
 interface State {
   isPopoverOpen: boolean;
   supportsFeatureEditing: boolean;
-  canEditFeatures: boolean;
+  isFeatureEditingEnabled: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false, supportsFeatureEditing: false, canEditFeatures: false };
+  state: State = {
+    isPopoverOpen: false,
+    supportsFeatureEditing: false,
+    isFeatureEditingEnabled: false,
+  };
   private _isMounted = false;
 
   componentDidMount() {
@@ -57,26 +61,26 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   componentDidUpdate() {
-    this._checkLayerEditable();
+    this._loadFeatureEditing();
   }
 
-  async _checkLayerEditable() {
+  async _loadFeatureEditing() {
     if (!(this.props.layer instanceof VectorLayer)) {
       return;
     }
     const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
-    const canEditFeatures = await this._getCanEditFeatures();
+    const isFeatureEditingEnabled = await this._getIsFeatureEditingEnabled();
     if (
       !this._isMounted ||
       (supportsFeatureEditing === this.state.supportsFeatureEditing &&
-        canEditFeatures === this.state.canEditFeatures)
+        isFeatureEditingEnabled === this.state.isFeatureEditingEnabled)
     ) {
       return;
     }
-    this.setState({ supportsFeatureEditing, canEditFeatures });
+    this.setState({ supportsFeatureEditing, isFeatureEditingEnabled });
   }
 
-  async _getCanEditFeatures(): Promise<boolean> {
+  async _getIsFeatureEditingEnabled(): Promise<boolean> {
     const vectorLayer = this.props.layer as VectorLayer;
     const layerSource = await this.props.layer.getSource();
     if (!(layerSource instanceof ESSearchSource)) {
@@ -160,13 +164,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           name: EDIT_FEATURES_LABEL,
           icon: <EuiIcon type="vector" size="m" />,
           'data-test-subj': 'editLayerButton',
-          toolTipContent: this.state.canEditFeatures
+          toolTipContent: this.state.isFeatureEditingEnabled
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
                 defaultMessage:
                   'Edit features only supported for document layers without clustering, joins, or time filtering',
               }),
-          disabled: !this.state.canEditFeatures,
+          disabled: !this.state.isFeatureEditingEnabled,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
