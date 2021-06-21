@@ -27,7 +27,6 @@ import {
   getMapSettings,
   getScrollZoom,
   getSpatialFiltersLayer,
-  getMapSettings,
   getTimeslice,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
