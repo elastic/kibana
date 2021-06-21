@@ -5,23 +5,58 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { existsSync } = require('fs');
-const { join } = require('path');
+import { resolve } from 'path';
+import webpackMerge from 'webpack-merge';
+import { defaultConfig } from '@kbn/storybook';
 
-// Check for DLL if we're not running in Jest
-if (
-  !existsSync(join(__dirname, '../../../../built_assets/canvas_storybook_dll/manifest.json')) &&
-  !process.env.JEST_WORKER_ID
-) {
-  // eslint-disable-next-line no-console
-  console.error(
-    'No DLL found. Run `node scripts/storybook --dll` from the Canvas plugin directory.'
-  );
-  process.exit(1);
-}
+import type { Configuration } from 'webpack';
+
+import { KIBANA_ROOT } from './constants';
+
+const canvasWebpack = {
+  module: {
+    rules: [
+      // Enable CSS Modules in Storybook (Shareable Runtime)
+      {
+        test: /\.module\.s(a|c)ss$/,
+        loader: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 2,
+              modules: {
+                localIdentName: '[name]__[local]___[hash:base64:5]',
+              },
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              path: resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+            },
+          },
+          {
+            loader: 'sass-loader',
+          },
+        ],
+      },
+      // Exclude large-dependency, troublesome or irrelevant modules.
+      {
+        test: [
+          resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout'),
+          resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
+          resolve(KIBANA_ROOT, 'src/plugins/kibana_legacy/public/angular'),
+          resolve(KIBANA_ROOT, 'src/plugins/kibana_legacy/public/paginate'),
+        ],
+        use: 'null-loader',
+      },
+    ],
+  },
+};
 
 module.exports = {
-  stories: ['../**/*.stories.tsx'],
-  addons: ['@storybook/addon-actions', '@storybook/addon-knobs', './addon/target/register'],
+  ...defaultConfig,
+  addons: [...(defaultConfig.addons || []), './addon/target/register'],
+  webpackFinal: (config: Configuration) => webpackMerge(config, canvasWebpack),
 };

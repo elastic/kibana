@@ -14,10 +14,15 @@ import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../../components/a
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { casesBreadcrumbs } from './links';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 export const AllCasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
+
+  useBreadcrumbs([casesBreadcrumbs.cases]);
+
   return userPermissions == null || userPermissions?.read ? (
     <>
       {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (

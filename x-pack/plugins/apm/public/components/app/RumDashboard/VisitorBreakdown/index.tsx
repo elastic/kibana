@@ -13,13 +13,13 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function VisitorBreakdown() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { start, end, searchTerm } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
+      const { serviceName } = uxUiFilters;
 
       if (start && end && serviceName) {
         return callApmApi({
@@ -28,7 +28,7 @@ export function VisitorBreakdown() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               urlQuery: searchTerm,
             },
           },
@@ -36,7 +36,7 @@ export function VisitorBreakdown() {
       }
       return Promise.resolve(null);
     },
-    [end, start, uiFilters, searchTerm]
+    [end, start, uxUiFilters, searchTerm]
   );
 
   return (
