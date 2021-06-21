@@ -61,7 +61,7 @@ export const createEndpointEventFiltersList = async ({
         os_types: [],
         tags: [],
         tie_breaker_id: tieBreaker ?? uuid.v4(),
-        type: 'endpoint',
+        type: 'endpoint_events',
         updated_by: user,
         version,
       },

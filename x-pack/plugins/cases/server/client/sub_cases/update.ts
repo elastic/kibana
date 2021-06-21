@@ -44,7 +44,7 @@ import {
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
 } from '../../common';
-import { UpdateAlertRequest } from '../../client/alerts/client';
+import { UpdateAlertRequest } from '../../client/alerts/types';
 import { CasesClientArgs } from '../types';
 import { CasesClientInternal } from '../client_internal';
 
