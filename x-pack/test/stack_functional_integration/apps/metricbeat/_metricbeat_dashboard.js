@@ -49,7 +49,9 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       await find.clickByButtonText('Dismiss');
       await PageObjects.dashboard.waitForRenderComplete();
-      await browser.setScreenshotSize(1000, 1000);
+      await PageObjects.common.sleep(2000);
+      await browser.setScreenshotSize(1000, 1337);
+      await PageObjects.common.sleep(2000);
     });
 
     after(async function () {
