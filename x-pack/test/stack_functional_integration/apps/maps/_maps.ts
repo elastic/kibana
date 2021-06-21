@@ -15,7 +15,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['common', 'maps']);
 
   describe('check Elastic Maps Server', function () {
     before(async function () {
