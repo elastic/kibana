@@ -35,15 +35,10 @@ export const getLegendAction = (
     const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
     const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
 
-    const currentSplitFormatter =
-      layersAlreadyFormatted[accessor] && splitColumn
-        ? formatFactory(splitColumn.meta.params)
-        : formatter;
-
     const rowIndex = table.rows.findIndex((row) => {
       if (layersAlreadyFormatted[accessor]) {
         // stringify the value to compare with the chart value
-        return currentSplitFormatter.convert(row[accessor]) === splitLabel;
+        return formatter.convert(row[accessor]) === splitLabel;
       }
       return row[accessor] === splitLabel;
     });
@@ -65,7 +60,11 @@ export const getLegendAction = (
 
     return (
       <LegendActionPopover
-        label={formatter ? formatter.convert(splitLabel) : splitLabel}
+        label={
+          !layersAlreadyFormatted[accessor] && formatter
+            ? formatter.convert(splitLabel)
+            : splitLabel
+        }
         context={context}
         onFilter={onFilter}
       />
