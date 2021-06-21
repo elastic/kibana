@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    it('should open the doc view of the selected document', async function () {
+    it.only('should open the doc view of the selected document', async function () {
       // navigate to the doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
