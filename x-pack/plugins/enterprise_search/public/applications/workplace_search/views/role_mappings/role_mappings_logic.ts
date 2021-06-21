@@ -56,10 +56,16 @@ interface RoleMappingsActions {
   initializeRoleMappings(): void;
   resetState(): void;
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
+  setRoleMappings({
+    roleMappings,
+  }: {
+    roleMappings: WSRoleMapping[];
+  }): { roleMappings: WSRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   openRoleMappingFlyout(): void;
   closeRoleMappingFlyout(): void;
   setRoleMappingErrors(errors: string[]): { errors: string[] };
+  enableRoleBasedAccess(): void;
 }
 
 interface RoleMappingsValues {
@@ -87,6 +93,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMapping: (roleMapping: WSRoleMapping) => ({ roleMapping }),
+    setRoleMappings: ({ roleMappings }: { roleMappings: WSRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
     handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
@@ -97,6 +104,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
     handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
+    enableRoleBasedAccess: true,
     resetState: true,
     initializeRoleMappings: true,
     initializeRoleMapping: (roleMappingId?: string) => ({ roleMappingId }),
@@ -110,13 +118,16 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       true,
       {
         setRoleMappingsData: () => false,
+        setRoleMappings: () => false,
         resetState: () => true,
+        enableRoleBasedAccess: () => true,
       },
     ],
     roleMappings: [
       [],
       {
         setRoleMappingsData: (_, { roleMappings }) => roleMappings,
+        setRoleMappings: (_, { roleMappings }) => roleMappings,
         resetState: () => [],
       },
     ],
@@ -259,6 +270,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     ],
   }),
   listeners: ({ actions, values }) => ({
+    enableRoleBasedAccess: async () => {
+      const { http } = HttpLogic.values;
+      const route = '/api/workplace_search/org/role_mappings/enable_role_based_access';
+
+      try {
+        const response = await http.post(route);
+        actions.setRoleMappings(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/role_mappings';
