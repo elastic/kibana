@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
-  const find = getService('find');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
@@ -42,7 +41,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       // await PageObjects.dashboard.clickFullScreenMode();
 
       await PageObjects.common.sleep(2000);
-      await find.clickByButtonText('Dismiss');
+      await PageObjects.common.dismissBanner();
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(2000);
       await browser.setScreenshotSize(1000, 1337);
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
           'metricbeat_dashboard',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.01);
+        expect(percentDifference).to.be.lessThan(0.017);
       } finally {
         log.debug('### Screenshot taken');
       }
