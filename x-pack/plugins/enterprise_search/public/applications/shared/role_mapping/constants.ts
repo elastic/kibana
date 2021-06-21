@@ -274,3 +274,21 @@ export const ENABLE_USERS_LINK = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.enableUsersLink',
   { defaultMessage: 'Learn more about user management' }
 );
+
+export const NEW_USER_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.newUserLabel', {
+  defaultMessage: 'Create new user',
+});
+
+export const EXISTING_USER_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.existingUserLabel',
+  { defaultMessage: 'Add existing user' }
+);
+
+export const USERNAME_NO_USERS_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usernameNoUsersText',
+  { defaultMessage: 'No existing user eligible for addition.' }
+);
+
+export const REQUIRED_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.requiredLabel', {
+  defaultMessage: 'Required',
+});

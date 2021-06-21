@@ -14,5 +14,6 @@ export { RoleMappingFlyout } from './role_mapping_flyout';
 export { RoleMappingsHeading } from './role_mappings_heading';
 export { UserAddedInfo } from './user_added_info';
 export { UserInvitationCallout } from './user_invitation_callout';
+export { UserSelector } from './user_selector';
 export { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 export { UsersEmptyPrompt } from './users_empty_prompt';
