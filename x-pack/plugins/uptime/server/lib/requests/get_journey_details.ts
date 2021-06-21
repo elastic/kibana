@@ -44,7 +44,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
 
   const { body: thisJourney } = await uptimeEsClient.search({ body: baseParams });
 
-  if (thisJourney?.hits?.hits.length > 0) {
+  if (thisJourney.hits.hits.length > 0) {
     const { _id, _source } = thisJourney.hits.hits[0];
     const decodedJourneySource = JourneyStepType.decode(Object.assign({ _id }, _source));
     if (!isRight(decodedJourneySource)) {
