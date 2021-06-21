@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
-  describe('lens formula', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/102183
+  describe.skip('lens formula', () => {
     it('should transition from count to formula', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -80,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let element = await find.byCssSelector('.monaco-editor');
       expect(await element.getVisibleText()).to.equal(`count(kql='Men\\'s Clothing ')`);
 
+      await PageObjects.common.sleep(100);
       await PageObjects.lens.typeFormula('count(kql=');
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);

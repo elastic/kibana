@@ -208,8 +208,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
+
     let ruleDataClient: RuleDataClient | null = null;
-    if (experimentalFeatures.ruleRegistryEnabled) {
+    if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
@@ -260,6 +262,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ready,
       });
 
+      // sec
+
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
@@ -291,7 +295,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
-      ...(experimentalFeatures.ruleRegistryEnabled ? referenceRuleTypes : []),
+      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature({

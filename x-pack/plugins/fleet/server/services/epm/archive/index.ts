@@ -114,6 +114,13 @@ export function getPathParts(path: string): AssetParts {
     [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
   }
 
+  // To support the NOTICE asset at the root level
+  if (service === 'NOTICE.txt') {
+    file = service;
+    type = 'notice';
+    service = '';
+  }
+
   // This is to cover for the fields.yml files inside the "fields" directory
   if (file === undefined) {
     file = type;

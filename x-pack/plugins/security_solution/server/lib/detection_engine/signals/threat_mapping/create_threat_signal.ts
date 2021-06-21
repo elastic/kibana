@@ -13,7 +13,7 @@ import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
-  tuples,
+  tuple,
   threatMapping,
   threatEnrichment,
   query,
@@ -31,10 +31,11 @@ export const createThreatSignal = async ({
   outputIndex,
   ruleSO,
   searchAfterSize,
-  refresh,
   buildRuleMessage,
   currentThreatList,
   currentResult,
+  bulkCreate,
+  wrapHits,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -69,7 +70,7 @@ export const createThreatSignal = async ({
     );
 
     const result = await searchAfterAndBulkCreate({
-      tuples,
+      tuple,
       listClient,
       exceptionsList: exceptionItems,
       ruleSO,
@@ -81,9 +82,10 @@ export const createThreatSignal = async ({
       signalsIndex: outputIndex,
       filter: esFilter,
       pageSize: searchAfterSize,
-      refresh,
       buildRuleMessage,
       enrichment: threatEnrichment,
+      bulkCreate,
+      wrapHits,
     });
     logger.debug(
       buildRuleMessage(

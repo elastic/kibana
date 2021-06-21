@@ -2162,4 +2162,45 @@ describe('migration visualization', () => {
       expect(distinctColors).toBe(true);
     });
   });
+
+  describe('7.14.0 update tagcloud defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (hasPalette = false) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'tagcloud',
+          title: '[Flights] Delay Type',
+          params: {
+            type: 'tagcloud',
+            ...(hasPalette && {
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+            }),
+          },
+        }),
+      },
+    });
+
+    it('should decorate existing docs with the kibana legacy palette if the palette is not defined - pie', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
+      const migratedTestDoc = migrate(getTestDoc(true));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('default');
+    });
+  });
 });

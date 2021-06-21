@@ -21,6 +21,10 @@
     }
   }
 
+  .euiButtonIcon:not(.euiButtonIcon--fill) {
+    color: $euiTextColor !important;
+  }
+
   &:hover {
     transform: translateY(-1px);
   }
@@ -45,5 +49,11 @@
 
   .euiButtonIcon {
     border-radius: 0;
+  }
+}
+
+.mapToolbarOverlay__button__exit {
+  .euiButtonIcon {
+    color: $euiColorDangerText !important;
   }
 }

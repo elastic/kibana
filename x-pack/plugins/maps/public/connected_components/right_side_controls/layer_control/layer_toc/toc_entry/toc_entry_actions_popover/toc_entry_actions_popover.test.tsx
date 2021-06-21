@@ -37,7 +37,6 @@ class LayerMock extends AbstractLayer implements ILayer {
 const defaultProps = {
   cloneLayer: () => {},
   displayName: 'layer 1',
-  editLayer: () => {},
   escapedDisplayName: 'layer1',
   fitToBounds: () => {},
   isEditButtonDisabled: false,
@@ -46,6 +45,9 @@ const defaultProps = {
   removeLayer: () => {},
   toggleVisible: () => {},
   supportsFitToBounds: true,
+  enableShapeEditing: () => {},
+  enablePointEditing: () => {},
+  openLayerSettings: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {
