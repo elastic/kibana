@@ -417,7 +417,9 @@ export type AggregateOf<
     {
       key: string;
       from?: number;
+      from_as_string?: string;
       to?: number;
+      to_as_string?: string;
       doc_count: number;
     },
     TAggregationContainer extends { range: { ranges: Array<infer TRangeType> } }
