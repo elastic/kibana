@@ -1018,7 +1018,7 @@ export const findCases = async ({
   return res;
 };
 
-export const getCaseIDsByAlert = async ({
+export const getCasesByAlert = async ({
   supertest,
   alertID,
   query = {},
@@ -1038,6 +1038,12 @@ export const getCaseIDsByAlert = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getCaseIDsFromCases = (cases: CasesByAlertId) => {
+  return cases.map((caseInfo): string => {
+    return caseInfo.id;
+  });
 };
 
 export const getTags = async ({

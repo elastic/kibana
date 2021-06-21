@@ -12,9 +12,10 @@ import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/
 import {
   createCase,
   createComment,
-  getCaseIDsByAlert,
+  getCasesByAlert,
   deleteAllCaseItems,
   getAuthWithSuperUser,
+  getCaseIDsFromCases,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -57,11 +58,13 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({
+      const casesByAlert = await getCasesByAlert({
         supertest,
         alertID: 'test-id',
         auth: authSpace1,
       });
+
+      const caseIDsWithAlert = getCaseIDsFromCases(casesByAlert);
 
       expect(caseIDsWithAlert.length).to.eql(3);
       expect(caseIDsWithAlert).to.contain(case1.id);
@@ -97,11 +100,13 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({
+      const casesByAlert = await getCasesByAlert({
         supertest,
         alertID: 'test-id',
         auth: authSpace2,
       });
+
+      const caseIDsWithAlert = getCaseIDsFromCases(casesByAlert);
 
       expect(caseIDsWithAlert.length).to.eql(1);
       expect(caseIDsWithAlert).to.eql([case3.id]);
