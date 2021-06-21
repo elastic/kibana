@@ -38,6 +38,8 @@ export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: U
     return response.ok({
       body: result,
       headers: {
+        // we can cache these blocks with extreme prejudice as they are inherently unchanging
+        // when queried by ID, since the ID is the hash of the data
         'Cache-Control': 'max-age=604800',
       },
     });
