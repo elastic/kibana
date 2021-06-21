@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiLoadingContent,
   EuiEmptyPrompt,
-  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
@@ -82,7 +81,6 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <EuiSpacer size="l" />
         <EuiFlexGroup direction="column">
           {(activityLogLoaded && !activityLogSize) || activityLogError ? (
             <EuiFlexItem>
