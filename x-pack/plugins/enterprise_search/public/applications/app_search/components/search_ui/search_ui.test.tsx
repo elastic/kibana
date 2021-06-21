@@ -6,9 +6,9 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import '../../__mocks__/engine_logic.mock';
 
-import { setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import { mockEngineValues } from '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -27,6 +27,7 @@ describe('SearchUI', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(actions);
+    setMockValues(mockEngineValues);
   });
 
   it('renders', () => {

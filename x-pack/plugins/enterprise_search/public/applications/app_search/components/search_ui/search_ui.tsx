@@ -7,15 +7,16 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DOCS_PREFIX } from '../../routes';
-import { getEngineBreadcrumbs } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
+import { EmptyState } from './components/empty_state';
 import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
 import { SEARCH_UI_TITLE } from './i18n';
@@ -23,6 +24,7 @@ import { SearchUILogic } from './search_ui_logic';
 
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
+  const { engine } = useValues(EngineLogic);
 
   useEffect(() => {
     loadFieldData();
@@ -32,6 +34,8 @@ export const SearchUI: React.FC = () => {
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([SEARCH_UI_TITLE])}
       pageHeader={{ pageTitle: SEARCH_UI_TITLE }}
+      isEmptyState={Object.keys(engine.schema || {}).length === 0}
+      emptyState={<EmptyState />}
     >
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem>
