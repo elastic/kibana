@@ -9,7 +9,7 @@ import { orderBy } from 'lodash';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../typings/elasticsearch';
+} from '../../../../../../src/core/types/elasticsearch';
 
 export interface TopSigTerm {
   fieldName: string;
