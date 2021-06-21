@@ -258,6 +258,7 @@ class TutorialDirectoryUi extends React.Component {
     return (
       <KibanaPageTemplate
         restrictWidth={1200}
+        template="empty"
         pageHeader={{
           pageTitle: (
             <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
@@ -269,7 +270,7 @@ class TutorialDirectoryUi extends React.Component {
         {notices && (
           <>
             {notices}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </>
         )}
         {this.renderTabContent()}
