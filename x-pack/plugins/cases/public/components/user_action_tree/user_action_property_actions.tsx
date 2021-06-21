@@ -32,8 +32,8 @@ const UserActionPropertyActionsComponent = ({
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
 
-  const propertyActions = useMemo(() => {
-    return [
+  const propertyActions = useMemo(
+    () => [
       {
         disabled,
         iconType: 'pencil',
@@ -46,8 +46,9 @@ const UserActionPropertyActionsComponent = ({
         label: quoteLabel,
         onClick: onQuoteClick,
       },
-    ];
-  }, [disabled, editLabel, quoteLabel, onEditClick, onQuoteClick]);
+    ],
+    [disabled, editLabel, quoteLabel, onEditClick, onQuoteClick]
+  );
   return (
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}
