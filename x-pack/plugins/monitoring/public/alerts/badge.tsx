@@ -23,8 +23,12 @@ export const numberOfRulesLabel = (count: number) => `${count} rule${count > 1 ?
 
 const MAX_TO_SHOW_BY_CATEGORY = 8;
 
-const PANEL_TITLE = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
+const PANEL_TITLE_ALERTS = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
   defaultMessage: 'Alerts',
+});
+
+const PANEL_TITLE_RULES = i18n.translate('xpack.monitoring.rules.badge.panelTitle', {
+  defaultMessage: 'Rules',
 });
 
 const GROUP_BY_NODE = i18n.translate('xpack.monitoring.alerts.badge.groupByNode', {
@@ -55,6 +59,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const [showByNode, setShowByNode] = React.useState(
     !inSetupMode && alertCount > MAX_TO_SHOW_BY_CATEGORY
   );
+  const PANEL_TITLE = inSetupMode ? PANEL_TITLE_RULES : PANEL_TITLE_ALERTS;
 
   React.useEffect(() => {
     if (inSetupMode && showByNode) {
