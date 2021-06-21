@@ -7,22 +7,12 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_START,
-  ALERT_STATUS,
-  RULE_ID,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { format, parse } from 'url';
-import {
-  ParsedTechnicalFields,
-  parseTechnicalFields,
-} from '../../../../rule_registry/common/parse_technical_fields';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
@@ -48,12 +38,20 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleTypeRegistry, ObservabilityPageTemplate } = usePluginContext();
+  const { core, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
@@ -61,7 +59,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     '/app/management/insightsAndAlerting/triggersActions/alerts'
   );
 
-  const { data: topAlerts } = useFetcher(
+  const { data: alerts } = useFetcher(
     ({ signal }) => {
       const { start, end } = getAbsoluteDateRange({ rangeFrom, rangeTo });
 
@@ -79,38 +77,9 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             status,
           },
         },
-      }).then((alerts) => {
-        return alerts.map((alert) => {
-          const parsedFields = parseTechnicalFields(alert);
-          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-          const formatted = {
-            link: undefined,
-            reason: parsedFields[RULE_NAME]!,
-            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-          };
-
-          const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-
-          return {
-            ...formatted,
-            fields: parsedFields,
-            link: parsedLink
-              ? format({
-                  ...parsedLink,
-                  query: {
-                    ...parsedLink.query,
-                    rangeFrom,
-                    rangeTo,
-                  },
-                })
-              : undefined,
-            active: parsedFields[ALERT_STATUS] !== 'closed',
-            start: new Date(parsedFields[ALERT_START]!).getTime(),
-          };
-        });
       });
     },
-    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
+    [kuery, rangeFrom, rangeTo, status]
   );
 
   function setStatusFilter(value: AlertStatus) {
@@ -193,7 +162,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertsTable items={topAlerts ?? []} />
+            <AlertsTable items={alerts ?? []} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

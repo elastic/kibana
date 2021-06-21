@@ -119,12 +119,13 @@ export const useUpdateComment = (): UseUpdateComment => {
     []
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, patchComment: dispatchUpdateComment };
 };

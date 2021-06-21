@@ -497,6 +497,56 @@ describe('#start()', () => {
       expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
     });
 
+    describe('deepLinkId option', () => {
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        service.setup(setupDeps);
+
+        service.setup(setupDeps);
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'unkown-deep-link' })).toBe(
+          '/base-path/app/app1'
+        );
+      });
+
+      it('creates URLs with deepLinkId parameter', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1' })).toBe(
+          '/base-path/custom/app-path/deep-link'
+        );
+      });
+
+      it('creates URLs with deepLinkId and path parameters', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1', path: 'foo/bar' })).toBe(
+          '/base-path/custom/app-path/deep-link/foo/bar'
+        );
+      });
+    });
+
     it('does not append trailing slash if hash is provided in path parameter', async () => {
       service.setup(setupDeps);
       const { getUrlForApp } = await service.start(startDeps);

@@ -137,7 +137,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "opacity": 1,
             },
             "rectBorder": Object {
-              "strokeWidth": 0,
+              "strokeWidth": 1,
               "visible": false,
             },
           },

@@ -17,7 +17,7 @@ describe('SeriesDatePicker', function () {
       data: {
         'uptime-pings-histogram': {
           dataType: 'synthetics' as const,
-          reportType: 'upp' as const,
+          reportType: 'dist' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
         },
@@ -32,7 +32,7 @@ describe('SeriesDatePicker', function () {
     const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          reportType: 'upp' as const,
+          reportType: 'kpi' as const,
           dataType: 'synthetics' as const,
           breakdown: 'monitor.status',
         },
@@ -46,7 +46,7 @@ describe('SeriesDatePicker', function () {
     expect(setSeries1).toHaveBeenCalledWith('uptime-pings-histogram', {
       breakdown: 'monitor.status',
       dataType: 'synthetics' as const,
-      reportType: 'upp' as const,
+      reportType: 'kpi' as const,
       time: DEFAULT_TIME,
     });
   });
@@ -56,7 +56,7 @@ describe('SeriesDatePicker', function () {
       data: {
         'uptime-pings-histogram': {
           dataType: 'synthetics' as const,
-          reportType: 'upp' as const,
+          reportType: 'kpi' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
         },
@@ -79,7 +79,7 @@ describe('SeriesDatePicker', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'monitor.status',
       dataType: 'synthetics',
-      reportType: 'upp',
+      reportType: 'kpi',
       time: { from: 'now/d', to: 'now/d' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);

@@ -13,6 +13,7 @@ export type {
   SavedObjectsExportResultDetails,
   SavedObjectsExportTransformContext,
   SavedObjectsExportTransform,
+  SavedObjectsExportExcludedObject,
 } from './types';
 export { SavedObjectsExporter } from './saved_objects_exporter';
 export type { ISavedObjectsExporter } from './saved_objects_exporter';

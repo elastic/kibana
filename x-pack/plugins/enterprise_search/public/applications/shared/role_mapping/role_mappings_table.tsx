@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiFieldSearch,
-  EuiIconTip,
-  EuiSpacer,
-  EuiTable,
-  EuiTableBody,
-  EuiTableHeader,
-  EuiTableHeaderCell,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTextColor,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiIconTip, EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
-import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../constants';
 import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
@@ -38,7 +24,9 @@ import {
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
+  ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
 } from './constants';
+import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
 interface AccessItem {
   name: string;
@@ -58,8 +46,6 @@ interface Props {
   handleDeleteMapping(roleMappingId: string): void;
 }
 
-const MAX_CELL_WIDTH = 24;
-
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
 const getAuthProviderDisplayValue = (authProvider: string) =>
@@ -73,114 +59,109 @@ export const RoleMappingsTable: React.FC<Props> = ({
   initializeRoleMapping,
   handleDeleteMapping,
 }) => {
-  const [filterValue, updateValue] = useState('');
-
-  // This is needed because App Search has `engines` and Workplace Search has `groups`.
-  const standardizeRoleMapping = (roleMappings as SharedRoleMapping[]).map((rm) => {
-    const _rm = { ...rm } as SharedRoleMapping;
-    _rm.accessItems = rm[accessItemKey];
-    return _rm;
-  });
-
-  const filterResults = (result: SharedRoleMapping) => {
-    // Filter out non-alphanumeric characters, except for underscores, hyphens, and spaces
-    const sanitizedValue = filterValue.replace(/[^\w\s-]/g, '');
-    const values = Object.values(result);
-    const regexp = new RegExp(sanitizedValue, 'i');
-    return values.filter((x) => regexp.test(x)).length > 0;
-  };
-
-  const filteredResults = standardizeRoleMapping.filter(filterResults);
   const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
   const getFirstAttributeValue = (rules: RoleRules): string => Object.entries(rules)[0][1];
 
-  const rowActions = (id: string) => (
-    <>
-      <EuiButtonIcon
-        onClick={() => initializeRoleMapping(id)}
-        iconType="pencil"
-        aria-label={MANAGE_BUTTON_LABEL}
-        data-test-subj="ManageButton"
-      />{' '}
-      <EuiButtonIcon
-        onClick={() => handleDeleteMapping(id)}
-        iconType="trash"
-        aria-label={DELETE_BUTTON_LABEL}
-        data-test-subj="DeleteButton"
-      />
-    </>
-  );
+  // This is needed because App Search has `engines` and Workplace Search has `groups`.
+  const standardizedRoleMappings = (roleMappings as SharedRoleMapping[]).map((rm) => {
+    const _rm = { ...rm } as SharedRoleMapping;
+    _rm.accessItems = rm[accessItemKey];
+    return _rm;
+  }) as SharedRoleMapping[];
 
+  const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'attribute',
+    name: EXTERNAL_ATTRIBUTE_LABEL,
+    render: (_, { rules }: SharedRoleMapping) => getFirstAttributeName(rules),
+  };
+
+  const attributeValueCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'attributeValue',
+    name: ATTRIBUTE_VALUE_LABEL,
+    render: (_, { rules }: SharedRoleMapping) => getFirstAttributeValue(rules),
+  };
+
+  const roleCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'roleType',
+    name: ROLE_LABEL,
+    render: (_, { roleType }: SharedRoleMapping) => roleType,
+  };
+
+  const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'accessItems',
+    name: accessHeader,
+    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => (
+      <span data-test-subj="AccessItemsList">
+        {accessAllEngines ? (
+          ALL_LABEL
+        ) : (
+          <>
+            {accessItems.length === 0
+              ? noItemsPlaceholder
+              : accessItems.map(({ name }) => (
+                  <Fragment key={name}>
+                    {name}
+                    <br />
+                  </Fragment>
+                ))}
+          </>
+        )}
+      </span>
+    ),
+  };
+
+  const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'authProvider',
+    name: AUTH_PROVIDER_LABEL,
+    render: (_, { authProvider }: SharedRoleMapping) => (
+      <span data-test-subj="AuthProviderDisplayValue">
+        {authProvider.map(getAuthProviderDisplayValue).join(', ')}
+      </span>
+    ),
+  };
+
+  const actionsCol: EuiBasicTableColumn<SharedRoleMapping> = {
+    field: 'id',
+    name: '',
+    align: 'right',
+    render: (_, { id, toolTip }: SharedRoleMapping) => (
+      <>
+        {id && (
+          <UsersAndRolesRowActions
+            onManageClick={() => initializeRoleMapping(id)}
+            onDeleteClick={() => handleDeleteMapping(id)}
+          />
+        )}
+        {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
+      </>
+    ),
+  };
+
+  const columns = shouldShowAuthProvider
+    ? [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, authProviderCol, actionsCol]
+    : [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
+
+  const pagination = {
+    hidePerPageOptions: true,
+  };
+
+  const search = {
+    box: {
+      incremental: true,
+      fullWidth: false,
+      placeholder: FILTER_ROLE_MAPPINGS_PLACEHOLDER,
+      'data-test-subj': 'RoleMappingsTableSearchInput',
+    },
+  };
   return (
-    <>
-      <EuiFieldSearch
-        value={filterValue}
-        placeholder={FILTER_ROLE_MAPPINGS_PLACEHOLDER}
-        onChange={(e) => updateValue(e.target.value)}
-      />
-      <EuiSpacer />
-      {filteredResults.length > 0 ? (
-        <EuiTable className="roleMappingsTable">
-          <EuiTableHeader>
-            <EuiTableHeaderCell>{EXTERNAL_ATTRIBUTE_LABEL}</EuiTableHeaderCell>
-            <EuiTableHeaderCell>{ATTRIBUTE_VALUE_LABEL}</EuiTableHeaderCell>
-            <EuiTableHeaderCell>{ROLE_LABEL}</EuiTableHeaderCell>
-            <EuiTableHeaderCell>{accessHeader}</EuiTableHeaderCell>
-            {shouldShowAuthProvider && (
-              <EuiTableHeaderCell>{AUTH_PROVIDER_LABEL}</EuiTableHeaderCell>
-            )}
-            <EuiTableHeaderCell />
-          </EuiTableHeader>
-          <EuiTableBody>
-            {filteredResults.map(
-              ({ id, authProvider, rules, roleType, accessAllEngines, accessItems, toolTip }) => (
-                <EuiTableRow key={id}>
-                  <EuiTableRowCell>{getFirstAttributeName(rules)}</EuiTableRowCell>
-                  <EuiTableRowCell style={{ maxWidth: MAX_CELL_WIDTH }}>
-                    {getFirstAttributeValue(rules)}
-                  </EuiTableRowCell>
-                  <EuiTableRowCell>{roleType}</EuiTableRowCell>
-                  <EuiTableRowCell
-                    data-test-subj="AccessItemsList"
-                    style={{ maxWidth: MAX_CELL_WIDTH }}
-                  >
-                    {accessAllEngines ? (
-                      ALL_LABEL
-                    ) : (
-                      <>
-                        {accessItems.length === 0
-                          ? noItemsPlaceholder
-                          : accessItems.map(({ name }) => (
-                              <Fragment key={name}>
-                                {name}
-                                <br />
-                              </Fragment>
-                            ))}
-                      </>
-                    )}
-                  </EuiTableRowCell>
-                  {shouldShowAuthProvider && (
-                    <EuiTableRowCell data-test-subj="AuthProviderDisplay">
-                      {authProvider.map(getAuthProviderDisplayValue).join(', ')}
-                    </EuiTableRowCell>
-                  )}
-                  <EuiTableRowCell align="right">
-                    {id && rowActions(id)}
-                    {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
-                  </EuiTableRowCell>
-                </EuiTableRow>
-              )
-            )}
-          </EuiTableBody>
-        </EuiTable>
-      ) : (
-        <p>
-          {i18n.translate('xpack.enterpriseSearch.roleMapping.moResults.message', {
-            defaultMessage: "No results found for '{filterValue}'",
-            values: { filterValue },
-          })}
-        </p>
-      )}
-    </>
+    <EuiInMemoryTable
+      data-test-subj="RoleMappingsTable"
+      columns={columns}
+      items={standardizedRoleMappings}
+      search={search}
+      pagination={pagination}
+      message={ROLE_MAPPINGS_NO_RESULTS_MESSAGE}
+      responsive={false}
+    />
   );
 };

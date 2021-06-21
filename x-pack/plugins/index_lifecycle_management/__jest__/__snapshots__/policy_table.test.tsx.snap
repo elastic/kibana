@@ -46,71 +46,67 @@ Array [
 `;
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
-<main
-  class="euiPageBody euiPageBody--borderRadiusNone"
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  role="main"
 >
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-    role="main"
+    class="euiEmptyPrompt"
   >
+    <span
+      color="subdued"
+      data-euiicon-type="managementApp"
+    />
     <div
-      class="euiEmptyPrompt"
+      class="euiSpacer euiSpacer--s"
+    />
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <h1
+        class="euiTitle euiTitle--medium"
+      >
+        Create your first index lifecycle policy
+      </h1>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <p>
+           An index lifecycle policy helps you manage your indices as they age.
+        </p>
+      </div>
+    </span>
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      data-test-subj="createPolicyButton"
+      type="button"
     >
       <span
-        color="subdued"
-        data-euiicon-type="managementApp"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <span
-        class="euiTextColor euiTextColor--subdued"
-      >
-        <h1
-          class="euiTitle euiTitle--medium"
-        >
-          Create your first index lifecycle policy
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m"
-        />
-        <div
-          class="euiText euiText--medium"
-        >
-          <p>
-             An index lifecycle policy helps you manage your indices as they age.
-          </p>
-        </div>
-      </span>
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        data-test-subj="createPolicyButton"
-        type="button"
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+        <span
+          class="euiButton__text"
         >
-          <span
-            class="euiButtonContent__icon"
-            color="inherit"
-            data-euiicon-type="plusInCircle"
-          />
-          <span
-            class="euiButton__text"
-          >
-            Create policy
-          </span>
+          Create policy
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   </div>
-</main>
+</div>
 `;
 
 exports[`policy table should sort when linked indices header is clicked 1`] = `

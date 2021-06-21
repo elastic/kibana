@@ -9,17 +9,10 @@ import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
-import { SectionError } from '../section_error';
-import {
-  SimulateTemplateFlyoutContent,
-  SimulateTemplateProps,
-  simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
-} from '../index_templates';
-import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
   StepSettingsContainer,
@@ -27,6 +20,15 @@ import {
   StepAliasesContainer,
 } from '../shared';
 import { documentationService } from '../../services/documentation';
+import { SectionError } from '../section_error';
+import {
+  SimulateTemplateFlyoutContent,
+  SimulateTemplateProps,
+  simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
+  LegacyIndexTemplatesDeprecation,
+} from '../index_templates';
+import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -38,6 +40,7 @@ interface Props {
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  history?: ScopedHistory;
   isLegacy?: boolean;
   defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
@@ -98,6 +101,7 @@ export const TemplateForm = ({
   saveError,
   clearSaveError,
   onSave,
+  history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
@@ -283,12 +287,20 @@ export const TemplateForm = ({
     );
   };
 
+  const isLegacyIndexTemplate = indexTemplate._kbnMeta.isLegacy === true;
+
   return (
     <>
       {/* Form header */}
       {title}
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+
+      {isLegacyIndexTemplate && (
+        <LegacyIndexTemplatesDeprecation history={history} showCta={true} />
+      )}
+
+      <EuiSpacer size="s" />
 
       <FormWizard<WizardContent, WizardSection>
         defaultValue={wizardDefaultValue}
@@ -311,7 +323,7 @@ export const TemplateForm = ({
           />
         </FormWizardStep>
 
-        {indexTemplate._kbnMeta.isLegacy !== true && (
+        {!isLegacyIndexTemplate && (
           <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
             <StepComponentContainer />
           </FormWizardStep>

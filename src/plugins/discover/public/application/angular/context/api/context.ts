@@ -16,7 +16,11 @@ import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
 
-export type SurrDocType = 'successors' | 'predecessors';
+export enum SurrDocType {
+  SUCCESSORS = 'successors',
+  PREDECESSORS = 'predecessors',
+}
+
 export type EsHitRecord = Required<
   Pick<
     estypes.SearchResponse['hits']['hits'][number],
@@ -68,7 +72,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = await createSearchSource(indexPattern, filters);
-    const sortDirToApply = type === 'successors' ? sortDir : reverseSortDir(sortDir);
+    const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
     const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
     const timeValueMillis =
@@ -108,7 +112,9 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
       );
 
       documents =
-        type === 'successors' ? [...documents, ...hits] : [...hits.slice().reverse(), ...documents];
+        type === SurrDocType.SUCCESSORS
+          ? [...documents, ...hits]
+          : [...hits.slice().reverse(), ...documents];
     }
 
     return documents;

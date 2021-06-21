@@ -7,7 +7,7 @@
 
 import type { ReactEventHandler } from 'react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +49,6 @@ import { CreatePackagePolicyPageLayout } from './components';
 import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
-import { StepSelectPackage } from './step_select_package';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
@@ -60,9 +59,15 @@ const StepsWithLessPadding = styled(EuiSteps)`
   }
 `;
 
+const CustomEuiBottomBar = styled(EuiBottomBar)`
+  // Set a relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar
+  z-index: 50;
+`;
+
 interface AddToPolicyParams {
   pkgkey: string;
   integration?: string;
+  policyId?: string;
 }
 
 interface AddFromPolicyParams {
@@ -81,10 +86,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = 'policyId' in params ? 'policy' : 'package';
 
+  const { search } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const policyId = useMemo(() => queryParams.get('policyId') ?? undefined, [queryParams]);
+
   // Agent policy and package info states
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
+  const [isLoadingAgentPolicyStep, setIsLoadingAgentPolicyStep] = useState<boolean>(false);
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
@@ -286,6 +295,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   agentPolicyName: agentPolicy.name,
                 },
               })
+            : (params as AddToPolicyParams)?.policyId && agentPolicy && agentCount === 0
+            ? i18n.translate('xpack.fleet.createPackagePolicy.addAgentNextNotification', {
+                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
+                values: {
+                  agentPolicyName: agentPolicy.name,
+                },
+              })
             : undefined,
         'data-test-subj': 'packagePolicyCreateSuccessToast',
       });
@@ -337,32 +353,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       <StepSelectAgentPolicy
         pkgkey={(params as AddToPolicyParams).pkgkey}
         updatePackageInfo={updatePackageInfo}
+        defaultAgentPolicyId={policyId}
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
-        setIsLoadingSecondStep={setIsLoadingSecondStep}
+        setIsLoadingSecondStep={setIsLoadingAgentPolicyStep}
       />
     ),
-    [params, updatePackageInfo, agentPolicy, updateAgentPolicy]
+    [params, updatePackageInfo, agentPolicy, updateAgentPolicy, policyId]
   );
 
   const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
 
-  const stepSelectPackage = useMemo(
-    () => (
-      <StepSelectPackage
-        agentPolicyId={(params as AddFromPolicyParams).policyId}
-        updateAgentPolicy={updateAgentPolicy}
-        packageInfo={packageInfo}
-        updatePackageInfo={updatePackageInfo}
-        setIsLoadingSecondStep={setIsLoadingSecondStep}
-      />
-    ),
-    [params, updateAgentPolicy, packageInfo, updatePackageInfo]
-  );
-
   const stepConfigurePackagePolicy = useMemo(
     () =>
-      isLoadingSecondStep ? (
+      isLoadingAgentPolicyStep ? (
         <Loading />
       ) : agentPolicy && packageInfo ? (
         <>
@@ -399,7 +403,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         <div />
       ),
     [
-      isLoadingSecondStep,
+      isLoadingAgentPolicyStep,
       agentPolicy,
       packageInfo,
       packagePolicy,
@@ -413,26 +417,19 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const steps: EuiStepProps[] = [
-    from === 'package'
-      ? {
-          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-            defaultMessage: 'Select an agent policy',
-          }),
-          children: stepSelectAgentPolicy,
-        }
-      : {
-          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectPackageTitle', {
-            defaultMessage: 'Select an integration',
-          }),
-          children: stepSelectPackage,
-        },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
       }),
-      status: !packageInfo || !agentPolicy || isLoadingSecondStep ? 'disabled' : undefined,
+      status: !packageInfo || !agentPolicy || isLoadingAgentPolicyStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children: stepConfigurePackagePolicy,
+    },
+    {
+      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+        defaultMessage: 'Apply to agent policy',
+      }),
+      children: stepSelectAgentPolicy,
     },
   ];
 
@@ -459,10 +456,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
-      <EuiBottomBar>
+      <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
+            {!isLoadingAgentPolicyStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                 defaultMessage="Your integration policy has errors. Please fix them before saving."
@@ -504,7 +501,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiBottomBar>
+      </CustomEuiBottomBar>
     </CreatePackagePolicyPageLayout>
   );
 };
