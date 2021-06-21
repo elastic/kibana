@@ -288,7 +288,6 @@ const CreateRulePageComponent: React.FC = () => {
     history.replace(getRulesUrl());
     return null;
   }
-  console.log('rendering');
   return (
     <>
       <SecuritySolutionPageWrapper>
