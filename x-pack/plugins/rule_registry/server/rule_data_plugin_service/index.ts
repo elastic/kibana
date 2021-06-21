@@ -7,6 +7,7 @@
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
+import { merge } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -109,24 +110,15 @@ export class RuleDataPluginService {
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing component template ${template.name}`);
-    return clusterClient.cluster.putComponentTemplate({
-      ...template,
-      body: {
-        ...template.body,
-        template: {
-          ...template.body.template,
-          mappings: {
-            ...template.body.template.mappings,
-            _meta: {
-              ...template.body.template.mappings._meta,
-              versions: {
-                [template.name]: templateVersion,
-              },
-            },
-          },
+    const mergedTemplate = merge(
+      {
+        body: {
+          template: { mappings: { _meta: { versions: { [template.name]: templateVersion } } } },
         },
       },
-    });
+      template
+    );
+    return clusterClient.cluster.putComponentTemplate(mergedTemplate);
   }
 
   private async _createOrUpdateIndexTemplate({
@@ -140,24 +132,15 @@ export class RuleDataPluginService {
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing index template ${template.name}`);
-    return clusterClient.indices.putIndexTemplate({
-      ...template,
-      body: {
-        ...template.body,
-        template: {
-          ...template.body?.template,
-          mappings: {
-            ...template.body?.template?.mappings,
-            _meta: {
-              ...template.body?.template?.mappings?._meta,
-              versions: {
-                [template.name]: templateVersion,
-              },
-            },
-          },
+    const mergedTemplate = merge(
+      {
+        body: {
+          template: { mappings: { _meta: { versions: { [template.name]: templateVersion } } } },
         },
       },
-    });
+      template
+    );
+    return clusterClient.indices.putIndexTemplate(mergedTemplate);
   }
 
   private async _createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {

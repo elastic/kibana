@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicesRolloverResponse } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { get } from 'lodash';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
@@ -72,7 +73,6 @@ export class RuleDataClient implements IRuleDataClient {
   async getWriter(options: { namespace?: string } = {}): Promise<RuleDataWriter> {
     const { namespace } = options;
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
-    await this.createOrUpdateWriteTarget({ namespace });
     await this.rolloverAliasIfNeeded({ namespace });
     return {
       bulk: async (request) => {
@@ -90,7 +90,7 @@ export class RuleDataClient implements IRuleDataClient {
               response.body.items.length > 0 &&
               response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
             ) {
-              return this.createOrUpdateWriteTarget({ namespace }).then(() => {
+              return this.createWriteTargetIfNeeded({ namespace }).then(() => {
                 return clusterClient.bulk(requestWithDefaultParameters);
               });
             }
@@ -106,13 +106,27 @@ export class RuleDataClient implements IRuleDataClient {
   async rolloverAliasIfNeeded({ namespace }: { namespace?: string }) {
     const clusterClient = await this.getClusterClient();
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
-    const { body: simulatedRollover } = await clusterClient.indices.rollover({
-      alias,
-      dry_run: true,
-    });
-    const writeIndexMapping = await clusterClient.indices.get({
-      index: simulatedRollover.old_index,
-    });
+    let simulatedRollover: IndicesRolloverResponse;
+    try {
+      ({ body: simulatedRollover } = await clusterClient.indices.rollover({
+        alias,
+        dry_run: true,
+      }));
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'index_not_found_exception') {
+        throw err;
+      }
+      return;
+    }
+
+    const [writeIndexMapping, simulatedIndexMapping] = await Promise.all([
+      clusterClient.indices.get({
+        index: simulatedRollover.old_index,
+      }),
+      clusterClient.indices.simulateIndexTemplate({
+        name: simulatedRollover.new_index,
+      }),
+    ]);
     const currentVersions = get(writeIndexMapping, [
       'body',
       simulatedRollover.old_index,
@@ -120,10 +134,13 @@ export class RuleDataClient implements IRuleDataClient {
       '_meta',
       'versions',
     ]);
-    const { body: simulatedIndex } = await clusterClient.indices.simulateIndexTemplate({
-      name: simulatedRollover.new_index,
-    });
-    const targetVersions = get(simulatedIndex, ['template', 'mappings', '_meta', 'versions']);
+    const targetVersions = get(simulatedIndexMapping, [
+      'body',
+      'template',
+      'mappings',
+      '_meta',
+      'versions',
+    ]);
     const componentTemplateRemoved =
       Object.keys(currentVersions).length > Object.keys(targetVersions).length;
     const componentTemplateUpdated = Object.entries(targetVersions).reduce(
@@ -137,18 +154,20 @@ export class RuleDataClient implements IRuleDataClient {
     );
     const needRollover = componentTemplateRemoved || componentTemplateUpdated;
     if (needRollover) {
-      await clusterClient.indices.rollover({
-        alias,
-        body: {
-          conditions: {
-            max_age: '5s',
-          },
-        },
-      });
+      try {
+        await clusterClient.indices.rollover({
+          alias,
+          new_index: simulatedRollover.new_index,
+        });
+      } catch (err) {
+        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+          throw err;
+        }
+      }
     }
   }
 
-  async createOrUpdateWriteTarget({ namespace }: { namespace?: string }) {
+  async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
     const clusterClient = await this.getClusterClient();
