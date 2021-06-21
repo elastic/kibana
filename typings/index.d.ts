@@ -33,3 +33,7 @@ declare module 'axios/lib/adapters/xhr';
 // See https://github.com/storybookjs/storybook/issues/11684
 declare module 'react-syntax-highlighter/dist/cjs/create-element';
 declare module 'react-syntax-highlighter/dist/cjs/prism-light';
+
+// Monaco languages support
+declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+declare module 'monaco-editor/esm/vs/basic-languages/css/css';

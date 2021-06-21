@@ -1,10 +1,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-ui-shared-deps"
+    "allowJs": true,
+    "incremental": true,
+    "outDir": "./target",
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-ui-shared-deps/src",
+    "types": [
+      "node",
+      "resize-observer-polyfill"
+    ]
   },
   "include": [
-    "index.d.ts",
-    "theme.ts"
+    "src/**/*",
   ]
 }

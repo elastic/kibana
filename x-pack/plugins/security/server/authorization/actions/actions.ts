@@ -15,7 +15,7 @@ import { UIActions } from './ui';
 
 /** Actions are used to create the "actions" that are associated with Elasticsearch's
  * application privileges, and are used to perform the authorization checks implemented
- * by the various `checkPrivilegesWithRequest` derivatives
+ * by the various `checkPrivilegesWithRequest` derivatives.
  */
 export class Actions {
   public readonly api = new ApiActions(this.versionNumber);

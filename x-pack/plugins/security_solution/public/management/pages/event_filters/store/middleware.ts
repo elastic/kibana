@@ -57,7 +57,8 @@ const addNewComments = (
 ): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
   if (newComment) {
     if (!entry.comments) entry.comments = [];
-    entry.comments.push({ comment: newComment });
+    const trimmedComment = newComment.trim();
+    if (trimmedComment) entry.comments.push({ comment: trimmedComment });
   }
   return entry;
 };

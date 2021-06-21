@@ -7,10 +7,10 @@
  */
 
 import _ from 'lodash';
+import { JsonObject } from '@kbn/common-utils';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 import { NamedArgTypeBuildNode } from './types';
-import { JsonObject } from '../../../../../kibana_utils/common';
 
 export function buildNode(name: string, value: any): NamedArgTypeBuildNode {
   const argumentNode =

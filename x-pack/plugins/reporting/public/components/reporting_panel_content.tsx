@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCopy,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { ToastsSetup } from 'src/core/public';
@@ -20,14 +30,12 @@ export interface Props {
   toasts: ToastsSetup;
   reportType: string;
 
-  /**
-   * Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-   */
+  /** Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.  **/
   requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
   getJobParams: () => BaseParams;
-  options?: ReactElement<any>;
+  options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
   intl: InjectedIntl;
@@ -110,50 +118,61 @@ class ReportingPanelContentUi extends Component<Props, State> {
       );
     }
 
-    const reportMsg = (
-      <FormattedMessage
-        id="xpack.reporting.panelContent.generationTimeDescription"
-        defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
-        description="Here 'reportingType' can be 'PDF' or 'CSV'"
-        values={{
-          reportingType: this.prettyPrintReportingType(),
-          objectType: this.state.objectType,
-        }}
-      />
-    );
-
     return (
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
         <EuiText size="s">
-          <p>{reportMsg}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.panelContent.generationTimeDescription"
+              defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
+              description="Here 'reportingType' can be 'PDF' or 'CSV'"
+              values={{
+                reportingType: this.prettyPrintReportingType(),
+                objectType: this.state.objectType,
+              }}
+            />
+          </p>
         </EuiText>
         <EuiSpacer size="s" />
 
         {this.props.options}
 
         {this.renderGenerateReportButton(false)}
-        <EuiSpacer size="s" />
 
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.reporting.panelContent.howToCallGenerationDescription"
-              defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
+        <EuiHorizontalRule
+          margin="s"
+          style={{ width: 'auto', marginLeft: '-16px', marginRight: '-16px' }}
+        />
 
-        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-          {(copy) => (
-            <EuiButton fullWidth onClick={copy} size="s">
+        <EuiAccordion
+          id="advanced-options"
+          buttonContent={i18n.translate('xpack.reporting.panelContent.advancedOptions', {
+            defaultMessage: 'Advanced options',
+          })}
+          paddingSize="none"
+        >
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <p>
               <FormattedMessage
-                id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                defaultMessage="Copy POST URL"
+                id="xpack.reporting.panelContent.howToCallGenerationDescription"
+                defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
               />
-            </EuiButton>
-          )}
-        </EuiCopy>
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+
+          <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+            {(copy) => (
+              <EuiButton fullWidth onClick={copy} size="s">
+                <FormattedMessage
+                  id="xpack.reporting.panelContent.copyUrlButtonLabel"
+                  defaultMessage="Copy POST URL"
+                />
+              </EuiButton>
+            )}
+          </EuiCopy>
+        </EuiAccordion>
       </EuiForm>
     );
   }
@@ -247,44 +266,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
       })
       .catch((error: any) => {
-        if (error.message === 'not exportable') {
-          return this.props.toasts.addWarning({
-            title: intl.formatMessage(
-              {
-                id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
-                defaultMessage: 'Only saved {objectType} can be exported',
-              },
-              { objectType: this.state.objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
-                defaultMessage="Please save your work first"
-              />
-            ),
-          });
-        }
-
-        const defaultMessage =
-          error?.res?.status === 403 ? (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
-              defaultMessage="You don't have permission to generate this report."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.notification.cantReachServerDescription"
-              defaultMessage="Can't reach the server. Please try again."
-            />
-          );
-
-        this.props.toasts.addDanger({
+        this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Reporting error',
+            defaultMessage: 'Failed to create report',
           }),
-          text: toMountPoint(error.message || defaultMessage),
-          'data-test-subj': 'queueReportError',
+          toastMessage: error.body.message,
         });
       });
   };

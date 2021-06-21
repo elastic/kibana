@@ -31,6 +31,7 @@ import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/publ
 import { validateExtent } from './axes_configuration';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+
 export interface AxisSettingsPopoverProps {
   /**
    * Determines the axis
@@ -93,8 +94,10 @@ export interface AxisSettingsPopoverProps {
    */
   setExtent?: (extent: AxisExtentConfig | undefined) => void;
   hasBarOrAreaOnAxis: boolean;
+  hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
 }
+
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
   isHorizontal: boolean
@@ -168,6 +171,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   extent,
   setExtent,
   hasBarOrAreaOnAxis,
+  hasPercentageAxis,
   dataBounds,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
@@ -333,10 +337,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                     defaultMessage: 'Custom',
                   }),
                   'data-test-subj': 'lnsXY_axisExtent_groups_custom',
+                  isDisabled: hasPercentageAxis,
                 },
               ]}
               idSelected={`${idPrefix}${
-                hasBarOrAreaOnAxis && localExtent.mode === 'dataBounds' ? 'full' : localExtent.mode
+                (hasBarOrAreaOnAxis && localExtent.mode === 'dataBounds') || hasPercentageAxis
+                  ? 'full'
+                  : localExtent.mode
               }`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
@@ -350,7 +357,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               }}
             />
           </EuiFormRow>
-          {localExtent.mode === 'custom' && (
+          {localExtent.mode === 'custom' && !hasPercentageAxis && (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s">

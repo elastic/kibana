@@ -13,10 +13,29 @@
           "term": {
             "event.category": "network"
           }
-        },
+        }
+      ],
+      "must": [
         {
-          "term": {
-            "event.outcome": "deny"
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "event.outcome": {
+                    "query": "deny",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "event.type": {
+                    "query": "denied",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
           }
         }
       ]

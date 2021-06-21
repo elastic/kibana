@@ -9,7 +9,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
 import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor } from 'src/plugins/data/server';
-import { ESSearchRequest, ESSearchResponse } from 'typings/elasticsearch';
+import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
 
 export interface RuleDataReader {

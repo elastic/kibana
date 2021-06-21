@@ -43,10 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         deployment.getHostPort() + '/app/management/security/users#some=hash-value'
       );
 
-      await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
-        20000
-      );
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());

@@ -9,16 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const SHOWING_CASES = (actionDate: string, actionName: string, userName: string) =>
-  i18n.translate('xpack.cases.caseView.actionHeadline', {
-    values: {
-      actionDate,
-      actionName,
-      userName,
-    },
-    defaultMessage: '{userName} {actionName} on {actionDate}',
-  });
-
 export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.addedField', {
   defaultMessage: 'added',
 });
@@ -89,10 +79,6 @@ export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
 
-export const ADDED_COMMENT = i18n.translate('xpack.cases.caseView.actionLabel.addComment', {
-  defaultMessage: 'added comment',
-});
-
 export const STATUS = i18n.translate('xpack.cases.caseView.statusLabel', {
   defaultMessage: 'Status',
 });
@@ -127,4 +113,21 @@ export const CHANGED_CONNECTOR_FIELD = i18n.translate('xpack.cases.caseView.fiel
 
 export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel', {
   defaultMessage: `Sync alerts`,
+});
+
+export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
+  defaultMessage: 'This case does not exist',
+});
+
+export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
+  i18n.translate('xpack.cases.caseView.doesNotExist.description', {
+    values: {
+      caseId,
+    },
+    defaultMessage:
+      'A case with id {caseId} could not be found. This likely means the case has been deleted, or the id is incorrect.',
+  });
+
+export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
+  defaultMessage: 'Back to Cases',
 });

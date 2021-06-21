@@ -15,7 +15,7 @@ describe('manifest_entry', () => {
     let manifestEntry: ManifestEntry;
 
     beforeAll(async () => {
-      artifact = await getInternalArtifactMock('windows', 'v1', { compress: true });
+      artifact = await getInternalArtifactMock('windows', 'v1');
       manifestEntry = new ManifestEntry(artifact);
     });
 
@@ -35,7 +35,7 @@ describe('manifest_entry', () => {
 
     test('Correct sha256 is returned', () => {
       expect(manifestEntry.getEncodedSha256()).toEqual(
-        '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e'
+        '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
       );
       expect(manifestEntry.getDecodedSha256()).toEqual(
         '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
@@ -43,7 +43,7 @@ describe('manifest_entry', () => {
     });
 
     test('Correct size is returned', () => {
-      expect(manifestEntry.getEncodedSize()).toEqual(147);
+      expect(manifestEntry.getEncodedSize()).toEqual(432);
       expect(manifestEntry.getDecodedSize()).toEqual(432);
     });
 
@@ -59,12 +59,12 @@ describe('manifest_entry', () => {
 
     test('Correct record is returned', () => {
       expect(manifestEntry.getRecord()).toEqual({
-        compression_algorithm: 'zlib',
+        compression_algorithm: 'none',
         encryption_algorithm: 'none',
         decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-        encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
+        encoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         decoded_size: 432,
-        encoded_size: 147,
+        encoded_size: 432,
         relative_url:
           '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
       });

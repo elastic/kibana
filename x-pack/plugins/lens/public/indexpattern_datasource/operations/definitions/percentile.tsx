@@ -59,7 +59,9 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     defaultMessage: 'Percentile',
   }),
   input: 'field',
-  operationParams: [{ name: 'percentile', type: 'number', required: false }],
+  operationParams: [
+    { name: 'percentile', type: 'number', required: false, defaultValue: DEFAULT_PERCENTILE_VALUE },
+  ],
   filterable: true,
   shiftable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
@@ -107,7 +109,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -212,5 +214,19 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
         />
       </EuiFormRow>
     );
+  },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.percentile.signature', {
+      defaultMessage: 'field: string, [percentile]: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.percentile.documentation', {
+      defaultMessage: `
+Returns the specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
+
+Example: Get the number of bytes larger than 95 % of values:
+\`percentile(bytes, percentile=95)\`
+      `,
+    }),
   },
 };

@@ -12,6 +12,7 @@ export {
   FieldValidateResponse,
   FIELD_TYPES,
   Form,
+  FormConfig,
   FormData,
   FormDataProvider,
   FormHook,

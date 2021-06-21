@@ -62,9 +62,11 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
+  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
+  showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -75,9 +77,11 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
+    disableAlerts,
     hiddenStatuses = [],
     isSelectorView,
     onRowClick,
+    showTitle,
     updateCase,
     userCanCrud,
   }) => {
@@ -190,6 +194,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
+      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
@@ -271,6 +276,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
             refresh={refresh}
+            showTitle={showTitle}
             userCanCrud={userCanCrud}
           />
         )}

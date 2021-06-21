@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -17,6 +17,9 @@ import {
   EuiFormLabel,
   EuiToolTip,
   EuiText,
+  EuiTabs,
+  EuiTab,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
@@ -91,6 +94,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     hideGrouping,
     dateRange,
     dimensionGroups,
+    toggleFullscreen,
+    isFullscreen,
   } = props;
   const services = {
     data: props.data,
@@ -101,30 +106,39 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
+  const selectedOperationDefinition =
+    selectedColumn && operationDefinitionMap[selectedColumn.operationType];
+
+  const updateLayer = useCallback(
+    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    [layerId, setState]
+  );
+
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => {
+    const prevOperationType =
+      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
+
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
     const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
-    const prevOperationType =
-      operationDefinitionMap[hypotheticalLayer.columns[columnId]?.operationType]?.input;
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        shouldReplaceDimension: Boolean(hypotheticalLayer.columns[columnId]),
-        // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
-        shouldRemoveDimension: Boolean(
-          hasIncompleteColumns && prevOperationType === 'fullReference'
-        ),
+        isDimensionComplete:
+          prevOperationType === 'fullReference'
+            ? !hasIncompleteColumns
+            : Boolean(hypotheticalLayer.columns[columnId]),
       }
     );
   };
 
-  const selectedOperationDefinition =
-    selectedColumn && operationDefinitionMap[selectedColumn.operationType];
+  const setIsCloseable = (isCloseable: boolean) => {
+    setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
+  };
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
   const incompleteOperation = incompleteInfo?.operationType;
@@ -132,14 +146,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
+  const [temporaryQuickFunction, setQuickFunction] = useState(false);
+
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .filter(({ hidden }) => !hidden)
+      .filter(
+        (operationDefinition) =>
+          !('selectionStyle' in operationDefinition) ||
+          operationDefinition.selectionStyle !== 'hidden'
+      )
+      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
-      .map((def) => def.type)
-      .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
+      .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
@@ -147,7 +168,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
-  const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
+  const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
     const currentField =
@@ -245,37 +266,44 @@ export function DimensionEditor(props: DimensionEditorProps) {
               visualizationGroups: dimensionGroups,
               targetGroup: props.groupId,
             });
+            if (temporaryQuickFunction && newLayer.columns[columnId].operationType !== 'formula') {
+              // Only switch the tab once the formula is fully removed
+              setQuickFunction(false);
+            }
             setStateWrapper(newLayer);
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || new Set();
 
+            let newLayer: IndexPatternLayer;
             if (possibleFields.size === 1) {
-              setStateWrapper(
-                insertOrReplaceColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: operationType,
-                  field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
-                  visualizationGroups: dimensionGroups,
-                  targetGroup: props.groupId,
-                })
-              );
+              newLayer = insertOrReplaceColumn({
+                layer: props.state.layers[props.layerId],
+                indexPattern: currentIndexPattern,
+                columnId,
+                op: operationType,
+                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                visualizationGroups: dimensionGroups,
+                targetGroup: props.groupId,
+              });
             } else {
-              setStateWrapper(
-                insertOrReplaceColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: operationType,
-                  field: undefined,
-                  visualizationGroups: dimensionGroups,
-                  targetGroup: props.groupId,
-                })
-              );
+              newLayer = insertOrReplaceColumn({
+                layer: props.state.layers[props.layerId],
+                indexPattern: currentIndexPattern,
+                columnId,
+                op: operationType,
+                field: undefined,
+                visualizationGroups: dimensionGroups,
+                targetGroup: props.groupId,
+              });
+              // );
             }
+            if (temporaryQuickFunction && newLayer.columns[columnId].operationType !== 'formula') {
+              // Only switch the tab once the formula is fully removed
+              setQuickFunction(false);
+            }
+            setStateWrapper(newLayer);
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           }
@@ -287,6 +315,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             return;
           }
 
+          if (temporaryQuickFunction) {
+            setQuickFunction(false);
+          }
           const newLayer = replaceColumn({
             layer: props.state.layers[props.layerId],
             indexPattern: currentIndexPattern,
@@ -315,9 +346,34 @@ export function DimensionEditor(props: DimensionEditorProps) {
       currentFieldIsInvalid
     );
 
-  return (
-    <div id={columnId}>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+  const shouldDisplayExtraOptions =
+    !currentFieldIsInvalid &&
+    !incompleteInfo &&
+    selectedColumn &&
+    selectedColumn.operationType !== 'formula';
+
+  const quickFunctions = (
+    <>
+      {temporaryQuickFunction && selectedColumn?.operationType === 'formula' && (
+        <>
+          <EuiCallOut
+            className="lnsIndexPatternDimensionEditor__warning"
+            size="s"
+            title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
+              defaultMessage: 'Formula currently applied',
+            })}
+            iconType="alert"
+            color="warning"
+          >
+            <p>
+              {i18n.translate('xpack.lens.indexPattern.formulaWarningText', {
+                defaultMessage: 'To overwrite your formula, select a quick function',
+              })}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Select a function',
@@ -336,7 +392,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       </div>
       <EuiSpacer size="s" />
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         {!incompleteInfo &&
         selectedColumn &&
         'references' in selectedColumn &&
@@ -349,19 +405,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <ReferenceEditor
                   key={index}
                   layer={state.layers[layerId]}
+                  layerId={layerId}
+                  activeData={props.activeData}
                   columnId={referenceId}
                   updateLayer={(
                     setter:
                       | IndexPatternLayer
                       | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                   ) => {
-                    setState(
-                      mergeLayer({
-                        state,
-                        layerId,
-                        newLayer:
-                          typeof setter === 'function' ? setter(state.layers[layerId]) : setter,
-                      })
+                    updateLayer(
+                      typeof setter === 'function' ? setter(state.layers[layerId]) : setter
                     );
                   }}
                   validation={validation}
@@ -375,6 +428,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     currentColumn: state.layers[layerId].columns[columnId],
                   })}
                   dimensionGroups={dimensionGroups}
+                  isFullscreen={isFullscreen}
+                  toggleFullscreen={toggleFullscreen}
+                  setIsCloseable={setIsCloseable}
                   {...services}
                 />
               );
@@ -385,7 +441,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
         {!selectedColumn ||
         selectedOperationDefinition?.input === 'field' ||
-        (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field') ? (
+        (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field') ||
+        temporaryQuickFunction ? (
           <EuiFormRow
             data-test-subj="indexPattern-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
@@ -436,19 +493,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFormRow>
         ) : null}
 
-        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && ParamEditor && (
-          <>
-            <ParamEditor
-              layer={state.layers[layerId]}
-              updateLayer={setStateWrapper}
-              columnId={columnId}
-              currentColumn={state.layers[layerId].columns[columnId]}
-              dateRange={dateRange}
-              indexPattern={currentIndexPattern}
-              operationDefinitionMap={operationDefinitionMap}
-              {...services}
-            />
-          </>
+        {shouldDisplayExtraOptions && ParamEditor && (
+          <ParamEditor
+            layer={state.layers[layerId]}
+            layerId={layerId}
+            activeData={props.activeData}
+            updateLayer={setStateWrapper}
+            columnId={columnId}
+            currentColumn={state.layers[layerId].columns[columnId]}
+            dateRange={dateRange}
+            indexPattern={currentIndexPattern}
+            operationDefinitionMap={operationDefinitionMap}
+            toggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
+            setIsCloseable={setIsCloseable}
+            {...services}
+          />
         )}
 
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
@@ -546,74 +606,137 @@ export function DimensionEditor(props: DimensionEditorProps) {
       </div>
 
       <EuiSpacer size="s" />
+    </>
+  );
 
-      {!currentFieldIsInvalid && (
-        <div className="lnsIndexPatternDimensionEditor__section">
+  const formulaTab = ParamEditor ? (
+    <ParamEditor
+      layer={state.layers[layerId]}
+      layerId={layerId}
+      activeData={props.activeData}
+      updateLayer={setStateWrapper}
+      columnId={columnId}
+      currentColumn={state.layers[layerId].columns[columnId]}
+      dateRange={dateRange}
+      indexPattern={currentIndexPattern}
+      operationDefinitionMap={operationDefinitionMap}
+      toggleFullscreen={toggleFullscreen}
+      isFullscreen={isFullscreen}
+      setIsCloseable={setIsCloseable}
+      {...services}
+    />
+  ) : null;
+
+  const onFormatChange = useCallback(
+    (newFormat) => {
+      updateLayer(
+        updateColumnParam({
+          layer: state.layers[layerId],
+          columnId,
+          paramName: 'format',
+          value: newFormat,
+        })
+      );
+    },
+    [columnId, layerId, state.layers, updateLayer]
+  );
+
+  return (
+    <div id={columnId}>
+      {!isFullscreen && operationSupportMatrix.operationWithoutField.has('formula') ? (
+        <EuiTabs size="s" className="lnsIndexPatternDimensionEditor__header">
+          <EuiTab
+            isSelected={temporaryQuickFunction || selectedColumn?.operationType !== 'formula'}
+            data-test-subj="lens-dimensionTabs-quickFunctions"
+            onClick={() => {
+              if (selectedColumn?.operationType === 'formula') {
+                setQuickFunction(true);
+              }
+            }}
+          >
+            {i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
+              defaultMessage: 'Quick functions',
+            })}
+          </EuiTab>
+          <EuiTab
+            isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
+            data-test-subj="lens-dimensionTabs-formula"
+            onClick={() => {
+              if (selectedColumn?.operationType !== 'formula') {
+                setQuickFunction(false);
+                const newLayer = insertOrReplaceColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: 'formula',
+                  visualizationGroups: dimensionGroups,
+                });
+                setStateWrapper(newLayer);
+                trackUiEvent(`indexpattern_dimension_operation_formula`);
+                return;
+              } else {
+                setQuickFunction(false);
+              }
+            }}
+          >
+            {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+              defaultMessage: 'Formula',
+            })}
+          </EuiTab>
+        </EuiTabs>
+      ) : null}
+
+      {isFullscreen
+        ? formulaTab
+        : selectedOperationDefinition?.type === 'formula' && !temporaryQuickFunction
+        ? formulaTab
+        : quickFunctions}
+
+      {!isFullscreen && !currentFieldIsInvalid && !temporaryQuickFunction && (
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
           {!incompleteInfo && selectedColumn && (
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: {
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          label: value,
-                          customLabel:
-                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                              selectedColumn,
-                              state.indexPatterns[state.layers[layerId].indexPatternId],
-                              state.layers[layerId].columns
-                            ) !== value,
-                        },
-                      },
+                updateLayer({
+                  columns: {
+                    ...state.layers[layerId].columns,
+                    [columnId]: {
+                      ...selectedColumn,
+                      label: value,
+                      customLabel:
+                        operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                          selectedColumn,
+                          state.indexPatterns[state.layers[layerId].indexPatternId],
+                          state.layers[layerId].columns
+                        ) !== value,
                     },
-                  })
-                );
+                  },
+                });
               }}
             />
           )}
 
-          {!incompleteInfo && !hideGrouping && (
+          {!isFullscreen && !incompleteInfo && !hideGrouping && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
-              setColumns={(columnOrder) =>
-                setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
-              }
+              setColumns={(columnOrder) => updateLayer({ columnOrder })}
               getFieldByName={currentIndexPattern.getFieldByName}
             />
           )}
 
-          {selectedColumn &&
+          {!isFullscreen &&
+          selectedColumn &&
           (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-            <FormatSelector
-              selectedColumn={selectedColumn}
-              onChange={(newFormat) => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: updateColumnParam({
-                      layer: state.layers[layerId],
-                      columnId,
-                      paramName: 'format',
-                      value: newFormat,
-                    }),
-                  })
-                );
-              }}
-            />
+            <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
           ) : null}
         </div>
       )}
     </div>
   );
 }
+
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,

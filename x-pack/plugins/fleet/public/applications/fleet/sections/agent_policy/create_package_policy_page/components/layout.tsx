@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { WithHeaderLayout } from '../../../../layouts';
-import type { AgentPolicy, PackageInfo } from '../../../../types';
+import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 import { PackageIcon } from '../../../../components';
 import type { CreatePackagePolicyFrom } from '../types';
 
@@ -29,6 +29,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   onCancel?: React.ReactEventHandler;
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
   'data-test-subj'?: string;
 }> = memo(
   ({
@@ -37,6 +38,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     onCancel,
     agentPolicy,
     packageInfo,
+    integrationInfo,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -47,8 +49,9 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <PackageIcon
                 packageName={packageInfo?.name || ''}
+                integrationName={integrationInfo?.name}
                 version={packageInfo?.version || ''}
-                icons={packageInfo?.icons}
+                icons={integrationInfo?.icons || packageInfo?.icons}
                 size="xl"
               />
             </EuiFlexItem>
@@ -68,7 +71,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
                       id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Add {packageName} integration"
                       values={{
-                        packageName: packageInfo.title,
+                        packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
                   )}
@@ -98,7 +101,14 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
           </h1>
         </EuiText>
       );
-    }, [dataTestSubj, from, packageInfo]);
+    }, [
+      dataTestSubj,
+      from,
+      integrationInfo?.icons,
+      integrationInfo?.name,
+      integrationInfo?.title,
+      packageInfo,
+    ]);
 
     const pageDescription = useMemo(() => {
       return from === 'edit' || from === 'package-edit' ? (
