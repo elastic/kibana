@@ -98,9 +98,9 @@ export const movingAverageOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
-      timeScale: previousColumn?.timeScale,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeScale: previousColumn?.timeScale,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),

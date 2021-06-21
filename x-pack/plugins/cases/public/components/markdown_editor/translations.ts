@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MARKDOWN_SYNTAX_HELP = i18n.translate('xpack.cases.markdownEditor.markdownInputHelp', {
-  defaultMessage: 'Markdown syntax help',
-});
-
 export const MARKDOWN = i18n.translate('xpack.cases.markdownEditor.markdown', {
   defaultMessage: 'Markdown',
 });
