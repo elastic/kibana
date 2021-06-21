@@ -20,8 +20,8 @@ export type {
   SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
-export { ResolvedSimpleSavedObject } from './resolved_simple_saved_object';
 export { SimpleSavedObject } from './simple_saved_object';
+export type { ResolvedSimpleSavedObject } from './types';
 export type { SavedObjectsStart } from './saved_objects_service';
 export type {
   SavedObjectsBaseOptions,

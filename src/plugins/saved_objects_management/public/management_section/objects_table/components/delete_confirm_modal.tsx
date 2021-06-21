@@ -56,7 +56,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
       });
   }, [selectedObjects]);
   const sharedObjectsCount = useMemo(() => {
-    return deletableObjects.reduce((acc, { isShared }) => (isShared ? ++acc : acc), 0);
+    return deletableObjects.filter((obj) => obj.isShared).length;
   }, [deletableObjects]);
 
   if (isDeleting) {

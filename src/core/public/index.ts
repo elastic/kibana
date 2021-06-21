@@ -98,7 +98,8 @@ export type {
   NavigateToAppOptions,
 } from './application';
 
-export { ResolvedSimpleSavedObject, SimpleSavedObject } from './saved_objects';
+export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,

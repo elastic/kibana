@@ -299,16 +299,17 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
           [new Set<string>(), new Set<string>(), new Map<string, Set<string>>()]
         );
 
+        const action = 'bulk_update';
         const { typeActionMap } = await this.ensureAuthorizedForSavedObjects(
           Array.from(uniqueTypes),
-          ['bulk_update'],
+          [action],
           Array.from(uniqueSpaces),
           { requireFullAuthorization: false }
         );
         const unauthorizedTypes = new Set<string>();
         for (const type of uniqueTypes) {
           const spaces = Array.from(typesAndSpacesMap.get(type)!);
-          if (!isAuthorizedForObjectInAllSpaces(type, 'bulk_update', typeActionMap, spaces)) {
+          if (!isAuthorizedForObjectInAllSpaces(type, action, typeActionMap, spaces)) {
             unauthorizedTypes.add(type);
           }
         }

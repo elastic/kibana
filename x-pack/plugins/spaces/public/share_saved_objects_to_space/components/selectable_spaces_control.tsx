@@ -24,6 +24,7 @@ import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { getSpaceAvatarComponent } from '../../space_avatar';
@@ -143,7 +144,7 @@ export const SelectableSpacesControl = (props: Props) => {
       docLinks!
     ).getKibanaPrivilegesDocUrl();
     return (
-      <EuiFlexItem grow={false} className="spcShareToSpace__bottomLabel">
+      <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
@@ -166,7 +167,7 @@ export const SelectableSpacesControl = (props: Props) => {
   const getNoSpacesAvailable = () => {
     if (enableCreateNewSpaceLink && spaces.length < 2) {
       return (
-        <EuiFlexItem grow={false} className="spcShareToSpace__bottomLabel">
+        <EuiFlexItem grow={false}>
           <NoSpacesAvailable application={application!} />
         </EuiFlexItem>
       );
@@ -210,7 +211,7 @@ export const SelectableSpacesControl = (props: Props) => {
         <></>
       </EuiFormRow>
 
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <EuiSelectable
@@ -223,7 +224,7 @@ export const SelectableSpacesControl = (props: Props) => {
                 'data-test-subj': 'sts-form-space-selector',
               }}
               height="full"
-              searchable={options.length > 6}
+              searchable={options.length > SPACE_SEARCH_COUNT_THRESHOLD}
             >
               {(list, search) => {
                 return (

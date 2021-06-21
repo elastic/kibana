@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -36,11 +36,18 @@ export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
 
-  const spacesMap = spaces.reduce(
-    (acc, space) => acc.set(space.id, space),
-    new Map<string, ShareToSpaceTarget>()
+  const spacesMap = useMemo(
+    () =>
+      spaces.reduce(
+        (acc, space) => acc.set(space.id, space),
+        new Map<string, ShareToSpaceTarget>()
+      ),
+    [spaces]
   );
-  const filteredAliasesToDisable = aliasesToDisable.filter(({ spaceExists }) => spaceExists);
+  const filteredAliasesToDisable = useMemo(
+    () => aliasesToDisable.filter(({ spaceExists }) => spaceExists),
+    [aliasesToDisable]
+  );
   const aliasesToDisableCount = filteredAliasesToDisable.length;
   const pagination: Pagination = {
     pageIndex,

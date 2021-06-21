@@ -263,19 +263,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         return;
       }
 
-      const [fetchedObjectsMap, objectErrors] = resp.reduce<
-        [Map<string, SavedObjectWithMetadata>, string[]]
-      >(
-        ([map, errors], obj) => {
+      const { map: fetchedObjectsMap, errors: objectErrors } = resp.reduce(
+        ({ map, errors }, obj) => {
           if (obj.error) {
             errors.push(obj.error.message);
           } else {
-            const key = `${obj.type}:${obj.id}`;
-            map.set(key, obj);
+            map.set(getObjectKey(obj), obj);
           }
-          return [map, errors];
+          return { map, errors };
         },
-        [new Map(), []]
+        { map: new Map<string, SavedObjectWithMetadata>(), errors: [] as string[] }
       );
 
       if (objectErrors.length) {
@@ -288,7 +285,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       this.setState(({ savedObjects, filteredItemCount }) => {
         // modify the existing objects array, replacing any existing objects with the newly fetched ones
         const refreshedSavedObjects = savedObjects.map((obj) => {
-          const fetchedObject = fetchedObjectsMap.get(`${obj.type}:${obj.id}`);
+          const fetchedObject = fetchedObjectsMap.get(getObjectKey(obj));
           return fetchedObject ?? obj;
         });
         return {
@@ -316,10 +313,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   refreshObjects = async (objects: Array<{ type: string; id: string }>) => {
     const currentObjectsSet = this.state.savedObjects.reduce(
-      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      (acc, obj) => acc.add(getObjectKey(obj)),
       new Set<string>()
     );
-    const objectsToFetch = objects.filter(({ type, id }) => currentObjectsSet.has(`${type}:${id}`));
+    const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
     if (objectsToFetch.length) {
       this.fetchSavedObjects(objectsToFetch);
     }
@@ -693,4 +690,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       </div>
     );
   }
+}
+
+function getObjectKey(obj: { type: string; id: string }) {
+  return `${obj.type}:${obj.id}`;
 }

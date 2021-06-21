@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Response } from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Response } from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,17 +30,33 @@ export default function ({ getService }: FtrProviderContext) {
       )
     );
 
+    function expectSuccess(index: number, { body }: Response) {
+      const { type, id, meta, error } = body[index];
+      expect(type).to.eql(validObject.type);
+      expect(id).to.eql(validObject.id);
+      expect(meta).to.not.equal(undefined);
+      expect(error).to.equal(undefined);
+    }
+
+    function expectBadRequest(index: number, { body }: Response) {
+      const { type, id, error } = body[index];
+      expect(type).to.eql(invalidObject.type);
+      expect(id).to.eql(invalidObject.id);
+      expect(error).to.eql({
+        message: `Unsupported saved object type: '${invalidObject.type}': Bad Request`,
+        statusCode: 400,
+        error: 'Bad Request',
+      });
+    }
+
     it('should return 200 for object that exists and inject metadata', async () =>
       await supertest
         .post(URL)
         .send([validObject])
         .expect(200)
-        .then(({ body }: Response) => {
-          const [{ type, id, meta, error }] = body;
-          expect(type).to.eql(validObject.type);
-          expect(id).to.eql(validObject.id);
-          expect(meta).to.not.equal(undefined);
-          expect(error).to.equal(undefined);
+        .then((response: Response) => {
+          expect(response.body).to.have.length(1);
+          expectSuccess(0, response);
         }));
 
     it('should return error for invalid object type', async () =>
@@ -48,15 +64,20 @@ export default function ({ getService }: FtrProviderContext) {
         .post(URL)
         .send([invalidObject])
         .expect(200)
-        .then(({ body }: Response) => {
-          const [{ type, id, error }] = body;
-          expect(type).to.eql(invalidObject.type);
-          expect(id).to.eql(invalidObject.id);
-          expect(error).to.eql({
-            message: `Unsupported saved object type: '${invalidObject.type}': Bad Request`,
-            statusCode: 400,
-            error: 'Bad Request',
-          });
+        .then((response: Response) => {
+          expect(response.body).to.have.length(1);
+          expectBadRequest(0, response);
+        }));
+
+    it('should return mix of successes and errors', async () =>
+      await supertest
+        .post(URL)
+        .send([validObject, invalidObject])
+        .expect(200)
+        .then((response: Response) => {
+          expect(response.body).to.have.length(2);
+          expectSuccess(0, response);
+          expectBadRequest(1, response);
         }));
   });
 }

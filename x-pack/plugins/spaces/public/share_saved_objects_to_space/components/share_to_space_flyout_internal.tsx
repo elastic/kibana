@@ -39,7 +39,7 @@ import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { AliasTable } from './alias_table';
 import { DEFAULT_OBJECT_NOUN } from './constants';
-import { RelativesControl } from './relatives_control';
+import { RelativesFooter } from './relatives_footer';
 import { ShareToSpaceForm } from './share_to_space_form';
 import type { InternalLegacyUrlAliasTarget } from './types';
 
@@ -345,7 +345,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     const showContinueButton = filteredAliasesToDisable.length && !showAliasesToDisable;
     return (
       <>
-        <RelativesControl
+        <RelativesFooter
           savedObjectTarget={savedObjectTarget}
           referenceGraph={referenceGraph}
           isDisabled={isStartShareButtonDisabled}

@@ -22,7 +22,7 @@ import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { AliasTable } from './alias_table';
 import { NoSpacesAvailable } from './no_spaces_available';
-import { RelativesControl } from './relatives_control';
+import { RelativesFooter } from './relatives_footer';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ShareModeControl } from './share_mode_control';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
@@ -731,7 +731,7 @@ describe('ShareToSpaceFlyout', () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
       const { wrapper } = await setup({ namespaces });
 
-      const relativesControl = wrapper.find(RelativesControl);
+      const relativesControl = wrapper.find(RelativesFooter);
       expect(relativesControl.isEmptyRender()).toBe(true);
     });
 
@@ -747,7 +747,7 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      const relativesControl = wrapper.find(RelativesControl);
+      const relativesControl = wrapper.find(RelativesFooter);
       expect(relativesControl.isEmptyRender()).toBe(false);
       expect(relativesControl.text()).toMatchInlineSnapshot(`"1 related object will also change."`);
     });

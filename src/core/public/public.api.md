@@ -1103,12 +1103,8 @@ export type ResolveDeprecationResponse = {
 };
 
 // @public
-export class ResolvedSimpleSavedObject<T = unknown> {
-    constructor(
-    savedObject: SimpleSavedObject<T>,
-    outcome: SavedObjectsResolveResponse['outcome'],
-    aliasTargetId: SavedObjectsResolveResponse['aliasTargetId']);
-    aliasTargetId: SavedObjectsResolveResponse['aliasTargetId'];
+export interface ResolvedSimpleSavedObject<T = unknown> {
+    aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
     outcome: SavedObjectsResolveResponse['outcome'];
     savedObject: SimpleSavedObject<T>;
 }

@@ -80,7 +80,7 @@ export class SavedObjectEdition extends Component<
       .catch((err) => {
         notifications.toasts.addDanger({
           title: unableFindSavedObjectNotificationMessage,
-          text: err.message,
+          text: err.message ?? 'Unknown error',
         });
       });
   }

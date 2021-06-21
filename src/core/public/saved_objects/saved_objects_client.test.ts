@@ -11,7 +11,6 @@ import type { SavedObjectsResolveResponse } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
-import { ResolvedSimpleSavedObject } from './resolved_simple_saved_object';
 
 describe('SavedObjectsClient', () => {
   const doc = {
@@ -197,10 +196,8 @@ describe('SavedObjectsClient', () => {
     });
 
     test('resolves with ResolvedSimpleSavedObject instance', async () => {
-      const response = savedObjectsClient.resolve(doc.type, doc.id);
-      await expect(response).resolves.toBeInstanceOf(ResolvedSimpleSavedObject);
-
-      const result = await response;
+      const result = await savedObjectsClient.resolve(doc.type, doc.id);
+      expect(result.savedObject).toBeInstanceOf(SimpleSavedObject);
       expect(result.savedObject.type).toBe(doc.type);
       expect(result.savedObject.get('title')).toBe('Example title');
       expect(result.outcome).toBe('conflict');

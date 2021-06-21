@@ -9,5 +9,5 @@ The ID of the object that the legacy URL alias points to. This is only defined w
 <b>Signature:</b>
 
 ```typescript
-aliasTargetId: SavedObjectsResolveResponse['aliasTargetId'];
+aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
 ```

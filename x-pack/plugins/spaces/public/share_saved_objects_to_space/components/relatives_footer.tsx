@@ -6,7 +6,7 @@
  */
 
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SavedObjectReferenceWithContext } from 'src/core/public';
@@ -18,13 +18,15 @@ interface Props {
   isDisabled: boolean;
 }
 
-export const RelativesControl = (props: Props) => {
+export const RelativesFooter = (props: Props) => {
   const { savedObjectTarget, referenceGraph, isDisabled } = props;
 
-  const { type, id } = savedObjectTarget;
-  const relativesCount = referenceGraph.filter(
-    (x) => (x.type !== type || x.id !== id) && x.spaces.length > 0 && !x.isMissing
-  ).length;
+  const relativesCount = useMemo(() => {
+    const { type, id } = savedObjectTarget;
+    return referenceGraph.filter(
+      (x) => (x.type !== type || x.id !== id) && x.spaces.length > 0 && !x.isMissing
+    ).length;
+  }, [savedObjectTarget, referenceGraph]);
 
   if (relativesCount > 0) {
     return (

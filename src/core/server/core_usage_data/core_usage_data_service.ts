@@ -108,9 +108,13 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): Promise<CoreServicesUsageData['savedObjects']> {
+    const [indices, legacyUrlAliases] = await Promise.all([
+      this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch),
+      this.getSavedObjectAliasUsageData(elasticsearch),
+    ]);
     return {
-      indices: await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch),
-      legacyUrlAliases: await this.getSavedObjectAliasUsageData(elasticsearch),
+      indices,
+      legacyUrlAliases,
     };
   }
 
@@ -157,6 +161,8 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   }
 
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
+    // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
+    // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
     const { body: resp } = await elasticsearch.client.asInternalUser.search({
       index: this.kibanaConfig!.index,
       body: {
