@@ -12,7 +12,7 @@ import { useValues, useActions } from 'kea';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPanel,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPageContentBody,
@@ -20,24 +20,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
-import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
+import { AppSearchPageTemplate } from '../layout';
 
-import {
-  EnginesOverviewHeader,
-  LoadingState,
-  EmptyState,
-  EmptyMetaEnginesState,
-} from './components';
+import { LaunchAppSearchButton, EmptyState, EmptyMetaEnginesState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
+  ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
@@ -73,16 +68,19 @@ export const EnginesOverview: React.FC = () => {
     if (hasPlatinumLicense) loadMetaEngines();
   }, [hasPlatinumLicense, metaEnginesMeta.page.current]);
 
-  if (dataLoading) return <LoadingState />;
-  if (!engines.length) return <EmptyState />;
-
   return (
-    <>
-      <SendTelemetry action="viewed" metric="engines_overview" />
-
-      <EnginesOverviewHeader />
-      <EuiPageContent hasBorder>
-        <FlashMessages />
+    <AppSearchPageTemplate
+      pageViewTelemetry="engines_overview"
+      pageChrome={[ENGINES_TITLE]}
+      pageHeader={{
+        pageTitle: ENGINES_OVERVIEW_TITLE,
+        rightSideItems: [<LaunchAppSearchButton />],
+      }}
+      isLoading={dataLoading}
+      isEmptyState={!engines.length}
+      emptyState={<EmptyState />}
+    >
+      <EuiPanel hasBorder>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -168,7 +166,7 @@ export const EnginesOverview: React.FC = () => {
             </EuiPageContentBody>
           </>
         )}
-      </EuiPageContent>
-    </>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };
