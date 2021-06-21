@@ -20,7 +20,7 @@
 import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
-import { buildArgv } from 'jest-cli/build/cli';
+import getopts from 'getopts';
 import { ToolingLog } from '@kbn/dev-utils';
 
 // yarn test:jest src/core/server/saved_objects
@@ -28,7 +28,10 @@ import { ToolingLog } from '@kbn/dev-utils';
 // :kibana/src/core/server/saved_objects yarn test:jest
 
 export function runJest(configName = 'jest.config.js') {
-  const argv = buildArgv(process.argv);
+  const argv = getopts(process.argv, {
+    boolean: ['verbose'],
+    string: ['config'],
+  });
 
   const log = new ToolingLog({
     level: argv.verbose ? 'verbose' : 'info',
