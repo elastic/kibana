@@ -56,28 +56,6 @@ import { addsFieldsToTimeline } from '../../tasks/rule_details';
 // });
 
 describe('CTI Enrichment', () => {
-  const fieldSearch = 'threat.indicator.matched';
-  const fields = [
-    'threat.indicator.matched.atomic',
-    'threat.indicator.matched.type',
-    'threat.indicator.matched.field',
-  ];
-  const expectedFieldsText = [
-    newThreatIndicatorRule.atomic,
-    newThreatIndicatorRule.type,
-    newThreatIndicatorRule.indicatorMappingField,
-  ];
-
-  const expectedEnrichment = [
-    { line: 4, text: '  "threat": {' },
-    {
-      line: 3,
-      text:
-        '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
-    },
-    { line: 2, text: '  }' },
-  ];
-
   before(() => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
@@ -99,15 +77,32 @@ describe('CTI Enrichment', () => {
     goToRuleDetails();
   });
 
-  it('Displays matches on the timeline', () => {
-    addsFieldsToTimeline(fieldSearch, fields);
+  it('Displays enrichment matched.* fields on the timeline', () => {
+    const expectedFields = {
+      'threat.indicator.matched.atomic': newThreatIndicatorRule.atomic,
+      'threat.indicator.matched.type': newThreatIndicatorRule.type,
+      'threat.indicator.matched.field': newThreatIndicatorRule.indicatorMappingField,
+    };
+    const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
-    fields.forEach((field, index) => {
-      cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFieldsText[index]);
+    addsFieldsToTimeline('threat.indicator.matched', fields);
+
+    fields.forEach((field) => {
+      cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFields[field]);
     });
   });
 
-  it('Displays enrichment on the JSON view', () => {
+  it('Displays persisted enrichments on the JSON view', () => {
+    const expectedEnrichment = [
+      { line: 4, text: '  "threat": {' },
+      {
+        line: 3,
+        text:
+          '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
+      },
+      { line: 2, text: '  }' },
+    ];
+
     expandFirstAlert();
     openJsonView();
     scrollJsonViewToBottom();
