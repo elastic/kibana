@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { EuiComment, EuiText, EuiAvatarProps, EuiCommentProps, IconType } from '@elastic/eui';
 import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
-import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
+import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { LogEntryTimelineIcon } from './log_entry_timeline_icon';
 
 import * as i18 from '../../translations';
@@ -144,9 +144,8 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
     <StyledEuiComment
       type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
-      timestamp={FormattedDateAndTime({
-        date: new Date(logEntry.item.data['@timestamp']),
-        showRelativeTime: true,
+      timestamp={FormattedRelativePreferenceDate({
+        value: logEntry.item.data['@timestamp'],
       })}
       event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
       timelineIcon={

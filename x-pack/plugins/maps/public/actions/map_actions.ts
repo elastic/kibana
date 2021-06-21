@@ -11,6 +11,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Geometry, Position } from 'geojson';
+import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -23,6 +25,8 @@ import {
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getLayerById,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -42,8 +46,9 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
+  UPDATE_EDIT_STATE,
 } from './map_action_constants';
-import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
@@ -56,6 +61,8 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { VectorLayer } from '../classes/layers/vector_layer';
+import { SET_DRAW_MODE } from './ui_actions';
 import { expandToTileBoundaries } from '../../common/geo_tile_utils';
 
 export interface MapExtentState {
@@ -316,5 +323,56 @@ export function updateDrawState(drawState: DrawState | null) {
       type: UPDATE_DRAW_STATE,
       drawState,
     });
+  };
+}
+
+export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const editState = getEditState(getState());
+    if (!editState) {
+      return;
+    }
+    dispatch({
+      type: UPDATE_EDIT_STATE,
+      editState: {
+        ...editState,
+        drawShape: shapeToDraw,
+      },
+    });
+  };
+}
+
+export function updateEditLayer(layerId: string | null) {
+  return (dispatch: Dispatch) => {
+    if (layerId !== null) {
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
+    }
+    dispatch({
+      type: SET_DRAW_MODE,
+      drawMode: DRAW_MODE.NONE,
+    });
+    dispatch({
+      type: UPDATE_EDIT_STATE,
+      editState: layerId ? { layerId } : undefined,
+    });
+  };
+}
+
+export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+    await layer.addFeature(geometry);
+    await dispatch(syncDataForLayer(layer, true));
   };
 }

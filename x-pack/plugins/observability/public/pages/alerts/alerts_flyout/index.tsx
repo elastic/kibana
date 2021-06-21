@@ -20,28 +20,50 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
-import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY_LEVEL,
+  ALERT_UUID,
   RULE_CATEGORY,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import { TopAlert } from '../';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import moment from 'moment-timezone';
+import React, { useMemo } from 'react';
+import type { TopAlertResponse } from '../';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { decorateResponse } from '../decorate_response';
 import { SeverityBadge } from '../severity_badge';
 
-type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
+type AlertsFlyoutProps = {
+  alerts?: TopAlertResponse[];
+  isInApp?: boolean;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  selectedAlertId?: string;
+} & EuiFlyoutProps;
 
-export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
+export function AlertsFlyout({
+  alerts,
+  isInApp = false,
+  observabilityRuleTypeRegistry,
+  onClose,
+  selectedAlertId,
+}: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
-  const { core } = usePluginContext();
-  const { prepend } = core.http.basePath;
+  const { services } = useKibana();
+  const { http } = services;
+  const prepend = http?.basePath.prepend;
+  const decoratedAlerts = useMemo(() => {
+    return decorateResponse(alerts ?? [], observabilityRuleTypeRegistry);
+  }, [alerts, observabilityRuleTypeRegistry]);
+  const alert = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
+
+  if (!alert) {
+    return null;
+  }
 
   const overviewListItems = [
     {
@@ -107,11 +129,11 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
           listItems={overviewListItems}
         />
       </EuiFlyoutBody>
-      {alert.link && (
+      {alert.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend(alert.link)} fill>
+              <EuiButton href={prepend && prepend(alert.link)} fill>
                 View in app
               </EuiButton>
             </EuiFlexItem>
@@ -121,3 +143,6 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     </EuiFlyout>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AlertsFlyout;

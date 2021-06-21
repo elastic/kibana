@@ -9,6 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { HasPrivilegesResponse } from './types';
 
+const anyBoolean = schema.boolean();
+const anyBooleanArray = schema.arrayOf(anyBoolean);
+const anyString = schema.string();
+const anyObject = schema.object({}, { unknowns: 'allow' });
+
 /**
  * Validates an Elasticsearch "Has privileges" response against the expected application, actions, and resources.
  *
@@ -31,7 +36,6 @@ export function validateEsPrivilegeResponse(
 }
 
 function buildValidationSchema(application: string, actions: string[], resources: string[]) {
-  const actionValidationSchema = schema.boolean();
   const actionsValidationSchema = schema.object(
     {},
     {
@@ -45,9 +49,7 @@ function buildValidationSchema(application: string, actions: string[], resources
           throw new Error('Payload did not match expected actions');
         }
 
-        Object.values(value).forEach((actionResult) => {
-          actionValidationSchema.validate(actionResult);
-        });
+        anyBooleanArray.validate(Object.values(value));
       },
     }
   );
@@ -73,12 +75,12 @@ function buildValidationSchema(application: string, actions: string[], resources
   );
 
   return schema.object({
-    username: schema.string(),
-    has_all_requested: schema.boolean(),
-    cluster: schema.object({}, { unknowns: 'allow' }),
+    username: anyString,
+    has_all_requested: anyBoolean,
+    cluster: anyObject,
     application: schema.object({
       [application]: resourcesValidationSchema,
     }),
-    index: schema.object({}, { unknowns: 'allow' }),
+    index: anyObject,
   });
 }
