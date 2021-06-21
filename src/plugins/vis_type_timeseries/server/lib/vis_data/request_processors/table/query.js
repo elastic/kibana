@@ -7,12 +7,19 @@
  */
 
 import { getTimerange } from '../../helpers/get_timerange';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
-export function query(req, panel, esQueryConfig, seriesIndex) {
-  return (next) => (doc) => {
-    const { timeField } = getIntervalAndTimefield(panel, {}, seriesIndex);
+export function query(
+  req,
+  panel,
+  esQueryConfig,
+  seriesIndex,
+  capabilities,
+  uiSettings,
+  buildSeriesMetaParams
+) {
+  return (next) => async (doc) => {
+    const { timeField } = await buildSeriesMetaParams();
     const { from, to } = getTimerange(req);
 
     doc.size = 0;

@@ -10,8 +10,7 @@ import Boom from '@hapi/boom';
 
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError } from '../../utils';
-import { CASE_ALERTS_URL } from '../../../../../common/constants';
-import { CasesByAlertIDRequest } from '../../../../../common';
+import { CASE_ALERTS_URL, CasesByAlertIDRequest } from '../../../../../common';
 
 export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
   router.get(

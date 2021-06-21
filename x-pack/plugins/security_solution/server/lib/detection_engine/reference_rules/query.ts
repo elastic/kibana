@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { ESSearchRequest } from 'typings/elasticsearch';
+import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
