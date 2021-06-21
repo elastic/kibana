@@ -35,7 +35,7 @@ import {
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading, SettingFlyout } from './components';
+import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -180,7 +180,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             error={initializationError}
           />
         ) : (
-          <Loading />
+          <FleetSetupLoading />
         )}
       </ErrorLayout>
     );
@@ -206,6 +206,17 @@ export const FleetAppContext: React.FC<{
   ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
+    // Sync our hash history with Kibana scoped history
+    useEffect(() => {
+      const unlistenParentHistory = history.listen(() => {
+        const newHash = createHashHistory();
+        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
+          routerHistoryInstance.replace(newHash.location.pathname);
+        }
+      });
+
+      return unlistenParentHistory;
+    }, [history, routerHistoryInstance]);
 
     return (
       <startServices.i18n.Context>
