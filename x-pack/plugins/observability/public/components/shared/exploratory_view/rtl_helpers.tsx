@@ -36,6 +36,7 @@ import indexPatternData from './configurations/test_data/test_index_pattern.json
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { LensPublicStart } from '../../../../../lens/public';
 import { UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
@@ -185,18 +186,20 @@ export function render<ExtraCore>(
 
   const seriesContextValue = mockSeriesStorageContext(initSeries);
 
+  const { getByTestId, getByText } = reactTestLibRender(
+    <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+      <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+        {ui}
+      </UrlStorageContext.Provider>
+    </MockRouter>,
+    renderOptions
+  );
+
   return {
-    ...reactTestLibRender(
-      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
-          {ui}
-        </UrlStorageContext.Provider>
-      </MockRouter>,
-      renderOptions
-    ),
-    history,
+    getByTestId,
+    getByText,
     core,
-    ...seriesContextValue,
+    setSeries: seriesContextValue.setSeries,
   };
 }
 
