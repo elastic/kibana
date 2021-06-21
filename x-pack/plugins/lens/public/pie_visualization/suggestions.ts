@@ -52,8 +52,9 @@ export function suggestions({
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
   if (groups.length <= MAX_PIE_BUCKETS) {
-    let newShape: PieVisualizationState['shape'] = 'donut';
-    if (groups.length !== 1) {
+    let newShape: PieVisualizationState['shape'] =
+      (subVisualizationId as PieVisualizationState['shape']) || 'donut';
+    if (groups.length !== 1 && !subVisualizationId) {
       newShape = 'pie';
     }
 
@@ -149,7 +150,11 @@ export function suggestions({
   }
 
   return [...results]
-    .sort((a, b) => a.score - b.score)
+    .map((suggestion) => ({
+      ...suggestion,
+      score: suggestion.score + 0.05 * groups.length,
+    }))
+    .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
       hide: incompleteConfiguration || suggestion.hide,
