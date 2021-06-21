@@ -200,7 +200,6 @@ export function createTestServers({
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
-      password: license === 'trial' ? 'changeme' : undefined,
     })
   );
 
