@@ -58,7 +58,7 @@ const checkReportIsEditable = (report: Report) => {
 
   if (_seq_no == null || _primary_term == null) {
     throw new Error(
-      `Report is not editable: Job [${_id}] is missing _seq_no and primary_term fields!`
+      `Report is not editable: Job [${_id}] is missing _seq_no and _primary_term fields!`
     );
   }
 };
