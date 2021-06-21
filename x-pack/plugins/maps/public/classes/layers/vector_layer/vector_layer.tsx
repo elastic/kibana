@@ -1141,14 +1141,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await this._source.getLicensedFeatures();
   }
 
-  _getUpdateDueToTimesliceFromSourceRequestMeta(source: ISource, timeslice?: Timeslice): boolean {
+  _getUpdateDueToTimesliceFromSourceRequestMeta = (source: ISource, timeslice?: Timeslice) => {
     const prevDataRequest = this.getSourceDataRequest();
     const prevMeta = prevDataRequest?.getMeta();
     if (!prevMeta) {
       return true;
     }
     return source.getUpdateDueToTimeslice(prevMeta, timeslice);
-  }
+  };
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
