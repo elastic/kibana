@@ -41,10 +41,10 @@ export const appSlice = createSlice({
         ...payload,
       };
     },
-    onChangeFromEditorFrame: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+    setSaveable: (state, { payload }: PayloadAction<boolean>) => {
       return {
         ...state,
-        ...payload,
+        isSaveable: payload,
       };
     },
     updateState: (

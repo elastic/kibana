@@ -100,10 +100,7 @@ export function WorkspacePanelWrapper({
                   <ChartSwitch
                     data-test-subj="lnsChartSwitcher"
                     visualizationMap={visualizationMap}
-                    visualizationId={visualizationId}
-                    visualizationState={visualizationState}
                     datasourceMap={datasourceMap}
-                    datasourceStates={datasourceStates}
                     framePublicAPI={framePublicAPI}
                   />
                 </EuiFlexItem>

@@ -381,7 +381,7 @@ export function mockLensStore({
       visualization: { activeId: 'testVis', state: null },
       datasourceStates: {
         testDatasource: {
-          isLoading: true,
+          isLoading: false, // todo
           state: '',
         },
       },

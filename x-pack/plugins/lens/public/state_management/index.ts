@@ -24,7 +24,7 @@ export const reducer = {
 export const {
   setState,
   navigateAway,
-  onChangeFromEditorFrame,
+  setSaveable,
   onActiveDataChange,
   setLoadedDocument,
   updateState,
@@ -57,15 +57,6 @@ export const makeConfigureStore = (
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
-      // serializableCheck: {
-      //   ignoredActions: [
-      //     'app/setState',
-      //     'app/onChangeFromEditorFrame',
-      //     'app/onActiveDataChange',
-      //     'app/navigateAway',
-      //     'app/*'
-      //   ],
-      // },
       serializableCheck: false,
     }),
     optimizingMiddleware(),

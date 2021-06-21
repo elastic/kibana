@@ -110,16 +110,16 @@ export function EditorFrame(props: EditorFrameProps) {
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
+            core={props.core}
+            plugins={props.plugins}
+            showNoDataPopover={props.showNoDataPopover}
             activeDatasource={activeDatasourceId}
             datasourceState={activeDatasourceId ? datasourceStates[activeDatasourceId].state : null}
             datasourceIsLoading={
               activeDatasourceId ? datasourceStates[activeDatasourceId].isLoading : true
             }
-            core={props.core}
-            showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
-            plugins={props.plugins}
           />
         }
         configPanel={
@@ -159,15 +159,15 @@ export function EditorFrame(props: EditorFrameProps) {
           allLoaded &&
           !state.isFullscreenDatasource && (
             <SuggestionPanel
-              frame={framePublicAPI}
-              activeDatasourceId={activeDatasourceId}
-              activeVisualizationId={visualization.activeId}
-              datasourceMap={props.datasourceMap}
-              datasourceStates={datasourceStates}
-              visualizationState={visualization.state}
               visualizationMap={props.visualizationMap}
+              datasourceMap={props.datasourceMap}
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={stagedPreview}
+              frame={framePublicAPI}
+              activeVisualizationId={visualization.activeId}
+              activeDatasourceId={activeDatasourceId}
+              datasourceStates={datasourceStates}
+              visualizationState={visualization.state}
             />
           )
         }

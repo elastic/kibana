@@ -57,7 +57,7 @@ import {
   useLensDispatch,
   updateVisualizationState,
   updateDatasourceState,
-  onChangeFromEditorFrame,
+  setSaveable,
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
@@ -236,11 +236,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
   useEffect(() => {
     if (hasLoaded) {
-      dispatchLens(
-        onChangeFromEditorFrame({
-          isSaveable: expressionExists,
-        })
-      );
+      dispatchLens(setSaveable(expressionExists));
     }
   }, [hasLoaded, expressionExists, dispatchLens]);
 

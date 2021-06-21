@@ -13,7 +13,12 @@ import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
 import { Document } from '../persistence';
-import { makeDefaultServices, mountWithProvider } from '../mocks';
+import {
+  createMockDatasource,
+  DatasourceMock,
+  makeDefaultServices,
+  mountWithProvider,
+} from '../mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   SavedObjectSaveModal,
@@ -59,19 +64,25 @@ jest.mock('lodash', () => {
 
 // const navigationStartMock = navigationPluginMock.createStartContract();
 
-function createMockFrame(): jest.Mocked<EditorFrameInstance> {
-  return {
-    EditorFrameContainer: jest.fn((props: EditorFrameProps) => <div />),
-    datasourceMap: {},
-    visualizationMap: {},
-  };
-}
-
 const sessionIdSubject = new Subject<string>();
 
 describe('Lens App', () => {
   let defaultDoc: Document;
   let defaultSavedObjectId: string;
+  const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
+  const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
+  const datasourceMap = {
+    testDatasource2: mockDatasource2,
+    testDatasource: mockDatasource,
+  };
+
+  function createMockFrame(): jest.Mocked<EditorFrameInstance> {
+    return {
+      EditorFrameContainer: jest.fn((props: EditorFrameProps) => <div />),
+      datasourceMap,
+      visualizationMap: {},
+    };
+  }
 
   const navMenuItems = {
     expectedSaveButton: { emphasize: true, testId: 'lnsApp_saveButton' },
@@ -87,7 +98,7 @@ describe('Lens App', () => {
       redirectToOrigin: jest.fn(),
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
-      datasourceMap: {},
+      datasourceMap,
       visualizationMap: {},
     };
   }
@@ -279,8 +290,8 @@ describe('Lens App', () => {
   });
 
   describe('persistence', () => {
-    it('loads a document and uses query and filters if initial input is provided', async () => {
-      const { instance, lensStore, services } = await mountWith({});
+    it.only('loads a document and uses query and filters if initial input is provided', async () => {
+      const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
       const document = ({
         savedObjectId: defaultSavedObjectId,
         state: {
@@ -303,7 +314,7 @@ describe('Lens App', () => {
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
-          indexPatterns: [{ id: '1' }],
+          filters: [{ query: { match_phrase: { src: 'test' } } }],
         }),
         {}
       );

@@ -7,7 +7,7 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState } from 'react';
+import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { createSelector } from '@reduxjs/toolkit';
@@ -21,7 +21,9 @@ import {
   updateDatasourceState,
   LensState,
   useLensSelector,
+  setState,
 } from '../../state_management';
+import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -37,17 +39,21 @@ interface DataPanelWrapperProps {
 
 const getExternals = createSelector(
   (state: LensState) => state.app,
-  ({ resolvedDateRange, query, filters }) => ({
+  ({ resolvedDateRange, query, filters, datasourceStates, activeDatasourceId }) => ({
     dateRange: resolvedDateRange,
     query,
     filters,
+    datasourceStates,
+    activeDatasourceId,
   })
 );
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const { activeDatasource } = props;
 
-  const { filters, query, dateRange } = useLensSelector(getExternals);
+  const { filters, query, dateRange, datasourceStates, activeDatasourceId } = useLensSelector(
+    getExternals
+  );
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
     return (updater) => {
@@ -60,6 +66,26 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       );
     };
   }, [activeDatasource, dispatchLens]);
+
+  useEffect(() => {
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
+      initializeDatasources(props.datasourceMap, datasourceStates, undefined, undefined, {
+        isFullEditor: true,
+      }).then((result) => {
+        const newDatasourceStates = Object.entries(result).reduce(
+          (state, [datasourceId, datasourceState]) => ({
+            ...state,
+            [datasourceId]: {
+              ...datasourceState,
+              isLoading: false,
+            },
+          }),
+          {}
+        );
+        dispatchLens(setState({ datasourceStates: newDatasourceStates }));
+      });
+    }
+  }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
 
   const datasourceProps: DatasourceDataPanelProps = {
     dragDropContext: useContext(DragContext),

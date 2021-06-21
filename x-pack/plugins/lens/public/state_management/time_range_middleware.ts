@@ -7,8 +7,6 @@
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-
-import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { setState, LensDispatch } from '.';
 import { LensAppState } from './types';
