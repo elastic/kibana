@@ -94,7 +94,7 @@ function registerPackagePolicyExternalCallback({
     const agentConfigurations = await listConfigurations({ setup });
     const artifacts = await listArtifacts({ fleetPluginStart });
     return getPackagePolicyWithAgentConfigurations(
-      getPackagePolicyWithSourceMap(packagePolicy, artifacts),
+      getPackagePolicyWithSourceMap({ packagePolicy, artifacts }),
       agentConfigurations
     );
   };
