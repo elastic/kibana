@@ -468,7 +468,7 @@
     "@kbn/plugin-generator": "link:bazel-bin/packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
-    "@kbn/storybook": "link:packages/kbn-storybook",
+    "@kbn/storybook": "link:bazel-bin/packages/kbn-storybook",
     "@kbn/telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
