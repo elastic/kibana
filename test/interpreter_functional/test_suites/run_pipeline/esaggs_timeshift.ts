@@ -71,6 +71,21 @@ export default function ({
       expect(getCell(result, 0, 2)).to.be(4618);
     });
 
+    it('shifts multiple metrics with relative time range and previous', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='now'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggCount id="1" enabled=true schema="metric"}
+          aggs={aggCount id="2" enabled=true schema="metric" timeShift="previous"}
+        `;
+      const result = await expectExpression(
+        'esaggs_shift_multi_metric_previous',
+        expression
+      ).getResponse();
+      expect(getCell(result, 0, 0)).to.be(9247);
+      expect(getCell(result, 0, 1)).to.be(4763);
+    });
+
     it('shifts single percentile', async () => {
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
@@ -137,7 +152,7 @@ export default function ({
             customMetric={aggAvg id="3"
               field="bytes"
               enabled=true
-              schema="metric" 
+              schema="metric"
             }
             enabled=true
             schema="metric"
@@ -154,7 +169,7 @@ export default function ({
             customMetric={aggAvg id="5"
               field="bytes"
               enabled=true
-              schema="metric" 
+              schema="metric"
             }
             enabled=true
             schema="metric"
