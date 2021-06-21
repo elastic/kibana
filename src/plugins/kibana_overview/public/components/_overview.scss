@@ -1,17 +1,17 @@
 @import '../../../../core/public/mixins';
 
-.kbnOverviewWrapper {
-  @include kibanaFullBodyMinHeight();
-  background-color: $euiColorEmptyShade;
-  display: flex;
-  flex-direction: column;
-}
+// .kbnOverviewWrapper {
+//   @include kibanaFullBodyMinHeight();
+//   background-color: $euiColorEmptyShade;
+//   display: flex;
+//   flex-direction: column;
+// }
 
 .kbnOverviewContent {
-  margin: 0 auto;
-  max-width: 1200px;
-  padding: $euiSizeXL $euiSize;
-  width: 100%;
+  // margin: 0 auto;
+  // max-width: 1200px;
+  // padding: $euiSizeXL $euiSize;
+  // width: 100%;
 
   // Ensure card heights are stretched equally when wrapped with this element
   .kbnRedirectCrossAppLinks {
