@@ -30,6 +30,8 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
+jest.mock('../../lib/kibana');
+
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
@@ -143,31 +145,26 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });
 
-    test('call the right reduce action to show event details', async () => {
+    test('call the right reduce action to show event details', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
         </TestProviders>
       );
-
-      await act(async () => {
-        wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
-      });
-
-      await waitFor(() => {
-        expect(mockDispatch).toBeCalledTimes(2);
-        expect(mockDispatch.mock.calls[1][0]).toEqual({
-          payload: {
-            panelView: 'eventDetail',
-            params: {
-              eventId: 'yb8TkHYBRgU82_bJu_rY',
-              indexName: 'auditbeat-7.10.1-2020.12.18-000001',
-            },
-            tabType: 'query',
-            timelineId: TimelineId.test,
+      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      wrapper.update();
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        payload: {
+          panelView: 'eventDetail',
+          params: {
+            eventId: 'yb8TkHYBRgU82_bJu_rY',
+            indexName: 'auditbeat-7.10.1-2020.12.18-000001',
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
-        });
+          tabType: 'query',
+          timelineId: TimelineId.test,
+        },
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
   });
@@ -196,7 +193,7 @@ describe('EventsViewer', () => {
       );
       expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
     });
-    // TO DO sourcerer @X
+
     test('it renders the footer containing the pagination', () => {
       const wrapper = mount(
         <TestProviders>
