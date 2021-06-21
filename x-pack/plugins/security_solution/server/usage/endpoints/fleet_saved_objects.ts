@@ -11,9 +11,7 @@ import {
   SavedObjectsFindResponse,
 } from 'src/core/server';
 import { AgentService } from '../../../../fleet/server';
-import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
-
-export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.Endpoint;
+import { FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
 
 export const AGENT_EVENT_SAVED_OBJECT_TYPE = 'donotexistsanymore-since-7.13';
 
@@ -22,7 +20,7 @@ export const getEndpointIntegratedFleetMetadata = async (
   esClient: ElasticsearchClient
 ) => {
   return agentService?.listAgents(esClient, {
-    kuery: `(packages : ${FLEET_ENDPOINT_PACKAGE_CONSTANT})`,
+    kuery: `(packages : ${FLEET_ENDPOINT_PACKAGE})`,
     perPage: 10000,
     showInactive: false,
     sortField: 'enrolled_at',

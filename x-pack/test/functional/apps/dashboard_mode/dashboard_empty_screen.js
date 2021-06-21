@@ -13,7 +13,8 @@ export default function ({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
-  describe('empty dashboard', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/102366
+  describe.skip('empty dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
