@@ -31,6 +31,7 @@ import {
   mapColumn,
   overallMetric,
   math,
+  mathColumn,
 } from '../expression_functions';
 
 /**
@@ -344,6 +345,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
       overallMetric,
       mapColumn,
       math,
+      mathColumn,
     ]) {
       this.registerFunction(fn);
     }

@@ -49,19 +49,19 @@ export function ActionMenuContent(): React.ReactElement {
   );
 
   return (
-    <EuiHeaderLinks>
+    <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderSectionItem>
         <EuiButtonEmpty
+          size="xs"
           aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
             defaultMessage: 'Navigate to the Uptime settings page',
           })}
-          color="primary"
+          color="text"
           data-test-subj="settings-page-link"
           href={history.createHref({
             pathname: SETTINGS_ROUTE,
             search: stringifyUrlParams(params, true),
           })}
-          iconType="gear"
         >
           <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
         </EuiButtonEmpty>
@@ -72,12 +72,13 @@ export function ActionMenuContent(): React.ReactElement {
       <EuiHeaderSectionItem>
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiButtonEmpty
+            size="xs"
             aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
               defaultMessage:
                 'Navigate to the "Analyze Data" view to visualize Synthetics/User data',
             })}
             href={syntheticExploratoryViewLink}
-            color="primary"
+            color="text"
             iconType="visBarVerticalStacked"
           >
             {ANALYZE_DATA}
