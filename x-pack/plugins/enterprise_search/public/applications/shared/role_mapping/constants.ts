@@ -292,3 +292,21 @@ export const USERNAME_NO_USERS_TEXT = i18n.translate(
 export const REQUIRED_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.requiredLabel', {
   defaultMessage: 'Required',
 });
+
+export const USERS_HEADING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingTitle',
+  { defaultMessage: 'Users' }
+);
+
+export const USERS_HEADING_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingDescription',
+  {
+    defaultMessage:
+      'User management provides granular access for individual or special permission needs. Users from federated sources such as SAML are managed by role mappings, and excluded from this list.',
+  }
+);
+
+export const USERS_HEADING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingButton',
+  { defaultMessage: 'Add a new user' }
+);
