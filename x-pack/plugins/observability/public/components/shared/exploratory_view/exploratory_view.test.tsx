@@ -63,7 +63,7 @@ describe('ExploratoryView', () => {
     render(<ExploratoryView />, { initSeries });
 
     expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
-    expect(await screen.findByText('Performance Distribution')).toBeInTheDocument();
+    expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
     await waitFor(() => {
