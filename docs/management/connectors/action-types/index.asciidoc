@@ -119,7 +119,7 @@ When creating a new rule, add an <<index-action-type, Index action>> and select 
 [role="screenshot"]
 image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
 
-Documents are indexed using a preconfigured schema that captures the <<defining-alerts-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index. Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
+Documents are indexed using a preconfigured schema that captures the <<defining-rules-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index. Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
 
 [IMPORTANT]
 ==============================================

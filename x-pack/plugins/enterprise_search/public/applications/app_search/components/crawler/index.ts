@@ -6,3 +6,4 @@
  */
 
 export { CRAWLER_TITLE } from './constants';
+export { CrawlerRouter } from './crawler_router';

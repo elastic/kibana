@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {

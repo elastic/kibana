@@ -9,6 +9,7 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerAnalyticsRoutes } from './analytics';
 import { registerApiLogsRoutes } from './api_logs';
+import { registerCrawlerRoutes } from './crawler';
 import { registerCredentialsRoutes } from './credentials';
 import { registerCurationsRoutes } from './curations';
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
@@ -17,6 +18,7 @@ import { registerOnboardingRoutes } from './onboarding';
 import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
 import { registerSchemaRoutes } from './schema';
+import { registerSearchRoutes } from './search';
 import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSearchUIRoutes } from './search_ui';
 import { registerSettingsRoutes } from './settings';
@@ -31,6 +33,7 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
   registerSchemaRoutes(dependencies);
+  registerSearchRoutes(dependencies);
   registerSourceEnginesRoutes(dependencies);
   registerCurationsRoutes(dependencies);
   registerSynonymsRoutes(dependencies);
@@ -40,4 +43,5 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerResultSettingsRoutes(dependencies);
   registerApiLogsRoutes(dependencies);
   registerOnboardingRoutes(dependencies);
+  registerCrawlerRoutes(dependencies);
 };

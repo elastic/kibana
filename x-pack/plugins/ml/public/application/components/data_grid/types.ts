@@ -27,7 +27,7 @@ export type DataGridItem = Record<string, any>;
 
 // `undefined` is used to indicate a non-initialized state.
 export type ChartsVisible = boolean | undefined;
-export type RowCountRelation = estypes.TotalHitsRelation | undefined;
+export type RowCountRelation = estypes.SearchTotalHitsRelation | undefined;
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 

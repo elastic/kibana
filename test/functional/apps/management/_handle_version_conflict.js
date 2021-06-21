@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
     });
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {

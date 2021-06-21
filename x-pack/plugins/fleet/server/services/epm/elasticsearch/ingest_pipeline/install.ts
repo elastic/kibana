@@ -16,6 +16,7 @@ import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
 
 import { deletePipelineRefs } from './remove';
+import { FINAL_PIPELINE, FINAL_PIPELINE_ID } from './final_pipeline';
 
 interface RewriteSubstitution {
   source: string;
@@ -183,6 +184,28 @@ async function installPipeline({
   await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
 
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+}
+
+export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+  const res = await esClient.ingest.getPipeline({ id: FINAL_PIPELINE_ID }, esClientRequestOptions);
+
+  if (res.statusCode === 404) {
+    await esClient.ingest.putPipeline(
+      // @ts-ignore pipeline is define in yaml
+      { id: FINAL_PIPELINE_ID, body: FINAL_PIPELINE },
+      {
+        headers: {
+          // pipeline is YAML
+          'Content-Type': 'application/yaml',
+          // but we want JSON responses (to extract error messages, status code, or other metadata)
+          Accept: 'application/json',
+        },
+      }
+    );
+  }
 }
 
 const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');

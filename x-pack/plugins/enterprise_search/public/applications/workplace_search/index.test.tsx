@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__';
+import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__/kea_logic';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
@@ -87,7 +88,7 @@ describe('WorkplaceSearchConfigured', () => {
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(ErrorState)).toHaveLength(2);
+    expect(wrapper.find(ErrorState)).toHaveLength(1);
   });
 
   it('passes readOnlyMode state', () => {

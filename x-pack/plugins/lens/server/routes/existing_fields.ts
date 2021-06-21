@@ -28,7 +28,7 @@ export interface Field {
   name: string;
   isScript: boolean;
   isMeta: boolean;
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   script?: string;
   runtimeField?: RuntimeField;
 }
@@ -201,10 +201,9 @@ async function fetchIndexPatternStats({
         _source: false,
         runtime_mappings: runtimeFields.reduce((acc, field) => {
           if (!field.runtimeField) return acc;
-          // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
           acc[field.name] = field.runtimeField;
           return acc;
-        }, {} as Record<string, estypes.RuntimeField>),
+        }, {} as Record<string, estypes.MappingRuntimeField>),
         script_fields: scriptedFields.reduce((acc, field) => {
           acc[field.name] = {
             script: {
@@ -233,7 +232,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
+export function existingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {

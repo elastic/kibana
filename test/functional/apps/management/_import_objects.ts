@@ -27,14 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('management');
+        await esArchiver.load('test/functional/fixtures/es_archiver/management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/management');
       });
 
       it('should import saved objects', async function () {
@@ -213,14 +213,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        await esArchiver.load('saved_objects_imports');
+        await esArchiver.load('test/functional/fixtures/es_archiver/saved_objects_imports');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('saved_objects_imports');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/saved_objects_imports');
       });
 
       it('should import saved objects', async function () {

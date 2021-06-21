@@ -6,11 +6,13 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
+
+import { rerender } from '../../../test_helpers';
 
 import { LoadingState, EmptyState } from './components';
 import { EnginesTable } from './components/tables/engines_table';

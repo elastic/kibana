@@ -30,10 +30,10 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('sources', () => {
-    before(() => esArchiver.load('infra/metrics_and_logs'));
-    after(() => esArchiver.unload('infra/metrics_and_logs'));
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     describe('patch request', () => {
       it('applies all top-level field updates to an existing source', async () => {

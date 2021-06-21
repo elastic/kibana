@@ -5,68 +5,52 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { IBasePath } from 'kibana/public';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent, useState } from 'react';
+import { ReportingStart } from '../../../../../reporting/public';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
-import { PDFPanel } from './pdf_panel';
+import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
-import { LayoutType } from './utils';
+import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
 
 const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
 type CopyTypes = 'pdf' | 'reportingConfig';
 type ExportTypes = 'pdf' | 'json';
-type ExportUrlTypes = 'pdf';
 type CloseTypes = 'share';
 
 export type OnCopyFn = (type: CopyTypes) => void;
-export type OnExportFn = (type: ExportTypes, layout?: LayoutType) => void;
+export type OnExportFn = (type: ExportTypes) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
-export type GetExportUrlFn = (type: ExportUrlTypes, layout: LayoutType) => string;
 
 export interface Props {
-  /** Flag to include the Reporting option only if Reporting is enabled */
-  includeReporting: boolean;
-  /** Handler to invoke when an export URL is copied to the clipboard. */
-  onCopy: OnCopyFn;
+  /** Canvas workpad to export as PDF **/
+  sharingData: CanvasWorkpadSharingData;
+  sharingServices: {
+    /** BasePath dependency **/
+    basePath: IBasePath;
+    /** Reporting dependency **/
+    reporting?: ReportingStart;
+  };
   /** Handler to invoke when an end product is exported. */
   onExport: OnExportFn;
-  /** Handler to retrive an export URL based on the type of export requested. */
-  getExportUrl: GetExportUrlFn;
 }
 
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
 export const ShareMenu: FunctionComponent<Props> = ({
-  includeReporting,
-  onCopy,
+  sharingData,
+  sharingServices: services,
   onExport,
-  getExportUrl,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = () => {
     setShowFlyout(false);
-  };
-
-  const getPDFPanel = (closePopover: ClosePopoverFn) => {
-    return (
-      <PDFPanel
-        getPdfURL={(layoutType: LayoutType) => getExportUrl('pdf', layoutType)}
-        onExport={(layoutType) => {
-          onExport('pdf', layoutType);
-          closePopover();
-        }}
-        onCopy={() => {
-          onCopy('pdf');
-          closePopover();
-        }}
-      />
-    );
   };
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
@@ -80,14 +64,20 @@ export const ShareMenu: FunctionComponent<Props> = ({
           closePopover();
         },
       },
-      includeReporting
+      services.reporting != null
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
             panel: {
               id: 1,
               title: strings.getShareDownloadPDFTitle(),
-              content: getPDFPanel(closePopover),
+              content: (
+                <services.reporting.components.ReportingPanelPDF
+                  getJobParams={() => getPdfJobParams(sharingData, services.basePath)}
+                  layoutOption="canvas"
+                  onClose={closePopover}
+                />
+              ),
             },
             'data-test-subj': 'sharePanel-PDFReports',
           }
@@ -132,8 +122,5 @@ export const ShareMenu: FunctionComponent<Props> = ({
 };
 
 ShareMenu.propTypes = {
-  includeReporting: PropTypes.bool.isRequired,
-  onCopy: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
-  getExportUrl: PropTypes.func.isRequired,
 };

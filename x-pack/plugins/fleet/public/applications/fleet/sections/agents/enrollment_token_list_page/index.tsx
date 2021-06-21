@@ -22,6 +22,7 @@ import {
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
 import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
   usePagination,
@@ -33,8 +34,8 @@ import {
 } from '../../../hooks';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
+import { DefaultLayout } from '../../../layouts';
 
-import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
@@ -155,8 +156,8 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('fleet_enrollment_tokens');
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  useBreadcrumbs('enrollment_tokens');
+  const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
 
@@ -269,12 +270,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   ];
 
   return (
-    <>
-      {flyoutOpen && (
-        <NewEnrollmentTokenFlyout
+    <DefaultLayout section="enrollment_tokens">
+      {isModalOpen && (
+        <NewEnrollmentTokenModal
           agentPolicies={agentPolicies}
-          onClose={() => {
-            setFlyoutOpen(false);
+          onClose={(key?: EnrollmentAPIKey) => {
+            setModalOpen(false);
             enrollmentAPIKeysRequest.resendRequest();
           }}
         />
@@ -301,7 +302,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="plusInCircle" onClick={() => setFlyoutOpen(true)}>
+          <EuiButton iconType="plusInCircle" onClick={() => setModalOpen(true)}>
             <FormattedMessage
               id="xpack.fleet.enrollmentTokensList.newKeyButton"
               defaultMessage="Create enrollment token"
@@ -344,6 +345,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           setPagination(newPagination);
         }}
       />
-    </>
+    </DefaultLayout>
   );
 };

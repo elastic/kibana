@@ -1,6 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
+exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
+<div>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft"
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        aria-label="Share this workpad"
+        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+        data-test-subj="shareTopNavButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Share
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/ShareMenu with Reporting 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownLeft"

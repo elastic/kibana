@@ -12,7 +12,7 @@ export default ({ getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const archive = 'uptime/full_heartbeat';
+  const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
   describe('uptime ml anomaly', function () {
     this.tags(['skipFirefox']);

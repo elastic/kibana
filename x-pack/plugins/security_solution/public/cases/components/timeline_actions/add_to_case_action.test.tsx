@@ -9,12 +9,12 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { EuiGlobalToastList } from '@elastic/eui';
 
-import { useKibana, useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions } from '../../../common/lib/kibana';
 import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { Case } from '../../../../../cases/common';
+import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../cases/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to', () => {
@@ -62,7 +62,7 @@ describe('AddToCaseAction', () => {
       getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
     };
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
-    (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
       crud: true,
       read: true,
     });
@@ -116,6 +116,7 @@ describe('AddToCaseAction', () => {
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: 'rule-name' },
+      owner: SECURITY_SOLUTION_OWNER,
     });
   });
 
@@ -138,7 +139,11 @@ describe('AddToCaseAction', () => {
     expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
-      rule: { id: 'rule-id', name: null },
+      rule: {
+        id: 'rule-id',
+        name: null,
+      },
+      owner: SECURITY_SOLUTION_OWNER,
     });
   });
 
@@ -196,7 +201,7 @@ describe('AddToCaseAction', () => {
   });
 
   it('disabled when user does not have crud permissions', () => {
-    (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
       crud: false,
       read: true,
     });

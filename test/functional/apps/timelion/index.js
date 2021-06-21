@@ -18,7 +18,7 @@ export default function ({ getService, loadTestFile }) {
     before(async function () {
       log.debug('Starting timelion before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 

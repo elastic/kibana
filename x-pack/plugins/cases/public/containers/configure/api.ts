@@ -15,11 +15,17 @@ import {
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
+  CasesConfigurationsResponse,
+  getCaseConfigurationDetailsUrl,
 } from '../../../common';
 import { KibanaServices } from '../../common/lib/kibana';
 
 import { ApiProps } from '../types';
-import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
+import {
+  convertToCamelCase,
+  decodeCaseConfigurationsResponse,
+  decodeCaseConfigureResponse,
+} from '../utils';
 import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
@@ -31,20 +37,27 @@ export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConne
   return response;
 };
 
-export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
-  const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
+export const getCaseConfigure = async ({
+  signal,
+  owner,
+}: ApiProps & { owner: string[] }): Promise<CaseConfigure | null> => {
+  const response = await KibanaServices.get().http.fetch<CasesConfigurationsResponse>(
     CASE_CONFIGURE_URL,
     {
       method: 'GET',
       signal,
+      query: { ...(owner.length > 0 ? { owner } : {}) },
     }
   );
 
-  return !isEmpty(response)
-    ? convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-        decodeCaseConfigureResponse(response)
-      )
-    : null;
+  if (!isEmpty(response)) {
+    const decodedConfigs = decodeCaseConfigurationsResponse(response);
+    if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
+      return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(decodedConfigs[0]);
+    }
+  }
+
+  return null;
 };
 
 export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
@@ -74,11 +87,12 @@ export const postCaseConfigure = async (
 };
 
 export const patchCaseConfigure = async (
+  id: string,
   caseConfiguration: CasesConfigurePatch,
   signal: AbortSignal
 ): Promise<CaseConfigure> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASE_CONFIGURE_URL,
+    getCaseConfigurationDetailsUrl(id),
     {
       method: 'PATCH',
       body: JSON.stringify(caseConfiguration),

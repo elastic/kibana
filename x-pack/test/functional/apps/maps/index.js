@@ -14,9 +14,9 @@ export default function ({ loadTestFile, getService }) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('maps/data');
-      await esArchiver.load('maps/kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
@@ -24,8 +24,8 @@ export default function ({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('maps/data');
-      await esArchiver.unload('maps/kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
     });
 
     describe('', async function () {

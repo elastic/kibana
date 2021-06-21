@@ -61,6 +61,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
+      // saving dashboard to populate map buffer. See https://github.com/elastic/kibana/pull/91148 for more info
+      // This can be removed after a fix to https://github.com/elastic/kibana/issues/98180 is completed
+      await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.dashboard.clickQuickSave();
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+
       await searchSessions.expectState('completed');
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');

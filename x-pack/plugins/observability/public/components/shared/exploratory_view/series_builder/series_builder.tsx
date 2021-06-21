@@ -15,35 +15,34 @@ import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
+import {
+  CORE_WEB_VITALS_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
+  KPI_OVER_TIME_LABEL,
+  PERF_DIST_LABEL,
+} from '../configurations/constants/labels';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'upd', label: 'Monitor duration' },
-    { id: 'upp', label: 'Pings histogram' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
   ],
   ux: [
-    { id: 'pld', label: 'Performance distribution' },
-    { id: 'kpi', label: 'KPI over time' },
-    { id: 'cwv', label: 'Core Web Vitals' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'cwv', label: CORE_WEB_VITALS_LABEL },
   ],
-  apm: [
-    { id: 'svl', label: 'Latency' },
-    { id: 'tpt', label: 'Throughput' },
+  mobile: [
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'mdd', label: DEVICE_DISTRIBUTION_LABEL },
   ],
-  infra_logs: [
-    {
-      id: 'logs',
-      label: 'Logs Frequency',
-    },
-  ],
-  infra_metrics: [
-    { id: 'cpu', label: 'CPU usage' },
-    { id: 'mem', label: 'Memory usage' },
-    { id: 'nwk', label: 'Network activity' },
-  ],
+  apm: [],
+  infra_logs: [],
+  infra_metrics: [],
 };
 
 export function SeriesBuilder({
@@ -53,7 +52,9 @@ export function SeriesBuilder({
   seriesId: string;
   seriesBuilderRef: RefObject<HTMLDivElement>;
 }) {
-  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const {
     dataType,
@@ -70,7 +71,7 @@ export function SeriesBuilder({
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
-      seriesId,
+      dataType,
       indexPattern,
       reportType: reportType!,
     });
@@ -156,9 +157,8 @@ export function SeriesBuilder({
         reportDefinitions,
       };
 
-      setSeries(newSeriesId, newSeriesN).then(() => {
-        removeSeries(NEW_SERIES_KEY);
-      });
+      setSeries(newSeriesId, newSeriesN);
+      removeSeries(NEW_SERIES_KEY);
     }
   };
 

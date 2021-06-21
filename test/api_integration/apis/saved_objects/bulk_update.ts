@@ -15,8 +15,16 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('bulkUpdate', () => {
-    before(() => kibanaServer.importExport.load('saved_objects/basic'));
-    after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
 
     it('should return 200', async () => {
       const response = await supertest

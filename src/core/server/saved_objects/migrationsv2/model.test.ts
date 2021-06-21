@@ -244,7 +244,7 @@ describe('migrations v2 model', () => {
             disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
           },
         },
-      };
+      } as const;
 
       test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
         const res: ResponseType<'INIT'> = Either.right({
@@ -683,7 +683,7 @@ describe('migrations v2 model', () => {
             disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
           },
         },
-      };
+      } as const;
 
       const waitForYellowSourceState: WaitForYellowSourceState = {
         ...baseState,

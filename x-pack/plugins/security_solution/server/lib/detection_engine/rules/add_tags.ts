@@ -10,7 +10,7 @@ import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common
 export const addTags = (tags: string[], ruleId: string, immutable: boolean): string[] => {
   return Array.from(
     new Set([
-      ...tags,
+      ...tags.filter((tag) => !tag.startsWith(INTERNAL_RULE_ID_KEY)),
       `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
       `${INTERNAL_IMMUTABLE_KEY}:${immutable}`,
     ])

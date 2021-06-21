@@ -26,10 +26,15 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DownloadStep } from '../components/agent_enrollment_flyout/steps';
-import { useStartServices, useGetOutputs, sendGenerateServiceToken } from '../../../hooks';
-import { PLATFORM_OPTIONS, usePlatform } from '../hooks/use_platform';
-import type { PLATFORM_TYPE } from '../hooks/use_platform';
+import { DownloadStep } from '../../../components';
+import {
+  useStartServices,
+  useGetOutputs,
+  sendGenerateServiceToken,
+  usePlatform,
+  PLATFORM_OPTIONS,
+} from '../../../hooks';
+import type { PLATFORM_TYPE } from '../../../hooks';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;

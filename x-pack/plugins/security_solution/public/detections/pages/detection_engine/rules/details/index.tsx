@@ -70,7 +70,7 @@ import {
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
-import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
+import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
@@ -461,7 +461,7 @@ const RuleDetailsPageComponent = () => {
       <LinkButton
         onClick={goToEditRule}
         iconType="controlsHorizontal"
-        isDisabled={!isExistingRule || (userHasNoPermissions(canUserCRUD) ?? true)}
+        isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
         href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
       >
         {ruleI18n.EDIT_RULE_SETTINGS}
@@ -608,7 +608,7 @@ const RuleDetailsPageComponent = () => {
                           isDisabled={
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                            userHasNoPermissions(canUserCRUD) ||
+                            !userHasPermissions(canUserCRUD) ||
                             (!hasMlPermissions && !rule?.enabled)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
@@ -625,9 +625,7 @@ const RuleDetailsPageComponent = () => {
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
-                          userHasNoPermissions={
-                            !isExistingRule || userHasNoPermissions(canUserCRUD)
-                          }
+                          userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
                           canDuplicateRuleWithActions={canEditRuleWithActions(
                             rule,
                             hasActionsPrivileges

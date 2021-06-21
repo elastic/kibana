@@ -1,0 +1,114 @@
+{
+  "type": "index",
+  "value": {
+    "index": "runtime_conflicting_fields",
+    "mappings": {
+      "dynamic": "strict",
+      "runtime": {
+        "host_alias": {
+          "type": "keyword",
+          "script": {
+            "source": "emit(doc['host.name'].value)"
+          }
+        },
+        ".": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [.] field that runtime exposes')"
+          }
+        },
+        "..": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [..] field that runtime exposes')"
+          }
+        },
+        "host.name.": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name] field that runtime exposes')"
+          }
+        },
+        ".host.name": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [.host.name] field that runtime exposes')"
+          }
+        },
+        ".host.name.": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [.host.name.] field that runtime exposes')"
+          }
+        },
+        "..host.name.": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [..host.name.] field that runtime exposes')"
+          }
+        },
+        "..host.name": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [..host.name] field that runtime exposes')"
+          }
+        },
+        ".host.name..": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [.host.name..] field that runtime exposes')"
+          }
+        },
+        "host.name..": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name..] field that runtime exposes')"
+          }
+        },
+        "host": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host] field which is now a keyword instead of object runtime exposes')"
+          }
+        },
+        "host.name": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name] field value which shadows the original host.name value')"
+          }
+        },
+        "host.field_1": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name.field_1] field value which now confuses which array element I should be in and am ambiguous')"
+          }
+        },
+        "host.name.subobject": {
+          "type": "keyword",
+          "script": {
+            "source": "emit('I am the [host.name.subobject] field value which is now an object instead of keyword runtime exposes')"
+          }
+        }
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

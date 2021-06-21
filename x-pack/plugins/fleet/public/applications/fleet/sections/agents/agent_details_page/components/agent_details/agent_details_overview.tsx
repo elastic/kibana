@@ -23,8 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { AgentPolicySummaryLine } from '../../../../../components';
+import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`

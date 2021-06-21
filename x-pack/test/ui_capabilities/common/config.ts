@@ -30,7 +30,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
       },
-      esArchiver: {},
       esTestCluster: {
         ...xPackFunctionalTestsConfig.get('esTestCluster'),
         license,

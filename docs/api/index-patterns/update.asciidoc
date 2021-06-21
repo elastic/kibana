@@ -93,7 +93,8 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern
     "fieldFormats": {},
     "type": "...",
     "typeMeta": {},
-    "fields": {}
+    "fields": {},
+    "runtimeFieldMap": {}
   }
 }
 --------------------------------------------------

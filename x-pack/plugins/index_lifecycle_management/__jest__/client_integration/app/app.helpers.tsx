@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 import { licensingMock } from '../../../../licensing/public/mocks';
 import { App } from '../../../public/application/app';

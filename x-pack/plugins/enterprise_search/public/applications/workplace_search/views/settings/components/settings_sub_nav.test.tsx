@@ -5,18 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+jest.mock('../../../../shared/layout', () => ({
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
 
-import { shallow } from 'enzyme';
+import { mockUseRouteMatch } from '../../../../__mocks__/react_router';
 
-import { SideNavLink } from '../../../../shared/layout';
+import { useSettingsSubNav } from './settings_sub_nav';
 
-import { SettingsSubNav } from './settings_sub_nav';
+describe('useSettingsSubNav', () => {
+  it('returns an array of side nav items when on the /settings path', () => {
+    mockUseRouteMatch.mockReturnValueOnce(true);
 
-describe('SettingsSubNav', () => {
-  it('renders', () => {
-    const wrapper = shallow(<SettingsSubNav />);
+    expect(useSettingsSubNav()).toEqual([
+      {
+        id: 'settingsCustomize',
+        name: 'Customize',
+        href: '/settings/customize',
+      },
+      {
+        id: 'settingsConnectors',
+        name: 'Content source connectors',
+        href: '/settings/connectors',
+      },
+      {
+        id: 'settingsOAuth',
+        name: 'OAuth application',
+        href: '/settings/oauth',
+      },
+    ]);
+  });
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(3);
+  it('returns undefined when not on the /settings path', () => {
+    mockUseRouteMatch.mockReturnValueOnce(false);
+
+    expect(useSettingsSubNav()).toEqual(undefined);
   });
 });

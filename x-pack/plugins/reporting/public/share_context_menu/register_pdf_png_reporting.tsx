@@ -11,7 +11,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
-import type { ShareContext } from '../../../../../src/plugins/share/public';
+import { ShareContext } from 'src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
 import type { LayoutParams, Locator } from '../../common/types';
 import { isJobV2Params } from '../../common/job_utils';
@@ -203,6 +203,7 @@ export const reportingScreenshotShareProvider = ({
             toasts={toasts}
             reportType={isJobV2Params(jobProviderOptions) ? 'pngV2' : 'png'}
             objectId={objectId}
+            requiresSavedState={true}
             getJobParams={getPngJobParams(jobProviderOptions)}
             isDirty={isDirty}
             onClose={onClose}
@@ -234,6 +235,8 @@ export const reportingScreenshotShareProvider = ({
             reportType={isJobV2Params(jobProviderOptions) ? 'printablePdfV2' : 'printablePdf'}
             objectId={objectId}
             getJobParams={getPdfJobParams(jobProviderOptions)}
+            requiresSavedState={true}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
             isDirty={isDirty}
             onClose={onClose}
           />

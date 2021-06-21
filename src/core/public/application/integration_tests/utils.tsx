@@ -35,12 +35,14 @@ export const createAppMounter = ({
   appId,
   html = `<div>App ${appId}</div>`,
   appRoute = `/app/${appId}`,
+  deepLinkPaths = {},
   exactRoute = false,
   extraMountHook,
 }: {
   appId: string;
   html?: string;
   appRoute?: string;
+  deepLinkPaths?: Record<string, string>;
   exactRoute?: boolean;
   extraMountHook?: (params: AppMountParameters) => void;
 }): MockedMounterTuple => {
@@ -51,6 +53,7 @@ export const createAppMounter = ({
       mounter: {
         appRoute,
         appBasePath: appRoute,
+        deepLinkPaths,
         exactRoute,
         mount: jest.fn(async (params: AppMountParameters) => {
           const { appBasePath: basename, element } = params;

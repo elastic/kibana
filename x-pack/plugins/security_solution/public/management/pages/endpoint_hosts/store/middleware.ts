@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
+import { Dispatch } from 'redux';
+import { CoreStart, HttpStart } from 'kibana/public';
 import {
+  ActivityLog,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
   HostResultList,
   Immutable,
+  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
+  selectedAgent,
   uiQueryParams,
   listData,
   endpointPackageInfo,
@@ -27,8 +31,12 @@ import {
   isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
+  getActivityLogData,
+  getActivityLogDataPaging,
+  getLastLoadedActivityLogData,
+  detailsData,
 } from './selectors';
-import { EndpointState, PolicyIds } from '../types';
+import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
@@ -37,21 +45,27 @@ import {
 } from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
-  HOST_METADATA_GET_API,
-  HOST_METADATA_LIST_API,
+  ENDPOINT_ACTION_LOG_ROUTE,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import { resolvePathVariables } from '../../trusted_apps/service/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { ServerReturnedEndpointPackageInfo } from './action';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
+
+// eslint-disable-next-line no-console
+const logError = console.error;
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -74,33 +88,21 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     const { getState, dispatch } = store;
 
+    await getEndpointPackageInfo(getState(), dispatch, coreStart);
+
     // Endpoint list
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState()) &&
       hasSelectedEndpoint(getState()) !== true
     ) {
-      if (!endpointPackageInfo(getState())) {
-        try {
-          const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
-          dispatch({
-            type: 'serverReturnedEndpointPackageInfo',
-            payload: packageInfo,
-          });
-        } catch (error) {
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      }
-
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
-        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API, {
+        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             filters: { kql: decodedQuery.query },
@@ -112,6 +114,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
+
+        loadEndpointsPendingActions(store);
 
         try {
           const endpointsTotalCount = await endpointsTotal(coreStart.http);
@@ -159,8 +163,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
@@ -249,7 +252,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       if (listData(getState()).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
         try {
-          const response = await coreStart.http.post(HOST_METADATA_LIST_API, {
+          const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
             body: JSON.stringify({
               paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             }),
@@ -280,8 +283,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             }
           } catch (error) {
             // Ignore Errors, since this should not hinder the user's ability to use the UI
-            // eslint-disable-next-line no-console
-            console.error(error);
+            logError(error);
           }
         } catch (error) {
           dispatch({
@@ -299,7 +301,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
-          resolvePathVariables(HOST_METADATA_GET_API, { id: selectedEndpoint as string })
+          resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
         );
         dispatch({
           type: 'serverReturnedEndpointDetails',
@@ -326,13 +328,41 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnEndpointDetails',
           payload: error,
+        });
+      }
+
+      loadEndpointsPendingActions(store);
+
+      // call the activity log api
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // ts error to be fixed when AsyncResourceState is refactored (#830)
+        // @ts-expect-error
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      });
+
+      try {
+        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createLoadedResourceState<ActivityLog>(activityLog),
+        });
+      } catch (error) {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
 
@@ -349,6 +379,56 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
+        });
+      }
+    }
+
+    // page activity log API
+    if (action.type === 'appRequestedEndpointActivityLog' && hasSelectedEndpoint(getState())) {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        // ts error to be fixed when AsyncResourceState is refactored (#830)
+        // @ts-expect-error
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      });
+
+      try {
+        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+          agent_id: selectedAgent(getState()),
+        });
+        const activityLog = await coreStart.http.get<ActivityLog>(route, {
+          query: { page, page_size: pageSize },
+        });
+
+        const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+        if (lastLoadedLogData !== undefined) {
+          const updatedLogDataItems = [
+            ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
+          ] as ActivityLog['data'];
+
+          const updatedLogData = {
+            total: activityLog.total,
+            page: activityLog.page,
+            pageSize: activityLog.pageSize,
+            data: updatedLogDataItems,
+          };
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+          });
+          // TODO dispatch 'noNewLogData' if !activityLog.length
+          // resets paging to previous state
+        } else {
+          dispatch({
+            type: 'endpointDetailsActivityLogChanged',
+            payload: createLoadedResourceState<ActivityLog>(activityLog),
+          });
+        }
+      } catch (error) {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
     }
@@ -431,17 +511,15 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>(HOST_METADATA_LIST_API, {
+      await http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
         body: JSON.stringify({
           paging_properties: [{ page_index: 0 }, { page_size: 1 }],
         }),
       })
     ).total;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check for total endpoints`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check for total endpoints`);
+    logError(error);
   }
   return 0;
 };
@@ -450,10 +528,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check if endpoints exist`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check if endpoints exist`);
+    logError(error);
   }
   return false;
 };
@@ -477,7 +553,13 @@ const handleIsolateEndpointHost = async (
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    const response = await isolateHost(action.payload as HostIsolationRequestBody);
+    let response: HostIsolationResponse;
+
+    if (action.payload.type === 'unisolate') {
+      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+    } else {
+      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+    }
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',
@@ -488,5 +570,69 @@ const handleIsolateEndpointHost = async (
       type: 'endpointIsolationRequestStateChange',
       payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
     });
+  }
+};
+
+async function getEndpointPackageInfo(
+  state: ImmutableObject<EndpointState>,
+  dispatch: Dispatch<ServerReturnedEndpointPackageInfo>,
+  coreStart: CoreStart
+) {
+  if (endpointPackageInfo(state)) return;
+
+  try {
+    const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
+    dispatch({
+      type: 'serverReturnedEndpointPackageInfo',
+      payload: packageInfo,
+    });
+  } catch (error) {
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    logError(error);
+  }
+}
+
+/**
+ * retrieves the Endpoint pending actions for all of the existing endpoints being displayed on the list
+ * or the details tab.
+ *
+ * @param store
+ */
+const loadEndpointsPendingActions = async ({
+  getState,
+  dispatch,
+}: EndpointPageStore): Promise<void> => {
+  const state = getState();
+  const detailsEndpoint = detailsData(state);
+  const listEndpoints = listData(state);
+  const agentsIds = new Set<string>();
+
+  // get all agent ids for the endpoints in the list
+  if (detailsEndpoint) {
+    agentsIds.add(detailsEndpoint.elastic.agent.id);
+  }
+
+  for (const endpointInfo of listEndpoints) {
+    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
+  }
+
+  if (agentsIds.size === 0) {
+    return;
+  }
+
+  try {
+    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
+    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
+
+    for (const pendingAction of pendingActions) {
+      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
+    }
+
+    dispatch({
+      type: 'endpointPendingActionsStateChanged',
+      payload: createLoadedResourceState(agentIdToPendingActions),
+    });
+  } catch (error) {
+    logError(error);
   }
 };

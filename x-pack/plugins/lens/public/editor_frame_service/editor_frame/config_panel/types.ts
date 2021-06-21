@@ -29,6 +29,7 @@ export interface ConfigPanelWrapperProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerPanelProps {
@@ -46,6 +47,7 @@ export interface LayerPanelProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerDatasourceDropProps {
