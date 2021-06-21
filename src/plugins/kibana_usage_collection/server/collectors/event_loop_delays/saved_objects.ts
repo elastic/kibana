@@ -17,7 +17,6 @@ import type { IntervalHistogram } from './event_loop_delays';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
 export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHistogram {
-  timestamp: string;
   processId: number;
 }
 
@@ -29,8 +28,8 @@ export function registerSavedObjectTypes(registerType: SavedObjectsServiceSetup[
     mappings: {
       dynamic: false,
       properties: {
-        // This type requires `timestamp` to be indexed so we can use it when rolling up totals (timestamp < now-90d)
-        timestamp: { type: 'date' },
+        // This type requires `lastUpdatedAt` to be indexed so we can use it when rolling up totals (lastUpdatedAt < now-90d)
+        lastUpdatedAt: { type: 'date' },
       },
     },
   });
@@ -48,7 +47,7 @@ export async function deleteHistogramSavedObjects(
 ) {
   const { saved_objects: savedObjects } = await internalRepository.find<EventLoopDelaysDaily>({
     type: SAVED_OBJECTS_DAILY_TYPE,
-    filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < "now-${daysTimeRange}d/d"`,
+    filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.lastUpdatedAt < "now-${daysTimeRange}d/d"`,
   });
 
   return await Promise.allSettled(
@@ -62,13 +61,12 @@ export async function storeHistogram(
   histogram: IntervalHistogram,
   internalRepository: ISavedObjectsRepository
 ) {
-  const date = moment();
   const pid = process.pid;
-  const id = serializeSavedObjectId({ date, pid });
+  const id = serializeSavedObjectId({ date: histogram.lastUpdatedAt, pid });
 
   return await internalRepository.create<EventLoopDelaysDaily>(
     SAVED_OBJECTS_DAILY_TYPE,
-    { ...histogram, processId: pid, timestamp: date.toISOString() },
+    { ...histogram, processId: pid },
     { id, overwrite: true }
   );
 }

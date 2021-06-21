@@ -13,12 +13,15 @@ import {
 } from '../../../../usage_collection/server/mocks';
 import { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import type { SavedObjectsFindResponse } from '../../../../../core/server';
+
 const logger = loggingSystemMock.createLogger();
 
 describe('registerEventLoopDelaysCollector', () => {
   let collector: Collector<unknown>;
   const mockRegisterType = jest.fn();
-  const mockGetSavedObjectsClient = () => savedObjectsRepositoryMock.create();
+  const mockInternalRepository = savedObjectsRepositoryMock.create();
+  const mockGetSavedObjectsClient = () => mockInternalRepository;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
@@ -52,10 +55,10 @@ describe('registerEventLoopDelaysCollector', () => {
   });
 
   it('returns objects from event_loop_delays_daily from fetch function', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFind = jest.fn().mockResolvedValue(({
       saved_objects: [{ attributes: { test: 1 } }],
-    });
-    collectorFetchContext.soClient.find = mockFetch;
+    } as unknown) as SavedObjectsFindResponse);
+    mockInternalRepository.find = mockFind;
     const fetchResult = await collector.fetch(collectorFetchContext);
 
     expect(fetchResult).toMatchInlineSnapshot(`
@@ -67,15 +70,14 @@ describe('registerEventLoopDelaysCollector', () => {
         ],
       }
     `);
-    expect(mockFetch.mock.calls).toMatchInlineSnapshot(`
+    expect(mockFind).toBeCalledTimes(1);
+    expect(mockFind.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          Object {
-            "sortField": "updated_at",
-            "sortOrder": "desc",
-            "type": "event_loop_delays_daily",
-          },
-        ],
+        Object {
+          "sortField": "updated_at",
+          "sortOrder": "desc",
+          "type": "event_loop_delays_daily",
+        },
       ]
     `);
   });

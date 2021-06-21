@@ -11,7 +11,8 @@ import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 export interface EventLoopDelaysUsageReport {
   daily: Array<{
     processId: number;
-    timestamp: string;
+    lastUpdatedAt: string;
+    fromTimestamp: string;
     min: number;
     max: number;
     mean: number;
@@ -36,7 +37,13 @@ export const eventLoopDelaysUsageSchema: MakeSchemaFrom<EventLoopDelaysUsageRepo
           description: 'The process id of the monitored kibana instance.',
         },
       },
-      timestamp: {
+      fromTimestamp: {
+        type: 'date',
+        _meta: {
+          description: 'Timestamp at which the histogram started monitoring.',
+        },
+      },
+      lastUpdatedAt: {
         type: 'date',
         _meta: {
           description: 'Latest timestamp this histogram object was updated this day.',

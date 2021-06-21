@@ -29,10 +29,15 @@ export function registerEventLoopDelaysCollector(
 
   const collector = usageCollection.makeUsageCollector<EventLoopDelaysUsageReport>({
     type: 'event_loop_delays',
-    isReady: () => true,
+    isReady: () => typeof getSavedObjectsClient() !== 'undefined',
     schema: eventLoopDelaysUsageSchema,
-    fetch: async ({ soClient }) => {
-      const { saved_objects: savedObjects } = await soClient.find<EventLoopDelaysDaily>({
+    fetch: async () => {
+      const internalRepository = getSavedObjectsClient();
+      if (!internalRepository) {
+        return { daily: [] };
+      }
+
+      const { saved_objects: savedObjects } = await internalRepository.find<EventLoopDelaysDaily>({
         type: SAVED_OBJECTS_DAILY_TYPE,
         sortField: 'updated_at',
         sortOrder: 'desc',

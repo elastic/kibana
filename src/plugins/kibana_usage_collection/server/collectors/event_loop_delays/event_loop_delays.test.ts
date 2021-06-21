@@ -47,6 +47,8 @@ describe('EventLoopDelaysCollector', () => {
         "mean",
         "exceeds",
         "stddev",
+        "fromTimestamp",
+        "lastUpdatedAt",
         "percentiles",
       ]
     `);

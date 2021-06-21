@@ -20,6 +20,8 @@ import {
 import { storeHistogram } from './saved_objects';
 
 export interface IntervalHistogram {
+  fromTimestamp: string;
+  lastUpdatedAt: string;
   min: number;
   max: number;
   mean: number;
@@ -35,11 +37,14 @@ export interface IntervalHistogram {
 
 export class EventLoopDelaysCollector {
   private readonly loopMonitor: EventLoopDelayMonitor;
+  private fromTimestamp: Date;
+
   constructor() {
     const monitor = monitorEventLoopDelay({
       resolution: MONITOR_EVENT_LOOP_DELAYS_RESOLUTION,
     });
     monitor.enable();
+    this.fromTimestamp = new Date();
     this.loopMonitor = monitor;
   }
 
@@ -52,6 +57,8 @@ export class EventLoopDelaysCollector {
       mean,
       exceeds,
       stddev,
+      fromTimestamp: this.fromTimestamp.toISOString(),
+      lastUpdatedAt: new Date().toISOString(),
       percentiles: {
         50: this.loopMonitor.percentile(50),
         75: this.loopMonitor.percentile(75),
@@ -63,7 +70,9 @@ export class EventLoopDelaysCollector {
 
   public reset() {
     this.loopMonitor.reset();
+    this.fromTimestamp = new Date();
   }
+
   public stop() {
     this.loopMonitor.disable();
   }

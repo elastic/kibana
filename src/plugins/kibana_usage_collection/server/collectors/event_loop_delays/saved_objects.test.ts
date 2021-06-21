@@ -14,7 +14,6 @@ import {
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import type { SavedObjectsFindResponse } from '../../../../../core/server/';
 import { mocked } from './event_loop_delays.mocks';
-import moment from 'moment';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {
@@ -41,7 +40,7 @@ describe('storeHistogram', () => {
 
     expect(mockInternalRepository.create).toBeCalledWith(
       'event_loop_delays_daily',
-      { ...mockHistogram, processId: pid, timestamp: moment(mockNow).toISOString() },
+      { ...mockHistogram, processId: pid },
       { id, overwrite: true }
     );
   });

@@ -33,8 +33,10 @@ function createRawObject(date: moment.MomentInput) {
     type: SAVED_OBJECTS_DAILY_TYPE,
     id: serializeSavedObjectId({ pid, date }),
     attributes: {
-      ...mocked.createHistogram(),
-      timestamp: moment(date).toISOString(),
+      ...mocked.createHistogram({
+        fromTimestamp: moment(date).startOf('day').toISOString(),
+        lastUpdatedAt: moment(date).toISOString(),
+      }),
       processId: pid,
     },
   };
