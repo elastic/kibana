@@ -143,7 +143,10 @@ export class ExpressionLoader {
     });
     this.subscription = this.execution
       .getData()
-      .pipe(delay(0)) // delaying until the next tick since we execute the expression in the constructor
+      .pipe(
+        delay(0), // delaying until the next tick since we execute the expression in the constructor
+        filter(({ partial }) => params.partial || !partial)
+      )
       .subscribe((value) => this.dataSubject.next(value));
   };
 
@@ -174,6 +177,7 @@ export class ExpressionLoader {
     }
     this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
+    this.params.partial = Boolean(params.partial);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;
