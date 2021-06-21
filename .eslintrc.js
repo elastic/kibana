@@ -876,6 +876,16 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -1461,7 +1471,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },

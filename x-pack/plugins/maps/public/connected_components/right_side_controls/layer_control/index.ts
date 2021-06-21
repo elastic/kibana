@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { LayerControl } from './layer_control';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen } from '../../../actions';
+import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen, setDrawMode } from '../../../actions';
 import {
   getIsReadOnly,
   getIsLayerTOCOpen,
@@ -19,6 +19,7 @@ import {
 } from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
+import { DRAW_MODE } from '../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -34,6 +35,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     showAddLayerWizard: async () => {
       await dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+      dispatch(setDrawMode(DRAW_MODE.NONE));
     },
     closeLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(false));

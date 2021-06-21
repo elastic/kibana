@@ -21,14 +21,14 @@ import {
   CasePostRequest,
   CaseType,
   OWNER_FIELD,
+  ENABLE_CASE_CONNECTOR,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { getConnectorFromConfiguration } from '../utils';
 
-import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
+  createCaseError,
   flattenCaseSavedObject,
   transformCaseConnectorToEsConnector,
   transformNewCase,

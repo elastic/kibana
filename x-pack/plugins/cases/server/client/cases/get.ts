@@ -24,10 +24,9 @@ import {
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-} from '../../../common/api';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common';
-import { createCaseError } from '../../common/error';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+  ENABLE_CASE_CONNECTOR,
+} from '../../../common';
+import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
