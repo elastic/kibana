@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
+import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { IRouter } from '../../http';
 import { IKibanaMigrator } from '../migrations';
 import { catchAndReturnBoomErrors } from './utils';
@@ -28,6 +30,33 @@ export const registerMigrateRoute = (
       return res.ok({
         body: {
           success: true,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/_migrate/doc',
+      validate: {
+        body: schema.object({
+          doc: schema.object({}, { unknowns: 'allow' }),
+        }),
+      },
+      options: {
+        tags: ['access:migrateSavedObjects'],
+      },
+    },
+    catchAndReturnBoomErrors(async (context, req, res) => {
+      const migrator = await migratorPromise;
+
+      const migratedDocument = await migrator.migrateDocument(
+        req.body.doc as SavedObjectUnsanitizedDoc
+      );
+
+      return res.ok({
+        body: {
+          doc: migratedDocument,
         },
       });
     })
