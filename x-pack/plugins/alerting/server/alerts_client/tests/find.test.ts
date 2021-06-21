@@ -306,7 +306,7 @@ describe('find()', () => {
               id: '1',
             },
             {
-              name: 'soRef_0',
+              name: 'param:soRef_0',
               type: 'someSavedObjectType',
               id: '9',
             },
@@ -323,10 +323,7 @@ describe('find()', () => {
         bar: true,
         parameterThatIsSavedObjectRef: 'soRef_0',
       },
-      [
-        { id: '1', name: 'action_0', type: 'action' },
-        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
-      ]
+      [{ id: '9', name: 'soRef_0', type: 'someSavedObjectType' }]
     );
 
     expect(result).toMatchInlineSnapshot(`

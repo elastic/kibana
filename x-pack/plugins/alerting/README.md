@@ -180,7 +180,7 @@ This is an optional pair of functions that can be implemented by a rule type. Bo
 
 **useSavedObjectReferences.extractReferences**
 
-This function should take the rule type params as input and extract out any saved object IDs stored within the params. For each saved object ID, a new saved object reference should be created and a saved object reference should replace the saved object ID in the rule params. This function should return the modified rule type params (with saved object references, not IDs) and an array of saved object references. Note that any extracted saved object reference name must not start with the prefix `action_`, which is reserved for use by the framework.
+This function should take the rule type params as input and extract out any saved object IDs stored within the params. For each saved object ID, a new saved object reference should be created and a saved object reference should replace the saved object ID in the rule params. This function should return the modified rule type params (with saved object reference name, not IDs) and an array of saved object references.
 
 
 **useSavedObjectReferences.injectReferences**

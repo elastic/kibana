@@ -474,7 +474,7 @@ describe('update()', () => {
           id: '1',
         },
         {
-          name: 'soRef_0',
+          name: 'param:soRef_0',
           type: 'someSavedObjectType',
           id: '9',
         },
@@ -529,7 +529,7 @@ describe('update()', () => {
         overwrite: true,
         references: [
           { id: '1', name: 'action_0', type: 'action' },
-          { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
+          { id: '9', name: 'param:soRef_0', type: 'someSavedObjectType' },
         ],
         version: '123',
       }
@@ -540,10 +540,7 @@ describe('update()', () => {
         bar: true,
         parameterThatIsSavedObjectRef: 'soRef_0',
       },
-      [
-        { id: '1', name: 'action_0', type: 'action' },
-        { id: '9', name: 'soRef_0', type: 'someSavedObjectType' },
-      ]
+      [{ id: '9', name: 'soRef_0', type: 'someSavedObjectType' }]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -1254,67 +1251,6 @@ describe('update()', () => {
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
     ).toBe('234');
-  });
-
-  test('throws error if extracted references uses reserved name prefix', async () => {
-    const ruleParams = {
-      bar: true,
-      parameterThatIsSavedObjectId: '9',
-    };
-    const extractReferencesFn = jest.fn().mockReturnValue({
-      params: {
-        bar: true,
-        parameterThatIsSavedObjectRef: 'action_0',
-      },
-      references: [
-        {
-          name: 'action_0',
-          type: 'someSavedObjectType',
-          id: '9',
-        },
-      ],
-    });
-    alertTypeRegistry.get.mockImplementation(() => ({
-      id: 'myType',
-      name: 'Test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup: RecoveredActionGroup,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      async executor() {},
-      producer: 'alerts',
-      useSavedObjectReferences: {
-        extractReferences: extractReferencesFn,
-        injectReferences: jest.fn(),
-      },
-    }));
-    await expect(
-      alertsClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: ruleParams,
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              params: {
-                foo: true,
-              },
-            },
-          ],
-        },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error creating rule: extracted saved object reference names are cannot start with action_"`
-    );
-
-    expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('updating an alert schedule', () => {

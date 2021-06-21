@@ -184,7 +184,7 @@ export interface GetAlertInstanceSummaryParams {
   dateStart?: string;
 }
 
-const reservedSavedObjectReferenceNamePrefix = 'action_';
+const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -285,7 +285,6 @@ export class AlertsClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    // Validate actions
     await this.validateActions(alertType, data.actions);
 
     // Extract saved object references for this rule
@@ -1590,19 +1589,13 @@ export class AlertsClient {
     const extractedReferences = extractedRefsAndParams?.references ?? [];
     const params = (extractedRefsAndParams?.params as ExtractedParams) ?? ruleParams;
 
-    // Validate that extract references don't use prefix reserved for actions
-    const referencesUsingReservedPrefix = extractedReferences.filter(
-      (reference: SavedObjectReference) =>
-        reference.name.startsWith(reservedSavedObjectReferenceNamePrefix)
-    );
+    // Prefix extracted references in order to avoid clashes with framework level references
+    const paramReferences = extractedReferences.map((reference: SavedObjectReference) => ({
+      ...reference,
+      name: `${extractedSavedObjectParamReferenceNamePrefix}${reference.name}`,
+    }));
 
-    if (referencesUsingReservedPrefix.length > 0) {
-      throw Boom.badRequest(
-        `Error creating rule: extracted saved object reference names are cannot start with ${reservedSavedObjectReferenceNamePrefix}`
-      );
-    }
-
-    const references = [...actionReferences, ...extractedReferences];
+    const references = [...actionReferences, ...paramReferences];
 
     return {
       actions,
@@ -1618,8 +1611,19 @@ export class AlertsClient {
     references: SavedObjectReference[]
   ): Params {
     try {
+      const paramReferences = references
+        .filter((reference: SavedObjectReference) =>
+          reference.name.startsWith(extractedSavedObjectParamReferenceNamePrefix)
+        )
+        .map((reference: SavedObjectReference) => ({
+          ...reference,
+          name: reference.name.replace(extractedSavedObjectParamReferenceNamePrefix, ''),
+        }));
       return ruleParams && ruleType?.useSavedObjectReferences?.injectReferences
-        ? (ruleType.useSavedObjectReferences.injectReferences(ruleParams, references) as Params)
+        ? (ruleType.useSavedObjectReferences.injectReferences(
+            ruleParams,
+            paramReferences
+          ) as Params)
         : (ruleParams as Params);
     } catch (err) {
       throw Boom.badRequest(
@@ -1645,7 +1649,7 @@ export class AlertsClient {
       alertActions.forEach(({ id, ...alertAction }, i) => {
         const actionResultValue = actionResults.find((action) => action.id === id);
         if (actionResultValue) {
-          const actionRef = `${reservedSavedObjectReferenceNamePrefix}${i}`;
+          const actionRef = `action_${i}`;
           references.push({
             id,
             name: actionRef,
