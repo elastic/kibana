@@ -50,7 +50,7 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
   value === null ? '' : numeral(value).format('0b') + '/s';
 
 export function MetricsSection({ bucketSize }: Props) {
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
@@ -88,7 +88,7 @@ export function MetricsSection({ bucketSize }: Props) {
     [data, setSortField, setSortDirection]
   );
 
-  if (!hasData.infra_metrics?.hasData) {
+  if (!hasDataMap.infra_metrics?.hasData) {
     return null;
   }
 
