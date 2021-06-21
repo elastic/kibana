@@ -242,15 +242,13 @@ describe('Navigation Breadcrumbs', () => {
 
     test('should return Alerts breadcrumbs when supplied detection pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
-        getMockObject('detections', '/', undefined),
+        getMockObject('alerts', '/alerts', undefined),
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
         { text: 'Security', href: 'securitySolutionoverview' },
         {
-          text: 'Detections',
-          href:
-            "securitySolution:detections?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          text: 'Alerts',
         },
       ]);
     });
