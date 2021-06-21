@@ -192,9 +192,8 @@ export class AggConfig {
       } else if (!this.aggConfigs.timeRange) {
         return;
       }
-      return moment.duration(
-        moment(this.aggConfigs.timeRange.to).diff(this.aggConfigs.timeRange.from)
-      );
+      const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
+      return moment.duration(moment(resolvedBounds.max).diff(resolvedBounds.min));
     }
     return parsedTimeShift;
   }
