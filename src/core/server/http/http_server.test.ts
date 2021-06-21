@@ -10,6 +10,7 @@ import { Server } from 'http';
 import { readFileSync } from 'fs';
 import supertest from 'supertest';
 import { omit } from 'lodash';
+import { join } from 'path';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
@@ -1409,12 +1410,92 @@ describe('setup contract', () => {
   });
 
   describe('#registerStaticDir', () => {
+    const assetFolder = join(__dirname, 'integration_tests', 'fixtures', 'static');
+
     test('does not throw if called after stop', async () => {
       const { registerStaticDir } = await server.setup(config);
       await server.stop();
       expect(() => {
         registerStaticDir('/path1/{path*}', '/path/to/resource');
       }).not.toThrow();
+    });
+
+    test('returns correct headers for static assets', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some-image.png')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+    });
+
+    test('returns compressed version if present', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/compression-available.png')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toEqual('gzip');
+    });
+
+    test('returns uncompressed version if compressed asset is not available', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some-image.png')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toBeUndefined();
+    });
+
+    test('returns a 304 if etag value matches', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some-image.png')
+        .expect(200);
+
+      const etag = response.get('etag');
+      expect(etag).not.toBeUndefined();
+
+      await supertest(innerServer.listener)
+        .get('/static/some-image.png')
+        .set('If-None-Match', etag)
+        .expect(304);
+    });
+
+    test('serves content if etag values does not match', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/static/some-image.png')
+        .set('If-None-Match', `"definitely not a valid etag"`)
+        .expect(200);
     });
   });
 
