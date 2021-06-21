@@ -127,25 +127,6 @@ export const dateHistogramOperation: OperationDefinition<
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
     );
   },
-  transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.getFieldByName(column.sourceField);
-
-    if (newField?.aggregationRestrictions?.date_histogram) {
-      return {
-        ...column,
-        params: {
-          ...column.params,
-          // TODO this rewrite logic is simplified - if the current interval is a multiple of
-          // the restricted interval, we could carry it over directly. However as the current
-          // UI does not allow to select multiples of an interval anyway, this is not included yet.
-          // If the UI allows to pick more complicated intervals, this should be re-visited.
-          interval: restrictedInterval(newField.aggregationRestrictions) as string,
-        },
-      };
-    }
-
-    return column;
-  },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
