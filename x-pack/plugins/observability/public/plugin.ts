@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { ConfigSchema } from '.';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -68,7 +69,6 @@ export class Plugin
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly alertsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -79,9 +79,13 @@ export class Plugin
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    const observabilityAppId = 'observability';
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initializerContext.config.get();
+
+    const shouldShowAlerts = config.unsafe.alertingExperience.enabled;
+    const shouldShowCases = config.unsafe.cases.enabled;
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -108,45 +112,65 @@ export class Plugin
     const updater$ = this.appUpdater$;
 
     coreSetup.application.register({
-      id: 'observability-overview',
-      title: 'Overview',
+      id: observabilityAppId,
+      title: i18n.translate('xpack.observability.overviewLinkTitle', {
+        defaultMessage: 'Overview',
+      }),
       appRoute: '/app/observability',
       order: 8000,
       category,
       euiIconType,
       mount,
       updater$,
+      deepLinks: [
+        {
+          id: 'alerts',
+          title: i18n.translate('xpack.observability.alertsLinkTitle', {
+            defaultMessage: 'Alerts',
+          }),
+          path: '/alerts',
+          navLinkStatus: shouldShowAlerts ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        },
+        {
+          id: 'cases',
+          title: i18n.translate('xpack.observability.casesLinkTitle', {
+            defaultMessage: 'Cases',
+          }),
+          path: '/cases',
+          navLinkStatus: shouldShowCases ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        },
+      ],
     });
 
-    if (config.unsafe.alertingExperience.enabled) {
-      coreSetup.application.register({
-        id: 'observability-alerts',
-        title: 'Alerts',
-        appRoute: '/app/observability/alerts',
-        order: 8025,
-        category,
-        euiIconType,
-        mount,
-        updater$: this.alertsAppUpdater$,
-      });
-    }
+    // if (config.unsafe.alertingExperience.enabled) {
+    //   coreSetup.application.register({
+    //     id: 'observability-alerts',
+    //     title: 'Alerts',
+    //     appRoute: '/app/observability/alerts',
+    //     order: 8025,
+    //     category,
+    //     euiIconType,
+    //     mount,
+    //     updater$: this.alertsAppUpdater$,
+    //   });
+    // }
 
-    if (config.unsafe.cases.enabled) {
-      coreSetup.application.register({
-        id: CASES_APP_ID,
-        title: 'Cases',
-        appRoute: '/app/observability/cases',
-        order: 8050,
-        category,
-        euiIconType,
-        mount,
-        updater$: this.casesAppUpdater$,
-      });
-    }
+    // if (config.unsafe.cases.enabled) {
+    //   coreSetup.application.register({
+    //     id: CASES_APP_ID,
+    //     title: 'Cases',
+    //     appRoute: '/app/observability/cases',
+    //     order: 8050,
+    //     category,
+    //     euiIconType,
+    //     mount,
+    //     updater$: this.casesAppUpdater$,
+    //   });
+    // }
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
-        id: 'observability',
+        id: observabilityAppId,
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
         }),
@@ -177,21 +201,36 @@ export class Plugin
     this.navigationRegistry.registerSections(
       from(coreSetup.getStartServices()).pipe(
         map(([coreStart]) => {
-          const shouldShowAlerts = config.unsafe.alertingExperience.enabled;
-          const shouldShowCases =
-            config.unsafe.cases.enabled &&
-            coreStart.application.capabilities.observabilityCases.read_cases;
+          // const shouldShowCases =
+          //   config.unsafe.cases.enabled &&
+          //   coreStart.application.capabilities.observabilityCases.read_cases;
 
           return [
             {
               label: '',
               sortKey: 100,
               entries: [
-                { label: 'Overview', app: 'observability-overview', path: '/overview' },
+                {
+                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                    defaultMessage: 'Overview',
+                  }),
+                  app: observabilityAppId,
+                  path: '/overview',
+                },
                 ...(shouldShowAlerts
-                  ? [{ label: 'Alerts', app: 'observability-alerts', path: '/' }]
+                  ? [
+                      {
+                        label: i18n.translate('xpack.observability.alertsLinkTitle', {
+                          defaultMessage: 'Alerts',
+                        }),
+                        app: observabilityAppId,
+                        path: '/alerts',
+                      },
+                    ]
                   : []),
-                ...(shouldShowCases ? [{ label: 'Cases', app: CASES_APP_ID, path: '/' }] : []),
+                ...(shouldShowCases
+                  ? [{ label: 'Cases', app: observabilityAppId, path: '/cases' }]
+                  : []),
               ],
             },
           ];
