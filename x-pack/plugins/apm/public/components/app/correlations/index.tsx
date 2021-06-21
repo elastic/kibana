@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { MlCorrelations } from './ml_correlations';
+import { MlLatencyCorrelations } from './ml_latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
@@ -49,7 +49,7 @@ const latencyCorrelationsTab = {
   label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
     defaultMessage: 'Latency',
   }),
-  component: MlCorrelations,
+  component: MlLatencyCorrelations,
 };
 const tabs = [latencyCorrelationsTab, errorRateTab];
 

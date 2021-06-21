@@ -55,7 +55,7 @@ interface MlCorrelationsTerms {
   fieldValue: string;
 }
 
-export function MlCorrelations({ onClose }: Props) {
+export function MlLatencyCorrelations({ onClose }: Props) {
   const {
     core: { notifications },
   } = useApmPluginContext();
