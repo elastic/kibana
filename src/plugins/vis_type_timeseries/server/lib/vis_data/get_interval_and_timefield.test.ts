@@ -16,7 +16,7 @@ describe('getIntervalAndTimefield(panel, series)', () => {
     const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
     const series = {} as Series;
 
-    expect(getIntervalAndTimefield(panel, series, index)).toEqual({
+    expect(getIntervalAndTimefield(panel, index, series)).toEqual({
       timeField: '@timestamp',
       interval: 'auto',
     });
@@ -30,7 +30,7 @@ describe('getIntervalAndTimefield(panel, series)', () => {
       series_time_field: 'time',
     } as unknown) as Series;
 
-    expect(getIntervalAndTimefield(panel, series, index)).toEqual({
+    expect(getIntervalAndTimefield(panel, index, series)).toEqual({
       timeField: 'time',
       interval: '1m',
     });

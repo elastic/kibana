@@ -15,7 +15,7 @@ import {
   getValueTypeConfig,
 } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,
