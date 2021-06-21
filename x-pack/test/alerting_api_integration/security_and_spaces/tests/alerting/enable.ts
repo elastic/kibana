@@ -183,7 +183,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -293,7 +293,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
