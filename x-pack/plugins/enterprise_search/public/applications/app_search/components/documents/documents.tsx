@@ -16,12 +16,12 @@ import { AppLogic } from '../../app_logic';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
-import { DocumentCreationButton } from './components';
+import { DocumentCreationButton, EmptyState } from './components';
 import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {
-  const { isMetaEngine } = useValues(EngineLogic);
+  const { isMetaEngine, engine } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
 
   return (
@@ -32,6 +32,8 @@ export const Documents: React.FC = () => {
         rightSideItems:
           myRole.canManageEngineDocuments && !isMetaEngine ? [<DocumentCreationButton />] : [],
       }}
+      isEmptyState={!engine.document_count}
+      emptyState={<EmptyState />}
     >
       {isMetaEngine && (
         <>
