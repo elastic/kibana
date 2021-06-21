@@ -54,6 +54,7 @@ export function ThemeSwitcher() {
       closeOnClick
       tooltip={({ onHide }) => <Menu onHide={onHide} />}
     >
+      {/* @ts-ignore Remove when @storybook has moved to @emotion v11 */}
       <IconButton key="eui-theme" title="Change the EUI theme">
         <Icons icon={selectedTheme?.includes('dark') ? 'heart' : 'hearthollow'} />
       </IconButton>
