@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
-import { Ping } from '../../../../common/runtime_types';
+import { JourneyStep, Ping } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
@@ -185,8 +185,8 @@ export const PingList = () => {
             name: i18n.translate('xpack.uptime.pingList.columns.failedStep', {
               defaultMessage: 'Failed step',
             }),
-            render: (_timestamp: string, item: Ping) => (
-              <FailedStep ping={item} failedSteps={failedSteps} />
+            render: (_timestamp: string, item: JourneyStep) => (
+              <FailedStep step={item} failedSteps={failedSteps} />
             ),
           },
         ]

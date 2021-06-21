@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { FailedStepsApiResponse } from '../../../../../common/runtime_types';
+import { FailedStepsApiResponse, JourneyStep } from '../../../../../common/runtime_types';
 
 interface Props {
-  ping: Ping;
+  step: JourneyStep;
   failedSteps?: FailedStepsApiResponse;
 }
 
-export const FailedStep = ({ ping, failedSteps }: Props) => {
+export const FailedStep = ({ step, failedSteps }: Props) => {
   const thisFailedStep = failedSteps?.steps?.find(
-    (fs) => fs.monitor.check_group === ping.monitor.check_group
+    (fs) => fs.monitor.check_group === step.monitor.check_group
   );
 
   if (!thisFailedStep) {
