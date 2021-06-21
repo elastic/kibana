@@ -386,6 +386,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
+        await es.indices.refresh({ index: alert._index });
+
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
@@ -438,6 +440,8 @@ export default ({ getService }: FtrProviderContext): void => {
             type: CommentType.alert,
           },
         });
+
+        await es.indices.refresh({ index: alert._index });
 
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
