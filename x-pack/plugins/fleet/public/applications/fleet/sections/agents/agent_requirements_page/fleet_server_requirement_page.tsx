@@ -134,6 +134,8 @@ export const FleetServerCommandStep = ({
   platform: string;
   setPlatform: (platform: PLATFORM_TYPE) => void;
 }): EuiStepProps => {
+  const { docLinks } = useStartServices();
+
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepInstallAgentTitle', {
       defaultMessage: 'Start Fleet Server',
@@ -147,7 +149,11 @@ export const FleetServerCommandStep = ({
             defaultMessage="From the agent directory, copy and run the appropriate quick start command to start an Elastic Agent as a Fleet Server using the generated token and a self-signed certificate. See the {userGuideLink} for instructions on using your own certificates for production deployment. All commands require administrator privileges."
             values={{
               userGuideLink: (
-                <EuiLink href="https://ela.st/add-fleet-server" external>
+                <EuiLink
+                  href={docLinks.links.fleet.fleetServerAddFleetServer}
+                  external
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
                     defaultMessage="Fleet User Guide"
@@ -191,11 +197,7 @@ export const FleetServerCommandStep = ({
             defaultMessage="If you are having trouble connecting, see our {link}."
             values={{
               link: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
-                >
+                <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                     defaultMessage="troubleshooting guide"
@@ -287,6 +289,7 @@ const OnPremInstructions: React.FC = () => {
     platform,
     setPlatform,
   } = useFleetServerInstructions();
+  const { docLinks } = useStartServices();
 
   return (
     <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>
@@ -304,7 +307,11 @@ const OnPremInstructions: React.FC = () => {
           defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. See the {userGuideLink} for more information."
           values={{
             userGuideLink: (
-              <EuiLink href="https://ela.st/add-fleet-server" external>
+              <EuiLink
+                href={docLinks.links.fleet.fleetServerAddFleetServer}
+                external
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
                   defaultMessage="Fleet User Guide"
@@ -328,6 +335,8 @@ const OnPremInstructions: React.FC = () => {
 };
 
 const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl }) => {
+  const { docLinks } = useStartServices();
+
   return (
     <EuiPanel
       paddingSize="none"
@@ -351,7 +360,11 @@ const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl 
             defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling APM & Fleet. For more information see the {link}"
             values={{
               link: (
-                <EuiLink href="https://ela.st/add-fleet-server" target="_blank" external>
+                <EuiLink
+                  href={docLinks.links.fleet.fleetServerAddFleetServer}
+                  target="_blank"
+                  external
+                >
                   <FormattedMessage
                     id="xpack.fleet.settings.userGuideLink"
                     defaultMessage="Fleet User Guide"
