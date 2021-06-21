@@ -26,17 +26,17 @@ export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
 // TODO: refactor to shared component with ../../../../../../../../x-pack/legacy/plugins/lens/public/indexpattern_plugin/change_indexpattern
 
 export function ChangeIndexPattern({
-  indexPatternRefs,
   indexPatternId,
+  indexPatternRefs,
   onChangeIndexPattern,
-  trigger,
   selectableProps,
+  trigger,
 }: {
-  trigger: ChangeIndexPatternTriggerProps;
+  indexPatternId?: string;
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
-  indexPatternId?: string;
   selectableProps?: EuiSelectableProps<{ value: string }>;
+  trigger: ChangeIndexPatternTriggerProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
