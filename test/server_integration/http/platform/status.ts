@@ -7,16 +7,17 @@
  */
 
 import expect from '@kbn/expect';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../src/core/server';
+import type { ServiceStatus, ServiceStatusLevels } from '../../../../src/core/server';
 import { FtrProviderContext } from '../../services/types';
+
+type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const log = getService('log');
+  const retry = getService('retry');
 
-  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const getStatus = async (pluginName: string): Promise<ServiceStatus> => {
+  const getStatus = async (pluginName: string): Promise<ServiceStatusSerialized> => {
     const resp = await supertest.get('/api/status?v8format=true');
 
     return resp.body.status.plugins[pluginName];
@@ -34,20 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
       let aStatus = await getStatus('corePluginA');
       expect(aStatus.level).to.eql('unavailable');
 
-      // Status will remain in unavailable due to core services until custom status timesout
+      // Status will remain in unavailable until the custom status check times out
       // Keep polling until that condition ends, up to a timeout
-      const start = Date.now();
-      while (aStatus.summary !== 'Status check timed out after 30s') {
+      await retry.waitForWithTimeout(`Status check to timeout`, 40_000, async () => {
         aStatus = await getStatus('corePluginA');
-
-        // If it's been more than 40s, break out of this loop
-        if (Date.now() - start >= 40_000) {
-          throw new Error(`Timed out waiting for status timeout after 40s`);
-        }
-
-        log.info('Waiting for status check to timeout...');
-        await delay(2000);
-      }
+        return aStatus.summary === 'Status check timed out after 30s';
+      });
 
       expect(aStatus.level).to.eql('unavailable');
       expect(aStatus.summary).to.eql('Status check timed out after 30s');
@@ -55,12 +48,20 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('propagates status issues to dependencies', async () => {
       await setStatus('degraded');
-      await delay(1000);
+      await retry.waitForWithTimeout(
+        `corePluginA status to update`,
+        5_000,
+        async () => (await getStatus('corePluginA')).level === 'degraded'
+      );
       expect((await getStatus('corePluginA')).level).to.eql('degraded');
       expect((await getStatus('corePluginB')).level).to.eql('degraded');
 
       await setStatus('available');
-      await delay(1000);
+      await retry.waitForWithTimeout(
+        `corePluginA status to update`,
+        5_000,
+        async () => (await getStatus('corePluginA')).level === 'available'
+      );
       expect((await getStatus('corePluginA')).level).to.eql('available');
       expect((await getStatus('corePluginB')).level).to.eql('available');
     });
