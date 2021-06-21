@@ -441,18 +441,45 @@ This endpoint, registered from the `usage_collection` plugin, is getting these s
 `metrics` service (`getOpsMetrics$`), which is also used in the `monitoring` plugin for stats
 collection.
 
-While we could try to follow a plan similar to `/status` and have each worker report metrics to
-the coordinator, there isn't a particularly sensible way to consolidate these. (e.g. Taking
-the average of these values isn't really helpful in case there's a scenario where one process
-is, for example, experiencing a spike in `event_loop_delay` while the others are operating
-normally).
+Ultimately we will extend the API to provide per-worker stats, but the question remains what we
+should do with the existing `process` stats.
 
-Ultimately we could extend the API to provide per-worker stats, but the question remains what we
-should do with the existing `process` stats:
+#### Options we considered:
 1. Deprecate them? (breaking change)
 2. Accept a situation where they may be round-robined to different workers? (probably no)
 3. Try to consolidate them somehow? (can't think of a good way to do this)
 4. Always return stats for one process, e.g. main or coordinator? (doesn't give us the full picture)
+
+#### Our recommended approach:
+We agreed that we would go with (3) and have each worker report metrics to the coordinator for
+sharing, with the metrics aggregated as follows:
+```json
+{
+  // ...
+  "process": {
+    "memory": {
+      "heap": {
+        "total_bytes": 533581824, // sum of coordinator + workers
+        "used_bytes": 296297424, // sum of coordinator + workers
+        "size_limit": 4345298944 // sum of coordinator + workers
+      },
+      "resident_set_size_bytes": 563625984 // sum of coordinator + workers
+    },
+    "pid": 52646, // pid of the coordinator
+    "event_loop_delay": 0.22967800498008728, // max of coordinator + workers
+    "uptime_ms": 1706021.930404 // uptime of the coordinator
+  },
+  // ...
+}
+```
+
+This has its downsides (`size_limit` in particular could be confusing), but otherwise generally makes sense:
+- sum of available/used heap & node rss is straightforward
+- `event_loop_delay` max makes sense, as we are mostly only interested in that number if it is high anyway
+- `pid` and `uptime_in_millis` from the coordinator make sense, especially as long as we are killing
+all workers any time one of them dies. In the future if we respawn workers that die, this could be
+misleading, but hopefully by then we can deprecate this and move Metricbeat to using the per-worker
+stats.
 
 ### 6.1.5 PID file
 
@@ -576,6 +603,8 @@ We could address that by making sure that the queues are held only in the main w
 Currently, task manager does "claims" for jobs to run based on the server uuid. We think this could still work with 
 a multi-process setup - each task manager in the worker would be doing "claims" for the same server uuid, which
 seems functionally the same as setting max_workers to `current max_workers * number of workers`.
+Another alternative would be to compose something like `${server.uuid}-${worker.Id}`, as TM only
+really needs a unique identifier.
 
 However, as a first step we can simply run Task Manager on the main worker. This doesn't completely solve potential
 noisy neighbor problems as the main worker will still be receiving & serving http requests, however it will at least
@@ -590,7 +619,8 @@ helpful first step in that direction.
 
 #### Alerting
 
-Do we need the alerting task runner (`TaskRunner`, `TaskRunnerFactory`) to be running on a single worker?
+Currently haven't identified any Alerting-specific requirements that aren't already covered by the
+Task Manager requirements.
 
 ## 6.3 Summary of breaking changes
 
@@ -679,15 +709,6 @@ with the teams who we think will most likely be affected by these changes.
 
 See 6.1.4 above.
 
-**Is it okay for the workers to share the same `path.data` directory?**
-
-Still need plugin devs to confirm whether there are any plugins writing to these files, which could cause concurrency issues.
-Reporting is the main question here.
-
-**Is using the same `server.uuid` in each worker going to cause problems?**
-
-Still need plugin devs to confirm whether this might be an issue, but so far we have no known cases where this would pose problems.
-
 # 12. Resolved questions
 
 **How do we handle http requests that need to be served by a specific process?**
@@ -697,3 +718,14 @@ The Node.js cluster API is not really the right solution for this, as it won't a
 **How do we handle http requests that need to have knowledge of all processes?**
 
 `/status` and `/stats` are the big issues here, as they could be reported differently from each process. The current plan is to manage their state centrally in the coordinator and have each process report this data at a regular interval, so that all processes can retrieve it and serve it in response to any requests against that endpoint. Exact details of the changes to those APIs would need to be determined. I think `status` will likely require breaking changes as pointed out above, however `stats` may not.
+
+**Is it okay for the workers to share the same `path.data` directory?**
+
+We have been unable to identify any plugins which are writing to this directory.
+The App Services team has confirmed that `path.data` is no longer in use in the reporting plugin.
+
+**Is using the same `server.uuid` in each worker going to cause problems?**
+
+We have been unable to identify any plugins for which this would cause issues.
+The Alerting team has confirmed that Task Manager doesn't need server uuid, just a unique
+identifier. That means something like server.uuid + worker.id would work.
