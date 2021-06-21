@@ -132,7 +132,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <HideShowContainer $isVisible={!timelineFullScreen}>
+      <HideShowContainer
+        $isVisible={!timelineFullScreen}
+        data-test-subj="timeline-hide-show-container"
+      >
         <FlyoutHeaderPanel timelineId={timelineId} />
         <FlyoutHeader timelineId={timelineId} />
       </HideShowContainer>
