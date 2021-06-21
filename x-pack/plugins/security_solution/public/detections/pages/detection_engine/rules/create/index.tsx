@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
@@ -48,6 +47,8 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
+import { APP_ID } from '../../../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -100,6 +101,7 @@ const CreateRulePageComponent: React.FC = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
+  const { navigateToApp } = useKibana().services.application;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
@@ -143,7 +145,6 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
-  const history = useHistory();
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -270,7 +271,10 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    history.replace(getRuleDetailsUrl(ruleId));
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId),
+    });
     return null;
   }
 
@@ -282,10 +286,16 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    history.replace(getRulesUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
+    });
     return null;
   }
   return (

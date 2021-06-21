@@ -7,7 +7,6 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -43,7 +42,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
-  const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
@@ -159,7 +157,10 @@ const RulesPageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   }
 
