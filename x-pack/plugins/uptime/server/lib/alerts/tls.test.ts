@@ -66,8 +66,8 @@ describe('tls alert', () => {
       expect(result).toEqual({
         commonName: mockCerts[0].common_name,
         issuer: mockCerts[0].issuer,
-
-        summary: 'expired on 2020-07-16T03:15:39.000Z 900 days ago.',
+        summary: 'expired on 2020-07-16T03:15:39.000Z, 900 days ago.',
+        status: 'expired',
       });
     });
 
@@ -82,6 +82,7 @@ describe('tls alert', () => {
         commonName: mockCerts[0].common_name,
         issuer: mockCerts[0].issuer,
         summary: 'valid since 2019-07-24T03:15:39.000Z, 702 days ago.',
+        status: 'becoming too old',
       });
     });
 
@@ -95,8 +96,8 @@ describe('tls alert', () => {
       expect(result).toEqual({
         commonName: mockCerts[0].common_name,
         issuer: mockCerts[0].issuer,
-
         summary: 'invalid until 2019-07-24T03:15:39.000Z, 90 days from now.',
+        status: 'invalid',
       });
     });
 
@@ -112,8 +113,8 @@ describe('tls alert', () => {
       expect(result).toEqual({
         commonName: mockCerts[0].common_name,
         issuer: mockCerts[0].issuer,
-
         summary: 'expires on 2020-07-16T03:15:39.000Z in 96 days.',
+        status: 'expiring',
       });
     });
   });

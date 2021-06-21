@@ -25,25 +25,45 @@ interface TlsAlertState {
   commonName: string;
   issuer: string;
   summary: string;
+  status: string;
 }
 
-const mapCertsToSummaryString = (cert: Cert, certLimitMessage: (cert: Cert) => string): string =>
-  certLimitMessage(cert);
+interface TLSContent {
+  summary: string;
+  status?: string;
+}
 
-const getValidAfter = ({ not_after: date }: Cert) => {
-  if (!date) return 'Error, missing `certificate_not_valid_after` date.';
+const mapCertsToSummaryString = (
+  cert: Cert,
+  certLimitMessage: (cert: Cert) => TLSContent
+): TLSContent => certLimitMessage(cert);
+
+const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
+  if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
-    ? tlsTranslations.validAfterExpiredString(date, relativeDate)
-    : tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate));
+    ? {
+        summary: tlsTranslations.validAfterExpiredString(date, relativeDate),
+        status: tlsTranslations.expiredLabel,
+      }
+    : {
+        summary: tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate)),
+        status: tlsTranslations.expiringLabel,
+      };
 };
 
-const getValidBefore = ({ not_before: date }: Cert): string => {
-  if (!date) return 'Error, missing `certificate_not_valid_before` date.';
+const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
+  if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
-    ? tlsTranslations.validBeforeExpiredString(date, relativeDate)
-    : tlsTranslations.validBeforeExpiringString(date, Math.abs(relativeDate));
+    ? {
+        summary: tlsTranslations.validBeforeExpiredString(date, relativeDate),
+        status: tlsTranslations.agingLabel,
+      }
+    : {
+        summary: tlsTranslations.validBeforeExpiringString(date, Math.abs(relativeDate)),
+        status: tlsTranslations.invalidLabel,
+      };
 };
 
 export const getCertSummary = (
@@ -53,21 +73,27 @@ export const getCertSummary = (
 ): TlsAlertState => {
   const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
   const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
+  let content: TLSContent | null = null;
+
+  if (isExpiring) {
+    content = mapCertsToSummaryString(cert, getValidAfter);
+  } else if (isAging) {
+    content = mapCertsToSummaryString(cert, getValidBefore);
+  }
+
+  const { summary = '', status = '' } = content || {};
 
   return {
     commonName: cert.common_name ?? '',
     issuer: cert.issuer ?? '',
-    summary: isExpiring
-      ? mapCertsToSummaryString(cert, getValidAfter)
-      : isAging
-      ? mapCertsToSummaryString(cert, getValidBefore)
-      : '',
+    summary,
+    status,
   };
 };
 
 export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
   uptimeAlertWrapper<ActionGroupIds>({
-    id: 'xpack.uptime.alerts.tlsIndividual',
+    id: 'xpack.uptime.alerts.tlsCertificate',
     name: tlsTranslations.alertFactoryName,
     validate: {
       params: schema.object({}),
@@ -133,7 +159,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             )
             .valueOf();
           const alertInstance = alertInstanceFactory(
-            `${TLS.id}-${cert.common_name}-${cert.issuer}`
+            `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`
           );
           const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
           alertInstance.replaceState({
