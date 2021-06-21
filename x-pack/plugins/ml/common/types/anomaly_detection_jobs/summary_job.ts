@@ -36,6 +36,7 @@ export interface MlSummaryJob {
   earliestStartTimestampMs?: number;
   awaitingNodeAssignment: boolean;
   alertingRules?: MlAnomalyDetectionAlertRule[];
+  jobTags: Record<string, string>;
 }
 
 export interface AuditMessage {
