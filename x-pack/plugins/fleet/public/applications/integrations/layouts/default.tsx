@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useLink } from '../../../hooks';
@@ -27,11 +27,29 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
     <WithHeaderLayout
       rightColumn={<HeroImage />}
       leftColumn={
-        <EuiText>
-          <h1>
-            <FormattedMessage id="xpack.fleet.integrationsAppTitle" defaultMessage="Integrations" />{' '}
-          </h1>
-        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+          <EuiText>
+            <h1>
+              <FormattedMessage
+                id="xpack.fleet.integrationsAppTitle"
+                defaultMessage="Integrations"
+              />
+            </h1>
+          </EuiText>
+
+          <EuiSpacer size="s" />
+
+          <EuiFlexItem grow={false}>
+            <EuiText size="m" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.epm.pageSubtitle"
+                  defaultMessage="Collect data from popular apps and services."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       tabs={[
         {
