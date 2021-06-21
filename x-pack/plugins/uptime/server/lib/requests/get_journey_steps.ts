@@ -18,10 +18,10 @@ export interface GetJourneyStepsParams {
 }
 
 const defaultEventTypes = [
-  'step/end',
   'cmd/status',
-  'step/screenshot',
   'journey/browserconsole',
+  'step/end',
+  'step/screenshot',
   'step/screenshot_ref',
 ];
 
@@ -105,7 +105,6 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     _id,
     ...rest,
     timestamp: rest['@timestamp'],
-    docId: _id,
     synthetics: {
       ...rest.synthetics,
       screenshotExists: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
