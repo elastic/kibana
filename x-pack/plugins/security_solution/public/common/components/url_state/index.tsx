@@ -5,38 +5,57 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import React from 'react';
+import { compose, Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { timelineActions } from '../../../timelines/store/timeline';
+import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 import { UrlStateContainerPropTypes, UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
-import { useUrlState } from './helpers';
+import { makeMapStateToProps } from './helpers';
 
-export const useSyncUrlState = (props: UrlStateProps) => {
-  const dispatch = useDispatch();
+export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = (
+  props: UrlStateContainerPropTypes
+) => {
+  useUrlStateHooks(props);
+  return null;
+};
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
+  updateTimeline: dispatchUpdateTimeline(dispatch),
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
+});
+
+export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
+  connect(makeMapStateToProps, mapDispatchToProps)
+)(
+  React.memo(
+    UrlStateContainer,
+    (prevProps, nextProps) =>
+      prevProps.pathName === nextProps.pathName && deepEqual(prevProps.urlState, nextProps.urlState)
+  )
+);
+
+const UseUrlStateComponent: React.FC<UrlStateProps> = (props) => {
   const [routeProps] = useRouteSpy();
-  const urlStateProps = useUrlState();
-  const actions = {
-    setInitialStateFromUrl: useMemo(() => dispatchSetInitialStateFromUrl(dispatch), [dispatch]),
-    updateTimeline: useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]),
-    updateTimelineIsLoading: useMemo(
-      () => ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-        dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-      [dispatch]
-    ) as ActionCreator<{ id: string; isLoading: boolean }>,
-  };
-  const syncProps: UrlStateContainerPropTypes = {
+  const urlStateReduxProps: RouteSpyState & UrlStateProps = {
     ...routeProps,
     ...props,
-    ...urlStateProps,
-    ...actions,
   };
-
-  useUrlStateHooks(syncProps);
+  return <UrlStateRedux {...urlStateReduxProps} />;
 };
+
+export const UseUrlState = React.memo(
+  UseUrlStateComponent,
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs)
+);

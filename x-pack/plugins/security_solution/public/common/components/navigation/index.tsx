@@ -6,15 +6,17 @@
  */
 
 import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
+import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { useUrlState } from '../url_state/helpers';
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
-import { RouteSpyState } from '../../utils/route/types';
 
 /**
  * @description - This component handels all of the tab navigation seen within a Security Soluton application page, not the Security Solution primary side navigation
@@ -63,8 +65,19 @@ export const TabNavigationComponent: React.FC<
           getUrlForApp
         );
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
+    }, [
+      chrome,
+      pageName,
+      pathName,
+      search,
+      navTabs,
+      urlState,
+      state,
+      detailName,
+      flowTarget,
+      tabName,
+      getUrlForApp,
+    ]);
 
     return (
       <TabNavigation
@@ -85,19 +98,29 @@ export const TabNavigationComponent: React.FC<
 );
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
+export const SecuritySolutionTabNavigationRedux = compose<
+  React.ComponentClass<SecuritySolutionTabNavigationProps & RouteSpyState>
+>(connect(makeMapStateToProps))(
+  React.memo(
+    TabNavigationComponent,
+    (prevProps, nextProps) =>
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+      deepEqual(prevProps.urlState, nextProps.urlState) &&
+      deepEqual(prevProps.state, nextProps.state)
+  )
+);
+
 export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> = React.memo(
   (props) => {
     const [routeProps] = useRouteSpy();
-    const urlStateProps = useUrlState();
-    const navigationManagerProps: RouteSpyState &
-      TabNavigationComponentProps &
-      SecuritySolutionTabNavigationProps = {
+    const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
       ...routeProps,
-      ...urlStateProps,
       ...props,
     };
 
-    return <TabNavigationComponent {...navigationManagerProps} />;
+    return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
   },
   (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
 );

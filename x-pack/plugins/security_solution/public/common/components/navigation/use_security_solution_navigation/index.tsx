@@ -10,9 +10,10 @@ import { useEffect } from 'react';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { setBreadcrumbs } from '../breadcrumbs';
-import { useUrlState } from '../../url_state/helpers';
+import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 /**
  * @description - This hook provides the structure necessary by the KibanaPageTemplate for rendering the primary security_solution side navigation.
@@ -20,7 +21,8 @@ import { navTabs } from '../../../../app/home/home_navigations';
  */
 export const useSecuritySolutionNavigation = () => {
   const [routeProps] = useRouteSpy();
-  const { urlState } = useUrlState();
+  const urlMapState = makeMapStateToProps();
+  const { urlState } = useDeepEqualSelector(urlMapState);
   const {
     chrome,
     application: { getUrlForApp },
@@ -51,8 +53,18 @@ export const useSecuritySolutionNavigation = () => {
         getUrlForApp
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
+  }, [
+    chrome,
+    pageName,
+    pathName,
+    search,
+    urlState,
+    state,
+    detailName,
+    flowTarget,
+    tabName,
+    getUrlForApp,
+  ]);
 
   return usePrimaryNavigation({
     query: urlState.query,

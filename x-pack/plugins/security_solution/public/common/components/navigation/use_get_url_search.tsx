@@ -7,12 +7,14 @@
 
 import { useMemo } from 'react';
 
-import { useUrlState } from '../url_state/helpers';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { makeMapStateToProps } from '../url_state/helpers';
 import { getSearch } from './helpers';
 import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => {
-  const { urlState } = useUrlState();
+  const mapState = makeMapStateToProps();
+  const { urlState } = useDeepEqualSelector(mapState);
   const urlSearch = useMemo(() => getSearch(tab, urlState), [tab, urlState]);
   return urlSearch;
 };
