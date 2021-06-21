@@ -49,7 +49,12 @@ export function SeriesEditor() {
             field: 'defaultFilters',
             width: '15%',
             render: (defaultFilters: string[], { id, seriesConfig }: EditItem) => (
-              <SeriesFilter defaultFilters={defaultFilters} seriesId={id} series={seriesConfig} />
+              <SeriesFilter
+                defaultFilters={defaultFilters}
+                seriesId={id}
+                series={seriesConfig}
+                filters={seriesConfig.filters}
+              />
             ),
           },
           {
