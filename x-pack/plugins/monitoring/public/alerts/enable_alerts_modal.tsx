@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import {
   EuiButton,
@@ -25,18 +25,20 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
+import { AlertsContext } from './context';
 import { Legacy } from '../legacy_shims';
 
 export const EnableAlertsModal: React.FC<{}> = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const $injector = Legacy.shims.getAngularInjector();
   const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
+  const alertsContext = React.useContext(AlertsContext);
 
   const closeModal = () => {
     setIsModalVisible(false);
+    alertsEnableModalProvider.hideModalForSession();
   };
-  // const idPrefix = htmlIdGenerator()();
+
   const radios = [
     {
       id: 'create-alerts',
@@ -59,10 +61,10 @@ export const EnableAlertsModal: React.FC<{}> = () => {
   };
 
   useEffect(() => {
-    if (alertsEnableModalProvider.shouldShowAlertsModal()) {
+    if (alertsEnableModalProvider.shouldShowAlertsModal(alertsContext)) {
       setIsModalVisible(true);
     }
-  }, [alertsEnableModalProvider]);
+  }, [alertsEnableModalProvider, alertsContext]);
 
   const confirmButtonClick = () => {
     if (radioIdSelected === 'create-alerts') {

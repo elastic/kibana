@@ -8,10 +8,14 @@ import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { showAlertsToast } from '../alerts/lib/alerts_toast';
 
 export function enableAlertsModalProvider($http, $window, $injector) {
-  function shouldShowAlertsModal() {
+  function shouldShowAlertsModal(alerts) {
     const modalHasBeenShown = $window.sessionStorage.getItem('ALERTS_MODAL_HAS_BEEN_SHOWN');
-
     const decisionMade = $window.localStorage.getItem('ALERTS_MODAL_DECISION_MADE');
+
+    if (Object.keys(alerts.allAlerts).length > 0) {
+      $window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', true);
+      return false;
+    }
 
     if (!modalHasBeenShown && !decisionMade) {
       return true;
