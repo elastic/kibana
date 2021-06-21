@@ -7,7 +7,7 @@
 
 import {
   EuiFlexGroup,
-  EuiPage,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -68,41 +67,41 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
-    return <SearchBar />;
+    return null;
   }
 
   return (
-    <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
-            />
-          </EuiPanel>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiPanel>
+          <ErrorDistribution
+            distribution={errorDistributionData}
+            title={i18n.translate(
+              'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+              { defaultMessage: 'Error occurrences' }
+            )}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
 
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorsList.title',
+                { defaultMessage: 'Errors' }
+              )}
+            </h3>
+          </EuiTitle>
           <EuiSpacer size="s" />
 
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Errors</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-
-            <ErrorGroupList
-              items={errorGroupListData.errorGroups}
-              serviceName={serviceName}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
-    </>
+          <ErrorGroupList
+            items={errorGroupListData.errorGroups}
+            serviceName={serviceName}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

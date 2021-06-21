@@ -25,8 +25,7 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
     if (!cached) {
       cached = (async () => {
         const labService = startPlugins.presentationUtil.labsService;
-        const useDataSearchProject = labService.getProject('labs:canvas:useDataService');
-        const hasDataSearch = useDataSearchProject.status.isEnabled;
+        const hasDataSearch = labService.isProjectEnabled('labs:canvas:useDataService');
         const dataSearchFns = ['essql', 'esdocs', 'escount'];
 
         const serverFunctionList = await coreSetup.http.get(API_ROUTE_FUNCTIONS);

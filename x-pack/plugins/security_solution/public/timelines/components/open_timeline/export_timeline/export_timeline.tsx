@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import uuid from 'uuid';
+import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import {
-  GenericDownloader,
-  ExportSelectedData,
-} from '../../../../common/components/generic_downloader';
 import * as i18n from '../translations';
-import { useStateToaster } from '../../../../common/components/toasters';
 import { TimelineType } from '../../../../../common/types/timeline';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { exportSelectedTimeline } from '../../../containers/api';
+import { downloadBlob } from '../../../../common/utils/download_blob';
 
 const ExportTimeline: React.FC<{
   exportedIds: string[] | undefined;
-  getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
   onComplete?: () => void;
-}> = ({ onComplete, isEnableDownloader, exportedIds, getExportedData }) => {
-  const [, dispatchToaster] = useStateToaster();
+}> = ({ onComplete, isEnableDownloader, exportedIds }) => {
   const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
+  const { addSuccess } = useAppToasts();
 
   const onExportSuccess = useCallback(
     (exportCount) => {
@@ -32,20 +28,15 @@ const ExportTimeline: React.FC<{
         onComplete();
       }
 
-      dispatchToaster({
-        type: 'addToaster',
-        toast: {
-          id: uuid.v4(),
-          title:
-            timelineType === TimelineType.template
-              ? i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportCount)
-              : i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
-          color: 'success',
-          iconType: 'check',
-        },
+      addSuccess({
+        title:
+          timelineType === TimelineType.template
+            ? i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportCount)
+            : i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
+        'data-test-subj': 'addObjectToContainerSuccess',
       });
     },
-    [dispatchToaster, onComplete, timelineType]
+    [addSuccess, onComplete, timelineType]
   );
   const onExportFailure = useCallback(() => {
     if (onComplete != null) {
@@ -53,20 +44,28 @@ const ExportTimeline: React.FC<{
     }
   }, [onComplete]);
 
-  return (
-    <>
-      {exportedIds != null && isEnableDownloader && (
-        <GenericDownloader
-          data-test-subj="export-timeline-downloader"
-          exportSelectedData={getExportedData}
-          filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ids={exportedIds}
-          onExportSuccess={onExportSuccess}
-          onExportFailure={onExportFailure}
-        />
-      )}
-    </>
-  );
+  useEffect(() => {
+    const downloadTimeline = async () => {
+      if (exportedIds?.length && isEnableDownloader) {
+        const result = await exportSelectedTimeline({ ids: exportedIds });
+        if (result instanceof Blob) {
+          downloadBlob(result, `${i18n.EXPORT_FILENAME}.ndjson`);
+          onExportSuccess(exportedIds.length);
+        } else {
+          onExportFailure();
+        }
+      }
+    };
+
+    downloadTimeline();
+    // We probably don't need to have ExportTimeline in the form of a React component.
+    // See https://github.com/elastic/kibana/issues/101571 for more detail.
+    // But for now, it uses isEnableDownloader as a signal to start downloading.
+    // Other variables are excluded from the deps array to avoid false positives
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exportedIds, isEnableDownloader]);
+
+  return null;
 };
 ExportTimeline.displayName = 'ExportTimeline';
 export const TimelineDownloader = React.memo(ExportTimeline);

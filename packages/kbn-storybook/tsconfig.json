@@ -8,12 +8,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-storybook",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "*.ts",
-    "lib/*.ts"
-  ]
+  "include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx", "../../typings/index.d.ts"]
 }

@@ -49,10 +49,9 @@ that accesses the {kib} API.
 
 {kib} uses the index pattern to show you a list of fields, such as
 `event.duration`. You can customize the display name and format for each field.
-For example, you can tell Kibana to display `event.duration` in seconds.
+For example, you can tell {kib} to display `event.duration` in seconds.
 {kib} has <<managing-fields,field formatters>> for strings,
-dates, geopoints,
-and numbers.
+dates, geopoints, and numbers.
 
 [float]
 [[kibana-concepts-searching-your-data]]
@@ -88,6 +87,7 @@ image:concepts/images/refresh-every.png["section of time filter where you can co
 
 
 [float]
+[[semi-structured-search]]
 ==== Semi-structured search
 
 Combine free text search with field-based search using the Kibana Query Language (KQL).

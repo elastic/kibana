@@ -1,0 +1,68 @@
+[role="xpack"]
+[[alerting-setup]]
+== Alerting Setup
+++++
+<titleabbrev>Setup</titleabbrev>
+++++
+
+The Alerting feature is automatically enabled in {kib}, but might require some additional configuration.
+
+[float]
+[[alerting-prerequisites]]
+=== Prerequisites
+If you are using an *on-premises* Elastic Stack deployment:
+
+* In the kibana.yml configuration file, add the <<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
+* For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+
+If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
+
+* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background rule checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
+
+[float]
+[[alerting-setup-production]]
+=== Production considerations and scaling guidance
+
+When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
+
+See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
+
+[float]
+[[alerting-security]]
+=== Security
+
+To access alerting in a space, a user must have access to one of the following features:
+
+* Alerting
+* <<xpack-apm,*APM*>>
+* <<logs-app,*Logs*>>
+* <<xpack-ml,*{ml-cap}*>>
+* <<metrics-app,*Metrics*>>
+* <<xpack-siem,*Security*>>
+* <<uptime-app,*Uptime*>>
+
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
+Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to a rule or to edit a rule that has an action attached to it.
+
+[float]
+[[alerting-restricting-actions]]
+==== Restrict actions
+
+For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with.
+
+[float]
+[[alerting-spaces]]
+=== Space isolation
+
+Rules and connectors are isolated to the {kib} space in which they were created. A rule or connector created in one space will not be visible in another. 
+
+[float]
+[[alerting-authorization]]
+=== Authorization
+
+Rules, including all background detection and the actions they generate are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. Upon creating or modifying a rule, an API key is generated for that user, capturing a snapshot of their privileges at that moment in time. The API key is then used to run all background tasks associated with the rule including detection checks and executing actions. 
+
+[IMPORTANT]
+==============================================
+If a rule requires certain privileges to run, such as index privileges, keep in mind that if a user without those privileges updates the rule, the rule will no longer function.  
+==============================================

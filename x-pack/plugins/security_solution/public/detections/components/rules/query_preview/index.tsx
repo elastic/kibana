@@ -20,11 +20,11 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash/fp';
 
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 import { FieldValueQueryBar } from '../query_bar';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { PreviewEqlQueryHistogram } from './eql_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { PreviewThresholdQueryHistogram } from './threshold_histogram';

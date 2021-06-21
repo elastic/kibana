@@ -14,31 +14,38 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { addFilter, closeTimeline, openTimelineById, pinFirstEvent } from '../../tasks/timeline';
+import {
+  addFilter,
+  closeTimeline,
+  openTimelineById,
+  pinFirstEvent,
+  refreshTimelinesUntilTimeLinePresent,
+} from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline query tab', () => {
-  let timelineId: string | null = null;
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(timeline)
-      .then((response) => {
-        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-      })
-      .then(() => {
-        const note = timeline.notes;
-        addNoteToTimeline(note, timelineId!).should((response) => {
-          expect(response.status).to.equal(200);
-          waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!);
-          pinFirstEvent();
-          addFilter(timeline.filter);
-        });
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId: string) => {
+        refreshTimelinesUntilTimeLinePresent(timelineId)
+          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+          // request responses and indeterminism since on clicks to activates URL's.
+          .then(() => cy.wait(1000))
+          .then(() =>
+            addNoteToTimeline(timeline.notes, timelineId).should((response) =>
+              expect(response.status).to.equal(200)
+            )
+          )
+          .then(() => openTimelineById(timelineId))
+          .then(() => pinFirstEvent())
+          .then(() => addFilter(timeline.filter));
       });
   });
 
@@ -46,6 +53,7 @@ describe('Timeline query tab', () => {
     after(() => {
       closeTimeline();
     });
+
     it('should contain the right query', () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query}`);
     });

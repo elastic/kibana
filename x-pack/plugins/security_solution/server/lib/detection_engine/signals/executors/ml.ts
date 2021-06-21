@@ -7,6 +7,7 @@
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -14,38 +15,37 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { SetupPlugins } from '../../../../plugin';
 import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
-import { RefreshTypes } from '../../types';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
-import { RuleStatusService } from '../rule_status_service';
-import { AlertAttributes } from '../types';
+import { AlertAttributes, BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
   rule,
+  tuple,
   ml,
   listClient,
   exceptionItems,
-  ruleStatusService,
   services,
   logger,
-  refresh,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
+  tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
@@ -67,7 +67,7 @@ export const mlExecutor = async ({
     jobSummaries.length < 1 ||
     jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
   ) {
-    const errorMessage = buildRuleMessage(
+    const warningMessage = buildRuleMessage(
       'Machine learning job(s) are not started:',
       ...jobSummaries.map((job) =>
         [
@@ -77,9 +77,9 @@ export const mlExecutor = async ({
         ].join(', ')
       )
     );
-    logger.warn(errorMessage);
+    result.warningMessages.push(warningMessage);
+    logger.warn(warningMessage);
     result.warning = true;
-    await ruleStatusService.partialFailure(errorMessage);
   }
 
   const anomalyResults = await findMlSignals({
@@ -90,8 +90,8 @@ export const mlExecutor = async ({
     savedObjectsClient: services.savedObjectsClient,
     jobIds: ruleParams.machineLearningJobId,
     anomalyThreshold: ruleParams.anomalyThreshold,
-    from: ruleParams.from,
-    to: ruleParams.to,
+    from: tuple.from.toISOString(),
+    to: tuple.to.toISOString(),
     exceptionItems,
   });
 
@@ -120,8 +120,9 @@ export const mlExecutor = async ({
     logger,
     id: rule.id,
     signalsIndex: ruleParams.outputIndex,
-    refresh,
     buildRuleMessage,
+    bulkCreate,
+    wrapHits,
   });
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
   const shardFailures =

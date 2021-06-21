@@ -11,6 +11,7 @@ import { normalizeQuery } from './normalize_query';
 describe('normalizeQuery', () => {
   const req = 'req';
   const seriesId = '61ca57f1-469d-11e7-af02-69e470af7417';
+  const panelId = '39d49073-a924-426b-aa32-35acb40a9bb7';
 
   let next;
   let panel;
@@ -48,6 +49,7 @@ describe('normalizeQuery', () => {
           intervalString: '10s',
           bucketSize: 10,
           seriesId: [seriesId],
+          panelId,
         },
       },
     },
@@ -78,6 +80,7 @@ describe('normalizeQuery', () => {
       intervalString: '10s',
       bucketSize: 10,
       seriesId: [seriesId],
+      panelId: panelId,
     });
   });
 

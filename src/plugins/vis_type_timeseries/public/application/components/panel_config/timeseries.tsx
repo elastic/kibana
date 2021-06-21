@@ -28,9 +28,8 @@ import {
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { AnnotationsEditor } from '../annotations_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
+import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
@@ -38,6 +37,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { TOOLTIP_MODES } from '../../../../common/enums';
 
 const positionOptions = [
   {
@@ -126,7 +126,7 @@ export class TimeseriesPanelConfig extends Component<
       axis_min: '',
       legend_position: 'right',
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
       ignore_daylight_time: false,
     };
     const model = { ...defaults, ...this.props.model };
@@ -161,7 +161,6 @@ export class TimeseriesPanelConfig extends Component<
         <AnnotationsEditor
           fields={this.props.fields}
           model={this.props.model}
-          name="annotations"
           onChange={this.props.onChange}
         />
       );

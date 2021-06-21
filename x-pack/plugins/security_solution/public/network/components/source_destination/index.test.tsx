@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';

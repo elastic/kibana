@@ -15,7 +15,7 @@ import { calculateSiblings } from '../lib/calculate_siblings';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { basicAggs } from '../../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 
 function createTypeFilter(restrict, exclude = []) {
   return (metric) => {

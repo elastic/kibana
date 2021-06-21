@@ -37,7 +37,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     return response.ok({
       body: Buffer.from(result.blob, 'base64'),
       headers: {
-        'content-type': 'image/png',
+        'content-type': result.mimeType || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
         'cache-control': 'max-age=600',
         'caption-name': result.stepName,
         'max-steps': result.totalSteps,

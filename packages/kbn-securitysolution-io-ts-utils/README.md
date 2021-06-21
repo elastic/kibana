@@ -1,10 +1,12 @@
 # kbn-securitysolution-io-ts-utils
 
-Temporary location for all the io-ts-utils from security solutions. This is a lift-and-shift, where
-we are moving them here for phase 1.
+Very small set of utilities for io-ts which we use across plugins within security solutions such as securitysolution, lists, cases, etc...
+This folder should remain small and concise since it is pulled into front end and the more files we add the more weight will be added to all
+of the plugins. Also, any new dependencies added to this will add weight here and the other plugins, so be careful of what is added here.
 
-Phase 2 is deprecating across plugins any copied code or sharing of io-ts utils that are now in here.
+You might consider making another package instead and putting a dependency on this one if needed, instead.
 
-Phase 3 is replacing those deprecated types with the ones in here.
-
-Phase 4+ is (potentially) consolidating any duplication or everything altogether with the `kbn-io-ts-utils` project
+Related packages are
+* kbn-securitysolution-io-ts-alerting-types
+* kbn-securitysolution-io-ts-list-types
+* kbn-securitysolution-io-ts-types

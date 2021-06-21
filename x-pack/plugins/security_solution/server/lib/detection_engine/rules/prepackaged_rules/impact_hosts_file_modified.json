@@ -13,7 +13,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Hosts File Modified",
-  "note": "For Windows systems using Auditbeat, this rule requires adding 'C:/Windows/System32/drivers/etc' as an additional path in the 'file_integrity' module of auditbeat.yml.",
+  "note": "## Config\n\nFor Windows systems using Auditbeat, this rule requires adding 'C:/Windows/System32/drivers/etc' as an additional path in the 'file_integrity' module of auditbeat.yml.",
   "query": "file where event.type in (\"change\", \"creation\") and\n  file.path : (\"/private/etc/hosts\", \"/etc/hosts\", \"?:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts\") \n",
   "references": [
     "https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html"

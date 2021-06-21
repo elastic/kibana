@@ -13,8 +13,12 @@ import { useHistory } from 'react-router-dom';
 import { getJourneySteps } from '../../../../state/actions/journey';
 import { journeySelector } from '../../../../state/selectors';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
-import { StepDetail } from './step_detail';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
+import { ClientPluginsStart } from '../../../../apps/plugin';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { StepPageTitle } from './step_page_title';
+import { StepPageNavigation } from './step_page_nav';
+import { WaterfallChartContainer } from './waterfall/waterfall_chart_container';
 
 export const NO_STEP_DATA = i18n.translate('xpack.uptime.synthetics.stepDetail.noData', {
   defaultMessage: 'No data could be found for this step',
@@ -66,8 +70,40 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
     history.push(`/journey/${journey?.details?.previous?.checkGroup}/step/1`);
   }, [history, journey?.details?.previous?.checkGroup]);
 
+  const {
+    services: { observability },
+  } = useKibana<ClientPluginsStart>();
+  const PageTemplateComponent = observability.navigation.PageTemplate;
+
   return (
-    <>
+    <PageTemplateComponent
+      pageHeader={{
+        pageTitle:
+          journey && activeStep ? (
+            <StepPageTitle
+              stepName={activeStep.synthetics?.step?.name}
+              stepIndex={stepIndex}
+              totalSteps={journey.steps.length}
+              hasPreviousStep={hasPreviousStep}
+              hasNextStep={hasNextStep}
+              handlePreviousStep={handlePreviousStep}
+              handleNextStep={handleNextStep}
+            />
+          ) : null,
+        rightSideItems: journey
+          ? [
+              <StepPageNavigation
+                dateFormat={dateFormat}
+                handleNextRun={handleNextRun}
+                handlePreviousRun={handlePreviousRun}
+                nextCheckGroup={journey.details?.next?.checkGroup}
+                previousCheckGroup={journey.details?.previous?.checkGroup}
+                checkTimestamp={journey.details?.timestamp}
+              />,
+            ]
+          : [],
+      }}
+    >
       <EuiPanel>
         {(!journey || journey.loading) && (
           <EuiFlexGroup justifyContent="center">
@@ -86,24 +122,9 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
           </EuiFlexGroup>
         )}
         {journey && activeStep && !journey.loading && (
-          <StepDetail
-            checkGroup={checkGroup}
-            stepName={activeStep.synthetics?.step?.name}
-            stepIndex={stepIndex}
-            totalSteps={journey.steps.length}
-            hasPreviousStep={hasPreviousStep}
-            hasNextStep={hasNextStep}
-            handlePreviousStep={handlePreviousStep}
-            handleNextStep={handleNextStep}
-            handleNextRun={handleNextRun}
-            handlePreviousRun={handlePreviousRun}
-            previousCheckGroup={journey.details?.previous?.checkGroup}
-            nextCheckGroup={journey.details?.next?.checkGroup}
-            checkTimestamp={journey.details?.timestamp}
-            dateFormat={dateFormat}
-          />
+          <WaterfallChartContainer checkGroup={checkGroup} stepIndex={stepIndex} />
         )}
       </EuiPanel>
-    </>
+    </PageTemplateComponent>
   );
 };

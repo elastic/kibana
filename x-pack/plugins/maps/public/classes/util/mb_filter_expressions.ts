@@ -15,61 +15,64 @@ import {
 export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true];
 const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
-const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
-// Kibana features are features added by kibana that do not exist in real data
-const EXCLUDE_KBN_FEATURES = ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES];
+function getFilterExpression(geometryFilter: unknown[], hasJoins: boolean) {
+  const filters: unknown[] = [
+    EXCLUDE_TOO_MANY_FEATURES_BOX,
+    EXCLUDE_CENTROID_FEATURES,
+    geometryFilter,
+  ];
 
-const CLOSED_SHAPE_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-  ],
-];
+  if (hasJoins) {
+    filters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
+  }
 
-const VISIBLE_CLOSED_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, CLOSED_SHAPE_MB_FILTER];
-
-const ALL_SHAPE_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
-  ],
-];
-
-const VISIBLE_ALL_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, ALL_SHAPE_MB_FILTER];
-
-const POINT_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
-  ],
-];
-
-const VISIBLE_POINT_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, POINT_MB_FILTER];
-
-const CENTROID_MB_FILTER = ['all', ['==', ['get', KBN_IS_CENTROID_FEATURE], true]];
-
-const VISIBLE_CENTROID_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, CENTROID_MB_FILTER];
+  return ['all', ...filters];
+}
 
 export function getFillFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_CLOSED_SHAPE_MB_FILTER : CLOSED_SHAPE_MB_FILTER;
+  return getFilterExpression(
+    [
+      'any',
+      ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+      ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+    ],
+    hasJoins
+  );
 }
 
 export function getLineFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_ALL_SHAPE_MB_FILTER : ALL_SHAPE_MB_FILTER;
+  return getFilterExpression(
+    [
+      'any',
+      ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+      ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+      ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+      ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
+    ],
+    hasJoins
+  );
 }
 
 export function getPointFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_POINT_MB_FILTER : POINT_MB_FILTER;
+  return getFilterExpression(
+    [
+      'any',
+      ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+      ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
+    ],
+    hasJoins
+  );
 }
 
 export function getCentroidFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_CENTROID_MB_FILTER : CENTROID_MB_FILTER;
+  const filters: unknown[] = [
+    EXCLUDE_TOO_MANY_FEATURES_BOX,
+    ['==', ['get', KBN_IS_CENTROID_FEATURE], true],
+  ];
+
+  if (hasJoins) {
+    filters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
+  }
+
+  return ['all', ...filters];
 }

@@ -285,6 +285,8 @@ function overridePackageInputs(
     }
 
     if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
+    if (typeof override.keep_enabled !== 'undefined')
+      originalInput.keep_enabled = override.keep_enabled;
 
     if (override.vars) {
       try {

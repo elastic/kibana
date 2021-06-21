@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PrintSpooler SPL File Created",
-  "note": "Refer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
+  "note": "## Threat intel\n\nRefer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
   "query": "file where event.type != \"deletion\" and\n  file.extension : \"spl\" and\n  file.path : \"?:\\\\Windows\\\\System32\\\\spool\\\\PRINTERS\\\\*\" and\n  not process.name : (\"spoolsv.exe\",\n                      \"printfilterpipelinesvc.exe\",\n                      \"PrintIsolationHost.exe\",\n                      \"splwow64.exe\",\n                      \"msiexec.exe\",\n                      \"poqexec.exe\")\n",
   "references": [
     "https://safebreach.com/Post/How-we-bypassed-CVE-2020-1048-Patch-and-got-CVE-2020-1337"

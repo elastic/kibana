@@ -24,11 +24,12 @@ import {
 import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { UserPrivilegesProvider } from '../../detections/components/user_privileges';
 
 const state: State = mockGlobalState;
 
 interface Props {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
@@ -59,7 +60,30 @@ const TestProvidersComponent: React.FC<Props> = ({
   </I18nProvider>
 );
 
+/**
+ * A utility for wrapping children in the providers required to run most tests
+ * WITH user privileges provider.
+ */
+const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  onDragEnd = jest.fn(),
+}) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <UserPrivilegesProvider>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          </UserPrivilegesProvider>
+        </ThemeProvider>
+      </ReduxStoreProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
+);
+
 export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProvidersWithPrivileges = React.memo(TestProvidersWithPrivilegesComponent);
 
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
   return {

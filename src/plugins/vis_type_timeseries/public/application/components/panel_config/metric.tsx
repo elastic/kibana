@@ -31,7 +31,7 @@ import { YesNo } from '../yes_no';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { limitOfSeries } from '../../../../common/ui_restrictions';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 
 export class MetricPanelConfig extends Component<

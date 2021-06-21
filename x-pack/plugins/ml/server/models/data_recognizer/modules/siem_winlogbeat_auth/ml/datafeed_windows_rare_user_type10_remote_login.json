@@ -7,9 +7,35 @@
   "query": {
     "bool": {
       "filter": [
-        {"term": {"event.type": "authentication_success"}},
-        {"term": {"winlog.event_data.LogonType": "10"}},
-        {"term": {"agent.type": "winlogbeat"}}
+        {
+          "term": {
+            "winlog.event_data.LogonType": "10"
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "event.type": {
+                    "query": "authentication_success",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "event.action": {
+                    "query": "logged-in",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
+          }
+        }
       ]
     }
   }

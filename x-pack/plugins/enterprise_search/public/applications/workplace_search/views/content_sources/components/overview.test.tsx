@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';

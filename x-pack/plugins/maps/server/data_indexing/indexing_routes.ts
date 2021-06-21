@@ -11,12 +11,14 @@ import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
   INDEX_SOURCE_API_PATH,
-  GIS_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
+  GET_MATCHING_INDEXES_PATH,
+  INDEX_FEATURE_PATH,
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { getMatchingIndexes } from './get_indexes_matching_pattern';
 
 export function initIndexingRoutes({
   router,
@@ -70,7 +72,7 @@ export function initIndexingRoutes({
 
   router.post(
     {
-      path: `/${GIS_API_PATH}/feature`,
+      path: INDEX_FEATURE_PATH,
       validate: {
         body: schema.object({
           index: schema.string(),
@@ -99,6 +101,24 @@ export function initIndexingRoutes({
           statusCode: 500,
         });
       }
+    }
+  );
+
+  router.get(
+    {
+      path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,
+      validate: {
+        params: schema.object({
+          indexPattern: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const result = await getMatchingIndexes(
+        request.params.indexPattern,
+        context.core.elasticsearch.client
+      );
+      return response.ok({ body: result });
     }
   );
 }

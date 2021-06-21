@@ -11,16 +11,29 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import ruleRegistryObj from './rule_registry.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 43 | 0 | 43 | 6 |
+
 ## Server
 
 ### Setup
 <DocDefinitionList data={[ruleRegistryObj.server.setup]}/>
 
-### Objects
-<DocDefinitionList data={ruleRegistryObj.server.objects}/>
+### Start
+<DocDefinitionList data={[ruleRegistryObj.server.start]}/>
 
 ### Functions
 <DocDefinitionList data={ruleRegistryObj.server.functions}/>
+
+### Classes
+<DocDefinitionList data={ruleRegistryObj.server.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={ruleRegistryObj.server.interfaces}/>
@@ -32,7 +45,4 @@ import ruleRegistryObj from './rule_registry.json';
 
 ### Functions
 <DocDefinitionList data={ruleRegistryObj.common.functions}/>
-
-### Enums
-<DocDefinitionList data={ruleRegistryObj.common.enums}/>
 

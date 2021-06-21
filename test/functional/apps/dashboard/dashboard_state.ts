@@ -34,6 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
+  const enableNewChartLibraryDebug = async () => {
+    if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+      await elasticChart.setNewChartUiDebugFlag();
+      await queryBar.submitQuery();
+    }
+  };
+
   describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = false;
@@ -84,10 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard(dashboarName);
 
-      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
-        await elasticChart.setNewChartUiDebugFlag();
-        await queryBar.submitQuery();
-      }
+      await enableNewChartLibraryDebug();
 
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
         overwriteColor
@@ -149,11 +153,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
-      const currentUrl = await browser.getCurrentUrl();
-      const newUrl = currentUrl.replace('query:%27%27', 'query:%27abc12345678910%27');
-      // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-      // soft refresh.
-      await browser.get(newUrl.toString(), false);
+      const currentUrl = await getUrlFromShare();
+      const newUrl = currentUrl.replace(`query:''`, `query:'abc12345678910'`);
+
+      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
+      await browser.get(newUrl.toString());
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const headers = await PageObjects.discover.getColumnHeaders();
@@ -200,20 +204,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return sharedUrl;
     };
 
+    const hardRefresh = async (newUrl: string) => {
+      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
+      await browser.get(newUrl.toString());
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      await enableNewChartLibraryDebug();
+      await PageObjects.dashboard.waitForRenderComplete();
+    };
+
     describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
+      before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.timePicker.setHistoricalDataRange();
+      });
 
+      it('for query parameter', async function () {
         const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
-        const currentUrl = await browser.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await browser.get(newUrl.toString(), false);
+        const currentUrl = await getUrlFromShare();
+        const newUrl = currentUrl.replace(`query:''`, `query:'hi:hello'`);
+
+        // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
+        await browser.get(newUrl.toString());
         const newQuery = await queryBar.getQueryString();
-        expect(newQuery).to.equal('hi');
+        expect(newQuery).to.equal('hi:hello');
+        await queryBar.clearQuery();
+        await queryBar.clickQuerySubmitButton();
       });
 
       it('for panel size parameters', async function () {
@@ -224,7 +242,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `w:${DEFAULT_PANEL_WIDTH}`,
           `w:${DEFAULT_PANEL_WIDTH * 2}`
         );
-        await browser.get(newUrl.toString(), false);
+        await hardRefresh(newUrl);
+
         await retry.try(async () => {
           const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
           if (newPanelDimensions.length < 0) {
@@ -247,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
         const currentUrl = await getUrlFromShare();
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
-        await browser.get(newUrl.toString(), false);
+        await hardRefresh(newUrl);
 
         await retry.try(async () => {
           const newPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -256,8 +275,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('for embeddable config color parameters on a visualization', () => {
-        it('updates a pie slice color on a soft refresh', async function () {
+        let originalPieSliceStyle = '';
+
+        before(async () => {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+          await enableNewChartLibraryDebug();
+          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+        });
+
+        it('updates a pie slice color on a hard refresh', async function () {
           await PageObjects.visChart.openLegendOptionColors(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
@@ -265,14 +291,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
-          await browser.get(newUrl.toString(), false);
+          await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
             const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach((style) => {
-              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+              if (style.indexOf('rgb(255, 255, 255)') > -1) {
                 whitePieSliceCounts++;
               }
             });
@@ -290,14 +316,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
-          await browser.get(newUrl.toString(), false);
+          const newUrl = isNewChartsLibraryEnabled
+            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
+            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+
+          await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
-            // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+
+            // After removing all overrides, pie slice style should match original.
+            expect(pieSliceStyle).to.be(originalPieSliceStyle);
           });
         });
 

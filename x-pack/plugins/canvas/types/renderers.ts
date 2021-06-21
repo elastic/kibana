@@ -9,7 +9,7 @@ import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
 type GenericRendererCallback = (callback: () => void) => void;
 
-export interface RendererHandlers extends IInterpreterRenderHandlers {
+export interface CanvasSpecificRendererHandlers {
   /** Handler to invoke when an element should be destroyed. */
   destroy: () => void;
   /** Get the id of the element being rendered.  Can be used as a unique ID in a render function */
@@ -30,6 +30,7 @@ export interface RendererHandlers extends IInterpreterRenderHandlers {
   setFilter: (filter: string) => void;
 }
 
+export type RendererHandlers = IInterpreterRenderHandlers & CanvasSpecificRendererHandlers;
 export interface RendererSpec<RendererConfig = {}> {
   /** The render type */
   name: string;

@@ -26,6 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Add to Dashboard', function describeIndexTests() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     it('adding a new metric to a new dashboard by value', async function () {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();

@@ -44,6 +44,7 @@ storiesOf('app/RumDashboard/VisitorsRegionMap', module)
                 '__kbnjoin__count__3657625d-17b0-41ef-99ba-3a2b2938655c': 439145,
                 '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c': 2041665.6350131081,
               },
+              actions: [],
             },
           ]}
         />

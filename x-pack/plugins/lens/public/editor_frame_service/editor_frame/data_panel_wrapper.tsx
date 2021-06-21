@@ -15,6 +15,7 @@ import { Action } from './state_management';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -29,6 +30,7 @@ interface DataPanelWrapperProps {
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  plugins: { uiActions: UiActionsStart };
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -56,6 +58,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
+    uiActions: props.plugins.uiActions,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

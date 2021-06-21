@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 
@@ -21,10 +21,9 @@ interface Props {
 }
 
 export function ReportTypesCol({ seriesId, reportTypes }: Props) {
-  const {
-    series: { reportType: selectedReportType, ...restSeries },
-    setSeries,
-  } = useUrlStorage(seriesId);
+  const { setSeries, getSeries } = useSeriesStorage();
+
+  const { reportType: selectedReportType, ...restSeries } = getSeries(seriesId);
 
   const { loading, hasData, selectedApp } = useAppIndexPatternContext();
 
@@ -41,7 +40,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
     <FlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
         <EuiFlexItem key={reportType}>
-          <EuiButton
+          <Button
             fullWidth
             size="s"
             iconSide="right"
@@ -67,7 +66,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -83,4 +82,8 @@ export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;

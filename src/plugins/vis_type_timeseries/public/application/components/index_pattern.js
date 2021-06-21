@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback, useEffect, useState } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -29,16 +29,17 @@ import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { DefaultIndexPatternContext } from '../contexts/default_index_context';
+import { PanelModelContext } from '../contexts/panel_model_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
+import { AUTO_INTERVAL, USE_KIBANA_INDEXES_KEY } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
-import { getUISettings } from '../../services';
-import { AUTO_INTERVAL } from '../../../common/constants';
+import { getDataStart, getUISettings } from '../../services';
 import { UI_SETTINGS } from '../../../../data/common';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
@@ -78,8 +79,13 @@ export const IndexPattern = ({
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
   const defaultIndex = useContext(DefaultIndexPatternContext);
+  const panelModel = useContext(PanelModelContext);
+
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+  const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
+
+  const [fetchedIndex, setFetchedIndex] = useState();
 
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
@@ -119,6 +125,7 @@ export const IndexPattern = ({
   };
 
   const model = { ...defaults, ..._model };
+  const index = model[indexPatternName];
 
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -134,10 +141,39 @@ export const IndexPattern = ({
     updateControlValidity(intervalName, intervalValidation.isValid);
   }, [intervalName, intervalValidation.isValid, updateControlValidity]);
 
+  useEffect(() => {
+    async function fetchIndex() {
+      const { indexPatterns } = getDataStart();
+
+      setFetchedIndex(
+        index
+          ? await fetchIndexPattern(index, indexPatterns, {
+              fetchKibanaIndexForStringIndexes: true,
+            })
+          : {
+              indexPattern: undefined,
+              indexPatternString: undefined,
+            }
+      );
+    }
+
+    fetchIndex();
+  }, [index]);
+
   const toggleIndicatorDisplay = useCallback(
     () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
     [model.hide_last_value_indicator, onChange]
   );
+
+  const getTimefieldPlaceholder = () => {
+    if (!model[indexPatternName]) {
+      return defaultIndex?.timeFieldName;
+    }
+
+    if (useKibanaIndices) {
+      return fetchedIndex?.indexPattern?.timeFieldName ?? undefined;
+    }
+  };
 
   return (
     <div className="index-pattern">
@@ -208,6 +244,7 @@ export const IndexPattern = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <IndexPatternSelect
+            fetchedIndex={fetchedIndex}
             value={model[indexPatternName]}
             indexPatternName={indexPatternName}
             onChange={onChange}
@@ -226,7 +263,7 @@ export const IndexPattern = ({
             onChange={handleSelectChange(timeFieldName)}
             indexPattern={model[indexPatternName]}
             fields={fields}
-            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+            placeholder={getTimefieldPlaceholder()}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

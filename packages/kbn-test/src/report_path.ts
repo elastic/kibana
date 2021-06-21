@@ -16,11 +16,17 @@ export function getUniqueJunitReportPath(
   reportName: string,
   counter?: number
 ): string {
+  const BUILDKITE_ID_SUFFIX = process.env.BUILDKITE_JOB_ID
+    ? `-${process.env.BUILDKITE_JOB_ID}`
+    : '';
+
   const path = Path.resolve(
     rootDirectory,
     'target/junit',
     process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}${counter ? `-${counter}` : ''}.xml`
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}${
+      counter ? `-${counter}` : ''
+    }${BUILDKITE_ID_SUFFIX}.xml`
   );
 
   return Fs.existsSync(path)

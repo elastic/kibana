@@ -7,15 +7,26 @@
 
 import * as t from 'io-ts';
 
-import { listArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
+  actionsCamel,
+  from,
+  machine_learning_job_id_normalized,
+  risk_score,
+  risk_score_mapping,
   threat_mapping,
   threat_index,
   threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
   threatIndicatorPathOrUndefined,
-} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+  threats,
+  severity,
+  severity_mapping,
+  throttleOrNull,
+  max_signals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   author,
   buildingBlockTypeOrUndefined,
@@ -23,7 +34,6 @@ import {
   enabled,
   noteOrUndefined,
   false_positives,
-  from,
   rule_id,
   immutable,
   indexOrUndefined,
@@ -36,32 +46,23 @@ import {
   query,
   queryOrUndefined,
   filtersOrUndefined,
-  max_signals,
-  risk_score,
-  risk_score_mapping,
   ruleNameOverrideOrUndefined,
-  severity,
-  severity_mapping,
   tags,
   timestampOverrideOrUndefined,
-  threats,
   to,
   references,
-  version,
   eventCategoryOverrideOrUndefined,
   savedIdOrUndefined,
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  actionsCamel,
-  throttleOrNull,
   createdByOrNull,
   updatedByOrNull,
   created_at,
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
-import { machine_learning_job_id_normalized } from '../../../../common/detection_engine/schemas/types/normalized_ml_job_id';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(

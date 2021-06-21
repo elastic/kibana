@@ -112,3 +112,10 @@ export const getTimelineById = (timelineId: string) =>
     url: `api/timeline?id=${timelineId}`,
     headers: { 'kbn-xsrf': 'timeline-by-id' },
   });
+
+export const loadPrepackagedTimelineTemplates = () =>
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline/_prepackaged',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });

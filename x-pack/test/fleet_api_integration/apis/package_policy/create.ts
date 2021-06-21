@@ -20,12 +20,16 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
-      await getService('esArchiver').load('empty_kibana');
-      await getService('esArchiver').load('fleet/empty_fleet_server');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
     after(async () => {
-      await getService('esArchiver').unload('empty_kibana');
-      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
 
     before(async function () {

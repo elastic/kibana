@@ -29,15 +29,15 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          renamed: 'toberenamed',
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+      const commands = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toEqual({
+        set: [
+          {
+            path: 'myplugin.renamed',
+            value: 'toberenamed',
+          },
+        ],
+        unset: [{ path: 'myplugin.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -64,16 +64,8 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'new')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          new: 'new',
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
-      });
+      const commands = rename('deprecated', 'new')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toBeUndefined();
       expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
     it('handles nested keys', () => {
@@ -88,22 +80,19 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('oldsection.deprecated', 'newsection.renamed')(
+      const commands = rename('oldsection.deprecated', 'newsection.renamed')(
         rawConfig,
         'myplugin',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          oldsection: {},
-          newsection: {
-            renamed: 'toberenamed',
+      expect(commands).toEqual({
+        set: [
+          {
+            path: 'myplugin.newsection.renamed',
+            value: 'toberenamed',
           },
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+        ],
+        unset: [{ path: 'myplugin.oldsection.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -127,11 +116,9 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          renamed: 'renamed',
-        },
+      const commands = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toEqual({
+        unset: [{ path: 'myplugin.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -162,19 +149,19 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
+      const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          renamed: 'toberenamed',
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+      expect(commands).toEqual({
+        set: [
+          {
+            path: 'myplugin.renamed',
+            value: 'toberenamed',
+          },
+        ],
+        unset: [{ path: 'myplugin.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -202,19 +189,19 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
+      const commands = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        oldplugin: {
-          valid: 'valid',
-        },
-        newplugin: {
-          renamed: 'toberenamed',
-          property: 'value',
-        },
+      expect(commands).toEqual({
+        set: [
+          {
+            path: 'newplugin.renamed',
+            value: 'toberenamed',
+          },
+        ],
+        unset: [{ path: 'oldplugin.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -242,20 +229,12 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = renameFromRoot('myplugin.deprecated', 'myplugin.new')(
+      const commands = renameFromRoot('myplugin.deprecated', 'myplugin.new')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          new: 'new',
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
-      });
+      expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
 
@@ -266,15 +245,13 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
+      const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          renamed: 'renamed',
-        },
+      expect(commands).toEqual({
+        unset: [{ path: 'myplugin.deprecated' }],
       });
 
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
@@ -306,14 +283,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toEqual({
+        unset: [{ path: 'myplugin.deprecated' }],
       });
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -343,17 +315,10 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('section.deprecated')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          valid: 'valid',
-          section: {},
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+      const commands = unused('section.deprecated')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toEqual({
+        unset: [{ path: 'myplugin.section.deprecated' }],
       });
-
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -379,15 +344,8 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
-      expect(processed).toEqual({
-        myplugin: {
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
-      });
+      const commands = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
   });
@@ -403,20 +361,14 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unusedFromRoot('myplugin.deprecated')(
+      const commands = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
+      expect(commands).toEqual({
+        unset: [{ path: 'myplugin.deprecated' }],
       });
-
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -442,19 +394,12 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unusedFromRoot('myplugin.deprecated')(
+      const commands = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
         addDeprecation
       );
-      expect(processed).toEqual({
-        myplugin: {
-          valid: 'valid',
-        },
-        someOtherPlugin: {
-          property: 'value',
-        },
-      });
+      expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
   });

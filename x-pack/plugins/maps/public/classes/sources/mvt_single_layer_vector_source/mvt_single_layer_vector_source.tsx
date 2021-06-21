@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { BoundsFilters, GeoJsonWithMeta } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
@@ -98,6 +98,10 @@ export class MVTSingleLayerVectorSource
     });
   }
 
+  addFeature(geometry: Geometry | Position[]): Promise<void> {
+    throw new Error('Does not implement addFeature');
+  }
+
   getMVTFields(): MVTField[] {
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return new MVTField({
@@ -169,7 +173,7 @@ export class MVTSingleLayerVectorSource
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
@@ -222,6 +226,10 @@ export class MVTSingleLayerVectorSource
       }
     }
     return tooltips;
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    return false;
   }
 }
 

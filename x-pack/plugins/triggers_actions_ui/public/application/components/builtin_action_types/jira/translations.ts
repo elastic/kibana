@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const JIRA_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in Jira.',
-  }
-);
-
-export const JIRA_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.actionTypeTitle',
-  {
-    defaultMessage: 'Jira',
-  }
-);
-
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiUrlTextFieldLabel',
   {
@@ -67,14 +53,6 @@ export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.authenticationLabel',
   {
     defaultMessage: 'Authentication',
-  }
-);
-
-export const JIRA_REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
   }
 );
 

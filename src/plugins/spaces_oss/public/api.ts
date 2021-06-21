@@ -19,7 +19,7 @@ export interface SpacesApi {
    * Observable representing the currently active space.
    * The details of the space can change without a full page reload (such as display name, color, etc.)
    */
-  readonly activeSpace$: Observable<Space>;
+  getActiveSpace$(): Observable<Space>;
 
   /**
    * Retrieve the currently active space.
@@ -169,8 +169,8 @@ export interface ShareToSpaceFlyoutProps {
   behaviorContext?: 'within-space' | 'outside-space';
   /**
    * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
-   * this is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or
-   * `/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred.
+   * this is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a toast indicating
+   * what occurred.
    */
   changeSpacesHandler?: (spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>;
   /**

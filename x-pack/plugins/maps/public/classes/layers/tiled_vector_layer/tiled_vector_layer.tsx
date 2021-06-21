@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import {
+import type {
   Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
-} from 'mapbox-gl';
+} from '@kbn/mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';

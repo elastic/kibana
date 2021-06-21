@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockUrlStorage, render } from '../../rtl_helpers';
+import { render } from '../../rtl_helpers';
 import { OperationTypeSelect } from './operation_type_select';
 
 describe('OperationTypeSelect', function () {
@@ -18,35 +18,35 @@ describe('OperationTypeSelect', function () {
   });
 
   it('should display selected value', function () {
-    mockUrlStorage({
+    const initSeries = {
       data: {
         'performance-distribution': {
-          dataType: 'ux',
-          reportType: 'kpi',
-          operationType: 'median',
+          dataType: 'ux' as const,
+          reportType: 'kpi' as const,
+          operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
-    render(<OperationTypeSelect seriesId={'series-id'} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />, { initSeries });
 
     screen.getByText('Median');
   });
 
   it('should call set series on change', function () {
-    const { setSeries } = mockUrlStorage({
+    const initSeries = {
       data: {
         'series-id': {
-          dataType: 'ux',
-          reportType: 'kpi',
-          operationType: 'median',
+          dataType: 'ux' as const,
+          reportType: 'kpi' as const,
+          operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
-    render(<OperationTypeSelect seriesId={'series-id'} />);
+    const { setSeries } = render(<OperationTypeSelect seriesId={'series-id'} />, { initSeries });
 
     fireEvent.click(screen.getByTestId('operationTypeSelect'));
 

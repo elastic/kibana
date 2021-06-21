@@ -19,6 +19,8 @@ use_alsa = false
 use_cups = false
 use_dbus = false
 use_gio = false
+# Please, consult @elastic/kibana-security before changing/removing this option.
+use_kerberos = false
 use_libpci = false
 use_pulseaudio = false
 use_udev = false
@@ -26,8 +28,3 @@ use_udev = false
 is_debug = false
 symbol_level = 0
 is_component_build = false
-
-# Please, consult @elastic/kibana-security before changing/removing this option.
-use_kerberos = false
-
-# target_cpu is appended before build: "x64" or "arm64"

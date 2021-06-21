@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -19,28 +14,33 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
   AlertAttributes,
+  BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
+  WrapHits,
 } from '../types';
 import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
@@ -57,7 +57,6 @@ export interface CreateThreatSignalsOptions {
   outputIndex: string;
   ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  refresh: false | 'wait_for';
   threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
@@ -66,10 +65,12 @@ export interface CreateThreatSignalsOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface CreateThreatSignalOptions {
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   threatMapping: ThreatMapping;
   threatEnrichment: SignalsEnrichment;
   query: string;
@@ -87,10 +88,11 @@ export interface CreateThreatSignalOptions {
   outputIndex: string;
   ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  refresh: false | 'wait_for';
   buildRuleMessage: BuildRuleMessage;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface BuildThreatMappingFilterOptions {
@@ -169,7 +171,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.Hit<ThreatListDoc>;
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;

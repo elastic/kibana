@@ -35,7 +35,7 @@ import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { runResilientMigrator } from '../../migrationsv2';
-import { migrateRawDocs } from '../core/migrate_raw_docs';
+import { migrateRawDocsSafely } from '../core/migrate_raw_docs';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -135,7 +135,6 @@ export class KibanaMigrator {
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
-
       this.migrationResult = this.runMigrationsInternal().then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
@@ -185,7 +184,11 @@ export class KibanaMigrator {
               logger: this.log,
               preMigrationScript: indexMap[index].script,
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocs(this.serializer, this.documentMigrator.migrateAndConvert, rawDocs),
+                migrateRawDocsSafely(
+                  this.serializer,
+                  this.documentMigrator.migrateAndConvert,
+                  rawDocs
+                ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
               migrationsConfig: this.soMigrationsConfig,

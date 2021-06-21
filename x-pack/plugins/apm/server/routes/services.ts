@@ -737,30 +737,15 @@ const serviceAlertsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async ({ context, params, apmRuleRegistry }) => {
-    const alertsClient = context.alerting.getAlertsClient();
-
+  handler: async ({ context, params, ruleDataClient }) => {
     const {
       query: { start, end, environment, transactionType },
       path: { serviceName },
     } = params;
 
-    const apmRuleRegistryClient = await apmRuleRegistry.createScopedRuleRegistryClient(
-      {
-        alertsClient,
-        context,
-      }
-    );
-
-    if (!apmRuleRegistryClient) {
-      throw Boom.failedDependency(
-        'xpack.ruleRegistry.unsafe.write.enabled is set to false'
-      );
-    }
-
     return {
       alerts: await getServiceAlerts({
-        apmRuleRegistryClient,
+        ruleDataClient,
         start,
         end,
         serviceName,

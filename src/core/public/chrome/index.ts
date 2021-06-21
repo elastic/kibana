@@ -16,7 +16,7 @@ export type {
   ChromeHelpExtensionMenuGitHubLink,
 } from './ui/header/header_help_menu';
 export type { NavType } from './ui';
-export type { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './nav_links';
+export type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,

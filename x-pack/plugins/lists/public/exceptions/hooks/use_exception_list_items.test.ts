@@ -6,21 +6,29 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import type {
+  ExceptionListItemSchema,
+  UseExceptionListItemsSuccess,
+  UseExceptionListProps,
+} from '@kbn/securitysolution-io-ts-list-types';
+import * as api from '@kbn/securitysolution-list-api';
+import {
+  ReturnExceptionListAndItems,
+  transformInput,
+  useExceptionListItems,
+} from '@kbn/securitysolution-list-hooks';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import * as api from '../api';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
-import { ExceptionListItemSchema } from '../../../common/schemas';
-import { UseExceptionListItemsSuccess, UseExceptionListProps } from '../types';
-import { transformInput } from '../transforms';
-
-import { ReturnExceptionListAndItems, useExceptionListItems } from './use_exception_list_items';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
+jest.mock('@kbn/securitysolution-list-api');
 
 const mockKibanaHttpService = coreMock.createStart().http;
+
+// TODO: Port all of this test code over to the package of: packages/kbn-securitysolution-list-hooks/src/use_exception_list_items/index.test.ts once the mocks and kibana core mocks are figured out
 
 describe('useExceptionListItems', () => {
   const onErrorMock = jest.fn();

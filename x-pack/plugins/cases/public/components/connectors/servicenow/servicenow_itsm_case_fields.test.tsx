@@ -10,6 +10,7 @@ import { waitFor, act } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 import { mount } from 'enzyme';
 
+import { useKibana } from '../../../common/lib/kibana';
 import { connector, choices as mockChoices } from '../mock';
 import { Choice } from './types';
 import Fields from './servicenow_itsm_case_fields';
@@ -24,6 +25,8 @@ jest.mock('./use_get_choices', () => ({
   },
 }));
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
 describe('ServiceNowITSM Fields', () => {
   const fields = {
     severity: '1',
@@ -36,6 +39,10 @@ describe('ServiceNowITSM Fields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
 
   it('all params fields are rendered - isEdit: true', () => {

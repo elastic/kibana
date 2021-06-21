@@ -39,7 +39,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { YesNo } from '../yes_no';
 
 import { limitOfSeries } from '../../../../common/ui_restrictions';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 

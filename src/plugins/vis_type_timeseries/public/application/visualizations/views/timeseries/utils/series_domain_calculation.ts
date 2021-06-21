@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PanelData } from '../../../../../../common/types';
+import type { PanelData } from '../../../../../../common/types';
 
 export const calculateDomainForSeries = (series: PanelData[]) => {
   const seriesData = series[0]?.data || [];

@@ -15,13 +15,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-      await esArchiver.loadIfNeeded('visualize');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/visualize');
     });
 
     after(async () => {
-      await esArchiver.unload('kibana_sample_data_flights');
-      await esArchiver.unload('visualize');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/visualize');
     });
 
     it('should show map with vega layer', async function () {

@@ -108,7 +108,7 @@ export function CollapsibleNav({
       link,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
-      navigateToApp,
+      navigateToUrl,
       onClick: closeNav,
       ...(needsIcon && { basePath }),
     });
@@ -143,7 +143,7 @@ export function CollapsibleNav({
                   createEuiListItem({
                     link: customNavLink,
                     basePath,
-                    navigateToApp,
+                    navigateToUrl,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,

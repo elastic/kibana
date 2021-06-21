@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../../constants.mock';
+import type { EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
 
-import { EntryMatch } from './entry_match';
+import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../../constants.mock';
 
 export const getEntryMatchMock = (): EntryMatch => ({
   field: FIELD,

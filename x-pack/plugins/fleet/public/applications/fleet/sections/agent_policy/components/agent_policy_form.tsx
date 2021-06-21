@@ -223,7 +223,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.monitoringDescription"
-            defaultMessage="Collect data about your agents for debugging and tracking performance."
+            defaultMessage="Collect data about your agents for debugging and tracking performance. Monitoring data will be written to the default namespace specified above."
           />
         }
       >

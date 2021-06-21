@@ -170,9 +170,9 @@ describe('execute()', () => {
           "getCustomHostSettings": [MockFunction],
           "getProxySettings": [MockFunction],
           "getResponseSettings": [MockFunction],
+          "getTLSSettings": [MockFunction],
           "isActionTypeEnabled": [MockFunction],
           "isHostnameAllowed": [MockFunction],
-          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
         "data": Object {
@@ -234,9 +234,9 @@ describe('execute()', () => {
           "getCustomHostSettings": [MockFunction],
           "getProxySettings": [MockFunction],
           "getResponseSettings": [MockFunction],
+          "getTLSSettings": [MockFunction],
           "isActionTypeEnabled": [MockFunction],
           "isHostnameAllowed": [MockFunction],
-          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
         "data": Object {

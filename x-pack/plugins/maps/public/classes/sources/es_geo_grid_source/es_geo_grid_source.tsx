@@ -471,7 +471,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     }
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return true;
   }
 

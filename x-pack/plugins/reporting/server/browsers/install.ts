@@ -40,16 +40,14 @@ export function installBrowser(
 
     if (binaryChecksum !== pkg.binaryChecksum) {
       await ensureBrowserDownloaded(logger);
+      await del(chromiumPath);
 
       const archive = path.join(paths.archivesPath, pkg.archiveFilename);
-      logger.info(`Extracting [${archive}] to [${binaryPath}]`);
-
-      await del(chromiumPath);
+      logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
       await extract(archive, chromiumPath);
     }
 
-    logger.debug(`Browser executable: ${binaryPath}`);
-
+    logger.info(`Browser executable: ${binaryPath}`);
     binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
   };
 

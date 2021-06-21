@@ -7,11 +7,9 @@
 
 import React, { memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,14 +33,14 @@ import { TrustedAppsGrid } from './components/trusted_apps_grid';
 import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
-import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { ABOUT_TRUSTED_APPS } from './translations';
+import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
-import { SearchBar } from './components/search_bar';
+import { SearchBar } from '../../../components/search_bar';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ListPageRouteState } from '../../../../../common/endpoint/types';
 
 export const TrustedAppsPage = memo(() => {
-  const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
@@ -96,30 +94,36 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
       {doEntriesExist ? (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          data-test-subj="trustedAppsListPageContent"
-        >
-          <EuiSpacer size="m" />
-          <EuiFlexItem grow={false}>
-            <ControlPanel
-              totalItemCount={totalItemsCount}
-              currentViewType={location.view_type}
-              onViewTypeChange={handleViewTypeChange}
-            />
-
+        <>
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+          />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="trustedAppsListPageContent"
+          >
             <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <ControlPanel
+                totalItemCount={totalItemsCount}
+                currentViewType={location.view_type}
+                onViewTypeChange={handleViewTypeChange}
+              />
 
-            {location.view_type === 'grid' && <TrustedAppsGrid />}
-            {location.view_type === 'list' && <TrustedAppsList />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+
+              {location.view_type === 'grid' && <TrustedAppsGrid />}
+              {location.view_type === 'list' && <TrustedAppsList />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
       )}
@@ -155,43 +159,3 @@ export const TrustedAppsPage = memo(() => {
 });
 
 TrustedAppsPage.displayName = 'TrustedAppsPage';
-
-const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-
-  .euiIcon {
-    width: ${({ theme }) => theme.eui.euiIconSizes.small};
-    height: ${({ theme }) => theme.eui.euiIconSizes.small};
-  }
-
-  .text {
-    font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  }
-`;
-
-const BackToExternalAppButton = memo<TrustedAppsListPageRouteState>(
-  ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
-
-    return (
-      <EuiButtonEmptyStyled
-        flush="left"
-        size="xs"
-        iconType="arrowLeft"
-        href={backButtonUrl!}
-        onClick={handleBackOnClick}
-        textProps={{ className: 'text' }}
-        data-test-subj="backToOrigin"
-      >
-        {backButtonLabel || (
-          <FormattedMessage
-            id="xpack.securitySolution.trustedapps.list.backButton"
-            defaultMessage="Back"
-          />
-        )}
-      </EuiButtonEmptyStyled>
-    );
-  }
-);
-
-BackToExternalAppButton.displayName = 'BackToExternalAppButton';

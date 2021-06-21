@@ -2,7 +2,8 @@
 === TSVB
 
 *TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
-most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, your data must have a date field. 
+most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. 
+To create *TSVB* visualization panels, your data must have a time field. 
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]
@@ -13,19 +14,21 @@ image::visualize/images/tsvb-screenshot.png[TSVB overview]
 
 Open *TSVB*, then make sure the required settings are configured.
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types*, then select *TSVB*.
 
-. On the *New visualization* window, click *TSVB*.
+. In *TSVB*, click *Panel options*, then specify the required *Data* settings.
 
-. In *TSVB*, click *Panel options*, then make sure the following settings are configured:
+.. From the *Index pattern* dropdown, select the index pattern you want to visualize. 
++
+To visualize an {es} index, open the *Index pattern select mode* menu, deselect *Use only {kib} index patterns*, then enter the {es} index.
 
-* *Index pattern*
-* *Time field*
-* *Interval*
+.. From the *Time field* dropdown, select the field you want to visualize, then enter the field *Interval*.
 
-. Select a *Drop last bucket* option. It is dropped by default because the time filter intersects the time range of the last bucket, but can be enabled to see the partial data.
+.. Select a *Drop last bucket* option. 
++
+By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
 
-. In the *Panel filter* field, specify any <<kuery-query, KQL filters>> to select specific documents.
+.. In the *Panel filter* field, enter <<kuery-query, KQL filters>> to view specific documents.
 
 [float]
 [[configure-the-data-series]]

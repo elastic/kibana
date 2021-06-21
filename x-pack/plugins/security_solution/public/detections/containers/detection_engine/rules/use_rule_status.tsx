@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { isNotFoundError } from '../../../../common/utils/api';
 
 import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
 import { getRuleStatusById, getRulesStatusByIds } from './api';
@@ -48,7 +49,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
           setRuleStatus(ruleStatusResponse[id ?? '']);
         }
       } catch (error) {
-        if (isSubscribed) {
+        if (isSubscribed && !isNotFoundError(error)) {
           setRuleStatus(null);
           addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
         }

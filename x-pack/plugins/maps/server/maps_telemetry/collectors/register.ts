@@ -275,6 +275,88 @@ export function registerMapsUsageCollector(
           },
         },
       },
+      resolutions: {
+        coarse: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with coarse resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with coarse resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with coarse resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with coarse resolution',
+            },
+          },
+        },
+        fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with fine resolution',
+            },
+          },
+        },
+        most_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with most_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with most_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with most_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with most_fine resolution',
+            },
+          },
+        },
+        super_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with super_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with super_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with super_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with super_fine resolution',
+            },
+          },
+        },
+      },
       joins: {
         term: {
           min: {

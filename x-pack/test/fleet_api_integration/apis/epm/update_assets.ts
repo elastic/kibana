@@ -207,7 +207,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.statusCode).equal(200);
       expect(res.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
-        properties: { '@timestamp': { type: 'date' } },
       });
       const resSettings = await es.transport.request({
         method: 'GET',

@@ -7,9 +7,8 @@
 
 import { patchRulesSchema, PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
 import { getPatchRulesSchemaMock, getPatchRulesSchemaDecodedMock } from './patch_rules_schema.mock';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import { getListArrayMock } from '../types/lists.mock';
 

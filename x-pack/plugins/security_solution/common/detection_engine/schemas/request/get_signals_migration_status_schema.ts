@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { from } from '../common/schemas';
+import { from } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const getSignalsMigrationStatusSchema = t.exact(
   t.type({

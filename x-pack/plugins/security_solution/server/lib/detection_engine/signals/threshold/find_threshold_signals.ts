@@ -138,7 +138,7 @@ export const findThresholdSignals = async ({
     logger,
     // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
-    pageSize: 1,
+    pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
   });

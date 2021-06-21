@@ -96,6 +96,27 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
   });
 
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.email',
+      config: {
+        hasAuth: true,
+      },
+      isMissingSecrets: true,
+      secrets: {},
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
+
   test('should display a message when editing an authenticated email connector explaining why username and password must be re-entered', () => {
     const actionConnector = {
       secrets: {},

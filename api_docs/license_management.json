@@ -8,44 +8,50 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "licenseManagement",
       "id": "def-public.LicenseManagementUIPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "LicenseManagementUIPluginSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "x-pack/plugins/license_management/public/plugin.ts",
+        "lineNumber": 28
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "licenseManagement",
           "id": "def-public.LicenseManagementUIPluginSetup.enabled",
           "type": "boolean",
+          "tags": [],
           "label": "enabled",
           "description": [],
           "source": {
             "path": "x-pack/plugins/license_management/public/plugin.ts",
             "lineNumber": 29
-          }
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 28
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "licenseManagement",
       "id": "def-public.LicenseManagementUIPluginStart",
       "type": "Type",
-      "label": "LicenseManagementUIPluginStart",
       "tags": [],
+      "label": "LicenseManagementUIPluginStart",
       "description": [],
+      "signature": [
+        "void"
+      ],
       "source": {
         "path": "x-pack/plugins/license_management/public/plugin.ts",
         "lineNumber": 31
       },
-      "signature": [
-        "void"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

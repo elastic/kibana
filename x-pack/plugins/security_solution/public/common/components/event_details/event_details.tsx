@@ -136,6 +136,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert
         ? {
             id: EventsViewType.threatIntelView,
+            'data-test-subj': 'threatIntelTab',
             name: `${i18n.THREAT_INTEL} (${threatCount})`,
             content: <ThreatDetailsView threatData={threatData} />,
           }

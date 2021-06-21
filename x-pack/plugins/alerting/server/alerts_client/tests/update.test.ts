@@ -11,12 +11,12 @@ import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
@@ -28,7 +28,7 @@ const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertsAuthorizationMock.create();
+const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
@@ -37,7 +37,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertsAuthorization,
+  authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
@@ -1415,7 +1415,12 @@ describe('update()', () => {
         },
       });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to update this type of alert', async () => {
@@ -1442,7 +1447,12 @@ describe('update()', () => {
         `[Error: Unauthorized to update a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

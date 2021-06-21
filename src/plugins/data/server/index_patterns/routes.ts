@@ -20,6 +20,12 @@ import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scri
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { registerManageDefaultIndexPatternRoutes } from './routes/default_index_pattern';
+import { registerCreateRuntimeFieldRoute } from './routes/runtime_fields/create_runtime_field';
+import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtime_field';
+import { registerDeleteRuntimeFieldRoute } from './routes/runtime_fields/delete_runtime_field';
+import { registerPutRuntimeFieldRoute } from './routes/runtime_fields/put_runtime_field';
+import { registerUpdateRuntimeFieldRoute } from './routes/runtime_fields/update_runtime_field';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -42,6 +48,7 @@ export function registerRoutes(
   registerGetIndexPatternRoute(router, getStartServices);
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
+  registerManageDefaultIndexPatternRoutes(router, getStartServices);
 
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);
@@ -52,6 +59,13 @@ export function registerRoutes(
   registerGetScriptedFieldRoute(router, getStartServices);
   registerDeleteScriptedFieldRoute(router, getStartServices);
   registerUpdateScriptedFieldRoute(router, getStartServices);
+
+  // Runtime Fields API
+  registerCreateRuntimeFieldRoute(router, getStartServices);
+  registerGetRuntimeFieldRoute(router, getStartServices);
+  registerDeleteRuntimeFieldRoute(router, getStartServices);
+  registerPutRuntimeFieldRoute(router, getStartServices);
+  registerUpdateRuntimeFieldRoute(router, getStartServices);
 
   router.get(
     {

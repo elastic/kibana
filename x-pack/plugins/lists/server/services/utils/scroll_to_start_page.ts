@@ -6,8 +6,12 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type {
+  Filter,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
 
 import { calculateScrollMath } from './calculate_scroll_math';

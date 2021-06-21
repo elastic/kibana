@@ -143,7 +143,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     });
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return false;
   }
 

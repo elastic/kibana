@@ -17,18 +17,26 @@ import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
+  createSessionStorageStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
-import { UrlStorageContextProvider } from './hooks/use_url_storage';
+import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
-export function ExploratoryViewPage() {
+export function ExploratoryViewPage({
+  saveAttributes,
+  useSessionStorage = false,
+}: {
+  useSessionStorage?: boolean;
+  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
+}) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });
 
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.overview.exploratoryView', {
-        defaultMessage: 'Exploratory view',
+        defaultMessage: 'Analyze data',
       }),
     },
   ]);
@@ -39,17 +47,19 @@ export function ExploratoryViewPage() {
 
   const history = useHistory();
 
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: uiSettings!.get('state:storeInSessionStorage'),
-    ...withNotifyOnErrors(notifications!.toasts),
-  });
+  const kbnUrlStateStorage = useSessionStorage
+    ? createSessionStorageStateStorage()
+    : createKbnUrlStateStorage({
+        history,
+        useHash: uiSettings!.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(notifications!.toasts),
+      });
 
   return (
     <Wrapper>
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-          <ExploratoryView />
+          <ExploratoryView saveAttributes={saveAttributes} />
         </UrlStorageContextProvider>
       </IndexPatternContextProvider>
     </Wrapper>

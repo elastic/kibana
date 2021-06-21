@@ -13,7 +13,7 @@ import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
 import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
-import { PanelData } from '../../../common/types';
+import type { PanelData } from '../../../common/types';
 
 interface LastValueModeIndicatorProps {
   seriesData?: PanelData['data'];

@@ -21,100 +21,109 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "banners",
         "id": "def-common.BannerConfiguration",
         "type": "Interface",
+        "tags": [],
         "label": "BannerConfiguration",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerConfiguration.placement",
             "type": "CompoundType",
+            "tags": [],
             "label": "placement",
             "description": [],
+            "signature": [
+              "\"top\" | \"disabled\""
+            ],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",
               "lineNumber": 16
             },
-            "signature": [
-              {
-                "pluginId": "banners",
-                "scope": "common",
-                "docId": "kibBannersPluginApi",
-                "section": "def-common.BannerPlacement",
-                "text": "BannerPlacement"
-              }
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerConfiguration.textContent",
             "type": "string",
+            "tags": [],
             "label": "textContent",
             "description": [],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",
               "lineNumber": 17
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerConfiguration.textColor",
             "type": "string",
+            "tags": [],
             "label": "textColor",
             "description": [],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerConfiguration.backgroundColor",
             "type": "string",
+            "tags": [],
             "label": "backgroundColor",
             "description": [],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",
               "lineNumber": 19
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/banners/common/types.ts",
-          "lineNumber": 15
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "banners",
         "id": "def-common.BannerInfoResponse",
         "type": "Interface",
+        "tags": [],
         "label": "BannerInfoResponse",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 8
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerInfoResponse.allowed",
             "type": "boolean",
+            "tags": [],
             "label": "allowed",
             "description": [],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",
               "lineNumber": 9
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "banners",
             "id": "def-common.BannerInfoResponse.banner",
             "type": "Object",
+            "tags": [],
             "label": "banner",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 10
-            },
             "signature": [
               {
                 "pluginId": "banners",
@@ -123,31 +132,34 @@
                 "section": "def-common.BannerConfiguration",
                 "text": "BannerConfiguration"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/banners/common/types.ts",
-          "lineNumber": 8
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "banners",
         "id": "def-common.BannerPlacement",
         "type": "Type",
-        "label": "BannerPlacement",
         "tags": [],
+        "label": "BannerPlacement",
         "description": [],
+        "signature": [
+          "\"top\" | \"disabled\""
+        ],
         "source": {
           "path": "x-pack/plugins/banners/common/types.ts",
           "lineNumber": 13
         },
-        "signature": [
-          "\"top\" | \"disabled\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

@@ -7,21 +7,47 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import type {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ServerApiError } from '../../../../common/types';
 
 export const getCreationSuccessMessage = (
-  entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined
+  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
 ) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
-    defaultMessage: '"{name}" has been added to the event exceptions list.',
+  return i18n.translate('xpack.securitySolution.eventFilter.form.creationSuccessToastTitle', {
+    defaultMessage: '"{name}" has been added to the event filters list.',
+    values: { name: entry?.name },
+  });
+};
+
+export const getUpdateSuccessMessage = (
+  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
+) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.form.updateSuccessToastTitle', {
+    defaultMessage: '"{name}" has been updated successfully.',
     values: { name: entry?.name },
   });
 };
 
 export const getCreationErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle', {
-    defaultMessage: 'There was an error creating the new exception: "{error}"',
+  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.create', {
+    defaultMessage: 'There was an error creating the new event filter: "{error}"',
     values: { error: creationError.message },
+  });
+};
+
+export const getUpdateErrorMessage = (updateError: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.update', {
+    defaultMessage: 'There was an error updating the event filter: "{error}"',
+    values: { error: updateError.message },
+  });
+};
+
+export const getGetErrorMessage = (getError: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.get', {
+    defaultMessage: 'Unable to edit event filter: "{error}"',
+    values: { error: getError.message },
   });
 };

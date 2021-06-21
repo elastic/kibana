@@ -12,7 +12,7 @@ import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';
 import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
-import { PALETTES } from '../../../common/types';
+import { PALETTES } from '../../../common/enums';
 
 export interface PalettePickerProps {
   activePalette?: PaletteOutput;
@@ -33,12 +33,12 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
         ...palettes
           .getAll()
           .filter(({ internal }) => !internal)
-          .map(({ id, title, getColors }) => {
+          .map(({ id, title, getCategoricalColors }) => {
             return {
               value: id,
               title,
               type: 'fixed' as const,
-              palette: getColors(10),
+              palette: getCategoricalColors(10),
             };
           }),
         {
@@ -49,7 +49,7 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
           type: 'fixed',
           palette: palettes
             .get('custom')
-            .getColors(10, { colors: [color, finalGradientColor], gradient: true }),
+            .getCategoricalColors(10, { colors: [color, finalGradientColor], gradient: true }),
         },
         {
           value: PALETTES.RAINBOW,
@@ -59,7 +59,7 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
           type: 'fixed',
           palette: palettes
             .get('custom')
-            .getColors(10, { colors: rainbowColors.slice(0, 10), gradient: false }),
+            .getCategoricalColors(10, { colors: rainbowColors.slice(0, 10), gradient: false }),
         },
       ]}
       onChange={(newPalette) => {

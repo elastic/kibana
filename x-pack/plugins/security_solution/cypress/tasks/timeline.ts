@@ -57,7 +57,7 @@ import {
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
-import { TIMELINES_TABLE } from '../screens/timelines';
+import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
 
@@ -127,7 +127,7 @@ export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
 };
 
-export const addFilter = (filter: TimelineFilter) => {
+export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
@@ -135,11 +135,12 @@ export const addFilter = (filter: TimelineFilter) => {
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
-  cy.get(SAVE_FILTER_BTN).click();
+  return cy.get(SAVE_FILTER_BTN).click();
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
+  cy.wait(300);
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
@@ -208,8 +209,8 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const markAsFavorite = () => {
-  cy.get(STAR_ICON).click();
+export const markAsFavorite = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(STAR_ICON).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -244,8 +245,8 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
 };
 
-export const pinFirstEvent = () => {
-  cy.get(PIN_EVENT).first().click({ force: true });
+export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const populateTimeline = () => {
@@ -294,10 +295,33 @@ export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };
 
-export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(TIMELINES_TABLE).should('exist');
-};
-
 export const waitForEventsPanelToBeLoaded = () => {
   cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
+};
+
+/**
+ * We keep clicking on the refresh button until we have the timeline we are looking
+ * for. NOTE: That because refresh happens so fast, the click handler in most cases
+ * is not on it reliably. You should not use a pipe off of this to get your timeline
+ * clicked as a pipe off the timeline link can product multiple URL loads which will
+ * add a different type of flake to your tests. You will usually have to use wait() for
+ * this like so:
+ *
+ * refreshTimelinesUntilTimeLinePresent(timelineId)
+ *   // This wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+ *   // request responses and indeterminism.
+ *   .then(() => cy.wait(1000))
+ *   .then(() => ... your code here ...)
+ * @param id The timeline id to click the refresh button until we find it.
+ */
+export const refreshTimelinesUntilTimeLinePresent = (
+  id: string
+): Cypress.Chainable<JQuery<HTMLHtmlElement>> => {
+  return cy
+    .root()
+    .pipe(($el) => {
+      $el.find(REFRESH_BUTTON).trigger('click');
+      return $el.find(TIMELINE(id));
+    })
+    .should('be.visible');
 };

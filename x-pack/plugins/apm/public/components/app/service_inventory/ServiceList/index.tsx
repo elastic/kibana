@@ -29,7 +29,7 @@ import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
-import { AgentIcon } from '../../../shared/AgentIcon';
+import { AgentIcon } from '../../../shared/agent_icon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
@@ -97,7 +97,7 @@ export function getServiceColumns({
       }),
       width: '40%',
       sortable: true,
-      render: (_, { serviceName, agentName }) => (
+      render: (_, { serviceName, agentName, transactionType }) => (
         <ToolTipWrapper>
           <EuiToolTip
             delay="long"
@@ -112,7 +112,11 @@ export function getServiceColumns({
                 </EuiFlexItem>
               )}
               <EuiFlexItem className="apmServiceList__serviceNameContainer">
-                <AppLink serviceName={serviceName} className="eui-textTruncate">
+                <AppLink
+                  serviceName={serviceName}
+                  transactionType={transactionType}
+                  className="eui-textTruncate"
+                >
                   {formatString(serviceName)}
                 </AppLink>
               </EuiFlexItem>

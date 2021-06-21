@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
-import Boom from '@hapi/boom';
+import * as t from 'io-ts';
+import { alertStatusRt } from '../../common/typings';
+import { getTopAlerts } from '../lib/rules/get_top_alerts';
 import { createObservabilityServerRoute } from './create_observability_server_route';
 import { createObservabilityServerRouteRepository } from './create_observability_server_route_repository';
-import { getTopAlerts } from '../lib/rules/get_top_alerts';
 
 const alertsListRoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/rules/alerts/top',
@@ -21,6 +21,7 @@ const alertsListRoute = createObservabilityServerRoute({
       t.type({
         start: isoToEpochRt,
         end: isoToEpochRt,
+        status: alertStatusRt,
       }),
       t.partial({
         kuery: t.string,
@@ -28,26 +29,18 @@ const alertsListRoute = createObservabilityServerRoute({
       }),
     ]),
   }),
-  handler: async ({ ruleRegistry, context, params }) => {
-    const ruleRegistryClient = await ruleRegistry.createScopedRuleRegistryClient({
-      context,
-      alertsClient: context.alerting.getAlertsClient(),
-    });
-
-    if (!ruleRegistryClient) {
-      throw Boom.failedDependency('xpack.ruleRegistry.unsafe.write.enabled is set to false');
-    }
-
+  handler: async ({ ruleDataClient, context, params }) => {
     const {
-      query: { start, end, kuery, size = 100 },
+      query: { start, end, kuery, size = 100, status },
     } = params;
 
     return getTopAlerts({
-      ruleRegistryClient,
+      ruleDataClient,
       start,
       end,
       kuery,
       size,
+      status,
     });
   },
 });
@@ -57,17 +50,10 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   options: {
     tags: [],
   },
-  handler: async ({ ruleRegistry, context }) => {
-    const ruleRegistryClient = await ruleRegistry.createScopedRuleRegistryClient({
-      context,
-      alertsClient: context.alerting.getAlertsClient(),
-    });
+  handler: async ({ ruleDataClient }) => {
+    const reader = ruleDataClient.getReader({ namespace: 'observability' });
 
-    if (!ruleRegistryClient) {
-      throw Boom.failedDependency();
-    }
-
-    return ruleRegistryClient.getDynamicIndexPattern();
+    return reader.getDynamicIndexPattern();
   },
 });
 

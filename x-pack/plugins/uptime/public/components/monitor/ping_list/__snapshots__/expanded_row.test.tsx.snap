@@ -174,10 +174,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 rel="noopener"
                 target="_blank"
               >
-                docs 
-                <span
-                  data-euiicon-type="popout"
-                />
+                docs
                 <span
                   aria-label="External link"
                   class="euiLink__externalIcon"

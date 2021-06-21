@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { ListSchema } from '../../../lists_plugin_deps';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { DATE_NOW, VERSION, IMMUTABLE } from '../../../../../lists/common/constants.mock';
@@ -28,8 +28,8 @@ const mockKeywordList: ListSchema = {
 };
 const mockResult = { ...getFoundListSchemaMock() };
 mockResult.data = [...mockResult.data, mockKeywordList];
-jest.mock('../../../lists_plugin_deps', () => {
-  const originalModule = jest.requireActual('../../../lists_plugin_deps');
+jest.mock('@kbn/securitysolution-list-hooks', () => {
+  const originalModule = jest.requireActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...originalModule,

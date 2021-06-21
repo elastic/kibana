@@ -105,10 +105,10 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
-  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
-    alertsQuery,
-    selectedPatterns[0]
-  );
+  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({
+    query: alertsQuery,
+    indexName: selectedPatterns[0],
+  });
 
   const alerts = useMemo(
     () =>

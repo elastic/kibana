@@ -28,28 +28,32 @@ import {
   setUISettings,
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
-import { Map, NavigationControl, Style } from 'mapbox-gl';
 
-jest.mock('mapbox-gl', () => ({
-  Map: jest.fn().mockImplementation(() => ({
-    getLayer: () => '',
-    removeLayer: jest.fn(),
-    once: (eventName: string, handler: Function) => handler(),
-    remove: () => jest.fn(),
-    getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
-    getCenter: () => ({ lat: 20, lng: 20 }),
-    getZoom: () => 3,
-    addControl: jest.fn(),
-    addLayer: jest.fn(),
-    dragRotate: {
-      disable: jest.fn(),
-    },
-    touchZoomRotate: {
-      disableRotation: jest.fn(),
-    },
-  })),
-  MapboxOptions: jest.fn(),
-  NavigationControl: jest.fn(),
+import { mapboxgl } from '@kbn/mapbox-gl';
+
+jest.mock('@kbn/mapbox-gl', () => ({
+  mapboxgl: {
+    setRTLTextPlugin: jest.fn(),
+    Map: jest.fn().mockImplementation(() => ({
+      getLayer: () => '',
+      removeLayer: jest.fn(),
+      once: (eventName: string, handler: Function) => handler(),
+      remove: () => jest.fn(),
+      getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
+      getCenter: () => ({ lat: 20, lng: 20 }),
+      getZoom: () => 3,
+      addControl: jest.fn(),
+      addLayer: jest.fn(),
+      dragRotate: {
+        disable: jest.fn(),
+      },
+      touchZoomRotate: {
+        disableRotation: jest.fn(),
+      },
+    })),
+    MapboxOptions: jest.fn(),
+    NavigationControl: jest.fn(),
+  },
 }));
 
 jest.mock('./layers', () => ({
@@ -75,9 +79,10 @@ describe('vega_map_view/view', () => {
     setUISettings(coreStart.uiSettings);
 
     const getTmsService = jest.fn().mockReturnValue(({
-      getVectorStyleSheet: (): Style => ({
+      getVectorStyleSheet: () => ({
         version: 8,
         sources: {},
+        // @ts-expect-error
         layers: [],
       }),
       getMaxZoom: async () => 20,
@@ -144,7 +149,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(Map).toHaveBeenCalledWith({
+      expect(mapboxgl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -170,7 +175,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(Map).toHaveBeenCalledWith({
+      expect(mapboxgl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -195,7 +200,7 @@ describe('vega_map_view/view', () => {
 
       await vegaMapView.init();
 
-      expect(NavigationControl).toHaveBeenCalled();
+      expect(mapboxgl.NavigationControl).toHaveBeenCalled();
     });
   });
 });

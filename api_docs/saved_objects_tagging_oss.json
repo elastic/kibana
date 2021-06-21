@@ -5,68 +5,81 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.GetSearchBarFilterOptions",
         "type": "Interface",
+        "tags": [],
         "label": "GetSearchBarFilterOptions",
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.GetSearchBarFilterOptions.useName",
-            "type": "CompoundType",
-            "label": "useName",
-            "description": [
-              "\nIf set to true, will use the tag's `name` instead of `id` for the tag field clause, which is recommended\nfor a better end-user experience.\n\nDefaults to true.\n"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 276
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.GetSearchBarFilterOptions.tagField",
-            "type": "string",
-            "label": "tagField",
-            "description": [
-              "\nThe tag clause field name to generate the query. Defaults to `tag`.\n"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 282
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
           "lineNumber": 259
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.GetSearchBarFilterOptions.useName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useName",
+            "description": [
+              "\nIf set to true, will use the tag's `name` instead of `id` for the tag field clause, which is recommended\nfor a better end-user experience.\n\nDefaults to true.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 276
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.GetSearchBarFilterOptions.tagField",
+            "type": "string",
+            "tags": [],
+            "label": "tagField",
+            "description": [
+              "\nThe tag clause field name to generate the query. Defaults to `tag`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 282
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.ITagsCache",
         "type": "Interface",
+        "tags": [],
         "label": "ITagsCache",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 40
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ITagsCache.getState",
             "type": "Function",
+            "tags": [],
             "label": "getState",
+            "description": [
+              "\nReturn the current state of the cache"
+            ],
             "signature": [
               "() => ",
               {
@@ -78,21 +91,23 @@
               },
               "[]"
             ],
-            "description": [
-              "\nReturn the current state of the cache"
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 44
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ITagsCache.getState$",
             "type": "Function",
+            "tags": [],
             "label": "getState$",
+            "description": [
+              "\nReturn an observable that will emit everytime the cache's state mutates."
+            ],
             "signature": [
               "() => ",
               "Observable",
@@ -106,54 +121,50 @@
               },
               "[]>"
             ],
-            "description": [
-              "\nReturn an observable that will emit everytime the cache's state mutates."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 49
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 40
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.ParsedSearchQuery",
         "type": "Interface",
+        "tags": [],
         "label": "ParsedSearchQuery",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 288
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ParsedSearchQuery.searchTerm",
             "type": "string",
+            "tags": [],
             "label": "searchTerm",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 289
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ParsedSearchQuery.tagReferences",
             "type": "Array",
+            "tags": [],
             "label": "tagReferences",
             "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 290
-            },
             "signature": [
               {
                 "pluginId": "core",
@@ -163,147 +174,178 @@
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[]"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 290
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ParsedSearchQuery.valid",
             "type": "boolean",
+            "tags": [],
             "label": "valid",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 291
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 288
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.ParseSearchQueryOptions",
         "type": "Interface",
+        "tags": [],
         "label": "ParseSearchQueryOptions",
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ParseSearchQueryOptions.useName",
-            "type": "CompoundType",
-            "label": "useName",
-            "description": [
-              "\nIf set to true, will assume the tag clause is using tag names instead of ids.\nIn that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.\n\nDefaults to true.\n"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 309
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ParseSearchQueryOptions.tagField",
-            "type": "string",
-            "label": "tagField",
-            "description": [
-              "\nThe tag clause field name to extract the tags from. Defaults to `tag`.\n"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 315
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
           "lineNumber": 299
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.ParseSearchQueryOptions.useName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useName",
+            "description": [
+              "\nIf set to true, will assume the tag clause is using tag names instead of ids.\nIn that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.\n\nDefaults to true.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 309
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.ParseSearchQueryOptions.tagField",
+            "type": "string",
+            "tags": [],
+            "label": "tagField",
+            "description": [
+              "\nThe tag clause field name to extract the tags from. Defaults to `tag`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 315
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
         "type": "Interface",
+        "tags": [],
         "label": "SavedObjectSaveModalTagSelectorComponentProps",
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.initialSelection",
-            "type": "Array",
-            "label": "initialSelection",
-            "description": [
-              "\nIds of the initially selected tags.\nChanging the value of this prop after initial mount will not rerender the component (see component description for more details)"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 247
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected",
-            "type": "Function",
-            "label": "onTagsSelected",
-            "description": [
-              "\ntags selection callback"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 251
-            },
-            "signature": [
-              "(ids: string[]) => void"
-            ]
-          }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
           "lineNumber": 242
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.initialSelection",
+            "type": "Array",
+            "tags": [],
+            "label": "initialSelection",
+            "description": [
+              "\nIds of the initially selected tags.\nChanging the value of this prop after initial mount will not rerender the component (see component description for more details)"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 247
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected",
+            "type": "Function",
+            "tags": [],
+            "label": "onTagsSelected",
+            "description": [
+              "\ntags selection callback"
+            ],
+            "signature": [
+              "(ids: string[]) => void"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 251
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.ids",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 251
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectsTaggingApi",
         "type": "Interface",
+        "tags": [],
         "label": "SavedObjectsTaggingApi",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 21
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApi.client",
             "type": "Object",
+            "tags": [],
             "label": "client",
             "description": [
               "\nThe client to perform tag-related operations on the server-side"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 25
-            },
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -312,20 +354,22 @@
                 "section": "def-common.ITagsClient",
                 "text": "ITagsClient"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApi.cache",
             "type": "Object",
+            "tags": [],
             "label": "cache",
             "description": [
               "\nA client-side auto-refreshing cache of the existing tags. Can be used\nto synchronously access the list of tags."
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 30
-            },
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -334,20 +378,22 @@
                 "section": "def-public.ITagsCache",
                 "text": "ITagsCache"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApi.ui",
             "type": "Object",
+            "tags": [],
             "label": "ui",
             "description": [
               "\nUI API to use to add tagging capabilities to an application"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 34
-            },
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -356,30 +402,40 @@
                 "section": "def-public.SavedObjectsTaggingApiUi",
                 "text": "SavedObjectsTaggingApiUi"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 21
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectsTaggingApiUi",
         "type": "Interface",
+        "tags": [],
         "label": "SavedObjectsTaggingApiUi",
         "description": [
           "\nReact components and utility methods to use the SO tagging feature\n"
         ],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 62
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getTag",
             "type": "Function",
+            "tags": [],
             "label": "getTag",
+            "description": [
+              "\nReturn a Tag from an ID\n"
+            ],
             "signature": [
               "(tagId: string) => ",
               {
@@ -391,36 +447,41 @@
               },
               " | undefined"
             ],
-            "description": [
-              "\nReturn a Tag from an ID\n"
-            ],
-            "children": [
-              {
-                "id": "def-public.SavedObjectsTaggingApiUi.getTag.$1",
-                "type": "string",
-                "label": "tagId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                  "lineNumber": 68
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 68
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tagId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 68
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration",
             "type": "Function",
+            "tags": [],
             "label": "hasTagDecoration",
+            "description": [
+              "\nType-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.\n"
+            ],
             "signature": [
               "(object: ",
               {
@@ -439,15 +500,19 @@
                 "text": "TagDecoratedSavedObject"
               }
             ],
-            "description": [
-              "\nType-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.\n"
-            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 75
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "object",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "savedObjects",
@@ -457,24 +522,25 @@
                     "text": "SavedObject"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 75
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 75
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter",
             "type": "Function",
+            "tags": [],
             "label": "getSearchBarFilter",
+            "description": [
+              "\nReturn a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.\n"
+            ],
             "signature": [
               "(options?: ",
               {
@@ -487,15 +553,19 @@
               " | undefined) => ",
               "SearchFilterConfig"
             ],
-            "description": [
-              "\nReturn a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.\n"
-            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 89
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "options",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -506,24 +576,25 @@
                   },
                   " | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 89
-                }
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 89
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getTableColumnDefinition",
             "type": "Function",
+            "tags": [],
             "label": "getTableColumnDefinition",
+            "description": [
+              "\nReturn the column definition to be used to display the tags in a EUI table.\nThe table's items must be of the `SavedObject` type (or at least have their references available\nvia the `references` field)\n"
+            ],
             "signature": [
               "() => ",
               "EuiTableFieldDataColumnType",
@@ -531,21 +602,23 @@
               "SavedObject",
               "<unknown>>"
             ],
-            "description": [
-              "\nReturn the column definition to be used to display the tags in a EUI table.\nThe table's items must be of the `SavedObject` type (or at least have their references available\nvia the `references` field)\n"
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 105
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference",
             "type": "Function",
+            "tags": [],
             "label": "convertNameToReference",
+            "description": [
+              "\nConvert given tag name to a {@link SavedObjectsFindOptionsReference | reference }\nto be used to search using the savedObjects `_find` API. Will return `undefined`\nif the given name does not match any existing tag."
+            ],
             "signature": [
               "(tagName: string) => ",
               {
@@ -557,36 +630,41 @@
               },
               " | undefined"
             ],
-            "description": [
-              "\nConvert given tag name to a {@link SavedObjectsFindOptionsReference | reference }\nto be used to search using the savedObjects `_find` API. Will return `undefined`\nif the given name does not match any existing tag."
-            ],
-            "children": [
-              {
-                "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference.$1",
-                "type": "string",
-                "label": "tagName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                  "lineNumber": 112
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 112
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tagName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 112
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery",
             "type": "Function",
+            "tags": [],
             "label": "parseSearchQuery",
+            "description": [
+              "\nParse given query using EUI's `Query` syntax, and return the search term and the tag references\nto be used when using the `_find` API to retrieve the filtered objects.\n"
+            ],
             "signature": [
               "(query: string, options?: ",
               {
@@ -605,31 +683,40 @@
                 "text": "ParsedSearchQuery"
               }
             ],
-            "description": [
-              "\nParse given query using EUI's `Query` syntax, and return the search term and the tag references\nto be used when using the `_find` API to retrieve the filtered objects.\n"
-            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 157
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.$1",
                 "type": "string",
+                "tags": [],
                 "label": "query",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
                 "description": [
                   "The query to parse"
+                ],
+                "signature": [
+                  "string"
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 157
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "options",
-                "isRequired": false,
+                "description": [
+                  "see {@link ParseSearchQueryOptions}"
+                ],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -640,26 +727,25 @@
                   },
                   " | undefined"
                 ],
-                "description": [
-                  "see {@link ParseSearchQueryOptions}"
-                ],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 157
-                }
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 157
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences",
             "type": "Function",
+            "tags": [],
             "label": "getTagIdsFromReferences",
+            "description": [
+              "\nReturns the object ids for the tag references from given references array"
+            ],
             "signature": [
               "(references: (",
               "SavedObjectReference",
@@ -673,15 +759,19 @@
               },
               ")[]) => string[]"
             ],
-            "description": [
-              "\nReturns the object ids for the tag references from given references array"
-            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 162
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences.$1",
                 "type": "Array",
+                "tags": [],
                 "label": "references",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "(",
                   "SavedObjectReference",
@@ -695,57 +785,63 @@
                   },
                   ")[]"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 163
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 162
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName",
             "type": "Function",
+            "tags": [],
             "label": "getTagIdFromName",
-            "signature": [
-              "(tagName: string) => string | undefined"
-            ],
             "description": [
               "\nReturns the id for given tag name. Will return `undefined`\nif the given name does not match any existing tag."
             ],
-            "children": [
-              {
-                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName.$1",
-                "type": "string",
-                "label": "tagName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                  "lineNumber": 170
-                }
-              }
+            "signature": [
+              "(tagName: string) => string | undefined"
             ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
               "lineNumber": 170
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tagName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 170
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences",
             "type": "Function",
+            "tags": [],
             "label": "updateTagsReferences",
+            "description": [
+              "\nReturns a new references array that replace the old tag references with references to the\nnew given tag ids, while preserving all non-tag references."
+            ],
             "signature": [
               "(references: ",
               "SavedObjectReference",
@@ -753,59 +849,59 @@
               "SavedObjectReference",
               "[]"
             ],
-            "description": [
-              "\nReturns a new references array that replace the old tag references with references to the\nnew given tag ids, while preserving all non-tag references."
-            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 176
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.$1",
                 "type": "Array",
+                "tags": [],
                 "label": "references",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "SavedObjectReference",
                   "[]"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 177
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.$2",
                 "type": "Array",
+                "tags": [],
                 "label": "newTagIds",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string[]"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                   "lineNumber": 178
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 176
-            }
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.components",
             "type": "Object",
+            "tags": [],
             "label": "components",
             "description": [
               "\n{@link SavedObjectsTaggingApiUiComponent | React components} to support the tagging feature."
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 184
-            },
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -814,38 +910,40 @@
                 "section": "def-public.SavedObjectsTaggingApiUiComponent",
                 "text": "SavedObjectsTaggingApiUiComponent"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 184
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 62
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectsTaggingApiUiComponent",
         "type": "Interface",
+        "tags": [],
         "label": "SavedObjectsTaggingApiUiComponent",
         "description": [
           "\nReact UI components to be used to display the tagging feature in any application.\n"
         ],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 192
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUiComponent.TagList",
             "type": "Function",
+            "tags": [],
             "label": "TagList",
             "description": [
               "\nDisplays the tags for given saved object."
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 196
-            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -856,20 +954,57 @@
                 "text": "TagListComponentProps"
               },
               ">"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 196
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector",
             "type": "Function",
+            "tags": [],
             "label": "TagSelector",
             "description": [
               "\nWidget to select tags."
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 200
-            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -880,20 +1015,57 @@
                 "text": "TagSelectorComponentProps"
               },
               ">"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 200
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector",
             "type": "Function",
+            "tags": [],
             "label": "SavedObjectSaveModalTagSelector",
             "description": [
               "\nComponent to be used with the `options` property of the `SavedObjectSaveModal` or `SavedObjectSaveModalOrigin`\nmodals from the `savedObjects` plugin. It displays the whole field row and handles the 'stateless' nature\nof props passed to inline components"
             ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 206
-            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -904,115 +1076,171 @@
                 "text": "SavedObjectSaveModalTagSelectorComponentProps"
               },
               ">"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 192
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TagListComponentProps",
-        "type": "Interface",
-        "label": "TagListComponentProps",
-        "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.TagListComponentProps.object",
-            "type": "Object",
-            "label": "object",
-            "description": [
-              "\nThe object to display tags for."
             ],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 218
+              "lineNumber": 206
             },
-            "signature": [
-              "SavedObject",
-              "<unknown>"
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
             ]
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-public.TagListComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TagListComponentProps",
+        "description": [
+          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
           "lineNumber": 214
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.TagListComponentProps.object",
+            "type": "Object",
+            "tags": [],
+            "label": "object",
+            "description": [
+              "\nThe object to display tags for."
+            ],
+            "signature": [
+              "SavedObject",
+              "<unknown>"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 218
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.TagSelectorComponentProps",
         "type": "Interface",
+        "tags": [],
         "label": "TagSelectorComponentProps",
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.TagSelectorComponentProps.selected",
-            "type": "Array",
-            "label": "selected",
-            "description": [
-              "\nIds of the currently selected tags"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 230
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.TagSelectorComponentProps.onTagsSelected",
-            "type": "Function",
-            "label": "onTagsSelected",
-            "description": [
-              "\ntags selection callback"
-            ],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-              "lineNumber": 234
-            },
-            "signature": [
-              "(ids: string[]) => void"
-            ]
-          }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
           "lineNumber": 226
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.TagSelectorComponentProps.selected",
+            "type": "Array",
+            "tags": [],
+            "label": "selected",
+            "description": [
+              "\nIds of the currently selected tags"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 230
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.TagSelectorComponentProps.onTagsSelected",
+            "type": "Function",
+            "tags": [],
+            "label": "onTagsSelected",
+            "description": [
+              "\ntags selection callback"
+            ],
+            "signature": [
+              "(ids: string[]) => void"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 234
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.ids",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 234
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectTagDecoratorTypeGuard",
         "type": "Type",
+        "tags": [],
         "label": "SavedObjectTagDecoratorTypeGuard",
-        "tags": [
-          "public"
-        ],
         "description": [],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-          "lineNumber": 55
-        },
         "signature": [
           "(object: ",
           {
@@ -1022,40 +1250,70 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ") => boolean"
+          ") => object is ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.TagDecoratedSavedObject",
+            "text": "TagDecoratedSavedObject"
+          }
         ],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 55
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.TagDecoratedSavedObject",
         "type": "Type",
+        "tags": [],
         "label": "TagDecoratedSavedObject",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObject",
+            "text": "SavedObject"
+          },
+          " & { getTags(): string[]; setTags(tags: string[]): void; }"
+        ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
           "lineNumber": 14
         },
-        "signature": [
-          "SavedObject & { getTags(): string[]; setTags(tags: string[]): void; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "savedObjectsTaggingOss",
       "id": "def-public.SavedObjectTaggingOssPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "SavedObjectTaggingOssPluginSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+        "lineNumber": 11
+      },
+      "deprecated": false,
       "children": [
         {
+          "parentPluginId": "savedObjectsTaggingOss",
           "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi",
           "type": "Function",
+          "tags": [],
           "label": "registerTaggingApi",
+          "description": [
+            "\nRegister a provider for the tagging API.\n\nOnly one provider can be registered, subsequent calls to this method will fail.\n"
+          ],
           "signature": [
             "(provider: Promise<",
             {
@@ -1067,15 +1325,19 @@
             },
             ">) => void"
           ],
-          "description": [
-            "\nRegister a provider for the tagging API.\n\nOnly one provider can be registered, subsequent calls to this method will fail.\n"
-          ],
+          "source": {
+            "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+            "lineNumber": 21
+          },
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "savedObjectsTaggingOss",
               "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi.$1",
               "type": "Object",
+              "tags": [],
               "label": "provider",
-              "isRequired": true,
+              "description": [],
               "signature": [
                 "Promise<",
                 {
@@ -1087,57 +1349,62 @@
                 },
                 ">"
               ],
-              "description": [],
               "source": {
                 "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
                 "lineNumber": 21
-              }
+              },
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
-            "lineNumber": 21
-          }
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
-        "lineNumber": 11
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "savedObjectsTaggingOss",
       "id": "def-public.SavedObjectTaggingOssPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "SavedObjectTaggingOssPluginStart",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+        "lineNumber": 24
+      },
+      "deprecated": false,
       "children": [
         {
+          "parentPluginId": "savedObjectsTaggingOss",
           "id": "def-public.SavedObjectTaggingOssPluginStart.isTaggingAvailable",
           "type": "Function",
+          "tags": [],
           "label": "isTaggingAvailable",
-          "signature": [
-            "() => boolean"
-          ],
           "description": [
             "\nReturns true if the tagging feature is available (if a provider registered the API)"
           ],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
+          "signature": [
+            "() => boolean"
+          ],
           "source": {
             "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
             "lineNumber": 28
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         },
         {
+          "parentPluginId": "savedObjectsTaggingOss",
           "id": "def-public.SavedObjectTaggingOssPluginStart.getTaggingApi",
           "type": "Function",
+          "tags": [],
           "label": "getTaggingApi",
+          "description": [
+            "\nReturns the tagging API, if registered.\nThis will always returns a value if `isTaggingAvailable` returns true, and undefined otherwise."
+          ],
           "signature": [
             "() => ",
             {
@@ -1149,22 +1416,15 @@
             },
             " | undefined"
           ],
-          "description": [
-            "\nReturns the tagging API, if registered.\nThis will always returns a value if `isTaggingAvailable` returns true, and undefined otherwise."
-          ],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
             "lineNumber": 34
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
-        "lineNumber": 24
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1182,44 +1442,57 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-common.GetAllTagsOptions",
         "type": "Interface",
+        "tags": [],
         "label": "GetAllTagsOptions",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.GetAllTagsOptions.asSystemRequest",
-            "type": "CompoundType",
-            "label": "asSystemRequest",
-            "description": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-              "lineNumber": 23
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
           "lineNumber": 22
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.GetAllTagsOptions.asSystemRequest",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "asSystemRequest",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-common.ITagsClient",
         "type": "Interface",
+        "tags": [],
         "label": "ITagsClient",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 26
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.ITagsClient.create",
             "type": "Function",
+            "tags": [],
             "label": "create",
+            "description": [],
             "signature": [
               "(attributes: ",
               {
@@ -1239,13 +1512,19 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-common.ITagsClient.create.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "attributes",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -1255,24 +1534,23 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 27
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-              "lineNumber": 27
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.ITagsClient.get",
             "type": "Function",
+            "tags": [],
             "label": "get",
+            "description": [],
             "signature": [
               "(id: string) => Promise<",
               {
@@ -1284,34 +1562,39 @@
               },
               ">"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-common.ITagsClient.get.$1",
-                "type": "string",
-                "label": "id",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-                  "lineNumber": 28
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 28
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-common.ITagsClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 28
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.ITagsClient.getAll",
             "type": "Function",
+            "tags": [],
             "label": "getAll",
+            "description": [],
             "signature": [
               "(options?: ",
               {
@@ -1331,13 +1614,19 @@
               },
               "[]>"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-common.ITagsClient.getAll.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "options",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -1348,55 +1637,59 @@
                   },
                   " | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 29
-                }
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-              "lineNumber": 29
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.ITagsClient.delete",
             "type": "Function",
+            "tags": [],
             "label": "delete",
+            "description": [],
             "signature": [
               "(id: string) => Promise<void>"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-common.ITagsClient.delete.$1",
-                "type": "string",
-                "label": "id",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-                  "lineNumber": 30
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 30
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-common.ITagsClient.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 30
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.ITagsClient.update",
             "type": "Function",
+            "tags": [],
             "label": "update",
+            "description": [],
             "signature": [
               "(id: string, attributes: ",
               {
@@ -1416,27 +1709,36 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-common.ITagsClient.update.$1",
                 "type": "string",
+                "tags": [],
                 "label": "id",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 31
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-common.ITagsClient.update.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "attributes",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -1446,130 +1748,140 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 31
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-              "lineNumber": 31
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-          "lineNumber": 26
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-common.Tag",
         "type": "Interface",
+        "tags": [],
         "label": "Tag",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.Tag.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 10
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.Tag.name",
             "type": "string",
+            "tags": [],
             "label": "name",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 11
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.Tag.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 12
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.Tag.color",
             "type": "string",
+            "tags": [],
             "label": "color",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 13
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-          "lineNumber": 9
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-common.TagAttributes",
         "type": "Interface",
+        "tags": [],
         "label": "TagAttributes",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.TagAttributes.name",
             "type": "string",
+            "tags": [],
             "label": "name",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 17
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.TagAttributes.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.TagAttributes.color",
             "type": "string",
+            "tags": [],
             "label": "color",
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 19
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
-          "lineNumber": 16
-        },
         "initialIsOpen": false
       }
     ],

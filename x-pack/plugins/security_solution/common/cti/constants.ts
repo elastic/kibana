@@ -44,3 +44,16 @@ export const SORTED_THREAT_SUMMARY_FIELDS = [
   INDICATOR_FIRSTSEEN,
   INDICATOR_LASTSEEN,
 ];
+
+export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
+  'file.hash.md5': 'threatintel.indicator.file.hash.md5',
+  'file.hash.sha1': 'threatintel.indicator.file.hash.sha1',
+  'file.hash.sha256': 'threatintel.indicator.file.hash.sha256',
+  'file.pe.imphash': 'threatintel.indicator.file.pe.imphash',
+  'file.elf.telfhash': 'threatintel.indicator.file.elf.telfhash',
+  'file.hash.ssdeep': 'threatintel.indicator.file.hash.ssdeep',
+  'source.ip': 'threatintel.indicator.ip',
+  'destination.ip': 'threatintel.indicator.ip',
+  'url.full': 'threatintel.indicator.url.full',
+  'registry.path': 'threatintel.indicator.registry.path',
+};

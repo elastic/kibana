@@ -15,6 +15,7 @@ import {
   PivotAggsConfigWithUiSupport,
 } from '../../../../../common';
 import { getFilterAggConfig } from './filter_agg/config';
+import { getTopMetricsAggConfig } from './top_metrics_agg/config';
 
 /**
  * Provides a configuration based on the aggregation type.
@@ -41,6 +42,8 @@ export function getDefaultAggregationConfig(
       };
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
+    case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
+      return getTopMetricsAggConfig(commonConfig);
     default:
       return commonConfig;
   }

@@ -38,7 +38,7 @@ export const SchemaFieldsTable: React.FC = () => {
     <EuiTable tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER}</EuiTableHeaderCell>
-        <EuiTableHeaderCell align="right">
+        <EuiTableHeaderCell align="right" id="schemaDataType">
           {SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}
         </EuiTableHeaderCell>
       </EuiTableHeader>
@@ -58,6 +58,7 @@ export const SchemaFieldsTable: React.FC = () => {
                 fieldName={fieldName}
                 fieldType={filteredSchemaFields[fieldName]}
                 updateExistingFieldType={updateExistingFieldType}
+                aria-labelledby="schemaDataType"
               />
             </EuiTableRowCell>
           </EuiTableRow>

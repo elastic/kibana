@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { CoreStartContext } from '../contexts/query_input_bar_context';
 import { DefaultIndexPatternContext } from '../contexts/default_index_context';
-import { IndexPatternValue } from '../../../common/types';
+import type { IndexPatternValue } from '../../../common/types';
 
 import { QueryStringInput, QueryStringInputProps } from '../../../../../plugins/data/public';
 import { getDataStart } from '../../services';

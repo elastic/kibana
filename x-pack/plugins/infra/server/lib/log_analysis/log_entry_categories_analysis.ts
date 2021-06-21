@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ILegacyScopedClusterClient } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import {
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
@@ -136,7 +136,7 @@ export async function getLogEntryCategoryDatasets(
 
 export async function getLogEntryCategoryExamples(
   context: {
-    core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } };
+    core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } };
     infra: {
       mlAnomalyDetectors: MlAnomalyDetectors;
       mlSystem: MlSystem;
@@ -402,9 +402,9 @@ async function fetchTopLogEntryCategoryHistograms(
 }
 
 async function fetchLogEntryCategoryExamples(
-  requestContext: { core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } } },
+  requestContext: { core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } } },
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -417,19 +417,20 @@ async function fetchLogEntryCategoryExamples(
   const {
     hits: { hits },
   } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
-    await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
-      'search',
-      createLogEntryCategoryExamplesQuery(
-        indices,
-        runtimeMappings,
-        timestampField,
-        tiebreakerField,
-        startTime,
-        endTime,
-        categoryQuery,
-        exampleCount
+    (
+      await requestContext.core.elasticsearch.client.asCurrentUser.search(
+        createLogEntryCategoryExamplesQuery(
+          indices,
+          runtimeMappings,
+          timestampField,
+          tiebreakerField,
+          startTime,
+          endTime,
+          categoryQuery,
+          exampleCount
+        )
       )
-    )
+    ).body
   );
 
   const esSearchSpan = finalizeEsSearchSpan();

@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Startup Shell Folder Modification",
-  "note": "Verify file creation events in the new Windows Startup folder location.",
+  "note": "## Triage and analysis\n\nVerify file creation events in the new Windows Startup folder location.",
   "query": "registry where\n registry.path : (\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Common Startup\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Common Startup\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Startup\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Startup\"\n     ) and\n  registry.data.strings != null and\n  /* Normal Startup Folder Paths */\n  not registry.data.strings : (\n           \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"%ProgramData%\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"%USERPROFILE%\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\"\n           )\n",
   "risk_score": 73,
   "rule_id": "c8b150f0-0164-475b-a75e-74b47800a9ff",

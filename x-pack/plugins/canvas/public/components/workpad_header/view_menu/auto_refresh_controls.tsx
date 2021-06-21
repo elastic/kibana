@@ -32,7 +32,7 @@ const { getSecondsText, getMinutesText, getHoursText } = timeStrings;
 
 interface Props {
   refreshInterval: number;
-  setRefresh: (interval: number | undefined) => void;
+  setRefresh: (interval: number) => void;
   disableInterval: () => void;
 }
 

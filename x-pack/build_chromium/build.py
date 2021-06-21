@@ -6,7 +6,7 @@ from build_util import (
   md5_file,
 )
 
-# This file builds Chromium headless on Windows, Mac, and Linux.
+# This file builds Chromium headless on Mac and Linux.
 
 # Verify that we have an argument, and if not print instructions
 if (len(sys.argv) < 2):
@@ -68,7 +68,6 @@ if platform.system() == 'Linux':
   print('Running install-build-deps...')
   runcmd(src_path + '/build/install-build-deps.sh')
 
-
 print('Updating all modules')
 runcmd('gclient sync -D')
 
@@ -76,7 +75,7 @@ print('Setting up build directory')
 runcmd('rm -rf out/headless')
 runcmd('mkdir out/headless')
 
-# Copy build args/{Linux | Darwin | Windows}.gn from the root of our directory to out/headless/args.gn,
+# Copy args.gn from the root of our directory to out/headless/args.gn,
 # add the target_cpu for cross-compilation
 print('Adding target_cpu to args')
 argsgn_file_out = path.abspath('out/headless/args.gn')
@@ -114,22 +113,10 @@ def archive_file(name):
 
 # Each platform has slightly different requirements for what dependencies
 # must be bundled with the Chromium executable.
+archive_file('headless_shell')
 if platform.system() == 'Linux':
-  archive_file('headless_shell')
   archive_file(path.join('swiftshader', 'libEGL.so'))
   archive_file(path.join('swiftshader', 'libGLESv2.so'))
-
-  if arch_name == 'arm64':
-    archive_file(path.join('swiftshader', 'libEGL.so'))
-
-elif platform.system() == 'Windows':
-  archive_file('headless_shell.exe')
-  archive_file('dbghelp.dll')
-  archive_file('icudtl.dat')
-  archive_file(path.join('swiftshader', 'libEGL.dll'))
-  archive_file(path.join('swiftshader', 'libEGL.dll.lib'))
-  archive_file(path.join('swiftshader', 'libGLESv2.dll'))
-  archive_file(path.join('swiftshader', 'libGLESv2.dll.lib'))
 
 elif platform.system() == 'Darwin':
   archive_file('headless_shell')

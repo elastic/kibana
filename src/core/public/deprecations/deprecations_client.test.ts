@@ -90,6 +90,7 @@ describe('DeprecationsClient', () => {
             path: 'some-path',
             method: 'POST',
           },
+          manualSteps: ['manual-step'],
         },
       };
 
@@ -104,7 +105,9 @@ describe('DeprecationsClient', () => {
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
-        correctiveActions: {},
+        correctiveActions: {
+          manualSteps: ['manual-step'],
+        },
       };
 
       const isResolvable = deprecationsClient.isDeprecationResolvable(mockDeprecationDetails);
@@ -120,7 +123,9 @@ describe('DeprecationsClient', () => {
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
-        correctiveActions: {},
+        correctiveActions: {
+          manualSteps: ['manual-step'],
+        },
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
@@ -144,6 +149,7 @@ describe('DeprecationsClient', () => {
               extra_param: 123,
             },
           },
+          manualSteps: ['manual-step'],
         },
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
@@ -176,6 +182,7 @@ describe('DeprecationsClient', () => {
               extra_param: 123,
             },
           },
+          manualSteps: ['manual-step'],
         },
       };
       http.fetch.mockRejectedValue({ body: { message: mockResponse } });

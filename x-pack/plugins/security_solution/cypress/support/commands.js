@@ -31,62 +31,17 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-import { findIndex } from 'lodash/fp';
-
-const getFindRequestConfig = (searchStrategyName, factoryQueryType) => {
-  if (!factoryQueryType) {
-    return {
-      options: { strategy: searchStrategyName },
-    };
-  }
-
-  return {
-    options: { strategy: searchStrategyName },
-    request: { factoryQueryType },
-  };
-};
-
 Cypress.Commands.add(
   'stubSearchStrategyApi',
   function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
     cy.intercept('POST', '/internal/bsearch', (req) => {
-      const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
-      const requestIndex = findIndex(findRequestConfig, req.body.batch);
-
-      if (requestIndex > -1) {
-        return req.reply((res) => {
-          const responseObjectsArray = res.body.split('\n').map((responseString) => {
-            try {
-              return JSON.parse(responseString);
-            } catch {
-              return responseString;
-            }
-          });
-          const responseIndex = findIndex({ id: requestIndex }, responseObjectsArray);
-
-          const stubbedResponseObjectsArray = [...responseObjectsArray];
-          stubbedResponseObjectsArray[responseIndex] = {
-            ...stubbedResponseObjectsArray[responseIndex],
-            result: {
-              ...stubbedResponseObjectsArray[responseIndex].result,
-              ...stubObject,
-            },
-          };
-
-          const stubbedResponse = stubbedResponseObjectsArray
-            .map((object) => {
-              try {
-                return JSON.stringify(object);
-              } catch {
-                return object;
-              }
-            })
-            .join('\n');
-
-          res.send(stubbedResponse);
-        });
+      if (searchStrategyName === 'securitySolutionIndexFields') {
+        req.reply(stubObject.rawResponse);
+      } else if (factoryQueryType === 'overviewHost') {
+        req.reply(stubObject.overviewHost);
+      } else if (factoryQueryType === 'overviewNetwork') {
+        req.reply(stubObject.overviewNetwork);
       }
-
       req.reply();
     });
   }

@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Persistence via Login Hook",
-  "note": "Starting in Mac OS X 10.7 (Lion), users can specify certain applications to be re-opened when a user reboots their machine. This can be abused to establish or maintain persistence on a compromised system.",
+  "note": "## Triage and analysis\n\nStarting in Mac OS X 10.7 (Lion), users can specify certain applications to be re-opened when a user reboots their machine. This can be abused to establish or maintain persistence on a compromised system.",
   "query": "event.category:\"file\" and not event.type:\"deletion\" and file.name:\"com.apple.loginwindow.plist\" and process.name:(* and not (systemmigrationd or DesktopServicesHelper or diskmanagementd or rsync or launchd or cfprefsd or xpcproxy or ManagedClient or MCXCompositor))",
   "references": [
     "https://github.com/D00MFist/PersistentJXA/blob/master/LoginScript.js"
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

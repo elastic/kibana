@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, HttpStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { AuthenticatedUser, SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -45,14 +45,13 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
-  private authenticatedUserPromise?: Promise<AuthenticatedUser | null>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = false;
   }
 
-  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
     const {
       id,
       cname,
@@ -68,10 +67,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       if (this.isCloudEnabled) {
         home.tutorials.setVariable('cloud', { id, baseUrl, profileUrl });
       }
-    }
-
-    if (security) {
-      this.authenticatedUserPromise = security.authc.getCurrentUser().catch(() => null);
     }
 
     return {
@@ -108,7 +103,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       }
     };
 
-    this.checkIfAuthorizedForLinks()
+    this.checkIfAuthorizedForLinks({ http: coreStart.http, security })
       .then(setLinks)
       // In the event of an unexpected error, fail *open*.
       // Cloud admin console will always perform the actual authorization checks.
@@ -123,12 +118,21 @@ export class CloudPlugin implements Plugin<CloudSetup> {
    * At this point, we do not have enough information to reliably make this determination,
    * but we do know that all cloud deployment admins are superusers by default.
    */
-  private async checkIfAuthorizedForLinks() {
+  private async checkIfAuthorizedForLinks({
+    http,
+    security,
+  }: {
+    http: HttpStart;
+    security?: SecurityPluginStart;
+  }) {
+    if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      return false;
+    }
     // Security plugin is disabled
-    if (!this.authenticatedUserPromise) return true;
+    if (!security) return true;
     // Otherwise check roles. If user is not defined due to an unexpected error, then fail *open*.
     // Cloud admin console will always perform the actual authorization checks.
-    const user = await this.authenticatedUserPromise;
+    const user = await security.authc.getCurrentUser().catch(() => null);
     return user?.roles.includes('superuser') ?? true;
   }
 }

@@ -99,8 +99,9 @@ export const browserStartLogs = (
   );
 
   const error$ = fromEvent(browserProcess, 'error').pipe(
-    map(() => {
+    map((err) => {
       logger.error(`Browser process threw an error on startup`);
+      logger.error(err as string | Error);
       return i18n.translate('xpack.reporting.diagnostic.browserErrored', {
         defaultMessage: `Browser process threw an error on startup`,
       });

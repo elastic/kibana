@@ -30,6 +30,7 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { emptyLabel } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { renderEndzoneTooltip } from '../../../../../../charts/public';
@@ -60,6 +61,7 @@ export const TimeSeries = ({
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
   syncColors,
@@ -117,6 +119,10 @@ export const TimeSeries = ({
     onBrush(min, max, series);
   };
 
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
+  };
+
   const getSeriesColor = useCallback(
     (seriesName, seriesGroupId, seriesId) => {
       const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
@@ -141,6 +147,7 @@ export const TimeSeries = ({
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
@@ -162,7 +169,10 @@ export const TimeSeries = ({
         baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          type:
+            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+              ? TooltipType.Follow
+              : TooltipType.VerticalCursor,
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}

@@ -93,7 +93,7 @@ export function _enrichStateWithStatsAggregation(
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
   const verticesWithStatsBuckets =
-    statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
+    statsAggregation.aggregations?.pipelines.scoped.vertices.vertex_id.buckets ?? [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
@@ -142,7 +142,7 @@ export async function getPipeline(
     getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
-  if (stateDocument === null) {
+  if (stateDocument === null || !statsAggregation) {
     return boom.notFound(
       `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
     );

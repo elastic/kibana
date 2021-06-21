@@ -6,24 +6,25 @@
  */
 
 import { useEffect, useState } from 'react';
-import { HttpStart } from '../../../../../../../src/core/public';
-
-import { Rule } from '../../../detections/containers/detection_engine/rules/types';
-import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
-import {
-  fetchRuleById,
-  patchRule,
-} from '../../../detections/containers/detection_engine/rules/api';
+import type {
+  List,
+  ListArray,
+  ExceptionListSchema,
+  CreateExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   fetchExceptionListById,
   addExceptionList,
   addEndpointExceptionList,
-} from '../../../lists_plugin_deps';
+} from '@kbn/securitysolution-list-api';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { HttpStart } from '../../../../../../../src/core/public';
+
+import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import {
-  ExceptionListSchema,
-  CreateExceptionListSchema,
-  ENDPOINT_LIST_ID,
-} from '../../../../common/shared_imports';
+  fetchRuleById,
+  patchRule,
+} from '../../../detections/containers/detection_engine/rules/api';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 

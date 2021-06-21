@@ -16,6 +16,7 @@ import type {
   RouteMethod,
   RequestHandler,
   RequestHandlerContext,
+  StartServicesAccessor,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -28,7 +29,8 @@ import {
   normalizeError,
 } from '../common';
 import { StreamingRequestHandler } from './types';
-import { createNDJSONStream } from './streaming';
+import { createStream } from './streaming';
+import { getUiSettings } from './ui_settings';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}
@@ -112,9 +114,19 @@ export class BfetchServerPlugin
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
     const logger = this.initializerContext.logger.get();
     const router = core.http.createRouter();
-    const addStreamingResponseRoute = this.addStreamingResponseRoute({ router, logger });
+
+    core.uiSettings.register(getUiSettings());
+
+    const addStreamingResponseRoute = this.addStreamingResponseRoute({
+      getStartServices: core.getStartServices,
+      router,
+      logger,
+    });
     const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
-    const createStreamingRequestHandler = this.createStreamingRequestHandler({ logger });
+    const createStreamingRequestHandler = this.createStreamingRequestHandler({
+      getStartServices: core.getStartServices,
+      logger,
+    });
 
     return {
       addBatchProcessingRoute,
@@ -129,10 +141,16 @@ export class BfetchServerPlugin
 
   public stop() {}
 
+  private getCompressionDisabled(request: KibanaRequest) {
+    return request.headers['x-chunk-encoding'] !== 'deflate';
+  }
+
   private addStreamingResponseRoute = ({
+    getStartServices,
     router,
     logger,
   }: {
+    getStartServices: StartServicesAccessor;
     router: ReturnType<CoreSetup['http']['createRouter']>;
     logger: Logger;
   }): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
@@ -146,9 +164,10 @@ export class BfetchServerPlugin
       async (context, request, response) => {
         const handlerInstance = handler(request);
         const data = request.body;
+        const compressionDisabled = this.getCompressionDisabled(request);
         return response.ok({
           headers: streamingHeaders,
-          body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
+          body: createStream(handlerInstance.getResponseStream(data), logger, compressionDisabled),
         });
       }
     );
@@ -156,17 +175,20 @@ export class BfetchServerPlugin
 
   private createStreamingRequestHandler = ({
     logger,
+    getStartServices,
   }: {
     logger: Logger;
+    getStartServices: StartServicesAccessor;
   }): BfetchServerSetup['createStreamingRequestHandler'] => (streamHandler) => async (
     context,
     request,
     response
   ) => {
     const response$ = await streamHandler(context, request);
+    const compressionDisabled = this.getCompressionDisabled(request);
     return response.ok({
       headers: streamingHeaders,
-      body: createNDJSONStream(response$, logger),
+      body: createStream(response$, logger, compressionDisabled),
     });
   };
 

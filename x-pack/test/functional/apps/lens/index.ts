@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context.d';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -16,13 +16,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('logstash_functional');
-      await esArchiver.load('lens/basic');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
 
     describe('', function () {
@@ -36,9 +36,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
+      loadTestFile(require.resolve('./time_shift'));
       loadTestFile(require.resolve('./drag_and_drop'));
+      loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./lens_reporting'));
       loadTestFile(require.resolve('./lens_tagging'));
+      loadTestFile(require.resolve('./formula'));
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));

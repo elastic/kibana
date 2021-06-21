@@ -13,10 +13,15 @@ const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,
   namespaceType: 'agnostic',
   mappings: {
-    dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
-    properties: {},
+    dynamic: false,
+    properties: {
+      sourceId: { type: 'keyword' },
+      targetType: { type: 'keyword' },
+      disabled: { type: 'boolean' },
+      // other properties exist, but we aren't querying or aggregating on those, so we don't need to specify them (because we use `dynamic: false` above)
+    },
   },
-  hidden: true,
+  hidden: false,
 };
 
 /**

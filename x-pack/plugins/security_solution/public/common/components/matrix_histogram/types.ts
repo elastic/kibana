@@ -66,6 +66,7 @@ export interface MatrixHistogramQueryProps {
   errorMessage: string;
   indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
+  onError?: () => void;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
     from: string;
@@ -78,6 +79,7 @@ export interface MatrixHistogramQueryProps {
   threshold?: Threshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

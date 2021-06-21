@@ -18,8 +18,9 @@ import {
 
 import { TimeRange } from '../../../../data/public';
 
-import { SearchInput, SearchOutput, SearchEmbeddable } from './types';
+import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -27,7 +28,7 @@ interface StartServices {
 }
 
 export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;
@@ -65,14 +66,11 @@ export class SearchEmbeddableFactory
     savedObjectId: string,
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
+  ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
     if (!this.$injector) {
       this.$injector = await this.getInjector();
     }
-    const $injector = this.$injector as auto.IInjectorService;
 
-    const $compile = $injector.get<ng.ICompileService>('$compile');
-    const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
     const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
@@ -81,12 +79,12 @@ export class SearchEmbeddableFactory
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
-      return new SearchEmbeddableClass(
+      const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
+        './saved_search_embeddable'
+      );
+      return new SavedSearchEmbeddableClass(
         {
           savedSearch: savedObject,
-          $rootScope,
-          $compile,
           editUrl,
           editPath: url,
           filterManager,

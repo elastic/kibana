@@ -15,18 +15,20 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "stackAlerts",
         "id": "def-server.ID",
         "type": "string",
+        "tags": [],
         "label": "ID",
         "description": [],
+        "signature": [
+          "\".index-threshold\""
+        ],
         "source": {
           "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
           "lineNumber": 20
         },
-        "signature": [
-          "\".index-threshold\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
@@ -39,53 +41,59 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "stackAlerts",
         "id": "def-common.Config",
         "type": "Type",
-        "label": "Config",
         "tags": [],
+        "label": "Config",
         "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; }"
+        ],
         "source": {
           "path": "x-pack/plugins/stack_alerts/common/config.ts",
           "lineNumber": 14
         },
-        "signature": [
-          "{ readonly enabled: boolean; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "stackAlerts",
         "id": "def-common.STACK_ALERTS_FEATURE_ID",
         "type": "string",
+        "tags": [],
         "label": "STACK_ALERTS_FEATURE_ID",
         "description": [],
+        "signature": [
+          "\"stackAlerts\""
+        ],
         "source": {
           "path": "x-pack/plugins/stack_alerts/common/index.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"stackAlerts\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
-        "tags": [],
+        "parentPluginId": "stackAlerts",
         "id": "def-common.configSchema",
         "type": "Object",
+        "tags": [],
         "label": "configSchema",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/stack_alerts/common/config.ts",
-          "lineNumber": 10
-        },
         "signature": [
           "ObjectType",
           "<{ enabled: ",
           "Type",
           "<boolean>; }>"
         ],
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ]

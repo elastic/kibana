@@ -15,6 +15,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
             "__dataRequests": Array [],
             "alpha": 0.75,
             "id": "testLayer",
+            "includeInFitToBounds": true,
             "label": null,
             "maxZoom": 24,
             "minZoom": 0,
@@ -74,13 +75,13 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -129,6 +130,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
             "__dataRequests": Array [],
             "alpha": 0.75,
             "id": "testLayer",
+            "includeInFitToBounds": true,
             "label": null,
             "maxZoom": 24,
             "minZoom": 0,
@@ -188,13 +190,13 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -243,6 +245,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
             "__dataRequests": Array [],
             "alpha": 0.75,
             "id": "testLayer",
+            "includeInFitToBounds": true,
             "label": null,
             "maxZoom": 24,
             "minZoom": 0,
@@ -303,13 +306,13 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "editLayerButton",
+              "data-test-subj": "layerSettingsButton",
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
-              "name": "Edit layer",
+              "name": "Edit layer settings",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -358,6 +361,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
             "__dataRequests": Array [],
             "alpha": 0.75,
             "id": "testLayer",
+            "includeInFitToBounds": true,
             "label": null,
             "maxZoom": 24,
             "minZoom": 0,

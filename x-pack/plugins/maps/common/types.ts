@@ -6,6 +6,13 @@
  */
 
 export interface CreateDocSourceResp {
+  indexPatternId?: string;
+  success: boolean;
+  error?: Error;
+}
+
+export interface MatchingIndexesResp {
+  matchingIndexes?: string[];
   success: boolean;
   error?: Error;
 }

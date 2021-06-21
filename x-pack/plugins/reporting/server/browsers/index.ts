@@ -6,9 +6,8 @@
  */
 
 import { first } from 'rxjs/operators';
-import { ReportingConfig } from '../';
+import { ReportingCore } from '../';
 import { LevelLogger } from '../lib';
-import { CaptureConfig } from '../types';
 import { chromium, ChromiumArchivePaths } from './chromium';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 import { installBrowser } from './install';
@@ -18,8 +17,8 @@ export { HeadlessChromiumDriver } from './chromium/driver';
 export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
 type CreateDriverFactory = (
+  core: ReportingCore,
   binaryPath: string,
-  captureConfig: CaptureConfig,
   logger: LevelLogger
 ) => HeadlessChromiumDriverFactory;
 
@@ -28,12 +27,8 @@ export interface BrowserDownload {
   paths: ChromiumArchivePaths;
 }
 
-export const initializeBrowserDriverFactory = async (
-  config: ReportingConfig,
-  logger: LevelLogger
-) => {
+export const initializeBrowserDriverFactory = async (core: ReportingCore, logger: LevelLogger) => {
   const { binaryPath$ } = installBrowser(logger);
   const binaryPath = await binaryPath$.pipe(first()).toPromise();
-  const captureConfig = config.get('capture');
-  return chromium.createDriverFactory(binaryPath, captureConfig, logger);
+  return chromium.createDriverFactory(core, binaryPath, logger);
 };

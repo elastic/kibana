@@ -108,7 +108,7 @@ export function getMlJobsForCluster(
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
     return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {
-      return response.aggregations.jobs_count.value ?? 0;
+      return response.aggregations?.jobs_count.value ?? 0;
     });
   }
 

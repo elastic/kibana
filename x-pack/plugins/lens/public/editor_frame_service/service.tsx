@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
@@ -44,7 +42,7 @@ export interface EditorFrameStartPlugins {
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions?: UiActionsStart;
+  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
 }
 
@@ -123,76 +121,33 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      let domElement: Element;
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
         collectAsyncDefinitions(this.datasources),
         collectAsyncDefinitions(this.visualizations),
       ]);
 
-      const unmount = () => {
-        if (domElement) {
-          unmountComponentAtNode(domElement);
-        }
-      };
+      const { EditorFrame } = await import('../async_services');
+      const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        mount: async (
-          element,
-          {
-            doc,
-            onError,
-            dateRange,
-            query,
-            filters,
-            savedQuery,
-            onChange,
-            showNoDataPopover,
-            initialContext,
-            searchSessionId,
-          }
-        ) => {
-          if (domElement !== element) {
-            unmount();
-          }
-          domElement = element;
-          const firstDatasourceId = Object.keys(resolvedDatasources)[0];
-          const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
-
-          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
-
-          const palettes = await plugins.charts.palettes.getPalettes();
-
-          render(
-            <I18nProvider>
+        EditorFrameContainer: ({ onError, showNoDataPopover, initialContext }) => {
+          return (
+            <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 onError={onError}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
-                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
-                initialVisualizationId={
-                  (doc && doc.visualizationType) || firstVisualizationId || null
-                }
-                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 palettes={palettes}
-                doc={doc}
-                dateRange={dateRange}
-                query={query}
-                filters={filters}
-                savedQuery={savedQuery}
-                onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
-                searchSessionId={searchSessionId}
               />
-            </I18nProvider>,
-            domElement
+            </div>
           );
         },
-        unmount,
       };
     };
 

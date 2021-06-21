@@ -6,7 +6,7 @@
  */
 
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   ConditionEntryField,

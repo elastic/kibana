@@ -48,28 +48,11 @@ export function registerOrgRoleMappingRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/role_mappings/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/role_mappings/:id',
-    })
-  );
-
   router.put(
     {
       path: '/api/workplace_search/org/role_mappings/{id}',
       validate: {
-        body: schema.object({
-          ...roleMappingBaseSchema,
-          id: schema.string(),
-        }),
+        body: schema.object(roleMappingBaseSchema),
         params: schema.object({
           id: schema.string(),
         }),
@@ -95,23 +78,7 @@ export function registerOrgRoleMappingRoute({
   );
 }
 
-export function registerOrgNewRoleMappingRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/role_mappings/new',
-      validate: false,
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/role_mappings/new',
-    })
-  );
-}
-
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
   registerOrgRoleMappingsRoute(dependencies);
   registerOrgRoleMappingRoute(dependencies);
-  registerOrgNewRoleMappingRoute(dependencies);
 };

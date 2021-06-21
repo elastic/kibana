@@ -21,7 +21,6 @@ import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../store/timeline';
@@ -89,8 +88,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
-
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>
       onRowSelected({
@@ -114,6 +111,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
   const eventType = getEventType(ecsData);
+
+  const isEventContextMenuEnabled = useMemo(
+    () => !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
+    [ecsData.event?.kind]
+  );
 
   return (
     <>
@@ -197,7 +199,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && (!isEventFilteringEnabled || eventType !== 'raw')}
+          disabled={eventType !== 'signal' && !isEventContextMenuEnabled}
           refetch={refetch}
           onRuleChange={onRuleChange}
         />

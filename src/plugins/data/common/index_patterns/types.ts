@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
@@ -25,8 +25,9 @@ export interface RuntimeField {
 }
 
 /**
+ * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * too ambiguous, should be avoided
+ * Use IndexPattern or IndexPatternSpec instead
  */
 export interface IIndexPattern {
   fields: IFieldType[];
@@ -166,7 +167,7 @@ export type FieldSpecConflictDescriptions = Record<string, string[]>;
 export interface FieldSpecExportFmt {
   count?: number;
   script?: string;
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
   type: KBN_FIELD_TYPES;
@@ -196,7 +197,7 @@ export interface FieldSpec {
    * Scripted field langauge
    * Painless is the only valid scripted field language
    */
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
   name: string;

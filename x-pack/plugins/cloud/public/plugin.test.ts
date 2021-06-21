@@ -13,10 +13,7 @@ import { CloudPlugin } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#start', () => {
-    function setupPlugin({
-      roles = [],
-      simulateUserError = false,
-    }: { roles?: string[]; simulateUserError?: boolean } = {}) {
+    function setupPlugin() {
       const plugin = new CloudPlugin(
         coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -28,20 +25,10 @@ describe('Cloud Plugin', () => {
       );
       const coreSetup = coreMock.createSetup();
       const homeSetup = homePluginMock.createSetupContract();
-      const securitySetup = securityMock.createSetup();
-      if (simulateUserError) {
-        securitySetup.authc.getCurrentUser.mockRejectedValue(new Error('Something happened'));
-      } else {
-        securitySetup.authc.getCurrentUser.mockResolvedValue(
-          securityMock.createMockAuthenticatedUser({
-            roles,
-          })
-        );
-      }
 
-      plugin.setup(coreSetup, { home: homeSetup, security: securitySetup });
+      plugin.setup(coreSetup, { home: homeSetup });
 
-      return { coreSetup, securitySetup, plugin };
+      return { coreSetup, plugin };
     }
 
     it('registers help support URL', async () => {
@@ -59,11 +46,37 @@ describe('Cloud Plugin', () => {
       `);
     });
 
+    it('does not register custom nav links on anonymous pages', async () => {
+      const { plugin } = setupPlugin();
+
+      const coreStart = coreMock.createStart();
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          roles: ['superuser'],
+        })
+      );
+
+      plugin.start(coreStart, { security: securityStart });
+
+      await nextTick();
+
+      expect(coreStart.chrome.setCustomNavLink).not.toHaveBeenCalled();
+      expect(securityStart.authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
     it('registers a custom nav link for superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['superuser'] });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          roles: ['superuser'],
+        })
+      );
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();
@@ -81,10 +94,11 @@ describe('Cloud Plugin', () => {
     });
 
     it('registers a custom nav link when there is an error retrieving the current user', async () => {
-      const { plugin } = setupPlugin({ simulateUserError: true });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockRejectedValue(new Error('something happened'));
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();
@@ -102,10 +116,15 @@ describe('Cloud Plugin', () => {
     });
 
     it('does not register a custom nav link for non-superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['not-a-superuser'] });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          roles: ['not-a-superuser'],
+        })
+      );
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();
@@ -114,10 +133,15 @@ describe('Cloud Plugin', () => {
     });
 
     it('registers user profile links for superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['superuser'] });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          roles: ['superuser'],
+        })
+      );
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();
@@ -145,10 +169,11 @@ describe('Cloud Plugin', () => {
     });
 
     it('registers profile links when there is an error retrieving the current user', async () => {
-      const { plugin } = setupPlugin({ simulateUserError: true });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockRejectedValue(new Error('something happened'));
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();
@@ -176,10 +201,15 @@ describe('Cloud Plugin', () => {
     });
 
     it('does not register profile links for non-superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['not-a-superuser'] });
+      const { plugin } = setupPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+      securityStart.authc.getCurrentUser.mockResolvedValue(
+        securityMock.createMockAuthenticatedUser({
+          roles: ['not-a-superuser'],
+        })
+      );
       plugin.start(coreStart, { security: securityStart });
 
       await nextTick();

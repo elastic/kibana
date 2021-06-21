@@ -6,27 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
+import {
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  PublicAppDeepLinkInfo,
+} from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
 
-export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapper {
-  const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
+export function toNavLink(
+  app: PublicAppInfo,
+  basePath: IBasePath,
+  deepLink?: PublicAppDeepLinkInfo
+): NavLinkWrapper {
   const relativeBaseUrl = basePath.prepend(app.appRoute!);
-  const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
+  const url = appendAppPath(relativeBaseUrl, deepLink?.path || app.defaultPath);
+  const href = relativeToAbsolute(url);
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 
   return new NavLinkWrapper({
-    ...app,
-    hidden: useAppStatus
-      ? app.status === AppStatus.inaccessible
-      : app.navLinkStatus === AppNavLinkStatus.hidden,
-    disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
+    ...(deepLink || app),
+    ...(app.category ? { category: app.category } : {}), // deepLinks use the main app category
+    hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
+    disabled: (deepLink?.navLinkStatus ?? app.navLinkStatus) === AppNavLinkStatus.disabled,
     baseUrl,
-    href: url,
+    href,
     url,
   });
+}
+
+function isAppNavLinkHidden(app: PublicAppInfo) {
+  return app.navLinkStatus === AppNavLinkStatus.default
+    ? app.status === AppStatus.inaccessible
+    : app.navLinkStatus === AppNavLinkStatus.hidden;
+}
+
+function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
+  return (
+    deepLink.navLinkStatus === AppNavLinkStatus.default ||
+    deepLink.navLinkStatus === AppNavLinkStatus.hidden
+  );
 }
 
 /**

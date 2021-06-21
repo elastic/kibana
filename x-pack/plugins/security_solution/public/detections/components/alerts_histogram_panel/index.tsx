@@ -141,15 +141,15 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       response,
       request,
       refetch,
-    } = useQueryAlerts<{}, AlertsAggregation>(
-      getAlertsHistogramQuery(
+    } = useQueryAlerts<{}, AlertsAggregation>({
+      query: getAlertsHistogramQuery(
         selectedStackByOption.value,
         from,
         to,
         buildCombinedQueries(combinedQueries)
       ),
-      signalIndexName
-    );
+      indexName: signalIndexName,
+    });
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.detections);

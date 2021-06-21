@@ -9,7 +9,6 @@ import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
-import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
@@ -47,20 +46,19 @@ function clonePage(page) {
 
 export const pagesReducer = handleActions(
   {
-    [actions.addPage]: (workpadState, { payload }) => {
+    [actions.addPage]: (workpadState, { payload: { gotoPage } }) => {
       const { page: activePage } = workpadState;
-      const withNewPage = addPage(workpadState, payload, activePage);
+      const withNewPage = addPage(workpadState, undefined, activePage);
       const newState = setPageIndex(withNewPage, activePage + 1);
 
       // changes to the page require navigation
-      const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
+      gotoPage(newState.page + 1);
 
       return newState;
     },
 
-    [actions.duplicatePage]: (workpadState, { payload }) => {
-      const srcPage = workpadState.pages.find((page) => page.id === payload);
+    [actions.duplicatePage]: (workpadState, { payload: { gotoPage, id } }) => {
+      const srcPage = workpadState.pages.find((page) => page.id === id);
 
       // if the page id is invalid, don't change the state
       if (!srcPage) {
@@ -73,8 +71,7 @@ export const pagesReducer = handleActions(
       const newState = setPageIndex(insertedWorkpadState, newPageIndex);
 
       // changes to the page require navigation
-      const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: newPageIndex + 1 });
+      gotoPage(newPageIndex + 1);
 
       return newState;
     },
@@ -83,7 +80,7 @@ export const pagesReducer = handleActions(
       return setPageIndex(workpadState, payload);
     },
 
-    [actions.movePage]: (workpadState, { payload }) => {
+    [actions.movePage]: (workpadState, { payload: { gotoPage, ...payload } }) => {
       const { id, position } = payload;
       const pageIndex = getPageIndexById(workpadState, id);
       const newIndex = pageIndex + position;
@@ -108,37 +105,31 @@ export const pagesReducer = handleActions(
       newState = set(newState, 'page', newSelectedIndex);
 
       // changes to the page require navigation
-      const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
+      gotoPage(newState.page + 1);
 
       return newState;
     },
 
-    [actions.removePage]: (workpadState, { payload }) => {
+    [actions.removePage]: (workpadState, { payload: { id, gotoPage } }) => {
       const curIndex = workpadState.page;
-      const delIndex = getPageIndexById(workpadState, payload);
+      const delIndex = getPageIndexById(workpadState, id);
       if (delIndex >= 0) {
         let newState = del(workpadState, `pages.${delIndex}`);
-        const router = routerProvider();
         const wasSelected = curIndex === delIndex;
         const wasOnlyPage = newState.pages.length === 0;
-        const newSelectedPage = curIndex >= delIndex ? curIndex - 1 : curIndex;
 
         // if we removed the only page, create a new empty one
         if (wasOnlyPage) {
           newState = addPage(newState);
         }
 
-        if (wasOnlyPage || wasSelected) {
-          // if we removed the only page or the selected one, select the first one
+        if (wasOnlyPage) {
           newState = set(newState, 'page', 0);
-        } else {
-          // set the adjusted selected page on new state
-          newState = set(newState, 'page', newSelectedPage);
+          gotoPage(1);
+        } else if (wasSelected || delIndex < curIndex) {
+          newState = set(newState, 'page', curIndex - 1);
+          gotoPage(curIndex);
         }
-
-        // changes to the page require navigation
-        router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
 
         return newState;
       }

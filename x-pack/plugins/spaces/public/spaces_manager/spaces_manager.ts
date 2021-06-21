@@ -9,7 +9,10 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 
-import type { HttpSetup } from 'src/core/public';
+import type {
+  HttpSetup,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
@@ -136,15 +139,21 @@ export class SpacesManager {
       });
   }
 
-  public async shareSavedObjectAdd(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_add`, {
-      body: JSON.stringify({ object, spaces }),
+  public async getShareableReferences(
+    objects: SavedObjectTarget[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return this.http.post(`/api/spaces/_get_shareable_references`, {
+      body: JSON.stringify({ objects }),
     });
   }
 
-  public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
-      body: JSON.stringify({ object, spaces }),
+  public async updateSavedObjectsSpaces(
+    objects: SavedObjectTarget[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ): Promise<void> {
+    return this.http.post(`/api/spaces/_update_objects_spaces`, {
+      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove }),
     });
   }
 

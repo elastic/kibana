@@ -104,3 +104,10 @@ export const EXCEPTIONS_TAB = i18n.translate(
     defaultMessage: 'Exceptions',
   }
 );
+
+export const DELETED_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
+  {
+    defaultMessage: 'Deleted rule',
+  }
+);

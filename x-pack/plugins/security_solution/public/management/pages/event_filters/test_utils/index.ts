@@ -6,15 +6,25 @@
  */
 
 import { combineReducers, createStore } from 'redux';
+import type {
+  FoundExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Ecs } from '../../../../../common/ecs';
 
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
 } from '../../../common/constants';
-import { ExceptionListItemSchema } from '../../../../shared_imports';
 
 import { eventFiltersPageReducer } from '../store/reducer';
+import {
+  httpHandlerMockFactory,
+  ResponseProvidersInterface,
+} from '../../../../common/mock/endpoint/http_handler_mock_factory';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 export const createGlobalNoMiddlewareStore = () => {
   return createStore(
@@ -83,9 +93,38 @@ export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
   name: 'Test',
   namespace_type: 'agnostic',
   os_types: ['windows'],
-  tags: [],
+  tags: ['policy:all'],
   tie_breaker_id: 'c42f3dbd-292f-49e8-83ab-158d024a4d8b',
   type: 'simple',
   updated_at: '2021-04-19T10:30:36.428Z',
   updated_by: 'elastic',
 });
+
+export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<{
+  eventFiltersList: () => FoundExceptionListItemSchema;
+  eventFiltersCreateList: () => ExceptionListItemSchema;
+}>;
+
+/**
+ * Mock `core.http` methods used by Event Filters List page
+ */
+export const eventFiltersListQueryHttpMock = httpHandlerMockFactory<EventFiltersListQueryHttpMockProviders>(
+  [
+    {
+      id: 'eventFiltersCreateList',
+      method: 'post',
+      path: EXCEPTION_LIST_URL,
+      handler: () => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersList',
+      method: 'get',
+      path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
+      handler: (): FoundExceptionListItemSchema => {
+        return getFoundExceptionListItemSchemaMock();
+      },
+    },
+  ]
+);

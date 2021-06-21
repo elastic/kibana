@@ -63,7 +63,6 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
-  DefaultPackages,
   TemplateRef,
   IndexTemplateMappings,
   Settings,
@@ -71,6 +70,7 @@ export {
   InstallType,
   InstallSource,
   InstallResult,
+  GetCategoriesRequest,
   DataType,
   dataTypes,
   // Fleet Server types

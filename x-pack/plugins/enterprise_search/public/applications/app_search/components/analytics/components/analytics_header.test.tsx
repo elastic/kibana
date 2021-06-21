@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, mockKibanaValues } from '../../../../__mocks__';
+import { setMockValues, mockKibanaValues } from '../../../../__mocks__/kea_logic';
 
 import React, { ReactElement } from 'react';
 

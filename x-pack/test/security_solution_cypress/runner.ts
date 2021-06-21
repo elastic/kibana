@@ -17,7 +17,7 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  await esArchiver.load('auditbeat');
+  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
@@ -56,7 +56,7 @@ export async function SecuritySolutionCypressCliFirefoxTestRunner({
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  await esArchiver.load('auditbeat');
+  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
@@ -93,8 +93,8 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  await esArchiver.load('empty_kibana');
-  await esArchiver.load('auditbeat');
+  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/empty_kibana');
+  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {

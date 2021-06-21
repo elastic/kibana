@@ -18,9 +18,8 @@ import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
-export const getMetrics = ({
+export const getMetrics = async ({
   setup,
   serviceName,
   environment,
@@ -31,10 +30,11 @@ export const getMetrics = ({
   environment?: string;
   numBuckets: number;
 }) => {
-  return withApmSpan('get_service_destination_metrics', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_destination_metrics',
+    {
       apm: {
         events: [ProcessorEvent.metric],
       },
@@ -46,7 +46,9 @@ export const getMetrics = ({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               {
-                exists: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
+                exists: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                },
               },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
@@ -99,47 +101,47 @@ export const getMetrics = ({
           },
         },
       },
-    });
+    }
+  );
 
-    return (
-      response.aggregations?.connections.buckets.map((bucket) => ({
-        span: {
-          destination: {
-            service: {
-              resource: String(bucket.key),
-            },
+  return (
+    response.aggregations?.connections.buckets.map((bucket) => ({
+      span: {
+        destination: {
+          service: {
+            resource: String(bucket.key),
           },
         },
-        value: {
-          count: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.count.value ?? 0
-            )
-          ),
-          latency_sum: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.latency_sum.value ?? 0
-            )
-          ),
-          error_count: sum(
-            bucket.timeseries.buckets.flatMap(
-              (dateBucket) =>
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0
-            )
-          ),
-        },
-        timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key,
-          count: dateBucket.count.value ?? 0,
-          latency_sum: dateBucket.latency_sum.value ?? 0,
-          error_count:
-            dateBucket[EVENT_OUTCOME].buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.count.value ?? 0,
-        })),
-      })) ?? []
-    );
-  });
+      },
+      value: {
+        count: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.count.value ?? 0
+          )
+        ),
+        latency_sum: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.latency_sum.value ?? 0
+          )
+        ),
+        error_count: sum(
+          bucket.timeseries.buckets.flatMap(
+            (dateBucket) =>
+              dateBucket[EVENT_OUTCOME].buckets.find(
+                (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+              )?.count.value ?? 0
+          )
+        ),
+      },
+      timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+        x: dateBucket.key,
+        count: dateBucket.count.value ?? 0,
+        latency_sum: dateBucket.latency_sum.value ?? 0,
+        error_count:
+          dateBucket[EVENT_OUTCOME].buckets.find(
+            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+          )?.count.value ?? 0,
+      })),
+    })) ?? []
+  );
 };

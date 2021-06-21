@@ -8,7 +8,7 @@
 import { ThreatMapEntries } from './types';
 import { State, reducer } from './reducer';
 import { getDefaultEmptyEntry } from './helpers';
-import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
+import { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

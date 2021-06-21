@@ -7,7 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroupDocker');
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
@@ -49,5 +48,8 @@ export default function ({ loadTestFile }) {
 
     // Outputs
     loadTestFile(require.resolve('./outputs'));
+
+    // Telemetry
+    loadTestFile(require.resolve('./fleet_telemetry'));
   });
 }

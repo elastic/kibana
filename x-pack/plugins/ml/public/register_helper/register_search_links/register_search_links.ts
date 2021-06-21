@@ -9,20 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 
 import { AppUpdater } from 'src/core/public';
-import { getSearchDeepLinks } from './search_deep_links';
+import { getDeepLinks } from './search_deep_links';
 
 export function registerSearchLinks(
   appUpdater: BehaviorSubject<AppUpdater>,
   isFullLicense: boolean
 ) {
   appUpdater.next(() => ({
-    meta: {
-      keywords: [
-        i18n.translate('xpack.ml.keyword.ml', {
-          defaultMessage: 'ML',
-        }),
-      ],
-      searchDeepLinks: getSearchDeepLinks(isFullLicense),
-    },
+    keywords: [
+      i18n.translate('xpack.ml.keyword.ml', {
+        defaultMessage: 'ML',
+      }),
+    ],
+    deepLinks: getDeepLinks(isFullLicense),
   }));
 }

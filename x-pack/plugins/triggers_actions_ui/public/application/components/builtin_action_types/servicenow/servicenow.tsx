@@ -6,12 +6,12 @@
  */
 
 import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
@@ -19,12 +19,12 @@ import {
   ServiceNowITSMActionParams,
   ServiceNowSIRActionParams,
 } from './types';
-import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
-const validateConnector = (
+const validateConnector = async (
   action: ServiceNowActionConnector
-): ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets> => {
+): Promise<ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets>> => {
+  const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
   };
@@ -39,27 +39,55 @@ const validateConnector = (
   };
 
   if (!action.config.apiUrl) {
-    configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRED];
+    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
   }
 
   if (action.config.apiUrl) {
     if (!isValidUrl(action.config.apiUrl)) {
-      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_INVALID];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
     } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
     }
   }
 
   if (!action.secrets.username) {
-    secretsErrors.username = [...secretsErrors.username, i18n.USERNAME_REQUIRED];
+    secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
   }
 
   if (!action.secrets.password) {
-    secretsErrors.password = [...secretsErrors.password, i18n.PASSWORD_REQUIRED];
+    secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
   }
 
   return validationResult;
 };
+
+export const SERVICENOW_ITSM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow ITSM.',
+  }
+);
+
+export const SERVICENOW_SIR_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow SecOps.',
+  }
+);
+
+export const SERVICENOW_ITSM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITSM',
+  }
+);
+
+export const SERVICENOW_SIR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow SecOps',
+  }
+);
 
 export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
@@ -68,14 +96,15 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
 > {
   return {
     id: '.servicenow',
-    iconClass: logo,
-    selectMessage: i18n.SERVICENOW_ITSM_DESC,
-    actionTypeTitle: i18n.SERVICENOW_ITSM_TITLE,
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: SERVICENOW_ITSM_DESC,
+    actionTypeTitle: SERVICENOW_ITSM_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
-    validateParams: (
+    validateParams: async (
       actionParams: ServiceNowITSMActionParams
-    ): GenericValidationResult<unknown> => {
+    ): Promise<GenericValidationResult<unknown>> => {
+      const translations = await import('./translations');
       const errors = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
@@ -88,7 +117,7 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
-        errors['subActionParams.incident.short_description'].push(i18n.TITLE_REQUIRED);
+        errors['subActionParams.incident.short_description'].push(translations.TITLE_REQUIRED);
       }
       return validationResult;
     },
@@ -103,12 +132,15 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
 > {
   return {
     id: '.servicenow-sir',
-    iconClass: logo,
-    selectMessage: i18n.SERVICENOW_SIR_DESC,
-    actionTypeTitle: i18n.SERVICENOW_SIR_TITLE,
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: SERVICENOW_SIR_DESC,
+    actionTypeTitle: SERVICENOW_SIR_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
-    validateParams: (actionParams: ServiceNowSIRActionParams): GenericValidationResult<unknown> => {
+    validateParams: async (
+      actionParams: ServiceNowSIRActionParams
+    ): Promise<GenericValidationResult<unknown>> => {
+      const translations = await import('./translations');
       const errors = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
@@ -121,7 +153,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
-        errors['subActionParams.incident.short_description'].push(i18n.TITLE_REQUIRED);
+        errors['subActionParams.incident.short_description'].push(translations.TITLE_REQUIRED);
       }
       return validationResult;
     },

@@ -20,9 +20,11 @@ describe('Stack Alerts Feature Privileges', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-    const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting;
-    const typesInFeaturePrivilegeAll = BUILT_IN_ALERTS_FEATURE.privileges.all.alerting.all;
-    const typesInFeaturePrivilegeRead = BUILT_IN_ALERTS_FEATURE.privileges.read.alerting.read;
+    const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
+    const typesInFeaturePrivilegeAll =
+      BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
+    const typesInFeaturePrivilegeRead =
+      BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
     expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilege.length);
     expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilegeAll.length);
     expect(alertingSetup.registerType.mock.calls.length).toEqual(

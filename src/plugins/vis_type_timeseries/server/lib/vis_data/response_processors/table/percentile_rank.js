@@ -11,7 +11,7 @@ import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { getAggValue } from '../../helpers/get_agg_value';
-import { METRIC_TYPES } from '../../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../../common/enums';
 
 export function percentileRank(bucket, panel, series, meta, extractFields) {
   return (next) => async (results) => {

@@ -6,11 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { JsonArray, JsonObject, JsonValue } from '../../../../src/plugins/kibana_utils/common';
+import { JsonArray, JsonObject, JsonValue } from '@kbn/common-utils';
 
 export { JsonArray, JsonObject, JsonValue };
 
 export const jsonScalarRT = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
+export type JsonScalar = rt.TypeOf<typeof jsonScalarRT>;
 
 export const jsonValueRT: rt.Type<JsonValue> = rt.recursion('JsonValue', () =>
   rt.union([jsonScalarRT, jsonArrayRT, jsonObjectRT])

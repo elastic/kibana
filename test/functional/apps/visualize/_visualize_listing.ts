@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and delete', function () {
       before(async function () {
+        await PageObjects.visualize.initTests();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.deleteAllVisualizations();
       });
@@ -44,7 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('search', function () {
       before(async function () {
         // create one new viz
-        await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickMarkdownWidget();
         await PageObjects.visEditor.setMarkdownTxt('HELLO');

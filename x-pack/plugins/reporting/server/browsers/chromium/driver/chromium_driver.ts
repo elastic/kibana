@@ -11,6 +11,8 @@ import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '../';
+import { ReportingCore } from '../../..';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
@@ -59,8 +61,14 @@ export class HeadlessChromiumDriver {
 
   private listenersAttached = false;
   private interceptedCount = 0;
+  private core: ReportingCore;
 
-  constructor(page: puppeteer.Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
+  constructor(
+    core: ReportingCore,
+    page: puppeteer.Page,
+    { inspect, networkPolicy }: ChromiumDriverOptions
+  ) {
+    this.core = core;
     this.page = page;
     this.inspect = inspect;
     this.networkPolicy = networkPolicy;
@@ -98,6 +106,8 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
+    const enableScreenshotMode = this.core.getEnableScreenshotMode();
+    await this.page.evaluateOnNewDocument(enableScreenshotMode);
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);
@@ -261,6 +271,7 @@ export class HeadlessChromiumDriver {
           {
             ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
+            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
           },
           (value, name) => ({
             name,
@@ -302,7 +313,7 @@ export class HeadlessChromiumDriver {
     // Even though 3xx redirects go through our request
     // handler, we should probably inspect responses just to
     // avoid being bamboozled by some malicious request
-    this.page.on('response', (interceptedResponse: puppeteer.Response) => {
+    this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 

@@ -31,7 +31,7 @@ export type Schema = Record<string, SchemaType>;
 
 // This is a mapping of schema field types ("text", "number", "geolocation", "date")
 // to the names of source engines which utilize that type
-export type SchemaConflictFieldTypes = Record<SchemaType, string[]>;
+export type SchemaConflictFieldTypes = Partial<Record<SchemaType, string[]>>;
 
 export interface SchemaConflict {
   fieldTypes: SchemaConflictFieldTypes;

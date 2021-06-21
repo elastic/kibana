@@ -17,6 +17,7 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { documentField } from './document_field';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -109,6 +110,7 @@ describe('IndexPattern Field Item', () => {
       itemIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
 
     data.fieldFormats = ({
@@ -162,7 +164,7 @@ describe('IndexPattern Field Item', () => {
       body: JSON.stringify({
         dslQuery: {
           bool: {
-            must: [{ match_all: {} }],
+            must: [],
             filter: [],
             should: [],
             must_not: [],

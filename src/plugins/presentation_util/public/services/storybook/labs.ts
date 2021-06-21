@@ -46,13 +46,17 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   };
 
   const reset = () => {
+    // This is normally not ok, but it's our isolated Storybook instance.
     storage.clear();
   };
+
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {
     getProjectIDs,
     getProjects,
     getProject,
+    isProjectEnabled,
     reset,
     setProjectStatus,
   };

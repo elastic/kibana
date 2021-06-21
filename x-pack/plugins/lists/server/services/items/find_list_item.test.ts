@@ -8,9 +8,9 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getShardMock } from '../../../common/get_shard.mock';
 import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
-import { getEmptySearchListMock } from '../../../common/schemas/elastic_response/search_es_list_schema.mock';
+import { getShardMock } from '../../schemas/common/get_shard.mock';
+import { getEmptySearchListMock } from '../../schemas/elastic_response/search_es_list_schema.mock';
 
 import { getFindListItemOptionsMock } from './find_list_item.mock';
 import { findListItem } from './find_list_item';

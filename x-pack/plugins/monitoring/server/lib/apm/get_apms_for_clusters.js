@@ -13,13 +13,12 @@ import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_sta
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(clusterUuid, response) {
-  const { apmTotal, totalEvents, memRss, memTotal, versions } = apmAggResponseHandler(response);
+  const { apmTotal, totalEvents, memRss, versions } = apmAggResponseHandler(response);
 
   // combine stats
   const stats = {
     totalEvents,
     memRss,
-    memTotal,
     apms: {
       total: apmTotal,
     },
@@ -39,6 +38,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
   const config = req.server.config();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const cgroup = config.get('monitoring.ui.container.apm.enabled');
 
   return Promise.all(
     clusters.map(async (cluster) => {
@@ -55,7 +55,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
             clusterUuid,
             metric: ApmMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
           }),
-          aggs: apmUuidsAgg(maxBucketSize),
+          aggs: apmUuidsAgg(maxBucketSize, cgroup),
         },
       };
 

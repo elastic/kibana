@@ -14,12 +14,11 @@ import { registerTestBed, TestBed, getCommonActions } from '../../test_utils';
 import { RuntimeFieldPainlessError } from '../../lib';
 import { Field } from '../../types';
 import { FieldEditor, Props, FieldEditorFormState } from './field_editor';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 const defaultProps: Props = {
   onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
+  links: docLinksServiceMock.createStartContract() as any,
   ctx: {
     existingConcreteFields: [],
     namesNotAllowed: [],

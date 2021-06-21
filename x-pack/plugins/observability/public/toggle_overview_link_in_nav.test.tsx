@@ -14,6 +14,7 @@ import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 describe('toggleOverviewLinkInNav', () => {
   let applicationStart: ReturnType<typeof applicationServiceMock.createStartContract>;
   let subjectMock: jest.Mocked<Subject<AppUpdater>>;
+  let casesMock: jest.Mocked<Subject<AppUpdater>>;
 
   beforeEach(() => {
     applicationStart = applicationServiceMock.createStartContract();
@@ -34,7 +35,7 @@ describe('toggleOverviewLinkInNav', () => {
       },
     };
 
-    toggleOverviewLinkInNav(subjectMock, applicationStart);
+    toggleOverviewLinkInNav(subjectMock, casesMock, applicationStart);
 
     expect(subjectMock.next).toHaveBeenCalledTimes(1);
     const updater = subjectMock.next.mock.calls[0][0]!;
@@ -54,7 +55,7 @@ describe('toggleOverviewLinkInNav', () => {
       },
     };
 
-    toggleOverviewLinkInNav(subjectMock, applicationStart);
+    toggleOverviewLinkInNav(subjectMock, casesMock, applicationStart);
 
     expect(subjectMock.next).not.toHaveBeenCalled();
   });

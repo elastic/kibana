@@ -12,12 +12,13 @@ import {
   StaleResourceState,
   UninitialisedResourceState,
 } from './async_resource_state';
+import { ServerApiError } from '../../common/types';
 
 export const createUninitialisedResourceState = (): UninitialisedResourceState => {
   return { type: 'UninitialisedResourceState' };
 };
 
-export const createLoadingResourceState = <Data, Error>(
+export const createLoadingResourceState = <Data, Error = ServerApiError>(
   previousState: StaleResourceState<Data, Error>
 ): LoadingResourceState<Data, Error> => {
   return {
@@ -33,7 +34,7 @@ export const createLoadedResourceState = <Data>(data: Data): LoadedResourceState
   };
 };
 
-export const createFailedResourceState = <Data, Error>(
+export const createFailedResourceState = <Data, Error = ServerApiError>(
   error: Error,
   lastLoadedState?: LoadedResourceState<Data>
 ): FailedResourceState<Data, Error> => {

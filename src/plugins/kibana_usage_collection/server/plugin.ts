@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Subject, Observable } from 'rxjs';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   Plugin,
   ISavedObjectsRepository,
   IUiSettingsClient,
   SharedGlobalConfig,
-  SavedObjectsClient,
   CoreStart,
   SavedObjectsServiceSetup,
   OpsMetrics,
   Logger,
   CoreUsageDataStart,
-} from '../../../core/server';
+} from 'src/core/server';
+import { SavedObjectsClient } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
   registerKibanaUsageCollector,
@@ -38,6 +38,7 @@ import {
   registerConfigUsageCollector,
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
+  registerSavedObjectsCountUsageCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -112,6 +113,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
+    registerSavedObjectsCountUsageCollector(usageCollection, this.legacyConfig$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

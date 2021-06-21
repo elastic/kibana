@@ -320,6 +320,22 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
+                "operationType": "overall_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_min",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_max",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_average",
+                "type": "fullReference",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "min",
                 "type": "field",
@@ -353,6 +369,14 @@ describe('getOperationTypesForField', () => {
                 "field": "bytes",
                 "operationType": "last_value",
                 "type": "field",
+              },
+              Object {
+                "operationType": "math",
+                "type": "managedReference",
+              },
+              Object {
+                "operationType": "formula",
+                "type": "managedReference",
               },
             ],
           },
