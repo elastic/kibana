@@ -16,11 +16,9 @@ jest.mock('../../common/hooks/endpoint/ingest_enabled');
 
 describe('when in the Admistration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
-  let coreStart: AppContextTestRender['coreStart'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    coreStart = mockedContext.coreStart;
     render = () => mockedContext.render(<ManagementContainer />);
     mockedContext.history.push('/administration/endpoints');
   });

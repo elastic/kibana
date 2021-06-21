@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiProgress, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
