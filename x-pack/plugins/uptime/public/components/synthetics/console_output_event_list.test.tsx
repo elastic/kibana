@@ -20,9 +20,10 @@ describe('ConsoleOutputEventList component', () => {
             // 4 steps, three console, one step/end
             steps: [
               {
-                timestamp: '123',
-                docId: '1',
+                '@timestamp': '123',
+                _id: '1',
                 monitor: {
+                  check_group: 'check_group',
                   id: 'MON_ID',
                   duration: {
                     us: 10,
@@ -35,9 +36,10 @@ describe('ConsoleOutputEventList component', () => {
                 },
               },
               {
-                timestamp: '124',
-                docId: '2',
+                '@timestamp': '124',
+                _id: '2',
                 monitor: {
+                  check_group: 'check_group',
                   id: 'MON_ID',
                   duration: {
                     us: 10,
@@ -50,9 +52,10 @@ describe('ConsoleOutputEventList component', () => {
                 },
               },
               {
-                timestamp: '124',
-                docId: '2',
+                '@timestamp': '124',
+                _id: '2',
                 monitor: {
+                  check_group: 'check_group',
                   id: 'MON_ID',
                   duration: {
                     us: 10,
@@ -65,9 +68,10 @@ describe('ConsoleOutputEventList component', () => {
                 },
               },
               {
-                timestamp: '125',
-                docId: '3',
+                '@timestamp': '125',
+                _id: '3',
                 monitor: {
+                  check_group: 'check_group',
                   id: 'MON_ID',
                   duration: {
                     us: 10,
