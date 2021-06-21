@@ -570,9 +570,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      // TODO: temporary regression
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -645,9 +644,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      // TODO: temporary regression, selectors will help
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1124,8 +1122,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      // TODO: why so many times?
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(10);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
