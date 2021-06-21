@@ -14,6 +14,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { SearchUIForm } from './components/search_ui_form';
+import { SearchUIGraphic } from './components/search_ui_graphic';
+
 import { SearchUI } from './';
 
 describe('SearchUI', () => {
@@ -27,8 +30,9 @@ describe('SearchUI', () => {
   });
 
   it('renders', () => {
-    shallow(<SearchUI />);
-    // TODO: Check for form
+    const wrapper = shallow(<SearchUI />);
+    expect(wrapper.find(SearchUIForm).exists()).toBe(true);
+    expect(wrapper.find(SearchUIGraphic).exists()).toBe(true);
   });
 
   it('initializes data on mount', () => {
