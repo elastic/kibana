@@ -24,26 +24,22 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('copy-to-clipboard', () => {
-  return jest.fn();
-});
+jest.mock('copy-to-clipboard', () => jest.fn());
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, options?: { path?: string; absolute?: boolean }) =>
     `${appId}${options?.path ?? ''}`
 );
 
-jest.mock('../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: mockGetUrlForApp,
-        },
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: mockGetUrlForApp,
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
 const props = {
   id: 'comment-id',
