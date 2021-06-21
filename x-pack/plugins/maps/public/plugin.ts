@@ -36,11 +36,7 @@ import type {
 } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import {
-  createMapsUrlGenerator,
-  createRegionMapUrlGenerator,
-  createTileMapUrlGenerator,
-} from './url_generator';
+import { createRegionMapUrlGenerator, createTileMapUrlGenerator } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
@@ -146,7 +142,6 @@ export class MapsPlugin
         useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
       };
     };
-    plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
     plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
     plugins.share.urlGenerators.registerUrlGenerator(createRegionMapUrlGenerator(getStartServices));
 

@@ -23,7 +23,6 @@ import { lazyLoadMapModules } from './lazy_load_bundle';
 const STATE_STORAGE_KEY = '_a';
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export const MAPS_APP_URL_GENERATOR = 'MAPS_APP_URL_GENERATOR';
 export const MAPS_APP_TILE_MAP_URL_GENERATOR = 'MAPS_APP_TILE_MAP_URL_GENERATOR';
 export const MAPS_APP_REGION_MAP_URL_GENERATOR = 'MAPS_APP_REGION_MAP_URL_GENERATOR';
 
@@ -111,15 +110,6 @@ async function createMapUrl({
 
   return url;
 }
-
-export const createMapsUrlGenerator = (
-  getStartServices: GetStartServices
-): UrlGeneratorsDefinition<typeof MAPS_APP_URL_GENERATOR> => ({
-  id: MAPS_APP_URL_GENERATOR,
-  createUrl: async (mapsUrlGeneratorState: MapsUrlGeneratorState): Promise<string> => {
-    return createMapUrl({ ...mapsUrlGeneratorState, getStartServices });
-  },
-});
 
 export const createTileMapUrlGenerator = (
   getStartServices: GetStartServices
