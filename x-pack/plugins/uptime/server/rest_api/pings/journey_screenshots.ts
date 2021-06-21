@@ -35,7 +35,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    let result: ScreenshotReturnTypesUnion = null;
+    let result: ScreenshotReturnTypesUnion | null = null;
     try {
       result = await libs.requests.getJourneyScreenshot({
         uptimeEsClient,
