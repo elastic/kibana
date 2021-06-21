@@ -25,7 +25,8 @@ import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
-import { getInstallations, installPackage, isPackageInstalled } from './epm/packages';
+import { getInstallations, installPackage } from './epm/packages';
+import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
 
 export interface SetupStatus {
