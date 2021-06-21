@@ -9,12 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Synopsis } from './synopsis';
-import { SampleDataSetCards } from './sample_data_set_cards';
-import { getServices } from '../kibana_services';
-
 import {
-  EuiPage,
   EuiTabs,
   EuiTab,
   EuiFlexItem,
@@ -22,13 +17,14 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
-  EuiPageBody,
 } from '@elastic/eui';
-
-import { getTutorials } from '../load_tutorials';
-
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { Synopsis } from './synopsis';
+import { SampleDataSetCards } from './sample_data_set_cards';
+import { getServices } from '../kibana_services';
+import { KibanaPageTemplate } from '../../../../kibana_react/public';
+import { getTutorials } from '../load_tutorials';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -276,18 +272,14 @@ class TutorialDirectoryUi extends React.Component {
 
   render() {
     return (
-      <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
-          <EuiFlexItem grow={false}>
-            {this.renderHeader()}
-            {this.renderNotices()}
-            <EuiSpacer size="m" />
-            <EuiTabs>{this.renderTabs()}</EuiTabs>
-            <EuiSpacer />
-            {this.renderTabContent()}
-          </EuiFlexItem>
-        </EuiPageBody>
-      </EuiPage>
+      <KibanaPageTemplate restrictWidth={1200}>
+        {this.renderHeader()}
+        {this.renderNotices()}
+        <EuiSpacer size="m" />
+        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiSpacer />
+        {this.renderTabContent()}
+      </KibanaPageTemplate>
     );
   }
 }
