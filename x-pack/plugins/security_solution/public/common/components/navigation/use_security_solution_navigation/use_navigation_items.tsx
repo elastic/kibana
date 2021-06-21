@@ -112,7 +112,13 @@ const useSideNavItem = ({
     track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
   };
 
-  const appHref = getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch });
+  const appHref =
+    id === 'overview' || id === 'timelines' || id === 'case'
+      ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
+      : getUrlForApp(`${APP_ID}:${id}`, {
+          path: urlSearch,
+        });
+
   return {
     'data-href': appHref,
     'data-test-subj': `navigation-${id}`,
