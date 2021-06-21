@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { Plugin } from 'kibana/server';
 
 export class CorePluginBPlugin implements Plugin {
   public setup() {}

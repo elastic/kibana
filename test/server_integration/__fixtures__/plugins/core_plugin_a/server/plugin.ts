@@ -13,7 +13,7 @@ import {
   CoreSetup,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../../../../src/core/server';
+} from '../../../../../../src/core/server';
 
 export class CorePluginAPlugin implements Plugin {
   private status$ = new Subject<ServiceStatus>();
