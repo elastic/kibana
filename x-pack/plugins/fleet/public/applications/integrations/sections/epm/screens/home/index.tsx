@@ -34,15 +34,19 @@ export const EPMHomePage: React.FC = memo(() => {
   } = usePackageInstallations();
 
   const [showUpdatesCategory, setShowUpdatesCategory] = useState(false);
+  const upgradeCallout = (
+    <UpgradeCallout
+      updatablePackages={updatablePackages}
+      updatableIntegrations={updatableIntegrations}
+      onLinkToPackages={() => setShowUpdatesCategory(true)}
+    />
+  );
+
   return (
-    <DefaultLayout>
-      <UpgradeCallout
-        updatablePackages={updatablePackages}
-        updatableIntegrations={updatableIntegrations}
-        onLinkToPackages={() => setShowUpdatesCategory(true)}
-      />
-      <Switch>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
+    <Switch>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
+        <DefaultLayout section="manage">
+          {upgradeCallout}
           <InstalledPackages
             allInstalledPackages={allInstalledPackages}
             updatablePackages={updatablePackages}
@@ -50,15 +54,18 @@ export const EPMHomePage: React.FC = memo(() => {
             showUpdatesCategory={showUpdatesCategory}
             onLoadUpdatesCategory={() => setShowUpdatesCategory(false)}
           />
-        </Route>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
+        </DefaultLayout>
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
+        <DefaultLayout section="browse">
+          {upgradeCallout}
           <AvailablePackages
             allPackages={allPackages?.response ?? []}
             isLoadingAllPackages={isLoadingPackages}
           />
-        </Route>
-      </Switch>
-    </DefaultLayout>
+        </DefaultLayout>
+      </Route>
+    </Switch>
   );
 });
 

@@ -7,7 +7,6 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { ColumnarPage } from '../../../components/page';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 
@@ -15,9 +14,7 @@ export const LogEntryCategoriesPage = () => {
   return (
     <EuiErrorBoundary>
       <LogEntryCategoriesPageProviders>
-        <ColumnarPage data-test-subj="logsLogEntryCategoriesPage">
-          <LogEntryCategoriesPageContent />
-        </ColumnarPage>
+        <LogEntryCategoriesPageContent />
       </LogEntryCategoriesPageProviders>
     </EuiErrorBoundary>
   );

@@ -297,7 +297,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
                     append:
-                      v.selection.dataLoss !== 'nothing' || v.showBetaBadge ? (
+                      v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
                         <EuiFlexGroup
                           gutterSize="xs"
                           responsive={false}
@@ -325,12 +325,12 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                               />
                             </EuiFlexItem>
                           ) : null}
-                          {v.showBetaBadge ? (
+                          {v.showExperimentalBadge ? (
                             <EuiFlexItem grow={false}>
                               <EuiBadge color="hollow">
                                 <FormattedMessage
-                                  id="xpack.lens.chartSwitch.betaLabel"
-                                  defaultMessage="Beta"
+                                  id="xpack.lens.chartSwitch.experimentalLabel"
+                                  defaultMessage="Experimental"
                                 />
                               </EuiBadge>
                             </EuiFlexItem>

@@ -21,6 +21,7 @@ interface RequestArgs {
   jobOverrides?: SetupMlModuleJobOverrides[];
   datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
   query?: object;
+  useDedicatedIndex?: boolean;
 }
 
 export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
@@ -34,6 +35,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     jobOverrides = [],
     datafeedOverrides = [],
     query,
+    useDedicatedIndex = false,
   } = requestArgs;
 
   const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
@@ -48,6 +50,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
         jobOverrides,
         datafeedOverrides,
         query,
+        useDedicatedIndex,
       })
     ),
   });
@@ -78,6 +81,7 @@ const setupMlModuleRequestParamsRT = rt.intersection([
     startDatafeed: rt.boolean,
     jobOverrides: rt.array(setupMlModuleJobOverridesRT),
     datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
+    useDedicatedIndex: rt.boolean,
   }),
   rt.exact(
     rt.partial({

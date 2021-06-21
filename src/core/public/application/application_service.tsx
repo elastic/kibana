@@ -282,8 +282,19 @@ export class ApplicationService {
       history: this.history!,
       getUrlForApp: (
         appId,
-        { path, absolute = false }: { path?: string; absolute?: boolean } = {}
+        {
+          path,
+          absolute = false,
+          deepLinkId,
+        }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
+        if (deepLinkId) {
+          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
+
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
