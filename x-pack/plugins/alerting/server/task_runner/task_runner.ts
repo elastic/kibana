@@ -492,16 +492,17 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    const runDate = new Date().toISOString();
-    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+    const runDate = new Date();
+    const runDateString = runDate.toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
-    const scheduleDelay = Date.now() - this.taskInstance.runAt.getTime();
+    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDate,
+      '@timestamp': runDateString,
       event: {
         action: EVENT_LOG_ACTIONS.execute,
         kind: 'alert',
