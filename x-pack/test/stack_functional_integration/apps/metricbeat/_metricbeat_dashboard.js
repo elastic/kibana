@@ -15,7 +15,6 @@ const ARCHIVE = resolve(INTEGRATION_TEST_ROOT, 'test/es_archives/metricbeat');
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
-  const find = getService('find');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
@@ -47,7 +46,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       // await PageObjects.dashboard.clickFullScreenMode();
 
       await PageObjects.common.sleep(2000);
-      await find.clickByButtonText('Dismiss');
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(2000);
       await browser.setScreenshotSize(1000, 1337);

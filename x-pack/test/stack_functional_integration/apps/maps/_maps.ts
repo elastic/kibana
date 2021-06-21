@@ -21,7 +21,6 @@ export default function ({
   describe('check Elastic Maps Server', function () {
     before(async function () {
       await PageObjects.maps.loadSavedMap('EMS Test');
-      await find.clickByButtonText('Dismiss');
       await browser.setScreenshotSize(1000, 1000);
     });
 

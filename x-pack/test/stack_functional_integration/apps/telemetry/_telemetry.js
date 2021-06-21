@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
+  const find = getService('find');
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
@@ -17,6 +18,9 @@ export default ({ getService, getPageObjects }) => {
       log.debug('monitoring');
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('home');
+    });
+    after(async function () {
+      await find.clickByButtonText('Dismiss');
     });
 
     it('should show banner Help us improve the Elastic Stack', async () => {
