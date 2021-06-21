@@ -54,6 +54,7 @@ export enum CommentType {
   user = 'user',
   alert = 'alert',
   generatedAlert = 'generated_alert',
+  actions = 'actions',
 }
 
 export const ContextTypeUserRt = rt.type({

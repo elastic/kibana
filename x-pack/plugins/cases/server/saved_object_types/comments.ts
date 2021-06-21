@@ -27,6 +27,13 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       type: {
         type: 'keyword',
       },
+      actions: {
+        properties: {
+          hostname: { type: 'text' },
+          endpointId: { type: 'text' },
+          type: { type: 'keyword' },
+        },
+      },
       alertId: {
         type: 'keyword',
       },

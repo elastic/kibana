@@ -115,6 +115,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 const DESCRIPTION_ID = 'description';
 const NEW_ID = 'newComment';
 
+// TODO: Check for the new comment type and add a new comment component that you make.
 export const UserActionTree = React.memo(
   ({
     caseServices,
