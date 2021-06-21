@@ -16,7 +16,7 @@ import { Create } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/public/containers/types';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 jest.mock('../use_insert_timeline');
@@ -71,8 +71,9 @@ describe('Create case', () => {
     );
 
     await waitFor(() =>
-      expect(mockNavigateToApp).toHaveBeenCalledWith(CASES_APP_ID, {
+      expect(mockNavigateToApp).toHaveBeenCalledWith(APP_ID, {
         path: `?${mockRes}`,
+        deepLinkId: SecurityPageName.case,
       })
     );
   });
@@ -97,6 +98,7 @@ describe('Create case', () => {
     await waitFor(() =>
       expect(mockNavigateToApp).toHaveBeenNthCalledWith(1, APP_ID, {
         path: `/basic-case-id?${mockRes}`,
+        deepLinkId: SecurityPageName.case,
       })
     );
   });
