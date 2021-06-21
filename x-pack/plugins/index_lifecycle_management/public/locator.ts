@@ -6,13 +6,13 @@
  */
 
 import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { ManagementAppLocator } from 'src/plugins/management/common';
 import { LocatorDefinition } from '../../../../src/plugins/share/public/';
 import {
   getPoliciesListPath,
   getPolicyCreatePath,
   getPolicyEditPath,
 } from './application/services/navigation';
-import { ManagementAppLocator } from '../../../../src/plugins/management/common';
 import { PLUGIN } from '../common/constants';
 
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
