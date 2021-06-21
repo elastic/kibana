@@ -636,7 +636,7 @@ instanceStateValue: true
                 callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
-                  ...searchResult.body.hits[0]._source.state.callClusterError,
+                  ...searchResult.body.hits.hits[0]._source.state.callClusterError,
                 },
                 callScopedClusterError: {
                   ...searchResult.body.hits.hits[0]._source.state.callScopedClusterError,
