@@ -205,3 +205,33 @@ export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
   { defaultMessage: 'Create a new role mapping' }
 );
+
+export const ROLES_DISABLED_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rolesDisabledTitle',
+  { defaultMessage: 'Role-based access is disabled' }
+);
+
+export const ROLES_DISABLED_DESCRIPTION = (productName: ProductName) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.rolesDisabledDescription', {
+    defaultMessage:
+      'All users set for this deployment currently have full access to {productName}. To restrict access and manage permissions, you must enable role-based access for Enterprise Search.',
+    values: { productName },
+  });
+
+export const ROLES_DISABLED_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rolesDisabledNote',
+  {
+    defaultMessage:
+      'Note: enabling role-based access restricts access for both App Search and Workplace Search. Once enabled, review access management for both products, if applicable.',
+  }
+);
+
+export const ENABLE_ROLES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableRolesButton',
+  { defaultMessage: 'Enable role-based access' }
+);
+
+export const ENABLE_ROLES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableRolesLink',
+  { defaultMessage: 'Learn more about role-based access' }
+);
