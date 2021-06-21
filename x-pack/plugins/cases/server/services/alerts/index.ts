@@ -12,7 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
-import { UpdateAlertRequest } from '../../client/alerts/client';
+import { UpdateAlertRequest } from '../../client/alerts/types';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
