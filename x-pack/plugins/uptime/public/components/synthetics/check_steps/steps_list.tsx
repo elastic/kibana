@@ -9,7 +9,7 @@ import { EuiBasicTable, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
-import { Ping } from '../../../../common/runtime_types';
+import { JourneyStep, Ping } from '../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
 import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
 import { StatusBadge } from '../status_badge';
@@ -23,7 +23,7 @@ export const SpanWithMargin = styled.span`
 `;
 
 interface Props {
-  data: Ping[];
+  data: JourneyStep[];
   error?: Error;
   loading: boolean;
 }
@@ -34,7 +34,7 @@ interface StepStatusCount {
   succeeded: number;
 }
 
-function isStepEnd(step: Ping) {
+function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 
@@ -62,7 +62,7 @@ function statusMessage(count: StepStatusCount, loading?: boolean) {
   });
 }
 
-function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
+function reduceStepStatus(prev: StepStatusCount, cur: JourneyStep): StepStatusCount {
   if (cur.synthetics?.payload?.status === 'succeeded') {
     prev.succeeded += 1;
     return prev;
@@ -77,7 +77,7 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
 export const StepsList = ({ data, error, loading }: Props) => {
   const steps = data.filter(isStepEnd);
 
-  const { expandedRows, toggleExpand } = useExpandedRow({ steps, allPings: data, loading });
+  const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
 
   const columns: any[] = [
     {
@@ -91,7 +91,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (timestamp: string, item: Ping) => <StepImage step={item} />,
+      render: (_timestamp: string, item: Ping) => <StepImage step={item} />,
     },
     {
       align: 'left',
@@ -110,20 +110,20 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'right',
       width: '24px',
       isExpander: true,
-      render: (ping: Ping) => {
+      render: (journeyStep: JourneyStep) => {
         return (
           <EuiButtonIcon
             data-test-subj="uptimeStepListExpandBtn"
-            onClick={() => toggleExpand({ ping })}
-            aria-label={expandedRows[ping.docId] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[ping.docId] ? 'arrowUp' : 'arrowDown'}
+            onClick={() => toggleExpand({ journeyStep })}
+            aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
+            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
     },
   ];
 
-  const getRowProps = (item: Ping) => {
+  const getRowProps = (item: JourneyStep) => {
     const { monitor } = item;
 
     return {
@@ -134,7 +134,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
 
         // we dont want to capture image click event
         if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'BUTTON') {
-          toggleExpand({ ping: item });
+          toggleExpand({ journeyStep: item });
         }
       },
     };
