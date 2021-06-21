@@ -1,25 +1,9 @@
-@import '../../../../core/public/mixins';
-
-// .kbnOverviewWrapper {
-//   @include kibanaFullBodyMinHeight();
-//   background-color: $euiColorEmptyShade;
-//   display: flex;
-//   flex-direction: column;
-// }
-
-.kbnOverviewContent {
-  // margin: 0 auto;
-  // max-width: 1200px;
-  // padding: $euiSizeXL $euiSize;
-  // width: 100%;
-
-  // Ensure card heights are stretched equally when wrapped with this element
-  .kbnRedirectCrossAppLinks {
-    align-items: flex-start;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-  }
+// Ensure card heights are stretched equally when wrapped with this element
+.kbnRedirectCrossAppLinks {
+  align-items: flex-start;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .kbnOverviewApps__item {
@@ -107,11 +91,6 @@
     margin-bottom: 0 !important;
     margin-top: 0 !important;
   }
-}
-
-// Accounting for no `flush="both"` prop on EuiButtonEmpty
-.kbnOverviewDataAdd__actionButton {
-  margin-right: 0;
 }
 
 .kbnOverviewDataManage__item:not(:only-child) {

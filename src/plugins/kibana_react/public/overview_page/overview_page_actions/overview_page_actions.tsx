@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart, CoreStart } from 'kibana/public';
+import { ApplicationStart } from 'kibana/public';
 import { RedirectAppLinks } from '../../app_links';
 
 interface Props {
@@ -27,10 +27,6 @@ export const overviewPageActions = ({
   showDevToolsLink,
   showManagementLink,
 }: Props) => {
-  // const {
-  //   services: { application },
-  // } = useKibana<CoreStart>();
-
   const {
     management: isManagementEnabled,
     dev_tools: isDevToolsEnabled,
