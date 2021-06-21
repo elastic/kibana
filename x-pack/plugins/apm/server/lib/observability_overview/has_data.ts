@@ -29,8 +29,14 @@ export async function getHasData({ setup }: { setup: Setup }) {
       'observability_overview_has_apm_data',
       params
     );
-    return response.hits.total.value > 0;
+    return {
+      hasData: response.hits.total.value > 0,
+      indices: setup.indices,
+    };
   } catch (e) {
-    return false;
+    return {
+      hasData: false,
+      indices: setup.indices,
+    };
   }
 }
