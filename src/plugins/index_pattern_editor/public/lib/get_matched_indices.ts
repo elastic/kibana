@@ -23,10 +23,6 @@ function isSystemIndex(index: string): boolean {
 }
 
 function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: boolean) {
-  if (!indices) {
-    return indices;
-  }
-
   const acceptableIndices = isIncludingSystemIndices
     ? indices
     : // All system indices begin with a period.
@@ -56,12 +52,19 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
 
 import { MatchedItem } from '../types';
 
+export interface MatchedIndicesSet {
+  allIndices: MatchedItem[];
+  exactMatchedIndices: MatchedItem[];
+  partialMatchedIndices: MatchedItem[];
+  visibleIndices: MatchedItem[];
+}
+
 export function getMatchedIndices(
   unfilteredAllIndices: MatchedItem[],
   unfilteredPartialMatchedIndices: MatchedItem[],
   unfilteredExactMatchedIndices: MatchedItem[],
   isIncludingSystemIndices: boolean = false
-) {
+): MatchedIndicesSet {
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);
   const partialMatchedIndices = filterSystemIndices(
     unfilteredPartialMatchedIndices,

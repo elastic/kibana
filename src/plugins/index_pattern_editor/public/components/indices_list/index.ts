@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const pluginName = 'index_pattern_editor';
-export const MAX_NUMBER_OF_MATCHING_INDICES = 100;
-export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+export { IndicesList } from './indices_list';

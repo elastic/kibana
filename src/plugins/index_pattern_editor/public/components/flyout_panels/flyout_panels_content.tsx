@@ -5,7 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React, { useEffect } from 'react';
 
-export const pluginName = 'index_pattern_editor';
-export const MAX_NUMBER_OF_MATCHING_INDICES = 100;
-export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+import { useFlyoutPanelContext } from './flyout_panel';
+
+export const PanelContent: React.FC = (props) => {
+  const { registerContent } = useFlyoutPanelContext();
+
+  useEffect(() => {
+    registerContent();
+  }, [registerContent]);
+
+  return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+};
