@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import rison from 'rison-node';
 import type {
   TimeRange,
@@ -16,9 +18,10 @@ import type {
 import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
-import type { LocatorDefinition } from '../../../../src/plugins/share/public';
+import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
+import { lazyLoadMapModules } from './lazy_load_bundle';
 
 export interface MapsAppLocatorParams extends SerializableState {
   /**
@@ -61,6 +64,8 @@ export interface MapsAppLocatorParams extends SerializableState {
 }
 
 export const MAPS_APP_LOCATOR = 'MAPS_APP_LOCATOR' as const;
+
+export type MapsAppLocator = LocatorPublic<MapsAppLocatorParams>;
 
 export interface MapsAppLocatorDependencies {
   useHash: boolean;
@@ -107,5 +112,72 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
       route: path,
       state: {},
     };
+  };
+}
+
+export interface MapsAppTileMapLocatorParams extends SerializableState {
+  label: string;
+  mapType: string;
+  colorSchema: string;
+  indexPatternId?: string;
+  geoFieldName?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+  timeRange?: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+  hash?: boolean;
+}
+
+export type MapsAppTileMapLocator = LocatorPublic<MapsAppLocatorParams>;
+
+export const MAPS_APP_TILE_MAP_LOCATOR = 'MAPS_APP_TILE_MAP_LOCATOR' as const;
+
+export interface MapsAppTileMapLocatorDependencies {
+  locator: MapsAppLocator;
+}
+
+export class MapsAppTileMapLocatorDefinition
+  implements LocatorDefinition<MapsAppTileMapLocatorParams> {
+  public readonly id = MAPS_APP_TILE_MAP_LOCATOR;
+
+  constructor(protected readonly deps: MapsAppTileMapLocatorDependencies) {}
+
+  public readonly getLocation = async (params: MapsAppTileMapLocatorParams) => {
+    const {
+      label,
+      mapType,
+      colorSchema,
+      indexPatternId,
+      geoFieldName,
+      metricAgg,
+      metricFieldName,
+      filters,
+      query,
+      timeRange,
+    } = params;
+    const mapModules = await lazyLoadMapModules();
+    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableState;
+    const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
+      label,
+      mapType,
+      colorSchema,
+      indexPatternId,
+      geoFieldName,
+      metricAgg,
+      metricFieldName,
+    });
+
+    if (tileMapLayerDescriptor) {
+      initialLayers.push(tileMapLayerDescriptor);
+    }
+
+    return await this.deps.locator.getLocation({
+      initialLayers,
+      filters,
+      query,
+      timeRange,
+      hash: true,
+    });
   };
 }
