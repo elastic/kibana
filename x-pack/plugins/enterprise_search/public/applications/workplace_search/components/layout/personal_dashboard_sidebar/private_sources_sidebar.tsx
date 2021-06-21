@@ -43,6 +43,7 @@ export const PrivateSourcesSidebar = () => {
   return (
     <>
       <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+      {/* @ts-expect-error: TODO, uncomment this once EUI 34.x lands in Kibana & `mobileBreakpoints` is a valid prop */}
       {id && <EuiSideNav items={navItems} mobileBreakpoints={[]} />}
     </>
   );
