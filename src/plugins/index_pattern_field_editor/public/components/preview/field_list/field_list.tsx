@@ -24,6 +24,7 @@ const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
 export interface Field {
   key: string;
   value: string;
+  isPinned: boolean;
 }
 
 interface Props {
@@ -37,6 +38,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
   } = useFieldPreviewContext();
 
   const [showAllFields, setShowAllFields] = useState(false);
+  const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
 
   const {
     fields: { getAll: getAllFields },
@@ -46,23 +48,39 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
     return getAllFields();
   }, [getAllFields]);
 
-  const fieldsValues: Field[] = useMemo(
+  const fieldList: Field[] = useMemo(
     () =>
       indexPatternFields
         .map((field) => ({
           key: field.displayName,
           value: JSON.stringify(get(currentDocument?._source, field.name)),
+          isPinned: false,
         }))
         .filter(({ value }) => value !== undefined),
     [indexPatternFields, currentDocument?._source]
   );
 
+  const fieldListWithPinnedFields: Field[] = useMemo(() => {
+    const pinned: Field[] = [];
+    const notPinned: Field[] = [];
+
+    fieldList.forEach((field) => {
+      if (pinnedFields[field.key]) {
+        pinned.push({ ...field, isPinned: true });
+      } else {
+        notPinned.push({ ...field, isPinned: false });
+      }
+    });
+
+    return [...pinned, ...notPinned];
+  }, [fieldList, pinnedFields]);
+
   const filteredFields = useMemo(
     () =>
       showAllFields
-        ? fieldsValues
-        : fieldsValues.filter((_, i) => i < INITIAL_MAX_NUMBER_OF_FIELDS),
-    [fieldsValues, showAllFields]
+        ? fieldListWithPinnedFields
+        : fieldListWithPinnedFields.filter((_, i) => i < INITIAL_MAX_NUMBER_OF_FIELDS),
+    [fieldListWithPinnedFields, showAllFields]
   );
 
   // "height" corresponds to the total height of the flex item that occupies the remaining
@@ -74,6 +92,16 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
 
   const toggleShowAllFields = useCallback(() => {
     setShowAllFields((prev) => !prev);
+  }, []);
+
+  const toggleIsPinnedField = useCallback((name) => {
+    setPinnedFields((prev) => {
+      const isPinned = Boolean(prev[name]) ? !prev[name] : true;
+      return {
+        ...prev,
+        [name]: isPinned,
+      };
+    });
   }, []);
 
   const renderToggleFieldsButton = () => (
@@ -106,7 +134,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
 
           return (
             <div key={field.key} style={style}>
-              <PreviewListItem key={field.key} field={field} />
+              <PreviewListItem key={field.key} field={field} toggleIsPinned={toggleIsPinnedField} />
             </div>
           );
         }}
