@@ -98,7 +98,7 @@ describe('Schema', () => {
 
     expect(wrapper.find(SchemaErrorsCallout)).toHaveLength(1);
     expect(wrapper.find(SchemaErrorsCallout).prop('viewErrorsPath')).toEqual(
-      '/sources/123/schema_errors/123'
+      '/sources/123/schemas/123'
     );
   });
 });
