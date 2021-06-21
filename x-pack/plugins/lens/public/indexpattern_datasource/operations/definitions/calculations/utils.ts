@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import type { TimeScaleUnit } from '../../../time_scale';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
@@ -45,6 +46,30 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
   ];
 }
 
+const getFullyManagedColumnIds = memoizeOne((layer: IndexPatternLayer) => {
+  const managedColumnIds = new Set<string>();
+  const queueToCheck: string[] = [];
+  Object.entries(layer.columns).forEach(([id, column]) => {
+    if (
+      'references' in column &&
+      operationDefinitionMap[column.operationType].input === 'managedReference'
+    ) {
+      managedColumnIds.add(id);
+      queueToCheck.push(...column.references);
+    }
+  });
+  while (queueToCheck.length) {
+    const idToCheck = queueToCheck.pop()!;
+    const columnToCheck = layer.columns[idToCheck];
+    managedColumnIds.add(idToCheck);
+    if ('references' in columnToCheck) {
+      queueToCheck.push(...columnToCheck.references);
+    }
+  }
+
+  return managedColumnIds;
+});
+
 export function checkReferences(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
 
@@ -72,7 +97,8 @@ export function checkReferences(layer: IndexPatternLayer, columnId: string) {
         column: referenceColumn,
       });
 
-      if (!isValid) {
+      // do not enforce column validity if current column is part of managed subtree
+      if (!isValid && !getFullyManagedColumnIds(layer).has(columnId)) {
         errors.push(
           i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
             defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
