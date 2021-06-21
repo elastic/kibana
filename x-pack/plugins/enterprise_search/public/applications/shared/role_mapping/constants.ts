@@ -82,10 +82,10 @@ export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
   }
 );
 
-export const DELETE_ROLE_MAPPING_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.deleteRoleMappingTitle',
+export const REMOVE_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeRoleMappingTitle',
   {
-    defaultMessage: 'Remove this role mapping',
+    defaultMessage: 'Remove role mapping',
   }
 );
 
@@ -96,10 +96,17 @@ export const DELETE_ROLE_MAPPING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const DELETE_ROLE_MAPPING_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.deleteRoleMappingButton',
+export const REMOVE_ROLE_MAPPING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeRoleMappingButton',
   {
-    defaultMessage: 'Delete mapping',
+    defaultMessage: 'Remove mapping',
+  }
+);
+
+export const REMOVE_USER_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeUserButton',
+  {
+    defaultMessage: 'Remove user',
   }
 );
 
@@ -349,3 +356,17 @@ export const UPDATE_USER_DESCRIPTION = i18n.translate(
     defaultMessage: 'Manage granular access and permissions',
   }
 );
+export const ROLE_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.roleModalText', {
+  defaultMessage:
+    'Removing a role mapping revokes access to any user corresponding to the mapping attributes, but may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
+});
+
+export const USER_MODAL_TITLE = (username: string) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.userModalTitle', {
+    defaultMessage: 'Remove {username}',
+    values: { username },
+  });
+
+export const USER_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.userModalText', {
+  defaultMessage:
+    'Removing a user immediately revokes access to the experience, unless this user’s attributes also corresponds to a role mapping for native and SAML-governed authentication, in which case associated role mappings should also be reviewed and adjusted, as needed.',
