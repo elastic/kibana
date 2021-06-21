@@ -61,14 +61,14 @@ describe('<JobList />', () => {
   it('should display a loading message when loading the jobs', () => {
     const { component, exists } = initTestBed({ isLoading: true });
 
-    expect(exists('jobListLoading')).toBeTruthy();
+    expect(exists('sectionLoading')).toBeTruthy();
     expect(component.find('JobTable').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
     const { component, exists } = initTestBed({ hasJobs: true });
 
-    expect(exists('jobListLoading')).toBeFalsy();
+    expect(exists('sectionLoading')).toBeFalsy();
     expect(component.find('JobTable').length).toBeTruthy();
   });
 

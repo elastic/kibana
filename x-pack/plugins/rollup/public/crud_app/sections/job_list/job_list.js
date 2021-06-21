@@ -15,14 +15,13 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiPageHeader,
-  EuiLoadingSpinner,
   EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { extractQueryParams } from '../../../shared_imports';
+import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouterLinkProps, listBreadcrumb } from '../../services';
 import { documentationLinks } from '../../services/documentation_links';
 
@@ -177,16 +176,12 @@ export class JobListUi extends Component {
   renderLoading() {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          data-test-subj="jobListLoading"
-          title={<EuiLoadingSpinner size="xl" />}
-          body={
-            <FormattedMessage
-              id="xpack.rollupJobs.jobList.loadingTitle"
-              defaultMessage="Loading rollup jobs…"
-            />
-          }
-        />
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.rollupJobs.jobList.loadingTitle"
+            defaultMessage="Loading rollup jobs…"
+          />
+        </SectionLoading>
       </EuiPageContent>
     );
   }

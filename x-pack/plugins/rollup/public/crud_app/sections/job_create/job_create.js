@@ -536,6 +536,7 @@ export class JobCreateUi extends Component {
     return (
       <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
         <EuiPageHeader
+          bottomBorder
           pageTitle={
             <FormattedMessage
               id="xpack.rollupJobs.createTitle"
@@ -544,21 +545,21 @@ export class JobCreateUi extends Component {
           }
         />
 
-        <>
-          <EuiStepsHorizontal steps={this.getSteps()} />
+        <EuiSpacer size="l" />
 
-          {saveErrorFeedback}
+        <EuiStepsHorizontal steps={this.getSteps()} />
 
-          <EuiSpacer />
+        {saveErrorFeedback}
 
-          {this.renderCurrentStep()}
+        <EuiSpacer />
 
-          <EuiSpacer size="l" />
+        {this.renderCurrentStep()}
 
-          {this.renderNavigation()}
+        <EuiSpacer size="l" />
 
-          {savingFeedback}
-        </>
+        {this.renderNavigation()}
+
+        {savingFeedback}
       </EuiPageContentBody>
     );
   }
