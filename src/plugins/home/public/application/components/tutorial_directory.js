@@ -9,15 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiTabs,
-  EuiTab,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
