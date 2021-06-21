@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-export function getType(node: any) {
-  if (node == null) return 'null';
-  if (Array.isArray(node)) {
-    throw new Error('Unexpected array value encountered.');
-  }
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
-  }
-  return typeof node;
-}
+export { ManagementAppLocator } from './locator';
