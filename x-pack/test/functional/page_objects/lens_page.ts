@@ -1066,7 +1066,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
       const input = await find.activeElement();
-      await input.clearValueWithKeyboard();
+      await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
     },
   });

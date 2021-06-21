@@ -146,9 +146,13 @@ export function ErrorGroupDetails({
 
   return (
     <>
+      <EuiSpacer size={'s'} />
+
       <ErrorGroupHeader groupId={groupId} isUnhandled={isUnhandled} />
 
-      <EuiPanel>
+      <EuiSpacer size={'m'} />
+
+      <EuiPanel hasBorder={true}>
         {showDetails && (
           <Titles>
             <EuiText>
