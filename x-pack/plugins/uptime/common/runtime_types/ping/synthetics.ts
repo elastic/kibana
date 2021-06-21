@@ -112,20 +112,22 @@ export function isScreenshotImageBlob(data: unknown): data is ScreenshotImageBlo
   return isRight(ScreenshotImageBlobType.decode(data));
 }
 
+export const ScreenshotBlockDocType = t.type({
+  id: t.string,
+  synthetics: t.type({
+    blob: t.string,
+    blob_mime: t.string,
+  }),
+});
+
+export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
+
 export const ScreenshotRefImageDataType = t.type({
   stepName: t.union([t.null, t.string]),
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    blocks: t.array(
-      t.type({
-        id: t.string,
-        synthetics: t.type({
-          blob: t.string,
-          blob_mime: t.string,
-        }),
-      })
-    ),
+    blocks: t.array(ScreenshotBlockDocType),
   }),
 });
 

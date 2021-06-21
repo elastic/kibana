@@ -13,21 +13,22 @@ import { ScreenshotRefImageData } from '../../../common/runtime_types';
  * @param canvas A canvas to use for the rendering.
  * @returns A promise that will resolve when the final draw operation completes.
  */
-export const composeScreenshotRef = async (
+export async function composeScreenshotRef(
   data: ScreenshotRefImageData,
   canvas: HTMLCanvasElement
-) => {
+) {
   const {
     ref: { screenshotRef, blocks },
   } = data;
 
-  const ctx = canvas.getContext('2d', { alpha: false });
   canvas.width = screenshotRef.screenshot_ref.width;
   canvas.height = screenshotRef.screenshot_ref.height;
 
+  const ctx = canvas.getContext('2d', { alpha: false });
+
   /**
-   * We need to mark each operation as an async task, otherwise when we try
-   * to extract a data URL from the canvas it will be blank.
+   * We need to treat each operation as an async task, otherwise we will race to draw
+   * and extract a data URL from the canvas, and the image will be blank or incomplete.
    */
   const drawOperations: Array<Promise<void>> = [];
 
@@ -48,5 +49,6 @@ export const composeScreenshotRef = async (
     );
   }
 
+  // once all `draw` operations finish, caller can extract img string
   return Promise.all(drawOperations);
-};
+}
