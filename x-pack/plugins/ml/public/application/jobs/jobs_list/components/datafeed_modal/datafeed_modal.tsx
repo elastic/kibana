@@ -71,6 +71,11 @@ interface DatafeedModalProps {
   onClose: () => void;
 }
 
+function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
+  lineDatum.header = dateFormatter(lineDatum.dataValue);
+  return lineDatum;
+}
+
 export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) => {
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
@@ -85,8 +90,10 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
   }>({ rect: [], line: [] });
+  const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
+  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
 
   const {
     results: { getDatafeedResultChartData },
@@ -149,11 +156,9 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       setBucketData(chartData.bucketResults);
       setAnnotationData({
         rect: chartData.annotationResultsRect,
-        line: chartData.annotationResultsLine.map((lineDatum) => {
-          lineDatum.header = dateFormatter(lineDatum.dataValue);
-          return lineDatum;
-        }),
+        line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
       });
+      setModelSnapshotData(chartData.modelSnapshotResultsLine.map(setLineAnnotationHeader));
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -191,7 +196,8 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   );
 
   const { datafeedConfig, bucketSpan, isInitialized } = data;
-  const checkboxId = useMemo(() => htmlIdGenerator()(), []);
+  const checkboxIdAnnotation = useMemo(() => htmlIdGenerator()(), []);
+  const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
 
   return (
     <EuiModal
@@ -264,19 +270,38 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id={checkboxId}
-                      label={
-                        <EuiText size={'xs'}>
-                          <FormattedMessage
-                            id="xpack.ml.jobsList.datafeedModal.showAnnotationsCheckboxLabel"
-                            defaultMessage="Show annotations"
-                          />
-                        </EuiText>
-                      }
-                      checked={showAnnotations}
-                      onChange={() => setShowAnnotations(!showAnnotations)}
-                    />
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiCheckbox
+                          id={checkboxIdAnnotation}
+                          label={
+                            <EuiText size={'xs'}>
+                              <FormattedMessage
+                                id="xpack.ml.jobsList.datafeedModal.showAnnotationsCheckboxLabel"
+                                defaultMessage="Show annotations"
+                              />
+                            </EuiText>
+                          }
+                          checked={showAnnotations}
+                          onChange={() => setShowAnnotations(!showAnnotations)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiCheckbox
+                          id={checkboxIdModelSnapshot}
+                          label={
+                            <EuiText size={'xs'}>
+                              <FormattedMessage
+                                id="xpack.ml.jobsList.datafeedModal.showModelSnapshotsCheckboxLabel"
+                                defaultMessage="Show model snapshots"
+                              />
+                            </EuiText>
+                          }
+                          checked={showModelSnapshots}
+                          onChange={() => setShowModelSnapshots(!showModelSnapshots)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -337,6 +362,28 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         })}
                         position={Position.Left}
                       />
+                      {showModelSnapshots ? (
+                        <LineAnnotation
+                          id={i18n.translate(
+                            'xpack.ml.jobsList.datafeedModal.modelSnapshotsLineSeriesId',
+                            {
+                              defaultMessage: 'Model snapshots',
+                            }
+                          )}
+                          key="model-snapshots-results-line"
+                          domainType={AnnotationDomainType.XDomain}
+                          dataValues={modelSnapshotData}
+                          marker={<EuiIcon type="asterisk" />}
+                          markerPosition={Position.Top}
+                          style={{
+                            line: {
+                              strokeWidth: 3,
+                              stroke: euiTheme.euiColorVis1,
+                              opacity: 0.5,
+                            },
+                          }}
+                        />
+                      ) : null}
                       {showAnnotations ? (
                         <>
                           <LineAnnotation

@@ -16,6 +16,7 @@ export interface GetDatafeedResultsChartDataResult {
   datafeedResults: number[][];
   annotationResultsRect: RectAnnotationDatum[];
   annotationResultsLine: LineAnnotationDatum[];
+  modelSnapshotResultsLine: LineAnnotationDatum[];
 }
 
 export interface DatafeedResultsChartDataParams {

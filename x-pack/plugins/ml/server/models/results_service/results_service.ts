@@ -623,6 +623,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       datafeedResults: [],
       annotationResultsRect: [],
       annotationResultsLine: [],
+      modelSnapshotResultsLine: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
@@ -702,10 +703,25 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         ]) || [];
     }
 
-    const bucketResp = await mlClient.getBuckets({
-      job_id: jobId,
-      body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
-    });
+    const { getAnnotations } = annotationServiceProvider(client!);
+
+    const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
+      mlClient.getBuckets({
+        job_id: jobId,
+        body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
+      }),
+      getAnnotations({
+        jobIds: [jobId],
+        earliestMs: start,
+        latestMs: end,
+        maxAnnotations: 1000,
+      }),
+      mlClient.getModelSnapshots({
+        job_id: jobId,
+        start: String(start),
+        end: String(end),
+      }),
+    ]);
 
     const bucketResults = bucketResp?.body?.buckets ?? [];
     bucketResults.forEach((dataForTime) => {
@@ -714,15 +730,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       finalResults.bucketResults.push([timestamp, eventCount]);
     });
 
-    const { getAnnotations } = annotationServiceProvider(client!);
-    const resp = await getAnnotations({
-      jobIds: [jobId],
-      earliestMs: start,
-      latestMs: end,
-      maxAnnotations: 1000,
-    });
-
-    const annotationResults = resp.annotations[jobId] || [];
+    const annotationResults = annotationResp.annotations[jobId] || [];
     annotationResults.forEach((annotation) => {
       const timestamp = Number(annotation?.timestamp);
       const endTimestamp = Number(annotation?.end_timestamp);
@@ -740,6 +748,16 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           details: annotation.annotation,
         });
       }
+    });
+
+    const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
+    modelSnapshots.forEach((modelSnapshot) => {
+      const timestamp = Number(modelSnapshot?.timestamp);
+
+      finalResults.modelSnapshotResultsLine.push({
+        dataValue: timestamp,
+        details: modelSnapshot.description,
+      });
     });
 
     return finalResults;
