@@ -14,6 +14,7 @@ import {
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
+import { Field } from '../../../../../../../../../common/types/fields';
 import { RareJobCreator } from '../../../../../common/job_creator';
 
 export const RareFieldSelector: FC = () => {
@@ -21,10 +22,16 @@ export const RareFieldSelector: FC = () => {
   const jobCreator = jc as RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
-  const categoryFields = useMemo(
+  const allCategoryFields = useMemo(
     () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
     []
   );
+  const categoryFields = useFilteredCategoryFields(
+    allCategoryFields,
+    jobCreator,
+    jobCreatorUpdated
+  );
+
   const [rareField, setRareField] = useState(jobCreator.rareField);
 
   useEffect(() => {
@@ -51,3 +58,24 @@ export const RareFieldSelector: FC = () => {
     </Description>
   );
 };
+
+// remove the rare (by) field from the by field options in the rare wizard
+function useFilteredCategoryFields(
+  allCategoryFields: Field[],
+  jobCreator: RareJobCreator,
+  jobCreatorUpdated: number
+) {
+  const [fields, setFields] = useState(allCategoryFields);
+
+  useEffect(() => {
+    const pf = jobCreator.populationField;
+    const sf = jobCreator.splitField;
+    if (pf !== null || sf !== null) {
+      setFields(allCategoryFields.filter(({ name }) => name !== pf?.name && name !== sf?.name));
+    } else {
+      setFields(allCategoryFields);
+    }
+  }, [jobCreatorUpdated]);
+
+  return fields;
+}

@@ -14,16 +14,26 @@ import {
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import { Field } from '../../../../../../../../../common/types/fields';
+import {
+  MultiMetricJobCreator,
+  RareJobCreator,
+  isMultiMetricJobCreator,
+} from '../../../../../common/job_creator';
 
 export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
-  const categoryFields = useMemo(
+  const allCategoryFields = useMemo(
     () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
     []
+  );
+  const categoryFields = useFilteredCategoryFields(
+    allCategoryFields,
+    jobCreator,
+    jobCreatorUpdated
   );
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
@@ -52,3 +62,28 @@ export const SplitFieldSelector: FC = () => {
     </Description>
   );
 };
+
+// remove the rare (by) and population (over) fields from the by field options in the rare wizard
+function useFilteredCategoryFields(
+  allCategoryFields: Field[],
+  jobCreator: MultiMetricJobCreator | RareJobCreator,
+  jobCreatorUpdated: number
+) {
+  const [fields, setFields] = useState(allCategoryFields);
+
+  useEffect(() => {
+    if (isMultiMetricJobCreator(jobCreator)) {
+      setFields(allCategoryFields);
+    } else {
+      const rf = jobCreator.rareField;
+      const pf = jobCreator.populationField;
+      if (rf !== null || pf !== null) {
+        setFields(allCategoryFields.filter(({ name }) => name !== rf?.name && name !== pf?.name));
+      } else {
+        setFields(allCategoryFields);
+      }
+    }
+  }, [jobCreatorUpdated]);
+
+  return fields;
+}

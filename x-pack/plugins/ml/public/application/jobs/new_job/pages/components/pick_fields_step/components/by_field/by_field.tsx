@@ -80,7 +80,7 @@ function useFilteredCategoryFields(
   useEffect(() => {
     const pf = jobCreator.populationField;
     if (pf !== null) {
-      setFields(allCategoryFields.filter((f) => f.name !== pf.name));
+      setFields(allCategoryFields.filter(({ name }) => name !== pf.name));
     } else {
       setFields(allCategoryFields);
     }
