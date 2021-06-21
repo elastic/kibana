@@ -26,9 +26,9 @@ export const HostIsolationPanel = React.memo(
     cancelCallback: () => void;
     isolateAction: string;
   }) => {
-    const agentId = useMemo(() => {
-      const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
-      return findAgentId ? findAgentId[0] : '';
+    const endpointId = useMemo(() => {
+      const findEndpointId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
+      return findEndpointId ? findEndpointId[0] : '';
     }, [details]);
 
     const hostName = useMemo(() => {
@@ -87,7 +87,7 @@ export const HostIsolationPanel = React.memo(
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
         caseIds={caseIds}
@@ -95,7 +95,7 @@ export const HostIsolationPanel = React.memo(
       />
     ) : (
       <UnisolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
         caseIds={caseIds}
