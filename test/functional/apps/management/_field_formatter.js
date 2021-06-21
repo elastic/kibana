@@ -18,12 +18,13 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
       await PageObjects.settings.navigateTo();
       await esArchiver.emptyKibanaIndex();
     });

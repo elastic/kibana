@@ -14,11 +14,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
     });
 
     it('detect navigate back issues', async () => {

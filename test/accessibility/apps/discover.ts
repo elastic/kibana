@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Discover a11y tests', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
