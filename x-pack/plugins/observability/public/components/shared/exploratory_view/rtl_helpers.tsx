@@ -36,7 +36,6 @@ import indexPatternData from './configurations/test_data/test_index_pattern.json
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { LensPublicStart } from '../../../../../lens/public';
 import { UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
