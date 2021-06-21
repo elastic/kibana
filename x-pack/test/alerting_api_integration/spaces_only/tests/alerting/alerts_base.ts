@@ -414,7 +414,7 @@ instanceStateValue: true
             },
           },
         });
-        expect(searchResult.body.hits.total.valueOf).to.eql(1);
+        expect(searchResult.body.hits.total.value).to.eql(1);
         return searchResult.body.hits.hits[0];
       });
       expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());

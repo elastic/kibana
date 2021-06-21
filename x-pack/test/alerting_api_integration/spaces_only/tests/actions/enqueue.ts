@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -14,6 +15,11 @@ import {
   ObjectRemover,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  TaskRunning,
+  TaskRunningStage,
+} from '../../../../../plugins/task_manager/server/task_running';
+import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -112,7 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       await retry.try(async () => {
-        const searchResult = await es.search({
+        const searchResult: ApiResponse<
+          estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
+        > = await es.search({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -135,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(searchResult.body.hits.total.valueOf).to.eql(0);
+        expect(searchResult.body.hits.total.value).to.eql(0);
       });
     });
   });

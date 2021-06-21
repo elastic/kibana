@@ -43,7 +43,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
         await getScheduledTask(createdAlert.scheduledTaskId);
         throw new Error('Should have removed scheduled task');
       } catch (e) {
-        expect(e.status).to.eql(404);
+        expect(e.meta.statusCode).to.eql(404);
       }
     });
 
@@ -81,7 +81,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           await getScheduledTask(createdAlert.scheduledTaskId);
           throw new Error('Should have removed scheduled task');
         } catch (e) {
-          expect(e.status).to.eql(404);
+          expect(e.meta.statusCode).to.eql(404);
         }
       });
     });

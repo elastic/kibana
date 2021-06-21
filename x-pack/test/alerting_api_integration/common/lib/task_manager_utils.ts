@@ -45,8 +45,8 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.valueOf) {
-        throw new Error(`Expected 0 tasks but received ${searchResult.body.hits.total.valueOf}`);
+      if (searchResult.body.hits.total.value) {
+        throw new Error(`Expected 0 tasks but received ${searchResult.body.hits.total.value}`);
       }
     });
   }
@@ -83,9 +83,9 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.valueOf) {
+      if (searchResult.body.hits.total.value) {
         throw new Error(
-          `Expected 0 non-idle tasks but received ${searchResult.body.hits.total.valueOf}`
+          `Expected 0 non-idle tasks but received ${searchResult.body.hits.total.value}`
         );
       }
     });
@@ -116,9 +116,9 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.valueOf) {
+      if (searchResult.body.hits.total.value) {
         throw new Error(
-          `Expected 0 action_task_params objects but received ${searchResult.body.hits.total.valueOf}`
+          `Expected 0 action_task_params objects but received ${searchResult.body.hits.total.value}`
         );
       }
     });
