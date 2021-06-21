@@ -82,5 +82,7 @@ export const overviewPageActions = ({
       </RedirectAppLinks>
     ) : null;
 
-  return !hidden ? [actionAddData, actionStackManagement, actionDevTools] : [];
+  const actions = [actionAddData, actionStackManagement, actionDevTools];
+
+  return !hidden ? actions.filter((obj) => obj) : [];
 };
