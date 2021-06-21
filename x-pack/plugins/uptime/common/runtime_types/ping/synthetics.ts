@@ -19,6 +19,7 @@ export const JourneyStepType = t.intersection([
       duration: t.type({
         us: t.number,
       }),
+      name: t.string,
       status: t.string,
       type: t.string,
     }),
@@ -28,6 +29,7 @@ export const JourneyStepType = t.intersection([
         stack: t.string,
       }),
       payload: t.partial({
+        message: t.string,
         source: t.string,
         status: t.string,
         text: t.string,

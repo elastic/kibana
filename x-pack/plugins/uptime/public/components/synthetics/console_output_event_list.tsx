@@ -9,17 +9,15 @@ import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { ConsoleEvent } from './console_event';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 import { JourneyState } from '../../state/reducers/journey';
 
 interface Props {
   journey: JourneyState;
 }
 
-const isConsoleStep = (step: Ping) =>
-  step.synthetics?.type === 'stderr' ||
-  step.synthetics?.type === 'stdout' ||
-  step.synthetics?.type === 'cmd/status';
+const isConsoleStep = (step: JourneyStep) =>
+  ['stderr', 'stdout', 'cmd/status'].some((type) => type === step.synthetics.type);
 
 export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
   <div>
@@ -41,7 +39,7 @@ export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
     <EuiSpacer />
     <EuiCodeBlock>
       {journey.steps.filter(isConsoleStep).map((consoleEvent) => (
-        <ConsoleEvent event={consoleEvent} key={consoleEvent.docId + '_console-event-row'} />
+        <ConsoleEvent event={consoleEvent} key={consoleEvent._id + '_console-event-row'} />
       ))}
     </EuiCodeBlock>
   </div>
