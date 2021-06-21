@@ -7956,7 +7956,6 @@
     "xpack.enterpriseSearch.roleMapping.attributeSelectorTitle": "属性マッピング",
     "xpack.enterpriseSearch.roleMapping.attributeValueLabel": "属性値",
     "xpack.enterpriseSearch.roleMapping.authProviderLabel": "認証プロバイダー",
-    "xpack.enterpriseSearch.roleMapping.deleteRoleMappingButton": "マッピングを削除",
     "xpack.enterpriseSearch.roleMapping.deleteRoleMappingDescription": "マッピングの削除は永久的であり、元に戻すことはできません",
     "xpack.enterpriseSearch.roleMapping.externalAttributeLabel": "外部属性",
     "xpack.enterpriseSearch.roleMapping.filterRoleMappingsPlaceholder": "ロールをフィルタリング...",
