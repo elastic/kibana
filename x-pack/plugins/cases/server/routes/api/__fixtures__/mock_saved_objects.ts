@@ -15,8 +15,8 @@ import {
   ConnectorTypes,
   ESCaseAttributes,
   ESCasesConfigureAttributes,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
   {
