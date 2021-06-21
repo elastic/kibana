@@ -180,17 +180,13 @@ class TutorialDirectoryUi extends React.Component {
     });
   };
 
-  renderTabs = () => {
-    return this.tabs.map((tab, index) => (
-      <EuiTab
-        data-test-subj={`homeTab-${tab.id}`}
-        onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.state.selectedTabId}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+  getTabs = () => {
+    return this.tabs.map((tab) => ({
+      label: tab.name,
+      onClick: () => this.onSelectedTabChanged(tab.id),
+      isSelected: tab.id === this.state.selectedTabId,
+      'data-test-subj': `homeTab-${tab.id}`,
+    }));
   };
 
   renderTabContent = () => {
@@ -256,6 +252,9 @@ class TutorialDirectoryUi extends React.Component {
 
   render() {
     const headerLinks = this.renderHeaderLinks();
+    const tabs = this.getTabs();
+    const notices = this.renderNotices();
+
     return (
       <KibanaPageTemplate
         restrictWidth={1200}
@@ -263,13 +262,16 @@ class TutorialDirectoryUi extends React.Component {
           pageTitle: (
             <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
           ),
+          tabs,
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        {this.renderNotices()}
-        <EuiSpacer size="m" />
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
-        <EuiSpacer />
+        {notices && (
+          <>
+            {notices}
+            <EuiSpacer size="m" />
+          </>
+        )}
         {this.renderTabContent()}
       </KibanaPageTemplate>
     );
