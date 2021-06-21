@@ -306,7 +306,46 @@ export const USERS_HEADING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const USERS_HEADING_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.usersHeadingButton',
+export const USERS_HEADING_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingLabel',
   { defaultMessage: 'Add a new user' }
+);
+
+export const UPDATE_USER_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateUserLabel',
+  {
+    defaultMessage: 'Update user',
+  }
+);
+
+export const ADD_USER_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.addUserLabel', {
+  defaultMessage: 'Add user',
+});
+
+export const USER_ADDED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.userAddedLabel',
+  {
+    defaultMessage: 'User added',
+  }
+);
+
+export const USER_UPDATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.userUpdatedLabel',
+  {
+    defaultMessage: 'User updated',
+  }
+);
+
+export const NEW_USER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.newUserDescription',
+  {
+    defaultMessage: 'Provide granular access and permissions',
+  }
+);
+
+export const UPDATE_USER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateUserDescription',
+  {
+    defaultMessage: 'Manage granular access and permissions',
+  }
 );

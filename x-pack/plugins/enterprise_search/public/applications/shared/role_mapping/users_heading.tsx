@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { USERS_HEADING_TITLE, USERS_HEADING_DESCRIPTION, USERS_HEADING_BUTTON } from './constants';
+import { USERS_HEADING_TITLE, USERS_HEADING_DESCRIPTION, USERS_HEADING_LABEL } from './constants';
 
 interface Props {
   onClick(): void;
@@ -28,7 +28,7 @@ export const UsersHeading: React.FC<Props> = ({ onClick }) => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton fill onClick={onClick}>
-          {USERS_HEADING_BUTTON}
+          {USERS_HEADING_LABEL}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -13,6 +13,7 @@ export { RoleSelector } from './role_selector';
 export { RoleMappingFlyout } from './role_mapping_flyout';
 export { RoleMappingsHeading } from './role_mappings_heading';
 export { UserAddedInfo } from './user_added_info';
+export { UserFlyout } from './user_flyout';
 export { UsersHeading } from './users_heading';
 export { UserInvitationCallout } from './user_invitation_callout';
 export { UserSelector } from './user_selector';
