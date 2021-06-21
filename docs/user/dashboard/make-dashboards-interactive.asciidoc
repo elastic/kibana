@@ -1,11 +1,8 @@
+[[role="xpack"]]
 [[make-dashboards-interactive]]
 == Make dashboards interactive
 
-Dashboards are interactive. When you interact with the values and in a visualization panel, {kib} creates and applies a filter for the value to the entire dashboard. To customize the behavior of what happens when you click a value, create drilldowns. 
-
-the data on the dashboard Add interactive capabilities to your dashboard, such as controls and drilldowns. 
-
-Add filter panels to interact with the data in your visualization panels
+Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other dashboards and external websites. 
 
 ++++
 <script type="text/javascript" async 
@@ -23,9 +20,9 @@ data-type="inline"
 
 [float]
 [[add-controls]]
-=== Add control panels
+== Add control panels
 
-To filter the data on your dashboard in real-time, add *Controls* panels.
+*Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
 
 {kib} supports two types of *Controls*:
 
@@ -51,11 +48,11 @@ image::images/dashboard-controls.png[]
 
 . Click *Update*
 
-[role="xpack"]
+[float]
 [[drilldowns]]
 == Create drilldowns
 
-Drilldows are shortcuts that allow you to quickly navigate between your most used dashboards, or navigate to external websites from your dashboards. You can create multiple drilldowns for a single panel. 
+When you interact with the values and in a visualization panel, {kib} creates and applies a filter for the value to the entire dashboard. To customize the behavior of what happens when you click a value, create drilldowns. Drilldows are shortcuts that allow you to quickly navigate between your most used dashboards, or navigate to external websites from your dashboards. You can create multiple drilldowns for a single panel. 
 Drilldowns apply only to the panel that you created the drilldown on, and are not shared across panels.
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
@@ -66,10 +63,10 @@ Third-party developers can create drilldowns. To learn how to code drilldowns, r
 
 Dashboard drilldowns enable you to open a dashboard from another dashboard, taking the time range, filters, and other parameters with you so the context remains the same. Dashboard drilldowns help you to continue your analysis from a new perspective.
 
-For example, if you have a dashboard that shows the overall status of multiple data center, you can create a drilldown that navigates from the overall status dashboard to a dashboard that shows a single data center or server.
+For example, if you have a dashboard that shows the logs and metrics for multiple data centers, you can create a drilldown that navigates from the dashboard that shows multiple data centers, to a dashboard that shows a single data center or server.
 
 [role="screenshot"]
-image:images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+image:images/drilldown_on_data_table.gif[Drilldown on data table that navigates to another dashboard]
 
 The panels you create using the following editors support dashboard drilldowns:
 
@@ -87,14 +84,14 @@ Use the *Sample web logs* data to create a dashboard and add panels, then set a 
 
 . Add the *Sample web logs* data.
 
-. Create a new dashboard, then add the following panels from the *Visualize Library*:
+. Create a new dashboard, click *Add from Library*, then add the following panels:
 
 * *[Logs] Heatmap*
 * *[Logs] Host, Visits, and Bytes Table*
 * *[Logs] Total Requests and Bytes*
 * *[Logs] Visitors by OS*
-+
-If you don’t see the data on a panel, change the <<set-time-filter,time filter>>.
+
+. Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
 . Save the dashboard. In the *Title* field, enter `Host Overview`.
 
@@ -106,14 +103,30 @@ If you don’t see the data on a panel, change the <<set-time-filter,time filter
 Search: `extension.keyword: ("gz" or "css" or "deb")`
 Filter: `geo.src: CN`
 
+. Create a data table. 
+
+.. Click *Create visualization*.
+
+.. From the *Chart type* dropdown, select *Table*.
+
+.. From the *Available fields* list, drag and drop the following fields onto the visualization builder:
+
+* *agent.keyword*
+
+* *bytes*
+
+* *geo.src*
+
+* *ip*
+
+.. In the editor, remove *Count of records*, then click *Save and return*.
+
 [float]
 ==== Create the drilldown
 
-Create a drilldown that allows you to open the *Host Overview* dashboard from the *[Logs] Web traffic* dashboard.
+Create a drilldown that opens the *Host Overview* dashboard from the *[Logs] Web traffic* dashboard.
 
-. In the toolbar, click *Edit*.
-
-. Open the *[Logs] Visitors by OS* panel menu, then select *Create drilldown*.
+. Open the panel menu for the data table you created, then select *Create drilldown*.
 
 . Click *Go to dashboard*.
 
@@ -127,12 +140,10 @@ Create a drilldown that allows you to open the *Host Overview* dashboard from th
 
 . Save the dashboard.
 
-. In the *[Logs] Visitors by OS* panel, click *win 8*, then select `My Drilldown`.
+. In the data table panel, hover over a value, click *+*, then select `My Drilldown`.
 +
 [role="screenshot"]
-image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to another dashboard]
-
-. On the *Host Overview* dashboard, verify that the geo.src filter, KQL query, and time filter are applied.
+image::images/drilldown_on_panel.png[Drilldown on data table that navigates to another dashboard]
 
 [float]
 [[url-drilldowns]]
