@@ -30,6 +30,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName,
   chartBase,
   fieldName,
+  operationName,
 }: {
   environment?: string;
   kuery?: string;
@@ -38,6 +39,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName?: string;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  operationName: string;
 }) {
   const { start, end, apmEventClient, config } = setup;
 
@@ -108,7 +110,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 
