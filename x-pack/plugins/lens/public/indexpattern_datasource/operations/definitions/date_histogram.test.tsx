@@ -176,30 +176,6 @@ describe('date_histogram', () => {
       });
       expect(column.params.interval).toEqual('auto');
     });
-
-    it('should create column object with restrictions', () => {
-      const column = dateHistogramOperation.buildColumn({
-        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          esTypes: ['date'],
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              time_zone: 'UTC',
-              calendar_interval: '1y',
-            },
-          },
-        },
-      });
-      expect(column.params.interval).toEqual('1y');
-      expect(column.params.timeZone).toEqual('UTC');
-    });
   });
 
   describe('toEsAggsFn', () => {
@@ -223,7 +199,7 @@ describe('date_histogram', () => {
       );
     });
 
-    it('should not use normalized es interval for rollups', () => {
+    it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
@@ -271,6 +247,7 @@ describe('date_histogram', () => {
           arguments: expect.objectContaining({
             interval: ['42w'],
             field: ['timestamp'],
+            time_zone: ['UTC'],
             useNormalizedEsInterval: [false],
           }),
         })
@@ -321,7 +298,7 @@ describe('date_histogram', () => {
   });
 
   describe('transfer', () => {
-    it('should adjust interval and time zone params if that is necessary due to restrictions', () => {
+    it('should adjust interval param if that is necessary due to restrictions', () => {
       const transferedColumn = dateHistogramOperation.transfer!(
         {
           dataType: 'date',
@@ -347,7 +324,6 @@ describe('date_histogram', () => {
               aggregationRestrictions: {
                 date_histogram: {
                   agg: 'date_histogram',
-                  time_zone: 'CET',
                   calendar_interval: 'w',
                 },
               },
@@ -363,7 +339,6 @@ describe('date_histogram', () => {
               aggregationRestrictions: {
                 date_histogram: {
                   agg: 'date_histogram',
-                  time_zone: 'CET',
                   calendar_interval: 'w',
                 },
               },
@@ -375,7 +350,6 @@ describe('date_histogram', () => {
         expect.objectContaining({
           params: {
             interval: 'w',
-            timeZone: 'CET',
           },
         })
       );
@@ -421,7 +395,6 @@ describe('date_histogram', () => {
         expect.objectContaining({
           params: {
             interval: '20s',
-            timeZone: undefined,
           },
         })
       );

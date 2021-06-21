@@ -2583,7 +2583,6 @@ describe('state_helpers', () => {
           ...layer.columns.col1,
           params: {
             interval: 'w',
-            timeZone: 'CET',
           },
         },
       });
