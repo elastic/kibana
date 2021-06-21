@@ -96,6 +96,13 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
+      const {
+        fieldCandidates,
+        totalHits,
+      } = await fetchTransactionDurationFieldCandidates(esClient, params);
+
+      progress.loadedFieldCanditates = 1;
+
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
       const percentiles = await fetchTransactionDurationPecentiles(
@@ -108,13 +115,6 @@ export const asyncSearchServiceProvider = (
         isRunning = false;
         return;
       }
-
-      const {
-        fieldCandidates,
-        totalHits,
-      } = await fetchTransactionDurationFieldCandidates(esClient, params);
-
-      progress.loadedFieldCanditates = 1;
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,
