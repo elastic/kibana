@@ -40,6 +40,7 @@ import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 
+const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
   return arg instanceof Error;
 };
@@ -63,14 +64,15 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
 
-  const fetchOptions = {
-    ...{
-      serviceName,
-      ...urlParams,
-    },
-  };
-
-  const percentileThreshold = 95;
+  const fetchOptions = useMemo(
+    () => ({
+      ...{
+        serviceName,
+        ...urlParams,
+      },
+    }),
+    [serviceName, urlParams]
+  );
 
   const {
     error,
@@ -86,7 +88,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     index: 'apm-*',
     ...{
       ...fetchOptions,
-      percentileThreshold,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });
 
@@ -348,7 +350,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           </EuiTitle>
 
           <CorrelationsChart
-            markerPercentile={percentileThreshold}
+            markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
             markerValue={percentileThresholdValue ?? 0}
             {...selectedHistogram}
             overallHistogram={overallHistogram}

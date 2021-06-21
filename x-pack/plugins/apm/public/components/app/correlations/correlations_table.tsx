@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiIcon,
@@ -48,6 +48,7 @@ export const EXCLUDE_ACTION_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Filter out value' }
 );
 
+const PAGINATION_SIZE_OPTIONS = [10, 20, 50];
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
@@ -86,6 +87,28 @@ export function CorrelationsTable<T extends SignificantTerm>({
     [trackApmEvent]
   );
   const history = useHistory();
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const pagination = useMemo(() => {
+    const itemCount = significantTerms?.length ?? 0;
+    return {
+      pageIndex,
+      pageSize,
+      totalItemCount: itemCount,
+      pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+      hidePerPageOptions: itemCount > PAGINATION_SIZE_OPTIONS[0],
+    };
+  }, [pageIndex, pageSize, significantTerms]);
+
+  const onTableChange = useCallback(({ page }) => {
+    const { index, size } = page;
+
+    setPageIndex(index);
+    setPageSize(size);
+  }, []);
+
   const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [
     {
       width: '116px',
@@ -222,6 +245,8 @@ export function CorrelationsTable<T extends SignificantTerm>({
           onMouseLeave: () => setSelectedSignificantTerm(null),
         };
       }}
+      pagination={pagination}
+      onChange={onTableChange}
     />
   );
 }
