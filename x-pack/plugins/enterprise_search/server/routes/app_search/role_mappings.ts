@@ -27,7 +27,7 @@ export function registerEnableRoleMappingsRoute({
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/enable_role_based_access',
+      path: '/as/role_mappings/enable_role_based_access',
     })
   );
 }
@@ -42,7 +42,7 @@ export function registerRoleMappingsRoute({
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings',
+      path: '/as/role_mappings',
     })
   );
 
@@ -54,7 +54,7 @@ export function registerRoleMappingsRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings',
+      path: '/as/role_mappings',
     })
   );
 }
@@ -74,7 +74,7 @@ export function registerRoleMappingRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/:id',
+      path: '/as/role_mappings/:id',
     })
   );
 
@@ -88,7 +88,7 @@ export function registerRoleMappingRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/:id',
+      path: '/as/role_mappings/:id',
     })
   );
 }

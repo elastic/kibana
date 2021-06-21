@@ -40,7 +40,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/enable_role_based_access',
+        path: '/as/role_mappings/enable_role_based_access',
       });
     });
   });
@@ -63,7 +63,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
   });
@@ -86,7 +86,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
 
@@ -121,7 +121,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
+        path: '/as/role_mappings/:id',
       });
     });
 
@@ -156,7 +156,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
+        path: '/as/role_mappings/:id',
       });
     });
   });
