@@ -102,7 +102,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/alerts',
             id: 'alerts',
-            name: 'Detections',
+            name: 'Alerts',
             urlKey: 'alerts',
           },
           case: {
@@ -116,7 +116,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/exceptions',
             id: 'exceptions',
-            name: 'Detections',
+            name: 'Exceptions',
             urlKey: 'exceptions',
           },
           administration: {
@@ -137,7 +137,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/rules',
             id: 'rules',
-            name: 'Detections',
+            name: 'Rules',
             urlKey: 'rules',
           },
           network: {
@@ -223,7 +223,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/alerts',
             id: 'alerts',
-            name: 'Detections',
+            name: 'Alerts',
             urlKey: 'alerts',
           },
           case: {
@@ -237,7 +237,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/exceptions',
             id: 'exceptions',
-            name: 'Detections',
+            name: 'Exceptions',
             urlKey: 'exceptions',
           },
           hosts: {
@@ -251,7 +251,7 @@ describe('SIEM Navigation', () => {
             disabled: false,
             href: '/app/security/rules',
             id: 'rules',
-            name: 'Detections',
+            name: 'Rules',
             urlKey: 'rules',
           },
           administration: {
