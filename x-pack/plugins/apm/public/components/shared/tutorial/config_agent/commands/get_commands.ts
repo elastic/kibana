@@ -16,7 +16,7 @@ import { dotnet } from './dotnet';
 import { php } from './php';
 import { rum, rumScript } from './rum';
 
-const commands: Record<string, string> = {
+const commandsMap: Record<string, string> = {
   java,
   node,
   django,
@@ -40,5 +40,9 @@ export function getCommands({
     secretToken?: string;
   };
 }) {
-  return Mustache.render(commands[variantId], environmentDetails);
+  const commands = commandsMap[variantId];
+  if (!commands) {
+    return '';
+  }
+  return Mustache.render(commands, environmentDetails);
 }

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getEnvironmentConfigurationOptions } from './';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { getEnvironmentConfigurationOptions } from './';
 
 type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 
@@ -80,6 +80,11 @@ describe('Tutorial config agent', () => {
               checked: 'on',
             },
             {
+              isGroupLabel: true,
+              key: 'fleet_policies',
+              label: 'Fleet policies',
+            },
+            {
               key: '1',
               label: 'agent foo',
               apmServerUrl: 'foo',
@@ -115,6 +120,11 @@ describe('Tutorial config agent', () => {
               apmServerUrl: 'foo',
               secretToken: 'bar',
               checked: undefined,
+            },
+            {
+              isGroupLabel: true,
+              key: 'fleet_policies',
+              label: 'Fleet policies',
             },
             {
               key: '3',
@@ -180,6 +190,11 @@ describe('Tutorial config agent', () => {
               checked: 'on',
             },
             {
+              isGroupLabel: true,
+              key: 'fleet_policies',
+              label: 'Fleet policies',
+            },
+            {
               key: '1',
               label: 'agent foo',
               apmServerUrl: 'foo',
@@ -212,6 +227,11 @@ describe('Tutorial config agent', () => {
               apmServerUrl: 'http://localhost:8200',
               secretToken: '',
               checked: undefined,
+            },
+            {
+              isGroupLabel: true,
+              key: 'fleet_policies',
+              label: 'Fleet policies',
             },
             {
               key: '3',
@@ -276,6 +296,11 @@ describe('Tutorial config agent', () => {
             apmServerUrl: 'http://localhost:8200',
             secretToken: '',
             checked: 'on',
+          },
+          {
+            isGroupLabel: true,
+            key: 'fleet_policies',
+            label: 'Fleet policies',
           },
           {
             key: '1',

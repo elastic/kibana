@@ -84,23 +84,34 @@ export function getEnvironmentConfigurationOptions({
     });
   }
 
-  // remaining agents with APM integration
-  newOptions.push(
-    ...data.agents.map(
-      ({
-        id,
-        name,
-        apmServerUrl,
-        secretToken,
-      }): EnvironmentConfigurationOption => ({
-        key: id,
-        label: name,
-        apmServerUrl,
-        secretToken,
-        checked: name === POLICY_ELASTIC_AGENT_ON_CLOUD ? 'on' : undefined,
-      })
-    )
-  );
+  if (data.agents.length) {
+    // Adds fleet policies group label
+    newOptions.push({
+      key: 'fleet_policies',
+      label: i18n.translate(
+        'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
+        { defaultMessage: 'Fleet policies' }
+      ),
+      isGroupLabel: true,
+    });
+    // remaining agents with APM integration
+    newOptions.push(
+      ...data.agents.map(
+        ({
+          id,
+          name,
+          apmServerUrl,
+          secretToken,
+        }): EnvironmentConfigurationOption => ({
+          key: id,
+          label: name,
+          apmServerUrl,
+          secretToken,
+          checked: name === POLICY_ELASTIC_AGENT_ON_CLOUD ? 'on' : undefined,
+        })
+      )
+    );
+  }
 
   return newOptions;
 }
@@ -149,7 +160,7 @@ function TutorialAgentSecretTokenSelector({
     );
   }
 
-  const command = getCommands({
+  const commands = getCommands({
     variantId,
     environmentDetails: {
       apmServerUrl: selectedOption?.apmServerUrl,
@@ -182,11 +193,13 @@ function TutorialAgentSecretTokenSelector({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CopyCommands commands={command} />
+          <CopyCommands commands={commands} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiCodeBlock language="bash">{command}</EuiCodeBlock>
+      <EuiCodeBlock language="bash" data-test-subj="commands">
+        {commands}
+      </EuiCodeBlock>
     </>
   );
 }

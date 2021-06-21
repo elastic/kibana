@@ -13,21 +13,21 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiSelectableOption,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { px } from '../../../../style/variables';
 
-export interface EnvironmentConfigurationOption {
-  key: string;
-  label: string;
+export type EnvironmentConfigurationOption = EuiSelectableOption & {
   apmServerUrl?: string;
   secretToken?: string;
   checked?: 'on';
-}
+};
 
-const StyledEuiButtomEmpty = styled(EuiButtonEmpty)`
+const StyledEuiButtomEmpty = styled(EuiButton)`
   .euiButtonContent {
     display: flex;
     justify-content: space-between;
@@ -70,6 +70,7 @@ export function EnvironmentConfigurationSelector({
 
   return (
     <EuiPopover
+      panelPaddingSize="none"
       button={
         <StyledEuiButtomEmpty
           color="text"
@@ -100,6 +101,7 @@ export function EnvironmentConfigurationSelector({
             // When there is no checked option don't update the options so we always have at least one option selected
             if (nextSelectedOption) {
               setAvailableOptions(newOptions);
+              setIsPopoverOpen(false);
             }
           }}
           singleSelection

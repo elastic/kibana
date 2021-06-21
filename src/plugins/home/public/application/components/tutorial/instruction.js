@@ -18,6 +18,7 @@ import {
   EuiCopy,
   EuiButton,
   EuiLoadingSpinner,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -100,13 +101,15 @@ export function Instruction({
 
       {LazyCustomComponent && (
         <Suspense fallback={<EuiLoadingSpinner />}>
-          <LazyCustomComponent
-            basePath={getBasePath()}
-            isDarkTheme={uiSettings.get('theme:darkMode')}
-            http={http}
-            variantId={variantId}
-            isCloudEnabled={isCloudEnabled}
-          />
+          <EuiErrorBoundary>
+            <LazyCustomComponent
+              basePath={getBasePath()}
+              isDarkTheme={uiSettings.get('theme:darkMode')}
+              http={http}
+              variantId={variantId}
+              isCloudEnabled={isCloudEnabled}
+            />
+          </EuiErrorBoundary>
         </Suspense>
       )}
 
