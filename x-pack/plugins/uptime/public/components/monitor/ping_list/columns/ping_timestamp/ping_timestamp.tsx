@@ -13,7 +13,6 @@ import {
   isScreenshotImageBlob,
   isScreenshotRef,
   Ping,
-  ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';

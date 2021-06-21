@@ -20,6 +20,7 @@ export const JourneyStepType = t.intersection([
         us: t.number,
       }),
       status: t.string,
+      type: t.string,
     }),
     synthetics: t.partial({
       error: t.partial({
