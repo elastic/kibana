@@ -311,7 +311,11 @@ export const Editor: React.FC<
           <EuiSpacer size="l" />
           <EuiCallOut color="warning">
             {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
-              defaultMessage: `When setting a group by we highly recommend using the ${Comparator.GT} comparator for your threshold. This can lead to significant performance improvements.`,
+              defaultMessage:
+                'When setting a group by we highly recommend using the {comparator} comparator for your threshold. This can lead to significant performance improvements.',
+              values: {
+                comparator: Comparator.GT,
+              },
             })}
           </EuiCallOut>
         </>
