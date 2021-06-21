@@ -80,3 +80,44 @@ export interface IInterpreterRenderHandlers {
    */
   uiState?: unknown;
 }
+
+type DefaultEmitters<T extends IInterpreterRenderHandlers> = Pick<T, 'done' | 'reload' | 'update'>;
+
+export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpreterRenderHandlers {
+  done() {}
+  onDestroy(fn: () => void) {}
+  reload() {}
+  update(params: any) {}
+  event(event: any) {}
+  getRenderMode() {
+    return 'noInteractivity' as RenderMode;
+  }
+  isSyncColorsEnabled() {
+    return false;
+  }
+  hasCompatibleActions?: (event: any) => Promise<boolean>;
+
+  on(event: keyof Emitters | keyof DefaultEmitters<this>, fn: (...args: any) => void) {
+    if (this[event as keyof this]) {
+      const eventCall = this[event as keyof this];
+      if (!eventCall || typeof eventCall !== 'function') return true;
+
+      const updatedEvent = (...args: unknown[]) => {
+        const preventFromCallingListener: void | boolean = eventCall(...args);
+        if (fn && typeof fn === 'function' && preventFromCallingListener === null) {
+          fn(...args);
+        }
+        return preventFromCallingListener;
+      };
+      this[event as keyof this] = (updatedEvent as unknown) as typeof eventCall;
+    }
+  }
+
+  uiState?: unknown;
+}
+
+export type InterpreterRenderHandlers<T = {}> = T & DefaultInterpreterRenderHandlers<T>;
+
+export function getDefaultHandlers<T = {}>(): InterpreterRenderHandlers<T> {
+  return new DefaultInterpreterRenderHandlers<T>() as InterpreterRenderHandlers<T>;
+}

@@ -11,7 +11,12 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, ExpressionAstExpression, RenderMode } from '../common';
+import {
+  ExpressionAstExpression,
+  RenderMode,
+  getDefaultHandlers,
+  InterpreterRenderHandlers,
+} from '../common';
 
 import { getRenderersRegistry } from './services';
 
@@ -45,7 +50,7 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
-  private handlers: IInterpreterRenderHandlers;
+  private handlers: InterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
   constructor(
@@ -71,8 +76,9 @@ export class ExpressionRenderHandler {
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
-
+    this.handlers = getDefaultHandlers();
     this.handlers = {
+      on: this.handlers.on,
       onDestroy: (fn: any) => {
         this.destroyFn = fn;
       },
@@ -89,6 +95,7 @@ export class ExpressionRenderHandler {
       event: (data) => {
         this.eventsSubject.next(data);
       },
+
       getRenderMode: () => {
         return renderMode || 'display';
       },
@@ -126,7 +133,7 @@ export class ExpressionRenderHandler {
           ...this.handlers,
           uiState,
         } as any);
-    } catch (e) {
+    } catch (e: any) {
       return this.handleRenderError(e);
     }
   };
