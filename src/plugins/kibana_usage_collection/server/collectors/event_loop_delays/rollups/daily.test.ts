@@ -27,11 +27,8 @@ describe('rollDailyData', () => {
     } as SavedObjectsFindResponse);
 
     await rollDailyData(logger, mockSavedObjectsClient);
-    expect(mockSavedObjectsClient.find).toBeCalledWith({
-      type: 'event_loop_delays_daily',
-      filter: `event_loop_delays_daily.attributes.timestamp < "now-3d/d"`,
-    });
 
+    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(mockSavedObjectsClient.delete).toBeCalledTimes(2);
     expect(mockSavedObjectsClient.delete).toHaveBeenNthCalledWith(
       1,

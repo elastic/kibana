@@ -105,7 +105,7 @@ describe('kibana_usage_collection', () => {
           "type": "localization",
         },
         Object {
-          "isReady": true,
+          "isReady": false,
           "type": "event_loop_delays",
         },
       ]
