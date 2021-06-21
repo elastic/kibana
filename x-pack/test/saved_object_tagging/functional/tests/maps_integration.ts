@@ -37,10 +37,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/89073
   describe.skip('maps integration', () => {
     before(async () => {
-      await esArchiver.load('maps');
+      await esArchiver.load('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
     after(async () => {
-      await esArchiver.unload('maps');
+      await esArchiver.unload('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
 
     describe('listing', () => {

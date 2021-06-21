@@ -42,9 +42,14 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
-        '--xpack.security.enabled=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
         '--xpack.maps.showMapVisualizationTypes=true',
+
+        // to be re-enabled once kibana/issues/102552 is completed
+        '--xpack.security.enabled=false',
+        '--monitoring.enabled=false',
+        '--xpack.reporting.enabled=false',
+        '--enterpriseSearch.enabled=false',
       ],
     },
 
@@ -96,6 +101,9 @@ export default async function ({ readConfigFile }) {
       home: {
         pathname: '/app/home',
         hash: '/',
+      },
+      observabilityCases: {
+        pathname: '/app/observability/cases',
       },
     },
     junit: {

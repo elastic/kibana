@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/react_router_history.mock';
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues, rerender } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../../__mocks__/react_router';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
@@ -18,6 +17,7 @@ import { EuiPageHeader } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { Loading } from '../../../../shared/loading';
+import { rerender } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
@@ -71,18 +71,18 @@ describe('Curation', () => {
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
-    (useParams as jest.Mock).mockReturnValueOnce({ curationId: 'hello-world' });
+    mockUseParams.mockReturnValueOnce({ curationId: 'hello-world' });
     shallow(<Curation {...props} />);
 
     expect(CurationLogic).toHaveBeenCalledWith({ curationId: 'hello-world' });
   });
 
   it('calls loadCuration on page load & whenever the curationId URL param changes', () => {
-    (useParams as jest.Mock).mockReturnValueOnce({ curationId: 'cur-123456789' });
+    mockUseParams.mockReturnValueOnce({ curationId: 'cur-123456789' });
     const wrapper = shallow(<Curation {...props} />);
     expect(actions.loadCuration).toHaveBeenCalledTimes(1);
 
-    (useParams as jest.Mock).mockReturnValueOnce({ curationId: 'cur-987654321' });
+    mockUseParams.mockReturnValueOnce({ curationId: 'cur-987654321' });
     rerender(wrapper);
     expect(actions.loadCuration).toHaveBeenCalledTimes(2);
   });

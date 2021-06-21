@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
-import { useUrlStorage } from '../../hooks/use_url_storage';
 import { DataSeries } from '../../types';
 
 interface Props {
@@ -19,7 +19,9 @@ interface Props {
 }
 
 export function Breakdowns({ reportViewConfig, seriesId, breakdowns = [] }: Props) {
-  const { setSeries, series } = useUrlStorage(seriesId);
+  const { setSeries, getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';

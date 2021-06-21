@@ -7,7 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -60,10 +60,11 @@ export default function ({ getService }: FtrProviderContext) {
             canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
             ml: ['all', 'read'],
-            siem: ['all', 'read'],
+            siem: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_all', 'cases_read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],

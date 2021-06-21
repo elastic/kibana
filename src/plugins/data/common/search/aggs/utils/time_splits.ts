@@ -8,12 +8,7 @@
 
 import moment from 'moment';
 import _, { isArray } from 'lodash';
-import {
-  Aggregate,
-  FiltersAggregate,
-  FiltersBucketItem,
-  MultiBucketAggregate,
-} from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { AggGroupNames } from '../agg_groups';
 import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
@@ -156,12 +151,15 @@ import { IBucketAggConfig } from '../buckets';
              }
    // ...
  * ```
- * 
- * 
+ *
+ *
  * @param aggConfigs The agg configs instance
  * @param aggCursor The root aggregations object from the response which will be mutated in place
  */
-export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string, Aggregate>) {
+export function mergeTimeShifts(
+  aggConfigs: AggConfigs,
+  aggCursor: Record<string, estypes.AggregationsAggregate>
+) {
   const timeShifts = aggConfigs.getTimeShifts();
   const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
   const requestAggs = aggConfigs.getRequestAggs();
@@ -200,7 +198,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
         } else if (agg && agg === bucketAggs[aggIndex]) {
           const bucketAgg = agg as IBucketAggConfig;
           // expected next bucket sub agg
-          const subAggregate = val as Aggregate;
+          const subAggregate = val as estypes.AggregationsAggregate;
           const buckets = ('buckets' in subAggregate ? subAggregate.buckets : undefined) as
             | GenericBucket[]
             | Record<string, GenericBucket>
@@ -212,7 +210,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
               buckets: isArray(buckets) ? [] : {},
             };
           }
-          const baseSubAggregate = target[key] as Aggregate;
+          const baseSubAggregate = target[key] as estypes.AggregationsAggregate;
           // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
           const baseBuckets = ('buckets' in baseSubAggregate
             ? baseSubAggregate.buckets
@@ -233,7 +231,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
               }
               mergeAggLevel(baseBucketMap[bucketKey], bucket, shift, aggIndex + 1);
             });
-            (baseSubAggregate as MultiBucketAggregate).buckets = Object.values(
+            (baseSubAggregate as estypes.AggregationsMultiBucketAggregate).buckets = Object.values(
               baseBucketMap
             ).sort((a, b) => bucketAgg.type.orderBuckets(bucketAgg, a, b));
           } else if (baseBuckets && buckets && !isArray(baseBuckets)) {
@@ -249,7 +247,10 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
       }
     });
   };
-  const transformTimeShift = (cursor: Record<string, Aggregate>, aggIndex: number): undefined => {
+  const transformTimeShift = (
+    cursor: Record<string, estypes.AggregationsAggregate>,
+    aggIndex: number
+  ): undefined => {
     const shouldSplit = aggConfigs.aggs[aggIndex].type.splitForTimeShift(
       aggConfigs.aggs[aggIndex],
       aggConfigs
@@ -257,10 +258,8 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
     if (shouldSplit) {
       // multiple time shifts caused a filters agg in the tree we have to merge
       if (hasMultipleTimeShifts && cursor.time_offset_split) {
-        const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate).buckets as Record<
-          string,
-          FiltersBucketItem
-        >;
+        const timeShiftedBuckets = (cursor.time_offset_split as estypes.AggregationsFiltersAggregate)
+          .buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
         const subTree = {};
         Object.entries(timeShifts).forEach(([key, shift]) => {
           mergeAggLevel(
@@ -301,7 +300,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
 /**
  * Inserts a filters aggregation into the aggregation tree which splits buckets to fetch data for all time ranges
  * configured in metric aggregations.
- * 
+ *
  * The current agg config can implement `splitForTimeShift` to force insertion of the time split filters aggregation
  * before the dsl of the agg config (date histogram and metrics aggregations do this)
  *
@@ -324,7 +323,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
           "date_histogram": {
             "field": "timestamp",
             "interval": "year"
-          },    
+          },
           "aggs": {
             "revenue": {
               "sum": {
@@ -347,7 +346,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
       "aggs": {
         "first_year": {
           "filter": {
-            "range": { 
+            "range": {
               "timestamp": {
                 "gte": "2019",
                 "lte": "2020"
@@ -366,7 +365,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
           "filters": {
             "filters": {
               "regular": {
-                "range": { 
+                "range": {
                   "timestamp": {
                     "gte": "2019",
                     "lte": "2020"
@@ -388,7 +387,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
               "date_histogram": {
                 "field": "timestamp",
                 "interval": "year"
-              },    
+              },
               "aggs": {
                 "revenue": {
                   "sum": {
@@ -399,7 +398,7 @@ export function mergeTimeShifts(aggConfigs: AggConfigs, aggCursor: Record<string
             }
           }
         }
-      } 
+      }
  * ```
  */
 export function insertTimeShiftSplit(

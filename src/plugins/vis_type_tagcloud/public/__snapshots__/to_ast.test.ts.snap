@@ -84,6 +84,9 @@ Object {
         "orientation": Array [
           "single",
         ],
+        "palette": Array [
+          "default",
+        ],
         "scale": Array [
           "linear",
         ],

@@ -72,7 +72,7 @@ interface AuthorizationServiceStartParams {
   online$: Observable<OnlineStatusRetryScheduler>;
 }
 
-export interface AuthorizationServiceSetup {
+export interface AuthorizationServiceSetupInternal extends AuthorizationServiceSetup {
   actions: Actions;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
@@ -80,6 +80,21 @@ export interface AuthorizationServiceSetup {
   applicationName: string;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
+}
+
+/**
+ * Authorization services available on the setup contract of the security plugin.
+ */
+export interface AuthorizationServiceSetup {
+  /**
+   * Actions are used to create the "actions" that are associated with Elasticsearch's
+   * application privileges, and are used to perform the authorization checks implemented
+   * by the various `checkPrivilegesWithRequest` derivatives.
+   */
+  actions: Actions;
+  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  mode: AuthorizationMode;
 }
 
 export class AuthorizationService {
@@ -101,7 +116,7 @@ export class AuthorizationService {
     kibanaIndexName,
     getSpacesService,
     getCurrentUser,
-  }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
+  }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 

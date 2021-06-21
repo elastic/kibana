@@ -1,0 +1,56 @@
+[role="xpack"]
+[[rule-types]]
+== Rule types
+
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides two types of rules:  rules specific to the Elastic Stack and rules specific to a domain.
+
+[NOTE]
+==============================================
+Some rule types are subscription features, while others are free features.
+For a comparison of the Elastic subscription levels,
+see {subscriptions}[the subscription page].
+==============================================
+
+[float]
+[[stack-rules]]
+=== Stack rules
+
+<<alert-management, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+
+[cols="2*<"]
+|===
+
+| <<rule-type-index-threshold>>
+| Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
+
+| <<rule-type-es-query>>
+| Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
+
+|===
+
+[float]
+[[domain-specific-rules]]
+=== Domain rules
+
+Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <<xpack-ml, Machine Learning>>.
+
+[cols="2*<"]
+|===
+
+| {observability-guide}/create-alerts.html[Observability rules]
+| Detect complex conditions in the *Logs*, *Metrics*, and *Uptime* apps.
+
+| {security-guide}/prebuilt-rules.html[Security rules]
+| Detect suspicous source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
+
+| <<geo-alerting, Maps rules>>
+| Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
+
+| {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
+| Run scheduled checks on an anomaly detection job to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+
+|===
+
+include::rule-types/index-threshold.asciidoc[]
+include::rule-types/es-query.asciidoc[]
+include::rule-types/geo-rule-types.asciidoc[]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   GetPingsParams,
@@ -74,7 +74,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
           { range: { '@timestamp': { gte: from, lte: to } } },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
         ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
     },

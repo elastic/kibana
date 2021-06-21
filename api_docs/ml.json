@@ -868,7 +868,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-          "lineNumber": 153
+          "lineNumber": 161
         },
         "deprecated": false,
         "children": [
@@ -884,7 +884,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 154
+              "lineNumber": 162
             },
             "deprecated": false
           },
@@ -897,7 +897,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 155
+              "lineNumber": 163
             },
             "deprecated": false
           },
@@ -910,7 +910,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 156
+              "lineNumber": 164
             },
             "deprecated": false
           },
@@ -923,7 +923,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 157
+              "lineNumber": 165
             },
             "deprecated": false
           }
@@ -1513,14 +1513,14 @@
         "description": [],
         "signature": [
           "{ GTE: ",
-          "TotalHitsRelation",
+          "SearchTotalHitsRelation",
           "; EQ: ",
-          "TotalHitsRelation",
+          "SearchTotalHitsRelation",
           "; }"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 20
+          "lineNumber": 22
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1563,7 +1563,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/ml/public/plugin.ts",
-        "lineNumber": 213
+        "lineNumber": 212
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -1779,7 +1779,7 @@
           ", indexPatternTitle: string, query: any, fields: ",
           "HistogramField",
           "[], samplerShardSize: number, runtimeMappings?: Record<string, ",
-          "RuntimeField",
+          "MappingRuntimeField",
           "> | undefined) => Promise<ChartData[]>"
         ],
         "source": {
@@ -1889,7 +1889,7 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              "RuntimeField",
+              "MappingRuntimeField",
               "> | undefined"
             ],
             "source": {
@@ -2852,7 +2852,7 @@
         "signature": [
           "CombinedJob",
           " extends ",
-          "Job"
+          "MlJob"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
@@ -2884,7 +2884,7 @@
             "label": "datafeed_config",
             "description": [],
             "signature": [
-              "Datafeed"
+              "MlDatafeed"
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
@@ -2937,79 +2937,13 @@
             "label": "datafeed_config",
             "description": [],
             "signature": [
-              "Datafeed",
+              "MlDatafeed",
               " & ",
-              "DatafeedStats"
+              "MlDatafeedStats"
             ],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
               "lineNumber": 26
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-server.IndicesOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndicesOptions",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 19
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.IndicesOptions.allow_no_indices",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allow_no_indices",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-              "lineNumber": 20
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.IndicesOptions.expand_wildcards",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "expand_wildcards",
-            "description": [],
-            "signature": [
-              "string | ",
-              "ExpandWildcardOptions",
-              "[] | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.IndicesOptions.ignore_unavailable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_unavailable",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-              "lineNumber": 22
             },
             "deprecated": false
           }
@@ -3518,156 +3452,6 @@
       },
       {
         "parentPluginId": "ml",
-        "id": "def-server.ModelSnapshot",
-        "type": "Interface",
-        "tags": [],
-        "label": "ModelSnapshot",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.job_id",
-            "type": "string",
-            "tags": [],
-            "label": "job_id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.min_version",
-            "type": "string",
-            "tags": [],
-            "label": "min_version",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 13
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.timestamp",
-            "type": "number",
-            "tags": [],
-            "label": "timestamp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 14
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 15
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.snapshot_id",
-            "type": "string",
-            "tags": [],
-            "label": "snapshot_id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.snapshot_doc_count",
-            "type": "number",
-            "tags": [],
-            "label": "snapshot_doc_count",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.model_size_stats",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "model_size_stats",
-            "description": [],
-            "signature": [
-              "ModelSizeStats",
-              " & { model_bytes_exceeded: number; model_bytes_memory_limit: number; peak_model_bytes?: number | undefined; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 18
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.latest_record_time_stamp",
-            "type": "number",
-            "tags": [],
-            "label": "latest_record_time_stamp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.latest_result_time_stamp",
-            "type": "number",
-            "tags": [],
-            "label": "latest_result_time_stamp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 20
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.ModelSnapshot.retain",
-            "type": "boolean",
-            "tags": [],
-            "label": "retain",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-server.PerPartitionCategorization",
         "type": "Interface",
         "tags": [],
@@ -3726,7 +3510,7 @@
         "description": [],
         "signature": [
           "{ [x: string]: ",
-          "AggregationContainer",
+          "AggregationsAggregationContainer",
           "; }"
         ],
         "source": {
@@ -3744,7 +3528,7 @@
         "label": "AnalysisConfig",
         "description": [],
         "signature": [
-          "AnalysisConfig"
+          "MlAnalysisConfig"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -3761,7 +3545,7 @@
         "label": "AnalysisLimits",
         "description": [],
         "signature": [
-          "AnalysisLimits"
+          "MlAnalysisLimits"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -3812,7 +3596,7 @@
         "label": "ChunkingConfig",
         "description": [],
         "signature": [
-          "ChunkingConfig"
+          "MlChunkingConfig"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
@@ -3829,7 +3613,7 @@
         "label": "CustomRule",
         "description": [],
         "signature": [
-          "DetectionRule"
+          "MlDetectionRule"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -3846,7 +3630,7 @@
         "label": "CustomSettings",
         "description": [],
         "signature": [
-          "CustomSettings"
+          "MlCustomSettings"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -3863,11 +3647,11 @@
         "label": "DataCounts",
         "description": [],
         "signature": [
-          "DataCounts"
+          "MlDataCounts"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 15
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3880,7 +3664,7 @@
         "label": "DataDescription",
         "description": [],
         "signature": [
-          "DataDescription"
+          "MlDataDescription"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -3897,7 +3681,7 @@
         "label": "Datafeed",
         "description": [],
         "signature": [
-          "Datafeed"
+          "MlDatafeed"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
@@ -3931,7 +3715,7 @@
         "label": "DatafeedStats",
         "description": [],
         "signature": [
-          "DatafeedStats"
+          "MlDatafeedStats"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
@@ -3948,9 +3732,9 @@
         "label": "DatafeedWithStats",
         "description": [],
         "signature": [
-          "Datafeed",
+          "MlDatafeed",
           " & ",
-          "DatafeedStats"
+          "MlDatafeedStats"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
@@ -3967,7 +3751,7 @@
         "label": "Detector",
         "description": [],
         "signature": [
-          "Detector"
+          "MlDetector"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -4001,11 +3785,28 @@
         "label": "ForecastsStats",
         "description": [],
         "signature": [
-          "JobForecastStatistics"
+          "MlJobForecastStatistics"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 27
+          "lineNumber": 18
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.IndicesOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "IndicesOptions",
+        "description": [],
+        "signature": [
+          "MlDatafeedIndicesOptions"
+        ],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4018,7 +3819,7 @@
         "label": "Job",
         "description": [],
         "signature": [
-          "Job"
+          "MlJob"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -4052,12 +3853,7 @@
         "label": "JobStats",
         "description": [],
         "signature": [
-          "JobStats",
-          " & { model_size_stats: ",
-          "ModelSizeStats",
-          "; timing_stats: ",
-          "TimingStats",
-          "; }"
+          "MlJobStats"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
@@ -4074,14 +3870,10 @@
         "label": "JobWithStats",
         "description": [],
         "signature": [
-          "Job",
+          "MlJob",
           " & ",
-          "JobStats",
-          " & { model_size_stats: ",
-          "ModelSizeStats",
-          "; timing_stats: ",
-          "TimingStats",
-          "; } & ",
+          "MlJobStats",
+          " & ",
           "JobAlertingRuleStats"
         ],
         "source": {
@@ -4117,7 +3909,7 @@
         "label": "ModelPlotConfig",
         "description": [],
         "signature": [
-          "ModelPlotConfig"
+          "MlModelPlotConfig"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -4134,12 +3926,28 @@
         "label": "ModelSizeStats",
         "description": [],
         "signature": [
-          "ModelSizeStats",
-          " & { model_bytes_exceeded: number; model_bytes_memory_limit: number; peak_model_bytes?: number | undefined; }"
+          "MlModelSizeStats"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 17
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.ModelSnapshot",
+        "type": "Type",
+        "tags": [],
+        "label": "ModelSnapshot",
+        "description": [],
+        "signature": [
+          "MlModelSnapshot"
+        ],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+          "lineNumber": 10
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4169,11 +3977,11 @@
         "label": "Node",
         "description": [],
         "signature": [
-          "DiscoveryNode"
+          "MlDiscoveryNode"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 29
+          "lineNumber": 20
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4203,12 +4011,11 @@
         "label": "TimingStats",
         "description": [],
         "signature": [
-          "TimingStats",
-          " & { total_bucket_processing_time_ms: number; }"
+          "MlTimingStats"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 23
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -4671,7 +4478,7 @@
         "description": [],
         "signature": [
           "{ [x: string]: ",
-          "RuntimeField",
+          "MappingRuntimeField",
           "; }"
         ],
         "source": {
@@ -4692,14 +4499,14 @@
         "description": [],
         "signature": [
           "{ GTE: ",
-          "TotalHitsRelation",
+          "SearchTotalHitsRelation",
           "; EQ: ",
-          "TotalHitsRelation",
+          "SearchTotalHitsRelation",
           "; }"
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 20
+          "lineNumber": 22
         },
         "deprecated": false,
         "initialIsOpen": false

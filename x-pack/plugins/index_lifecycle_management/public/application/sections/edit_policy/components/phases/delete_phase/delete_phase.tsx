@@ -73,7 +73,7 @@ export const DeletePhase: FunctionComponent = () => {
     <>
       <EuiSpacer />
       <EuiComment
-        data-test-subj="delete-phaseContent"
+        data-test-subj="delete-phase"
         username={phaseTitle}
         actions={<MinAgeField phase={'delete'} />}
         className="ilmDeletePhase ilmPhase"

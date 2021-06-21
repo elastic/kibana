@@ -8,17 +8,19 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
   EuiScreenReaderOnly,
   EuiToolTip,
-  EuiButtonEmpty,
   EuiLink,
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { WaterfallTooltipResponsiveMaxWidth } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 interface Props {
   index: number;
@@ -116,7 +118,9 @@ export const MiddleTruncatedText = ({
       </EuiScreenReaderOnly>
       <WaterfallTooltipResponsiveMaxWidth
         as={EuiToolTip}
-        content={`${index}. ${fullText}`}
+        content={
+          <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
+        }
         data-test-subj="middleTruncatedTextToolTip"
         delay="long"
         position="top"

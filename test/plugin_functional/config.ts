@@ -44,9 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: ['xpack.security.enabled=false'],
     },
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',

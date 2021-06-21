@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchRequest, SortContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
@@ -20,7 +20,7 @@ export interface QueryBuilderOptions {
 // using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
 // effectively ignoring it
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
-const MetadataSortMethod: SortContainer[] = [
+const MetadataSortMethod: estypes.SearchSortContainer[] = [
   {
     'event.created': {
       order: 'desc',
@@ -147,7 +147,7 @@ function buildQueryBody(
 export function getESQueryHostMetadataByID(
   agentID: string,
   metadataQueryStrategy: MetadataQueryStrategy
-): SearchRequest {
+): estypes.SearchRequest {
   return {
     body: {
       query: {

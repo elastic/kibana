@@ -107,6 +107,7 @@ describe('#setup()', () => {
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
         defaultPath: 'foo/bar',
+        deepLinks: [{ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }],
       }));
 
       applications = await applications$.pipe(take(1)).toPromise();
@@ -118,6 +119,9 @@ describe('#setup()', () => {
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
+          deepLinks: [
+            expect.objectContaining({ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }),
+          ],
         })
       );
       expect(applications.get('app2')).toEqual(
@@ -493,6 +497,56 @@ describe('#start()', () => {
       expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
     });
 
+    describe('deepLinkId option', () => {
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        service.setup(setupDeps);
+
+        service.setup(setupDeps);
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'unkown-deep-link' })).toBe(
+          '/base-path/app/app1'
+        );
+      });
+
+      it('creates URLs with deepLinkId parameter', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1' })).toBe(
+          '/base-path/custom/app-path/deep-link'
+        );
+      });
+
+      it('creates URLs with deepLinkId and path parameters', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { getUrlForApp } = await service.start(startDeps);
+        expect(getUrlForApp('app1', { deepLinkId: 'dl1', path: 'foo/bar' })).toBe(
+          '/base-path/custom/app-path/deep-link/foo/bar'
+        );
+      });
+    });
+
     it('does not append trailing slash if hash is provided in path parameter', async () => {
       service.setup(setupDeps);
       const { getUrlForApp } = await service.start(startDeps);
@@ -812,6 +866,128 @@ describe('#start()', () => {
         expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
 
         expect(MockHistory.replace).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deepLinkId option', () => {
+      beforeEach(() => {
+        MockHistory.push.mockClear();
+      });
+
+      it('preserves trailing slash when path contains a hash', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            appRoute: '/custom/app-path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '#/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link#/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '#/foo/bar/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link#/foo/bar/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path#/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path#/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path#/hash/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path#/hash/',
+          undefined
+        );
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: '/path/' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom/app-path/deep-link/path',
+          undefined
+        );
+      });
+
+      it('omits the defaultPath when the deepLinkId parameter is specified', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            defaultPath: 'default/path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+        register(
+          Symbol(),
+          createApp({
+            id: 'app2',
+            appRoute: '/custom-app-path',
+            defaultPath: '/my-default',
+            deepLinks: [{ id: 'dl2', title: 'deep link 2', path: '/deep-link-2' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', {});
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/default/path', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl1' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/deep-link', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl1', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/app/app1/deep-link/some-other-path',
+          undefined
+        );
+
+        await navigateToApp('app2', {});
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/custom-app-path/my-default', undefined);
+
+        await navigateToApp('app2', { deepLinkId: 'dl2' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom-app-path/deep-link-2',
+          undefined
+        );
+
+        await navigateToApp('app2', { deepLinkId: 'dl2', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith(
+          '/custom-app-path/deep-link-2/some-other-path',
+          undefined
+        );
+      });
+
+      it('ignores the deepLinkId parameter if it is unknown', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(
+          Symbol(),
+          createApp({
+            id: 'app1',
+            defaultPath: 'default/path',
+            deepLinks: [{ id: 'dl1', title: 'deep link 1', path: '/deep-link' }],
+          })
+        );
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/default/path', undefined);
+
+        await navigateToApp('app1', { deepLinkId: 'dl-unknown', path: 'some-other-path' });
+        expect(MockHistory.push).toHaveBeenLastCalledWith('/app/app1/some-other-path', undefined);
       });
     });
   });

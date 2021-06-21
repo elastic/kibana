@@ -26,14 +26,12 @@ import {
   TimeRange,
   Filter,
   Query,
-  RefreshInterval,
 } from '../../../../../src/plugins/data/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  setRefreshConfig,
   disableScrollZoom,
   setReadOnly,
 } from '../actions';
@@ -106,7 +104,6 @@ export class MapEmbeddable
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
-  private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
@@ -171,9 +168,6 @@ export class MapEmbeddable
     this._dispatchSetQuery({
       forceRefresh: false,
     });
-    if (this.input.refreshConfig) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
-    }
 
     this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
       this._handleStoreChanges();
@@ -260,10 +254,6 @@ export class MapEmbeddable
       });
     }
 
-    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
@@ -314,16 +304,6 @@ export class MapEmbeddable
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
           ? this.input.mapBuffer
           : undefined,
-      })
-    );
-  }
-
-  _dispatchSetRefreshConfig(refreshConfig: RefreshInterval) {
-    this._prevRefreshConfig = refreshConfig;
-    this._savedMap.getStore().dispatch(
-      setRefreshConfig({
-        isPaused: refreshConfig.pause,
-        interval: refreshConfig.value,
       })
     );
   }

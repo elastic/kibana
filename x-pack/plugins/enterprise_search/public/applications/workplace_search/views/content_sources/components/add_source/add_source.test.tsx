@@ -6,7 +6,11 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockActions, setMockValues } from '../../../../../__mocks__';
+import {
+  mockKibanaValues,
+  setMockActions,
+  setMockValues,
+} from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';

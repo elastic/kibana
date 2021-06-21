@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -100,17 +93,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   return (
-    <EuiPanel paddingSize="m">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
-            defaultMessage: 'Choose service',
-          })}
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
+    <>
       {/* Service name options */}
       <FormRowSelect
         title={i18n.translate(
@@ -207,6 +190,6 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 }

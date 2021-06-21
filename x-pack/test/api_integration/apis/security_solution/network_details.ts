@@ -15,8 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('Network details', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/default'));
-      after(() => esArchiver.unload('filebeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
 
       it('Make sure that we get Network details data', async () => {
         const { body } = await supertest
@@ -39,8 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/default'));
-      after(() => esArchiver.unload('packetbeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default'));
 
       it('Make sure that we get Network details data', async () => {
         const { body } = await supertest

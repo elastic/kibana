@@ -18,7 +18,7 @@ import { ExceptionListsTable } from './exceptions/exceptions_table';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: () => Promise<void>;
@@ -64,7 +64,7 @@ const allRulesTabs = [
 export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
-    hasNoPermissions,
+    hasPermissions,
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
@@ -110,7 +110,7 @@ export const AllRules = React.memo<AllRulesProps>(
             formatUrl={formatUrl}
             selectedTab={allRulesTab}
             createPrePackagedRules={createPrePackagedRules}
-            hasNoPermissions={hasNoPermissions}
+            hasPermissions={hasPermissions}
             loading={loading}
             loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
             refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
@@ -125,7 +125,7 @@ export const AllRules = React.memo<AllRulesProps>(
           <ExceptionListsTable
             formatUrl={formatUrl}
             history={history}
-            hasNoPermissions={hasNoPermissions}
+            hasPermissions={hasPermissions}
             loading={loading}
           />
         )}

@@ -8,7 +8,7 @@
 import { TestBedConfig } from '@kbn/test/jest';
 
 import { AppServicesContext } from '../../../../../public/types';
-import { createEnablePhaseAction, createNodeAllocationActions } from '../../../helpers';
+import { createTogglePhaseAction, createNodeAllocationActions } from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
 
 type SetupReturn = ReturnType<typeof setupCloudNodeAllocation>;
@@ -24,12 +24,11 @@ export const setupCloudNodeAllocation = async (arg?: {
   return {
     ...testBed,
     actions: {
+      togglePhase: createTogglePhaseAction(testBed),
       warm: {
-        enable: createEnablePhaseAction(testBed, 'warm'),
         ...createNodeAllocationActions(testBed, 'warm'),
       },
       cold: {
-        enable: createEnablePhaseAction(testBed, 'cold'),
         ...createNodeAllocationActions(testBed, 'cold'),
       },
     },

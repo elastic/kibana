@@ -6,7 +6,6 @@
  */
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
-import { Location } from 'history';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
@@ -23,7 +22,6 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
-  location: Location;
   errorsPerTransaction: IWaterfall['errorsPerTransaction'];
   childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>;
   onToggleEntryTransaction?: () => void;
@@ -100,7 +98,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     duration,
     childrenByParentId,
     waterfallItemId,
-    location,
     errorsPerTransaction,
     timelineMargins,
     onClickWaterfallItem,
@@ -160,7 +157,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
           item={child}
           level={nextLevel}
           waterfallItemId={waterfallItemId}
-          location={location}
           errorsPerTransaction={errorsPerTransaction}
           duration={duration}
           childrenByParentId={childrenByParentId}

@@ -60,9 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visEditor.clickGo();
   }
 
-  describe('vlad point series', function describeIndexTests() {
+  describe('point series', function describeIndexTests() {
+    let isNewChartsLibraryEnabled = false;
     before(async () => {
-      await PageObjects.visualize.initTests();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
       await initChart();
     });
 

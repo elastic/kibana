@@ -36,6 +36,8 @@ import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createLazyObservabilityPageTemplate } from './components/shared';
+import { CASES_APP_ID } from './components/app/cases/constants';
+import { CasesUiStart } from '../../cases/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -46,6 +48,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  cases: CasesUiStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -63,6 +66,7 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -111,7 +115,6 @@ export class Plugin
       mount,
       updater$,
     });
-
     if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
@@ -127,14 +130,14 @@ export class Plugin
 
     if (config.unsafe.cases.enabled) {
       coreSetup.application.register({
-        id: 'observability-cases',
+        id: CASES_APP_ID,
         title: 'Cases',
         appRoute: '/app/observability/cases',
         order: 8050,
         category,
         euiIconType,
         mount,
-        updater$,
+        updater$: this.casesAppUpdater$,
       });
     }
 
@@ -188,7 +191,7 @@ export class Plugin
     };
   }
   public start({ application }: CoreStart) {
-    toggleOverviewLinkInNav(this.appUpdater$, application);
+    toggleOverviewLinkInNav(this.appUpdater$, this.casesAppUpdater$, application);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,

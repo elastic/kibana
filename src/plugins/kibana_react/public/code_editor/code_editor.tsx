@@ -192,10 +192,16 @@ export class CodeEditor extends React.Component<Props, {}> {
             wordBasedSuggestions: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            matchBrackets: 'never',
             ...options,
           }}
         />
-        <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
+        <ReactResizeDetector
+          handleWidth
+          handleHeight
+          onResize={this._updateDimensions}
+          refreshMode="debounce"
+        />
       </>
     );
   }

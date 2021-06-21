@@ -19,7 +19,6 @@ import {
 
 export { getActionType as getCaseConnectorUi } from './case';
 
-export * from './config';
 export * from './types';
 
 interface GetCaseConnectorsReturn {
@@ -50,8 +49,6 @@ class CaseConnectors {
 
 const caseConnectors = new CaseConnectors();
 
-export const getCaseConnectors = (): GetCaseConnectorsReturn => {
-  return {
-    caseConnectorsRegistry: caseConnectors.registry(),
-  };
-};
+export const getCaseConnectors = (): GetCaseConnectorsReturn => ({
+  caseConnectorsRegistry: caseConnectors.registry(),
+});

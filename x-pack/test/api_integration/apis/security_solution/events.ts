@@ -409,8 +409,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Timeline', () => {
-    before(() => esArchiver.load('auditbeat/hosts'));
-    after(() => esArchiver.unload('auditbeat/hosts'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
     it('Make sure that we get Timeline data', async () => {
       await retry.try(async () => {

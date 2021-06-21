@@ -8,7 +8,14 @@
     "declarationMap": true,
     "isolatedModules": true
   },
-  "include": ["public/**/**/*", "server/**/**/*", "common/**/*", "../../../typings/**/*"],
+  "include": [
+    "public/**/**/*",
+    "server/**/**/*",
+    "common/**/*",
+    "../../../typings/**/*",
+    "schema/oss_plugins.json",
+    "schema/oss_root.json",
+  ],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../plugins/kibana_react/tsconfig.json" },

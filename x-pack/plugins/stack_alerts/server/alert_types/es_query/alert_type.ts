@@ -220,7 +220,7 @@ export function getAlertType(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
     );
 
-    const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
+    const numMatches = (searchResult.hits.total as estypes.SearchTotalHits).value;
 
     // apply the alert condition
     const conditionMet = compareFn(numMatches, params.threshold);

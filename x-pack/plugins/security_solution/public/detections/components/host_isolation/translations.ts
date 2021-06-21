@@ -25,7 +25,8 @@ export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
   i18n.translate(
     'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
     {
-      defaultMessage: ' {caseCount, plural, one {case} other {cases}} associated with the rule ',
+      defaultMessage:
+        '{caseCount} {caseCount, plural, one {case} other {cases}} associated with this host',
       values: { caseCount },
     }
   );

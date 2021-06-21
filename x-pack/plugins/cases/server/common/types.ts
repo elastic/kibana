@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { KueryNode } from '../../../../../src/plugins/data/server';
+import { SavedObjectFindOptions } from '../../common';
+
 /**
  * This structure holds the alert ID and index from an alert comment
  */
@@ -12,3 +15,7 @@ export interface AlertInfo {
   id: string;
   index: string;
 }
+
+export type SavedObjectFindOptionsKueryNode = Omit<SavedObjectFindOptions, 'filter'> & {
+  filter?: KueryNode;
+};

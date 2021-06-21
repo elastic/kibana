@@ -21,18 +21,16 @@ Delete any items that are not applicable to this PR.
 
 Delete this section if it is not applicable to this PR.
 
-Before closing this PR, invite QA, stakeholders, and other developers to
-identify risks that should be tested prior to the change/feature release.
+Before closing this PR, invite QA, stakeholders, and other developers to identify risks that should be tested prior to the change/feature release.
 
-When forming the risk matrix, consider some of the following examples and how
-they may potentially impact the change:
+When forming the risk matrix, consider some of the following examples and how they may potentially impact the change:
 
 | Risk                      | Probability | Severity | Mitigation/Notes        |
 |---------------------------|-------------|----------|-------------------------|
 | Multiple Spaces&mdash;unexpected behavior in non-default Kibana Space. | Low | High | Integration tests will verify that all features are still supported in non-default Kibana Space and when user switches between spaces. |
 | Multiple nodes&mdash;Elasticsearch polling might have race conditions when multiple Kibana nodes are polling for the same tasks. | High | Low | Tasks are idempotent, so executing them multiple times will not result in logical error, but will degrade performance. To test for this case we add plenty of unit tests around this logic and document manual testing procedure. |
 | Code should gracefully handle cases when feature X or plugin Y are disabled. | Medium | High | Unit tests will verify that any feature flag or plugin combination still results in our service operational. |
-| [See more potential risk examples](../RISK_MATRIX.mdx) |
+| [See more potential risk examples](https://github.com/elastic/kibana/blob/master/RISK_MATRIX.mdx) |
 
 
 ### For maintainers

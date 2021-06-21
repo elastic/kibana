@@ -37,8 +37,8 @@ export default function ({ getService, getPageObjects }) {
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard_view_mode');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard_view_mode');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 

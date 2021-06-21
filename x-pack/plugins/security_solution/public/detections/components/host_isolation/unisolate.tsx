@@ -18,16 +18,14 @@ import { useHostUnisolation } from '../../containers/detection_engine/alerts/use
 
 export const UnisolateHost = React.memo(
   ({
-    agentId,
+    endpointId,
     hostName,
-    alertRule,
     cases,
     caseIds,
     cancelCallback,
   }: {
-    agentId: string;
+    endpointId: string;
     hostName: string;
-    alertRule: string;
     cases: ReactNode;
     caseIds: string[];
     cancelCallback: () => void;
@@ -35,7 +33,7 @@ export const UnisolateHost = React.memo(
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
 
-    const { loading, unIsolateHost } = useHostUnisolation({ agentId, comment, caseIds });
+    const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
     const confirmHostUnIsolation = useCallback(async () => {
       const hostIsolated = await unIsolateHost();
@@ -80,15 +78,9 @@ export const UnisolateHost = React.memo(
             messageAppend={
               <FormattedMessage
                 id="xpack.securitySolution.detections.hostIsolation.impactedCases"
-                defaultMessage="This action will be added to the {cases}."
+                defaultMessage="This action will be added to {cases}."
                 values={{
-                  cases: (
-                    <b>
-                      {caseCount}
-                      {CASES_ASSOCIATED_WITH_ALERT(caseCount)}
-                      {alertRule}
-                    </b>
-                  ),
+                  cases: <b>{CASES_ASSOCIATED_WITH_ALERT(caseCount)}</b>,
                 }}
               />
             }
@@ -103,7 +95,6 @@ export const UnisolateHost = React.memo(
       comment,
       loading,
       caseCount,
-      alertRule,
     ]);
 
     return isUnIsolated ? hostUnisolatedSuccess : hostNotUnisolated;

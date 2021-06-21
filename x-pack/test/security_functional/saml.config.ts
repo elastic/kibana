@@ -76,7 +76,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
     },
     apps: kibanaFunctionalConfig.get('apps'),
-    esArchiver: { directory: resolve(__dirname, 'es_archives') },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {
