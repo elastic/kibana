@@ -95,7 +95,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
