@@ -15,12 +15,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
-
-    const { importExport: { load, unload } } = kibanaServer;
-    const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -30,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await load(archive);
+        await kibanaServer.importExport.load(archive);
 
         await spacesService.create({
           id: 'custom_space',
@@ -41,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await unload(archive);
+        await kibanaServer.importExport.unload(archive);
       });
 
       it('shows canvas navlink', async () => {

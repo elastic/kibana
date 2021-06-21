@@ -15,16 +15,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
 
-    const { importExport: { load, unload } } = kibanaServer;
-    const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
 
-    before(async () => await load(archive));
+    before(async () => await kibanaServer.importExport.load(archive));
 
-    after(async () => await unload(archive));
+    after(async () => await kibanaServer.importExport.unload(archive));
 
     describe('global canvas all privileges', () => {
       before(async () => {
