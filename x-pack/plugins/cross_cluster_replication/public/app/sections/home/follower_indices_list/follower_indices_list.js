@@ -94,45 +94,6 @@ export class FollowerIndicesList extends PureComponent {
     clearInterval(this.interval);
   }
 
-  renderHeader() {
-    const { isAuthorized, history } = this.props;
-
-    return (
-      <>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-                  defaultMessage="A follower index replicates a leader index on a remote cluster."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            {isAuthorized && (
-              <EuiButton
-                {...reactRouterNavigate(history, `/follower_indices/add`)}
-                fill
-                iconType="plusInCircle"
-                data-test-subj="createFollowerIndexButton"
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-                  defaultMessage="Create a follower index"
-                />
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-      </>
-    );
-  }
-
   renderEmpty() {
     return (
       <section>
@@ -192,11 +153,22 @@ export class FollowerIndicesList extends PureComponent {
     const { isDetailPanelOpen } = this.state;
 
     return (
-      <Fragment>
-        {this.renderHeader()}
+      <>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
+              defaultMessage="A follower index replicates a leader index on a remote cluster."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="l" />
+
         <FollowerIndicesTable followerIndices={followerIndices} />
+
         {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectFollowerIndex(null)} />}
-      </Fragment>
+      </>
     );
   }
 

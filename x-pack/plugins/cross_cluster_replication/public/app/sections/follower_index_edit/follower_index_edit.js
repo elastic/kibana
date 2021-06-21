@@ -15,7 +15,7 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPageContentBody,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -24,11 +24,11 @@ import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_rea
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
-  SectionLoading,
   SectionError,
   RemoteClustersProvider,
 } from '../../components';
 import { API_STATUS } from '../../constants';
+import { SectionLoading } from '../../../shared_imports';
 
 export class FollowerIndexEdit extends PureComponent {
   static propTypes = {
@@ -143,7 +143,7 @@ export class FollowerIndexEdit extends PureComponent {
         : error;
 
     return (
-      <Fragment>
+      <>
         <SectionError title={title} error={errorMessage} />
 
         <EuiSpacer size="m" />
@@ -163,7 +163,7 @@ export class FollowerIndexEdit extends PureComponent {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </Fragment>
+      </>
     );
   }
 
@@ -238,7 +238,7 @@ export class FollowerIndexEdit extends PureComponent {
     const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
 
     return (
-      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
         <FollowerIndexPageTitle
           title={
             <FormattedMessage
@@ -287,7 +287,7 @@ export class FollowerIndexEdit extends PureComponent {
         )}
 
         {showConfirmModal && this.renderConfirmModal()}
-      </EuiPageContent>
+      </EuiPageContentBody>
     );
   }
 }

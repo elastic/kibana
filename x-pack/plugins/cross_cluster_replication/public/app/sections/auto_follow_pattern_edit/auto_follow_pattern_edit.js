@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPageContentBody, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
@@ -18,10 +18,10 @@ import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
   RemoteClustersProvider,
-  SectionLoading,
   SectionError,
 } from '../../components';
 import { API_STATUS } from '../../constants';
+import { SectionLoading } from '../../../shared_imports';
 
 export class AutoFollowPatternEdit extends PureComponent {
   static propTypes = {
@@ -146,7 +146,7 @@ export class AutoFollowPatternEdit extends PureComponent {
     } = this.props;
 
     return (
-      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
         <AutoFollowPatternPageTitle
           title={
             <FormattedMessage
@@ -193,7 +193,7 @@ export class AutoFollowPatternEdit extends PureComponent {
             }}
           </RemoteClustersProvider>
         )}
-      </EuiPageContent>
+      </EuiPageContentBody>
     );
   }
 }
