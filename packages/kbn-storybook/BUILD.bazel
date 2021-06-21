@@ -57,7 +57,6 @@ ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
-    "//:tsconfig.json",
     "//:tsconfig.base.json",
   ],
 )
