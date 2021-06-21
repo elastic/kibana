@@ -113,9 +113,8 @@ export class TelemetryEndpointTask {
     const failedPolicyResponses = await this.sender.fetchFailedEndpointPolicyResponses();
     this.logger.debug(`ep policy responses: ${failedPolicyResponses}`);
 
-    // 4. [CD] Get the EP metrics
-    // 5. [PH/CD] Document restructuring / Join on agent / host id
-    // 6. [PH/CD] Send to dedicated infra web channel
+    // 4. [PH/CD] Document restructuring / Join on agent / host id
+    // 5. [PH/CD] Send to dedicated infra web channel
 
     return 0; // hits
   };

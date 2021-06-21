@@ -20,6 +20,9 @@ import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { Agent } from '../../../../fleet/common/types/models/agent';
+import { AgentPolicy } from '../../../../fleet/common/types/models/agent_policy';
+import { EndpointMetricsPolicyResponse } from './types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -141,8 +144,7 @@ export class TelemetryEventsSender {
 
   public async fetchFleetAgents() {
     if (this.esClient === undefined) {
-      this.logger.debug(`es client is not available`);
-      return [];
+      throw Error('could not fetch policy responses. es client is not available');
     }
 
     // require ALL fleet agents (inc inactive), not just the ones with EP Package.
@@ -157,8 +159,7 @@ export class TelemetryEventsSender {
 
   public async fetchEndpointPolicyConfigs() {
     if (this.savedObjectClient === undefined) {
-      this.logger.debug(`saved object client is not available`);
-      return [];
+      throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
     return this.agentPolicyService?.list(this.savedObjectClient, {
@@ -168,19 +169,20 @@ export class TelemetryEventsSender {
 
   public async fetchFailedEndpointPolicyResponses() {
     if (this.esClient === undefined) {
-      this.logger.debug(`es client is not available`);
-      return [];
+      throw Error('could not fetch policy responses. es client is not available');
     }
 
     /* 
       TODO: Grant kibana_system access to this datastream
         ~~>> https://github.com/elastic/elasticsearch/pull/74309
+      Re-indexed .ds-metrics-endpoint.policy* to .fleet-pjhampton-metrics-endpoint-policy*
       query the last 24h worth of failed policy responses 
     */
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.policy*`,
-      size: this.maxQueueSize,
+      index: `.fleet-pjhampton-metrics-endpoint-policy*`,
+      ignore_unavailable: false,
+      size: 10_000,
       body: {
         query: {
           match: {
@@ -190,7 +192,9 @@ export class TelemetryEventsSender {
       },
     };
 
-    const { body: failedPolicyResponses } = await this.esClient.search(query);
+    const {
+      body: failedPolicyResponses,
+    } = await this.esClient.search<EndpointMetricsPolicyResponse>(query);
     return failedPolicyResponses;
   }
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-interface EndpointPolicyWrapper {
+export interface EndpointMetricsPolicyResponse {
   endpoint: EndpointPolicyResponse;
-  elastic: EndpointPolicyAgent;
+  agent: EndpointPolicyAgent;
   host: EndpointPolicyHost;
   event: EndpointPolicyEvent;
 }
