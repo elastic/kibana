@@ -5,13 +5,19 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
-import { PackagePolicy, APM_SERVER } from './register_fleet_policy_callbacks';
 import { Artifact } from '../../../../fleet/server';
 import { sourceMapRt } from '../../routes/source_maps';
 import { APMPluginStartDependencies } from '../../types';
+import { getApmPackgePolicies } from './get_apm_package_policies';
+import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
 
 export interface ApmArtifactBody {
   serviceName: string;
@@ -125,20 +131,22 @@ export function getPackagePolicyWithSourceMap({
 }
 
 export async function updateSourceMapsOnFleetPolicies({
+  core,
   fleetPluginStart,
   savedObjectsClient,
   elasticsearchClient,
 }: {
+  core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: FleetPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
   elasticsearchClient: ElasticsearchClient;
 }) {
   const artifacts = await listArtifacts({ fleetPluginStart });
 
-  const apmFleetPolicies = await fleetPluginStart.packagePolicyService.list(
-    savedObjectsClient,
-    { kuery: 'ingest-package-policies.package.name:apm' }
-  );
+  const apmFleetPolicies = await getApmPackgePolicies({
+    core,
+    fleetPluginStart,
+  });
 
   return Promise.all(
     apmFleetPolicies.items.map(async (item) => {
