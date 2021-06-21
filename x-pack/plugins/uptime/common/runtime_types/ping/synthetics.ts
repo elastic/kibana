@@ -10,9 +10,25 @@ import * as t from 'io-ts';
 
 export const JourneyStepType = t.intersection([
   t.partial({
+    monitor: t.partial({
+      duration: t.type({
+        us: t.number,
+      }),
+      status: t.string,
+    }),
     synthetics: t.partial({
+      error: t.partial({
+        message: t.string,
+        stack: t.string,
+      }),
       payload: t.partial({
+        source: t.string,
         status: t.string,
+        text: t.string,
+      }),
+      step: t.type({
+        index: t.number,
+        name: t.string,
       }),
       isScreenshotRef: t.boolean,
       screenshotExists: t.boolean,
@@ -26,10 +42,6 @@ export const JourneyStepType = t.intersection([
       check_group: t.string,
     }),
     synthetics: t.type({
-      step: t.type({
-        index: t.number,
-        name: t.string,
-      }),
       type: t.string,
     }),
   }),
@@ -44,6 +56,9 @@ export const FailedStepsApiResponseType = t.type({
 
 export type FailedStepsApiResponse = t.TypeOf<typeof FailedStepsApiResponseType>;
 
+/**
+ * The individual screenshot blocks Synthetics uses to reduce disk footprint.
+ */
 export const ScreenshotBlockType = t.type({
   hash: t.string,
   top: t.number,
@@ -52,6 +67,9 @@ export const ScreenshotBlockType = t.type({
   width: t.number,
 });
 
+/**
+ * The old style of screenshot document that contains a full screenshot blob.
+ */
 export const ScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
@@ -74,6 +92,10 @@ export function isScreenshot(data: unknown): data is Screenshot {
   return isRight(ScreenshotType.decode(data));
 }
 
+/**
+ * The ref used by synthetics to organize the blocks needed to recompose a
+ * fragmented image.
+ */
 export const RefResultType = t.type({
   '@timestamp': t.string,
   monitor: t.type({
@@ -100,6 +122,9 @@ export function isRef(data: unknown): data is RefResult {
   return isRight(RefResultType.decode(data));
 }
 
+/**
+ * Represents the result of querying for the old-style full screenshot blob.
+ */
 export const ScreenshotImageBlobType = t.type({
   stepName: t.union([t.null, t.string]),
   maxSteps: t.number,

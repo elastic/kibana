@@ -51,19 +51,12 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
               'monitor.check_group': checkGroup,
             },
           },
+          {
+            terms: {
+              'synthetics.type': ['step/screenshot', 'step/screenshot_ref'],
+            },
+          },
         ] as QueryDslQueryContainer[],
-        should: [
-          {
-            term: {
-              'synthetics.type': 'step/screenshot',
-            },
-          },
-          {
-            term: {
-              'synthetics.type': 'step/screenshot_ref',
-            },
-          },
-        ],
       },
     },
     aggs: {

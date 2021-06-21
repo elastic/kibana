@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { DateRangeType } from '../common';
 import { PingErrorType } from '../monitor';
+import { JourneyStepType } from './synthetics';
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -245,14 +246,14 @@ export const PingType = t.intersection([
 export const SyntheticsJourneyApiResponseType = t.intersection([
   t.type({
     checkGroup: t.string,
-    steps: t.array(PingType),
+    steps: t.array(JourneyStepType),
   }),
   t.partial({
     details: t.union([
       t.intersection([
         t.type({
           timestamp: t.string,
-          journey: PingType,
+          journey: JourneyStepType,
         }),
         t.partial({
           next: t.type({

@@ -51,7 +51,12 @@ const StepImage = styled(EuiImage)`
   }
 `;
 
-const BaseStepImage = ({ stepIndex, stepName, img }: any) => {
+const BaseStepImage = ({
+  stepIndex,
+  stepName,
+  url,
+}: Pick<StepScreenshotDisplayProps, 'stepIndex' | 'stepName'> & { url?: string }) => {
+  if (!url) return <EuiLoadingSpinner />;
   return (
     <StepImage
       allowFullScreen={true}
@@ -69,7 +74,7 @@ const BaseStepImage = ({ stepIndex, stepName, img }: any) => {
       }
       caption={`Step:${stepIndex} ${stepName}`}
       hasShadow
-      url={img}
+      url={url}
     />
   );
 };
@@ -85,11 +90,11 @@ const ComposedStepImage = ({
   stepName,
   url,
   imgRef,
-  setUrl: setImg,
+  setUrl,
 }: ComposedStepImageProps) => {
-  useCompositeImage(imgRef, setImg, url);
+  useCompositeImage(imgRef, setUrl, url);
   if (!url) return <EuiLoadingSpinner />;
-  return <BaseStepImage stepIndex={stepIndex} stepName={stepName} img={url} />;
+  return <BaseStepImage stepIndex={stepIndex} stepName={stepName} url={url} />;
 };
 
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
