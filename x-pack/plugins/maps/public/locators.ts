@@ -155,6 +155,7 @@ export class MapsAppTileMapLocatorDefinition
       filters,
       query,
       timeRange,
+      hash = true,
     } = params;
     const mapModules = await lazyLoadMapModules();
     const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableState;
@@ -177,7 +178,83 @@ export class MapsAppTileMapLocatorDefinition
       filters,
       query,
       timeRange,
-      hash: true,
+      hash,
+    });
+  };
+}
+
+export interface MapsAppRegionMapLocatorParams extends SerializableState {
+  label: string;
+  emsLayerId?: string;
+  leftFieldName?: string;
+  termsFieldName?: string;
+  termsSize?: number;
+  colorSchema: string;
+  indexPatternId?: string;
+  indexPatternTitle?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+  timeRange?: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+  hash?: boolean;
+}
+
+export type MapsAppRegionMapLocator = LocatorPublic<MapsAppRegionMapLocatorParams>;
+
+export const MAPS_APP_REGION_MAP_LOCATOR = 'MAPS_APP_REGION_MAP_LOCATOR' as const;
+
+export interface MapsAppRegionMapLocatorDependencies {
+  locator: MapsAppLocator;
+}
+
+export class MapsAppRegionMapLocatorDefinition
+  implements LocatorDefinition<MapsAppRegionMapLocatorParams> {
+  public readonly id = MAPS_APP_REGION_MAP_LOCATOR;
+
+  constructor(protected readonly deps: MapsAppRegionMapLocatorDependencies) {}
+
+  public readonly getLocation = async (params: MapsAppRegionMapLocatorParams) => {
+    const {
+      label,
+      emsLayerId,
+      leftFieldName,
+      termsFieldName,
+      termsSize,
+      colorSchema,
+      indexPatternId,
+      indexPatternTitle,
+      metricAgg,
+      metricFieldName,
+      filters,
+      query,
+      timeRange,
+      hash = true,
+    } = params;
+    const mapModules = await lazyLoadMapModules();
+    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableState;
+    const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
+      label,
+      emsLayerId,
+      leftFieldName,
+      termsFieldName,
+      termsSize,
+      colorSchema,
+      indexPatternId,
+      indexPatternTitle,
+      metricAgg,
+      metricFieldName,
+    });
+    if (regionMapLayerDescriptor) {
+      initialLayers.push(regionMapLayerDescriptor);
+    }
+
+    return await this.deps.locator.getLocation({
+      initialLayers,
+      filters,
+      query,
+      timeRange,
+      hash,
     });
   };
 }
