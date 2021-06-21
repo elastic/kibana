@@ -9,7 +9,6 @@ import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
 
 import type { PackagePolicyConfigRecord } from '../../../../common';
-import { value } from '../../../../../../../packages/kbn-securitysolution-io-ts-list-types/src/common/value/index';
 
 const handlebars = Handlebars.create();
 
