@@ -152,6 +152,9 @@ export const ScreenshotBlockDocType = t.type({
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
 
+/**
+ * Contains the fields requried by the Synthetics UI when utilizing screenshot refs.
+ */
 export const ScreenshotRefImageDataType = t.type({
   stepName: t.union([t.null, t.string]),
   maxSteps: t.number,
