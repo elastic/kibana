@@ -9,11 +9,10 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
 
 import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
@@ -36,11 +35,12 @@ export const RoleMappings: React.FC = () => {
     initializeRoleMappings();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const roleMappingsSection = (
-    <>
-      <RoleMappingsHeading productName="Workplace Search" onClick={() => initializeRoleMapping()} />
+    <section>
+      <RoleMappingsHeading
+        productName={WORKPLACE_SEARCH_PLUGIN.NAME}
+        onClick={() => initializeRoleMapping()}
+      />
       <RoleMappingsTable
         roleMappings={roleMappings}
         accessItemKey="groups"
@@ -49,15 +49,17 @@ export const RoleMappings: React.FC = () => {
         initializeRoleMapping={initializeRoleMapping}
         handleDeleteMapping={handleDeleteMapping}
       />
-    </>
+    </section>
   );
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[ROLE_MAPPINGS_TITLE]}
+      pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
+      isLoading={dataLoading}
+    >
       {roleMappingFlyoutOpen && <RoleMapping />}
-      <FlashMessages />
       {roleMappingsSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

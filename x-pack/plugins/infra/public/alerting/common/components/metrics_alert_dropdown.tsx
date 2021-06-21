@@ -134,7 +134,13 @@ export const MetricsAlertDropdown = () => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={openPopover}>
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            iconSide={'right'}
+            iconType={'arrowDown'}
+            onClick={openPopover}
+          >
             <FormattedMessage id="xpack.infra.alerting.alertsButton" defaultMessage="Alerts" />
           </EuiButtonEmpty>
         }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useReducer, useState, useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -118,56 +118,74 @@ export function EditorFrame(props: EditorFrameProps) {
   );
   const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
 
-  const framePublicAPI: FramePublicAPI = {
-    datasourceLayers,
-    activeData,
-    dateRange,
-    query,
-    filters,
-    searchSessionId,
-    availablePalettes: props.palettes,
+  const framePublicAPI: FramePublicAPI = useMemo(
+    () => ({
+      datasourceLayers,
+      activeData,
+      dateRange,
+      query,
+      filters,
+      searchSessionId,
+      availablePalettes: props.palettes,
 
-    addNewLayer() {
-      const newLayerId = generateId();
+      addNewLayer() {
+        const newLayerId = generateId();
 
-      dispatch({
-        type: 'UPDATE_LAYER',
-        datasourceId: state.activeDatasourceId!,
-        layerId: newLayerId,
-        updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
-      });
-
-      return newLayerId;
-    },
-
-    removeLayers(layerIds: string[]) {
-      if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          visualizationId: activeVisualization.id,
-          updater: layerIds.reduce(
-            (acc, layerId) =>
-              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-            state.visualization.state
-          ),
-        });
-      }
-
-      layerIds.forEach((layerId) => {
-        const layerDatasourceId = Object.entries(props.datasourceMap).find(
-          ([datasourceId, datasource]) =>
-            state.datasourceStates[datasourceId] &&
-            datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-        )![0];
         dispatch({
           type: 'UPDATE_LAYER',
-          layerId,
-          datasourceId: layerDatasourceId,
-          updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          datasourceId: state.activeDatasourceId!,
+          layerId: newLayerId,
+          updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
         });
-      });
-    },
-  };
+
+        return newLayerId;
+      },
+
+      removeLayers(layerIds: string[]) {
+        if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
+          dispatch({
+            type: 'UPDATE_VISUALIZATION_STATE',
+            visualizationId: activeVisualization.id,
+            updater: layerIds.reduce(
+              (acc, layerId) =>
+                activeVisualization.removeLayer
+                  ? activeVisualization.removeLayer(acc, layerId)
+                  : acc,
+              state.visualization.state
+            ),
+          });
+        }
+
+        layerIds.forEach((layerId) => {
+          const layerDatasourceId = Object.entries(props.datasourceMap).find(
+            ([datasourceId, datasource]) =>
+              state.datasourceStates[datasourceId] &&
+              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+          )![0];
+          dispatch({
+            type: 'UPDATE_LAYER',
+            layerId,
+            datasourceId: layerDatasourceId,
+            updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          });
+        });
+      },
+    }),
+    [
+      activeData,
+      activeVisualization,
+      datasourceLayers,
+      dateRange,
+      query,
+      filters,
+      searchSessionId,
+      props.palettes,
+      props.datasourceMap,
+      state.activeDatasourceId,
+      state.datasourceStates,
+      state.visualization.state,
+    ]
+  );
 
   useEffect(
     () => {
