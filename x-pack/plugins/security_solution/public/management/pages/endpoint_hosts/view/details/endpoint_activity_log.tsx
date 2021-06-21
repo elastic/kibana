@@ -81,7 +81,7 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" style={{ height: '75vh' }}>
           {(activityLogLoaded && !activityLogSize) || activityLogError ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
@@ -93,7 +93,7 @@ export const EndpointActivityLog = memo(
             </EuiFlexItem>
           ) : (
             <>
-              <EuiFlexItem>
+              <EuiFlexItem grow={true}>
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (
                     <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
@@ -103,7 +103,7 @@ export const EndpointActivityLog = memo(
                     <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
                   ))}
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
                 {(!activityLogLoading || !isPagingDisabled) && <Sentinel ref={fetchMoreSentinel} />}
                 {isPagingDisabled && !activityLogLoading && (
