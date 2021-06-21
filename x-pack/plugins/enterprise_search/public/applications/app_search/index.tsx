@@ -98,6 +98,22 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={ENGINES_PATH} />
+      </Route>
+      <Route exact path={ENGINES_PATH}>
+        <EnginesOverview />
+      </Route>
+      {canManageEngines && (
+        <Route exact path={ENGINE_CREATION_PATH}>
+          <EngineCreation />
+        </Route>
+      )}
+      {canManageMetaEngines && (
+        <Route exact path={META_ENGINE_CREATION_PATH}>
+          <MetaEngineCreation />
+        </Route>
+      )}
       {canViewSettings && (
         <Route exact path={SETTINGS_PATH}>
           <Settings />
@@ -116,25 +132,9 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           <Switch>
-            <Route exact path={ROOT_PATH}>
-              <Redirect to={ENGINES_PATH} />
-            </Route>
-            <Route exact path={ENGINES_PATH}>
-              <EnginesOverview />
-            </Route>
             <Route path={ENGINE_PATH}>
               <EngineRouter />
             </Route>
-            {canManageEngines && (
-              <Route exact path={ENGINE_CREATION_PATH}>
-                <EngineCreation />
-              </Route>
-            )}
-            {canManageMetaEngines && (
-              <Route exact path={META_ENGINE_CREATION_PATH}>
-                <MetaEngineCreation />
-              </Route>
-            )}
             <Route>
               <NotFound product={APP_SEARCH_PLUGIN} />
             </Route>
