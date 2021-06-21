@@ -569,7 +569,7 @@ instanceStateValue: true
                     },
                   },
                 });
-                expect(searchResult.body.hits.total.value).to.eql(1);
+                expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
                 return searchResult.body.hits.hits[0];
               });
 
