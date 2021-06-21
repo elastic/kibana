@@ -28,8 +28,8 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async setCodeEditorValue(nthIndex: number, value: string) {
-    await retry.try(async () => {
-      await browser.execute(
+    await this.retry.try(async () => {
+      await this.browser.execute(
         (editorIndex, codeEditorValue) => {
           const editor = (window as any).MonacoEnvironment.monaco.editor;
           const instance = editor.getModels()[editorIndex];
