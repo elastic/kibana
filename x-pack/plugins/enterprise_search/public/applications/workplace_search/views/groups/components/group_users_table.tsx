@@ -11,7 +11,6 @@ import { useValues } from 'kea';
 
 import { EuiTable, EuiTableBody, EuiTablePagination } from '@elastic/eui';
 import { Pager } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../../../../shared/constants';
 import { TableHeader } from '../../../../shared/table_header';
@@ -27,9 +26,9 @@ export const GroupUsersTable: React.FC = () => {
   const {
     group: { users },
   } = useValues(GroupLogic);
-  const headerItems = [USERNAME_TABLE_HEADER];
+  const headerItems = [USERNAME_LABEL];
   if (!isFederatedAuth) {
-    headerItems.push(EMAIL_TABLE_HEADER);
+    headerItems.push(EMAIL_LABEL);
   }
 
   const [firstItem, setFirstItem] = useState(0);
