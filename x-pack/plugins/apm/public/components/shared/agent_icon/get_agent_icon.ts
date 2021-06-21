@@ -6,8 +6,9 @@
  */
 
 import {
+  isRumAgentName,
+  isJavaAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
-  RUM_AGENT_NAMES,
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import defaultIcon from '../span_icon/icons/default.svg';
@@ -60,8 +61,13 @@ export function getAgentIconKey(agentName: string) {
   const lowercasedAgentName = agentName.toLowerCase();
 
   // RUM agent names
-  if (RUM_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
+  if (isRumAgentName(lowercasedAgentName)) {
     return 'rum';
+  }
+
+  // Java  agent names
+  if (isJavaAgentName(lowercasedAgentName)) {
+    return 'java';
   }
 
   // Remove "opentelemetry/" prefix

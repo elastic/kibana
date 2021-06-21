@@ -20,7 +20,6 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
@@ -35,7 +34,10 @@ import {
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
+import {
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -222,9 +224,6 @@ export function registerTransactionDurationAnomalyAlertType({
 
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
-
-          const parsedEnvironment = parseEnvironmentUrlParam(environment);
-
           const severityLevel = getSeverity(score);
 
           services
@@ -239,9 +238,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 .join('_'),
               fields: {
                 [SERVICE_NAME]: serviceName,
-                ...(parsedEnvironment.esFieldValue
-                  ? { [SERVICE_ENVIRONMENT]: environment }
-                  : {}),
+                ...getEnvironmentEsField(environment),
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_SEVERITY_LEVEL]: severityLevel,
@@ -253,7 +250,7 @@ export function registerTransactionDurationAnomalyAlertType({
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
-              environment,
+              environment: getEnvironmentLabel(environment),
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
             });
