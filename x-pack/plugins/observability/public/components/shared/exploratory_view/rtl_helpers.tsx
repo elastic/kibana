@@ -185,7 +185,7 @@ export function render<ExtraCore>(
 
   const seriesContextValue = mockSeriesStorageContext(initSeries);
 
-  const { getByTestId, getByText } = reactTestLibRender(
+  const { debug: _, ...reactTestLibHelpersWithoutDebug } = reactTestLibRender(
     <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
       <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
         {ui}
@@ -195,8 +195,7 @@ export function render<ExtraCore>(
   );
 
   return {
-    getByTestId,
-    getByText,
+    ...reactTestLibHelpersWithoutDebug,
     core,
     setSeries: seriesContextValue.setSeries,
   };

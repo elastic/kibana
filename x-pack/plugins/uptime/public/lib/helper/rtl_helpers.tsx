@@ -173,15 +173,17 @@ export function render<ExtraCore>(
     history = getHistoryFromUrl(url);
   }
 
+  const { debug: _, ...reactTestLibHelpersWithoutDebug } = reactTestLibRender(
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+        {ui}
+      </MockRouter>
+    </MountWithReduxProvider>,
+    renderOptions
+  );
+
   return {
-    ...reactTestLibRender(
-      <MountWithReduxProvider state={testState}>
-        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-          {ui}
-        </MockRouter>
-      </MountWithReduxProvider>,
-      renderOptions
-    ),
+    ...reactTestLibHelpersWithoutDebug,
     history,
   };
 }
