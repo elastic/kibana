@@ -11,6 +11,7 @@ import { Maybe } from '../../../../../../observability/common/typings';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getHostMetadata } from './api';
 import { ISOLATION_STATUS_FAILURE } from './translations';
+import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
@@ -36,7 +37,7 @@ export const useHostIsolationStatus = ({
       try {
         const metadataResponse = await getHostMetadata({ agentId });
         if (isMounted) {
-          setIsIsolated(Boolean(metadataResponse.metadata.Endpoint.state.isolation));
+          setIsIsolated(isEndpointHostIsolated(metadataResponse.metadata));
         }
       } catch (error) {
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });

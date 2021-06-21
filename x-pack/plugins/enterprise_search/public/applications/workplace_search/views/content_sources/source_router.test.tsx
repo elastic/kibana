@@ -7,13 +7,12 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
-import { mockLocation } from '../../../__mocks__/react_router_history.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockLocation, mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
@@ -46,7 +45,7 @@ describe('SourceRouter', () => {
       resetSourceState,
     });
     setMockValues({ ...mockValues });
-    (useParams as jest.Mock).mockImplementationOnce(() => ({
+    mockUseParams.mockImplementationOnce(() => ({
       sourceId: contentSource.id,
     }));
   });

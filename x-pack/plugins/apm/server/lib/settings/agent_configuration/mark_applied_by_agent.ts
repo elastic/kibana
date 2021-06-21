@@ -29,5 +29,8 @@ export async function markAppliedByAgent({
     },
   };
 
-  return internalClient.index<AgentConfiguration>(params);
+  return internalClient.index<AgentConfiguration>(
+    'mark_configuration_applied_by_agent',
+    params
+  );
 }

@@ -94,6 +94,7 @@ describe('TaskStore', () => {
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
+        traceparent: 'apmTraceparent',
       };
       const result = await testSchedule(task);
 
@@ -112,6 +113,7 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'report',
           user: undefined,
+          traceparent: 'apmTraceparent',
         },
         {
           id: 'id',
@@ -134,6 +136,7 @@ describe('TaskStore', () => {
         taskType: 'report',
         user: undefined,
         version: '123',
+        traceparent: 'apmTraceparent',
       });
     });
 
@@ -205,7 +208,7 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
+    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
       esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
 
       const result = await store.fetch(opts);
@@ -285,6 +288,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: 'myTraceparent',
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -318,6 +322,7 @@ describe('TaskStore', () => {
           taskType: task.taskType,
           user: undefined,
           ownerId: null,
+          traceparent: 'myTraceparent',
         },
         { version: '123', refresh: false }
       );
@@ -347,6 +352,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: '',
       };
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
@@ -384,6 +390,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: '',
       };
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
@@ -500,6 +507,7 @@ describe('TaskStore', () => {
             status: status as TaskStatus,
             version: '123',
             ownerId: null,
+            traceparent: 'myTraceparent',
           };
 
           savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({

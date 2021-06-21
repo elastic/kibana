@@ -36,12 +36,6 @@ export const HostIsolationPanel = React.memo(
       return findHostName ? findHostName[0] : '';
     }, [details]);
 
-    const alertRule = useMemo(() => {
-      const findAlertRule = find({ category: 'signal', field: 'signal.rule.name' }, details)
-        ?.values;
-      return findAlertRule ? findAlertRule[0] : '';
-    }, [details]);
-
     const alertId = useMemo(() => {
       const findAlertId = find({ category: '_id', field: '_id' }, details)?.values;
       return findAlertId ? findAlertId[0] : '';
@@ -95,7 +89,6 @@ export const HostIsolationPanel = React.memo(
       <IsolateHost
         agentId={agentId}
         hostName={hostName}
-        alertRule={alertRule}
         cases={associatedCases}
         caseIds={caseIds}
         cancelCallback={cancelCallback}
@@ -104,7 +97,6 @@ export const HostIsolationPanel = React.memo(
       <UnisolateHost
         agentId={agentId}
         hostName={hostName}
-        alertRule={alertRule}
         cases={associatedCases}
         caseIds={caseIds}
         cancelCallback={cancelCallback}

@@ -13,9 +13,7 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
-  defaultPackages,
   installationStatuses,
-  requiredPackages,
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
@@ -48,7 +46,12 @@ export type EpmPackageInstallStatus = 'installed' | 'installing';
 export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
-export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
+export type DocAssetType = 'doc' | 'notice';
+export type AssetType =
+  | KibanaAssetType
+  | ElasticsearchAssetType
+  | ValueOf<AgentAssetType>
+  | DocAssetType;
 
 /*
   Enum mapping of a saved object asset type to how it would appear in a package file path (snake cased)
@@ -276,6 +279,7 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -291,11 +295,17 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
   'index_template.settings'?: object;
   'index_template.mappings'?: object;
+}
+
+export interface RegistryDataStreamPermissions {
+  cluster?: string[];
+  indices?: string[];
 }
 
 export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
@@ -337,6 +347,7 @@ export interface EpmPackageAdditions {
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
+  notice?: string;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -394,10 +405,6 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 };
-
-export type RequiredPackage = typeof requiredPackages;
-
-export type DefaultPackages = typeof defaultPackages;
 
 export interface IndexTemplateMappings {
   properties: any;

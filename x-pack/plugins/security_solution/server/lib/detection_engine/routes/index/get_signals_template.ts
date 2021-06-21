@@ -22,7 +22,7 @@ import otherMapping from './other_mappings.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 35;
+export const SIGNALS_TEMPLATE_VERSION = 45;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {

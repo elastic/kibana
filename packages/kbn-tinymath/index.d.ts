@@ -24,9 +24,11 @@ export interface TinymathLocation {
 export interface TinymathFunction {
   type: 'function';
   name: string;
-  text: string;
   args: TinymathAST[];
-  location: TinymathLocation;
+  // Location is not guaranteed because PEG grammars are not left-recursive
+  location?: TinymathLocation;
+  // Text is not guaranteed because PEG grammars are not left-recursive
+  text?: string;
 }
 
 export interface TinymathVariable {

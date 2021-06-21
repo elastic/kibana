@@ -284,6 +284,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: () => {},
     };
 
     jest.clearAllMocks();

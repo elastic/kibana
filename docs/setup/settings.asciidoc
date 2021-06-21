@@ -262,11 +262,11 @@ on the {kib} index at startup. {kib} users still need to authenticate with
  {es} {ref}/indices-create-index.html[index name limitations].
  *Default: `".kibana"`*
 
-| `kibana.autocompleteTimeout:` {ess-icon}
+| `data.autocomplete.valueSuggestions.timeout:` {ess-icon}
  | Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
 
-| `kibana.autocompleteTerminateAfter:` {ess-icon}
+| `data.autocomplete.valueSuggestions.terminateAfter:` {ess-icon}
  | Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
@@ -595,6 +595,10 @@ inactive socket. *Default: `"120000"`*
 |[[server-ssl-cert-key]] `server.ssl.certificate:` and `server.ssl.key:`
  | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
+
+|[[server-uuid]] `server.uuid:`
+ | The unique identifier for this {kib} instance.
+
 
 |===
 

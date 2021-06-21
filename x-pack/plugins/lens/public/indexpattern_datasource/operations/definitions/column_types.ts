@@ -16,6 +16,7 @@ export interface BaseIndexPatternColumn extends Operation {
   customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   filter?: Query;
+  timeShift?: string;
 }
 
 // Formatting can optionally be added to any column

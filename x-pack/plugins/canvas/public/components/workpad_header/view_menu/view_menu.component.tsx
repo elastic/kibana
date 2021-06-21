@@ -76,7 +76,7 @@ export interface Props {
   /**
    * Sets auto refresh interval
    */
-  setRefreshInterval: (interval?: number) => void;
+  setRefreshInterval: (interval: number) => void;
   /**
    * Is autoplay enabled?
    */
@@ -92,7 +92,7 @@ export interface Props {
   /**
    * Sets autoplay interval
    */
-  setAutoplayInterval: (interval?: number) => void;
+  setAutoplayInterval: (interval: number) => void;
 }
 
 export const ViewMenu: FunctionComponent<Props> = ({
@@ -113,7 +113,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   enableAutoplay,
   setAutoplayInterval,
 }) => {
-  const setRefresh = (val: number | undefined) => setRefreshInterval(val);
+  const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
@@ -193,16 +193,6 @@ export const ViewMenu: FunctionComponent<Props> = ({
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           enterFullscreen();
-          closePopover();
-        },
-      },
-      {
-        name: autoplayEnabled
-          ? strings.getAutoplayOffMenuItemLabel()
-          : strings.getAutoplayOnMenuItemLabel(),
-        icon: autoplayEnabled ? 'stop' : 'play',
-        onClick: () => {
-          enableAutoplay(!autoplayEnabled);
           closePopover();
         },
       },

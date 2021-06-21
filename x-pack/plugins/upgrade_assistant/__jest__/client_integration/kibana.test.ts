@@ -182,9 +182,7 @@ describe('Kibana deprecations', () => {
       component.update();
 
       expect(exists('kibanaRequestError')).toBe(true);
-      expect(find('kibanaRequestError').text()).toContain(
-        'Could not retrieve Kibana deprecations.'
-      );
+      expect(find('kibanaRequestError').text()).toContain('Could not retrieve Kibana deprecations');
     });
 
     test('handles deprecation service error', async () => {
@@ -217,7 +215,7 @@ describe('Kibana deprecations', () => {
       // Verify top-level callout renders
       expect(exists('kibanaPluginError')).toBe(true);
       expect(find('kibanaPluginError').text()).toContain(
-        'Not all Kibana deprecations were retrieved successfully.'
+        'Not all Kibana deprecations were retrieved successfully'
       );
 
       // Open all deprecations

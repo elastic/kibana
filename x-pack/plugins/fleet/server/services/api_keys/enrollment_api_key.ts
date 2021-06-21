@@ -197,7 +197,6 @@ export async function generateEnrollmentAPIKey(
     .createApiKey({
       body: {
         name,
-        // @ts-expect-error Metadata in api keys
         metadata: {
           managed_by: 'fleet',
           managed: true,

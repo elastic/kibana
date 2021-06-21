@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { CreateCaseModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
 import { getCreateCaseLazy as getCreateCase } from '../../methods';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../methods');
 const getCreateCaseMock = getCreateCase as jest.Mock;
@@ -20,6 +21,7 @@ const defaultProps = {
   isModalOpen: true,
   onCloseCaseModal,
   onSuccess,
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 describe('CreateCaseModal', () => {

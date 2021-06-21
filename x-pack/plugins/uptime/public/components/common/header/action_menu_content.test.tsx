@@ -49,7 +49,7 @@ describe('ActionMenuContent', () => {
 
     // this href value is mocked, so it doesn't correspond to the real link
     // that Kibana core services will provide
-    expect(addDataAnchor.getAttribute('href')).toBe('/app/uptime');
+    expect(addDataAnchor.getAttribute('href')).toBe('/home#/tutorial/uptimeMonitors');
     expect(getByText('Add data'));
   });
 });

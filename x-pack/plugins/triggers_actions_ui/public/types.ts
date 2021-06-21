@@ -109,10 +109,10 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
-  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
+  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>

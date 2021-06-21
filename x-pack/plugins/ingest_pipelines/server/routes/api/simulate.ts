@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SimulatePipelineDocument } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -38,7 +38,7 @@ export const registerSimulateRoute = ({
           verbose,
           body: {
             pipeline,
-            docs: documents as SimulatePipelineDocument[],
+            docs: documents as estypes.IngestSimulatePipelineDocument[],
           },
         });
 

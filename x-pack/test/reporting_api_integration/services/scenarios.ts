@@ -31,12 +31,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
   const initEcommerce = async () => {
-    await esArchiver.load('reporting/ecommerce');
-    await esArchiver.load('reporting/ecommerce_kibana');
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
   };
   const teardownEcommerce = async () => {
-    await esArchiver.unload('reporting/ecommerce');
-    await esArchiver.unload('reporting/ecommerce_kibana');
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
     await deleteAllReports();
   };
 

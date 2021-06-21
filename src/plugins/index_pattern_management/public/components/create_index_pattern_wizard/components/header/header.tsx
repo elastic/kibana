@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@elastic/eui';
+import { EuiBetaBadge, EuiCode, EuiLink, EuiPageHeader, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,9 +39,9 @@ export const Header = ({
   changeTitle(createIndexPatternHeader);
 
   return (
-    <div>
-      <EuiTitle>
-        <h1>
+    <EuiPageHeader
+      pageTitle={
+        <>
           {createIndexPatternHeader}
           {isBeta ? (
             <>
@@ -53,9 +53,10 @@ export const Header = ({
               />
             </>
           ) : null}
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+        </>
+      }
+      bottomBorder
+    >
       <EuiText>
         <p>
           <FormattedMessage
@@ -82,6 +83,6 @@ export const Header = ({
           {prompt}
         </>
       ) : null}
-    </div>
+    </EuiPageHeader>
   );
 };

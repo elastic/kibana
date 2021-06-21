@@ -240,6 +240,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         fullWidth
         error={errors['subActionParams.incident.short_description']}
         isInvalid={
+          errors['subActionParams.incident.short_description'] !== undefined &&
           errors['subActionParams.incident.short_description'].length > 0 &&
           incident.short_description !== undefined
         }

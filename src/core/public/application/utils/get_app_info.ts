@@ -16,17 +16,19 @@ import {
 } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
-  const navLinkStatus =
-    app.navLinkStatus === AppNavLinkStatus.default
-      ? app.status === AppStatus.inaccessible
-        ? AppNavLinkStatus.hidden
-        : AppNavLinkStatus.visible
-      : app.navLinkStatus!;
-  const { updater$, mount, ...infos } = app;
+  const { updater$, mount, navLinkStatus = AppNavLinkStatus.default, ...infos } = app;
   return {
     ...infos,
     status: app.status!,
-    navLinkStatus,
+    navLinkStatus:
+      navLinkStatus === AppNavLinkStatus.default
+        ? app.status === AppStatus.inaccessible
+          ? AppNavLinkStatus.hidden
+          : AppNavLinkStatus.visible
+        : navLinkStatus,
+    searchable:
+      app.searchable ??
+      (navLinkStatus === AppNavLinkStatus.default || navLinkStatus === AppNavLinkStatus.visible),
     appRoute: app.appRoute!,
     keywords: app.keywords ?? [],
     deepLinks: getDeepLinkInfos(app.deepLinks),
@@ -37,17 +39,18 @@ function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
   if (!deepLinks) return [];
 
   return deepLinks.map(
-    (rawDeepLink): PublicAppDeepLinkInfo => {
-      const navLinkStatus =
-        rawDeepLink.navLinkStatus === AppNavLinkStatus.default
-          ? AppNavLinkStatus.hidden
-          : rawDeepLink.navLinkStatus!;
+    ({ navLinkStatus = AppNavLinkStatus.default, ...rawDeepLink }): PublicAppDeepLinkInfo => {
       return {
         id: rawDeepLink.id,
         title: rawDeepLink.title,
         path: rawDeepLink.path,
         keywords: rawDeepLink.keywords ?? [],
-        navLinkStatus,
+        navLinkStatus:
+          navLinkStatus === AppNavLinkStatus.default ? AppNavLinkStatus.hidden : navLinkStatus,
+        searchable:
+          rawDeepLink.searchable ??
+          (navLinkStatus === AppNavLinkStatus.default ||
+            navLinkStatus === AppNavLinkStatus.visible),
         deepLinks: getDeepLinkInfos(rawDeepLink.deepLinks),
       };
     }

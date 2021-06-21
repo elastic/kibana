@@ -113,7 +113,7 @@ async function executeAlert(
   alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
@@ -144,7 +144,7 @@ async function executeRatioAlert(
   alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
@@ -198,7 +198,7 @@ const getESQuery = (
   alertParams: Omit<AlertParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ) => {
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings)
@@ -433,7 +433,7 @@ export const getGroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ): estypes.SearchRequest | undefined => {
   const { groupBy } = params;
 
@@ -493,7 +493,7 @@ export const getUngroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.RuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,

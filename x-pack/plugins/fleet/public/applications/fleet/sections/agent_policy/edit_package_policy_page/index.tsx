@@ -24,13 +24,14 @@ import {
   useBreadcrumbs,
   useStartServices,
   useConfig,
+  useUIExtension,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
+import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -41,11 +42,9 @@ import type {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import type { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 export const EditPackagePolicyPage = memo(() => {
   const {

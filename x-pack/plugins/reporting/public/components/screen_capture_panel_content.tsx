@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
+import moment from 'moment';
+import React, { Component } from 'react';
 import { ToastsSetup } from 'src/core/public';
-import { BaseParams } from '../../common/types';
+import { getDefaultLayoutSelectors } from '../../common';
+import { BaseParams, LayoutParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content';
 
@@ -17,33 +19,33 @@ export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
+  layoutOption?: 'canvas' | 'print';
   objectId?: string;
   getJobParams: () => BaseParams;
+  requiresSavedState: boolean;
   isDirty?: boolean;
   onClose?: () => void;
 }
 
 interface State {
-  isPreserveLayoutSupported: boolean;
   usePrintLayout: boolean;
+  useCanvasLayout: boolean;
 }
 
 export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { objectType } = props.getJobParams();
-    const isPreserveLayoutSupported = props.reportType !== 'png' && objectType !== 'visualization';
     this.state = {
-      isPreserveLayoutSupported,
       usePrintLayout: false,
+      useCanvasLayout: false,
     };
   }
 
   public render() {
     return (
       <ReportingPanelContent
-        requiresSavedState
+        requiresSavedState={this.props.requiresSavedState}
         apiClient={this.props.apiClient}
         toasts={this.props.toasts}
         reportType={this.props.reportType}
@@ -58,9 +60,16 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    if (this.state.isPreserveLayoutSupported) {
+    if (this.props.layoutOption === 'print') {
       return (
-        <Fragment>
+        <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+              defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
+            />
+          }
+        >
           <EuiSwitch
             label={
               <FormattedMessage
@@ -72,43 +81,83 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
             onChange={this.handlePrintLayoutChange}
             data-test-subj="usePrintLayout"
           />
-          <EuiSpacer size="s" />
-        </Fragment>
+        </EuiFormRow>
       );
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
+    if (this.props.layoutOption === 'canvas') {
+      return (
+        <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText"
+              defaultMessage="Remove borders and footer logo"
+            />
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.canvasLayoutLabel"
+                defaultMessage="Full page layout"
+              />
+            }
+            checked={this.state.useCanvasLayout}
+            onChange={this.handleCanvasLayoutChange}
+            data-test-subj="reportModeToggle"
+          />
+        </EuiFormRow>
+      );
+    }
+
+    return null;
   };
 
   private handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
-    this.setState({ usePrintLayout: evt.target.checked });
+    this.setState({ usePrintLayout: evt.target.checked, useCanvasLayout: false });
   };
 
-  private getLayout = () => {
-    if (this.state.usePrintLayout) {
-      return { id: 'print' };
+  private handleCanvasLayoutChange = (evt: EuiSwitchEvent) => {
+    this.setState({ useCanvasLayout: evt.target.checked, usePrintLayout: false });
+  };
+
+  private getLayout = (): Required<LayoutParams> => {
+    const { layout: outerLayout } = this.props.getJobParams();
+
+    let dimensions = outerLayout?.dimensions;
+    if (!dimensions) {
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      dimensions = { height, width };
     }
 
-    const el = document.querySelector('[data-shared-items-container]');
-    const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+    let selectors = outerLayout?.selectors;
+    if (!selectors) {
+      selectors = getDefaultLayoutSelectors();
+    }
 
-    return {
-      id: this.props.reportType === 'png' ? 'png' : 'preserve_layout',
-      dimensions: {
-        height: bounds.height,
-        width: bounds.width,
-      },
-    };
+    if (this.state.usePrintLayout) {
+      return { id: 'print', dimensions, selectors };
+    }
+
+    if (this.state.useCanvasLayout) {
+      return { id: 'canvas', dimensions, selectors };
+    }
+
+    return { id: 'preserve_layout', dimensions, selectors };
   };
 
-  private getJobParams = () => {
+  private getJobParams = (): Required<BaseParams> => {
+    const outerParams = this.props.getJobParams();
+    let browserTimezone = outerParams.browserTimezone;
+    if (!browserTimezone) {
+      browserTimezone = moment.tz.guess();
+    }
+
     return {
       ...this.props.getJobParams(),
       layout: this.getLayout(),
+      browserTimezone,
     };
   };
 }

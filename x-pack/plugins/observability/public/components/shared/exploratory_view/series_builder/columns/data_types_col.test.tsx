@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockAppIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
+import { mockAppIndexPattern, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
 
 describe('DataTypesCol', function () {
@@ -24,9 +24,7 @@ describe('DataTypesCol', function () {
   });
 
   it('should set series on change', function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<DataTypesCol seriesId={seriesId} />);
+    const { setSeries } = render(<DataTypesCol seriesId={seriesId} />);
 
     fireEvent.click(screen.getByText(/user experience \(rum\)/i));
 
@@ -35,18 +33,18 @@ describe('DataTypesCol', function () {
   });
 
   it('should set series on change on already selected', function () {
-    mockUrlStorage({
+    const initSeries = {
       data: {
         [seriesId]: {
-          dataType: 'synthetics',
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'kpi' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
-    render(<DataTypesCol seriesId={seriesId} />);
+    render(<DataTypesCol seriesId={seriesId} />, { initSeries });
 
     const button = screen.getByRole('button', {
       name: /Synthetic Monitoring/i,

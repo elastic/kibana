@@ -42,7 +42,7 @@ export class LargeShardSizeAlert extends BaseAlert {
       id: ALERT_LARGE_SHARD_SIZE,
       name: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].label,
       throttle: '12h',
-      defaultParams: { indexPattern: '*', threshold: 55 },
+      defaultParams: { indexPattern: '-.*', threshold: 55 },
       actionVariables: [
         {
           name: 'shardIndices',

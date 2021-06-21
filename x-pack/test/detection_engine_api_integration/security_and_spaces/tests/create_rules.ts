@@ -61,13 +61,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -297,12 +297,16 @@ export default ({ getService }: FtrProviderContext) => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
-        await esArchiver.load('security_solution/timestamp_override');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
 
       it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {

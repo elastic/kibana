@@ -25,7 +25,9 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly inspector = this.ctx.getService('inspector');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common', 'dashboard']);
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   async findContextMenu(parent?: WebElementWrapper) {
     return parent
@@ -78,8 +80,8 @@ export class DashboardPanelActionsService extends FtrService {
     const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
-    await this.PageObjects.common.waitForTopNavToBeVisible();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForTopNavToBeVisible();
   }
 
   async editPanelByTitle(title?: string) {
@@ -146,7 +148,7 @@ export class DashboardPanelActionsService extends FtrService {
       await this.openContextMenu();
     }
     await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
-    await this.PageObjects.dashboard.waitForRenderComplete();
+    await this.dashboard.waitForRenderComplete();
   }
 
   async openCopyToModalByTitle(title?: string) {

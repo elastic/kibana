@@ -8,7 +8,7 @@ import { estypes } from '@elastic/elasticsearch';
 import type { ESSearchRequest } from '../../../../typings/elasticsearch';
 
 interface BuildSortedEventsQueryOpts {
-  aggs?: Record<string, estypes.AggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   track_total_hits: boolean | number;
   index: estypes.Indices;
   size: number;

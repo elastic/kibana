@@ -11,9 +11,13 @@ exports[`TruncatableText renders correctly against snapshot 1`] = `
   white-space: nowrap;
 }
 
-<span
-  className="c0"
->
-  Hiding in plain sight
-</span>
+<TruncatableText>
+  <EllipsisText>
+    <span
+      className="c0"
+    >
+      Hiding in plain sight
+    </span>
+  </EllipsisText>
+</TruncatableText>
 `;

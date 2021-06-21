@@ -6,7 +6,7 @@ from build_util import (
   md5_file,
 )
 
-# This file builds Chromium headless on Linux.
+# This file builds Chromium headless on Mac and Linux.
 
 # Verify that we have an argument, and if not print instructions
 if (len(sys.argv) < 2):
@@ -68,7 +68,6 @@ if platform.system() == 'Linux':
   print('Running install-build-deps...')
   runcmd(src_path + '/build/install-build-deps.sh')
 
-
 print('Updating all modules')
 runcmd('gclient sync -D')
 
@@ -89,7 +88,7 @@ runcmd('gn gen out/headless')
 print('Compiling... this will take a while')
 runcmd('autoninja -C out/headless headless_shell')
 
-# Optimize the output on Linux x64 by stripping inessentials from the binary
+# Optimize the output on Linux x64 and Mac by stripping inessentials from the binary
 # ARM must be cross-compiled from Linux and can not read the ARM binary in order to strip
 if platform.system() != 'Windows' and arch_name != 'arm64':
   print('Optimizing headless_shell')
@@ -112,10 +111,18 @@ def archive_file(name):
   archive.write(from_path, to_path)
   return to_path
 
-# Add dependencies that must be bundled with the Chromium executable.
+# Each platform has slightly different requirements for what dependencies
+# must be bundled with the Chromium executable.
 archive_file('headless_shell')
-archive_file(path.join('swiftshader', 'libEGL.so'))
-archive_file(path.join('swiftshader', 'libGLESv2.so'))
+if platform.system() == 'Linux':
+  archive_file(path.join('swiftshader', 'libEGL.so'))
+  archive_file(path.join('swiftshader', 'libGLESv2.so'))
+
+elif platform.system() == 'Darwin':
+  archive_file('headless_shell')
+  archive_file('libswiftshader_libEGL.dylib')
+  archive_file('libswiftshader_libGLESv2.dylib')
+  archive_file(path.join('Helpers', 'chrome_crashpad_handler'))
 
 archive.close()
 

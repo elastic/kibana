@@ -28,9 +28,9 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
+  SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
-  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
@@ -39,13 +39,13 @@ import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
+  EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -56,6 +56,7 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
+import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -197,21 +198,8 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
-  return !!map.mapState.drawState;
-};
-
-export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
-  if (map.mapState.refreshConfig) {
-    return map.mapState.refreshConfig;
-  }
-
-  const refreshInterval = getTimeFilter().getRefreshInterval();
-  return {
-    isPaused: refreshInterval.pause,
-    interval: refreshInterval.value,
-  };
-};
+export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
+  map.mapState.editState;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
   map.mapState.refreshTimerLastTriggeredAt;
@@ -242,6 +230,7 @@ export const getDataFilters = createSelector(
   getFilters,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getIsReadOnly,
   (
     mapExtent,
     mapBuffer,
@@ -252,7 +241,8 @@ export const getDataFilters = createSelector(
     query,
     filters,
     searchSessionId,
-    searchSessionMapBuffer
+    searchSessionMapBuffer,
+    isReadOnly
   ) => {
     return {
       extent: mapExtent,
@@ -264,6 +254,7 @@ export const getDataFilters = createSelector(
       query,
       filters,
       searchSessionId,
+      isReadOnly,
     };
   }
 );

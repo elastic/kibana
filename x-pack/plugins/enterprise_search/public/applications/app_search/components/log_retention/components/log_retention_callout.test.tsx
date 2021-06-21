@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,7 +14,9 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { LogRetentionOptions } from '../';
+import { mountWithIntl } from '../../../../test_helpers';
+
+import { LogRetentionOptions } from '../index';
 
 import { LogRetentionCallout } from './';
 

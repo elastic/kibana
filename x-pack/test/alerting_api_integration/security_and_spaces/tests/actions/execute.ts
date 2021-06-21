@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
                 spaceId: space.id,
                 connectorId: createdAction.id,
                 outcome: 'success',
+                actionTypeId: 'test.index-record',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
               break;
@@ -502,13 +503,14 @@ export default function ({ getService }: FtrProviderContext) {
   interface ValidateEventLogParams {
     spaceId: string;
     connectorId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, connectorId, outcome, message, errorMessage } = params;
+    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -549,6 +551,7 @@ export default function ({ getService }: FtrProviderContext) {
         rel: 'primary',
         type: 'action',
         id: connectorId,
+        type_id: actionTypeId,
         namespace: spaceId,
       },
     ]);

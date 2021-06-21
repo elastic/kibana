@@ -22,7 +22,7 @@ export interface ResolvedLogSourceConfiguration {
   tiebreakerField: string;
   messageField: string[];
   fields: IndexPattern['fields'];
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogSourceColumnConfiguration[];
 }
 
@@ -103,12 +103,12 @@ const resolveKibanaIndexPatternReference = async (
 };
 
 // this might take other sources of runtime fields into account in the future
-const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.RuntimeFields => {
+const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRuntimeFields => {
   const { runtimeFields } = indexPattern.getComputedFields();
 
   const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
     typeof runtimeFields
-  >).reduce<estypes.RuntimeFields>(
+  >).reduce<estypes.MappingRuntimeFields>(
     (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
       ...accumulatedMappings,
       [runtimeFieldName]: {

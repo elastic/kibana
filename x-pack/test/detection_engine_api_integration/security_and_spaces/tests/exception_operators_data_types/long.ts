@@ -36,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('rule_exceptions/long');
-      await esArchiver.load('rule_exceptions/long_as_string');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
     });
 
     afterEach(async () => {
@@ -45,8 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('rule_exceptions/long');
-      await esArchiver.unload('rule_exceptions/long_as_string');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/long_as_string');
     });
 
     describe('"is" operator', () => {

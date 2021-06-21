@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

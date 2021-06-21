@@ -14,7 +14,7 @@ export default function ({ getService }) {
 
   describe('list', () => {
     describe('with trial license clusters', () => {
-      const archive = 'monitoring/multicluster';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
       const timeRange = {
         min: '2017-08-15T21:00:00Z',
         max: '2017-08-16T00:00:00Z',

@@ -47,9 +47,6 @@ import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
   actionConnector: ActionConnector;
-  actionParamsErrors: {
-    errors: IErrorObject;
-  };
   index: number;
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
@@ -80,7 +77,6 @@ const preconfiguredMessage = i18n.translate(
 export const ActionTypeForm = ({
   actionItem,
   actionConnector,
-  actionParamsErrors,
   index,
   onAddConnector,
   onConnectorSelected,
@@ -106,6 +102,9 @@ export const ActionTypeForm = ({
   const selectedActionGroup =
     actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
   const [actionGroup, setActionGroup] = useState<string>();
+  const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
+    errors: {},
+  });
 
   useEffect(() => {
     setAvailableActionVariables(
@@ -129,6 +128,16 @@ export const ActionTypeForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionGroup]);
+
+  useEffect(() => {
+    (async () => {
+      const res: { errors: IErrorObject } = await actionTypeRegistry
+        .get(actionItem.actionTypeId)
+        ?.validateParams(actionItem.params);
+      setActionParamsErrors(res);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionItem]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {

@@ -16,7 +16,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -58,7 +57,6 @@ const TransactionLinkName = euiStyled.div`
 interface Props {
   errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
   urlParams: IUrlParams;
-  location: Location;
 }
 
 // TODO: Move query-string-based tabs into a re-usable component?
@@ -70,7 +68,7 @@ function getCurrentTab(
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
-export function DetailView({ errorGroup, urlParams, location }: Props) {
+export function DetailView({ errorGroup, urlParams }: Props) {
   const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 

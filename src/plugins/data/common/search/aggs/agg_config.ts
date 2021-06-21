@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
@@ -20,6 +21,7 @@ import {
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
+import { parseTimeShift } from './utils';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -170,6 +172,31 @@ export class AggConfig {
 
   getParam(key: string): any {
     return _.get(this.params, key);
+  }
+
+  hasTimeShift(): boolean {
+    return Boolean(this.getParam('timeShift'));
+  }
+
+  getTimeShift(): undefined | moment.Duration {
+    const rawTimeShift = this.getParam('timeShift');
+    if (!rawTimeShift) return undefined;
+    const parsedTimeShift = parseTimeShift(rawTimeShift);
+    if (parsedTimeShift === 'invalid') {
+      throw new Error(`could not parse time shift ${rawTimeShift}`);
+    }
+    if (parsedTimeShift === 'previous') {
+      const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
+      if (timeShiftInterval) {
+        return timeShiftInterval;
+      } else if (!this.aggConfigs.timeRange) {
+        return;
+      }
+      return moment.duration(
+        moment(this.aggConfigs.timeRange.to).diff(this.aggConfigs.timeRange.from)
+      );
+    }
+    return parsedTimeShift;
   }
 
   write(aggs?: IAggConfigs) {

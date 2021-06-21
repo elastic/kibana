@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
-import { mockTelemetryActions } from '../../../../__mocks__';
+import { mockTelemetryActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

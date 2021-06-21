@@ -11,28 +11,33 @@ import { act, waitFor } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
 import { TestProviders } from '../../../common/mock';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { Create } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { Case } from '../../../../../cases/public/containers/types';
 import { basicCase } from '../../../../../cases/public/containers/mock';
+import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
+import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 jest.mock('../use_insert_timeline');
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/navigation/use_get_url_search');
 
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 
 describe('Create case', () => {
   const mockCreateCase = jest.fn();
+  const mockNavigateToApp = jest.fn();
+  const mockRes = 'coolstring';
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    (useGetUrlSearch as jest.Mock).mockReturnValue(mockRes);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
           getCreateCase: mockCreateCase,
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
   });
@@ -40,13 +45,12 @@ describe('Create case', () => {
   it('it renders', () => {
     mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <Create />
       </TestProviders>
     );
 
     expect(mockCreateCase).toHaveBeenCalled();
+    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([APP_ID]);
   });
 
   it('should redirect to all cases on cancel click', async () => {
@@ -57,17 +61,20 @@ describe('Create case', () => {
             onCancel();
           },
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <Create />
       </TestProviders>
     );
 
-    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
+    await waitFor(() =>
+      expect(mockNavigateToApp).toHaveBeenCalledWith(CASES_APP_ID, {
+        path: `?${mockRes}`,
+      })
+    );
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -78,17 +85,20 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <Create />
       </TestProviders>
     );
 
-    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/basic-case-id'));
+    await waitFor(() =>
+      expect(mockNavigateToApp).toHaveBeenNthCalledWith(1, CASES_APP_ID, {
+        path: `/basic-case-id?${mockRes}`,
+      })
+    );
   });
 
   it.skip('it should insert a timeline', async () => {
@@ -99,9 +109,7 @@ describe('Create case', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <Create />
       </TestProviders>
     );
 

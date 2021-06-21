@@ -18,8 +18,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dls', function () {
     before('initialize tests', async () => {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('security/dlstest');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('settings');
