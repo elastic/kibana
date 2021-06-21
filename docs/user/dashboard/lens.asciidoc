@@ -141,7 +141,7 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 
 [float]
 [[lens-formulas]]
-==== Formulas
+==== Use formulas to perform math
 
 Formulas let you perform math on aggregated data in Lens by typing
 math and quick functions. To access formulas,
