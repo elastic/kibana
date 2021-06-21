@@ -1,5 +1,5 @@
 [[role="xpack"]]
-[[make-dashboards-interactive]]
+[[drilldowns]]
 == Make dashboards interactive
 
 Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other dashboards and external websites. 
@@ -49,7 +49,7 @@ image::images/dashboard-controls.png[]
 . Click *Update*
 
 [float]
-[[drilldowns]]
+[[create-drilldowns]]
 == Create drilldowns
 
 When you interact with the values and in a visualization panel, {kib} creates and applies a filter for the value to the entire dashboard. To customize the behavior of what happens when you click a value, create drilldowns. Drilldows are shortcuts that allow you to quickly navigate between your most used dashboards, or navigate to external websites from your dashboards. You can create multiple drilldowns for a single panel. 
