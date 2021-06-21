@@ -8,6 +8,11 @@
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
+/**
+ * This type has some overlap with the Ping type, but it helps avoid runtime type
+ * check failures and removes a lot of unnecessary fields that our Synthetics UI code
+ * does not care about.
+ */
 export const JourneyStepType = t.intersection([
   t.partial({
     monitor: t.partial({
