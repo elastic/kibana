@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
