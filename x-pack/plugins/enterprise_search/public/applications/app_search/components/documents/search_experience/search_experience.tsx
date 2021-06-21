@@ -21,7 +21,6 @@ import './search_experience.scss';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { EngineLogic } from '../../engine';
-import { EmptyState } from '../components';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { buildSortOptions } from './build_sort_options';
@@ -141,11 +140,7 @@ export const SearchExperience: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
-            {engine.document_count && engine.document_count > 0 ? (
-              <SearchExperienceContent />
-            ) : (
-              <EmptyState />
-            )}
+            <SearchExperienceContent />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>
