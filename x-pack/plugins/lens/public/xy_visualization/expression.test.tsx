@@ -1099,6 +1099,51 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onElementClick returns correct context data for date histogram', () => {
+      const geometry: GeometryValue = {
+        x: 1585758120000,
+        y: 1,
+        accessor: 'y1',
+        mark: null,
+        datum: {},
+      };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'yAccessorId',
+        splitAccessors: {},
+        seriesKeys: ['yAccessorId'],
+      };
+
+      const { args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: dateHistogramData.tables.timeLayer,
+            value: 1585758120000,
+          },
+        ],
+      });
+    });
+
     test('returns correct original data for ordinal x axis with special formatter', () => {
       const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {

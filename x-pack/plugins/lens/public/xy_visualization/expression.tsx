@@ -561,9 +561,6 @@ export function XYChart({
       });
     }
 
-    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-    const timeFieldName = xDomain && xAxisFieldName;
-
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
@@ -571,7 +568,6 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName,
     };
     onClickValue(desanitizeFilterContext(context));
   };
