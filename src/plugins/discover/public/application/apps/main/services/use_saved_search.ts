@@ -232,7 +232,15 @@ export const useSavedSearch = ({
         refs.current.fetchStatus = FetchStatus.LOADING;
       }
 
+      const sendPartialStateMsg = () => {
+        refs.current.fetchStatus = FetchStatus.PARTIAL;
+        data$.next({
+          fetchStatus: FetchStatus.PARTIAL,
+        });
+      };
+
       const { hideChart, interval, sort } = stateContainer.appStateContainer.getState();
+      // let's update the base searchSource
       updateSearchSource(searchSource, false, {
         indexPattern,
         services,
@@ -257,10 +265,7 @@ export const useSavedSearch = ({
             fieldCounts,
           });
           refs.current.fieldCounts = fieldCounts;
-          refs.current.fetchStatus = FetchStatus.PARTIAL;
-          data$.next({
-            fetchStatus: FetchStatus.PARTIAL,
-          });
+          sendPartialStateMsg();
         });
         return documentsSourceFetch$;
       };
@@ -282,7 +287,7 @@ export const useSavedSearch = ({
               chartData: res.chartData,
               bucketInterval: res.bucketInterval,
             });
-            data$.next({ fetchStatus: FetchStatus.PARTIAL });
+            sendPartialStateMsg();
           }
         });
         return chartDataFetch$;
@@ -299,7 +304,7 @@ export const useSavedSearch = ({
         totalHitsFetch$.subscribe((res) => {
           const totalHitsNr = res.rawResponse.hits.total as number;
           dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-          data$.next({ fetchStatus: FetchStatus.PARTIAL });
+          sendPartialStateMsg();
         });
         return totalHitsFetch$;
       };
