@@ -66,7 +66,10 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       false
     );
-    wrapHits = wrapHitsFactory({ ruleSO, signalsIndex: DEFAULT_SIGNALS_INDEX });
+    wrapHits = wrapHitsFactory({
+      ruleSO,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+    });
   });
 
   test('should return success with number of searches less than max signals', async () => {

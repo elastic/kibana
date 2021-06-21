@@ -84,7 +84,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
         this.authenticationInfoToAuthenticatedUser(
-          // @ts-expect-error @elastic/elasticsearch GetUserAccessTokenResponse declares authentication: string, but expected AuthenticatedUser
+          // @ts-expect-error @elastic/elasticsearch metadata defined as Record<string, any>;
           authenticationInfo as AuthenticationInfo
         ),
         {

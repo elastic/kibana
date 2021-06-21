@@ -25,7 +25,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch normal stats', async () => {
     esClient.search.mockReturnValue(
-      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -79,7 +79,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch container stats', async () => {
     esClient.search.mockReturnValue(
-      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -146,7 +146,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch properly return ccs', async () => {
     esClient.search.mockReturnValue(
-      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
