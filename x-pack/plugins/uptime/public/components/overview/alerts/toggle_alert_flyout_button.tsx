@@ -19,6 +19,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { ToggleFlyoutTranslations } from './translations';
 import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
+import { i18n } from '@kbn/i18n';
 
 interface ComponentProps {
   setAlertFlyoutVisible: (value: boolean | string) => void;
@@ -114,7 +115,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       },
       {
         id: ALERT_CONTEXT_SELECT_TYPE_PANEL_ID,
-        title: 'Create rules',
+        title: ToggleFlyoutTranslations.toggleAlertFlyoutButtonLabel,
         items: selectionItems,
       },
     ];
