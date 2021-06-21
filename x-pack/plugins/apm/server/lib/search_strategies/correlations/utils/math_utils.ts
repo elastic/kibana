@@ -38,8 +38,44 @@ export const isHistogramRoughlyEqual = (
     return (
       roundToDecimalPlace(a[idx].key, significantFraction) !==
         roundToDecimalPlace(b[idx].key, significantFraction) &&
-      roundToDecimalPlace(a[idx].doc_count, significantFraction) !==
-        roundToDecimalPlace(b[idx].doc_count, significantFraction)
+      roundToNearest(a[idx].doc_count) !== roundToNearest(b[idx].doc_count)
     );
   });
+};
+
+/** Round numeric to the nearest 5
+ * E.g. if roundBy = 5, results will be 11 -> 10, 14 -> 10, 16 -> 20
+ * @param n
+ * @param roundBy
+ */
+export const roundToNearest = (n: number, roundBy = 5) => {
+  return Math.ceil((n + 1) / roundBy) * roundBy;
+};
+
+/**
+ * Create a rough stringified version of the histogram
+ * @param histogram
+ * @param significantFraction
+ * @param numBinsToSample
+ */
+export const hashHistogram = (
+  histogram: HistogramItem[],
+  { significantFraction = 3, numBinsToSample = 10 }
+) => {
+  // Generate bins to sample evenly
+  const sampledIndices = Array.from(
+    range(
+      0,
+      histogram.length - 1,
+      Math.ceil(histogram.length / numBinsToSample)
+    )
+  );
+  return JSON.stringify(
+    sampledIndices.map((idx) => {
+      return `${roundToDecimalPlace(
+        histogram[idx].key,
+        significantFraction
+      )}-${roundToNearest(histogram[idx].doc_count)}`;
+    })
+  );
 };

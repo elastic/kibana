@@ -37,6 +37,7 @@ export interface SearchServiceValue {
   field: string;
   correlation: number;
   ksTest: number;
+  duplicatedFields?: string[];
 }
 
 export interface AsyncSearchProviderProgress {

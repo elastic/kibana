@@ -54,6 +54,7 @@ interface MlCorrelationsTerms {
   ksTest: number;
   fieldName: string;
   fieldValue: string;
+  duplicatedFields: string[];
 }
 
 export function MlLatencyCorrelations({ onClose }: Props) {
@@ -173,6 +174,22 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           String(term.fieldValue).slice(0, 50),
       },
       {
+        field: 'duplicatedFields',
+        name: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.duplicatesLabel',
+          { defaultMessage: 'Duplicates' }
+        ),
+        render: (_: any, term: MlCorrelationsTerms) => {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {term?.duplicatedFields.map((f) => (
+                <div>{f}</div>
+              ))}
+            </div>
+          );
+        },
+      },
+      {
         width: '100px',
         actions: [
           {
@@ -264,6 +281,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         impact: d.correlation,
         ksTest: d.ksTest,
         correlation: d.correlation,
+        duplicatedFields: d.duplicatedFields,
         fieldCount,
         valueCount,
       };

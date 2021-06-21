@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shuffle, uniqWith, isEqual } from 'lodash';
+import { shuffle } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
@@ -21,14 +21,22 @@ import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
-import { isHistogramRoughlyEqual, range } from './utils';
+import { hashHistogram, isHistogramRoughlyEqual, range } from './utils';
 import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 const SIGNIFICANT_FRACTION = 3;
-const MAX_CORRELATIONS_TO_SHOW = 15;
+const MAX_CORRELATIONS_TO_SHOW = 20;
 
+interface HashedSearchServiceValue {
+  histogram: HistogramItem[];
+  value: string;
+  field: string;
+  correlation: number;
+  ksTest: number;
+  duplicatedFields: Set<string>;
+}
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
@@ -196,32 +204,49 @@ export const asyncSearchServiceProvider = (
   fetchCorrelations();
 
   return () => {
-    // Remove duplicates
-    const uniqueValues = uniqWith(
-      values.sort((a, b) => b.correlation - a.correlation),
-      (a, b) => {
-        // Row/value is considered duplicates of others
-        // if they both have roughly same pearson correlation and ks test values
-        // And the histograms are the same
-        return (
-          isEqual(
-            roundToDecimalPlace(b.correlation, SIGNIFICANT_FRACTION),
-            roundToDecimalPlace(a.correlation, SIGNIFICANT_FRACTION)
-          ) &&
-          isEqual(
-            roundToDecimalPlace(b.ksTest, SIGNIFICANT_FRACTION),
-            roundToDecimalPlace(a.ksTest, SIGNIFICANT_FRACTION)
-          ) &&
-          // Here we only check if they are roughly equal by comparing 10 random bins
-          // because it's computation intensive to check all bin
-          isHistogramRoughlyEqual(b.histogram, a.histogram, {
-            significantFraction: SIGNIFICANT_FRACTION,
-          })
-        );
+    const hashed: Record<string, HashedSearchServiceValue> = {};
+
+    // Group potential duplicates together
+    values.forEach((value) => {
+      // Row/value is considered duplicates of others
+      // if they both have roughly same pearson correlation and ks test values
+      // And the histograms are the same
+      const roundedCorrelation = roundToDecimalPlace(
+        value.correlation,
+        SIGNIFICANT_FRACTION
+      );
+      const roundedKS = roundToDecimalPlace(value.ksTest, SIGNIFICANT_FRACTION);
+      // Here we only check if they are roughly equal by comparing 10 different bins
+      // and also rounding the values to account for floating points
+      const key = `${roundedCorrelation}-${roundedKS}-${hashHistogram(
+        value.histogram,
+        {
+          significantFraction: SIGNIFICANT_FRACTION,
+        }
+      )}`;
+      if (
+        hashed.hasOwnProperty(key) &&
+        isHistogramRoughlyEqual(hashed[key].histogram, value.histogram, {
+          significantFraction: SIGNIFICANT_FRACTION,
+        })
+      ) {
+        hashed[key].duplicatedFields.add(`${value.field}: ${value.value}`);
+        // check distribution
+      } else {
+        hashed[key] = {
+          ...value,
+          duplicatedFields: new Set(),
+        };
       }
-    )
+    });
+
+    const uniqueValues = Object.values(hashed)
+      .map((v) => ({
+        ...v,
+        duplicatedFields: [...v.duplicatedFields],
+      }))
       .sort((a, b) => b.correlation - a.correlation)
-      .slice(0, MAX_CORRELATIONS_TO_SHOW);
+      .slice(MAX_CORRELATIONS_TO_SHOW);
 
     return {
       error,
