@@ -20,8 +20,10 @@ export function ReportFilters({
     <SeriesFilter
       series={dataViewSeries}
       defaultFilters={dataViewSeries.defaultFilters}
+      filters={dataViewSeries.filters}
       seriesId={seriesId}
       isNew={true}
+      labels={dataViewSeries.labels}
     />
   );
 }
