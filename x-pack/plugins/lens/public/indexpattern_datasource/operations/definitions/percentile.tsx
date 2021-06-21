@@ -109,7 +109,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),

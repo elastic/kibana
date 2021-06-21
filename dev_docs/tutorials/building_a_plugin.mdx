@@ -4,7 +4,7 @@ slug: /kibana-dev-docs/tutorials/build-a-plugin
 title: Kibana plugin tutorial
 summary: Anatomy of a Kibana plugin and how to build one
 date: 2021-02-05
-tags: ['kibana','onboarding', 'dev', 'tutorials']
+tags: ['kibana', 'onboarding', 'dev', 'tutorials']
 ---
 
 Prereading material:
@@ -14,7 +14,7 @@ Prereading material:
 ## The anatomy of a plugin
 
 Plugins are defined as classes and present themselves to Kibana through a simple wrapper function. A plugin can have browser-side code, server-side code,
-or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly, 
+or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly,
 and you interact with Core and other plugins in the same way.
 
 The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
@@ -33,7 +33,7 @@ plugins/
       index.ts  [6]
 ```
 
-### [1] kibana.json 
+### [1] kibana.json
 
 `kibana.json` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
@@ -42,14 +42,33 @@ plugins/
   "id": "demo",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "owner": { [1]
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "This plugin extends Kibana by doing xyz, and allows other plugins to extend Kibana by offering abc functionality. It also exposes some helper utilities that do efg", [2]
+  "requiredPlugins": ["data"], [3]
+  "optionalPlugins": ["alerting"] [4]
+  "requiredBundles": ["anotherPlugin"] [5]
 }
 ```
 
+[1], [2]: Every internal plugin should fill in the owner and description properties.
+
+[3], [4]: Any plugin that you have a dependency on should be listed in `requiredPlugins` or `optionalPlugins`. Doing this will ensure that you have access to that plugin's start and setup contract inside your own plugin's start and setup lifecycle methods. If a plugin you optionally depend on is not installed or disabled, it will be undefined if you try to access it. If a plugin you require is not installed or disabled, kibana will fail to build.
+
+[5]: Don't worry too much about getting 5 right. The build optimizer will complain if any of these values are incorrect.
+
+
+<DocCallOut>
+  You don't need to declare a dependency on a plugin if you only wish to access its types.
+</DocCallOut>
+
 ### [2] public/index.ts
 
-`public/index.ts` is the entry point into the client-side code of this plugin. It must export a function named plugin, which will receive a standard set of
- core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
+`public/index.ts` is the entry point into the client-side code of this plugin. Everything exported from this file will be a part of the plugins <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>. If the plugin only exists to export static utilities, consider using a package. Otherwise, this file must export a function named plugin, which will receive a standard set of
+core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
 
 ```
 import type { PluginInitializerContext } from 'kibana/server';
@@ -60,13 +79,32 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ```
 
+<DocCallOut title="Best practices for every top level index.ts file">
+
+1. When possible, use
+
+```
+export type { AType } from '...'`
+```
+
+instead of
+
+```
+export { AType } from '...'`.
+```
+
+Using the non-`type` variation will increase the bundle size unnecessarily and may unwillingly provide access to the implementation of `AType` class.
+
+2. Don't use `export *` in these top level index.ts files
+
+</DocCallOut>
+
 ### [3] public/plugin.ts
 
 `public/plugin.ts` is the client-side plugin definition itself. Technically speaking, it does not need to be a class or even a separate file from the entry
- point, but all plugins at Elastic should be consistent in this way.
+point, but all plugins at Elastic should be consistent in this way.
 
-
- ```ts
+```ts
 import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
 export class DemoPlugin implements Plugin {
@@ -84,10 +122,9 @@ export class DemoPlugin implements Plugin {
     // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
- ```
+```
 
-
-### [4] server/index.ts 
+### [4] server/index.ts
 
 `server/index.ts` is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
@@ -115,7 +152,7 @@ export class DemoPlugin implements Plugin {
 }
 ```
 
-Kibana does not impose any technical restrictions on how the the internals of a plugin are architected, though there are certain 
+Kibana does not impose any technical restrictions on how the the internals of a plugin are architected, though there are certain
 considerations related to how plugins integrate with core APIs and APIs exposed by other plugins that may greatly impact how they are built.
 
 ### [6] common/index.ts
@@ -124,8 +161,8 @@ considerations related to how plugins integrate with core APIs and APIs exposed 
 
 ## How plugin's interact with each other, and Core
 
-The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin. 
-For example, the core http service exposes a function createRouter to all plugin setup functions. To use this function to register an HTTP route handler, 
+The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin.
+For example, the core http service exposes a function createRouter to all plugin setup functions. To use this function to register an HTTP route handler,
 a plugin just accesses it off of the first argument:
 
 ```ts
@@ -135,14 +172,16 @@ export class DemoPlugin {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     // handler is called when '/path' resource is requested with `GET` method
-    router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/path', validate: false }, (context, req, res) =>
+      res.ok({ content: 'ok' })
+    );
   }
 }
 ```
 
 Unlike core, capabilities exposed by plugins are not automatically injected into all plugins.
 Instead, if a plugin wishes to use the public interface provided by another plugin, it must first declare that plugin as a
- dependency in it’s kibana.json manifest file.
+dependency in it’s kibana.json manifest file.
 
 ** foobar plugin.ts: **
 
@@ -174,8 +213,8 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
   }
 }
 ```
-[1]  We highly encourage plugin authors to explicitly declare public interfaces for their plugins.
 
+[1] We highly encourage plugin authors to explicitly declare public interfaces for their plugins.
 
 ** demo kibana.json**
 
@@ -194,7 +233,7 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 import type { CoreSetup, CoreStart } from 'kibana/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
-interface DemoSetupPlugins {  [1]
+interface DemoSetupPlugins { [1]
   foobar: FoobarPluginSetup;
 }
 
@@ -218,7 +257,7 @@ export class DemoPlugin {
   public stop() {}
 }
 ```
-	
+
 [1] The interface for plugin’s dependencies must be manually composed. You can do this by importing the appropriate type from the plugin and constructing an interface where the property name is the plugin’s ID.
 
 [2] These manually constructed types should then be used to specify the type of the second argument to the plugin.

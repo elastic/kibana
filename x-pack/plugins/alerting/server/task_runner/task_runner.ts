@@ -522,7 +522,18 @@ export class TaskRunner<
         namespace,
       },
     };
+
     eventLogger.startTiming(event);
+
+    const startEvent = cloneDeep({
+      ...event,
+      event: {
+        ...event.event,
+        action: EVENT_LOG_ACTIONS.executeStart,
+      },
+      message: `alert execution start: "${alertId}"`,
+    });
+    eventLogger.logEvent(startEvent);
 
     const { state, schedule } = await errorAsAlertTaskRunResult(
       this.loadAlertAttributesAndRun(event)

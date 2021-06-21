@@ -23,7 +23,7 @@ This reference can help simplify the comparison if you need a specific feature.
 
 | Table with summary row
 ^| X
-|
+^| X
 |
 |
 |
@@ -65,7 +65,7 @@ This reference can help simplify the comparison if you need a specific feature.
 
 | Heat map
 ^| X
-|
+^| X
 |
 |
 ^| X
@@ -190,8 +190,8 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 | Metrics with filters
 |
-^| X
 |
+^| X
 |
 
 | Average
@@ -333,7 +333,7 @@ build their advanced visualization.
 
 | Math on aggregated data
 |
-|
+^| X
 ^| X
 ^| X
 ^| X
@@ -349,6 +349,13 @@ build their advanced visualization.
 |
 |
 |
+^| X
+^| X
+
+| Time shifts
+|
+^| X
+^| X
 ^| X
 ^| X
 

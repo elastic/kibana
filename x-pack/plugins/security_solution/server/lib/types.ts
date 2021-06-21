@@ -17,6 +17,7 @@ import { Notes } from './timeline/saved_object/notes';
 import { PinnedEvent } from './timeline/saved_object/pinned_events';
 import { Timeline } from './timeline/saved_object/timelines';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
+import { SignalHit } from './detection_engine/signals/types';
 
 export interface AppDomainLibs {
   fields: IndexFields;
@@ -99,6 +100,8 @@ export interface SearchResponse<T> extends BaseSearchResponse<T> {
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+
+export type SearchSignalHit = SearchResponse<SignalHit>['hits']['hits'][0];
 
 export interface TermAggregationBucket {
   key: string;

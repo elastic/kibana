@@ -161,13 +161,13 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const permissionField = (
     <>
       <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
-        <EuiTitle size="xs">
+        <EuiTitle size="s">
           <h3>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
+        <EuiText color="subdued" size="s">
           {!needsPermissions && (
             <span>
               <FormattedMessage
@@ -191,11 +191,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
             </span>
           )}
         </EuiText>
-        <EuiSpacer size="s" />
         {!indexPermissionsValue && (
           <>
-            <EuiSpacer size="s" />
-            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
               <p>
                 {CONNECT_NOT_SYNCED_TEXT}
                 {needsPermissions && whichDocsLink}
