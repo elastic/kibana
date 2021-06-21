@@ -973,7 +973,6 @@ export interface OverlayFlyoutOpenOptions {
     hideCloseButton?: boolean;
     // (undocumented)
     maxWidth?: boolean | number | string;
-    // (undocumented)
     onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;

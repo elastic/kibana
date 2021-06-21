@@ -4,6 +4,8 @@
 
 ## OverlayFlyoutOpenOptions.onClose property
 
+EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout;
+
 <b>Signature:</b>
 
 ```typescript

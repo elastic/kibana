@@ -20,7 +20,7 @@ export interface OverlayFlyoutOpenOptions
 |  [closeButtonAriaLabel](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | <code>string</code> |  |
 |  [hideCloseButton](./kibana-plugin-core-public.overlayflyoutopenoptions.hideclosebutton.md) | <code>boolean</code> |  |
 |  [maxWidth](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | <code>boolean &#124; number &#124; string</code> |  |
-|  [onClose](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | <code>(flyout: OverlayRef) =&gt; void</code> |  |
+|  [onClose](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | <code>(flyout: OverlayRef) =&gt; void</code> | EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
 |  [ownFocus](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | <code>boolean</code> |  |
 |  [size](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | <code>EuiFlyoutSize</code> |  |
 

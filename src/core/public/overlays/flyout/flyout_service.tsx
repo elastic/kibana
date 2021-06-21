@@ -85,6 +85,10 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  /**
+   * EuiFlyout onClose handler.
+   * If provided the consumer is responsible for calling flyout.close() to close the flyout;
+   */
   onClose?: (flyout: OverlayRef) => void;
 }
 
