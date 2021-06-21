@@ -22,6 +22,7 @@ describe('AppLogic', () => {
     hasInitialized: false,
     isFederatedAuth: true,
     isOrganization: false,
+    searchOAuth: {},
     organization: {},
   };
 
@@ -38,6 +39,10 @@ describe('AppLogic', () => {
     hasInitialized: true,
     isFederatedAuth: false,
     isOrganization: false,
+    searchOAuth: {
+      clientId: 'someUID',
+      redirectUrl: 'http://localhost:3002/ws/search_callback',
+    },
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',

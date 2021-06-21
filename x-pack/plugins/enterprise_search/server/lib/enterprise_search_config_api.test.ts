@@ -48,6 +48,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       read_only_mode: false,
       ilm_enabled: true,
       is_federated_auth: false,
+      search_oauth: {
+        client_id: 'someUID',
+        redirect_url: 'http://localhost:3002/ws/search_callback',
+      },
       configured_limits: {
         app_search: {
           engine: {
@@ -137,6 +141,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       readOnlyMode: false,
       ilmEnabled: false,
       isFederatedAuth: false,
+      searchOAuth: {
+        clientId: undefined,
+        redirectUrl: undefined,
+      },
       configuredLimits: {
         appSearch: {
           engine: {
