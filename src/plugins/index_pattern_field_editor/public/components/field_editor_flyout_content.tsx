@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -60,6 +60,10 @@ export interface Props {
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;
+  /** Handler to call when the component mounts.
+   *  We will pass "up" data that the parent component might need
+   */
+  onMounted?: (args: { canCloseValidator: () => boolean }) => void;
 }
 
 const FieldEditorFlyoutContentComponent = ({
@@ -68,6 +72,7 @@ const FieldEditorFlyoutContentComponent = ({
   onCancel,
   runtimeFieldValidator,
   isSavingField,
+  onMounted,
 }: Props) => {
   const isEditingExistingField = !!field;
   const { indexPattern } = useFieldEditorContext();
@@ -104,6 +109,16 @@ const FieldEditorFlyoutContentComponent = ({
     [painlessSyntaxError, clearSyntaxError]
   );
 
+  const canCloseValidator = useCallback(() => {
+    if (isFormModified) {
+      setModalVisibility({
+        ...defaultModalVisibility,
+        confirmUnsavedChanges: true,
+      });
+    }
+    return !isFormModified;
+  }, [isFormModified]);
+
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
     const nameChange = field?.name !== data.name;
@@ -138,16 +153,12 @@ const FieldEditorFlyoutContentComponent = ({
   }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
-    if (isFormModified) {
-      setModalVisibility({
-        ...defaultModalVisibility,
-        confirmUnsavedChanges: true,
-      });
-      return;
-    }
+    const canClose = canCloseValidator();
 
-    onCancel();
-  }, [onCancel, isFormModified]);
+    if (canClose) {
+      onCancel();
+    }
+  }, [onCancel, canCloseValidator]);
 
   const renderModal = () => {
     if (modalVisibility.confirmChangeNameOrType) {
@@ -181,6 +192,19 @@ const FieldEditorFlyoutContentComponent = ({
 
     return null;
   };
+
+  useEffect(() => {
+    if (onMounted) {
+      // When the flyout mounts we send to the parent the validator to check
+      // if we can close the flyout or not (and display a confirm modal if needed).
+      // This is required to display the confirm modal when clicking outside the flyout.
+      onMounted({ canCloseValidator });
+
+      return () => {
+        onMounted({ canCloseValidator: () => true });
+      };
+    }
+  }, [onMounted, canCloseValidator]);
 
   return (
     <>

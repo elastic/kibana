@@ -85,6 +85,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  onClose?: () => void | boolean;
 }
 
 interface StartDeps {
@@ -119,9 +120,19 @@ export class FlyoutService {
 
         this.activeFlyout = flyout;
 
+        const onCloseFlyout = () => {
+          if (options.onClose) {
+            const canClose = options.onClose();
+            if (!canClose) {
+              return;
+            }
+          }
+          flyout.close();
+        };
+
         render(
           <i18n.Context>
-            <EuiFlyout {...options} onClose={() => flyout.close()}>
+            <EuiFlyout {...options} onClose={onCloseFlyout}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiFlyout>
           </i18n.Context>,
