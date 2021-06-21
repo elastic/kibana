@@ -27,20 +27,19 @@ describe('checkClusterForUserData', () => {
   it('returns false if data only exists in system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.cat.indices.mockResolvedValue(
-      // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'kibana_sample_ecommerce_data',
-            'docs.count': 20,
+            'docs.count': '20',
           },
           {
             index: '.somethingElse',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -56,16 +55,15 @@ describe('checkClusterForUserData', () => {
   it('returns true if data exists in non-system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.cat.indices.mockResolvedValue(
-      // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'some_real_index',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -87,23 +85,21 @@ describe('checkClusterForUserData', () => {
       )
       .mockRejectedValueOnce(new Error('something terrible happened'))
       .mockResolvedValueOnce(
-        // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
         elasticsearchServiceMock.createApiResponse({
           body: [
             {
               index: '.kibana',
-              'docs.count': 500,
+              'docs.count': '500',
             },
           ],
         })
       )
       .mockResolvedValueOnce(
-        // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
         elasticsearchServiceMock.createApiResponse({
           body: [
             {
               index: 'some_real_index',
-              'docs.count': 20,
+              'docs.count': '20',
             },
           ],
         })
