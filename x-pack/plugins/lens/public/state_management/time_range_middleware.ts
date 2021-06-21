@@ -14,21 +14,19 @@ import { setState, LensDispatch } from '.';
 import { LensAppState } from './types';
 import { getResolvedDateRange, containsDynamicMath, TIME_LAG_PERCENTAGE_LIMIT } from '../utils';
 
+/**
+ * checks if TIME_LAG_PERCENTAGE_LIMIT passed to renew searchSessionId
+ * and request new data.
+ */
 export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    // todo: move to optimizing reducer
-    if (action.type === 'app/onActiveDataChange') {
-      if (isEqual(store.getState().app.activeData, action.payload?.activeData)) {
-        return;
-      }
+    if (!action.payload.searchSessionId) {
+      updateTimeRange(data, store.dispatch);
     }
-
-    //  check if too much time passed to update searchSessionId
-    // todo: check if document changed
-    updateTimeRange(data, store.dispatch);
     next(action);
   };
 };
+
 function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
   const timefilter = data.query.timefilter.timefilter;
   const unresolvedTimeRange = timefilter.getTime();

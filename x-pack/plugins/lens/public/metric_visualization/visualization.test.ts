@@ -38,11 +38,11 @@ describe('metric_visualization', () => {
 
       expect(initialState.accessor).not.toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
-                Object {
-                  "accessor": undefined,
-                  "layerId": "l42",
-                }
-            `);
+        Object {
+          "accessor": undefined,
+          "layerId": "test-id1",
+        }
+      `);
     });
 
     it('loads from persisted state', () => {

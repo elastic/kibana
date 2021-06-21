@@ -10,6 +10,7 @@ import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { appSlice, initialState } from './app_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
+import { optimizingMiddleware } from './optimizing_middleware';
 import { externalContextMiddleware } from './external_context_middleware';
 
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -67,6 +68,7 @@ export const makeConfigureStore = (
       // },
       serializableCheck: false,
     }),
+    optimizingMiddleware(),
     timeRangeMiddleware(data),
     externalContextMiddleware(data),
   ];

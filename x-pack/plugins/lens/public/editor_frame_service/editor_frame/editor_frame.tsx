@@ -45,9 +45,8 @@ export function EditorFrame(props: EditorFrameProps) {
   } = useLensSelector((state) => state.app);
 
   const dispatchLens = useLensDispatch();
-  const allLoaded = Object.values(datasourceStates).every(
-    ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
-  );
+
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   const datasourceLayers = React.useMemo(
     () => createDatasourceLayers(props.datasourceMap, datasourceStates),

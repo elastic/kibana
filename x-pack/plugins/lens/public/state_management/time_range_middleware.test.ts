@@ -158,7 +158,10 @@ describe('timeRangeMiddleware', () => {
       const action = {
         type: 'app/setState',
         payload: {
-          // lastKnownDoc: ('new' as unknown) as Document
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
         },
       };
       invoke(action);
@@ -190,7 +193,36 @@ describe('timeRangeMiddleware', () => {
       const action = {
         type: 'app/setState',
         payload: {
-          // lastKnownDoc: ('new' as unknown) as Document
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+        },
+      };
+      invoke(action);
+      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(action);
+    });
+    it('does not trigger another update the searchSessionId when the update already contains searchSessionId', () => {
+      const data = makeDefaultData();
+      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 30000),
+      });
+      const { next, invoke, store } = createMiddleware(data);
+      const action = {
+        type: 'app/setState',
+        payload: {
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+          searchSessionId: 'searchSessionId',
         },
       };
       invoke(action);
