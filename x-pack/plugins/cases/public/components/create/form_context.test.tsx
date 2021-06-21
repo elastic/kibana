@@ -144,7 +144,7 @@ describe('Create case', () => {
   });
   const defaultProps = {
     onSuccess: onFormSubmitSuccess,
-    casesUrl: 'https://elastic.co',
+    casesUrl: 'https://elastic.co/app/security/cases',
   };
 
   describe('Step 1 - Case Fields', () => {
@@ -349,6 +349,7 @@ describe('Create case', () => {
           },
         });
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'jira-1',
@@ -416,6 +417,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'resilient-2',
@@ -500,6 +502,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'servicenow-1',
@@ -595,6 +598,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'servicenow-sir',
