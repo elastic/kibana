@@ -7,8 +7,18 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { DragDropContext, Droppable, Draggable, DragDropContextProps } from 'react-beautiful-dnd';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  DragDropContextProps,
+} from '@elastic/eui';
+
 // @ts-expect-error untyped dependency
 import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
@@ -156,46 +166,37 @@ export class PageManager extends Component<Props, State> {
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
-        {(provided) => (
-          <div
-            key={page.id}
-            className={`canvasPageManager__page ${
-              page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
-            }`}
-            ref={(el) => {
-              if (page.id === selectedPage) {
-                this._activePageRef = el;
-              }
-              provided.innerRef(el);
-            }}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" className="canvasPageManager__pageNumber">
-                  {pageNumber}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <WorkpadRoutingContext.Consumer>
-                  {({ getUrl }) => (
-                    <RoutingLink to={getUrl(pageNumber)}>
-                      {Style.it(
-                        workpadCSS,
-                        <div>
-                          <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
-                        </div>
-                      )}
-                    </RoutingLink>
+      <EuiDraggable
+        key={page.id}
+        draggableId={page.id}
+        index={i}
+        isDragDisabled={!isWriteable}
+        className={`canvasPageManager__page ${
+          page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
+        }`}
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" className="canvasPageManager__pageNumber">
+              {pageNumber}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <WorkpadRoutingContext.Consumer>
+              {({ getUrl }) => (
+                <RoutingLink to={getUrl(pageNumber)}>
+                  {Style.it(
+                    workpadCSS,
+                    <div>
+                      <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
+                    </div>
                   )}
-                </WorkpadRoutingContext.Consumer>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        )}
-      </Draggable>
+                </RoutingLink>
+              )}
+            </WorkpadRoutingContext.Consumer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiDraggable>
     );
   };
 
@@ -207,25 +208,17 @@ export class PageManager extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup gutterSize="none" className="canvasPageManager">
           <EuiFlexItem className="canvasPageManager__pages">
-            <DragDropContext onDragEnd={this.onDragEnd}>
-              <Droppable droppableId="droppable-page-manager" direction="horizontal">
-                {(provided) => (
-                  <div
-                    className={`canvasPageManager__pageList ${
-                      showTrayPop ? 'canvasPageManager--trayPop' : ''
-                    }`}
-                    ref={(el) => {
-                      this._pageListRef = el;
-                      provided.innerRef(el);
-                    }}
-                    {...provided.droppableProps}
-                  >
-                    {pages.map(this.renderPage)}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+            <EuiDragDropContext onDragEnd={this.onDragEnd}>
+              <EuiDroppable droppableId="droppable-page-manager" grow={true} direction="horizontal">
+                <div
+                  className={`canvasPageManager__pageList ${
+                    showTrayPop ? 'canvasPageManager--trayPop' : ''
+                  }`}
+                >
+                  {pages.map(this.renderPage)}
+                </div>
+              </EuiDroppable>
+            </EuiDragDropContext>
           </EuiFlexItem>
           {isWriteable && (
             <EuiFlexItem grow={false}>
