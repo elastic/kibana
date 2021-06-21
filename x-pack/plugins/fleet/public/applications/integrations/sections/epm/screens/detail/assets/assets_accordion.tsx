@@ -13,12 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSplitPanel,
-  EuiBadge,
   EuiSpacer,
   EuiTitle,
   EuiText,
   EuiLink,
   EuiHorizontalRule,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../../../../../constants';
@@ -39,23 +39,21 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiText size="m">
               <h3>{AssetTitleMap[type]}</h3>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge>
-              <EuiTitle size="xs">
-                <h3>{savedObjects.length}</h3>
-              </EuiTitle>
-            </EuiBadge>
+            <EuiNotificationBadge color="subdued" size="m">
+              <h3>{savedObjects.length}</h3>
+            </EuiNotificationBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       id={type}
     >
       <>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
             const pathToObjectInApp = getHrefToObjectInKibanaApp({
@@ -75,11 +73,13 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
                       )}
                     </p>
                   </EuiText>
-                  <EuiSpacer size="s" />
                   {description && (
-                    <EuiText size="s" color="subdued">
-                      <p>{description}</p>
-                    </EuiText>
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="s" color="subdued">
+                        <p>{description}</p>
+                      </EuiText>
+                    </>
                   )}
                 </EuiSplitPanel.Inner>
                 {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
