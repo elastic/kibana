@@ -31,12 +31,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Polling for jobs', () => {
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+      );
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+      );
       await reportingApi.deleteAllReports();
     });
 

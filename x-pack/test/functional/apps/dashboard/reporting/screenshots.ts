@@ -31,8 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.loadIfNeeded(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
       );
       await browser.setWindowSize(1600, 850);
 
@@ -61,7 +61,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+      );
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
