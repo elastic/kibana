@@ -127,6 +127,10 @@ export class AggConfigs {
     this.aggs.forEach(updateAggTimeRange);
   }
 
+  /**
+   * Returns the current time range as moment instance (date math will get resolved using the current "now" value or system time if not set)
+   * @returns Current time range as resolved date.
+   */
   getResolvedTimeRange() {
     return (
       this.timeRange &&

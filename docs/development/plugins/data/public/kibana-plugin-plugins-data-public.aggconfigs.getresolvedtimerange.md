@@ -4,6 +4,8 @@
 
 ## AggConfigs.getResolvedTimeRange() method
 
+Returns the current time range as moment instance (date math will get resolved using the current "now" value or system time if not set)
+
 <b>Signature:</b>
 
 ```typescript
@@ -12,4 +14,6 @@ getResolvedTimeRange(): import("../..").TimeRangeBounds | undefined;
 <b>Returns:</b>
 
 `import("../..").TimeRangeBounds | undefined`
+
+Current time range as resolved date.
 

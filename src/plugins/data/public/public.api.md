@@ -259,7 +259,6 @@ export class AggConfigs {
     getRequestAggById(id: string): AggConfig | undefined;
     // (undocumented)
     getRequestAggs(): AggConfig[];
-    // (undocumented)
     getResolvedTimeRange(): import("../..").TimeRangeBounds | undefined;
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
