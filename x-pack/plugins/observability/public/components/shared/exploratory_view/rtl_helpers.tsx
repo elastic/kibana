@@ -196,8 +196,9 @@ export function render<ExtraCore>(
 
   return {
     ...reactTestLibHelpersWithoutDebug,
+    history,
     core,
-    setSeries: seriesContextValue.setSeries,
+    ...seriesContextValue,
   };
 }
 
