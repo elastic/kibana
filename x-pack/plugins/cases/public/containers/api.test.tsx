@@ -473,7 +473,7 @@ describe('Case Configuration API', () => {
         `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
         {
           method: 'POST',
-          body: JSON.stringify({}),
+          body: JSON.stringify({ case_url: `${CASES_URL}/${basicCase.id}` }),
           signal: abortCtrl.signal,
         }
       );

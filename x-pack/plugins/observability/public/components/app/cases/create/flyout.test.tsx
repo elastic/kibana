@@ -11,12 +11,14 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 
 import { CreateCaseFlyout } from './flyout';
 
+const mockCasesUrl = 'https://elastic.co/app/observability/cases';
 jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       cases: {
         getCreateCase: jest.fn(),
       },
+      application: { getUrlForApp: () => mockCasesUrl },
     },
   }),
 }));

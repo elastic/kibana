@@ -12,12 +12,16 @@ import '../../../common/mock/match_media';
 import { CreateCaseFlyout } from './flyout';
 import { TestProviders } from '../../../common/mock';
 
+const mockNavigateToApp = jest.fn();
+const mockCasesUrl = 'https://elastic.co/app/security/cases';
+const mockApplication = { navigateToApp: mockNavigateToApp, getUrlForApp: () => mockCasesUrl };
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       cases: {
         getCreateCase: () => {},
       },
+      application: mockApplication,
     },
   }),
 }));

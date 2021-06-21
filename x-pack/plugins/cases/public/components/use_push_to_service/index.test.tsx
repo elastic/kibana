@@ -61,7 +61,7 @@ describe('usePushToService', () => {
       type: ConnectorTypes.serviceNowITSM,
       fields: null,
     },
-    caseUrl: `https://elastic.co`,
+    caseUrl: `https://elastic.co/app/security/cases/${caseId}`,
     caseId,
     caseServices,
     caseStatus: CaseStatuses.open,
@@ -96,6 +96,7 @@ describe('usePushToService', () => {
       result.current.pushButton.props.children.props.onClick();
       expect(pushCaseToExternalService).toBeCalledWith({
         caseId,
+        caseUrl: defaultArgs.caseUrl,
         connector: {
           fields: null,
           id: 'servicenow-1',

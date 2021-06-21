@@ -52,7 +52,10 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       result.current.pushCaseToExternalService(pushArgs);
       await waitForNextUpdate();
-      expect(spyOnPushToService).toBeCalledWith(caseId, connector.id, abortCtrl.signal);
+      expect(spyOnPushToService).toBeCalledWith(
+        { caseId, caseUrl: pushArgs.caseUrl, connectorId: connector.id },
+        abortCtrl.signal
+      );
     });
   });
 
