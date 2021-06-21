@@ -47,7 +47,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -65,7 +65,7 @@ export function LogsSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.infra_logs?.hasData) {
+  if (!hasDataMap.infra_logs?.hasData) {
     return null;
   }
 
