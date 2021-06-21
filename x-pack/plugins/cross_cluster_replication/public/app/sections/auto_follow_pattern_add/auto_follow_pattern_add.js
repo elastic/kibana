@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContentBody } from '@elastic/eui';
 
-
 import { listBreadcrumb, addBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import {
   AutoFollowPatternForm,
@@ -58,12 +57,14 @@ export class AutoFollowPatternAdd extends PureComponent {
           {({ isLoading, error, remoteClusters }) => {
             if (isLoading) {
               return (
-                <SectionLoading dataTestSubj="remoteClustersLoading">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
-                    defaultMessage="Loading remote clusters…"
-                  />
-                </SectionLoading>
+                <section data-test-subj="remoteClustersLoading">
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
+                      defaultMessage="Loading remote clusters…"
+                    />
+                  </SectionLoading>
+                </section>
               );
             }
 

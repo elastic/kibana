@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPageContentBody, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContentBody,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
@@ -101,7 +107,7 @@ export class AutoFollowPatternEdit extends PureComponent {
         : error;
 
     return (
-      <Fragment>
+      <>
         <SectionError title={title} error={errorMessage} />
 
         <EuiSpacer size="m" />
@@ -121,7 +127,7 @@ export class AutoFollowPatternEdit extends PureComponent {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </Fragment>
+      </>
     );
   }
 

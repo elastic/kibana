@@ -58,12 +58,14 @@ export class FollowerIndexAdd extends PureComponent {
           {({ isLoading, error, remoteClusters }) => {
             if (isLoading) {
               return (
-                <SectionLoading dataTestSubj="remoteClustersLoading">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
-                    defaultMessage="Loading remote clusters…"
-                  />
-                </SectionLoading>
+                <section data-test-subj="remoteClustersLoading">
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
+                      defaultMessage="Loading remote clusters…"
+                    />
+                  </SectionLoading>
+                </section>
               );
             }
 

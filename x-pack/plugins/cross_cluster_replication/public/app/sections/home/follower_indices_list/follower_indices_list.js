@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { extractQueryParams, SectionLoading } from '../../../../shared_imports';
@@ -137,7 +130,7 @@ export class FollowerIndicesList extends PureComponent {
   renderLoading() {
     return (
       <section data-test-subj="followerIndexLoading">
-        <SectionLoading >
+        <SectionLoading>
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
             defaultMessage="Loading follower indices..."
@@ -202,9 +195,7 @@ export class FollowerIndicesList extends PureComponent {
         }
       );
 
-      return (
-        <SectionError title={title} error={apiError} />
-      );
+      return <SectionError title={title} error={apiError} />;
     }
 
     if (isEmpty) {

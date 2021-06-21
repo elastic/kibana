@@ -9,11 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiSpacer,
-  EuiPageHeader,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPageHeader, EuiButtonEmpty } from '@elastic/eui';
 
 import { documentationLinks } from '../services/documentation_links';
 
