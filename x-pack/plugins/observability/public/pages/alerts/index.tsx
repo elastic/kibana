@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
@@ -43,6 +44,14 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.

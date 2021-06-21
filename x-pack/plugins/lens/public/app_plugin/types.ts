@@ -18,6 +18,7 @@ import {
   SavedObjectsStart,
 } from '../../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
@@ -97,6 +98,7 @@ export interface LensAppServices {
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
