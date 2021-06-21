@@ -81,9 +81,6 @@ export async function runTypeCheckCli() {
     ...['--emitDeclarationOnly', 'false'],
     '--noEmit',
     '--pretty',
-    ...(opts['skip-lib-check']
-      ? ['--skipLibCheck', opts['skip-lib-check']]
-      : ['--skipLibCheck', 'false']),
   ];
   const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
 
