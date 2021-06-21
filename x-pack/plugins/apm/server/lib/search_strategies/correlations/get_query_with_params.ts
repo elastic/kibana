@@ -9,7 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import {
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 export enum ProcessorEvent {
@@ -23,6 +26,7 @@ export enum ProcessorEvent {
 const PROCESSOR_EVENT = 'processor.event';
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
+const TRANSACTION_TYPE = 'transaction.type';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
@@ -84,6 +88,30 @@ const getRangeQuery = (
   ];
 };
 
+const getTransactionTypeQuery = (
+  transactionType: string | undefined
+): estypes.QueryDslQueryContainer[] => {
+  return transactionType
+    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+    : [];
+};
+
+const getTransactionNameQuery = (
+  transactionName: string | undefined
+): estypes.QueryDslQueryContainer[] => {
+  return typeof transactionName === 'string'
+    ? [
+        {
+          term: {
+            [TRANSACTION_NAME]: {
+              value: transactionName,
+            },
+          },
+        },
+      ]
+    : [];
+};
+
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number
 ): estypes.QueryDslQueryContainer[] => {
@@ -101,15 +129,19 @@ const getPercentileThresholdValueQuery = (
 export const getQueryWithParams = ({
   environment,
   serviceName,
+  transactionType,
   start,
   end,
   percentileThresholdValue,
+  transactionName,
 }: SearchServiceParams) => {
   return {
     bool: {
       filter: [
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+        ...getTransactionTypeQuery(transactionType),
+        ...getTransactionNameQuery(transactionName),
         ...getRangeQuery(start, end),
         ...getEnvironmentQuery(environment),
         ...(percentileThresholdValue

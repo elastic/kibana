@@ -28,21 +28,24 @@ export type Field = string;
 export const getTermsAggRequest = (
   params: SearchServiceParams,
   fieldName: string
-): estypes.SearchRequest => ({
-  index: params.index,
-  body: {
-    query: getQueryWithParams(params),
-    size: 0,
-    aggs: {
-      attribute_terms: {
-        terms: {
-          field: fieldName,
-          size: TERMS_SIZE,
+): estypes.SearchRequest => {
+  const query = getQueryWithParams(params);
+  return {
+    index: params.index,
+    body: {
+      query,
+      size: 0,
+      aggs: {
+        attribute_terms: {
+          terms: {
+            field: fieldName,
+            size: TERMS_SIZE,
+          },
         },
       },
     },
-  },
-});
+  };
+};
 
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
