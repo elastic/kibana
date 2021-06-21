@@ -747,7 +747,7 @@ instanceStateValue: true
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.body.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
