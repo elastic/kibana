@@ -10,6 +10,7 @@
 // used as dependencies or dev dependencies
 export const LICENSE_ALLOWED = [
   'Elastic-License',
+  'Elastic License 2.0',
   'SSPL-1.0 OR Elastic License 2.0',
   '0BSD',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
