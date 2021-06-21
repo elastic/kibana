@@ -379,3 +379,14 @@ export const USER_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMappin
   defaultMessage:
     'Removing a user immediately revokes access to the experience, unless this user’s attributes also corresponds to a role mapping for native and SAML-governed authentication, in which case associated role mappings should also be reviewed and adjusted, as needed.',
 });
+
+export const FILTER_USERS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.filterUsersLabel',
+  {
+    defaultMessage: 'Filter users',
+  }
+);
+
+export const NO_USERS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersLabel', {
+  defaultMessage: 'No matching users found',
+});

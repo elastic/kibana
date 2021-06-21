@@ -15,7 +15,12 @@ import { ASRoleMapping } from '../../app_search/types';
 import { SingleUserRoleMapping } from '../../shared/types';
 import { WSRoleMapping } from '../../workplace_search/types';
 
-import { INVITATION_PENDING_LABEL } from './constants';
+import {
+  INVITATION_PENDING_LABEL,
+  ALL_LABEL,
+  FILTER_USERS_LABEL,
+  NO_USERS_LABEL,
+} from './constants';
 
 import { UsersAndRolesRowActions } from './';
 
@@ -91,7 +96,7 @@ export const UsersTable: React.FC<Props> = ({
         // Design calls for showing the first 2 items followed by a +x after those 2.
         // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
         const numItems = accessItems.length;
-        if (numItems === 0) return <span data-test-subj="AllItems">All</span>;
+        if (numItems === 0) return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
         const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
         const names = accessItems.map((item) => item.name);
         return (
@@ -121,7 +126,7 @@ export const UsersTable: React.FC<Props> = ({
     box: {
       incremental: true,
       fullWidth: false,
-      placeholder: 'Filter users',
+      placeholder: FILTER_USERS_LABEL,
       'data-test-subj': 'UsersTableSearchInput',
     },
   };
@@ -133,7 +138,7 @@ export const UsersTable: React.FC<Props> = ({
       items={users}
       search={search}
       pagination={pagination}
-      message="No matching users found"
+      message={NO_USERS_LABEL}
       responsive={false}
     />
   );
