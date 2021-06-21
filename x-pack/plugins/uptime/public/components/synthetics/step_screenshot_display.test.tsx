@@ -18,6 +18,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByAltText } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
+        isScreenshotRef={false}
         screenshotExists={true}
         stepIndex={1}
         stepName="STEP_NAME"
@@ -29,7 +30,12 @@ describe('StepScreenshotDisplayProps', () => {
 
   it('uses alternative text when step name not available', () => {
     const { getByAltText } = render(
-      <StepScreenshotDisplay checkGroup="check_group" screenshotExists={true} stepIndex={1} />
+      <StepScreenshotDisplay
+        checkGroup="check_group"
+        isScreenshotRef={false}
+        screenshotExists={true}
+        stepIndex={1}
+      />
     );
 
     expect(getByAltText('Screenshot')).toBeInTheDocument();
@@ -39,6 +45,7 @@ describe('StepScreenshotDisplayProps', () => {
     const { getByTestId } = render(
       <StepScreenshotDisplay
         checkGroup="check_group"
+        isScreenshotRef={false}
         stepIndex={1}
         stepName="STEP_NAME"
         screenshotExists={false}
