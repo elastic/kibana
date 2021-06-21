@@ -47,7 +47,7 @@ export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
   const decoded = ScreenshotBlockResultType.decode(fetchScreenshotBlocksResult.body.hits.hits);
 
   if (!isRight(decoded)) {
-    throw Error('Error parsing Journey screenshot blocks. Malformed data.');
+    throw Error('Error parsing journey screenshot blocks. Malformed data.');
   }
 
   return decoded.right.map(({ _id, _source }) => ({
