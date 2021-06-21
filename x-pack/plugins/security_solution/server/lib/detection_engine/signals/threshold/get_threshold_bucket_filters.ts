@@ -6,7 +6,7 @@
  */
 
 import { Filter } from 'src/plugins/data/common';
-import { ESFilter } from '../../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
 import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 export const getThresholdBucketFilters = async ({
