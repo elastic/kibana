@@ -10,7 +10,7 @@ import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
-import { MemoizedFormulaEditor } from './editor';
+import { WrappedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
@@ -100,28 +100,11 @@ export const formulaOperation: OperationDefinition<
     return [
       {
         type: 'function',
-        function: 'mapColumn',
+        function: currentColumn.references.length ? 'mathColumn' : 'mapColumn',
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          exp: [
-            {
-              type: 'expression',
-              chain: currentColumn.references.length
-                ? [
-                    {
-                      type: 'function',
-                      function: 'math',
-                      arguments: {
-                        expression: [
-                          currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
-                        ],
-                      },
-                    },
-                  ]
-                : [],
-            },
-          ],
+          expression: [currentColumn.references.length ? `"${currentColumn.references[0]}"` : ''],
         },
       },
     ];
@@ -177,5 +160,5 @@ export const formulaOperation: OperationDefinition<
     return newLayer;
   },
 
-  paramEditor: MemoizedFormulaEditor,
+  paramEditor: WrappedFormulaEditor,
 };

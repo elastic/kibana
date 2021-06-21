@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
+import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
-import { SO_SEARCH_LIMIT, REQUIRED_PACKAGES } from '../constants';
+import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -22,7 +25,7 @@ import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
-import { getInstallations, installPackage } from './epm/packages';
+import { getInstallations, installPackage, isPackageInstalled } from './epm/packages';
 import { pkgToPkgKey } from './epm/registry';
 
 export interface SetupStatus {
@@ -57,11 +60,25 @@ async function createSetupSideEffects(
   const policies = policiesOrUndefined ?? [];
 
   let packages = packagesOrUndefined ?? [];
+
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
+
+  const autoUpdateablePackages = compact(
+    await Promise.all(
+      AUTO_UPDATE_PACKAGES.map((pkg) =>
+        isPackageInstalled({
+          savedObjectsClient: soClient,
+          pkgName: pkg.name,
+        }).then((installed) => (installed ? pkg : undefined))
+      )
+    )
+  );
+
   packages = [
     ...packages,
-    ...REQUIRED_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+    ...DEFAULT_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
+    ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
   const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
