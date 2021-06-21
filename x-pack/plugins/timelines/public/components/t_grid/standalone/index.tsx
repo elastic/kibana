@@ -13,6 +13,8 @@ import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
+import { TimelineTabs } from '../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -21,8 +23,6 @@ import type {
   RowRenderer,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
-import { TimelineTabs } from '../../../../common/types/timeline';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { Refetch } from '../../../store/t_grid/inputs';

@@ -21,8 +21,9 @@ import type {
   Query,
 } from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
+import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';

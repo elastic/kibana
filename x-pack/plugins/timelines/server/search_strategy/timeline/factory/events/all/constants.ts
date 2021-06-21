@@ -7,7 +7,7 @@
 
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
-//TODO: share with security_solution/common/cti/constants.ts
+// TODO: share with security_solution/common/cti/constants.ts
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export const MATCHED_ATOMIC = 'matched.atomic';

@@ -10,13 +10,14 @@ import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   ControlColumnProps,
   ColumnHeaderOptions,
   HeaderActionProps,
 } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 
 import type { OnSelectAll } from '../../types';

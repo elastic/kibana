@@ -15,8 +15,11 @@ import {
 import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
 
 export const createTGridMocks = () => ({
+  // eslint-disable-next-line react/display-name
   getTGrid: () => <>{'hello grid'}</>,
+  // eslint-disable-next-line react/display-name
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
+  // eslint-disable-next-line react/display-name
   getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,

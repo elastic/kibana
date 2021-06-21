@@ -35,12 +35,9 @@ export const INVESTIGATE = i18n.translate(
   }
 );
 
-export const UNPINNED = i18n.translate(
-  'xpack.timelines.timeline.body.pinning.unpinnedTooltip',
-  {
-    defaultMessage: 'Unpinned event',
-  }
-);
+export const UNPINNED = i18n.translate('xpack.timelines.timeline.body.pinning.unpinnedTooltip', {
+  defaultMessage: 'Unpinned event',
+});
 
 export const PINNED = i18n.translate('xpack.timelines.timeline.body.pinning.pinnedTooltip', {
   defaultMessage: 'Pinned event',
@@ -108,12 +105,9 @@ export const EXPAND_EVENT = i18n.translate(
   }
 );
 
-export const COLLAPSE = i18n.translate(
-  'xpack.timelines.timeline.body.actions.collapseAriaLabel',
-  {
-    defaultMessage: 'Collapse',
-  }
-);
+export const COLLAPSE = i18n.translate('xpack.timelines.timeline.body.actions.collapseAriaLabel', {
+  defaultMessage: 'Collapse',
+});
 
 export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
   'xpack.timelines.timeline.body.actions.investigateInResolverTooltip',
@@ -144,14 +138,10 @@ export const ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate(
-    'xpack.timelines.timeline.body.actions.investigateInResolverForRowAriaLabel',
-    {
-      values: { ariaRowindex, columnValues },
-      defaultMessage:
-        'Analyze the alert or event in row {ariaRowindex}, with columns {columnValues}',
-    }
-  );
+  i18n.translate('xpack.timelines.timeline.body.actions.investigateInResolverForRowAriaLabel', {
+    values: { ariaRowindex, columnValues },
+    defaultMessage: 'Analyze the alert or event in row {ariaRowindex}, with columns {columnValues}',
+  });
 
 export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({
   ariaRowindex,
@@ -160,14 +150,10 @@ export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({
   ariaRowindex: number;
   columnValues: string;
 }) =>
-  i18n.translate(
-    'xpack.timelines.timeline.body.actions.sendAlertToTimelineForRowAriaLabel',
-    {
-      values: { ariaRowindex, columnValues },
-      defaultMessage:
-        'Send the alert in row {ariaRowindex} to timeline, with columns {columnValues}',
-    }
-  );
+  i18n.translate('xpack.timelines.timeline.body.actions.sendAlertToTimelineForRowAriaLabel', {
+    values: { ariaRowindex, columnValues },
+    defaultMessage: 'Send the alert in row {ariaRowindex} to timeline, with columns {columnValues}',
+  });
 
 export const ADD_NOTES_FOR_ROW = ({
   ariaRowindex,

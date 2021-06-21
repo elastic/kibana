@@ -22,6 +22,8 @@ import {
 
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   ActionProps,
   CellValueElementProps,
@@ -29,7 +31,6 @@ import type {
   ControlColumnProps,
   RowCellRender,
 } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import type { Ecs } from '../../../../../common/ecs';

@@ -9,9 +9,10 @@ import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd
 import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
-import type { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
-// eslint-disable-next-line no-duplicate-imports
+
 import { stopPropagationAndPreventDefault, TimelineId } from '../../../common';
+// eslint-disable-next-line no-duplicate-imports
+import type { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
 import { tGridActions } from '../../store/t_grid';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 

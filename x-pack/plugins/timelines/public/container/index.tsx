@@ -19,7 +19,12 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-import { Direction } from '../../common/search_strategy';
+import {
+  Direction,
+  TimelineFactoryQueryTypes,
+  TimelineEventsQueries,
+} from '../../common/search_strategy';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   DocValueFields,
   Inspect,
@@ -31,7 +36,6 @@ import type {
   TimelineItem,
   TimelineRequestSortField,
 } from '../../common/search_strategy';
-import { TimelineFactoryQueryTypes, TimelineEventsQueries } from '../../common/search_strategy';
 import type { ESQuery } from '../../common/typed_json';
 import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';

@@ -50,6 +50,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setTGridEmbeddedStore: (store: any) => {
         this._store = store;
       },

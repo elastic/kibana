@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DataProvider } from '../../common/types/timeline';
 import { IS_OPERATOR } from '../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
+import type { DataProvider } from '../../common/types/timeline';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;

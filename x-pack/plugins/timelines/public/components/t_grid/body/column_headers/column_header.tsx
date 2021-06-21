@@ -27,9 +27,9 @@ import { Header } from './header';
 
 import * as i18n from './translations';
 import { tGridActions } from '../../../../store/t_grid';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import { TimelineTabs } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 
 import { Direction } from '../../../../../common/search_strategy';
 import { useDraggableKeyboardWrapper } from '../../../drag_and_drop';

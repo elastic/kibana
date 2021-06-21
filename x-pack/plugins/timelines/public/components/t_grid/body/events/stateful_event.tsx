@@ -18,6 +18,8 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from './stateful_event_context';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -25,7 +27,7 @@ import type {
   RowRenderer,
   TimelineExpandedDetailType,
 } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';

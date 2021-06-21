@@ -21,6 +21,7 @@ export interface TimelinesUIStart {
   getTGrid: <T extends TGridType = 'embedded'>(
     props: GetTGridProps<T>
   ) => ReactElement<GetTGridProps<T>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTGridReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;

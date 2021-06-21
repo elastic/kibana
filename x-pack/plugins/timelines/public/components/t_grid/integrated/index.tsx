@@ -16,6 +16,8 @@ import { Direction } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -23,8 +25,6 @@ import type {
   DataProvider,
   RowRenderer,
 } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   esQuery,
   Filter,

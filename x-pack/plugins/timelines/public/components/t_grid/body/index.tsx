@@ -18,13 +18,14 @@ import {
   onKeyDownFocusHandler,
 } from '../../../../common';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import { RowRendererId, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
 } from '../../../../common/types/timeline';
-import { RowRendererId, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';

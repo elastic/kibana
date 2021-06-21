@@ -16,5 +16,6 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   header: ColumnHeaderOptions;
   linkValues: string[] | undefined;
   timelineId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFlyoutAlert?: (data: any) => void;
 };

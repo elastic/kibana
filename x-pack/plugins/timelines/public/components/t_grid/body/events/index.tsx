@@ -11,6 +11,8 @@ import { isEmpty } from 'lodash';
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -18,7 +20,7 @@ import type {
   OnRowSelected,
   RowRenderer,
 } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */

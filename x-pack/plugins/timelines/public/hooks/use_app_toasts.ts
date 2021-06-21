@@ -7,8 +7,10 @@
 
 import { useCallback, useRef } from 'react';
 import { isString } from 'lodash/fp';
-import type { AppError } from '@kbn/securitysolution-t-grid';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
+// eslint-disable-next-line no-duplicate-imports
+import type { AppError } from '@kbn/securitysolution-t-grid';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   ErrorToastOptions,
