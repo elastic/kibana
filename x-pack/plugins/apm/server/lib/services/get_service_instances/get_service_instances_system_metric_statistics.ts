@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from 'typings/elasticsearch';
+import { AggregationOptionsByType } from 'src/core/types/elasticsearch';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
