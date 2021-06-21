@@ -26,7 +26,7 @@ export default function canvasApp({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./filters'));
     loadTestFile(require.resolve('./custom_elements'));
     loadTestFile(require.resolve('./feature_controls/canvas_security'));
-    // loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
+    loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
     // loadTestFile(require.resolve('./lens'));
     // loadTestFile(require.resolve('./reports'));
   });
