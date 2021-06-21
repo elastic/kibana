@@ -19,6 +19,7 @@ import {
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
+import { useGroupSubNav } from '../../views/groups/components/group_sub_nav';
 import { useSettingsSubNav } from '../../views/settings/components/settings_sub_nav';
 
 export const useWorkplaceSearchNav = () => {
@@ -38,7 +39,7 @@ export const useWorkplaceSearchNav = () => {
       id: 'groups',
       name: NAV.GROUPS,
       ...generateNavLink({ to: GROUPS_PATH }),
-      items: [], // TODO: Group subnav
+      items: useGroupSubNav(),
     },
     {
       id: 'usersRoles',
