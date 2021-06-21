@@ -12159,10 +12159,10 @@ ejs@^3.1.2, ejs@^3.1.5, ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@^9.8.0:
-  version "9.8.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-9.8.0.tgz#caa738c2663b3ec8521ebede86cc841e4c77863c"
-  integrity sha512-JrlQbijs4dY8539zH+QNKLqLDCNyNymyy720tDaj+/i5pcwWYz5ipPARAdrKkor56AmKBxib8Fd6KsSWtIYjcA==
+elastic-apm-http-client@^9.8.1:
+  version "9.8.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-9.8.1.tgz#62a0352849e2d7a75696a1c777ad90ddb55083b0"
+  integrity sha512-tVU7+y4nSDUEZp/TXbXDxE+kXbWHsGVG1umk0OOV71UEPc/AqC7xSP5ACirOlDkewkfCOFXkvNThgu2zlx8PUw==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -12174,24 +12174,28 @@ elastic-apm-http-client@^9.8.0:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.14.0:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.14.0.tgz#942d6e86bd9d3710f51f0e43f04965d63c3fefd3"
-  integrity sha512-B7Xkz6UL44mm+2URdZy2yxpEB2C5CvZLOP3sGpf2h/hepXr4NgrVoRxGqO1F2b2wCB48smPv4a3v35b396VSwA==
+elastic-apm-node@^3.16.0:
+  version "3.16.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.16.0.tgz#b55ba5c54acd2f40be704dc48c664ddb1729f20f"
+  integrity sha512-WR56cjpvt9ZAAw+4Ct2XjCtmy+lgn5kXZH220TRgC7W71c5uuRdioRJpIdvBPMZmeLnHwzok2+acUB7bxnYvVA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.1.0"
     after-all-results "^2.0.0"
+    async-cache "^1.1.0"
     async-value-promise "^1.1.1"
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^9.8.0"
+    elastic-apm-http-client "^9.8.1"
     end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
     escape-string-regexp "^4.0.0"
     fast-safe-stringify "^2.0.7"
     http-headers "^3.0.2"
     is-native "^1.0.1"
+    load-source-map "^2.0.0"
+    lru-cache "^6.0.0"
     measured-reporting "^1.51.1"
     monitor-event-loop-delay "^1.0.0"
     object-filter-sequence "^1.0.0"
@@ -12205,7 +12209,6 @@ elastic-apm-node@^3.14.0:
     set-cookie-serde "^1.0.0"
     shallow-clone-shim "^2.0.0"
     sql-summary "^1.0.1"
-    stackman "^4.0.1"
     traceparent "^1.0.0"
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
@@ -12459,10 +12462,10 @@ errno@^0.1.1, errno@^0.1.3, errno@~0.1.7:
   dependencies:
     prr "~1.0.1"
 
-error-callsites@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/error-callsites/-/error-callsites-2.0.3.tgz#c9278de0d7d4b4861150af295bb92891393ff24a"
-  integrity sha512-v036z4IEffZFE5kBkV5/F2MzhLnG0vuDyN+VXpzCf4yWXvX/1WJCI0A+TGTr8HWzBfCw5k8gr9rwAo09V+obTA==
+error-callsites@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/error-callsites/-/error-callsites-2.0.4.tgz#44f09e6a201e9a1603ead81eacac5ba258fca76e"
+  integrity sha512-V877Ch4FC4FN178fDK1fsrHN4I1YQIBdtjKrHh3BUHMnh3SMvwUVrqkaOgDpUuevgSNna0RBq6Ox9SGlxYrigA==
 
 error-ex@^1.2.0, error-ex@^1.3.1:
   version "1.3.1"
@@ -18328,14 +18331,12 @@ load-json-file@^6.2.0:
     strip-bom "^4.0.0"
     type-fest "^0.6.0"
 
-load-source-map@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/load-source-map/-/load-source-map-1.0.0.tgz#318f49905ce8a709dfb7cc3f16f3efe3bcf1dd05"
-  integrity sha1-MY9JkFzopwnft8w/FvPv47zx3QU=
+load-source-map@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/load-source-map/-/load-source-map-2.0.0.tgz#48f1c7002d7d9e20dd119da6e566104ec46a5683"
+  integrity sha512-QNZzJ2wMrTmCdeobMuMNEXHN1QGk8HG6louEkzD/zwQ7EU2RarrzlhQ4GnUYEFzLhK+Jq7IGyF/qy+XYBSO7AQ==
   dependencies:
-    in-publish "^2.0.0"
-    semver "^5.3.0"
-    source-map "^0.5.6"
+    source-map "^0.7.3"
 
 loader-runner@^2.4.0:
   version "2.4.0"
@@ -25594,17 +25595,6 @@ stackframe@^1.1.0, stackframe@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stackframe/-/stackframe-1.1.1.tgz#ffef0a3318b1b60c3b58564989aca5660729ec71"
   integrity sha512-0PlYhdKh6AfFxRyK/v+6/k+/mMfyiEBbTM5L94D0ZytQnJ166wuwoTYLHFWGbs2dpA8Rgq763KGWmN1EQEYHRQ==
-
-stackman@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/stackman/-/stackman-4.0.1.tgz#b5709446f078db9b9dadbb317f296224d9a35b5b"
-  integrity sha512-lntIge3BFEElgvpZT2ld5f4U+mF84fRtJ8vA3ymUVx1euVx43ZMkd09+5RWW4FmvYDFhZwPh1gvtdsdnJyF4Fg==
-  dependencies:
-    after-all-results "^2.0.0"
-    async-cache "^1.1.0"
-    debug "^4.1.1"
-    error-callsites "^2.0.3"
-    load-source-map "^1.0.0"
 
 stacktrace-gps@^3.0.3:
   version "3.0.3"
