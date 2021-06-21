@@ -974,6 +974,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     // (undocumented)
+    onClose?: () => void | boolean;
+    // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
     size?: EuiFlyoutSize;
