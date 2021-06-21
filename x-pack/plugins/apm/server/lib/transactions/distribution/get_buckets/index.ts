@@ -117,8 +117,11 @@ export async function getBuckets({
                   }),
                   aggs: {
                     samples: {
-                      top_hits: {
-                        _source: [TRANSACTION_ID, TRACE_ID],
+                      top_metrics: {
+                        metrics: [
+                          { field: TRANSACTION_ID },
+                          { field: TRACE_ID },
+                        ],
                         size: 10,
                         sort: {
                           _score: 'desc' as const,

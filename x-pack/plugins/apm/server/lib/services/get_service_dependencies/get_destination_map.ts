@@ -71,9 +71,12 @@ export const getDestinationMap = ({
             },
             aggs: {
               sample: {
-                top_hits: {
-                  size: 1,
-                  _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
+                top_metrics: {
+                  metrics: [
+                    { field: SPAN_TYPE },
+                    { field: SPAN_SUBTYPE },
+                    { field: SPAN_ID },
+                  ],
                   sort: [
                     {
                       '@timestamp': 'desc' as const,
