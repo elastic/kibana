@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
@@ -26,40 +26,37 @@ const BottomContentWrapper = styled(EuiFlexGroup)`
   `}
 `;
 
-export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
-  id,
-  field,
-  dataTestSubj,
-  idAria,
-  bottomRightContent,
-}) => {
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = forwardRef(
+  ({ id, field, dataTestSubj, idAria, bottomRightContent }, ref) => {
+    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  return (
-    <EuiFormRow
-      data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-      error={errorMessage}
-      fullWidth
-      helpText={field.helpText}
-      isInvalid={isInvalid}
-      label={field.label}
-      labelAppend={field.labelAppend}
-    >
-      <>
-        <MarkdownEditor
-          ariaLabel={idAria}
-          editorId={id}
-          onChange={field.setValue}
-          value={field.value as string}
-          data-test-subj={`${dataTestSubj}-markdown-editor`}
-        />
-        {bottomRightContent && (
-          <BottomContentWrapper justifyContent={'flexEnd'}>
-            <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
-          </BottomContentWrapper>
-        )}
-      </>
-    </EuiFormRow>
-  );
-};
+    return (
+      <EuiFormRow
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+        error={errorMessage}
+        fullWidth
+        helpText={field.helpText}
+        isInvalid={isInvalid}
+        label={field.label}
+        labelAppend={field.labelAppend}
+      >
+        <>
+          <MarkdownEditor
+            ref={ref}
+            ariaLabel={idAria}
+            editorId={id}
+            onChange={field.setValue}
+            value={field.value as string}
+            data-test-subj={`${dataTestSubj}-markdown-editor`}
+          />
+          {bottomRightContent && (
+            <BottomContentWrapper justifyContent={'flexEnd'}>
+              <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
+            </BottomContentWrapper>
+          )}
+        </>
+      </EuiFormRow>
+    );
+  }
+);

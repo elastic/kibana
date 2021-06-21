@@ -201,6 +201,7 @@ export const plugin: EuiMarkdownEditorUiPlugin = {
   button: {
     label: i18n.INSERT_LENS,
     iconType: 'lensApp',
+    className: 'markdownLensPlugin',
   },
   helpText: (
     <EuiCodeBlock language="md" paddingSize="s" fontSize="l">

@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import React, {
+  memo,
+  useContext,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useImperativeHandle,
+} from 'react';
 import { PluggableList } from 'unified';
 import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin, EuiMarkdownContext } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
@@ -23,46 +32,49 @@ interface MarkdownEditorProps {
   value: string;
 }
 
-const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
-  ariaLabel,
-  dataTestSubj,
-  editorId,
-  height,
-  onChange,
-  value,
-}) => {
-  const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
+const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
 
-  const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
-  const LensContextProvider = useLensContext()?.editor_context.Provider;
-  const editorRef = useRef(null);
-  const markdownContext = useContext(EuiMarkdownContext);
+    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
+    const LensContextProvider = useLensContext()?.editor_context.Provider;
+    const editorRef = useRef(null);
+    const markdownContext = useContext(EuiMarkdownContext);
 
-  console.error('markdownContext', markdownContext);
-  console.error('useRef', editorRef.current);
+    console.error('markdownContext', markdownContext);
+    console.error('useRef', ref.current);
 
-  const onParse = useCallback(
-    (err, { messages }) => {
-      console.error('onParse', markdownContext);
-      markdownContext.openPluginEditor(uiPlugins[2]);
-      markdownContext.replaceNode(
-        {
-          start: {
-            offset: 0,
+    const onParse = useCallback(
+      (err, { messages }) => {
+        console.error('onParse', markdownContext);
+        markdownContext.openPluginEditor(uiPlugins[2]);
+        markdownContext.replaceNode(
+          {
+            start: {
+              offset: 0,
+            },
+            end: {
+              offset: 0,
+            },
           },
-          end: {
-            offset: 0,
-          },
-        },
-        'dupa'
-      );
-      setMarkdownErrorMessages(err ? [err] : messages);
-    },
-    [markdownContext, uiPlugins]
-  );
+          'dupa'
+        );
+        setMarkdownErrorMessages(err ? [err] : messages);
+      },
+      [markdownContext, uiPlugins]
+    );
 
-  const editor = (
-    <>
+    useImperativeHandle(ref, (payload) => {
+      console.error('reft', ref, editorRef);
+      return {
+        ...editorRef.current,
+        toolbar: editorRef.current.textarea
+          .closest('.euiMarkdownEditor')
+          .querySelector('.euiMarkdownEditorToolbar'),
+      };
+    });
+
+    const editor = (
       <EuiMarkdownEditor
         ref={editorRef}
         aria-label={ariaLabel}
@@ -76,35 +88,33 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
-      >
-        <>{`dupa`}</>
-      </EuiMarkdownEditor>
-    </>
-  );
+      />
+    );
 
-  // useEffect(() => {
-  //   if (markdownContext) {
-  //     console.error('uiPlugins', uiPlugins[2]);
-  //     markdownContext.openPluginEditor(uiPlugins[2]);
-  //   }
-  //   document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus();
-  // }, []);
+    // useEffect(() => {
+    //   if (markdownContext) {
+    //     console.error('uiPlugins', uiPlugins[2]);
+    //     markdownContext.openPluginEditor(uiPlugins[2]);
+    //   }
+    //   document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus();
+    // }, []);
 
-  // if (LensContextProvider) {
-  //   return (
-  //     <LensContextProvider
-  //       value={{
-  //         editorId,
-  //         onChange,
-  //         value,
-  //       }}
-  //     >
-  //       {editor}
-  //     </LensContextProvider>
-  //   );
-  // }
+    // if (LensContextProvider) {
+    //   return (
+    //     <LensContextProvider
+    //       value={{
+    //         editorId,
+    //         onChange,
+    //         value,
+    //       }}
+    //     >
+    //       {editor}
+    //     </LensContextProvider>
+    //   );
+    // }
 
-  return editor;
-};
+    return editor;
+  }
+);
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

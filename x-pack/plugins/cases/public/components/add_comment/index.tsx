@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
 import { CommentType } from '../../../common';
@@ -48,6 +48,7 @@ export const AddComment = React.memo(
       { caseId, disabled, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
       ref
     ) => {
+      const editorRef = useRef();
       const owner = useOwnerContext();
       const { isLoading, postComment } = usePostComment();
 
@@ -70,6 +71,7 @@ export const AddComment = React.memo(
 
       useImperativeHandle(ref, () => ({
         addQuote,
+        editorRef: editorRef.current,
       }));
 
       const onSubmit = useCallback(async () => {
@@ -88,6 +90,8 @@ export const AddComment = React.memo(
         }
       }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
 
+      console.error('aaaaaaa', editorRef, ref);
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
@@ -96,6 +100,7 @@ export const AddComment = React.memo(
               path={fieldName}
               component={MarkdownEditorForm}
               componentProps={{
+                ref: editorRef,
                 idAria: 'caseComment',
                 isDisabled: isLoading,
                 dataTestSubj: 'add-comment',

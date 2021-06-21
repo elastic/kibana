@@ -587,6 +587,15 @@ export const UserActionTree = React.memo(
 
     const comments = [...userActions, ...bottomActions];
 
+    useEffect(() => {
+      console.error('addCommentRef', addCommentRef.current);
+      const buttons = addCommentRef.current?.editorRef?.toolbar?.querySelector(
+        '[aria-label="Insert lens link"]'
+      );
+      buttons.click();
+      console.error('buttons', buttons);
+    }, []);
+
     return (
       <>
         <MyEuiCommentList comments={comments} data-test-subj="user-actions" />
