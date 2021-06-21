@@ -73,18 +73,19 @@ export function registerSnapshotsRoutes({
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
-          const { snapshots: fetchedSnapshots = [] } = response.body;
+          const { responses: fetchedResponses = [] } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
-
-          fetchedSnapshots.forEach((snapshot) => {
-            snapshots.push(
-              deserializeSnapshotDetails(
-                repository,
-                snapshot as SnapshotDetailsEs,
-                managedRepository
-              )
-            );
+          fetchedResponses.forEach(({ snapshots: fetchedSnapshots = [] }) => {
+            fetchedSnapshots.forEach((snapshot) => {
+              snapshots.push(
+                deserializeSnapshotDetails(
+                  repository,
+                  snapshot as SnapshotDetailsEs,
+                  managedRepository
+                )
+              );
+            });
           });
 
           repositories.push(repository);
