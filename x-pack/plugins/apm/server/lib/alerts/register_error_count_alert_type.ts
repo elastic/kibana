@@ -18,11 +18,6 @@ import {
 } from '../../../../alerting/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
-import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ThresholdMetActionGroupId,
@@ -32,9 +27,12 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
