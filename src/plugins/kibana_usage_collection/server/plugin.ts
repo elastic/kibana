@@ -22,7 +22,10 @@ import type {
   CoreUsageDataStart,
 } from 'src/core/server';
 import { SavedObjectsClient } from '../../../core/server';
-import { startTrackingEventLoopDelaysUsage } from './collectors/event_loop_delays';
+import {
+  startTrackingEventLoopDelaysUsage,
+  SAVED_OBJECTS_DAILY_TYPE,
+} from './collectors/event_loop_delays';
 import {
   registerApplicationUsageCollector,
   registerKibanaUsageCollector,
@@ -78,7 +81,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public start(core: CoreStart) {
     const { savedObjects, uiSettings } = core;
-    this.savedObjectsClient = savedObjects.createInternalRepository();
+    this.savedObjectsClient = savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);

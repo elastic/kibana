@@ -26,9 +26,9 @@ import moment from 'moment';
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-let esServer: TestElasticsearchUtils;
 
-function createRawObject(pid: number, date: moment.MomentInput) {
+function createRawObject(date: moment.MomentInput) {
+  const pid = Math.round(Math.random() * 10000);
   return {
     type: SAVED_OBJECTS_DAILY_TYPE,
     id: serializeSavedObjectId({ pid, date }),
@@ -41,33 +41,36 @@ function createRawObject(pid: number, date: moment.MomentInput) {
 }
 
 const rawEventLoopDelaysDaily = [
-  createRawObject(12351, moment.now()),
-  createRawObject(9019, moment.now()),
-  createRawObject(12351, moment().subtract(1, 'days')),
-  createRawObject(12351, moment().subtract(3, 'days')),
-  createRawObject(12351, moment().subtract(5, 'days')),
-  createRawObject(12351, moment().subtract(1, 'weeks')),
+  createRawObject(moment.now()),
+  createRawObject(moment.now()),
+  createRawObject(moment().subtract(1, 'days')),
+  createRawObject(moment().subtract(3, 'days')),
+];
+
+const outdatedRawEventLoopDelaysDaily = [
+  createRawObject(moment().subtract(5, 'days')),
+  createRawObject(moment().subtract(7, 'days')),
 ];
 
 describe('daily rollups integration test', () => {
+  let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
   let logger: Logger;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = createRootWithCorePlugins({
-      server: {
-        basePath: '/daily_test',
-      },
-    });
+    root = createRootWithCorePlugins();
 
     await root.setup();
     const start = await root.start();
     logger = root.logger.get('test dailt rollups');
-    internalRepository = start.savedObjects.createInternalRepository();
+    internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
 
-    await internalRepository.bulkCreate<EventLoopDelaysDaily>(rawEventLoopDelaysDaily);
+    await internalRepository.bulkCreate<EventLoopDelaysDaily>(
+      [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
+      { refresh: true }
+    );
   });
 
   afterAll(async () => {
@@ -81,9 +84,9 @@ describe('daily rollups integration test', () => {
       total,
       saved_objects: savedObjects,
     } = await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
-    expect(total).toBe(4);
+    expect(total).toBe(rawEventLoopDelaysDaily.length);
     expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
-      rawEventLoopDelaysDaily.slice(0, 4)
+      rawEventLoopDelaysDaily
     );
   });
 });

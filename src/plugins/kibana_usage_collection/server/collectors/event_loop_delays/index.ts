@@ -8,3 +8,4 @@
 
 export { startTrackingEventLoopDelaysUsage } from './event_loop_delays';
 export { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
+export { SAVED_OBJECTS_DAILY_TYPE } from './saved_objects';

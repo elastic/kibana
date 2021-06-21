@@ -24,7 +24,7 @@ export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHis
 export function registerSavedObjectTypes(registerType: SavedObjectsServiceSetup['registerType']) {
   registerType({
     name: SAVED_OBJECTS_DAILY_TYPE,
-    hidden: false,
+    hidden: true,
     namespaceType: 'agnostic',
     mappings: {
       dynamic: false,

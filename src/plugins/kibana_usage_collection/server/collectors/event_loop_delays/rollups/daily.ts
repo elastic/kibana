@@ -11,7 +11,7 @@ import { ISavedObjectsRepository } from '../../../../../../core/server';
 import { deleteHistogramSavedObjects } from '../saved_objects';
 
 /**
- * Deletes docs older than 3 days
+ * daily rollup function. Deletes histogram saved objects older than 3 days
  * @param logger
  * @param savedObjectsClient
  */
