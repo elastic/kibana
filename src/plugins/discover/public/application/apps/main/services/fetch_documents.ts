@@ -24,6 +24,8 @@ export const fetchDocuments = ({
 }) => {
   const childSearchSource = searchSource.createCopy();
   childSearchSource.setField('trackTotalHits', false);
+  childSearchSource.setField('highlightAll', true);
+  childSearchSource.setField('version', true);
 
   return childSearchSource
     .fetch$({

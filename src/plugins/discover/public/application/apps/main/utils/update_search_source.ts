@@ -50,8 +50,6 @@ export function updateSearchSource(
       .setField('trackTotalHits', true)
       .setField('size', size)
       .setField('sort', usedSort)
-      .setField('highlightAll', true)
-      .setField('version', true)
       // Even when searching rollups, we want to use the default strategy so that we get back a
       // document-like response.
       .setPreferredSearchStrategyId('default');

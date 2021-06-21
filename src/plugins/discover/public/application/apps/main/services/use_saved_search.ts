@@ -219,14 +219,10 @@ export const useSavedSearch = ({
           fetchStatus: FetchStatus.LOADING,
           fetchCounter,
         });
-        dataDocuments$.next({
-          fetchStatus: FetchStatus.LOADING,
-        });
-        dataTotalHits$.next({
-          fetchStatus: FetchStatus.LOADING,
-        });
-        dataCharts$.next({
-          fetchStatus: FetchStatus.LOADING,
+        [dataDocuments$, dataTotalHits$, dataCharts$].map((subject$) => {
+          subject$.next({
+            fetchStatus: FetchStatus.LOADING,
+          });
         });
 
         refs.current.fetchStatus = FetchStatus.LOADING;
@@ -248,13 +244,15 @@ export const useSavedSearch = ({
         useNewFieldsApi,
       });
 
+      const fetchDeps = {
+        abortController: refs.current.abortController!,
+        inspectorAdapters,
+        searchSessionId: sessionId,
+        searchSource,
+      };
+
       const fetchAndSubscribeDocuments = () => {
-        const documentsSourceFetch$ = fetchDocuments({
-          abortController: refs.current.abortController!,
-          inspectorAdapters,
-          searchSessionId: sessionId,
-          searchSource,
-        });
+        const documentsSourceFetch$ = fetchDocuments(fetchDeps);
 
         documentsSourceFetch$.subscribe((res) => {
           const documents = res.rawResponse.hits.hits;
@@ -272,12 +270,12 @@ export const useSavedSearch = ({
 
       const fetchAndSubscribeChart = () => {
         const chartDataFetch$ = fetchChart({
-          searchSource,
-          data,
           abortController: refs.current.abortController!,
-          searchSessionId: sessionId,
+          data,
           inspectorAdapters,
           interval: interval ?? 'auto',
+          searchSessionId: sessionId,
+          searchSource,
         });
 
         chartDataFetch$.subscribe((res) => {
