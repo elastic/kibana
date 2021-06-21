@@ -8,12 +8,16 @@
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
-
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
+import {
+  getHttp,
+  getMapAppConfig,
+  getSearchService,
+  getTimeFilter,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -24,7 +28,6 @@ import {
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
-
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -39,11 +42,9 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
-import { loadIndexSettings } from './load_index_settings';
-
+import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
 import { registerSource } from '../source_registry';
 import {
   DataMeta,
@@ -63,8 +64,9 @@ import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import { addFeatureToIndex, getMatchingIndexes } from './util/feature_edit';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -421,6 +423,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
+  async supportsFeatureEditing(): Promise<boolean> {
+    if (!getMapAppConfig().enableDrawingFeature) {
+      return false;
+    }
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+    if (!matchingIndexes) {
+      return false;
+    }
+    // For now we only support 1:1 index-pattern:index matches
+    return matchingIndexes.length === 1;
+  }
+
   _hasSort(): boolean {
     const { sortField, sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
@@ -691,6 +709,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getLayerName(): string {
     return MVT_SOURCE_LAYER_NAME;
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    const indexPattern = await this.getIndexPattern();
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
   }
 
   async getUrlTemplateWithMeta(

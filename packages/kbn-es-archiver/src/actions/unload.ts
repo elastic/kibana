@@ -37,7 +37,6 @@ export async function unloadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
@@ -47,7 +46,7 @@ export async function unloadAction({
       createReadStream(resolve(inputDir, filename)) as Readable,
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream(client, stats, log, kibanaPluginIds),
+      createDeleteIndexStream(client, stats, log),
     ] as [Readable, ...Writable[]]);
   }
 
