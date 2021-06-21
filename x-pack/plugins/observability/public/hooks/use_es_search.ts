@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { isCompleteResponse } from '../../../../../src/plugins/data/common';
 import { useFetcher } from './use_fetcher';

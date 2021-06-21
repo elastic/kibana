@@ -21,10 +21,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
-jest.mock('../../hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../common/lib/kibana');
 
@@ -53,7 +49,6 @@ const testProps = {
 };
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();
-  useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 

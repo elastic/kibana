@@ -66,8 +66,9 @@ export const sourceIsContent = (result: DropResult): boolean =>
 
 export const sourceAndDestinationAreSameTimelineProviders = (result: DropResult): boolean => {
   const regex = /^droppableId\.timelineProviders\.(\S+)\./;
-  const sourceMatches = result.source.droppableId.match(regex) ?? [];
-  const destinationMatches = result.destination?.droppableId.match(regex) ?? [];
+  const sourceMatches = result.source.droppableId.match(regex) || [];
+  const destinationMatches =
+    (result.destination && result.destination.droppableId.match(regex)) || [];
 
   return (
     sourceMatches.length >= 2 &&

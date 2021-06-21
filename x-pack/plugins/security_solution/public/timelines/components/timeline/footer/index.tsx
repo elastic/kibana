@@ -264,9 +264,11 @@ export const FooterComponent = ({
   const [paginationLoading, setPaginationLoading] = useState(false);
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id)
-  );
+  const {
+    documentType = i18n.TOTAL_COUNT_OF_EVENTS,
+    loadingText = i18n.LOADING_EVENTS,
+    footerText = i18n.TOTAL_COUNT_OF_EVENTS,
+  } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {

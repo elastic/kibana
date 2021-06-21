@@ -29,7 +29,7 @@ jest.mock('react-router-dom', () => ({
 describe('APMSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         apm: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           hasData: true,

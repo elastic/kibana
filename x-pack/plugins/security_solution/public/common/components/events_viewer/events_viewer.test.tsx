@@ -30,7 +30,6 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../timelines/public/components';
 
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -81,33 +80,6 @@ const defaultMocks = {
   loading: false,
   selectedPatterns: mockIndexNames,
 };
-
-jest.mock('../../lib/kibana', () => {
-  const originalModule = jest.requireActual('../../lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-        },
-        docLinks: { links: { query: { eql: 'url-eql_doc' } } },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
-        },
-      },
-    }),
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
 
 const utilityBar = (refetch: inputsModel.Refetch, totalCount: number) => (
   <div data-test-subj="mock-utility-bar" />
