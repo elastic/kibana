@@ -94,6 +94,11 @@ export const EngineRouter: React.FC = () => {
       <Route exact path={ENGINE_PATH}>
         <EngineOverview />
       </Route>
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs />
+        </Route>
+      )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
         {canViewEngineAnalytics && (
@@ -134,11 +139,6 @@ export const EngineRouter: React.FC = () => {
         {canManageEngineResultSettings && (
           <Route path={ENGINE_RESULT_SETTINGS_PATH}>
             <ResultSettings />
-          </Route>
-        )}
-        {canViewEngineApiLogs && (
-          <Route path={ENGINE_API_LOGS_PATH}>
-            <ApiLogs />
           </Route>
         )}
         {canManageEngineSearchUi && (
