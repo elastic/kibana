@@ -65,14 +65,14 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
   useEffect(() => {
     if (isScreenshotRef(data)) {
       setScreenshotRef(data);
-    } else if (data) {
-      setStepImages((prevState) => [...prevState, (data as ScreenshotImageBlob)?.src]);
+    } else if (isScreenshotImageBlob(data)) {
+      setStepImages((prevState) => [...prevState, data?.src]);
     }
   }, [data]);
 
   let imgSrc;
   if (isScreenshotImageBlob(data)) {
-    imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
+    imgSrc = stepImages?.[stepNumber - 1] ?? data.src;
   }
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);

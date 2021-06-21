@@ -49,7 +49,7 @@ const DefaultImage: React.FC<ScreenshotImageProps & { url?: string }> = ({
       className="syntheticsStepImage"
     />
   ) : (
-    <EuiLoadingSpinner />
+    <EuiLoadingSpinner size="l" />
   );
 
 const RecomposedScreenshotImage: React.FC<
@@ -120,7 +120,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
           style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (
-        <EuiLoadingSpinner />
+        <EuiLoadingSpinner size="l" />
       )}
     </EuiPopover>
   );

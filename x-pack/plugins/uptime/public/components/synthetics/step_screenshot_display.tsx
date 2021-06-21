@@ -56,7 +56,7 @@ const BaseStepImage = ({
   stepName,
   url,
 }: Pick<StepScreenshotDisplayProps, 'stepIndex' | 'stepName'> & { url?: string }) => {
-  if (!url) return <EuiLoadingSpinner />;
+  if (!url) return <EuiLoadingSpinner size="l" />;
   return (
     <StepImage
       allowFullScreen={true}
@@ -93,7 +93,7 @@ const ComposedStepImage = ({
   setUrl,
 }: ComposedStepImageProps) => {
   useCompositeImage(imgRef, setUrl, url);
-  if (!url) return <EuiLoadingSpinner />;
+  if (!url) return <EuiLoadingSpinner size="l" />;
   return <BaseStepImage stepIndex={stepIndex} stepName={stepName} url={url} />;
 };
 
