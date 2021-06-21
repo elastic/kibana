@@ -185,5 +185,18 @@ readonly links: {
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
+        readonly fleet: Readonly<{
+            guide: string;
+            fleetServer: string;
+            fleetServerAddFleetServer: string;
+            settings: string;
+            settingsFleetServerHostSettings: string;
+            troubleshooting: string;
+            elasticAgent: string;
+            datastreams: string;
+            datastreamsNamingScheme: string;
+            upgradeElasticAgent: string;
+            upgradeElasticAgent712lower: string;
+        }>;
     };
 ```
