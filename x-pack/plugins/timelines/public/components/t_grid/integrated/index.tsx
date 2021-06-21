@@ -173,7 +173,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { queryFields, title, unit } = useDeepEqualSelector((state) =>
+  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
+  const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
 

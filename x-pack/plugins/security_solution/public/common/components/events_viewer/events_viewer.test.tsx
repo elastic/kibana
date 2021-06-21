@@ -21,9 +21,8 @@ import { mockBrowserFields, mockDocValueFields } from '../../containers/source/m
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, SortDirection } from '../../../../common/types/timeline';
 import { KqlMode } from '../../../timelines/store/timeline/model';
-import { SortDirection } from '../../../timelines/components/timeline/body/sort';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';

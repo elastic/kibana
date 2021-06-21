@@ -87,7 +87,6 @@ export const tGridDefaults: SubsetTGridModel = {
   ],
   savedObjectId: null,
   version: null,
-  unit: (n: number) => String(n),
 };
 
 export const getTGridManageDefaults = (id: string) => ({

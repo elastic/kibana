@@ -32,7 +32,6 @@ export interface TGridModelSettings {
   queryFields: string[];
   selectAll: boolean;
   title: string;
-  unit: (n: number) => string;
 }
 export interface TGridModel extends TGridModelSettings {
   /** The columns displayed in the timeline */
@@ -77,7 +76,6 @@ export interface TGridModel extends TGridModelSettings {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
-  unit: (n: number) => string;
 }
 
 export type TGridModelForTimeline = Pick<
@@ -103,7 +101,6 @@ export type TGridModelForTimeline = Pick<
   | 'savedObjectId'
   | 'title'
   | 'version'
-  | 'unit'
 >;
 
 export type SubsetTGridModel = Readonly<
@@ -127,6 +124,5 @@ export type SubsetTGridModel = Readonly<
     | 'selectedEventIds'
     | 'savedObjectId'
     | 'version'
-    | 'unit'
   >
 >;

@@ -34,7 +34,6 @@ export const getManageTimelineById = () =>
       queryFields,
       selectAll,
       title,
-      unit,
     }) => ({
       documentType,
       defaultColumns,
@@ -45,6 +44,5 @@ export const getManageTimelineById = () =>
       queryFields,
       selectAll,
       title,
-      unit,
     })
   );
