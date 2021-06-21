@@ -54,7 +54,11 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const [pagination, setPagination] = useState({ pageSize: 50, pageIndex: 0 });
+  const [pagination, setPagination] = useState({
+    pageSize: 50,
+    pageIndex: 0,
+    pageSizeOptions: [25, 50, 75],
+  });
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
@@ -79,16 +83,17 @@ export const DocViewerTable = ({
 
   const onSetRowProps = useCallback(({ field: { fieldName } }: FieldRecord) => {
     return {
-      className: 'kbnDocViewer_tableRow',
+      className: 'kbnDocViewer__tableRow',
       'data-test-subj': `tableDocViewRow-${fieldName}`,
     };
   }, []);
 
   const onTableChange = useCallback(({ page }: CriteriaWithPagination<FieldRecord>) => {
-    setPagination({
+    setPagination((prevPagination) => ({
+      ...prevPagination,
       pageSize: page.size,
       pageIndex: page.index,
-    });
+    }));
   }, []);
 
   if (!indexPattern) {
@@ -139,7 +144,6 @@ export const DocViewerTable = ({
       pagination={pagination}
       onTableChange={onTableChange}
       rowProps={onSetRowProps}
-      responsive={false}
     />
   );
 };

@@ -62,7 +62,6 @@ export const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
           fieldType={fieldType}
           fieldMapping={fieldMapping}
           scripted={scripted}
-          className="kbnDocViewer__fieldNameCell"
         />
       );
     },

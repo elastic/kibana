@@ -4,7 +4,7 @@
   }
 }
 
-.kbnDocViewer_tableRow {
+.kbnDocViewer__tableRow {
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
 
@@ -40,11 +40,12 @@
   }
 }
 
-.kbnDocViewer__fieldNameCell {
-  width: 100%;
-  .dscMultiFieldBadge {
-    @include euiFont;
-  }
+.kbnDocViewer__fieldIcon {
+  padding: $euiSizeS; 
+}
+
+.kbnDocViewer__multiFieldBadge {
+  @include euiFont;
 }
 
 .kbnDocViewer__value {
