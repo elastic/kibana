@@ -122,7 +122,6 @@ function extractColumns(
 
     if (nodeOperation.input === 'fullReference') {
       const [referencedOp] = functions;
-      const currentColumnIndex = columns.length;
       const consumedParam = parseNode(referencedOp);
       const hasActualMathContent = typeof consumedParam !== 'string';
 
@@ -148,7 +147,9 @@ function extractColumns(
           layer,
           indexPattern,
           referenceIds: [
-            getManagedId(idPrefix, hasActualMathContent ? columns.length - 1 : currentColumnIndex),
+            hasActualMathContent
+              ? getManagedId(idPrefix, columns.length - 1)
+              : (consumedParam as string),
           ],
         },
         mappedParams
