@@ -192,7 +192,6 @@ export class MapsPlugin implements Plugin {
       catalogue: [APP_ID],
       privileges: {
         all: {
-          api: ['fileUpload:import'],
           app: [APP_ID, 'kibana'],
           catalogue: [APP_ID],
           savedObject: {
