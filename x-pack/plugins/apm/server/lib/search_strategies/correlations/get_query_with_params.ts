@@ -9,7 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import {
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 export enum ProcessorEvent {
@@ -98,12 +101,29 @@ const getPercentileThresholdValueQuery = (
   ];
 };
 
+const getTransactionNameQuery = (
+  transactionName: string | undefined
+): estypes.QueryDslQueryContainer[] => {
+  return typeof transactionName === 'string'
+    ? [
+        {
+          term: {
+            [TRANSACTION_NAME]: {
+              value: transactionName,
+            },
+          },
+        },
+      ]
+    : [];
+};
+
 export const getQueryWithParams = ({
   environment,
   serviceName,
   start,
   end,
   percentileThresholdValue,
+  transactionName,
 }: SearchServiceParams) => {
   return {
     bool: {
@@ -111,6 +131,7 @@ export const getQueryWithParams = ({
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...getRangeQuery(start, end),
+        ...getTransactionNameQuery(transactionName),
         ...getEnvironmentQuery(environment),
         ...(percentileThresholdValue
           ? getPercentileThresholdValueQuery(percentileThresholdValue)
