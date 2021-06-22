@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { waitFor, act } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
@@ -150,20 +151,25 @@ describe('EventsViewer', () => {
           <StatefulEventsViewer {...testProps} />
         </TestProviders>
       );
-      wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
-      wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
-        payload: {
-          panelView: 'eventDetail',
-          params: {
-            eventId: 'yb8TkHYBRgU82_bJu_rY',
-            indexName: 'auditbeat-7.10.1-2020.12.18-000001',
+
+      act(() => {
+        wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      });
+
+      waitFor(() => {
+        expect(mockDispatch).toBeCalledTimes(2);
+        expect(mockDispatch.mock.calls[1][0]).toEqual({
+          payload: {
+            panelView: 'eventDetail',
+            params: {
+              eventId: 'yb8TkHYBRgU82_bJu_rY',
+              indexName: 'auditbeat-7.10.1-2020.12.18-000001',
+            },
+            tabType: 'query',
+            timelineId: TimelineId.test,
           },
-          tabType: 'query',
-          timelineId: TimelineId.test,
-        },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        });
       });
     });
   });
