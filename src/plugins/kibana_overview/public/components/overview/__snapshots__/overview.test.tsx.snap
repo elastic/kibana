@@ -1,10 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview render 1`] = `
-<EuiPageTemplate
+<Component
   pageHeader={
     Object {
-      "className": "kbnPageHeader",
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
         defaultMessage="Kibana"
@@ -14,6 +13,7 @@ exports[`Overview render 1`] = `
       "rightSideItems": Array [],
     }
   }
+  template="empty"
 >
   <section
     aria-labelledby="kbnOverviewApps__title"
@@ -298,14 +298,13 @@ exports[`Overview render 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</EuiPageTemplate>
+</Component>
 `;
 
 exports[`Overview without features 1`] = `
-<EuiPageTemplate
+<Component
   pageHeader={
     Object {
-      "className": "kbnPageHeader",
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
         defaultMessage="Kibana"
@@ -315,6 +314,7 @@ exports[`Overview without features 1`] = `
       "rightSideItems": Array [],
     }
   }
+  template="empty"
 >
   <section
     aria-labelledby="kbnOverviewApps__title"
@@ -655,14 +655,13 @@ exports[`Overview without features 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</EuiPageTemplate>
+</Component>
 `;
 
 exports[`Overview without solutions 1`] = `
-<EuiPageTemplate
+<Component
   pageHeader={
     Object {
-      "className": "kbnPageHeader",
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
         defaultMessage="Kibana"
@@ -672,6 +671,7 @@ exports[`Overview without solutions 1`] = `
       "rightSideItems": Array [],
     }
   }
+  template="empty"
 >
   <section
     aria-labelledby="kbnOverviewApps__title"
@@ -969,5 +969,5 @@ exports[`Overview without solutions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</EuiPageTemplate>
+</Component>
 `;
