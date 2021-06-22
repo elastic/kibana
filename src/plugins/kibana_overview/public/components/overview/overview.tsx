@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPageTemplate,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
@@ -24,6 +23,7 @@ import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
   useKibana,
+  KibanaPageTemplate,
   overviewPageActions,
   OverviewPageFooter,
 } from '../../../../../../src/plugins/kibana_react/public';
@@ -117,9 +117,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       pageHeader={{
-        className: 'kbnPageHeader',
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />,
         rightSideItems: overviewPageActions({
@@ -128,6 +127,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           hidden: isNewKibanaInstance,
         }),
       }}
+      template="empty"
     >
       {isNewKibanaInstance ? (
         <GettingStarted addBasePath={addBasePath} isDarkTheme={IS_DARK_THEME} apps={kibanaApps} />
@@ -260,6 +260,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
         }}
       />
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

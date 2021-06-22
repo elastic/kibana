@@ -9,10 +9,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import {
+  KibanaPageTemplate,
   overviewPageActions,
   OverviewPageFooter,
 } from '../../../../../../src/plugins/kibana_react/public';
@@ -124,9 +125,8 @@ export class Home extends Component {
     }
 
     return (
-      <EuiPageTemplate
+      <KibanaPageTemplate
         pageHeader={{
-          className: `homPageHeader ${solutions.length ? ' homPageHeader--hasOverlap' : null}`,
           pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Home" />,
           rightSideItems: overviewPageActions({
             addBasePath,
@@ -135,6 +135,7 @@ export class Home extends Component {
             showManagementLink: true,
           }),
         }}
+        template="empty"
       >
         {solutions.length ? (
           <SolutionsSection
@@ -172,7 +173,7 @@ export class Home extends Component {
             trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
           }}
         />
-      </EuiPageTemplate>
+      </KibanaPageTemplate>
     );
   }
 
