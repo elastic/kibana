@@ -97,7 +97,7 @@ describe('constructor', () => {
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
       browserSupportsCsp: true,
-      packageInfoVersion: 'version',
+      kibanaVersion: 'version',
     });
   });
 

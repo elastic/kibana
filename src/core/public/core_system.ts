@@ -97,6 +97,7 @@ export class CoreSystem {
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -108,18 +109,16 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-
+    this.chrome = new ChromeService({
+      browserSupportsCsp,
+      kibanaVersion: injectedMetadata.version,
+    });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
 
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
-    this.chrome = new ChromeService({
-      browserSupportsCsp,
-      packageInfoVersion: injectedMetadata.version,
-    });
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }

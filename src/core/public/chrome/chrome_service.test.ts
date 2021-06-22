@@ -55,14 +55,14 @@ function defaultStartDeps(availableApps?: App[]) {
 
 function defaultStartTestOptions({
   browserSupportsCsp = true,
-  packageInfoVersion = 'version',
+  kibanaVersion = 'version',
 }: {
   browserSupportsCsp?: boolean;
-  packageInfoVersion?: string;
+  kibanaVersion?: string;
 }): any {
   return {
     browserSupportsCsp,
-    packageInfoVersion,
+    kibanaVersion,
   };
 }
 
@@ -96,7 +96,7 @@ afterAll(() => {
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
     const { startDeps } = await start({
-      options: { browserSupportsCsp: false, packageVersionInfo: '7.0.0' },
+      options: { browserSupportsCsp: false, kibanaVersion: '7.0.0' },
     });
 
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
@@ -110,19 +110,39 @@ describe('start', () => {
     `);
   });
 
-  it('adds the kibana version class to the document body', async () => {
-    const { chrome } = await start({
-      options: { browserSupportsCsp: false, packageVersionInfo: '1.2.3' },
+  it('adds the kibana versioned class to the document body', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '1.2.3' },
     });
-    const classes = chrome.getBodyClasses$().pipe(take(1));
-    classes.subscribe((classList) =>
-      expect(classList).toEqual([
-        'kbnBody',
-        'kibana-version-1-2-3',
-        'kbnBody--noHeaderBanner',
-        'kbnBody--chromeHidden',
-      ])
-    );
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-1-2-3",
+              ],
+            ]
+          `);
+  });
+  it('strips off "snapshot" from the kibana version if present', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
+    });
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-8-0-0",
+              ],
+            ]
+          `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {
