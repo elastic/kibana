@@ -102,8 +102,10 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
+        body: {
+          scroll: scrollSettings.duration,
+          scroll_id: scrollId,
+        },
       })
     ).body as SearchResponse<unknown>;
     return results;
@@ -387,7 +389,7 @@ export class CsvGenerator {
       if (scrollId) {
         this.logger.debug(`executing clearScroll request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
+          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
         } catch (err) {
           this.logger.error(err);
         }
