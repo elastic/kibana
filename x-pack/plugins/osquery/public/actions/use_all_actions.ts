@@ -84,6 +84,7 @@ export const useAllActions = ({
     {
       keepPreviousData: true,
       enabled: !skip,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.all_actions.fetchError', {

@@ -63,6 +63,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
     },
     {
       enabled: !skip,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_details.fetchError', {

@@ -102,6 +102,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
     },
     {
       enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_groups.fetchError', {

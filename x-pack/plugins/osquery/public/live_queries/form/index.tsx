@@ -68,7 +68,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   );
 
-  const expirationDate = useMemo(() => new Date(data.actions[0].expiration), [data.actions]);
+  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
 
   const formSchema = {
     query: {

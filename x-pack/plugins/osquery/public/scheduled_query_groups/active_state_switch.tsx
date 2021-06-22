@@ -53,6 +53,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     {
       onSuccess: (response) => {
         queryClient.invalidateQueries('scheduledQueries');
+        setErrorToast();
         toasts.addSuccess(
           response.item.enabled
             ? i18n.translate(

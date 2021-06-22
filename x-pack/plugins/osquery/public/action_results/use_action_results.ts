@@ -126,6 +126,7 @@ export const useActionResults = ({
       refetchInterval: isLive ? 1000 : false,
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_results.fetchError', {

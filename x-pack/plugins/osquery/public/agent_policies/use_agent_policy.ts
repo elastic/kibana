@@ -31,6 +31,7 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
       enabled: !skip,
       keepPreviousData: true,
       select: (response) => response.item,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.agent_policy_details.fetchError', {

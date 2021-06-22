@@ -24,6 +24,7 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
       queryKey: ['agentPolicy', policyId],
       queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
       enabled: policyIds.length > 0,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {

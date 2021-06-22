@@ -36,6 +36,7 @@ export const useAgentPolicies = () => {
       placeholderData: [],
       keepPreviousData: true,
       select: (response) => response.items,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_policies.fetchError', {

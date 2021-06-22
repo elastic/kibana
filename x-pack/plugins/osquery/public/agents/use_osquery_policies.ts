@@ -32,6 +32,7 @@ export const useOsqueryPolicies = () => {
     {
       select: (response) =>
         uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_policies.fetchError', {

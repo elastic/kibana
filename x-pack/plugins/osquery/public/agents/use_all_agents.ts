@@ -53,6 +53,7 @@ export const useAllAgents = (
     },
     {
       enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {

@@ -83,6 +83,7 @@ export const useAllResults = ({
     {
       refetchInterval: isLive ? 1000 : false,
       enabled: !skip,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.results.fetchError', {

@@ -40,6 +40,7 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
     {
       enabled: !skip,
       select: (response) => response.results,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_status.fetchError', {

@@ -112,6 +112,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           return;
         }
 
+        setErrorToast();
         navigateToApp(PLUGIN_ID, { path: `scheduled_query_groups/${data.item.id}` });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.scheduledQueryGroup.form.updateSuccessToastMessageText', {
