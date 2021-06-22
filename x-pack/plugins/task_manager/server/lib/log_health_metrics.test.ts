@@ -117,6 +117,24 @@ describe('logHealthMetrics', () => {
     expect(firstDebug).toMatchObject(health);
   });
 
+  it('should log as debug if status is OK even if not enabled', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth();
+
+    logHealthMetrics(health, logger, config);
+
+    const firstDebug = JSON.parse(
+      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+    );
+    expect(firstDebug).toMatchObject(health);
+  });
+
   it('should log as warn if status is Warn', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({

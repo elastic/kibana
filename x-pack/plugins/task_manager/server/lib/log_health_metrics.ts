@@ -43,6 +43,7 @@ export function logHealthMetrics(
     logLevel = LogLevel.Error;
   }
 
+  const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
   if (enabled) {
     const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
     if (
@@ -53,8 +54,6 @@ export function logHealthMetrics(
       );
       logLevel = LogLevel.Warn;
     }
-
-    const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
     switch (logLevel) {
       case LogLevel.Warn:
         logger.warn(message);
@@ -66,6 +65,8 @@ export function logHealthMetrics(
         logger.debug(message);
     }
   } else {
+    // This is legacy support - we used to always show this
+    logger.debug(message);
     if (logLevel !== LogLevel.Debug && lastLogLevel === LogLevel.Debug) {
       logger.warn(
         `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
