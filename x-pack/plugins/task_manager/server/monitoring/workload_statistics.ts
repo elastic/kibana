@@ -13,7 +13,7 @@ import { keyBy, mapValues } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../../../typings/elasticsearch';
+import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 import { createRunningAveragedStat } from './task_run_calcultors';

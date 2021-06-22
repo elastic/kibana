@@ -91,7 +91,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
         hasAppData,
         indexPatterns,
         loadIndexPattern,
-        loading: !!Object.entries(loading).find(([_dataType, loadingT]) => loadingT),
+        loading: !!Object.values(loading).find((loadingT) => loadingT),
       }}
     >
       {children}

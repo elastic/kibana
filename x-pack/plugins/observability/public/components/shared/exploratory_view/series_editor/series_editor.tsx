@@ -46,9 +46,9 @@ export function SeriesEditor() {
       }),
       field: 'defaultFilters',
       width: '15%',
-      render: (defaultFilters: string[], { seriesConfig, id }: EditItem) => (
+      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
         <SeriesFilter
-          defaultFilters={defaultFilters}
+          defaultFilters={seriesConfig.defaultFilters}
           seriesId={id}
           seriesConfig={seriesConfig}
           filters={seriesConfig.baseFilters}
@@ -59,10 +59,14 @@ export function SeriesEditor() {
       name: i18n.translate('xpack.observability.expView.seriesEditor.breakdowns', {
         defaultMessage: 'Breakdowns',
       }),
-      field: 'breakdowns',
+      field: 'id',
       width: '25%',
-      render: (breakdowns: string[], { seriesConfig, id }: EditItem) => (
-        <ChartEditOptions seriesId={id} breakdowns={breakdowns} seriesConfig={seriesConfig} />
+      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
+        <ChartEditOptions
+          seriesId={id}
+          breakdowns={seriesConfig.breakdowns}
+          series={seriesConfig}
+        />
       ),
     },
     {
@@ -118,8 +122,8 @@ export function SeriesEditor() {
         items={items}
         rowHeader="firstName"
         columns={columns}
-        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-          defaultMessage: 'No series found, please add a series.',
+        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.seriesNotFound', {
+          defaultMessage: 'No series found. Please add a series.',
         })}
         cellProps={{
           style: {

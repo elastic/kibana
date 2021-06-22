@@ -40,7 +40,7 @@ export function EmptyView({
 
   if (!series) {
     emptyMessage = i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-      defaultMessage: 'No series found, please add a series.',
+      defaultMessage: 'No series found. Please add a series.',
     });
   }
 

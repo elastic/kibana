@@ -20,18 +20,16 @@ export const urlFiltersToKueryString = (urlFilters: UrlFilter[]): string => {
 
     if (valuesT && valuesT?.length > 0) {
       if (kueryString.length > 0) {
-        kueryString += ` and ${field}: (${valuesT?.join(' or ')})`;
-      } else {
-        kueryString += `${field}: (${valuesT.join(' or ')})`;
+        kueryString += ' and ';
       }
+      kueryString += `${field}: (${valuesT.join(' or ')})`;
     }
 
     if (notValuesT && notValuesT?.length > 0) {
       if (kueryString.length > 0) {
-        kueryString += ` and not (${field}: (${notValuesT?.join(' or ')}))`;
-      } else {
-        kueryString += `not (${field}: (${notValuesT.join(' or ')}))`;
+        kueryString += ' and ';
       }
+      kueryString += `not (${field}: (${notValuesT.join(' or ')}))`;
     }
   });
 

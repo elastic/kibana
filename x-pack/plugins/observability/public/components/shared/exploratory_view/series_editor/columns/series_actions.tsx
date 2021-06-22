@@ -38,7 +38,7 @@ export function SeriesActions({ seriesId, editorMode = false }: Props) {
 
   const saveSeries = () => {
     if (isSaveAble) {
-      const reportDefId = Object.entries(reportDefinitions ?? {})[0][1];
+      const reportDefId = Object.values(reportDefinitions ?? {})[0];
       let newSeriesId = `${reportDefId}-${reportType}`;
 
       if (allSeriesIds.includes(newSeriesId)) {
@@ -60,7 +60,7 @@ export function SeriesActions({ seriesId, editorMode = false }: Props) {
       {!editorMode && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconType={'documentEdit'}
+            iconType="documentEdit"
             aria-label={i18n.translate('xpack.observability.seriesEditor.edit', {
               defaultMessage: 'Edit series',
             })}

@@ -32,6 +32,7 @@ import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/
 import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN, TERMS_COLUMN } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
+import { parseAbsoluteDate } from '../series_date_picker/date_range_picker';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
@@ -92,6 +93,7 @@ export interface LayerConfig {
   seriesType?: SeriesType;
   operationType?: OperationType;
   reportDefinitions: URLReportDefinition;
+  time: { to: string; from: string };
   indexPattern: IndexPattern;
 }
 
@@ -454,12 +456,18 @@ export class LensAttributes {
     } as CountIndexPatternColumn;
   }
 
-  getLayerFilters(layerConfig: LayerConfig) {
+  getLayerFilters(layerConfig: LayerConfig, totalLayers: number) {
     const {
       filters,
-      seriesConfig: { baseFilters: layerFilters },
+      time: { from, to },
+      seriesConfig: { baseFilters: layerFilters, reportType },
     } = layerConfig;
     let baseFilters = '';
+    if (reportType !== 'kpi-over-time' && totalLayers > 1) {
+      // for kpi over time, we don't need to add time range filters
+      // since those are essentially plotted along the x-axis
+      baseFilters += `@timestamp >= ${from} and @timestamp <= ${to}`;
+    }
 
     layerFilters?.forEach((filter: PersistableFilter | ExistsFilter) => {
       const qFilter = filter as PersistableFilter;
@@ -513,14 +521,38 @@ export class LensAttributes {
     return `${rFilters} and ${baseFilters}`;
   }
 
+  getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
+    if (index === 0 || mainLayerConfig.reportConfig.reportType !== 'kpi-over-time') {
+      return null;
+    }
+
+    const {
+      time: { from: mainFrom },
+    } = mainLayerConfig;
+
+    const {
+      time: { from },
+    } = layerConfig;
+
+    const inDays = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days');
+    if (inDays > 1) {
+      return inDays + 'd';
+    }
+    const inHours = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours');
+    return inHours + 'h';
+  }
+
   getLayers() {
     const layers: Record<string, PersistedIndexPatternLayer> = {};
+    const layerConfigs = this.layerConfigs;
 
-    this.layerConfigs.forEach((layerConfig, index) => {
+    layerConfigs.forEach((layerConfig, index) => {
       const { breakdown } = layerConfig;
 
       const layerId = `layer${index}`;
-      const columnFilter = this.getLayerFilters(layerConfig);
+      const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
+      const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
+      const mainYAxis = this.getMainYAxis(layerConfig);
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
@@ -531,8 +563,10 @@ export class LensAttributes {
         columns: {
           [`x-axis-column-${layerId}`]: this.getXAxis(layerConfig, layerId),
           [`y-axis-column-${layerId}`]: {
-            ...this.getMainYAxis(layerConfig),
+            ...mainYAxis,
+            label: timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label,
             filter: { query: columnFilter, language: 'kuery' },
+            ...(timeShift ? { timeShift } : {}),
           },
           ...(breakdown && breakdown !== USE_BREAK_DOWN_COLUMN
             ? // do nothing since this will be used a x axis source

@@ -31,6 +31,7 @@ describe('Lens Attribute', () => {
     operationType: 'count',
     indexPattern: mockIndexPattern,
     reportDefinitions: {},
+    time: { from: 'now-15m', to: 'now' },
   };
 
   beforeEach(() => {
@@ -96,6 +97,7 @@ describe('Lens Attribute', () => {
       operationType: 'count',
       indexPattern: mockIndexPattern,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+      time: { from: 'now-15m', to: 'now' },
     };
 
     lnsAttr = new LensAttributes([layerConfig1]);
@@ -273,6 +275,7 @@ describe('Lens Attribute', () => {
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
+        time: { from: 'now-15m', to: 'now' },
       };
 
       lnsAttr = new LensAttributes([layerConfig1]);
@@ -360,12 +363,13 @@ describe('Lens Attribute', () => {
         operationType: 'count',
         indexPattern: mockIndexPattern,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+        time: { from: 'now-15m', to: 'now' },
       };
 
-      const filters = lnsAttr.getLayerFilters(layerConfig1);
+      const filters = lnsAttr.getLayerFilters(layerConfig1, 2);
 
       expect(filters).toEqual(
-        'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'
+        '@timestamp >= now-15m and @timestamp <= now and transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'
       );
     });
   });
