@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Dashboard Reporting Screenshots', () => {
+  // https://github.com/elastic/kibana/issues/102911
+  describe.skip('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(
