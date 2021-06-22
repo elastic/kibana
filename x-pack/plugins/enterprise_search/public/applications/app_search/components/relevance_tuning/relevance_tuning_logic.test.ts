@@ -32,6 +32,7 @@ describe('RelevanceTuningLogic', () => {
       ],
     },
     search_fields: {},
+    precision: 10,
   };
   const schema = {};
   const schemaConflicts = {};
@@ -60,6 +61,7 @@ describe('RelevanceTuningLogic', () => {
     searchSettings: {
       boosts: {},
       search_fields: {},
+      precision: 2,
     },
     unsavedChanges: false,
     filterInputValue: '',
