@@ -47,6 +47,13 @@ export function PolicySelector({
           <EuiLink href={fleetLink.href}>{fleetLink.label}</EuiLink>
         </EuiText>
       }
+      helpText={i18n.translate(
+        'xpack.apm.tutorial.agent_config.choosePolicy.helper',
+        {
+          defaultMessage:
+            'Adds the selected policy configuration to the snippet below.',
+        }
+      )}
     >
       <EuiComboBox
         data-test-subj={`policySelector_${selectedOption?.key}`}
