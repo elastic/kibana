@@ -30,7 +30,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
   const { loading, hasData } = useAppIndexPatternContext(restSeries.dataType);
 
   if (!restSeries.dataType) {
-    return SELECT_DATA_TYPE;
+    return <span>{SELECT_DATA_TYPE}</span>;
   }
 
   if (!loading && !hasData) {

@@ -122,7 +122,7 @@ export function SeriesEditor() {
         items={items}
         rowHeader="firstName"
         columns={columns}
-        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
+        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.seriesNotFound', {
           defaultMessage: 'No series found, please add a series.',
         })}
         cellProps={{

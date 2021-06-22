@@ -463,7 +463,7 @@ export class LensAttributes {
       reportConfig: { filters: layerFilters, reportType },
     } = layerConfig;
     let baseFilters = '';
-    if (reportType !== 'kpi-over-time') {
+    if (reportType !== 'kpi-over-time' && totalLayers > 1) {
       // for kpi over time, we don't need to add time range filters
       // since those are essentially plotted along the x-axis
       baseFilters += `@timestamp >= ${from} and @timestamp <= ${to}`;
