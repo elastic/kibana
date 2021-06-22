@@ -101,11 +101,11 @@ export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpr
     const eventName = event as keyof this;
     if (this[eventName]) {
       const eventCall = this[eventName];
-      if (!eventCall || typeof eventCall !== 'function') return;
+      if (typeof eventCall !== 'function') return;
 
       const updatedEvent = (...args: unknown[]) => {
         const preventFromCallingListener: void | boolean = eventCall(...args);
-        if (fn && typeof fn === 'function' && !preventFromCallingListener) {
+        if (typeof fn === 'function' && !preventFromCallingListener) {
           fn(...args);
         }
         return preventFromCallingListener;
