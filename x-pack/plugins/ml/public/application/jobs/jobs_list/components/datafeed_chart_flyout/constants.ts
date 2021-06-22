@@ -26,14 +26,14 @@ export type TabIdsType = typeof TAB_IDS[keyof typeof TAB_IDS];
 export const tabs = [
   {
     id: TAB_IDS.CHART,
-    name: i18n.translate('xpack.ml.jobsList.datafeedModal.chartTabName', {
+    name: i18n.translate('xpack.ml.jobsList.datafeedChart.chartTabName', {
       defaultMessage: 'Chart',
     }),
     disabled: false,
   },
   {
     id: TAB_IDS.MESSAGES,
-    name: i18n.translate('xpack.ml.jobsList.datafeedModal.messagesTabName', {
+    name: i18n.translate('xpack.ml.jobsList.datafeedChart.messagesTabName', {
       defaultMessage: 'Messages',
     }),
     disabled: false,

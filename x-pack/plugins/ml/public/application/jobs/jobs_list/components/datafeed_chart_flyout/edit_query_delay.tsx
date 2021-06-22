@@ -22,7 +22,7 @@ import { useToastNotificationService } from '../../../../services/toast_notifica
 import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
 const tooltipContent = i18n.translate(
-  'xpack.ml.jobsList.datafeedModal.editQueryDelay.tooltipContent',
+  'xpack.ml.jobsList.datafeedChart.editQueryDelay.tooltipContent',
   {
     defaultMessage: 'Cannot update query delay when datafeed is running.',
   }
@@ -46,7 +46,7 @@ export const EditQueryDelay: FC<{
       });
       displaySuccessToast(
         i18n.translate(
-          'xpack.ml.jobsList.datafeedModal.editQueryDelay.changesSavedNotificationMessage',
+          'xpack.ml.jobsList.datafeedChart.editQueryDelay.changesSavedNotificationMessage',
           {
             defaultMessage: 'Changes to query delay for {datafeedId} saved',
             values: {
@@ -59,7 +59,7 @@ export const EditQueryDelay: FC<{
       displayErrorToast(
         error,
         i18n.translate(
-          'xpack.ml.jobsList.datafeedModal.editQueryDelay.changesNotSavedNotificationMessage',
+          'xpack.ml.jobsList.datafeedChart.editQueryDelay.changesNotSavedNotificationMessage',
           {
             defaultMessage: 'Could not save changes to query delay for {datafeedId}',
             values: {
@@ -83,7 +83,7 @@ export const EditQueryDelay: FC<{
       iconType="pencil"
     >
       <FormattedMessage
-        id="xpack.ml.jobsList.datafeedModal.queryDelayLinkLabel"
+        id="xpack.ml.jobsList.datafeedChart.queryDelayLinkLabel"
         defaultMessage="Query delay: {queryDelay}"
         values={{ queryDelay: newQueryDelay || queryDelay }}
       />
@@ -99,7 +99,7 @@ export const EditQueryDelay: FC<{
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
+              id="xpack.ml.jobsList.datafeedChart.queryDelayLabel"
               defaultMessage="Query delay"
             />
           }
@@ -119,7 +119,7 @@ export const EditQueryDelay: FC<{
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty color="primary" size="xs" onClick={updateQueryDelay}>
                     <FormattedMessage
-                      id="xpack.ml.jobsList.datafeedModal.applyQueryDelayLabel"
+                      id="xpack.ml.jobsList.datafeedChart.applyQueryDelayLabel"
                       defaultMessage="Apply"
                     />
                   </EuiButtonEmpty>
@@ -127,7 +127,7 @@ export const EditQueryDelay: FC<{
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty color="text" size="xs" onClick={() => setIsEditing(false)}>
                     <FormattedMessage
-                      id="xpack.ml.jobsList.datafeedModal.cancelQueryDelayUpdateLabel"
+                      id="xpack.ml.jobsList.datafeedChart.cancelQueryDelayUpdateLabel"
                       defaultMessage="Cancel"
                     />
                   </EuiButtonEmpty>

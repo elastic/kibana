@@ -56,7 +56,7 @@ import { loadFullJob } from '../utils';
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
 
-interface DatafeedModalProps {
+interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
@@ -67,7 +67,7 @@ function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
   return lineDatum;
 }
 
-export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) => {
+export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, onClose }) => {
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -131,7 +131,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       });
       setModelSnapshotData(chartData.modelSnapshotResultsLine.map(setLineAnnotationHeader));
     } catch (error) {
-      const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
+      const title = i18n.translate('xpack.ml.jobsList.datafeedChart.errorToastTitle', {
         defaultMessage: 'Error fetching data',
       });
       displayErrorToast(error, title);
@@ -176,7 +176,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
         size="l"
         ownFocus
         onClose={onClose.bind(null, false)}
-        aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.datafeedChartFlyoutAriaLabel', {
+        aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}
       >
@@ -190,7 +190,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                     type="help"
                     content={
                       <FormattedMessage
-                        id="xpack.ml.jobsList.datafeedModal.headerTooltipContent"
+                        id="xpack.ml.jobsList.datafeedChart.headerTooltipContent"
                         defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
                       />
                     }
@@ -200,7 +200,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                   <EuiTitle size="xs">
                     <h4>
                       <FormattedMessage
-                        id="xpack.ml.jobsList.datafeedModal.header"
+                        id="xpack.ml.jobsList.datafeedChart.header"
                         defaultMessage="Datafeed chart for {jobId}"
                         values={{
                           jobId,
@@ -213,7 +213,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ padding: '10px' }}>
               <EuiDatePicker
-                aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.chartIntervalEndTime', {
+                aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.chartIntervalEndTime', {
                   defaultMessage: 'Chart interval end time',
                 })}
                 showTimeSelect
@@ -245,7 +245,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                           label={
                             <EuiText size={'xs'}>
                               <FormattedMessage
-                                id="xpack.ml.jobsList.datafeedModal.showAnnotationsCheckboxLabel"
+                                id="xpack.ml.jobsList.datafeedChart.showAnnotationsCheckboxLabel"
                                 defaultMessage="Show annotations"
                               />
                             </EuiText>
@@ -260,7 +260,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                           label={
                             <EuiText size={'xs'}>
                               <FormattedMessage
-                                id="xpack.ml.jobsList.datafeedModal.showModelSnapshotsCheckboxLabel"
+                                id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
                                 defaultMessage="Show model snapshots"
                               />
                             </EuiText>
@@ -279,14 +279,14 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                     <EuiToolTip
                       content={
                         <FormattedMessage
-                          id="xpack.ml.jobsList.datafeedModal.chartLeftArrowTooltip"
+                          id="xpack.ml.jobsList.datafeedChart.chartLeftArrowTooltip"
                           defaultMessage="Previous time window"
                         />
                       }
                     >
                       <EuiButtonEmpty
                         aria-label={i18n.translate(
-                          'xpack.ml.jobsList.datafeedModal.chartIntervalLeftArrow',
+                          'xpack.ml.jobsList.datafeedChart.chartIntervalLeftArrow',
                           {
                             defaultMessage: 'Previous time window',
                           }
@@ -318,14 +318,14 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         position={Position.Bottom}
                         showOverlappingTicks
                         tickFormat={dateFormatter}
-                        title={i18n.translate('xpack.ml.jobsList.datafeedModal.xAxisTitle', {
+                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.xAxisTitle', {
                           defaultMessage: 'Bucket span ({bucketSpan})',
                           values: { bucketSpan },
                         })}
                       />
                       <Axis
                         id="left"
-                        title={i18n.translate('xpack.ml.jobsList.datafeedModal.yAxisTitle', {
+                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.yAxisTitle', {
                           defaultMessage: 'Count',
                         })}
                         position={Position.Left}
@@ -333,7 +333,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                       {showModelSnapshots ? (
                         <LineAnnotation
                           id={i18n.translate(
-                            'xpack.ml.jobsList.datafeedModal.modelSnapshotsLineSeriesId',
+                            'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
                             {
                               defaultMessage: 'Model snapshots',
                             }
@@ -356,7 +356,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         <>
                           <LineAnnotation
                             id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedModal.annotationLineSeriesId',
+                              'xpack.ml.jobsList.datafeedChart.annotationLineSeriesId',
                               {
                                 defaultMessage: 'Annotations line result',
                               }
@@ -378,7 +378,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                             key="annotation-results-rect"
                             dataValues={annotationData.rect}
                             id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedModal.annotationRectSeriesId',
+                              'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',
                               {
                                 defaultMessage: 'Annotations rectangle result',
                               }
@@ -390,7 +390,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                       <LineSeries
                         key={'source-results'}
                         color={euiTheme.euiColorPrimary}
-                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
+                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
                           defaultMessage: 'Source indices',
                         })}
                         xScaleType={ScaleType.Time}
@@ -403,7 +403,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                       <LineSeries
                         key={'job-results'}
                         color={euiTheme.euiColorAccentText}
-                        id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
+                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
                           defaultMessage: 'Job results',
                         })}
                         xScaleType={ScaleType.Time}
@@ -419,14 +419,14 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                     <EuiToolTip
                       content={
                         <FormattedMessage
-                          id="xpack.ml.jobsList.datafeedModal.chartRightArrowTooltip"
+                          id="xpack.ml.jobsList.datafeedChart.chartRightArrowTooltip"
                           defaultMessage="Next time window"
                         />
                       }
                     >
                       <EuiButtonEmpty
                         aria-label={i18n.translate(
-                          'xpack.ml.jobsList.datafeedModal.chartIntervalRightArrow',
+                          'xpack.ml.jobsList.datafeedChart.chartIntervalRightArrow',
                           {
                             defaultMessage: 'Next time window',
                           }
