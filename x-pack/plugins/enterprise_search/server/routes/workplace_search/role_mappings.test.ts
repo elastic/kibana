@@ -11,6 +11,7 @@ import {
   registerOrgEnableRoleMappingsRoute,
   registerOrgRoleMappingsRoute,
   registerOrgRoleMappingRoute,
+  registerOrgUserRoute,
 } from './role_mappings';
 
 describe('role mappings routes', () => {
@@ -125,6 +126,29 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/role_mappings/:id',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/single_user_role_mapping', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/single_user_role_mapping',
+      });
+
+      registerOrgUserRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/role_mappings/upsert_single_user_role_mapping',
       });
     });
   });
