@@ -29,13 +29,10 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { pct } from '../../../../style/variables';
-import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
+import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/KueryBar/utils';
-import {
-  getCloudIcon,
-  getContainerIcon,
-} from '../../service_details/service_icons';
+import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
 type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;

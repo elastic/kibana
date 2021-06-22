@@ -11,7 +11,7 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
-import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
+import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available

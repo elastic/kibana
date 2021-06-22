@@ -11,15 +11,18 @@ import styled from 'styled-components';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
-import { useUrlStorage } from './hooks/use_url_storage';
+import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
-import { ReportToDataTypeMap } from './configurations/constants';
 import { SeriesBuilder } from './series_builder/series_builder';
 
-export function ExploratoryView() {
+export function ExploratoryView({
+  saveAttributes,
+}: {
+  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
+}) {
   const {
     services: { lens, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
@@ -28,6 +31,7 @@ export function ExploratoryView() {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [height, setHeight] = useState<string>('100vh');
+  const [seriesId, setSeriesId] = useState<string>('');
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -37,7 +41,11 @@ export function ExploratoryView() {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId: seriesId, firstSeries: series, setSeries } = useUrlStorage();
+  const { firstSeriesId, firstSeries: series, setSeries, allSeries } = useSeriesStorage();
+
+  useEffect(() => {
+    setSeriesId(firstSeriesId);
+  }, [allSeries, firstSeriesId]);
 
   const lensAttributesT = useLensAttributes({
     seriesId,
@@ -52,13 +60,17 @@ export function ExploratoryView() {
   };
 
   useEffect(() => {
-    if (series?.reportType || series?.dataType) {
-      loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
+    if (series?.dataType) {
+      loadIndexPattern({ dataType: series?.dataType });
     }
-  }, [series?.reportType, series?.dataType, loadIndexPattern]);
+  }, [series?.dataType, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
+    if (saveAttributes) {
+      saveAttributes(lensAttributesT);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
@@ -78,7 +90,7 @@ export function ExploratoryView() {
                 timeRange={series?.time}
                 attributes={lensAttributes}
                 onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'pld') {
+                  if (series?.reportType !== 'dist') {
                     setSeries(seriesId, {
                       ...series,
                       time: {

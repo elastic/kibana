@@ -7,9 +7,11 @@
 
 import { merge } from 'lodash/fp';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
-import { buildSiemResponse, transformError } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { readPrivileges } from '../../privileges/read_privileges';
 
 export const readPrivilegesRoute = (

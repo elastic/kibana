@@ -9,5 +9,5 @@ Name of type of value this function outputs.
 <b>Signature:</b>
 
 ```typescript
-type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+type?: TypeString<Output> | UnmappedTypeStrings;
 ```

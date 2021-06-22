@@ -17,9 +17,9 @@ export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_shareable_references'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./share_add'));
-    loadTestFile(require.resolve('./share_remove'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_objects_spaces'));
   });
 }

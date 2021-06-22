@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { readdir, stat } from 'fs';
+import { PathLike, readdir, stat, Stats } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -14,7 +14,7 @@ import { Logger } from '../../logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
-const fsStat$ = bindNodeCallback(stat);
+const fsStat$ = bindNodeCallback<PathLike, Stats>(stat);
 
 const maxScanDepth = 5;
 

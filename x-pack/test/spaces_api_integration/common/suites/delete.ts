@@ -187,7 +187,9 @@ export function deleteTestSuiteFactory(
   ) => {
     describeFn(description, () => {
       beforeEach(async () => {
-        await esArchiver.load('saved_objects/spaces');
+        await esArchiver.load(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        );
 
         // since we want to verify that we only delete the right things
         // and can't include a config document with the correct id in the
@@ -199,7 +201,11 @@ export function deleteTestSuiteFactory(
           .auth(user.username, user.password)
           .expect(200);
       });
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      afterEach(() =>
+        esArchiver.unload(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
         it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {

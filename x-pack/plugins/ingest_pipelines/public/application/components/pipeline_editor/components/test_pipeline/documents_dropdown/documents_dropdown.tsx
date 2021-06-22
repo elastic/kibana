@@ -109,13 +109,13 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       >
         {(list) => (
           <>
-            <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">{i18nTexts.popoverTitle}</EuiPopoverTitle>
             {list}
           </>
         )}
       </EuiSelectable>
 
-      <EuiPopoverFooter>
+      <EuiPopoverFooter paddingSize="s">
         <EuiButton
           size="s"
           fullWidth

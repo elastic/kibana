@@ -9,16 +9,7 @@ import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
-  hostname: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (value === '0') {
-          return 'must not be "0" for the headless browser to correctly resolve the host';
-        }
-      },
-      hostname: true,
-    })
-  ),
+  hostname: schema.maybe(schema.string({ hostname: true })),
   port: schema.maybe(schema.number()),
   protocol: schema.maybe(
     schema.string({

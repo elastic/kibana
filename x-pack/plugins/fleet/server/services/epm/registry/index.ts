@@ -20,6 +20,7 @@ import type {
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
+  GetCategoriesRequest,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -42,10 +43,6 @@ import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
-  experimental?: boolean;
-}
-
-export interface CategoriesParams {
   experimental?: boolean;
 }
 
@@ -150,12 +147,17 @@ function setKibanaVersion(url: URL) {
   }
 }
 
-export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+export async function fetchCategories(
+  params?: GetCategoriesRequest['query']
+): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
     if (params.experimental) {
       url.searchParams.set('experimental', params.experimental.toString());
+    }
+    if (params.include_policy_templates) {
+      url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
     }
   }
 
@@ -252,4 +254,16 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     kibana: assets.kibana,
     elasticsearch: assets.elasticsearch,
   };
+}
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
 }

@@ -38,6 +38,7 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -150,7 +151,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService.get(palette.name).getColor(
+          const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
               behindText: categoryDisplay !== 'hide',
@@ -281,6 +282,7 @@ export function PieComponent(
           onElementClick={
             props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
           }
+          legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
             ...chartTheme,
             background: {

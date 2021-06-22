@@ -18,11 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('../../../functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {

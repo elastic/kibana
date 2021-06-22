@@ -48,7 +48,7 @@ describe('getImportWarnings', () => {
     const warnings = getImportWarnings(
       (savedObjectConnectors as unknown) as Array<SavedObject<RawAction>>
     );
-    expect(warnings[0].message).toBe('1 connector has secrets that require updates.');
+    expect(warnings[0].message).toBe('1 connector has sensitive information that require updates.');
   });
 
   it('does not return the warning message if all of the imported connectors do not have secrets to update', () => {

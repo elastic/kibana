@@ -15,6 +15,6 @@ correctiveActions: {
                 [key: string]: any;
             };
         };
-        manualSteps?: string[];
+        manualSteps: string[];
     };
 ```

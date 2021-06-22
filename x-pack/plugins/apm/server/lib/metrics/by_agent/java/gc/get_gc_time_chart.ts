@@ -7,7 +7,6 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
 import { METRIC_JAVA_GC_TIME } from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
@@ -45,17 +44,16 @@ function getGcTimeChart({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return withApmSpan('get_gc_time_charts', () =>
-    fetchAndTransformGcMetrics({
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      chartBase,
-      fieldName: METRIC_JAVA_GC_TIME,
-    })
-  );
+  return fetchAndTransformGcMetrics({
+    environment,
+    kuery,
+    setup,
+    serviceName,
+    serviceNodeName,
+    chartBase,
+    fieldName: METRIC_JAVA_GC_TIME,
+    operationName: 'get_gc_time_charts',
+  });
 }
 
 export { getGcTimeChart };

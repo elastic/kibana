@@ -1,0 +1,27 @@
+- name: stat /etc/kibana
+  become: yes
+  register: kibana_yml_directory
+  stat:
+    path: /etc/kibana
+
+- name: /etc/kibana 2750 root:kibana
+  assert:
+    that:
+      - kibana_yml_directory.stat.exists
+      - kibana_yml_directory.stat.mode == "2750"
+      - kibana_yml_directory.stat.pw_name == "root"
+      - kibana_yml_directory.stat.gr_name == "kibana"
+
+- name: stat /etc/kibana/kibana.yml
+  become: yes
+  register: kibana_yml
+  stat:
+    path: /etc/kibana/kibana.yml
+
+- name: /etc/kibana/kibana.yml 0660 root:kibana
+  assert:
+    that:
+      - kibana_yml.stat.exists
+      - kibana_yml.stat.mode == "0660"
+      - kibana_yml.stat.pw_name == "root"
+      - kibana_yml.stat.gr_name == "kibana"

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import '../../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';

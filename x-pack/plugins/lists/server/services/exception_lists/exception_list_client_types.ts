@@ -6,45 +6,44 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import {
+import type {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
-  EmptyStringArrayDecoded,
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  FilterOrUndefined,
   Id,
   IdOrUndefined,
-  MetaOrUndefined,
-  Name,
-  NameOrUndefined,
-  NamespaceType,
-  NamespaceTypeArray,
-  NonEmptyStringArrayDecoded,
-  OsTypeArray,
-  Tags,
-  TagsOrUndefined,
-  UpdateCommentsArray,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
-  FilterOrUndefined,
   Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
   ListIdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  NameOrUndefined,
+  NamespaceType,
+  NamespaceTypeArray,
+  OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
+  Tags,
+  TagsOrUndefined,
+  UpdateCommentsArray,
+  _VersionOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
   Version,
   VersionOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-types';
 
 export interface ConstructorOptions {
   user: string;
@@ -52,6 +51,12 @@ export interface ConstructorOptions {
 }
 
 export interface GetExceptionListOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface GetExceptionListSummaryOptions {
   listId: ListIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;

@@ -24,13 +24,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Visualize Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await esArchiver.loadIfNeeded('reporting/ecommerce');
-      await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.loadIfNeeded(
+        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
+      );
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

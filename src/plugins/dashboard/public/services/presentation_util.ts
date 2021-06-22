@@ -10,4 +10,5 @@ export {
   PresentationUtilPluginStart,
   LazyDashboardPicker,
   withSuspense,
+  useLabs,
 } from '../../../presentation_util/public';

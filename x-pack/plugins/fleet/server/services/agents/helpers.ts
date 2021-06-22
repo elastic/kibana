@@ -7,11 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchHit } from '../../../../../../typings/elasticsearch';
+import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
-  | estypes.MultiGetHit<FleetServerAgent>
+  | estypes.MgetHit<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 

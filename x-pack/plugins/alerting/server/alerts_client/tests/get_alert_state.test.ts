@@ -9,11 +9,11 @@ import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { TaskStatus } from '../../../../task_manager/server';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
 
@@ -22,7 +22,7 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertsAuthorizationMock.create();
+const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 const kibanaVersion = 'v7.10.0';
@@ -30,7 +30,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertsAuthorization,
+  authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
@@ -210,31 +210,33 @@ describe('getAlertState()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.getAlertState({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'getAlertState'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'getRuleState',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to getAlertState this type of alert', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       // `get` check
       authorization.ensureAuthorized.mockResolvedValueOnce();
-      // `getAlertState` check
+      // `getRuleState` check
       authorization.ensureAuthorized.mockRejectedValueOnce(
-        new Error(`Unauthorized to getAlertState a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to getRuleState a "myType" alert for "myApp"`)
       );
 
       await expect(alertsClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to getAlertState a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to getRuleState a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'getAlertState'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'getRuleState',
+        ruleTypeId: 'myType',
+      });
     });
   });
 });

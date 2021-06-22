@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* istanbul ignore file */
+
 import React, { useState } from 'react';
 
 import {

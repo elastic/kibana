@@ -31,7 +31,6 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       job.data_counts.latest_record_timestamp,
       intervalMs,
       job.datafeed_config.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       job.datafeed_config.indices_options
     );
     if (resp.error !== undefined) {

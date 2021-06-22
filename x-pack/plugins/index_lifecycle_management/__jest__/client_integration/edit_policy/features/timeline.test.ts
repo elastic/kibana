@@ -6,8 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { getDefaultHotPhasePolicy } from '../constants';
+import { setupEnvironment } from '../../helpers';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
 describe('<EditPolicy /> timeline', () => {
@@ -19,13 +18,7 @@ describe('<EditPolicy /> timeline', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: {},
-      nodesByAttributes: { test: ['123'] },
-      isUsingDeprecatedDataRoleConfig: false,
-    });
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup();
@@ -38,27 +31,27 @@ describe('<EditPolicy /> timeline', () => {
   test('showing all phases on the timeline', async () => {
     const { actions } = testBed;
     // This is how the default policy should look
-    expect(actions.timeline.hasHotPhase()).toBe(true);
-    expect(actions.timeline.hasWarmPhase()).toBe(false);
-    expect(actions.timeline.hasColdPhase()).toBe(false);
-    expect(actions.timeline.hasDeletePhase()).toBe(false);
+    expect(actions.timeline.hasPhase('hot')).toBe(true);
+    expect(actions.timeline.hasPhase('warm')).toBe(false);
+    expect(actions.timeline.hasPhase('cold')).toBe(false);
+    expect(actions.timeline.hasPhase('delete')).toBe(false);
 
-    await actions.warm.enable(true);
-    expect(actions.timeline.hasHotPhase()).toBe(true);
-    expect(actions.timeline.hasWarmPhase()).toBe(true);
-    expect(actions.timeline.hasColdPhase()).toBe(false);
-    expect(actions.timeline.hasDeletePhase()).toBe(false);
+    await actions.togglePhase('warm');
+    expect(actions.timeline.hasPhase('hot')).toBe(true);
+    expect(actions.timeline.hasPhase('warm')).toBe(true);
+    expect(actions.timeline.hasPhase('cold')).toBe(false);
+    expect(actions.timeline.hasPhase('delete')).toBe(false);
 
-    await actions.cold.enable(true);
-    expect(actions.timeline.hasHotPhase()).toBe(true);
-    expect(actions.timeline.hasWarmPhase()).toBe(true);
-    expect(actions.timeline.hasColdPhase()).toBe(true);
-    expect(actions.timeline.hasDeletePhase()).toBe(false);
+    await actions.togglePhase('cold');
+    expect(actions.timeline.hasPhase('hot')).toBe(true);
+    expect(actions.timeline.hasPhase('warm')).toBe(true);
+    expect(actions.timeline.hasPhase('cold')).toBe(true);
+    expect(actions.timeline.hasPhase('delete')).toBe(false);
 
-    await actions.delete.enable(true);
-    expect(actions.timeline.hasHotPhase()).toBe(true);
-    expect(actions.timeline.hasWarmPhase()).toBe(true);
-    expect(actions.timeline.hasColdPhase()).toBe(true);
-    expect(actions.timeline.hasDeletePhase()).toBe(true);
+    await actions.togglePhase('delete');
+    expect(actions.timeline.hasPhase('hot')).toBe(true);
+    expect(actions.timeline.hasPhase('warm')).toBe(true);
+    expect(actions.timeline.hasPhase('cold')).toBe(true);
+    expect(actions.timeline.hasPhase('delete')).toBe(true);
   });
 });

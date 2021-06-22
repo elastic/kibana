@@ -260,6 +260,7 @@ function validateMigrationsMapObject(
       throw new Error(`${prefix} Got ${obj}.`);
     }
   }
+
   function assertValidSemver(version: string, type: string) {
     if (!Semver.valid(version)) {
       throw new Error(
@@ -272,6 +273,7 @@ function validateMigrationsMapObject(
       );
     }
   }
+
   function assertValidTransform(fn: any, version: string, type: string) {
     if (typeof fn !== 'function') {
       throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
@@ -560,6 +562,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
       id: `${namespace}:${type}:${originId}`,
       type: LEGACY_URL_ALIAS_TYPE,
       attributes: {
+        sourceId: originId,
         targetNamespace: namespace,
         targetType: type,
         targetId: id,
@@ -660,13 +663,14 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
+  const context = Object.freeze({
+    log: new MigrationLogger(log),
+    migrationVersion: version,
+    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+  });
+
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = {
-        log: new MigrationLogger(log),
-        migrationVersion: version,
-        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
@@ -677,19 +681,8 @@ function wrapWithTry(
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      const failedTransform = `${type.name}:${version}`;
-      const failedDoc = JSON.stringify(doc);
       log.error(error);
-      // To make debugging failed migrations easier, we add items needed to convert the
-      // saved object id to the full raw id (the id only contains the uuid part) and the full error itself
-      throw new TransformSavedObjectDocumentError(
-        doc.id,
-        doc.type,
-        doc.namespace,
-        failedTransform,
-        failedDoc,
-        error
-      );
+      throw new TransformSavedObjectDocumentError(error, version);
     }
   };
 }

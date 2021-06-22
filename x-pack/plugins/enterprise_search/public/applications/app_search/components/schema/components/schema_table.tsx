@@ -35,7 +35,9 @@ export const SchemaTable: React.FC = () => {
       <EuiTableHeader>
         <EuiTableHeaderCell>{FIELD_NAME}</EuiTableHeaderCell>
         <EuiTableHeaderCell aria-hidden />
-        <EuiTableHeaderCell align="right">{FIELD_TYPE}</EuiTableHeaderCell>
+        <EuiTableHeaderCell align="right" id="schemaFieldType">
+          {FIELD_TYPE}
+        </EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableBody>
         <EuiTableRow style={{ height: 56 }}>
@@ -74,6 +76,7 @@ export const SchemaTable: React.FC = () => {
                   fieldName={fieldName}
                   fieldType={fieldType}
                   updateExistingFieldType={updateSchemaFieldType}
+                  aria-labelledby="schemaFieldType"
                 />
               </EuiTableRowCell>
             </EuiTableRow>

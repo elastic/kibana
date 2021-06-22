@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateComment, UpdateCommentsArray } from '@kbn/securitysolution-io-ts-utils';
+import type { UpdateComment, UpdateCommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ID } from '../../constants.mock';
 

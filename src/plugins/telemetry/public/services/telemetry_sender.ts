@@ -33,8 +33,7 @@ export class TelemetrySender {
   };
 
   private shouldSendReport = (): boolean => {
-    // check if opt-in for telemetry is enabled
-    if (this.telemetryService.getIsOptedIn()) {
+    if (this.telemetryService.canSendTelemetry()) {
       if (!this.lastReported) {
         return true;
       }

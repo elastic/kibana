@@ -17,7 +17,8 @@ export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
 export const jobsAndSpaces = schema.object({
   jobType: jobTypeLiterals,
   jobIds: schema.arrayOf(schema.string()),
-  spaces: schema.arrayOf(schema.string()),
+  spacesToAdd: schema.arrayOf(schema.string()),
+  spacesToRemove: schema.arrayOf(schema.string()),
 });
 
 export const jobsAndCurrentSpace = schema.object({

@@ -6,7 +6,6 @@
  */
 
 import { buildOSSFeatures } from './oss_features';
-// @ts-expect-error
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 import { KibanaFeature } from '.';
 import { LicenseType } from '../../licensing/server';

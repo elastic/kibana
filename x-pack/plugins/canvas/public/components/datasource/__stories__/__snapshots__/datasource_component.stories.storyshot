@@ -15,6 +15,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
       />
@@ -61,6 +62,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
       />

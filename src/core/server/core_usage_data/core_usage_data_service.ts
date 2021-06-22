@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { takeUntil, first } from 'rxjs/operators';
 import { get } from 'lodash';
-import { hasConfigPathIntersection } from '@kbn/config';
+import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
@@ -39,6 +39,7 @@ export interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
   savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  changedDeprecatedConfigPath$: Observable<ChangedDeprecatedPaths>;
 }
 
 export interface StartDeps {
@@ -89,6 +90,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   private opsMetrics?: OpsMetrics;
   private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
+  private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -124,14 +126,12 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.count' as optional
-              docsCount: parseInt(stats['docs.count'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.deleted' as optional
-              docsDeleted: parseInt(stats['docs.deleted'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'store.size' as string | number
-              storeSizeBytes: parseInt(stats['store.size'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'pri.store.size' as string | number
-              primaryStoreSizeBytes: parseInt(stats['pri.store.size'], 10),
+              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+              primaryStoreSizeBytes: stats['pri.store.size']
+                ? parseInt(stats['pri.store.size'], 10)
+                : 0,
             };
           });
       })
@@ -257,6 +257,8 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSize: this.soConfig.maxImportExportSize,
         },
+
+        deprecatedKeys: this.deprecatedConfigPaths,
       },
       environment: {
         memory: {
@@ -376,7 +378,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     }, {} as Record<string, any | any[]>);
   }
 
-  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
+  setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -416,6 +418,10 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
       .subscribe((config) => {
         this.kibanaConfig = config;
       });
+
+    changedDeprecatedConfigPath$
+      .pipe(takeUntil(this.stop$))
+      .subscribe((deprecatedConfigPaths) => (this.deprecatedConfigPaths = deprecatedConfigPaths));
 
     const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
       savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])

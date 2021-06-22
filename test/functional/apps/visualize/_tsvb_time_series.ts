@@ -26,6 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('visual builder', function describeIndexTests() {
+    before(async () => {
+      await visualize.initTests();
+    });
     beforeEach(async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();

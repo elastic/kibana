@@ -8,7 +8,7 @@
 import type { OperationMetadata } from '../../types';
 import type { OperationType } from './definitions';
 
-export const createMockedReferenceOperation = () => {
+export const createMockedFullReference = () => {
   return {
     input: 'fullReference',
     displayName: 'Reference test',
@@ -22,6 +22,31 @@ export const createMockedReferenceOperation = () => {
           meta.dataType === 'number' && !meta.isBucketed,
       },
     ],
+    buildColumn: jest.fn((args) => {
+      return {
+        label: 'Test reference',
+        isBucketed: false,
+        dataType: 'number',
+
+        operationType: 'testReference',
+        references: args.referenceIds,
+      };
+    }),
+    filterable: true,
+    isTransferable: jest.fn(),
+    toExpression: jest.fn().mockReturnValue([]),
+    getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
+    getDefaultLabel: jest.fn().mockReturnValue('Default label'),
+    getErrorMessage: jest.fn(),
+  };
+};
+
+export const createMockedManagedReference = () => {
+  return {
+    input: 'managedReference',
+    displayName: 'Managed reference test',
+    type: 'managedReference' as OperationType,
+    selectionStyle: 'full',
     buildColumn: jest.fn((args) => {
       return {
         label: 'Test reference',

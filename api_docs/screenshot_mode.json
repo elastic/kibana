@@ -1,0 +1,451 @@
+{
+  "id": "screenshotMode",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-public.setScreenshotModeEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "setScreenshotModeEnabled",
+        "description": [
+          "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-public.KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "description": [],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-public.KBN_SCREENSHOT_MODE_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_HEADER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "screenshotMode",
+      "id": "def-public.ScreenshotModePluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "ScreenshotModePluginSetup",
+      "description": [],
+      "signature": [
+        "IScreenshotModeService"
+      ],
+      "source": {
+        "path": "src/plugins/screenshot_mode/public/types.ts",
+        "lineNumber": 17
+      },
+      "deprecated": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-server.setScreenshotModeEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "setScreenshotModeEnabled",
+        "description": [
+          "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-server.ScreenshotModeRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScreenshotModeRequestHandlerContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "screenshotMode",
+            "scope": "server",
+            "docId": "kibScreenshotModePluginApi",
+            "section": "def-server.ScreenshotModeRequestHandlerContext",
+            "text": "ScreenshotModeRequestHandlerContext"
+          },
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "screenshotMode",
+            "id": "def-server.ScreenshotModeRequestHandlerContext.screenshotMode",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotMode",
+            "description": [],
+            "signature": [
+              "{ isScreenshot: boolean; }"
+            ],
+            "source": {
+              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-server.KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "description": [],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-server.KBN_SCREENSHOT_MODE_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_HEADER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "screenshotMode",
+      "id": "def-server.ScreenshotModePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ScreenshotModePluginSetup",
+      "description": [],
+      "source": {
+        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "lineNumber": 18
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "screenshotMode",
+          "id": "def-server.ScreenshotModePluginSetup.isScreenshotMode",
+          "type": "Function",
+          "tags": [],
+          "label": "isScreenshotMode",
+          "description": [],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => boolean"
+          ],
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 19
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "screenshotMode",
+              "id": "def-server.request",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "screenshotMode",
+          "id": "def-server.ScreenshotModePluginSetup.setScreenshotModeEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "setScreenshotModeEnabled",
+          "description": [
+            "\nSet the current environment to screenshot mode. Intended to run in a browser-environment."
+          ],
+          "signature": [
+            "() => void"
+          ],
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "screenshotMode",
+      "id": "def-server.ScreenshotModePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ScreenshotModePluginStart",
+      "description": [],
+      "source": {
+        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "lineNumber": 27
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "screenshotMode",
+          "id": "def-server.ScreenshotModePluginStart.isScreenshotMode",
+          "type": "Function",
+          "tags": [],
+          "label": "isScreenshotMode",
+          "description": [],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => boolean"
+          ],
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 28
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "screenshotMode",
+              "id": "def-server.request",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
+              "deprecated": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.getScreenshotMode",
+        "type": "Function",
+        "tags": [],
+        "label": "getScreenshotMode",
+        "description": [
+          "\nThis function is responsible for detecting whether we are currently in screenshot mode.\n\nWe check in the current window context whether screenshot mode is enabled, otherwise we check\nlocalStorage. The ability to set a value in localStorage enables more convenient development and testing\nin functionality that needs to detect screenshot mode."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.setScreenshotModeDisabled",
+        "type": "Function",
+        "tags": [],
+        "label": "setScreenshotModeDisabled",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.setScreenshotModeEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "setScreenshotModeEnabled",
+        "description": [
+          "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
+        "description": [],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.KBN_SCREENSHOT_MODE_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_SCREENSHOT_MODE_HEADER",
+        "description": [],
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -82,7 +82,7 @@ describe('applyDeprecations', () => {
   it('returns the migrated config', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
-    const migrated = applyDeprecations(initialConfig, [
+    const { config: migrated } = applyDeprecations(initialConfig, [
       wrapHandler(deprecations.unused('deprecated')),
       wrapHandler(deprecations.rename('renamed', 'newname')),
     ]);
@@ -93,7 +93,7 @@ describe('applyDeprecations', () => {
   it('does not alter the initial config', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const migrated = applyDeprecations(initialConfig, [
+    const { config: migrated } = applyDeprecations(initialConfig, [
       wrapHandler(deprecations.unused('deprecated')),
     ]);
 
@@ -110,7 +110,7 @@ describe('applyDeprecations', () => {
       return { unset: [{ path: 'unknown' }] };
     });
 
-    const migrated = applyDeprecations(
+    const { config: migrated } = applyDeprecations(
       initialConfig,
       [wrapHandler(handler, 'pathA')],
       createAddDeprecation
@@ -128,12 +128,33 @@ describe('applyDeprecations', () => {
       return { rewrite: [{ path: 'foo' }] };
     });
 
-    const migrated = applyDeprecations(
+    const { config: migrated } = applyDeprecations(
       initialConfig,
       [wrapHandler(handler, 'pathA')],
       createAddDeprecation
     );
 
     expect(migrated).toEqual(initialConfig);
+  });
+
+  it('returns a list of changes config paths', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+
+    const handler = jest.fn().mockImplementation((config) => {
+      return { set: [{ path: 'foo', value: 'bar' }], unset: [{ path: 'baz' }] };
+    });
+
+    const { changedPaths } = applyDeprecations(
+      initialConfig,
+      [wrapHandler(handler, 'pathA')],
+      createAddDeprecation
+    );
+
+    expect(changedPaths).toEqual({
+      set: ['foo'],
+      unset: ['baz'],
+    });
   });
 });

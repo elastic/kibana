@@ -6,13 +6,13 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { getIndexCount } from '../index/get_index_count';
+import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { finalizeMigration } from './finalize_migration';
 
 jest.mock('./update_migration_saved_object');
-jest.mock('../index/get_index_count');
+jest.mock('@kbn/securitysolution-es-utils');
 
 describe('finalizeMigration', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

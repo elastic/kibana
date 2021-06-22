@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable no-bitwise */
+
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
-import { Node, Type } from 'ts-morph';
+import { Node, TypeFormatFlags } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
 import { Reference } from '../types';
 import { extractImportReferences } from './extract_import_refs';
@@ -31,12 +33,7 @@ export function getSignature(
   log: ToolingLog
 ): Array<string | Reference> | undefined {
   let signature = '';
-  //  node.getType() on a TypeAliasDeclaration is just a reference to itself. If we don't special case this, then
-  // `export type Foo = string | number;` would show up with a signagure of `Foo` that is a link to itself, instead of
-  //  `string | number`.
-  if (Node.isTypeAliasDeclaration(node)) {
-    signature = getSignatureForTypeAlias(node.getType(), log, node);
-  } else if (Node.isFunctionDeclaration(node)) {
+  if (Node.isFunctionDeclaration(node)) {
     // See https://github.com/dsherret/ts-morph/issues/907#issue-770284331.
     // Unfortunately this has to be manually pieced together, or it comes up as "typeof TheFunction"
     const params = node
@@ -59,7 +56,14 @@ export function getSignature(
     // Here, 'node' is explicitly *not* passed in to `getText` otherwise arrow functions won't
     // include reference links. Tests will break if you add it in here, or remove it from above.
     // There is test coverage for all this oddness.
-    signature = node.getType().getText();
+    signature = node
+      .getType()
+      .getText(
+        undefined,
+        TypeFormatFlags.UseFullyQualifiedType |
+          TypeFormatFlags.InTypeAlias |
+          TypeFormatFlags.NoTruncation
+      );
   }
 
   // Don't return the signature if it's the same as the type (string, string)
@@ -77,44 +81,15 @@ export function getSignature(
     return undefined;
   }
 
-  return referenceLinks;
-}
-
-/**
- * Not all types are handled here, but does return links for the more common ones.
- */
-function getSignatureForTypeAlias(type: Type, log: ToolingLog, node?: Node): string {
-  if (type.isUnion()) {
-    return type
-      .getUnionTypes()
-      .map((nestedType) => getSignatureForTypeAlias(nestedType, log))
-      .join(' | ');
-  } else if (node && type.getCallSignatures().length >= 1) {
-    return type
-      .getCallSignatures()
-      .map((sig) => {
-        const params = sig
-          .getParameters()
-          .map((p) => `${p.getName()}: ${p.getTypeAtLocation(node).getText()}`)
-          .join(', ');
-        const returnType = sig.getReturnType().getText();
-        return `(${params}) => ${returnType}`;
-      })
-      .join(' ');
-  } else if (node) {
-    const symbol = node.getSymbol();
-    if (symbol) {
-      const declarations = symbol
-        .getDeclarations()
-        .map((d) => d.getType().getText(node))
-        .join(' ');
-      if (symbol.getDeclarations().length !== 1) {
-        log.error(
-          `Node is type alias declaration with more than one declaration. This is not handled! ${declarations} and node is ${node.getText()}`
-        );
-      }
-      return declarations;
-    }
-  }
-  return type.getText();
+  return referenceLinks.map((link) => {
+    // This is such a terrible hack, but the docs look really terrible with it, and I'm not sure of a better way to solve it.
+    // See for context. This is what the second default generic type of `ReactElement` expands to. Blech!
+    if (
+      link ===
+      ', string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>'
+      //   ', string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, a'
+    ) {
+      return '>';
+    } else return link;
+  });
 }

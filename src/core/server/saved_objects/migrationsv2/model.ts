@@ -9,7 +9,7 @@
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { cloneDeep } from 'lodash';
+
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
@@ -109,23 +109,25 @@ function getAliases(indices: FetchIndexResponse) {
 function extractTransformFailuresReason(
   corruptDocumentIds: string[],
   transformErrors: TransformErrorObjects[]
-): { corruptDocsReason: string; transformErrsReason: string } {
+): string {
   const corruptDocumentIdReason =
     corruptDocumentIds.length > 0
-      ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}`
+      ? ` ${
+          corruptDocumentIds.length
+        } corrupt saved object documents were found: ${corruptDocumentIds.join(',')}`
       : '';
   // we have both the saved object Id and the stack trace in each `transformErrors` item.
   const transformErrorsReason =
     transformErrors.length > 0
-      ? ' Transformation errors: ' +
+      ? ` ${transformErrors.length} transformation errors were encountered:\n ` +
         transformErrors
-          .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
-          .join('/n')
+          .map((errObj) => `- ${errObj.rawId}: ${errObj.err.stack ?? errObj.err.message}\n`)
+          .join('')
       : '';
-  return {
-    corruptDocsReason: corruptDocumentIdReason,
-    transformErrsReason: transformErrorsReason,
-  };
+  return (
+    `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}\n` +
+    `To allow migrations to proceed, please delete or fix these documents.`
+  );
 }
 
 const delayRetryState = <S extends State>(
@@ -187,7 +189,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // control state using:
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
-  let stateP: State = cloneDeep(currentState);
+  let stateP: State = currentState;
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
@@ -538,14 +540,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+          const transformFailureReason = extractTransformFailuresReason(
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: transformFailureReason,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
@@ -722,14 +724,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+          const transformFailureReason = extractTransformFailuresReason(
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: transformFailureReason,
           };
         } else {
           // If there are no more results we have transformed all outdated

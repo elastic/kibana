@@ -6,24 +6,23 @@
  */
 
 import { combineReducers, createStore } from 'redux';
+import type {
+  FoundExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Ecs } from '../../../../../common/ecs';
 
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
 } from '../../../common/constants';
-import {
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-  ExceptionListItemSchema,
-} from '../../../../shared_imports';
 
 import { eventFiltersPageReducer } from '../store/reducer';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../../common/mock/endpoint/http_handler_mock_factory';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 

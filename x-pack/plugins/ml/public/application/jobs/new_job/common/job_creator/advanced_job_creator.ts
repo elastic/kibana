@@ -29,9 +29,10 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: estypes.ExcludeFrequent | null;
+  excludeFrequent: estypes.MlExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
+  useNull: boolean | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -57,8 +58,9 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
-    description: string | null
+    excludeFrequent: estypes.MlExcludeFrequent | null,
+    description: string | null,
+    useNull: boolean | null
   ) {
     // addDetector doesn't support adding new custom rules.
     // this will be added in the future once it's supported in the UI
@@ -71,7 +73,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._addDetector(detector, agg, field);
@@ -84,9 +87,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    index: number
+    index: number,
+    useNull: boolean | null
   ) {
     const customRules =
       this._detectors[index] !== undefined ? this._detectors[index].custom_rules || null : null;
@@ -99,7 +103,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._editDetector(detector, agg, field, index);
@@ -115,9 +120,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    customRules: CustomRule[] | null
+    customRules: CustomRule[] | null,
+    useNull: boolean | null
   ): { detector: Detector; richDetector: RichDetector } {
     const detector: Detector = createBasicDetector(agg, field);
 
@@ -139,6 +145,9 @@ export class AdvancedJobCreator extends JobCreator {
     if (customRules !== null) {
       detector.custom_rules = customRules;
     }
+    if (useNull !== null) {
+      detector.use_null = useNull;
+    }
 
     const richDetector: RichDetector = {
       agg,
@@ -149,6 +158,7 @@ export class AdvancedJobCreator extends JobCreator {
       excludeFrequent,
       description,
       customRules,
+      useNull,
     };
 
     return { detector, richDetector };
@@ -183,7 +193,6 @@ export class AdvancedJobCreator extends JobCreator {
       timeFieldName: this.timeFieldName,
       query: this.query,
       runtimeMappings: this.datafeedConfig.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       indicesOptions: this.datafeedConfig.indices_options,
     });
     this.setTimeRange(start.epoch, end.epoch);
@@ -209,7 +218,8 @@ export class AdvancedJobCreator extends JobCreator {
           dtr.overField,
           dtr.partitionField,
           dtr.excludeFrequent,
-          dtr.description
+          dtr.description,
+          dtr.useNull
         );
       }
     });

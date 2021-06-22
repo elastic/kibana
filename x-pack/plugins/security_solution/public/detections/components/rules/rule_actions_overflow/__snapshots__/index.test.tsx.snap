@@ -69,12 +69,5 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
       }
     />
   </EuiPopover>
-  <GenericDownloader
-    data-test-subj="rules-details-generic-downloader"
-    exportSelectedData={[Function]}
-    filename="rules_export.ndjson"
-    ids={Array []}
-    onExportSuccess={[Function]}
-  />
 </Fragment>
 `;

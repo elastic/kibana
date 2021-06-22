@@ -198,6 +198,31 @@ describe('migrations v2 model', () => {
   });
 
   describe('model transitions from', () => {
+    it('transition returns new state', () => {
+      const initState: State = {
+        ...baseState,
+        controlState: 'INIT',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+      };
+
+      const res: ResponseType<'INIT'> = Either.right({
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
+          },
+          mappings: {
+            properties: {},
+          },
+          settings: {},
+        },
+      });
+      const newState = model(initState, res);
+      expect(newState).not.toBe(initState);
+    });
+
     describe('INIT', () => {
       const initState: State = {
         ...baseState,
@@ -219,7 +244,7 @@ describe('migrations v2 model', () => {
             disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
           },
         },
-      };
+      } as const;
 
       test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
         const res: ResponseType<'INIT'> = Either.right({
@@ -658,7 +683,7 @@ describe('migrations v2 model', () => {
             disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
           },
         },
-      };
+      } as const;
 
       const waitForYellowSourceState: WaitForYellowSourceState = {
         ...baseState,
@@ -838,9 +863,10 @@ describe('migrations v2 model', () => {
         });
         const newState = model(testState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"Migrations failed. Reason: Corrupt saved object documents: a:b. To allow migrations to proceed, please delete these documents."`
-        );
+        expect(newState.reason).toMatchInlineSnapshot(`
+          "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
+          To allow migrations to proceed, please delete or fix these documents."
+        `);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1134,12 +1160,8 @@ describe('migrations v2 model', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
         const transFormErr = new TransformSavedObjectDocumentError(
-          '123',
-          'vis',
-          undefined,
-          'randomvis: 7.12.0',
-          'failedDoc',
-          originalTransformError
+          originalTransformError,
+          '7.11.0'
         );
         const transformationErrors = [
           { rawId: 'bob:tail', err: transFormErr },
@@ -1157,9 +1179,9 @@ describe('migrations v2 model', () => {
         const newState = model(transformErrorsState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
         expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
-        expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
-        expect(newState.reason.includes('Transformation errors: ')).toBe(true);
-        expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+        expect(newState.reason.includes('1 corrupt saved object documents were found')).toBe(true);
+        expect(newState.reason.includes('1 transformation errors were encountered')).toBe(true);
+        expect(newState.reason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1204,14 +1226,7 @@ describe('migrations v2 model', () => {
       const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
       const corruptDocumentIds = ['a:somethingelse'];
       const originalTransformError = new Error('Dang diggity!');
-      const transFormErr = new TransformSavedObjectDocumentError(
-        'id',
-        'type',
-        'namespace',
-        'failedTransform',
-        'failedDoc',
-        originalTransformError
-      );
+      const transFormErr = new TransformSavedObjectDocumentError(originalTransformError, '7.11.0');
       const transformationErrors = [
         { rawId: 'bob:tail', err: transFormErr },
       ] as TransformErrorObjects[];

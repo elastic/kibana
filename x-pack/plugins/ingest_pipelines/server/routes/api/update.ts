@@ -19,7 +19,6 @@ const paramsSchema = schema.object({
 
 export const registerUpdateRoute = ({
   router,
-  license,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.put(
@@ -30,7 +29,7 @@ export const registerUpdateRoute = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
       const { name } = req.params;
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -54,6 +53,6 @@ export const registerUpdateRoute = ({
       } catch (error) {
         return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

@@ -25,6 +25,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security-solution';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
@@ -68,6 +69,8 @@ export enum SecurityPageName {
   case = 'case',
   administration = 'administration',
 }
+
+export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
 export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
@@ -149,6 +152,18 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 export const SIGNALS_ID = `siem.signals`;
 
 /**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
+
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
+export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
+export const ML_ALERT_TYPE_ID = `siem.mlRule`;
+export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+
+/**
  * Id for the notifications alerting type
  */
 export const NOTIFICATIONS_ID = `siem.notifications`;
@@ -173,6 +188,7 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';

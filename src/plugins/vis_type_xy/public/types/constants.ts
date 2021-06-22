@@ -6,52 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
+export enum ChartMode {
+  Normal = 'normal',
+  Stacked = 'stacked',
+}
 
-export const ChartMode = Object.freeze({
-  Normal: 'normal' as const,
-  Stacked: 'stacked' as const,
-});
-export type ChartMode = $Values<typeof ChartMode>;
+export enum InterpolationMode {
+  Linear = 'linear',
+  Cardinal = 'cardinal',
+  StepAfter = 'step-after',
+}
 
-export const InterpolationMode = Object.freeze({
-  Linear: 'linear' as const,
-  Cardinal: 'cardinal' as const,
-  StepAfter: 'step-after' as const,
-});
-export type InterpolationMode = $Values<typeof InterpolationMode>;
+export enum AxisType {
+  Category = 'category',
+  Value = 'value',
+}
 
-export const AxisType = Object.freeze({
-  Category: 'category' as const,
-  Value: 'value' as const,
-});
-export type AxisType = $Values<typeof AxisType>;
+export enum ScaleType {
+  Linear = 'linear',
+  Log = 'log',
+  SquareRoot = 'square root',
+}
 
-export const ScaleType = Object.freeze({
-  Linear: 'linear' as const,
-  Log: 'log' as const,
-  SquareRoot: 'square root' as const,
-});
-export type ScaleType = $Values<typeof ScaleType>;
+export enum AxisMode {
+  Normal = 'normal',
+  Percentage = 'percentage',
+  Wiggle = 'wiggle',
+  Silhouette = 'silhouette',
+}
 
-export const AxisMode = Object.freeze({
-  Normal: 'normal' as const,
-  Percentage: 'percentage' as const,
-  Wiggle: 'wiggle' as const,
-  Silhouette: 'silhouette' as const,
-});
-export type AxisMode = $Values<typeof AxisMode>;
+export enum ThresholdLineStyle {
+  Full = 'full',
+  Dashed = 'dashed',
+  DotDashed = 'dot-dashed',
+}
 
-export const ThresholdLineStyle = Object.freeze({
-  Full: 'full' as const,
-  Dashed: 'dashed' as const,
-  DotDashed: 'dot-dashed' as const,
-});
-export type ThresholdLineStyle = $Values<typeof ThresholdLineStyle>;
-
-export const ColorMode = Object.freeze({
-  Background: 'Background' as const,
-  Labels: 'Labels' as const,
-  None: 'None' as const,
-});
-export type ColorMode = $Values<typeof ColorMode>;
+export enum ColorMode {
+  Background = 'Background',
+  Labels = 'Labels',
+  None = 'None',
+}

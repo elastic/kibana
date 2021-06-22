@@ -39,14 +39,14 @@ export interface PointInTimeFinderDependencies
 }
 
 /** @public */
-export interface ISavedObjectsPointInTimeFinder {
+export interface ISavedObjectsPointInTimeFinder<T, A> {
   /**
    * An async generator which wraps calls to `savedObjectsClient.find` and
    * iterates over multiple pages of results using `_pit` and `search_after`.
    * This will open a new Point-In-Time (PIT), and continue paging until a set
    * of results is received that's smaller than the designated `perPage` size.
    */
-  find: () => AsyncGenerator<SavedObjectsFindResponse>;
+  find: () => AsyncGenerator<SavedObjectsFindResponse<T, A>>;
   /**
    * Closes the Point-In-Time associated with this finder instance.
    *
@@ -63,7 +63,8 @@ export interface ISavedObjectsPointInTimeFinder {
 /**
  * @internal
  */
-export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
+export class PointInTimeFinder<T = unknown, A = unknown>
+  implements ISavedObjectsPointInTimeFinder<T, A> {
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
@@ -162,7 +163,7 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
     searchAfter?: estypes.Id[];
   }) {
     try {
-      return await this.#client.find({
+      return await this.#client.find<T, A>({
         // Sort fields are required to use searchAfter, so we set some defaults here
         sortField: 'updated_at',
         sortOrder: 'desc',

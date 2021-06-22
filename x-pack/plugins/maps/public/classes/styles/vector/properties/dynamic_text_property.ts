@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
 import { RawValue } from '../../../../../common/constants';

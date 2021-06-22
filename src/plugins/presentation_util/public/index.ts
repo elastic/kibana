@@ -12,6 +12,7 @@ export {
   PresentationCapabilitiesService,
   PresentationDashboardsService,
   PresentationLabsService,
+  getStubPluginServices,
 } from './services';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
@@ -40,3 +41,7 @@ export {
 export function plugin() {
   return new PresentationUtilPlugin();
 }
+
+import { pluginServices } from './services';
+
+export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

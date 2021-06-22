@@ -6,7 +6,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ApplicationStart } from 'kibana/public';
 
 import {
   DeleteTrustedAppsRequestSchema,
@@ -133,15 +132,3 @@ export type TrustedApp = NewTrustedApp & {
   updated_at: string;
   updated_by: string;
 };
-
-/**
- * Supported React-Router state for the Trusted Apps List page
- */
-export interface TrustedAppsListPageRouteState {
-  /** Where the user should be redirected to when the `Back` button is clicked */
-  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
-  /** The URL for the `Back` button */
-  backButtonUrl?: string;
-  /** The label for the button */
-  backButtonLabel?: string;
-}

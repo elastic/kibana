@@ -14,12 +14,16 @@ Case management in Kibana
 ## Table of Contents
 
 - [Cases API](#cases-api)
+- [Cases Client API](#cases-client-api)
 - [Cases UI](#cases-ui)
 - [Case Action Type](#case-action-type) _feature in development, disabled by default_
 
 
 ## Cases API
 [**Explore the API docs »**](https://www.elastic.co/guide/en/security/current/cases-api-overview.html)
+
+## Cases Client API
+[**Cases Client API docs**][cases-client-api-docs]
 
 ## Cases UI
 
@@ -73,7 +77,7 @@ Arguments:
 |---|---|
 |alertData?|`Omit<CommentRequestAlertType, 'type'>;` alert data to post to case
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
-|disabledStatuses?|`CaseStatuses[];` array of disabled statuses
+|hiddenStatuses?|`CaseStatuses[];` array of hidden statuses
 |onRowClick|<code>(theCase?: Case &vert; SubCase) => void;</code> callback for row click, passing case in row
 |updateCase?|<code>(theCase: Case &vert; SubCase) => void;</code> callback after case has been updated
 |userCanCrud|`boolean;` user permissions to crud
@@ -263,4 +267,4 @@ For IBM Resilient connectors:
 [all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
-
+[cases-client-api-docs]: docs/cases_client/cases_client_api.md

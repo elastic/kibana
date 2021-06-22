@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   COMMENTS,
   DATE_NOW,
@@ -21,8 +23,6 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../constants.mock';
-
-import { ExceptionListItemSchema } from './exception_list_item_schema';
 
 export const getExceptionListItemSchemaMock = (
   overrides?: Partial<ExceptionListItemSchema>

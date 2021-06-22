@@ -46,21 +46,68 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.getStubPluginServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStubPluginServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationUtilPluginStart",
+            "text": "PresentationUtilPluginStart"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/index.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
         "label": "LazyDashboardPicker",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<typeof ",
-          "DashboardPicker",
-          ">"
+          "React.ExoticComponent<",
+          "DashboardPickerProps",
+          "> & { readonly _result: (props: ",
+          "DashboardPickerProps",
+          ") => JSX.Element; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
           "lineNumber": 32
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -71,15 +118,36 @@
         "label": "LazyLabsBeakerButton",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ solutions, ...props }: ",
+          "React.ExoticComponent<",
           "Props",
-          ") => JSX.Element>"
+          "> & { readonly _result: ({ solutions, ...props }: ",
+          "Props",
+          ") => JSX.Element; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
           "lineNumber": 28
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -90,15 +158,36 @@
         "label": "LazyLabsFlyout",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<(props: ",
+          "React.ExoticComponent<",
           "Props",
-          ") => JSX.Element>"
+          "> & { readonly _result: (props: ",
+          "Props",
+          ") => JSX.Element; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
           "lineNumber": 30
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -109,15 +198,48 @@
         "label": "LazySavedObjectSaveModalDashboard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<typeof ",
-          "default",
-          ">"
+          "React.ExoticComponent<",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          "> & { readonly _result: (props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          ") => JSX.Element; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
           "lineNumber": 34
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -169,7 +291,7 @@
         "signature": [
           "(props: Pick<",
           "Props",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">) => JSX.Element"
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"iconType\" | \"data-test-subj\" | \"panelRef\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">) => JSX.Element"
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
@@ -187,7 +309,7 @@
             "signature": [
               "Pick<",
               "Props",
-              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">"
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"iconType\" | \"data-test-subj\" | \"panelRef\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
@@ -358,6 +480,32 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.useLabs",
+        "type": "Function",
+        "tags": [],
+        "label": "useLabs",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationLabsService",
+            "text": "PresentationLabsService"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/index.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.withSuspense",
         "type": "Function",
         "tags": [],
@@ -380,7 +528,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
-            "description": [],
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
             "signature": [
               "React.ComponentType<P>"
             ],
@@ -397,7 +547,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fallback",
-            "description": [],
+            "description": [
+              "A fallback component to render while things load; default is `EuiLoadingSpinner`"
+            ],
             "signature": [
               "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
             ],
@@ -441,7 +593,9 @@
               "path": "src/plugins/presentation_util/public/services/capabilities.ts",
               "lineNumber": 10
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -457,7 +611,9 @@
               "path": "src/plugins/presentation_util/public/services/capabilities.ts",
               "lineNumber": 11
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -473,7 +629,9 @@
               "path": "src/plugins/presentation_util/public/services/capabilities.ts",
               "lineNumber": 12
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -489,7 +647,9 @@
               "path": "src/plugins/presentation_util/public/services/capabilities.ts",
               "lineNumber": 13
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -531,7 +691,39 @@
               "path": "src/plugins/presentation_util/public/services/dashboards.ts",
               "lineNumber": 13
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.query",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 14
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.fields",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 15
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -557,7 +749,23 @@
               "path": "src/plugins/presentation_util/public/services/dashboards.ts",
               "lineNumber": 17
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+                  "lineNumber": 18
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -577,19 +785,56 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.isProjectEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isProjectEnabled",
+            "description": [],
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 23
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
             "id": "def-public.PresentationLabsService.getProjectIDs",
             "type": "Function",
             "tags": [],
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -599,7 +844,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\") => ",
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -610,9 +855,28 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -622,7 +886,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", ",
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -634,9 +898,28 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 26
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -646,13 +929,61 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.env",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "env",
+                "description": [],
+                "signature": [
+                  "\"kibana\" | \"browser\" | \"session\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.status",
+                "type": "boolean",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -666,9 +997,11 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -725,7 +1058,9 @@
               "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
               "lineNumber": 19
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -815,7 +1150,9 @@
               "path": "src/plugins/presentation_util/public/components/types.ts",
               "lineNumber": 21
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "presentationUtil",
@@ -839,7 +1176,33 @@
               "path": "src/plugins/presentation_util/public/components/types.ts",
               "lineNumber": 22
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.OnSaveProps",
+                    "text": "OnSaveProps"
+                  },
+                  " & { dashboardId: string | null; addToLibrary: boolean; }"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/components/types.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -879,11 +1242,26 @@
         "label": "Project",
         "description": [],
         "signature": [
-          "ProjectConfig & { status: ProjectStatus; }"
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectConfig",
+            "text": "ProjectConfig"
+          },
+          " & { status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectStatus",
+            "text": "ProjectStatus"
+          },
+          "; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 78
+          "lineNumber": 94
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -896,11 +1274,11 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 54
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -915,11 +1293,11 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 14
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -962,13 +1340,48 @@
           "label": "ContextProvider",
           "description": [],
           "signature": [
-            "React.FC<{}>"
+            "React.FunctionComponent<{}>"
           ],
           "source": {
             "path": "src/plugins/presentation_util/public/types.ts",
             "lineNumber": 15
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.props",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.context",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            }
+          ]
         },
         {
           "parentPluginId": "presentationUtil",
@@ -1034,11 +1447,11 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 80
+          "lineNumber": 96
         },
         "deprecated": false,
         "children": [],
@@ -1065,7 +1478,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 82
+          "lineNumber": 98
         },
         "deprecated": false,
         "children": [
@@ -1081,7 +1494,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 82
+              "lineNumber": 98
             },
             "deprecated": false,
             "isRequired": true
@@ -1104,7 +1517,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 82
+              "lineNumber": 98
             },
             "deprecated": false,
             "isRequired": true
@@ -1124,7 +1537,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 68
+          "lineNumber": 84
         },
         "deprecated": false,
         "children": [
@@ -1136,11 +1549,11 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 69
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -1153,7 +1566,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 70
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -1166,7 +1579,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 71
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -1179,7 +1592,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 72
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -1195,7 +1608,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 73
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -1208,7 +1621,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 74
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -1224,7 +1637,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 75
+              "lineNumber": 91
             },
             "deprecated": false
           }
@@ -1234,6 +1647,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.DEFER_BELOW_FOLD",
+        "type": "string",
+        "tags": [],
+        "label": "DEFER_BELOW_FOLD",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:deferBelowFold\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-common.EnvironmentName",
@@ -1246,7 +1676,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 55
+          "lineNumber": 71
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1263,7 +1693,24 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 58
+          "lineNumber": 74
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.LABS_PROJECT_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_PROJECT_PREFIX",
+        "description": [],
+        "signature": [
+          "\"labs:\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 11
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1310,11 +1757,26 @@
         "label": "Project",
         "description": [],
         "signature": [
-          "ProjectConfig & { status: ProjectStatus; }"
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectConfig",
+            "text": "ProjectConfig"
+          },
+          " & { status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectStatus",
+            "text": "ProjectStatus"
+          },
+          "; }"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 78
+          "lineNumber": 94
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1327,11 +1789,11 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 54
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1344,11 +1806,18 @@
         "label": "ProjectStatus",
         "description": [],
         "signature": [
-          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & EnvironmentStatus"
+          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          }
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 62
+          "lineNumber": 78
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1365,7 +1834,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 56
+          "lineNumber": 72
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1382,7 +1851,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 12
+          "lineNumber": 13
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1399,7 +1868,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1418,7 +1887,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 15
+          "lineNumber": 17
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1431,11 +1900,11 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 14
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1451,7 +1920,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 22
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -1464,7 +1933,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             },
             "deprecated": false,
             "children": [
@@ -1480,7 +1949,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 24
+                  "lineNumber": 26
                 },
                 "deprecated": false
               },
@@ -1496,7 +1965,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 25
+                  "lineNumber": 27
                 },
                 "deprecated": false
               },
@@ -1512,7 +1981,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 28
                 },
                 "deprecated": false
               },
@@ -1528,7 +1997,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 27
+                  "lineNumber": 29
                 },
                 "deprecated": false
               },
@@ -1541,7 +2010,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 28
+                  "lineNumber": 30
                 },
                 "deprecated": false
               },
@@ -1554,7 +2023,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 31
+                  "lineNumber": 33
                 },
                 "deprecated": false
               },
@@ -1570,7 +2039,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 34
+                  "lineNumber": 36
                 },
                 "deprecated": false
               }
@@ -1585,7 +2054,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             },
             "deprecated": false,
             "children": [
@@ -1601,7 +2070,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 37
+                  "lineNumber": 39
                 },
                 "deprecated": false
               },
@@ -1617,7 +2086,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 38
+                  "lineNumber": 40
                 },
                 "deprecated": false
               },
@@ -1633,7 +2102,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 39
+                  "lineNumber": 41
                 },
                 "deprecated": false
               },
@@ -1649,7 +2118,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 40
+                  "lineNumber": 42
                 },
                 "deprecated": false
               },
@@ -1662,7 +2131,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 41
+                  "lineNumber": 43
                 },
                 "deprecated": false
               },
@@ -1675,7 +2144,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 44
+                  "lineNumber": 46
                 },
                 "deprecated": false
               },
@@ -1691,7 +2160,128 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 50
+                  "lineNumber": 52
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DEFER_BELOW_FOLD",
+            "type": "Object",
+            "tags": [],
+            "label": "[DEFER_BELOW_FOLD]",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 55
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 57
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 58
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 62
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 66
                 },
                 "deprecated": false
               }
@@ -1712,7 +2302,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 16
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false

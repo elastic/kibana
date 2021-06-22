@@ -9,7 +9,6 @@ import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
-
 import {
   doesNotExistOperator,
   existsOperator,
@@ -19,7 +18,9 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
+} from '@kbn/securitysolution-list-utils';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
+
 import {
   fields,
   getField,
@@ -27,11 +28,10 @@ import {
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
-import { useFindLists } from '../../../lists/hooks/use_find_lists';
 
 import { BuilderEntryItem } from './entry_renderer';
 
-jest.mock('../../../lists/hooks/use_find_lists');
+jest.mock('@kbn/securitysolution-list-hooks');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();

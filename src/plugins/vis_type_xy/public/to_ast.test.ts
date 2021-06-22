@@ -42,7 +42,7 @@ describe('xy vis toExpressionAst function', () => {
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
+    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
 
     expect(builtExpression).toMatchSnapshot();
   });

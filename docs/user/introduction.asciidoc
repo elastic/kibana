@@ -20,6 +20,20 @@ Manage your indices and ingest pipelines, monitor the health of your
 Elastic Stack cluster, and control which users have access to
 which features.
 
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/iyqMwJcvi8r4YfjeoPMjyH.jpg"
+data-uuid="iyqMwJcvi8r4YfjeoPMjyH"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
+
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
 deployment to getting {es} data into {kib}, and then
@@ -42,9 +56,6 @@ If you’re not ready to use your own data, you can add a sample data set.
 
 The home page provides access to the *Enterprise Search*, *Observability*, and *Security* solutions,
 and everything you need to visualize and analyze your data.
-
-[role="screenshot"]
-image::images/home-page.png[Kibana home page]
 
 To access all of {kib} features, use the main menu.
 Open this menu by clicking the
@@ -184,7 +195,7 @@ When the rule triggers, you can send a notification to a system that is part of
 your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
 to name a few.
 
-A dedicated view for creating, searching, and editing rules is in <<alert-management,*Rules and Connectors*>>.
+A dedicated view for creating, searching, and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
 
 [role="screenshot"]
 image::images/rules-and-connectors.png[Rules and Connectors view]
@@ -426,7 +437,7 @@ the <<get-started,{kib} Quick start>>.
 |<<manage-data,Stack Management > Data>>
 
 |Set up rules
-|<<alert-management,Stack Management > Rules and Connectors>>
+|<<create-and-manage-rules,Stack Management > Rules and Connectors>>
 
 |Organize your workspace and users
 |<<xpack-spaces,Stack Management > Spaces>>

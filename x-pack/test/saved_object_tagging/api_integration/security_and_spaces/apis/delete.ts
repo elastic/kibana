@@ -16,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
-      await esArchiver.load('rbac_tags');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('rbac_tags');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     const responses: Record<string, ExpectedResponse> = {

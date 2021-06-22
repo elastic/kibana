@@ -11,59 +11,17 @@ import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
-  NamespaceType,
-  NamespaceTypeArray,
-  UpdateCommentsArrayOrUndefined,
-  exceptionListItemType,
-  exceptionListType,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../../common/types';
-import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-} from '../../../common/schemas';
+  UpdateCommentsArrayOrUndefined,
+  exceptionListItemType,
+  exceptionListType,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListType } from '@kbn/securitysolution-list-utils';
+
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
-
-export const getSavedObjectType = ({
-  namespaceType,
-}: {
-  namespaceType: NamespaceType;
-}): SavedObjectType => {
-  if (namespaceType === 'agnostic') {
-    return exceptionListAgnosticSavedObjectType;
-  } else {
-    return exceptionListSavedObjectType;
-  }
-};
-
-export const getExceptionListType = ({
-  savedObjectType,
-}: {
-  savedObjectType: string;
-}): NamespaceType => {
-  if (savedObjectType === exceptionListAgnosticSavedObjectType) {
-    return 'agnostic';
-  } else {
-    return 'single';
-  }
-};
-
-export const getSavedObjectTypes = ({
-  namespaceType,
-}: {
-  namespaceType: NamespaceTypeArray;
-}): SavedObjectType[] => {
-  return namespaceType.map((singleNamespaceType) =>
-    getSavedObjectType({ namespaceType: singleNamespaceType })
-  );
-};
 
 export const transformSavedObjectToExceptionList = ({
   savedObject,

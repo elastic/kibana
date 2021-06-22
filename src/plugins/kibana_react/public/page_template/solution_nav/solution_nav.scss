@@ -1,0 +1,22 @@
+.kbnPageTemplateSolutionNav__title {
+  margin-bottom: $euiSizeL;
+}
+
+@include euiBreakpoint('xs','s') {
+  .kbnPageTemplateSolutionNav {
+    // TODO: Fix in EUI
+    .euiSideNav__mobileToggle {
+      height: auto;
+      font-size: $euiFontSizeM;
+
+      .euiButtonEmpty__text {
+        overflow: visible;
+      }
+    }
+  }
+
+  // Rely on the `mobileToggle` of the EuiSideNav component to title the navigation list
+  .kbnPageTemplateSolutionNav__title {
+    display: none;
+  }
+}

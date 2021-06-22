@@ -92,17 +92,17 @@ create visual art for a specific topic.
 
 Choose the type of visualization you want to create, then use the editor to configure the options.
 
-. From the dashboard, click *Create panel*, then click *Aggregation based* on the *New visualization* window.
+. On the dashboard, click *All types > Aggregation based*.
 
-.. Click the type of visualization you want to create.
+.. Select the visualization type you want to create.
 
-.. Click the data source you want to visualize.
+.. Select the data source you want to visualize.
 
-. From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
+. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +
 NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the index pattern.
 
-. To change the order, drag the aggregations along the editor. 
+. To change the order, drag and drop the aggregations in the editor. 
 + 
 [role="screenshot"]
 image:images/bar-chart-tutorial-3.png[Option to change the order of aggregations]
@@ -137,13 +137,9 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 
 Open the bar chart visualization builder and change the time range. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 
-. On the *New visualization* window, click *Aggregation based > Vertical bar*.
-
-. On the *Choose a source* window, click *kibana_sample_data_logs*.
-
-. Change the <<set-time-filter, time filter>>> to *Last 7 days*.
+. Make sure the <<set-time-filter, time filter>>> is *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
@@ -176,19 +172,6 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 +
 [role="screenshot"]
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
-
-[float]
-===== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
 
 . Click *Save and return*.
 

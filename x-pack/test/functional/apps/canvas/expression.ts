@@ -21,7 +21,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',

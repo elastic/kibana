@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../common';
-
-import { ExceptionsBuilderExceptionItem } from './types';
-import { getDefaultEmptyEntry } from './helpers';
+import {
+  ExceptionListItemSchema,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionsBuilderExceptionItem,
+  getDefaultEmptyEntry,
+} from '@kbn/securitysolution-list-utils';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 

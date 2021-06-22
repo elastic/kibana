@@ -9,10 +9,14 @@ import * as t from 'io-ts';
 import {
   created_at,
   created_by,
+  deserializerOrUndefined,
+  list_id,
   metaOrUndefined,
+  serializerOrUndefined,
+  tie_breaker_id,
   updated_at,
   updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   binaryOrUndefined,
@@ -39,12 +43,6 @@ import {
   shortOrUndefined,
   textOrUndefined,
 } from '../common/schemas';
-import {
-  deserializerOrUndefined,
-  list_id,
-  serializerOrUndefined,
-  tie_breaker_id,
-} from '../../../common/schemas';
 
 export const searchEsListItemSchema = t.exact(
   t.type({

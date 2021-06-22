@@ -19,7 +19,7 @@ export async function cleanup(
   if (!state) return;
   if ('sourceIndexPitId' in state) {
     try {
-      await Actions.closePit(client, state.sourceIndexPitId)();
+      await Actions.closePit({ client, pitId: state.sourceIndexPitId })();
     } catch (e) {
       executionLog.push({
         type: 'cleanup',

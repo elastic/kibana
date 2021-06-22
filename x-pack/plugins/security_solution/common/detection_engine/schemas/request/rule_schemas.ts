@@ -7,8 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { listArray } from '../types/lists';
 import {
+  actions,
+  from,
+  risk_score,
+  machine_learning_job_id,
+  risk_score_mapping,
   threat_filters,
   threat_query,
   threat_mapping,
@@ -16,14 +20,20 @@ import {
   threat_indicator_path,
   concurrent_searches,
   items_per_search,
-} from '../types/threat_mapping';
+  threats,
+  severity_mapping,
+  severity,
+  max_signals,
+  throttle,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+
 import {
   id,
   index,
   filters,
   event_category_override,
-  risk_score_mapping,
-  severity_mapping,
   building_block_type,
   note,
   license,
@@ -35,25 +45,17 @@ import {
   author,
   description,
   false_positives,
-  from,
   rule_id,
   immutable,
   output_index,
   query,
-  machine_learning_job_id,
-  max_signals,
-  risk_score,
-  severity,
-  threats,
   to,
   references,
-  version,
   saved_id,
   threshold,
   anomaly_threshold,
   name,
   tags,
-  actions,
   interval,
   enabled,
   updated_at,
@@ -66,10 +68,9 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
-  throttle,
 } from '../common/schemas';
 
-const createSchema = <
+export const createSchema = <
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -117,7 +118,7 @@ const responseSchema = <
   ]);
 };
 
-const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
+export const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
   params: APIParams<R, O, D>
 ) => {
   return {
@@ -215,6 +216,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
+export { eqlCreateParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -243,6 +245,7 @@ const {
   patch: threatMatchPatchParams,
   response: threatMatchResponseParams,
 } = buildAPISchemas(threatMatchRuleParams);
+export { threatMatchCreateParams };
 
 const queryRuleParams = {
   required: {
@@ -263,6 +266,8 @@ const {
   patch: queryPatchParams,
   response: queryResponseParams,
 } = buildAPISchemas(queryRuleParams);
+
+export { queryCreateParams };
 
 const savedQueryRuleParams = {
   required: {
@@ -286,6 +291,8 @@ const {
   response: savedQueryResponseParams,
 } = buildAPISchemas(savedQueryRuleParams);
 
+export { savedQueryCreateParams };
+
 const thresholdRuleParams = {
   required: {
     type: t.literal('threshold'),
@@ -307,6 +314,8 @@ const {
   response: thresholdResponseParams,
 } = buildAPISchemas(thresholdRuleParams);
 
+export { thresholdCreateParams };
+
 const machineLearningRuleParams = {
   required: {
     type: t.literal('machine_learning'),
@@ -321,6 +330,8 @@ const {
   patch: machineLearningPatchParams,
   response: machineLearningResponseParams,
 } = buildAPISchemas(machineLearningRuleParams);
+
+export { machineLearningCreateParams };
 
 const createTypeSpecific = t.union([
   eqlCreateParams,

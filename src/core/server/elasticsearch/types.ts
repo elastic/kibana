@@ -179,6 +179,7 @@ export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
 }
 
 /**

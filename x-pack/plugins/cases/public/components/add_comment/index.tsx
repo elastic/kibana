@@ -18,6 +18,7 @@ import { Form, useForm, UseField, useFormData } from '../../common/shared_import
 import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
+import { useOwnerContext } from '../owner_context/use_owner_context';
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
@@ -47,6 +48,7 @@ export const AddComment = React.memo(
       { caseId, disabled, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
       ref
     ) => {
+      const owner = useOwnerContext();
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -78,13 +80,13 @@ export const AddComment = React.memo(
           }
           postComment({
             caseId,
-            data: { ...data, type: CommentType.user },
+            data: { ...data, type: CommentType.user, owner: owner[0] },
             updateCase: onCommentPosted,
             subCaseId,
           });
           reset();
         }
-      }, [caseId, onCommentPosted, onCommentSaving, postComment, reset, submit, subCaseId]);
+      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
 
       return (
         <span id="add-comment-permLink">

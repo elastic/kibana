@@ -25,5 +25,5 @@ export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginat
 }
 
 export interface AggregationRequest {
-  [aggField: string]: estypes.AggregationContainer;
+  [aggField: string]: estypes.AggregationsAggregationContainer;
 }

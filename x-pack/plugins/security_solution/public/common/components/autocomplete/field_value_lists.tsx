@@ -8,8 +8,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { useFindLists, ListSchema } from '../../../lists_plugin_deps';
 import { useKibana } from '../../../common/lib/kibana';
 import { filterFieldToList, getGenericComboBoxProps } from './helpers';
 import * as i18n from './translations';

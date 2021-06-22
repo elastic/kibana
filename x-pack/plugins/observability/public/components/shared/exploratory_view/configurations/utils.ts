@@ -5,7 +5,7 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
-import type { AllSeries, AllShortSeries } from '../hooks/use_url_storage';
+import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
 import type { SeriesUrl } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';

@@ -7,6 +7,7 @@
 import moment from 'moment';
 import {
   colourPalette,
+  formatTooltipHeading,
   getConnectingTime,
   getSeriesAndDomain,
   getSidebarItems,
@@ -727,5 +728,15 @@ describe('getSidebarItems', () => {
   it('passes the item index offset by 1 to offsetIndex for visual display', () => {
     const actual = getSidebarItems(networkItems, false, '', []);
     expect(actual[0].offsetIndex).toBe(1);
+  });
+});
+
+describe('formatTooltipHeading', () => {
+  it('puts index and URL text together', () => {
+    expect(formatTooltipHeading(1, 'http://www.elastic.co/')).toEqual('1. http://www.elastic.co/');
+  });
+
+  it('returns only the text if `index` is NaN', () => {
+    expect(formatTooltipHeading(NaN, 'http://www.elastic.co/')).toEqual('http://www.elastic.co/');
   });
 });

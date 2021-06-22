@@ -7,8 +7,11 @@
 
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import uuid from 'uuid';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
 import { OldExceptionListSoSchema, migrations } from './migrations';

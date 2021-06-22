@@ -14,7 +14,7 @@ import { useHttp } from '../../../lib/kibana';
 import { useGetMlCapabilities } from '../hooks/use_get_ml_capabilities';
 import * as i18n from './translations';
 
-interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
+export interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
   capabilitiesFetched: boolean;
 }
 

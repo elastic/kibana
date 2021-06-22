@@ -19,9 +19,7 @@ interface Options {
 
 type CircularDepList = Set<string>;
 
-const allowedList: CircularDepList = new Set([
-  'x-pack/plugins/lists -> x-pack/plugins/security_solution',
-]);
+const allowedList: CircularDepList = new Set([]);
 
 run(
   async ({ flags, log }) => {

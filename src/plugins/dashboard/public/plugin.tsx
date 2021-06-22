@@ -65,6 +65,7 @@ import {
   AddToLibraryAction,
   LibraryNotificationAction,
   CopyToDashboardAction,
+  DashboardCapabilities,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -145,15 +146,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    {
-      share,
-      uiActions,
-      embeddable,
-      home,
-      urlForwarding,
-      data,
-      usageCollection,
-    }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
@@ -208,21 +201,9 @@ export class DashboardPlugin
         inspector: deps.inspector,
         http: coreStart.http,
         ExitFullScreenButton,
+        presentationUtil: deps.presentationUtil,
       };
     };
-
-    if (share) {
-      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
-        createDashboardUrlGenerator(async () => {
-          const [coreStart, , selfStart] = await core.getStartServices();
-          return {
-            appBasePath: coreStart.application.getUrlForApp('dashboards'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
-          };
-        })
-      );
-    }
 
     const {
       appMounted,
@@ -358,6 +339,9 @@ export class DashboardPlugin
     const { notifications, overlays, application } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
+    const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
+      .dashboard as DashboardCapabilities;
+
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
     const expandPanelAction = new ExpandPanelAction();
@@ -402,8 +386,8 @@ export class DashboardPlugin
         overlays,
         embeddable.getStateTransfer(),
         {
-          canCreateNew: Boolean(application.capabilities.dashboard.createNew),
-          canEditExisting: !Boolean(application.capabilities.dashboard.hideWriteControls),
+          canCreateNew: Boolean(dashboardCapabilities.createNew),
+          canEditExisting: Boolean(dashboardCapabilities.showWriteControls),
         },
         presentationUtil.ContextProvider
       );

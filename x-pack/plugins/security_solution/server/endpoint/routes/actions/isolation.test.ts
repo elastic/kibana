@@ -94,7 +94,6 @@ describe('Host Isolation', () => {
         },
       ])
     );
-    endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
@@ -173,7 +172,7 @@ describe('Host Isolation', () => {
     expect(mockResponse.ok).not.toBeCalled();
     const response = mockResponse.customError.mock.calls[0][0];
     expect(response.statusCode).toEqual(500);
-    expect((response.body as HostIsolationResponse).message).toEqual(ErrMessage);
+    expect((response.body as Error).message).toEqual(ErrMessage);
   });
   it('accepts a comment field', async () => {
     await callRoute(ISOLATE_HOST_ROUTE, { body: { agent_ids: ['XYZ'], comment: 'XYZ' } });
