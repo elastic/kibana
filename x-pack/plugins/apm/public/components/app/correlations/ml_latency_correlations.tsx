@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { sum } from 'd3-array';
 import {
   EuiIcon,
   EuiLink,
@@ -54,7 +53,7 @@ interface MlCorrelationsTerms {
   ksTest: number;
   fieldName: string;
   fieldValue: string;
-  duplicatedFields: string[];
+  duplicatedFields?: string[];
 }
 
 export function MlLatencyCorrelations({ onClose }: Props) {
@@ -182,9 +181,9 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         render: (_: any, term: MlCorrelationsTerms) => {
           return (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {term?.duplicatedFields.map((f) => (
-                <div>{f}</div>
-              ))}
+              {Array.isArray(term?.duplicatedFields)
+                ? term.duplicatedFields.map((f) => <div>{f}</div>)
+                : null}
             </div>
           );
         },
@@ -262,31 +261,17 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     [history, onClose, trackApmEvent]
   );
 
-  const histogramTerms = useMemo(() => {
+  const histogramTerms: MlCorrelationsTerms[] = useMemo(() => {
     return histograms.map((d) => {
-      // all docs for this field/value pair
-      const fieldCount = sum(d.histogram.map((h) => h.doc_count));
-      // docs for this field/value pair above the percentile threshold
-      const valueCount = sum(
-        d.histogram
-          .filter((h) => h.key > (percentileThresholdValue ?? 0))
-          .map((h) => h.doc_count)
-      );
-
       return {
-        distribution: [],
         fieldName: d.field,
         fieldValue: d.value,
-        score: d.correlation,
-        impact: d.correlation,
         ksTest: d.ksTest,
         correlation: d.correlation,
         duplicatedFields: d.duplicatedFields,
-        fieldCount,
-        valueCount,
       };
     });
-  }, [histograms, percentileThresholdValue]);
+  }, [histograms]);
 
   return (
     <>
@@ -379,15 +364,15 @@ export function MlLatencyCorrelations({ onClose }: Props) {
       ) : null}
 
       {histograms.length > 0 && selectedHistogram !== undefined && (
-        <>
-          <CorrelationsTable
-            columns={mlCorrelationColumns}
-            significantTerms={histogramTerms}
-            status={FETCH_STATUS.SUCCESS}
-            setSelectedSignificantTerm={setSelectedSignificantTerm}
-            onFilter={onClose}
-          />
-        </>
+        <CorrelationsTable
+          // @ts-ignore correlations don't have the same column format other tables have
+          columns={mlCorrelationColumns}
+          // @ts-expect-error correlations don't have the same significant term other tables have
+          significantTerms={histogramTerms}
+          status={FETCH_STATUS.SUCCESS}
+          setSelectedSignificantTerm={setSelectedSignificantTerm}
+          onFilter={onClose}
+        />
       )}
       {histograms.length < 1 && progress > 0.99 ? (
         <>

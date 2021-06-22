@@ -27,7 +27,6 @@ import { roundToDecimalPlace } from '../../../../common/search_strategies/correl
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
 const SIGNIFICANT_FRACTION = 3;
-const MAX_CORRELATIONS_TO_SHOW = 20;
 
 interface HashedSearchServiceValue {
   histogram: HistogramItem[];
@@ -245,8 +244,7 @@ export const asyncSearchServiceProvider = (
         ...v,
         duplicatedFields: [...v.duplicatedFields],
       }))
-      .sort((a, b) => b.correlation - a.correlation)
-      .slice(MAX_CORRELATIONS_TO_SHOW);
+      .sort((a, b) => b.correlation - a.correlation);
 
     return {
       error,

@@ -71,16 +71,17 @@ export const fetchTransactionDurationFieldCandidates = async (
   const acceptableFields: Set<string> = new Set();
 
   Object.entries(respMapping.body.fields).forEach(([key, value]) => {
+    const fieldTypes = Object.keys(value);
+    const isSupportedType = fieldTypes.some(
+      (type) => type === 'keyword' || type === 'ip'
+    );
     // Definitely include if field name matches any of the wild card
-    if (hasPrefixToInclude(key)) {
+    if (hasPrefixToInclude(key) && isSupportedType) {
       finalFieldCandidates.add(key);
     }
 
     // Check if fieldName is something we can aggregate on
-    if (
-      Object.keys(value).includes('keyword') ||
-      Object.keys(value).includes('ip')
-    ) {
+    if (isSupportedType) {
       acceptableFields.add(key);
     }
   });
