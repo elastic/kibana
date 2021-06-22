@@ -118,7 +118,7 @@ export class CoreSystem {
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
     this.chrome = new ChromeService({
       browserSupportsCsp,
-      packageInfo: this.coreContext.env.packageInfo,
+      packageInfoVersion: injectedMetadata.version,
     });
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);

@@ -12,7 +12,6 @@ import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } 
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
-import { PackageInfo } from '../../server/types';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
@@ -41,7 +40,7 @@ const IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
-  packageInfo: PackageInfo;
+  packageInfoVersion: string;
 }
 
 interface StartDeps {
@@ -119,7 +118,7 @@ export class ChromeService {
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
     const formatKbnVersionHeader = () => {
-      const unformattedVersion = this.params.packageInfo.version;
+      const unformattedVersion = this.params.packageInfoVersion;
       // we assume that the version is valid
       return `kibana-version-${unformattedVersion.split('.').join('-')}`;
     };

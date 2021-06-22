@@ -19,7 +19,6 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { PackageInfo } from 'kibana/server';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -54,26 +53,16 @@ function defaultStartDeps(availableApps?: App[]) {
   return deps;
 }
 
-function createMockedPackageInfo(val?: string) {
-  return {
-    version: val ?? 'version',
-    branch: 'branch',
-    buildNum: 100,
-    buildSha: 'buildSha',
-    dist: false,
-  };
-}
-
 function defaultStartTestOptions({
   browserSupportsCsp = true,
-  packageInfo = createMockedPackageInfo(),
+  packageInfoVersion = 'version',
 }: {
   browserSupportsCsp?: boolean;
-  packageInfo?: PackageInfo;
+  packageInfoVersion?: string;
 }): any {
   return {
     browserSupportsCsp,
-    packageInfo,
+    packageInfoVersion,
   };
 }
 
@@ -106,9 +95,8 @@ afterAll(() => {
 
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const mockPackageInfo = createMockedPackageInfo('7.0.0');
     const { startDeps } = await start({
-      options: { browserSupportsCsp: false, packageInfo: { ...mockPackageInfo } },
+      options: { browserSupportsCsp: false, packageVersionInfo: '7.0.0' },
     });
 
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
@@ -123,9 +111,8 @@ describe('start', () => {
   });
 
   it('adds the kibana version class to the document body', async () => {
-    const mockPackageInfo = createMockedPackageInfo('1.2.3');
     const { chrome } = await start({
-      options: { browserSupportsCsp: false, packageInfo: { ...mockPackageInfo } },
+      options: { browserSupportsCsp: false, packageVersionInfo: '1.2.3' },
     });
     const classes = chrome.getBodyClasses$().pipe(take(1));
     classes.subscribe((classList) =>

@@ -46,6 +46,7 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    version: 'version',
   } as any,
 };
 
@@ -96,7 +97,7 @@ describe('constructor', () => {
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
       browserSupportsCsp: true,
-      coreContext: expect.any(Object),
+      packageInfoVersion: 'version',
     });
   });
 
