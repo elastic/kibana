@@ -402,9 +402,6 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     }
     const fields = wrapper.updater(app);
     if (fields) {
-      const deepLinks = fields.deepLinks
-        ? populateDeepLinkDefaults(fields.deepLinks)
-        : changes.deepLinks;
       changes = {
         ...changes,
         ...fields,
@@ -418,7 +415,7 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.navLinkStatus ?? AppNavLinkStatus.default,
           fields.navLinkStatus ?? AppNavLinkStatus.default
         ),
-        ...(deepLinks ? { deepLinks } : {}),
+        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
   });
