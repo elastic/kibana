@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
+  unenroll_timeout?: number;
   is_preconfigured?: boolean;
 }
 
