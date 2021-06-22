@@ -12,7 +12,7 @@ import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } 
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
-import { valid } from 'semver';
+import { PackageInfo } from '../../server/types';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
@@ -35,14 +35,13 @@ import {
   ChromeUserBanner,
 } from './types';
 
-import { CoreContext } from '..';
 export type { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
-  coreContext: CoreContext;
+  packageInfo: PackageInfo;
 }
 
 interface StartDeps {
@@ -120,9 +119,8 @@ export class ChromeService {
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
     const formatKbnVersionHeader = () => {
-      const unformattedVersion = this.params.coreContext.env.packageInfo.version;
-      // only add the versioned classname if the version is valid
-      if (!valid(unformattedVersion)) return;
+      const unformattedVersion = this.params.packageInfo.version;
+      // we assume that the version is valid
       return `kibana-version-${unformattedVersion.split('.').join('-')}`;
     };
 
@@ -134,8 +132,7 @@ export class ChromeService {
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
         ];
-        const kBnVersionHeader = formatKbnVersionHeader();
-        return !!kBnVersionHeader ? [...requiredClasses, kBnVersionHeader] : [...requiredClasses];
+        return [...requiredClasses, formatKbnVersionHeader()];
       })
     );
 

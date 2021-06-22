@@ -116,7 +116,10 @@ export class CoreSystem {
     this.deprecations = new DeprecationsService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
-    this.chrome = new ChromeService({ browserSupportsCsp, coreContext: this.coreContext });
+    this.chrome = new ChromeService({
+      browserSupportsCsp,
+      packageInfo: this.coreContext.env.packageInfo,
+    });
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }
