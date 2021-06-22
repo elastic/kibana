@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const security = getService('security');
   const PageObjects = getPageObjects(['visualize']);
@@ -22,11 +22,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/sample_data_flights_index_pattern.json'
       );
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/sample_data_flights_index_pattern.json'
+      );
+      await security.testUser.restoreDefaults();
     });
 
     it('should add filter with scripted field', async () => {
@@ -49,13 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(2);
       expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');
-    });
-
-    after(async () => {
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
-      );
-      await security.testUser.restoreDefaults();
     });
   });
 }
