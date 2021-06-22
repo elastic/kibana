@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'reporting']);
   const log = getService('log');
   const supertest = getService('supertestWithoutAuth');
-
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const reportingApi = getService('reportingAPI');
