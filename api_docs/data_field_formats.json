@@ -513,7 +513,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-          "lineNumber": 157
+          "lineNumber": 211
         },
         "deprecated": false,
         "children": [
@@ -535,7 +535,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 158
+              "lineNumber": 212
             },
             "deprecated": false
           },
@@ -548,7 +548,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 159
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -570,7 +570,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 162
+              "lineNumber": 216
             },
             "deprecated": false
           },
@@ -586,7 +586,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 163
+              "lineNumber": 217
             },
             "deprecated": false
           },
@@ -598,11 +598,11 @@
             "label": "outputFormats",
             "description": [],
             "signature": [
-              "{ text: string; method: string; }[]"
+              "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 164
+              "lineNumber": 218
             },
             "deprecated": false
           },
@@ -615,7 +615,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 165
+              "lineNumber": 219
             },
             "deprecated": false
           },
@@ -631,7 +631,25 @@
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 167
+              "lineNumber": 221
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DurationFormat.isHumanPrecise",
+            "type": "Function",
+            "tags": [],
+            "label": "isHumanPrecise",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/duration.ts",
+              "lineNumber": 225
             },
             "deprecated": false,
             "children": [],
@@ -645,11 +663,11 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { inputFormat: string; outputFormat: string; outputPrecision: number; }"
+              "() => { inputFormat: string; outputFormat: string; outputPrecision: number; includeSpaceWithSuffix: boolean; }"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 170
+              "lineNumber": 229
             },
             "deprecated": false,
             "children": [],
@@ -663,11 +681,11 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: any) => string"
+              "(val: any) => any"
             ],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-              "lineNumber": 178
+              "lineNumber": 238
             },
             "deprecated": false,
             "children": [
@@ -683,7 +701,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/duration.ts",
-                  "lineNumber": 178
+                  "lineNumber": 238
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1687,7 +1705,9 @@
                 "type": "Enum",
                 "tags": [],
                 "label": "fieldType",
-                "description": [],
+                "description": [
+                  "- the field type"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1710,7 +1730,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1759,7 +1781,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "formatId",
-                "description": [],
+                "description": [
+                  "- the format id"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1878,7 +1902,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -1941,7 +1967,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": [],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "data",

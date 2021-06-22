@@ -8,7 +8,7 @@
 import { SavedObjectsType } from 'src/core/server';
 import { APP_ICON, getExistingMapPath } from '../../common/constants';
 // @ts-ignore
-import { migrations } from './migrations';
+import { savedObjectMigrations } from './saved_object_migrations';
 
 export const mapSavedObjects: SavedObjectsType = {
   name: 'map',
@@ -39,5 +39,5 @@ export const mapSavedObjects: SavedObjectsType = {
       };
     },
   },
-  migrations: migrations.map,
+  migrations: savedObjectMigrations,
 };

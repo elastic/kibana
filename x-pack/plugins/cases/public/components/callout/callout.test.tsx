@@ -80,7 +80,7 @@ describe('Callout', () => {
   });
 
   it('dismiss the callout correctly', () => {
-    const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
+    const wrapper = mount(<CallOut {...defaultProps} />);
     expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
     wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).simulate('click');
     wrapper.update();

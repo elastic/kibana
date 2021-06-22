@@ -3847,7 +3847,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [],
+                "description": [
+                  "- The id of the app to fetch the title for"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -4716,7 +4718,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [],
+            "description": [
+              "- {@link EmbeddableRendererProps}"
+            ],
             "signature": [
               {
                 "pluginId": "embeddable",

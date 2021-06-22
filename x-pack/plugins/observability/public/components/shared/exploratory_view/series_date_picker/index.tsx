@@ -8,7 +8,7 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
 import { DEFAULT_TIME } from '../configurations/constants';
 
@@ -30,7 +30,9 @@ export function SeriesDatePicker({ seriesId }: Props) {
 
   const commonlyUsedRanges = useQuickTimeRanges();
 
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     onRefreshTimeRange();

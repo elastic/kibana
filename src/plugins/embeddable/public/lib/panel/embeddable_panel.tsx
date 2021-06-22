@@ -14,6 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { UsageCollectionStart } from '../../../../usage_collection/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {
@@ -62,6 +63,7 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
+  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }
 
 interface State {
@@ -312,7 +314,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
         this.props.notifications,
-        this.props.SavedObjectFinder
+        this.props.SavedObjectFinder,
+        this.props.reportUiCounter
       ),
       inspectPanel: new InspectPanelAction(this.props.inspector),
       removePanel: new RemovePanelAction(),

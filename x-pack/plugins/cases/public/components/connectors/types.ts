@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { IconType } from '@elastic/eui';
 import React from 'react';
 
 import {

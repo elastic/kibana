@@ -18,13 +18,13 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params as typeof paramsSchema.type;
       const template = req.body as TemplateDeserialized;
@@ -58,6 +58,6 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

@@ -7,9 +7,9 @@
  */
 
 import { services as functionalServices } from '../../functional/services';
-import { VisualTestingProvider } from './visual_testing';
+import { VisualTestingService } from './visual_testing';
 
 export const services = {
   ...functionalServices,
-  visualTesting: VisualTestingProvider,
+  visualTesting: VisualTestingService,
 };

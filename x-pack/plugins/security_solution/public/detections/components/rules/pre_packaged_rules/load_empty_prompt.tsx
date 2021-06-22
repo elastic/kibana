@@ -27,13 +27,13 @@ EmptyPrompt.displayName = 'EmptyPrompt';
 interface PrePackagedRulesPromptProps {
   createPrePackagedRules: () => void;
   loading: boolean;
-  userHasNoPermissions: boolean;
+  userHasPermissions: boolean;
 }
 
 const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = ({
   createPrePackagedRules,
   loading = false,
-  userHasNoPermissions = true,
+  userHasPermissions = false,
 }) => {
   const history = useHistory();
   const handlePreBuiltCreation = useCallback(() => {
@@ -64,16 +64,17 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions,
+        isDisabled: !userHasPermissions,
         onClick: handlePreBuiltCreation,
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasNoPermissions]
+    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions]
   );
 
   return (
     <EmptyPrompt
+      data-test-subj="rulesEmptyPrompt"
       title={<h2>{i18n.PRE_BUILT_TITLE}</h2>}
       body={<p>{i18n.PRE_BUILT_MSG}</p>}
       actions={
@@ -81,7 +82,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
           <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LinkButton
-              isDisabled={userHasNoPermissions}
+              isDisabled={!userHasPermissions}
               onClick={goToCreateRule}
               href={formatUrl(getCreateRuleUrl())}
               iconType="plusInCircle"

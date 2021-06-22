@@ -9,6 +9,8 @@
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
+import { createUnitTestExecutor } from '../../../test_helpers';
+import { first } from 'rxjs/operators';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
@@ -32,21 +34,49 @@ describe('expression_functions', () => {
     });
 
     it('updates a variable', () => {
-      const actual = fn(input, { name: 'test', value: 2 }, context);
+      const actual = fn(input, { name: ['test'], value: [2] }, context);
       expect(variables.test).toEqual(2);
       expect(actual).toEqual(input);
     });
 
     it('sets a new variable', () => {
-      const actual = fn(input, { name: 'new', value: 3 }, context);
+      const actual = fn(input, { name: ['new'], value: [3] }, context);
       expect(variables.new).toEqual(3);
       expect(actual).toEqual(input);
     });
 
     it('stores context if value is not set', () => {
-      const actual = fn(input, { name: 'test' }, context);
+      const actual = fn(input, { name: ['test'], value: [] }, context);
       expect(variables.test).toEqual(input);
       expect(actual).toEqual(input);
+    });
+
+    it('sets multiple variables', () => {
+      const actual = fn(input, { name: ['new1', 'new2', 'new3'], value: [1, , 3] }, context);
+      expect(variables.new1).toEqual(1);
+      expect(variables.new2).toEqual(input);
+      expect(variables.new3).toEqual(3);
+      expect(actual).toEqual(input);
+    });
+
+    describe('running function thru executor', () => {
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(variableSet);
+
+      it('sets the variables', async () => {
+        const vars = {};
+        const result = await executor
+          .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
+          .pipe(first())
+          .toPromise();
+
+        expect(result).toEqual(2);
+
+        expect(vars).toEqual({
+          test1: 1,
+          test2: 2,
+        });
+      });
     });
   });
 });

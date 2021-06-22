@@ -265,6 +265,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     position: Position.Top,
   },
   valueLabels: 'hide',
+  valuesInLegend: false,
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -837,6 +838,36 @@ describe('xy_expression', () => {
         />
       );
       expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
+    });
+
+    test('disabled legend extra by default', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    });
+
+    test('ignores legend extra for ordinal chart', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart {...defaultProps} data={data} args={{ ...args, valuesInLegend: true }} />
+      );
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    });
+
+    test('shows legend extra for histogram chart', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+            valuesInLegend: true,
+          }}
+        />
+      );
+      expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
     });
 
     test('it renders bar', () => {

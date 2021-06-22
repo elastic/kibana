@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPage,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
@@ -126,28 +120,24 @@ export function ServiceInventory() {
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {displayMlCallout ? (
-            <EuiFlexItem>
-              <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
-            </EuiFlexItem>
-          ) : null}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {displayMlCallout && (
           <EuiFlexItem>
-            <EuiPanel>
-              <ServiceList
-                items={servicesData.items}
-                noItemsMessage={
-                  <NoServicesMessage
-                    historicalDataFound={servicesData.hasHistoricalData}
-                    status={servicesStatus}
-                  />
-                }
-              />
-            </EuiPanel>
+            <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPage>
+        )}
+        <EuiFlexItem>
+          <ServiceList
+            items={servicesData.items}
+            noItemsMessage={
+              <NoServicesMessage
+                historicalDataFound={servicesData.hasHistoricalData}
+                status={servicesStatus}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

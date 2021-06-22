@@ -91,6 +91,7 @@ export type {
   AppLeaveConfirmAction,
   AppUpdatableFields,
   AppUpdater,
+  AppNavOptions,
   AppDeepLink,
   PublicAppInfo,
   PublicAppDeepLinkInfo,

@@ -9,37 +9,31 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
-  EuiPopover,
-  EuiContextMenuItemProps,
   EuiContextMenuPanelProps,
-  EuiContextMenuItem,
+  EuiPopover,
   EuiPopoverProps,
 } from '@elastic/eui';
-import { NavigateToAppOptions } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_rotuer';
+import { HostMetadata } from '../../../../../../common/endpoint/types';
+import { useEndpointActionItems } from '../hooks';
 
 export interface TableRowActionProps {
-  items: Array<
-    Omit<EuiContextMenuItemProps, 'onClick'> & {
-      navigateAppId: string;
-      navigateOptions: NavigateToAppOptions;
-      children: React.ReactNode;
-      key: string;
-    }
-  >;
+  endpointMetadata: HostMetadata;
 }
 
-export const TableRowActions = memo<TableRowActionProps>(({ items }) => {
+export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const endpointActions = useEndpointActionItems(endpointMetadata);
+
   const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
 
   const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
-    return items.map((itemProps) => {
-      return <EuiContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
+    return endpointActions.map((itemProps) => {
+      return <ContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
     });
-  }, [handleCloseMenu, items]);
+  }, [handleCloseMenu, endpointActions]);
 
   const panelProps: EuiPopoverProps['panelProps'] = useMemo(() => {
     return { 'data-test-subj': 'tableRowActionsMenuPanel' };
@@ -69,22 +63,4 @@ export const TableRowActions = memo<TableRowActionProps>(({ items }) => {
 });
 TableRowActions.displayName = 'EndpointTableRowActions';
 
-const EuiContextMenuItemNavByRouter = memo<
-  EuiContextMenuItemProps & {
-    navigateAppId: string;
-    navigateOptions: NavigateToAppOptions;
-    children: React.ReactNode;
-  }
->(({ navigateAppId, navigateOptions, onClick, children, ...otherMenuItemProps }) => {
-  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, {
-    ...navigateOptions,
-    onClick,
-  });
-
-  return (
-    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
-      {children}
-    </EuiContextMenuItem>
-  );
-});
-EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';
+ContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

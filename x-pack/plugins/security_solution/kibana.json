@@ -8,6 +8,7 @@
     "actions",
     "alerting",
     "cases",
+    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",

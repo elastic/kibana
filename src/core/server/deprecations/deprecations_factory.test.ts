@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GetDeprecationsContext } from './types';
+import type { GetDeprecationsContext } from './types';
 import { DeprecationsFactory } from './deprecations_factory';
 import { loggerMock } from '../logging/logger.mock';
 

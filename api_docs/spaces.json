@@ -1203,14 +1203,14 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/plugin.ts",
-                  "lineNumber": 263
+                  "lineNumber": 267
                 }
               },
               {
                 "plugin": "reporting",
                 "link": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 271
+                  "lineNumber": 269
                 }
               },
               {
@@ -1245,7 +1245,7 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 194
+                  "lineNumber": 206
                 }
               },
               {
@@ -2002,49 +2002,49 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 57
+                "lineNumber": 60
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 263
+                "lineNumber": 267
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 281
+                "lineNumber": 285
               }
             },
             {
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 297
+                "lineNumber": 301
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 269
+                "lineNumber": 267
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 291
+                "lineNumber": 289
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 303
+                "lineNumber": 301
               }
             },
             {
@@ -2086,7 +2086,7 @@
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 194
+                "lineNumber": 206
               }
             }
           ]

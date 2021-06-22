@@ -8,7 +8,7 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
-import { setMockActions } from '../../../__mocks__';
+import { setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 

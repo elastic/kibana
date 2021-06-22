@@ -157,6 +157,9 @@ Object {
         "valueLabels": Array [
           "hide",
         ],
+        "valuesInLegend": Array [
+          false,
+        ],
         "xTitle": Array [
           "",
         ],

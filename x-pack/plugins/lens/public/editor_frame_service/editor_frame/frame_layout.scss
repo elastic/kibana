@@ -67,8 +67,15 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   padding: $euiSize $euiSize 0;
   position: relative;
   z-index: $lnsZLevel1;
+
   &:first-child {
     padding-left: $euiSize;
+  }
+
+  &.lnsFrameLayout__pageBody-isFullscreen {
+    background: $euiColorEmptyShade;
+    flex: 1;
+    padding: 0;
   }
 }
 
@@ -79,6 +86,13 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.lnsFrameLayout-isFullscreen .lnsFrameLayout__sidebar--left,
+.lnsFrameLayout-isFullscreen .lnsFrameLayout__suggestionPanel {
+  // Hide the datapanel and suggestions in fullscreen mode. Using display: none does trigger
+  // a rerender when the container becomes visible again, maybe pushing offscreen is better
+  display: none;
 }
 
 .lnsFrameLayout__sidebar--right {
@@ -105,4 +119,9 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       margin-left: 0;
     }
   }
+}
+
+.lnsFrameLayout__sidebar-isFullscreen {
+  flex: 1;
+  max-width: none;
 }

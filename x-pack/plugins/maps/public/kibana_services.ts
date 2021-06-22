@@ -112,7 +112,7 @@ export async function getChartsPaletteServiceGetColor(): Promise<
   const chartConfiguration = { syncColors: true };
   return (value: string) => {
     const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getColor(series, chartConfiguration);
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
     return color ? color : '#3d3d3d';
   };
 }

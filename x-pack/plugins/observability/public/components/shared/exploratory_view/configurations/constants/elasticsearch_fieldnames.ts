@@ -86,6 +86,8 @@ export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
+export const METRIC_SYSTEM_MEMORY_USAGE = 'system.memory.usage';
+export const METRIC_SYSTEM_CPU_USAGE = 'system.cpu.usage';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
@@ -119,6 +121,7 @@ export const TRANSACTION_URL = 'url.full';
 export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
+export const USER_AGENT_OS_VERSION = 'user_agent.os.version';
 
 export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
 export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';

@@ -63,7 +63,7 @@ npm-debug.log*
 .vagrant
 
 ## @cypress/snapshot from apm plugin
-snapshots.js
+/snapshots.js
 
 # release notes script output
 report.csv

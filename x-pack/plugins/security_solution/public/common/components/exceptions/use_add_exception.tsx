@@ -19,9 +19,11 @@ import { getUpdateAlertsQuery } from '../../../detections/components/alerts_tabl
 import {
   buildAlertStatusFilter,
   buildAlertsRuleIdFilter,
+  buildAlertStatusFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
 
@@ -82,6 +84,8 @@ export const useAddOrUpdateException = ({
     },
     []
   );
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
@@ -127,10 +131,15 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
+          // TODO: Once we are past experimental phase this code should be removed
+          const alertStatusFilter = ruleRegistryEnabled
+            ? buildAlertStatusFilterRuleRegistry('open')
+            : buildAlertStatusFilter('open');
+
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
+            [...buildAlertsRuleIdFilter(ruleId), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -176,7 +185,14 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, onSuccess, onError, updateExceptionListItem, addExceptionListItem]);
+  }, [
+    addExceptionListItem,
+    http,
+    onSuccess,
+    onError,
+    ruleRegistryEnabled,
+    updateExceptionListItem,
+  ]);
 
   return [{ isLoading }, addOrUpdateException];
 };

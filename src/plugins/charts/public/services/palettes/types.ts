@@ -80,21 +80,11 @@ export interface PaletteDefinition<T = unknown> {
    */
   toExpression: (state?: T) => Ast;
   /**
-   * Renders the UI for editing the internal state of the palette.
-   * Not each palette has to feature an internal state, so this is an optional property.
-   * @param domElement The dom element to the render the editor UI into
-   * @param props Current state and state setter to issue updates
-   */
-  renderEditor?: (
-    domElement: Element,
-    props: { state?: T; setState: (updater: (oldState: T) => T) => void }
-  ) => void;
-  /**
    * Color a series according to the internal rules of the palette.
    * @param series The current series along with its ancestors.
    * @param state  The internal state of the palette
    */
-  getColor: (
+  getCategoricalColor: (
     series: SeriesLayer[],
     chartConfiguration?: ChartColorConfiguration,
     state?: T
@@ -103,7 +93,20 @@ export interface PaletteDefinition<T = unknown> {
    * Get a spectrum of colors of the current palette.
    * This can be used if the chart wants to control color assignment locally.
    */
-  getColors: (size: number, state?: T) => string[];
+  getCategoricalColors: (size: number, state?: T) => string[];
+  /**
+   * Define whether a palette supports dynamic coloring (i.e. gradient colors mapped to number values)
+   */
+  canDynamicColoring?: boolean;
+  /**
+   * Get the assigned color for the given value based on its data domain and state settings.
+   * This can be used for dynamic coloring based on uniform color distribution or custom stops.
+   */
+  getColorForValue?: (
+    value: number | undefined,
+    state: T,
+    { min, max }: { min: number; max: number }
+  ) => string | undefined;
 }
 
 export interface PaletteRegistry {

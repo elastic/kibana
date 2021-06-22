@@ -213,7 +213,9 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         fullWidth
         error={errors['subActionParams.incident.name']}
         isInvalid={
-          errors['subActionParams.incident.name'].length > 0 && incident.name !== undefined
+          errors['subActionParams.incident.name'] !== undefined &&
+          errors['subActionParams.incident.name'].length > 0 &&
+          incident.name !== undefined
         }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
@@ -226,7 +228,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           messageVariables={messageVariables}
           paramsProperty={'name'}
           inputTargetValue={incident.name ?? undefined}
-          errors={errors['subActionParams.incident.name'] as string[]}
+          errors={(errors['subActionParams.incident.name'] ?? []) as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables

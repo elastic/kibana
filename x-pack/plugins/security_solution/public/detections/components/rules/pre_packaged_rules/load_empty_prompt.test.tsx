@@ -44,7 +44,7 @@ jest.mock('../../../../common/hooks/use_app_toasts');
 const props = {
   createPrePackagedRules: jest.fn(),
   loading: false,
-  userHasNoPermissions: false,
+  userHasPermissions: true,
   'data-test-subj': 'load-prebuilt-rules',
 };
 

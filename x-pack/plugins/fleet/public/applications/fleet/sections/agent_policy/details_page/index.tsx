@@ -26,20 +26,21 @@ import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab'
 import styled from 'styled-components';
 
 import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
-import { PAGE_ROUTING_PATHS } from '../../../constants';
+import { FLEET_ROUTING_PATHS } from '../../../constants';
 import {
+  AgentPolicyRefreshContext,
   useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
   useStartServices,
   useFleetStatus,
+  useIntraAppState,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
-import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { PackagePoliciesView, SettingsView } from './components';
 
 const Divider = styled.div`
@@ -327,13 +328,13 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
   return (
     <Switch>
       <Route
-        path={PAGE_ROUTING_PATHS.policy_details_settings}
+        path={FLEET_ROUTING_PATHS.policy_details_settings}
         render={() => {
           return <SettingsView agentPolicy={agentPolicy} />;
         }}
       />
       <Route
-        path={PAGE_ROUTING_PATHS.policy_details}
+        path={FLEET_ROUTING_PATHS.policy_details}
         render={() => {
           return <PackagePoliciesView agentPolicy={agentPolicy} />;
         }}
