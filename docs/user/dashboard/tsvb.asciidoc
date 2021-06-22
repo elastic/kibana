@@ -119,6 +119,27 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
   This function must always be the last metric in the series.
 
 [float]
+[[tsvb-index-pattern-mode]]
+==== TSVB Index pattern mode
+From 7.13.0, TSVB supports a new mode of creating a chart, the *index pattern mode*. 
+It is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then click the gear icon on the *Index pattern* setting.
+. Switch on the *Use only Kibana index patterns* switch
+. Reselect the index pattern from the dropdown and the timefield
+
+image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+
+The new mode unlocks many new features such as:
+* Runtime fields
+* Url drilldowns
+* Create filters by clicking on a timeseries chart
+* Better performance
+* and more features to come
+
+The old mode, which the users can create a TSVB chart by applying an es index string, is considered as deprecated and is going to be removed in the future.
+
+[float]
 [[tsvb-faq]]
 ==== Frequently asked questions
 
