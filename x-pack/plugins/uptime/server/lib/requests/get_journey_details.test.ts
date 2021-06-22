@@ -6,29 +6,7 @@
  */
 
 import { getJourneyDetails } from './get_journey_details';
-import { getUptimeESMockClient } from './helper';
-
-function mockEs(data: unknown) {
-  const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
-  mockEsClient.search.mockResolvedValue({
-    body: {
-      took: 18,
-      timed_out: false,
-      _shards: {
-        total: 1,
-        successful: 1,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        hits: Array.isArray(data) ? data : [data],
-        max_score: 0.0,
-        total: 0,
-      },
-    },
-  } as any);
-  return uptimeEsClient;
-}
+import { mockSearchResult } from './helper';
 
 describe('getJourneyDetails', () => {
   let mockData: unknown;
@@ -70,7 +48,7 @@ describe('getJourneyDetails', () => {
   it('formats ref detail data', async () => {
     expect(
       await getJourneyDetails({
-        uptimeEsClient: mockEs(mockData),
+        uptimeEsClient: mockSearchResult(mockData),
         checkGroup: '85946468-d385-11eb-8848-acde48001122',
       })
     ).toMatchInlineSnapshot(`
@@ -119,24 +97,25 @@ describe('getJourneyDetails', () => {
   });
 
   it('returns null for 0 hits', async () => {
-    expect(await getJourneyDetails({ uptimeEsClient: mockEs([]), checkGroup: 'check_group' })).toBe(
-      null
-    );
+    expect(
+      await getJourneyDetails({ uptimeEsClient: mockSearchResult([]), checkGroup: 'check_group' })
+    ).toBe(null);
   });
 
   it('throws an error for malformed data', async () => {
     let exception: unknown;
     try {
       await getJourneyDetails({
-        uptimeEsClient: mockEs({ _id: 'id', _source: { foo: 'bar' } }),
+        uptimeEsClient: mockSearchResult({ _id: 'id', _source: { foo: 'bar' } }),
         checkGroup: '85946468-d385-11eb-8848-acde48001122',
       });
     } catch (e: unknown) {
       exception = e;
+    } finally {
+      expect(exception).toBeDefined();
+      expect(exception).toMatchInlineSnapshot(
+        `[Error: Could not process journey step for check group 85946468-d385-11eb-8848-acde48001122, malformed data]`
+      );
     }
-    expect(exception).toBeDefined();
-    expect(exception).toMatchInlineSnapshot(
-      `[Error: Could not process journey step for check group 85946468-d385-11eb-8848-acde48001122, malformed data]`
-    );
   });
 });
