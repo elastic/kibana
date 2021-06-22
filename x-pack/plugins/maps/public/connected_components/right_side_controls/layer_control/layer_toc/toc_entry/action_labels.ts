@@ -21,10 +21,17 @@ export function getVisibilityToggleLabel(isVisible: boolean) {
       });
 }
 
-export const EDIT_LAYER_LABEL = i18n.translate(
-  'xpack.maps.layerControl.layerTocActions.editButtonLabel',
+export const EDIT_LAYER_SETTINGS_LABEL = i18n.translate(
+  'xpack.maps.layerControl.layerTocActions.layerSettingsButtonLabel',
   {
-    defaultMessage: 'Edit layer',
+    defaultMessage: 'Edit layer settings',
+  }
+);
+
+export const EDIT_FEATURES_LABEL = i18n.translate(
+  'xpack.maps.layerControl.layerTocActions.editFeaturesButtonLabel',
+  {
+    defaultMessage: 'Edit features',
   }
 );
 

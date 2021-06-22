@@ -94,7 +94,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
