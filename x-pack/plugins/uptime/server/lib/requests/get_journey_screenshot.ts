@@ -16,23 +16,11 @@ import {
   ScreenshotType,
 } from '../../../common/runtime_types';
 
-const ResultWrapperType = t.type({
-  body: t.type({
-    aggregations: t.type({
-      step: t.type({
-        image: t.type({
-          hits: t.type({
-            hits: t.array(
-              t.type({
-                _source: t.union([RefResultType, ScreenshotType]),
-              })
-            ),
-          }),
-        }),
-      }),
-    }),
-  }),
-});
+const ResultWrapperType = t.array(
+  t.type({
+    _source: t.union([RefResultType, ScreenshotType]),
+  })
+);
 
 export type ScreenshotReturnTypesUnion = ((Screenshot | RefResult) & { totalSteps: number }) | null;
 
@@ -90,23 +78,11 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
 
   const result = await uptimeEsClient.search({ body });
 
-  const decoded = ResultWrapperType.decode(result);
+  const decoded = ResultWrapperType.decode(result.body.aggregations?.step.image.hits.hits ?? null);
 
   if (!isRight(decoded)) throw Error('Error parsing journey screenshot type. Malformed data.');
 
-  const {
-    right: {
-      body: {
-        aggregations: {
-          step: {
-            image: {
-              hits: { hits: screenshotsOrRefs },
-            },
-          },
-        },
-      },
-    },
-  } = decoded;
+  const screenshotsOrRefs = decoded.right;
 
   if (screenshotsOrRefs.length > 1) {
     throw Error(
