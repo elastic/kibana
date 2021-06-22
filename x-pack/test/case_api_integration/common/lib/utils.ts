@@ -1040,12 +1040,6 @@ export const getCasesByAlert = async ({
   return res;
 };
 
-export const getCaseIDsFromCases = (cases: CasesByAlertId) => {
-  return cases.map((caseInfo): string => {
-    return caseInfo.id;
-  });
-};
-
 export const getTags = async ({
   supertest,
   query = {},

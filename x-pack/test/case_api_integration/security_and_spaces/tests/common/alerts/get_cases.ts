@@ -16,7 +16,8 @@ import {
   getCasesByAlert,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
-import { CaseResponse, CasesByAlertId } from '../../../../../../plugins/cases/common';
+import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
+import { CaseResponse } from '../../../../../../plugins/cases/common';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -28,23 +29,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-
-/**
- * Ensure that the result of the API request matches with the cases created for the test.
- */
-function validateResponse(
-  casesFromAPIResponse: CasesByAlertId,
-  createdCasesForTest: CaseResponse[]
-) {
-  const idToTitle = new Map<string, string>(
-    createdCasesForTest.map((caseInfo) => [caseInfo.id, caseInfo.title])
-  );
-
-  for (const apiResCase of casesFromAPIResponse) {
-    // check that the title in the api response matches the title in the map from the created cases
-    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id));
-  }
-}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -72,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(3);
-      validateResponse(caseIDsWithAlert, [case1, case2, case3]);
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, [case1, case2, case3]);
     });
 
     it('should return all cases with the same alert ID when more than 100 cases', async () => {
@@ -99,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
-      validateResponse(caseIDsWithAlert, cases);
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, cases);
     });
 
     it('should return no cases when the alert ID is not found', async () => {
@@ -150,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      it('should return the correct case IDs', async () => {
+      it('should return the correct cases info', async () => {
         const secOnlyAuth = { user: secOnly, space: 'space1' };
         const obsOnlyAuth = { user: obsOnly, space: 'space1' };
 
@@ -213,7 +197,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(res.length).to.eql(scenario.cases.length);
 
-          validateResponse(res, scenario.cases);
+          validateCasesFromAlertIDResponse(res, scenario.cases);
         }
       });
 
@@ -282,7 +266,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(res).to.eql([{ id: case1.id, title: case1.title }]);
       });
 
-      it('should return the correct case IDs when the owner query parameter contains unprivileged values', async () => {
+      it('should return the correct cases info when the owner query parameter contains unprivileged values', async () => {
         const auth = { user: obsSec, space: 'space1' };
         const [case1, case2] = await Promise.all([
           createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth),
