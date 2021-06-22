@@ -149,7 +149,7 @@ export class MonitorReportsTask implements ReportingTask {
     if (!this.taskManagerStart) {
       throw new Error('Reporting task runner has not been initialized!');
     }
-    logger.info(`Rescheduling ${task.id} to retry.`);
+    logger.info(`Rescheduling task:${task.id} to retry.`);
 
     const newTask = await this.reporting.scheduleTask(task);
     return newTask;
