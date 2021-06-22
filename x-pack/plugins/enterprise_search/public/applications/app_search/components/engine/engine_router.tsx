@@ -109,9 +109,24 @@ export const EngineRouter: React.FC = () => {
           <Documents />
         </Route>
       )}
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
+        </Route>
+      )}
+      {canManageEngineRelevanceTuning && (
+        <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
+          <RelevanceTuning />
+        </Route>
+      )}
       {canManageEngineCurations && (
         <Route path={ENGINE_CURATIONS_PATH}>
           <CurationsRouter />
+        </Route>
+      )}
+      {canManageEngineResultSettings && (
+        <Route path={ENGINE_RESULT_SETTINGS_PATH}>
+          <ResultSettings />
         </Route>
       )}
       {canManageEngineSearchUi && (
@@ -119,31 +134,16 @@ export const EngineRouter: React.FC = () => {
           <SearchUI />
         </Route>
       )}
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs />
+        </Route>
+      )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
-        {canViewEngineSchema && (
-          <Route path={ENGINE_SCHEMA_PATH}>
-            <SchemaRouter />
-          </Route>
-        )}
-        {canManageEngineRelevanceTuning && (
-          <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
-            <RelevanceTuning />
-          </Route>
-        )}
         {canManageEngineSynonyms && (
           <Route path={ENGINE_SYNONYMS_PATH}>
             <Synonyms />
-          </Route>
-        )}
-        {canManageEngineResultSettings && (
-          <Route path={ENGINE_RESULT_SETTINGS_PATH}>
-            <ResultSettings />
-          </Route>
-        )}
-        {canViewEngineApiLogs && (
-          <Route path={ENGINE_API_LOGS_PATH}>
-            <ApiLogs />
           </Route>
         )}
         {canViewMetaEngineSourceEngines && (

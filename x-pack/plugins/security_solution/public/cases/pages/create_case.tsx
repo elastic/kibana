@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
@@ -25,6 +25,7 @@ export const CreateCasePage = React.memo(() => {
   const {
     application: { navigateToApp },
   } = useKibana().services;
+
   const backOptions = useMemo(
     () => ({
       href: getCaseUrl(search),
@@ -34,12 +35,13 @@ export const CreateCasePage = React.memo(() => {
     [search]
   );
 
-  if (userPermissions != null && !userPermissions.crud) {
-    navigateToApp(CASES_APP_ID, {
-      path: getCaseUrl(search),
-    });
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.crud) {
+      navigateToApp(CASES_APP_ID, {
+        path: getCaseUrl(search),
+      });
+    }
+  }, [userPermissions, navigateToApp, search]);
 
   return (
     <>
