@@ -22,7 +22,9 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       policyName: string,
       warmEnabled: boolean = false,
       coldEnabled: boolean = false,
+      frozenEnabled: boolean = false,
       deletePhaseEnabled: boolean = false,
+      snapshotRepository: string = 'test',
       minAges: { [key: string]: { value: string; unit: string } } = {
         warm: { value: '10', unit: 'd' },
         cold: { value: '15', unit: 'd' },
@@ -42,6 +44,12 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
         });
         await testSubjects.setValue('cold-selectedMinimumAge', minAges.cold.value);
       }
+      if (frozenEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('enablePhaseSwitch-frozen');
+        });
+        await testSubjects.setValue('frozen-selectedMinimumAge', minAges.frozen.value);
+      }
       if (deletePhaseEnabled) {
         await retry.try(async () => {
           await testSubjects.click('enableDeletePhaseButton');
@@ -55,15 +63,19 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       policyName: string,
       warmEnabled: boolean = false,
       coldEnabled: boolean = false,
+      frozenEnabled: boolean = false,
       deletePhaseEnabled: boolean = false,
-      minAges?: { [key: string]: { value: string; unit: string } }
+      snapshotRepository: string = 'test',
+      minAges: { [key: string]: { value: string; unit: string } }
     ) {
       await testSubjects.click('createPolicyButton');
       await this.fillNewPolicyForm(
         policyName,
         warmEnabled,
         coldEnabled,
+        frozenEnabled,
         deletePhaseEnabled,
+        snapshotRepository,
         minAges
       );
       await this.saveNewPolicy();
