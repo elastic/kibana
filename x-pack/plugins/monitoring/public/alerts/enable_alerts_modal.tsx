@@ -16,11 +16,8 @@ import {
   EuiModalHeaderTitle,
   EuiButtonEmpty,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiRadioGroup,
-  htmlIdGenerator,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,7 +29,7 @@ export const EnableAlertsModal: React.FC<{}> = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const $injector = Legacy.shims.getAngularInjector();
   const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
-  const alertsContext = React.useContext(AlertsContext);
+  const alertsContext = useContext(AlertsContext);
 
   const closeModal = () => {
     setIsModalVisible(false);
