@@ -143,7 +143,6 @@ const requiredDependencies = [
   'infra',
   'observability',
   'ruleRegistry',
-  'fleet',
 ] as const;
 
 const optionalDependencies = [
