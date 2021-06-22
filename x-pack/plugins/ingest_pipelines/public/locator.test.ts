@@ -6,8 +6,7 @@
  */
 
 import { ManagementAppLocatorDefinition } from 'src/plugins/management/common/locator';
-import { IngestPipelinesLocatorDefinition } from './locator';
-import { INGEST_PIPELINES_PAGES } from './url_generator';
+import { IngestPipelinesLocatorDefinition, INGEST_PIPELINES_PAGES } from './locator';
 
 describe('Ingest pipeline locator', () => {
   const setup = () => {

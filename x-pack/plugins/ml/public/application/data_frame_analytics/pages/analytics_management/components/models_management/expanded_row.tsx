@@ -114,10 +114,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   }
 
   const {
-    services: {
-      share,
-      application: { navigateToUrl },
-    },
+    services: { share },
   } = useMlKibana();
 
   const tabs = [
