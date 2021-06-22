@@ -17,6 +17,8 @@ interface EngineValues {
   dataLoading: boolean;
   engine: Partial<EngineDetails>;
   engineName: string;
+  isEngineEmpty: boolean;
+  isEngineSchemaEmpty: boolean;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaErrors: boolean;
@@ -74,6 +76,11 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
+    isEngineEmpty: [() => [selectors.engine], (engine) => !engine.document_count],
+    isEngineSchemaEmpty: [
+      () => [selectors.engine],
+      (engine) => Object.keys(engine.schema || {}).length === 0,
+    ],
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
     // Indexed engines

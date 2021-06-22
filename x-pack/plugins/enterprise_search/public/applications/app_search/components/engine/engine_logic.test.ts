@@ -9,6 +9,7 @@ import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { SchemaType } from '../../../shared/schema/types';
 import { ApiTokenTypes } from '../credentials/constants';
 
 import { EngineTypes } from './types';
@@ -34,7 +35,7 @@ describe('EngineLogic', () => {
     sample: false,
     isMeta: false,
     invalidBoosts: false,
-    schema: {},
+    schema: { test: SchemaType.Text },
     apiTokens: [],
     apiKey: 'some-key',
   };
@@ -43,6 +44,8 @@ describe('EngineLogic', () => {
     dataLoading: true,
     engine: {},
     engineName: '',
+    isEngineEmpty: true,
+    isEngineSchemaEmpty: true,
     isMetaEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
@@ -50,6 +53,13 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
     searchKey: '',
+  };
+
+  const DEFAULT_VALUES_WITH_ENGINE = {
+    ...DEFAULT_VALUES,
+    engine: mockEngineData,
+    isEngineEmpty: false,
+    isEngineSchemaEmpty: false,
   };
 
   beforeEach(() => {
@@ -69,7 +79,7 @@ describe('EngineLogic', () => {
           EngineLogic.actions.setEngineData(mockEngineData);
 
           expect(EngineLogic.values).toEqual({
-            ...DEFAULT_VALUES,
+            ...DEFAULT_VALUES_WITH_ENGINE,
             engine: mockEngineData,
             dataLoading: false,
           });
@@ -184,14 +194,58 @@ describe('EngineLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('isSampleEngine', () => {
-      it('should be set based on engine.sample', () => {
-        const mockSampleEngine = { ...mockEngineData, sample: true };
-        mount({ engine: mockSampleEngine });
+    describe('isEngineEmpty', () => {
+      it('returns true if the engine contains no documents', () => {
+        const engine = { ...mockEngineData, document_count: 0 };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isEngineEmpty: true,
+        });
+      });
+
+      it('returns true if the engine is not yet initialized', () => {
+        mount({ engine: {} });
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          engine: mockSampleEngine,
+          isEngineEmpty: true,
+        });
+      });
+    });
+
+    describe('isEngineSchemaEmpty', () => {
+      it('returns true if the engine schema contains no fields', () => {
+        const engine = { ...mockEngineData, schema: {} };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isEngineSchemaEmpty: true,
+        });
+      });
+
+      it('returns true if the engine is not yet initialized', () => {
+        mount({ engine: {} });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isEngineSchemaEmpty: true,
+        });
+      });
+    });
+
+    describe('isSampleEngine', () => {
+      it('should be set based on engine.sample', () => {
+        const engine = { ...mockEngineData, sample: true };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           isSampleEngine: true,
         });
       });
@@ -199,12 +253,12 @@ describe('EngineLogic', () => {
 
     describe('isMetaEngine', () => {
       it('should be set based on engine.type', () => {
-        const mockMetaEngine = { ...mockEngineData, type: EngineTypes.meta };
-        mount({ engine: mockMetaEngine });
+        const engine = { ...mockEngineData, type: EngineTypes.meta };
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockMetaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           isMetaEngine: true,
         });
       });
@@ -212,17 +266,17 @@ describe('EngineLogic', () => {
 
     describe('hasSchemaErrors', () => {
       it('should be set based on engine.activeReindexJob.numDocumentsWithErrors', () => {
-        const mockSchemaEngine = {
+        const engine = {
           ...mockEngineData,
           activeReindexJob: {
             numDocumentsWithErrors: 10,
           },
         };
-        mount({ engine: mockSchemaEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockSchemaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasSchemaErrors: true,
         });
       });
@@ -230,7 +284,7 @@ describe('EngineLogic', () => {
 
     describe('hasSchemaConflicts', () => {
       it('should be set based on engine.schemaConflicts', () => {
-        const mockSchemaEngine = {
+        const engine = {
           ...mockEngineData,
           schemaConflicts: {
             someSchemaField: {
@@ -241,11 +295,11 @@ describe('EngineLogic', () => {
             },
           },
         };
-        mount({ engine: mockSchemaEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockSchemaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasSchemaConflicts: true,
         });
       });
@@ -253,15 +307,15 @@ describe('EngineLogic', () => {
 
     describe('hasUnconfirmedSchemaFields', () => {
       it('should be set based on engine.unconfirmedFields', () => {
-        const mockUnconfirmedFieldsEngine = {
+        const engine = {
           ...mockEngineData,
           unconfirmedFields: ['new_field_1', 'new_field_2'],
         };
-        mount({ engine: mockUnconfirmedFieldsEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockUnconfirmedFieldsEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasUnconfirmedSchemaFields: true,
         });
       });
@@ -292,7 +346,7 @@ describe('EngineLogic', () => {
         mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           searchKey: 'search-123xyz',
         });
@@ -312,7 +366,7 @@ describe('EngineLogic', () => {
         mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           searchKey: '',
         });
