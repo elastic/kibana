@@ -148,14 +148,27 @@ export const DrawCircle = {
       radiusLabel = `${Math.round(state.circle.properties.radiusKm)} km`;
     }
 
-    // display line from center vertex to edge
-    // custom draw style displays label in center of line
+    // display radius label, requires custom 'symbol' style with DRAW_CIRCLE_RADIUS_MB_FILTER filter
     display({
       type: 'Feature',
       properties: {
         meta: DRAW_CIRCLE_RADIUS,
         parent: state.circle.id,
         radiusLabel,
+        active: 'false',
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: state.circle.properties.edge,
+      },
+    });
+
+    // display line from center vertex to edge
+    display({
+      type: 'Feature',
+      properties: {
+        meta: 'draw-circle-radius-line',
+        parent: state.circle.id,
         active: 'true',
       },
       geometry: {

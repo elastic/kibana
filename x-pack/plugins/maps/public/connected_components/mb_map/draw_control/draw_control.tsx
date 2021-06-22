@@ -114,11 +114,10 @@ export class DrawControl extends Component<Props> {
         source: 'mapbox-gl-draw-hot',
         filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
         layout: {
-          'symbol-placement': 'line-center',
+          'text-anchor': 'right',
           'text-field': '{radiusLabel}',
-          'text-rotation-alignment': 'viewport',
           'text-size': 16,
-          'text-offset': [0, 1],
+          'text-offset': [-1, 0],
           'text-ignore-placement': true,
           'text-allow-overlap': true,
         },
