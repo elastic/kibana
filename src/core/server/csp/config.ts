@@ -9,27 +9,55 @@
 import { TypeOf, schema } from '@kbn/config-schema';
 import { ServiceConfigDescriptor } from '../internal_types';
 
+const validateDirectiveValues = (values: string[]) => {};
+
+const cspDirectiveSchema = schema.arrayOf(schema.string(), {
+  defaultValue: [],
+  validate: validateDirectiveValues,
+});
+
 const configSchema = schema.object(
   {
     rules: schema.maybe(schema.arrayOf(schema.string())),
-    script_src: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    worker_src: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    style_src: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    script_src: cspDirectiveSchema,
+    worker_src: cspDirectiveSchema,
+    style_src: cspDirectiveSchema,
+    connect_src: cspDirectiveSchema,
+    default_src: cspDirectiveSchema,
+    font_src: cspDirectiveSchema,
+    frame_src: cspDirectiveSchema,
+    img_src: cspDirectiveSchema,
+    frame_ancestors: cspDirectiveSchema,
+    report_uri: cspDirectiveSchema,
+    report_to: cspDirectiveSchema,
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
     disableEmbedding: schema.oneOf([schema.literal<boolean>(false)], { defaultValue: false }),
   },
   {
     validate: (cspConfig) => {
-      if (
-        cspConfig.rules &&
-        (cspConfig.script_src.length || cspConfig.worker_src.length || cspConfig.style_src.length)
-      ) {
+      if (cspConfig.rules && hasDirectiveSpecified(cspConfig)) {
         return `"csp.rules" cannot be used when specifying per-directive additions such as "script_src", "worker_src" or "style_src"`;
       }
     },
   }
 );
+
+const hasDirectiveSpecified = (rawConfig: CspConfigType): boolean => {
+  return Boolean(
+    rawConfig.script_src.length ||
+      rawConfig.worker_src.length ||
+      rawConfig.style_src.length ||
+      rawConfig.connect_src.length ||
+      rawConfig.default_src.length ||
+      rawConfig.font_src.length ||
+      rawConfig.frame_src.length ||
+      rawConfig.img_src.length ||
+      rawConfig.frame_ancestors.length ||
+      rawConfig.report_uri.length ||
+      rawConfig.report_to.length
+  );
+};
 
 /**
  * @internal

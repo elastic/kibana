@@ -215,6 +215,36 @@ describe('CspDirectives', () => {
       );
     });
 
+    it('adds additional values for some directives without defaults', () => {
+      const config = cspConfig.schema.validate({
+        connect_src: [`connect-src`],
+        default_src: [`default-src`],
+        font_src: [`font-src`],
+        frame_src: [`frame-src`],
+        img_src: [`img-src`],
+        frame_ancestors: [`frame-ancestors`],
+        report_uri: [`report-uri`],
+        report_to: [`report-to`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+
+      expect(directives.getRules()).toMatchInlineSnapshot(`
+        Array [
+          "script-src 'unsafe-eval' 'self'",
+          "worker-src blob: 'self'",
+          "style-src 'unsafe-inline' 'self'",
+          "connect-src 'self' connect-src",
+          "default-src 'self' default-src",
+          "font-src 'self' font-src",
+          "frame-src frame-src",
+          "img-src 'self' img-src",
+          "frame-ancestors frame-ancestors",
+          "report-uri report-uri",
+          "report-to report-to",
+        ]
+      `);
+    });
+
     it('adds single quotes for keywords in added directives', () => {
       const config = cspConfig.schema.validate({
         script_src: [`unsafe-hashes`],

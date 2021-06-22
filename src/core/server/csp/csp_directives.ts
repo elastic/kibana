@@ -8,12 +8,37 @@
 
 import { CspConfigType } from './config';
 
-export type CspDirectiveName = 'script-src' | 'worker-src' | 'style-src' | 'frame-ancestors';
+export type CspDirectiveName =
+  | 'script-src'
+  | 'worker-src'
+  | 'style-src'
+  | 'frame-ancestors'
+  | 'connect-src'
+  | 'default-src'
+  | 'font-src'
+  | 'frame-src'
+  | 'img-src'
+  | 'report-uri'
+  | 'report-to';
 
+/**
+ * The default rules that are always applied
+ */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'script-src': [`'unsafe-eval'`, `'self'`],
   'worker-src': [`blob:`, `'self'`],
   'style-src': [`'unsafe-inline'`, `'self'`],
+};
+
+/**
+ * Per-directive rules that will be added when the configuration contains at least one value
+ * Main purpose is to add `self` value to some directives when the configuration specifies other values
+ */
+export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
+  'connect-src': [`'self'`],
+  'default-src': [`'self'`],
+  'font-src': [`'self'`],
+  'img-src': [`'self'`],
 };
 
 export class CspDirectives {
@@ -38,21 +63,24 @@ export class CspDirectives {
 
   static fromConfig(config: CspConfigType): CspDirectives {
     const cspDirectives = new CspDirectives();
+
+    // adding `csp.rules` or `default` rules
     const initialRules = config.rules ? parseRules(config.rules) : { ...defaultRules };
     Object.entries(initialRules).forEach(([key, values]) => {
       values?.forEach((value) => {
         cspDirectives.addDirectiveValue(key as CspDirectiveName, value);
       });
     });
-    config.script_src.forEach((scriptSrc) => {
-      cspDirectives.addDirectiveValue('script-src', scriptSrc);
+
+    // adding per-directive configuration
+    const additiveConfig = parseConfigDirectives(config);
+    [...additiveConfig.entries()].forEach(([directiveName, directiveValues]) => {
+      const additionalValues = additionalRules[directiveName] ?? [];
+      [...additionalValues, ...directiveValues].forEach((value) => {
+        cspDirectives.addDirectiveValue(directiveName, value);
+      });
     });
-    config.worker_src.forEach((workerSrc) => {
-      cspDirectives.addDirectiveValue('worker-src', workerSrc);
-    });
-    config.style_src.forEach((styleSrc) => {
-      cspDirectives.addDirectiveValue('style-src', styleSrc);
-    });
+
     return cspDirectives;
   }
 }
@@ -64,6 +92,46 @@ const parseRules = (rules: string[]): Partial<Record<CspDirectiveName, string[]>
     directives[name as CspDirectiveName] = values;
   });
   return directives;
+};
+
+const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, string[]> => {
+  const map = new Map<CspDirectiveName, string[]>();
+
+  if (cspConfig.script_src.length) {
+    map.set('script-src', cspConfig.script_src);
+  }
+  if (cspConfig.worker_src.length) {
+    map.set('worker-src', cspConfig.worker_src);
+  }
+  if (cspConfig.style_src.length) {
+    map.set('style-src', cspConfig.style_src);
+  }
+  if (cspConfig.connect_src.length) {
+    map.set('connect-src', cspConfig.connect_src);
+  }
+  if (cspConfig.default_src.length) {
+    map.set('default-src', cspConfig.default_src);
+  }
+  if (cspConfig.font_src.length) {
+    map.set('font-src', cspConfig.font_src);
+  }
+  if (cspConfig.frame_src.length) {
+    map.set('frame-src', cspConfig.frame_src);
+  }
+  if (cspConfig.img_src.length) {
+    map.set('img-src', cspConfig.img_src);
+  }
+  if (cspConfig.frame_ancestors.length) {
+    map.set('frame-ancestors', cspConfig.frame_ancestors);
+  }
+  if (cspConfig.report_uri.length) {
+    map.set('report-uri', cspConfig.report_uri);
+  }
+  if (cspConfig.report_to.length) {
+    map.set('report-to', cspConfig.report_to);
+  }
+
+  return map;
 };
 
 const keywordTokens = [
