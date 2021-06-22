@@ -60,6 +60,7 @@ interface RoleMappingsActions {
   handleRoleChange(roleType: RoleTypes): { roleType: RoleTypes };
   handleUsernameSelectChange(username: string): { username: string };
   handleSaveMapping(): void;
+  handleSaveUser(): void;
   initializeRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeSingleUserRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeRoleMappings(): void;
@@ -144,6 +145,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     initializeRoleMapping: (roleMappingId) => ({ roleMappingId }),
     handleDeleteMapping: (roleMappingId: string) => ({ roleMappingId }),
     handleSaveMapping: true,
+    handleSaveUser: true,
     openRoleMappingFlyout: true,
     closeUsersAndRolesFlyout: false,
     setElasticsearchUsernameValue: (username: string) => ({ username }),
@@ -470,6 +472,38 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     resetState: () => {
       clearFlashMessages();
+    },
+    handleSaveUser: async () => {
+      const { http } = HttpLogic.values;
+      const {
+        roleType,
+        singleUserRoleMapping,
+        accessAllEngines,
+        selectedEngines,
+        elasticsearchUser: { email, username },
+      } = values;
+
+      const body = JSON.stringify({
+        roleMapping: {
+          engines: accessAllEngines ? [] : Array.from(selectedEngines),
+          roleType,
+          accessAllEngines,
+          id: singleUserRoleMapping?.roleMapping?.id,
+        },
+        elasticsearchUser: {
+          username,
+          email,
+        },
+      });
+
+      try {
+        const response = await http.post('/api/app_search/single_user_role_mapping', { body });
+        actions.setSingleUserRoleMapping(response);
+        actions.setUserCreated();
+        actions.initializeRoleMappings();
+      } catch (e) {
+        actions.setRoleMappingErrors(e?.body?.attributes?.errors);
+      }
     },
     closeUsersAndRolesFlyout: () => {
       clearFlashMessages();

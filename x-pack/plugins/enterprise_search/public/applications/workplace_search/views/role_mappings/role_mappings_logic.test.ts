@@ -504,6 +504,100 @@ describe('RoleMappingsLogic', () => {
       });
     });
 
+    describe('handleSaveUser', () => {
+      it('calls API and refreshes list when new mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
+        const setUserCreatedSpy = jest.spyOn(RoleMappingsLogic.actions, 'setUserCreated');
+        const setSingleUserRoleMappingSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setSingleUserRoleMapping'
+        );
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+
+        http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.handleSaveUser();
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/workplace_search/org/single_user_role_mapping',
+          {
+            body: JSON.stringify({
+              roleMapping: {
+                groups: [defaultGroup.id],
+                roleType: 'admin',
+                allGroups: false,
+              },
+              elasticsearchUser: {
+                username: elasticsearchUsers[0].username,
+                email: elasticsearchUsers[0].email,
+              },
+            }),
+          }
+        );
+        await nextTick();
+
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
+        expect(setUserCreatedSpy).toHaveBeenCalled();
+        expect(setSingleUserRoleMappingSpy).toHaveBeenCalled();
+      });
+
+      it('calls API and refreshes list when existing mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
+        RoleMappingsLogic.actions.setSingleUserRoleMapping(wsSingleUserRoleMapping);
+        RoleMappingsLogic.actions.handleAllGroupsSelectionChange(true);
+
+        http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.handleSaveUser();
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/workplace_search/org/single_user_role_mapping',
+          {
+            body: JSON.stringify({
+              roleMapping: {
+                groups: [],
+                roleType: 'admin',
+                allGroups: true,
+                id: wsSingleUserRoleMapping.roleMapping.id,
+              },
+              elasticsearchUser: {
+                username: '',
+                email: '',
+              },
+            }),
+          }
+        );
+        await nextTick();
+
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
+      });
+
+      it('handles error', async () => {
+        const setRoleMappingErrorsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setRoleMappingErrors'
+        );
+
+        http.post.mockReturnValue(
+          Promise.reject({
+            body: {
+              attributes: {
+                errors: ['this is an error'],
+              },
+            },
+          })
+        );
+        RoleMappingsLogic.actions.handleSaveUser();
+        await nextTick();
+
+        expect(setRoleMappingErrorsSpy).toHaveBeenCalledWith(['this is an error']);
+      });
+    });
+
     describe('handleDeleteMapping', () => {
       const roleMappingId = 'r1';
 
