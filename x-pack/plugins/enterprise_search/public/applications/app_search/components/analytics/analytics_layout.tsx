@@ -10,15 +10,12 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
-
-import { FlashMessages } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
-import { Loading } from '../../../shared/loading';
+import { AppSearchPageTemplate } from '../layout';
 
-import { LogRetentionCallout, LogRetentionOptions } from '../log_retention';
+import { LogRetentionTooltip, LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
-import { AnalyticsHeader } from './components';
+import { AnalyticsFilters } from './components';
 
 import { AnalyticsLogic } from './';
 
@@ -43,15 +40,20 @@ export const AnalyticsLayout: React.FC<Props> = ({
     if (isAnalyticsView) loadAnalyticsData();
   }, [history.location.search]);
 
-  if (dataLoading) return <Loading />;
-
   return (
-    <>
-      <AnalyticsHeader title={title} />
-      <FlashMessages />
+    <AppSearchPageTemplate
+      pageHeader={{
+        pageTitle: title,
+        rightSideItems: [
+          <LogRetentionTooltip type={LogRetentionOptions.Analytics} position="left" />,
+        ],
+        children: <AnalyticsFilters />,
+        responsive: false,
+      }}
+      isLoading={dataLoading}
+    >
       <LogRetentionCallout type={LogRetentionOptions.Analytics} />
       {children}
-      <EuiSpacer />
-    </>
+    </AppSearchPageTemplate>
   );
 };
