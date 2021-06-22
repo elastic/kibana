@@ -395,17 +395,16 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
 
   return (
     <>
-      <EuiFlyoutHeader>
-        <EuiTitle data-test-subj="flyoutTitle">
-          <h2>Create index pattern</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item>
-          {/* <EuiFlyoutBody> */}
           {/*
           possibly break out into own component
         */}
+          {/* <EuiFlyoutHeader> */}
+          <EuiTitle data-test-subj="flyoutTitle">
+            <h2>Create index pattern</h2>
+          </EuiTitle>
+          {/* </EuiFlyoutHeader> */}
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
             <EuiFlexGroup>
@@ -464,6 +463,37 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
           </Form>
           {/* </EuiFlyoutBody> */}
           {/* modal */}
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  flush="left"
+                  onClick={onCancel}
+                  data-test-subj="closeFlyoutButton"
+                >
+                  {i18nTexts.closeButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={onClickSave}
+                  data-test-subj="saveIndexPatternButton"
+                  fill
+                  disabled={
+                    !isValid ||
+                    !exactMatchedIndices.length ||
+                    !!indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices) // todo display errors
+                  }
+                  // isLoading={isSavingField || isValidating}
+                >
+                  {i18nTexts.saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </FlyoutPanels.Item>
         <FlyoutPanels.Item>
           {renderStatusMessage(matchedIndices)}
@@ -471,37 +501,6 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
           {renderIndexList()}
         </FlyoutPanels.Item>
       </FlyoutPanels.Group>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              flush="left"
-              onClick={onCancel}
-              data-test-subj="closeFlyoutButton"
-            >
-              {i18nTexts.closeButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              onClick={onClickSave}
-              data-test-subj="saveIndexPatternButton"
-              fill
-              disabled={
-                !isValid ||
-                !exactMatchedIndices.length ||
-                !!indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices) // todo display errors
-              }
-              // isLoading={isSavingField || isValidating}
-            >
-              {i18nTexts.saveButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </>
   );
 };
