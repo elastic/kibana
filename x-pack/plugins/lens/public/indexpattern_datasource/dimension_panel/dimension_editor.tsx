@@ -750,7 +750,7 @@ function getErrorMessage(
   if (selectedColumn && incompleteOperation) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'To use this function, select a different field.',
+        defaultMessage: 'This field does not work with the selected function.',
       });
     }
     return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
