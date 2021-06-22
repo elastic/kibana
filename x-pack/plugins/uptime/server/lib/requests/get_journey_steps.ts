@@ -87,7 +87,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
   const stepsWithoutImages: Array<t.TypeOf<typeof ResultHit>> = [];
 
   /**
-   * Store screenshot indexes for later tagging.
+   * Store screenshot indexes, we use these to determine if a step has a screenshot below.
    * Store steps that are not screenshots, we return these to the client.
    */
   for (const step of steps) {
