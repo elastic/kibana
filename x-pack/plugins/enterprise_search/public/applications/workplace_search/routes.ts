@@ -88,7 +88,7 @@ export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
 export const SOURCE_SCHEMAS_PATH = `${SOURCES_PATH}/:sourceId/schemas`;
 export const SOURCE_DISPLAY_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/display_settings`;
 export const SOURCE_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/settings`;
-export const REINDEX_JOB_PATH = `${SOURCES_PATH}/:sourceId/schema_errors/:activeReindexJobId`;
+export const REINDEX_JOB_PATH = `${SOURCE_SCHEMAS_PATH}/:activeReindexJobId`;
 
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result_detail`;
