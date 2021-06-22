@@ -94,6 +94,11 @@ export const EngineRouter: React.FC = () => {
       <Route exact path={ENGINE_PATH}>
         <EngineOverview />
       </Route>
+      {canViewEngineAnalytics && (
+        <Route path={ENGINE_ANALYTICS_PATH}>
+          <AnalyticsRouter />
+        </Route>
+      )}
       {canViewEngineDocuments && (
         <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
           <DocumentDetail />
@@ -106,11 +111,6 @@ export const EngineRouter: React.FC = () => {
       )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
-        {canViewEngineAnalytics && (
-          <Route path={ENGINE_ANALYTICS_PATH}>
-            <AnalyticsRouter />
-          </Route>
-        )}
         {canViewEngineSchema && (
           <Route path={ENGINE_SCHEMA_PATH}>
             <SchemaRouter />
