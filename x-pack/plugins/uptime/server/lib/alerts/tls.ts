@@ -41,13 +41,14 @@ const mapCertsToSummaryString = (
 const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
   if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
   const relativeDate = moment().diff(date, 'days');
+  const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
-        summary: tlsTranslations.validAfterExpiredString(date, relativeDate),
+        summary: tlsTranslations.validAfterExpiredString(formattedDate, relativeDate),
         status: tlsTranslations.expiredLabel,
       }
     : {
-        summary: tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate)),
+        summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
         status: tlsTranslations.expiringLabel,
       };
 };
@@ -55,13 +56,14 @@ const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
 const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
   if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
   const relativeDate = moment().diff(date, 'days');
+  const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
-        summary: tlsTranslations.validBeforeExpiredString(date, relativeDate),
+        summary: tlsTranslations.validBeforeExpiredString(formattedDate, relativeDate),
         status: tlsTranslations.agingLabel,
       }
     : {
-        summary: tlsTranslations.validBeforeExpiringString(date, Math.abs(relativeDate)),
+        summary: tlsTranslations.validBeforeExpiringString(formattedDate, Math.abs(relativeDate)),
         status: tlsTranslations.invalidLabel,
       };
 };
@@ -135,16 +137,8 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
 
       const foundCerts = total > 0;
 
-      const uniqueCerts = certs.reduce<Cert[]>((uniqueCertArray, currentCert) => {
-        if (!uniqueCertArray.find((cert) => cert.common_name === currentCert.common_name)) {
-          uniqueCertArray.push(currentCert);
-        }
-
-        return uniqueCertArray;
-      }, []);
-
       if (foundCerts) {
-        uniqueCerts.forEach((cert) => {
+        certs.forEach((cert) => {
           const absoluteExpirationThreshold = moment()
             .add(
               dynamicSettings.certExpirationThreshold ??
