@@ -78,7 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Generate CSV: new search', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana'); // reload the archive to wipe out changes made by each test
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+        );
         await PageObjects.common.navigateToApp('discover');
       });
 
@@ -155,12 +157,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+        );
       });
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+        );
       });
 
       beforeEach(() => PageObjects.common.navigateToApp('discover'));

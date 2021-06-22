@@ -22,6 +22,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
@@ -32,11 +33,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+    await kibanaServer.importExport.load(
+      'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+    );
   };
   const teardownEcommerce = async () => {
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+    await kibanaServer.importExport.unload(
+      'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+    );
     await deleteAllReports();
   };
 

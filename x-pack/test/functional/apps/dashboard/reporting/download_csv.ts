@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
@@ -67,11 +68,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('E-Commerce Data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+        );
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
+        );
       });
 
       it('Download CSV export of a saved search panel', async function () {
