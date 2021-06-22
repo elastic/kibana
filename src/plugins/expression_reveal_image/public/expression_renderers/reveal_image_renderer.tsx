@@ -12,7 +12,6 @@ import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plug
 import { withSuspense } from '../../../presentation_util/public';
 import { getRendererStrings } from '../../common/i18n';
 import { RevealImageRendererConfig } from '../../common/types';
-import './reveal_image.scss';
 
 const { revealImage: revealImageStrings } = getRendererStrings();
 
