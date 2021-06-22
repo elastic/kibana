@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import { EuiIconTip, EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
@@ -45,8 +45,6 @@ interface Props {
   initializeRoleMapping(roleMappingId: string): void;
   handleDeleteMapping(roleMappingId: string): void;
 }
-
-const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
 const getAuthProviderDisplayValue = (authProvider: string) =>
   authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_OPTION_LABEL : authProvider;
