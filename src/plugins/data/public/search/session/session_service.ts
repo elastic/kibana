@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionStateInternal,
   SessionMeta,
   SessionStateContainer,
 } from './search_session_state';
@@ -34,6 +35,11 @@ export type ISessionService = PublicContract<SessionService>;
 export interface TrackSearchDescriptor {
   abort: () => void;
 }
+
+/**
+ * Represents a search session state in {@link SessionService} in any given moment of time
+ */
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -88,6 +94,13 @@ export class SessionService {
 
   private toastService?: ToastService;
 
+  /**
+   * Holds snapshot of last cleared session so that it can be continued
+   * Can be used to re-use a session between apps
+   * @private
+   */
+  private lastSessionSnapshot?: SessionSnapshot;
+
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
@@ -128,6 +141,21 @@ export class SessionService {
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
           this.currentApp = newAppName;
+          if (!this.getSessionId()) return;
+
+          // Apps required to clean up their sessions before unmounting
+          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
+          const message = `Application '${
+            this.state.get().appName
+          }' had an open session while navigating`;
+          if (initializerContext.env.mode.dev) {
+            coreStart.fatalErrors.add(message);
+          } else {
+            // this should never happen in prod because should be caught in dev mode
+            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
+            // eslint-disable-next-line no-console
+            console.warn(message);
+          }
         })
       );
     });
@@ -158,6 +186,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
+    this.lastSessionSnapshot = undefined;
   }
 
   /**
@@ -198,7 +227,9 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
     this.state.transitions.start({ appName: this.currentApp });
+
     return this.getSessionId()!;
   }
 
@@ -212,9 +243,29 @@ export class SessionService {
   }
 
   /**
+   * Continue previous search session
+   * Can be used to share a search session between different apps
+   * @param sessionId
+   */
+  public continue(sessionId: string) {
+    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.state.set(this.lastSessionSnapshot);
+      this.lastSessionSnapshot = undefined;
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
+      );
+    }
+  }
+
+  /**
    * Cleans up current state
    */
   public clear() {
+    if (this.getSessionId()) {
+      this.lastSessionSnapshot = this.state.get();
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

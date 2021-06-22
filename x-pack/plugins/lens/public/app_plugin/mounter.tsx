@@ -149,6 +149,7 @@ export async function mountApp(
           embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
           input,
+          searchSessionId: data.search.session.getSessionId(),
         },
       });
     } else {
@@ -166,6 +167,11 @@ export async function mountApp(
   if (!initialContext) {
     data.query.filterManager.setAppFilters([]);
   }
+
+  if (embeddableEditorIncomingState?.searchSessionId) {
+    data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
+  }
+
   const preloadedState = getPreloadedState({
     query: data.query.queryString.getQuery(),
     // Do not use app-specific filters from previous app,
@@ -264,6 +270,7 @@ export async function mountApp(
     params.element
   );
   return () => {
+    data.search.session.clear();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
@@ -299,6 +306,7 @@ export function loadDocument(
     (newState) => {
       if (newState) {
         const { doc, indexPatterns } = newState;
+
         const currentSessionId = data.search.session.getSessionId();
         lensStore.dispatch(
           setState({

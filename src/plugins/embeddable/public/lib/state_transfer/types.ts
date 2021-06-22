@@ -19,6 +19,12 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   embeddableId?: string;
   valueInput?: EmbeddableInput;
+
+  /**
+   * Pass current search session id when navigating to an editor,
+   * Editors could use it continue previous search session
+   */
+  searchSessionId?: string;
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
@@ -35,6 +41,12 @@ export interface EmbeddablePackageState {
   type: string;
   input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
   embeddableId?: string;
+
+  /**
+   * Pass current search session id when navigating to an editor,
+   * Editors could use it continue previous search session
+   */
+  searchSessionId?: string;
 }
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
