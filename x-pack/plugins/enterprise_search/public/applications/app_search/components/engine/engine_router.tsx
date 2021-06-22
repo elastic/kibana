@@ -114,6 +114,16 @@ export const EngineRouter: React.FC = () => {
           <SchemaRouter />
         </Route>
       )}
+      {canManageEngineRelevanceTuning && (
+        <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
+          <RelevanceTuning />
+        </Route>
+      )}
+      {canManageEngineResultSettings && (
+        <Route path={ENGINE_RESULT_SETTINGS_PATH}>
+          <ResultSettings />
+        </Route>
+      )}
       {canManageEngineSearchUi && (
         <Route path={ENGINE_SEARCH_UI_PATH}>
           <SearchUI />
@@ -131,19 +141,9 @@ export const EngineRouter: React.FC = () => {
             <CurationsRouter />
           </Route>
         )}
-        {canManageEngineRelevanceTuning && (
-          <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
-            <RelevanceTuning />
-          </Route>
-        )}
         {canManageEngineSynonyms && (
           <Route path={ENGINE_SYNONYMS_PATH}>
             <Synonyms />
-          </Route>
-        )}
-        {canManageEngineResultSettings && (
-          <Route path={ENGINE_RESULT_SETTINGS_PATH}>
-            <ResultSettings />
           </Route>
         )}
         {canViewMetaEngineSourceEngines && (
