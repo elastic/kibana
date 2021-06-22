@@ -18,6 +18,12 @@ export {
   useHTTPSimpleFieldsContext,
 } from './http_context';
 export {
+  HTTPAdvancedFieldsContext,
+  HTTPAdvancedFieldsContextProvider,
+  initialValues as defaultHTTPAdvancedFields,
+  useHTTPAdvancedFieldsContext,
+} from './advanced_fields_http_context';
+export {
   TCPSimpleFieldsContext,
   TCPSimpleFieldsContextProvider,
   initialValues as defaultTCPSimpleFields,
@@ -36,11 +42,11 @@ export {
   useTCPAdvancedFieldsContext,
 } from './advanced_fields_tcp_context';
 export {
-  HTTPAdvancedFieldsContext,
-  HTTPAdvancedFieldsContextProvider,
-  initialValues as defaultHTTPAdvancedFields,
-  useHTTPAdvancedFieldsContext,
-} from './advanced_fields_http_context';
+  BrowserSimpleFieldsContext,
+  BrowserSimpleFieldsContextProvider,
+  initialValues as defaultBrowserSimpleFields,
+  useBrowserSimpleFieldsContext,
+} from './browser_context';
 export {
   TLSFieldsContext,
   TLSFieldsContextProvider,
