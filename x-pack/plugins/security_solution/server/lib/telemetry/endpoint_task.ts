@@ -144,6 +144,8 @@ export class TelemetryEndpointTask {
       const policyConfig = endpointPolicyCache.get(policyInformation?.policy_id!);
 
       return {
+        endpoint_id: hit._source?.agent.id,
+        fleet_agent_id: hit._source?.elastic.agent.id,
         policy_response_failure: hit._source?.Endpoint.policy.applied,
         policy_config: policyConfig,
       };

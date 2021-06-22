@@ -6,10 +6,15 @@
  */
 
 export interface EndpointMetricsPolicyResponse {
+  agent: EndpointAgent;
   Endpoint: EndpointPolicyResponse;
   elastic: EndpointPolicyAgent;
   host: EndpointPolicyHost;
   event: EndpointPolicyEvent;
+}
+
+interface EndpointAgent {
+  id: string;
 }
 
 interface EndpointPolicyResponse {
