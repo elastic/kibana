@@ -141,7 +141,7 @@ export const EngineRouter: React.FC = () => {
       )}
       {canViewEngineApiLogs && (
         <Route path={ENGINE_API_LOGS_PATH}>
-          <ApiLogs />master
+          <ApiLogs />
         </Route>
       )}
       {/* TODO: Remove layout once page template migration is over */}
