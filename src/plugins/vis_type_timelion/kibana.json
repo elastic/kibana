@@ -5,5 +5,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["visualizations", "data", "expressions"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Registers the timelion visualization. Also contains the backend for both timelion app and timelion visualization."
 }

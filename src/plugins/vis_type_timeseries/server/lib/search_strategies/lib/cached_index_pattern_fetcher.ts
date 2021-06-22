@@ -13,12 +13,19 @@ import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/
 
 export const getCachedIndexPatternFetcher = (
   indexPatternsService: IndexPatternsService,
-  fetchKibanaIndexForStringIndexes: boolean = false
+  globalOptions: {
+    fetchKibanaIndexForStringIndexes: boolean;
+  } = {
+    fetchKibanaIndexForStringIndexes: false,
+  }
 ) => {
   const cache = new Map();
 
-  return async (indexPatternValue: IndexPatternValue): Promise<FetchedIndexPattern> => {
-    const key = getIndexPatternKey(indexPatternValue);
+  return async (
+    indexPatternValue: IndexPatternValue,
+    fetchKibanaIndexForStringIndexes: boolean = globalOptions.fetchKibanaIndexForStringIndexes
+  ): Promise<FetchedIndexPattern> => {
+    const key = `${getIndexPatternKey(indexPatternValue)}:${fetchKibanaIndexForStringIndexes}`;
 
     if (cache.has(key)) {
       return cache.get(key);

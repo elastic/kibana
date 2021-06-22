@@ -53,6 +53,7 @@ import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
+import { JsonValue } from '@kbn/common-utils';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
@@ -258,6 +259,7 @@ export class AggConfigs {
     getRequestAggById(id: string): AggConfig | undefined;
     // (undocumented)
     getRequestAggs(): AggConfig[];
+    getResolvedTimeRange(): import("../..").TimeRangeBounds | undefined;
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
@@ -856,7 +858,7 @@ export const esFilters: {
 export const esKuery: {
     nodeTypes: import("../common/es_query/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: any, parseOptions?: Partial<import("../common").KueryParseOptions>) => import("../common").KueryNode;
-    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IIndexPattern | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("../../kibana_utils/common").JsonObject;
+    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IIndexPattern | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

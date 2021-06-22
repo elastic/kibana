@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
@@ -67,7 +67,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
         <FieldValueSuggestions
           label={labels[field]}
           sourceField={field}
-          indexPattern={indexPattern}
+          indexPatternTitle={indexPattern.title}
           selectedValue={selectedReportDefinitions?.[field]}
           onChange={(val?: string[]) => onChange(field, val)}
           filters={queryFilters}

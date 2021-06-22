@@ -15,6 +15,7 @@ import { Root } from '../../../root';
 const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -110,11 +111,13 @@ describe('migration v2 with corrupt saved object documents', () => {
       const errorMessage = err.message;
       expect(
         errorMessage.startsWith(
-          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: '
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 19 corrupt saved object documents were found: '
         )
       ).toBeTruthy();
       expect(
-        errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
+        errorMessage.endsWith(
+          'To allow migrations to proceed, please delete or fix these documents.'
+        )
       ).toBeTruthy();
       const expectedCorruptDocIds = [
         '"foo:my_name"',

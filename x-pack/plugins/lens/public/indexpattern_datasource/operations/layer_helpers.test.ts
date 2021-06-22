@@ -117,7 +117,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX2',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'math' as const,
         params: { tinymathAst: 'formulaX2' },
         references: ['formulaX2'],
@@ -126,7 +126,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX0',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
         scale: 'ratio' as const,
         sourceField: 'bytes',
@@ -135,7 +135,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX2',
+        label: 'Part of moving_average(sum(bytes), window=5)',
         operationType: 'moving_average' as const,
         params: { window: 5 },
         references: ['formulaX0'],
@@ -152,7 +152,7 @@ describe('state_helpers', () => {
               formulaX2: movingAvg,
               formulaX3: {
                 ...math,
-                label: 'formulaX3',
+                label: 'Part of moving_average(sum(bytes), window=5)',
                 references: ['formulaX2'],
                 params: { tinymathAst: 'formulaX2' },
               },
@@ -185,26 +185,24 @@ describe('state_helpers', () => {
           formulaX2: movingAvg,
           formulaX3: {
             ...math,
-            label: 'formulaX3',
             references: ['formulaX2'],
             params: { tinymathAst: 'formulaX2' },
           },
           copy: expect.objectContaining({ ...source, references: ['copyX3'] }),
-          copyX0: expect.objectContaining({ ...sum, label: 'copyX0' }),
+          copyX0: expect.objectContaining({
+            ...sum,
+          }),
           copyX1: expect.objectContaining({
             ...math,
-            label: 'copyX1',
             references: ['copyX0'],
             params: { tinymathAst: 'copyX0' },
           }),
           copyX2: expect.objectContaining({
             ...movingAvg,
-            label: 'copyX2',
             references: ['copyX1'],
           }),
           copyX3: expect.objectContaining({
             ...math,
-            label: 'copyX3',
             references: ['copyX2'],
             params: { tinymathAst: 'copyX2' },
           }),
@@ -583,6 +581,46 @@ describe('state_helpers', () => {
           visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+    });
+
+    it('should inherit filters from the incomplete column when passed', () => {
+      expect(
+        insertNewColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Date histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+              },
+            },
+          },
+          columnId: 'col2',
+          indexPattern,
+          op: 'average',
+          field: indexPattern.fields[2],
+          visualizationGroups: [],
+          incompleteParams: { filter: { language: 'kuery', query: '' }, timeShift: '3d' },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col2: expect.objectContaining({
+              filter: { language: 'kuery', query: '' },
+              timeShift: '3d',
+            }),
+          }),
+        })
+      );
     });
 
     describe('inserting a new reference', () => {

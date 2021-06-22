@@ -13,12 +13,13 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../shared/licensing';
-import { Loading } from '../../../shared/loading';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { AppLogic } from '../../app_logic';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
+import { PersonalDashboardLayout } from '../../components/layout';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
+import { NAV } from '../../constants';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 import { toSentenceSerial } from '../../utils';
 
@@ -52,8 +53,6 @@ export const PrivateSources: React.FC = () => {
   const {
     account: { canCreatePersonalSources, groups },
   } = useValues(AppLogic);
-
-  if (dataLoading) return <Loading />;
 
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
@@ -144,10 +143,12 @@ export const PrivateSources: React.FC = () => {
   );
 
   return (
-    <SourcesView>
-      {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canCreatePersonalSources && privateSourcesSection}
-      {sharedSourcesSection}
-    </SourcesView>
+    <PersonalDashboardLayout pageChrome={[NAV.SOURCES]} isLoading={dataLoading}>
+      <SourcesView>
+        {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
+        {canCreatePersonalSources && privateSourcesSection}
+        {sharedSourcesSection}
+      </SourcesView>
+    </PersonalDashboardLayout>
   );
 };
