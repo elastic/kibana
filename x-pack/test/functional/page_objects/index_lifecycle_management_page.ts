@@ -49,6 +49,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
           await testSubjects.click('enablePhaseSwitch-frozen');
         });
         await testSubjects.setValue('frozen-selectedMinimumAge', minAges.frozen.value);
+        await testSubjects.setValue('searchableSnapshotCombobox', snapshotRepository);
       }
       if (deletePhaseEnabled) {
         await retry.try(async () => {
@@ -66,7 +67,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
       frozenEnabled: boolean = false,
       deletePhaseEnabled: boolean = false,
       snapshotRepository: string = 'test',
-      minAges: { [key: string]: { value: string; unit: string } }
+      minAges?: { [key: string]: { value: string; unit: string } }
     ) {
       await testSubjects.click('createPolicyButton');
       await this.fillNewPolicyForm(

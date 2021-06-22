@@ -8,15 +8,22 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const policyName = 'testPolicy1';
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const esClient = getService('es');
 
   describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
+    });
+    after(async () => {
+      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
+      await esClient.ilm.deleteLifecycle({ policy: policyName });
     });
 
     it('Loads the app', async () => {
@@ -28,13 +35,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await createPolicyButton.isDisplayed()).to.be(true);
     });
 
-    it('Create new policy with Warm and Cold Phases', async () => {
-      const policyName = 'testPolicy1';
+    it('Create new policy with all Phases', async () => {
       await pageObjects.indexLifecycleManagement.createNewPolicyAndSave(
         policyName,
         true,
         true,
-        false
+        true,
+        true
       );
 
       await retry.waitFor('navigation back to home page.', async () => {
