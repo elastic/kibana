@@ -131,7 +131,7 @@ export function isRefResult(data: unknown): data is RefResult {
 }
 
 /**
- * Represents the result of querying for the old-style full screenshot blob.
+ * Represents the result of querying for the legacy-style full screenshot blob.
  */
 export const ScreenshotImageBlobType = t.type({
   stepName: t.union([t.null, t.string]),
@@ -145,6 +145,9 @@ export function isScreenshotImageBlob(data: unknown): data is ScreenshotImageBlo
   return isRight(ScreenshotImageBlobType.decode(data));
 }
 
+/**
+ * Represents the block blobs stored by hash. These documents are used to recompose synthetics images.
+ */
 export const ScreenshotBlockDocType = t.type({
   id: t.string,
   synthetics: t.type({
