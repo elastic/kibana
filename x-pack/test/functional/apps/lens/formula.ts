@@ -102,18 +102,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
-        operation: 'formula',
-        formula: `unique_count(`,
+        operation: 'unique_count',
+        field: `*`,
         keepOpen: true,
       });
 
+      await PageObjects.lens.switchToFormula();
+      let element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(`unique_count('*\\' "\\'')`);
+
       const input = await find.activeElement();
+      await input.clearValueWithKeyboard({ charByChar: true });
+      await input.type('unique_count(');
+      await PageObjects.common.sleep(100);
       await input.type('*');
       await input.pressKeys(browser.keys.ENTER);
 
       await PageObjects.common.sleep(100);
 
-      const element = await find.byCssSelector('.monaco-editor');
+      element = await find.byCssSelector('.monaco-editor');
       expect(await element.getVisibleText()).to.equal(`unique_count('*\\' "\\'')`);
     });
 
