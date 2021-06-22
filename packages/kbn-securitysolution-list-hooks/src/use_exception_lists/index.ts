@@ -53,7 +53,8 @@ export const useExceptionLists = ({
 
   const namespaceTypesAsString = useMemo(() => namespaceTypes.join(','), [namespaceTypes]);
   const filters = useMemo(
-    (): string => getFilters(filterOptions, namespaceTypes, showTrustedApps, showEventFilters),
+    (): string =>
+      getFilters({ filters: filterOptions, namespaceTypes, showTrustedApps, showEventFilters }),
     [namespaceTypes, filterOptions, showTrustedApps, showEventFilters]
   );
 
