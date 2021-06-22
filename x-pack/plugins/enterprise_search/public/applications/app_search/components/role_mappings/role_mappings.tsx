@@ -9,11 +9,10 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
+import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
 import { RoleMapping } from './role_mapping';
@@ -38,11 +37,12 @@ export const RoleMappings: React.FC = () => {
     return resetState;
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const roleMappingsSection = (
-    <>
-      <RoleMappingsHeading productName="App Search" onClick={() => initializeRoleMapping()} />
+    <section>
+      <RoleMappingsHeading
+        productName={APP_SEARCH_PLUGIN.NAME}
+        onClick={() => initializeRoleMapping()}
+      />
       <RoleMappingsTable
         roleMappings={roleMappings}
         accessItemKey="engines"
@@ -51,15 +51,17 @@ export const RoleMappings: React.FC = () => {
         shouldShowAuthProvider={multipleAuthProvidersConfig}
         handleDeleteMapping={handleDeleteMapping}
       />
-    </>
+    </section>
   );
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
+    <AppSearchPageTemplate
+      pageChrome={[ROLE_MAPPINGS_TITLE]}
+      pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
+      isLoading={dataLoading}
+    >
       {roleMappingFlyoutOpen && <RoleMapping />}
-      <FlashMessages />
       {roleMappingsSection}
-    </>
+    </AppSearchPageTemplate>
   );
 };

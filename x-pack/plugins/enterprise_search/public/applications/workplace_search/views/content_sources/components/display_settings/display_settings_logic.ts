@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DropResult } from 'react-beautiful-dnd';
-
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual, differenceBy } from 'lodash';
+
+import { DropResult } from '@elastic/eui';
 
 import {
   setSuccessMessage,

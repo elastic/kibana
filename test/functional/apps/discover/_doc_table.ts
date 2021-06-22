@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
-      it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table with `, async function () {
+      it('should load more rows when scrolling down the document table', async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         await testSubjects.scrollIntoView('discoverBackToTop');
         // now count the rows
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
-      it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table with `, async function () {
+      it('should load more rows when scrolling down the document table', async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         await testSubjects.scrollIntoView('discoverBackToTop');
         // now count the rows
@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const scrollWidth = await dscTable.getAttribute('scrollWidth');
           const clientWidth = await dscTable.getAttribute('clientWidth');
           log.debug(`scrollWidth: ${scrollWidth}, clientWidth: ${clientWidth}`);
-          return scrollWidth > clientWidth;
+          return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
           await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);

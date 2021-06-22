@@ -306,6 +306,7 @@ export type TestSubjects =
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
+  | 'legacyIndexTemplateDeprecationWarning'
   | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'

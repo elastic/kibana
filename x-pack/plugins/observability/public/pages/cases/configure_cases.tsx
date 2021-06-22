@@ -14,8 +14,8 @@ import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants'
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { getCaseUrl, useFormatUrl } from './links';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -23,22 +23,23 @@ const ButtonEmpty = styled(EuiButtonEmpty)`
 function ConfigureCasesPageComponent() {
   const {
     cases,
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const onClickGoToCases = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(`${CASES_APP_ID}`);
+      return navigateToUrl(casesUrl);
     },
-    [navigateToApp]
+    [casesUrl, navigateToUrl]
   );
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.configure]);
   if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(`${CASES_APP_ID}`);
+    navigateToUrl(casesUrl);
     return null;
   }
 

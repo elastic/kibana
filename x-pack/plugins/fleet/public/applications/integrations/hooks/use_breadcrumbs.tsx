@@ -22,14 +22,7 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
 const breadcrumbGetters: {
   [key in Page]?: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
 } = {
-  integrations: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-        defaultMessage: 'Integrations',
-      }),
-    },
-  ],
+  integrations: () => [BASE_BREADCRUMB],
   integrations_all: () => [
     BASE_BREADCRUMB,
     {
