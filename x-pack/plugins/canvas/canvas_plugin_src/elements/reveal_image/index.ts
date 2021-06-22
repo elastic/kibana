@@ -13,8 +13,8 @@ export const revealImage: ElementFactory = () => ({
   type: 'image',
   help: 'Reveals a percentage of an image',
   expression: `filters
-    | demodata
-    | math "mean(percent_uptime)"
-    | revealImage origin=bottom image=null
-    | render`,
+| demodata
+| math "mean(percent_uptime)"
+| revealImage origin=bottom image=null
+| render`,
 });
