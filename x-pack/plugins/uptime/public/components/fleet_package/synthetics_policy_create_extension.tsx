@@ -18,11 +18,13 @@ import {
   HTTPSimpleFieldsContext,
   TCPSimpleFieldsContext,
   ICMPSimpleFieldsContext,
+  BrowserSimpleFieldsContext,
   defaultHTTPAdvancedFields,
   defaultHTTPSimpleFields,
   defaultICMPSimpleFields,
   defaultTCPSimpleFields,
   defaultTCPAdvancedFields,
+  defaultBrowserSimpleFields,
   defaultTLSFields,
 } from './contexts';
 import { CustomFields } from './custom_fields';
@@ -41,6 +43,7 @@ export const defaultConfig: PolicyConfig = {
     ...defaultTLSFields,
   },
   [DataStream.ICMP]: defaultICMPSimpleFields,
+  [DataStream.BROWSER]: defaultBrowserSimpleFields,
 };
 
 /**
@@ -53,6 +56,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
     const { fields: httpSimpleFields } = useContext(HTTPSimpleFieldsContext);
     const { fields: tcpSimpleFields } = useContext(TCPSimpleFieldsContext);
     const { fields: icmpSimpleFields } = useContext(ICMPSimpleFieldsContext);
+    const { fields: browserSimpleFields } = useContext(BrowserSimpleFieldsContext);
     const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
     const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
     const { fields: tlsFields } = useContext(TLSFieldsContext);
@@ -97,9 +101,9 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
                 ...tlsFields,
               };
             case DataStream.ICMP:
-              return {
-                ...icmpSimpleFields,
-              };
+              return icmpSimpleFields;
+            case DataStream.BROWSER:
+              return browserSimpleFields;
           }
         });
       },
@@ -109,6 +113,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
         httpSimpleFields,
         tcpSimpleFields,
         icmpSimpleFields,
+        browserSimpleFields,
         httpAdvancedFields,
         tcpAdvancedFields,
         tlsFields,

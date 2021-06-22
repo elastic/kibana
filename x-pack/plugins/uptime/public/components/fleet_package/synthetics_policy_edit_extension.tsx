@@ -17,6 +17,7 @@ import {
   useHTTPSimpleFieldsContext,
   useHTTPAdvancedFieldsContext,
   useTLSFieldsContext,
+  useBrowserSimpleFieldsContext,
 } from './contexts';
 import { PolicyConfig, DataStream } from './types';
 import { CustomFields } from './custom_fields';
@@ -44,6 +45,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
     const { fields: httpAdvancedFields } = useHTTPAdvancedFieldsContext();
     const { fields: tcpAdvancedFields } = useTCPAdvancedFieldsContext();
     const { fields: tlsFields } = useTLSFieldsContext();
+    const { fields: browserSimpleFields } = useBrowserSimpleFieldsContext();
     const { setConfig } = useUpdatePolicy({
       defaultConfig,
       newPolicy,
@@ -72,6 +74,10 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
               return {
                 ...icmpSimpleFields,
               };
+            case DataStream.BROWSER:
+              return {
+                ...browserSimpleFields,
+              };
           }
         });
       },
@@ -83,6 +89,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
         tcpSimpleFields,
         tcpAdvancedFields,
         icmpSimpleFields,
+        browserSimpleFields,
         tlsFields,
       ]
     );

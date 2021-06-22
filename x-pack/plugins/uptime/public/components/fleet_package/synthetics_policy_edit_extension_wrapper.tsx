@@ -20,13 +20,15 @@ import {
   MonitorTypeContextProvider,
   HTTPContextProvider,
   TCPContextProvider,
+  ICMPSimpleFieldsContextProvider,
+  BrowserSimpleFieldsContextProvider,
   defaultTCPSimpleFields,
   defaultHTTPSimpleFields,
   defaultICMPSimpleFields,
+  defaultBrowserSimpleFields,
   defaultHTTPAdvancedFields,
   defaultTCPAdvancedFields,
   defaultTLSFields,
-  ICMPSimpleFieldsContextProvider,
 } from './contexts';
 
 /**
@@ -48,6 +50,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           ...defaultTLSFields,
         },
         [DataStream.ICMP]: defaultICMPSimpleFields,
+        [DataStream.BROWSER]: defaultBrowserSimpleFields,
       };
       let enableTLS = false;
       const getDefaultConfig = () => {
@@ -162,12 +165,14 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         <HTTPContextProvider defaultValues={defaultConfig[DataStream.HTTP]}>
           <TCPContextProvider defaultValues={defaultConfig[DataStream.TCP]}>
             <ICMPSimpleFieldsContextProvider defaultValues={defaultConfig[DataStream.ICMP]}>
-              <SyntheticsPolicyEditExtension
-                newPolicy={newPolicy}
-                onChange={onChange}
-                defaultConfig={defaultConfig}
-                isTLSEnabled={isTLSEnabled}
-              />
+              <BrowserSimpleFieldsContextProvider defaultValues={defaultConfig[DataStream.BROWSER]}>
+                <SyntheticsPolicyEditExtension
+                  newPolicy={newPolicy}
+                  onChange={onChange}
+                  defaultConfig={defaultConfig}
+                  isTLSEnabled={isTLSEnabled}
+                />
+              </BrowserSimpleFieldsContextProvider>
             </ICMPSimpleFieldsContextProvider>
           </TCPContextProvider>
         </HTTPContextProvider>
