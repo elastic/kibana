@@ -525,10 +525,6 @@ export function replaceColumn({
     }
 
     if (!field) {
-      // if no field is available perform a full clean of the column from the layer
-      // if (previousDefinition.input === 'fullReference') {
-      //   tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
-      // }
       return {
         ...tempLayer,
         incompleteColumns: {
