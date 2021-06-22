@@ -74,6 +74,9 @@ export function HeatmapDimensionEditor(
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="lnsHeatmap_dynamicColoring_trigger"
+            aria-label={i18n.translate('xpack.lens.paletteHeatmapGradient.customizeLong', {
+              defaultMessage: 'Edit palette',
+            })}
             iconType="controlsHorizontal"
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);
