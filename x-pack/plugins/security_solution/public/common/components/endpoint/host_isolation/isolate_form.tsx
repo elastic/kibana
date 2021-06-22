@@ -11,8 +11,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
-  EuiSpacer,
+  EuiForm,
+  EuiFormRow,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
@@ -41,63 +41,62 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
     );
 
     return (
-      <>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
-              defaultMessage="Isolate host {hostName} from network."
-              values={{ hostName: <b>{hostName}</b> }}
-            />
-            <br />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHostAbout"
-              defaultMessage="Isolating a host will disconnect it from the network. The host will only be able to communicate with the Kibana platform."
-            />{' '}
-            {messageAppend}
-          </p>
-        </EuiText>
+      <EuiForm>
+        <EuiFormRow fullWidth>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
+                defaultMessage="Isolate host {hostName} from network."
+                values={{ hostName: <b>{hostName}</b> }}
+              />
+              <br />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHostAbout"
+                defaultMessage="Isolating a host will disconnect it from the network. The host will only be able to communicate with the Kibana platform."
+              />{' '}
+              {messageAppend}
+            </p>
+          </EuiText>
+        </EuiFormRow>
 
-        <EuiSpacer size="m" />
+        <EuiFormRow label={COMMENT} fullWidth>
+          <EuiTextArea
+            data-test-subj="host_isolation_comment"
+            fullWidth
+            placeholder={COMMENT_PLACEHOLDER}
+            value={comment}
+            onChange={handleCommentChange}
+          />
+        </EuiFormRow>
 
-        <EuiFormLabel>
-          <span>{COMMENT}</span>
-        </EuiFormLabel>
-        <EuiTextArea
-          data-test-subj="host_isolation_comment"
-          fullWidth
-          placeholder={COMMENT_PLACEHOLDER}
-          value={comment}
-          onChange={handleCommentChange}
-        />
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCancel}
-              disabled={isLoading}
-              data-test-subj="hostIsolateCancelButton"
-            >
-              {CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={onConfirm}
-              disabled={isLoading}
-              isLoading={isLoading}
-              data-test-subj="hostIsolateConfirmButton"
-            >
-              {CONFIRM}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                disabled={isLoading}
+                data-test-subj="hostIsolateCancelButton"
+              >
+                {CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onConfirm}
+                disabled={isLoading}
+                isLoading={isLoading}
+                data-test-subj="hostIsolateConfirmButton"
+              >
+                {CONFIRM}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      </EuiForm>
     );
   }
 );
