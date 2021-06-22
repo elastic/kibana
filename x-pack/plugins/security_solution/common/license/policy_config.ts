@@ -30,6 +30,13 @@ export const isEndpointPolicyValidForLicense = (
       return false;
     }
 
+    // only platinum or higher may enable ransomware
+    if (
+      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
+    ) {
+      return false;
+    }
+
     return true; // currently, platinum allows all features
   }
 
@@ -58,6 +65,10 @@ export const isEndpointPolicyValidForLicense = (
   if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
     return false;
   }
+  // only platinum or higher may enable ransomware
+  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
+    return false;
+  }
 
   // only platinum or higher may enable ransomware notification
   if (policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled) {
@@ -74,6 +85,36 @@ export const isEndpointPolicyValidForLicense = (
 
   // only platinum or higher may enable ransomware
   if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+    return false;
+  }
+  //
+  // only platinum or higher may enable memory_protection
+  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
+    return false;
+  }
+  // only platinum or higher may enable memory_protection
+  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
+    return false;
+  }
+
+  // only platinum or higher may enable memory_protection notification
+  if (
+    policy.windows.popup.memory_protection.enabled !==
+    defaults.windows.popup.memory_protection.enabled
+  ) {
+    return false;
+  }
+
+  // Only Platinum or higher may change the memory_protection message (which can be blank or what Endpoint defaults)
+  if (
+    policy.windows.popup.memory_protection.message !== '' &&
+    policy.windows.popup.memory_protection.message !== DefaultPolicyNotificationMessage
+  ) {
+    return false;
+  }
+
+  // only platinum or higher may enable memory_protection
+  if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
     return false;
   }
 
