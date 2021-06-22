@@ -119,6 +119,13 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
       );
     });
 
+    after(() => {
+      swimlaneServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
+    });
+
     describe('Swimlane - Action Creation', () => {
       it('should return 200 when creating a swimlane action successfully', async () => {
         const { body: createdAction } = await supertest
@@ -469,11 +476,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             },
           });
         });
-      });
-      after(() => {
-        if (proxyServer) {
-          proxyServer.close();
-        }
       });
     });
   });
