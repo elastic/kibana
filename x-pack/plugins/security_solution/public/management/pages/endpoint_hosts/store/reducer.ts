@@ -166,7 +166,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     };
   } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
     const paging = {
-      ...action.payload
+      ...action.payload,
     };
     return {
       ...state,

@@ -166,6 +166,7 @@ export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsS
 export interface EndpointDetailsActivityLogUpdatePaging {
   type: 'endpointDetailsActivityLogUpdatePaging';
   payload: {
+    // disable paging when no more data after paging
     disabled: boolean;
     page: number;
     pageSize: number;

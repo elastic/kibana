@@ -236,7 +236,7 @@ describe('endpoint list middleware', () => {
       });
     };
 
-    const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+    const fleetActionGenerator = new FleetActionGenerator('seed');
     const actionData = fleetActionGenerator.generate({
       agents: [endpointList.hosts[0].metadata.agent.id],
     });

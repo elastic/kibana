@@ -31,7 +31,7 @@ import {
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
-const Sentinel = styled.div`
+const LoadMoreTrigger = styled.div`
   height: 6px;
   width: 100%;
 `;
@@ -49,7 +49,7 @@ export const EndpointActivityLog = memo(
       getActivityLogDataPaging
     );
 
-    const fetchMoreSentinel = useRef<HTMLInputElement | null>(null);
+    const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
         const isIntersecting = entries.some((entry) => entry.intersectionRatio > 0);
@@ -70,7 +70,7 @@ export const EndpointActivityLog = memo(
       const observer = new IntersectionObserver(getActivityLog, {
         rootMargin: '-50px',
       });
-      const element = fetchMoreSentinel.current;
+      const element = loadMoreTrigger.current;
       if (element) {
         observer.observe(element);
       }
@@ -106,7 +106,9 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {(!activityLogLoading || !isPagingDisabled) && <Sentinel ref={fetchMoreSentinel} />}
+                {(!activityLogLoading || !isPagingDisabled) && (
+                  <LoadMoreTrigger ref={loadMoreTrigger} />
+                )}
                 {isPagingDisabled && !activityLogLoading && (
                   <EuiText color="subdued" textAlign="center">
                     <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>

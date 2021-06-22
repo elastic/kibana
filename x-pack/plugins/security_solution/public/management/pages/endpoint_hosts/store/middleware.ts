@@ -49,6 +49,7 @@ import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
@@ -343,7 +344,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
       // call the policy response api
       try {
-        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
+        const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
           query: { agentId: selectedEndpoint },
         });
         dispatch({

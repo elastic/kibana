@@ -780,7 +780,7 @@ describe('when on the endpoint list page', () => {
 
       let getMockData: () => ActivityLog;
       beforeEach(async () => {
-        global.IntersectionObserver = jest.fn(() => ({
+        window.IntersectionObserver = jest.fn(() => ({
           root: null,
           rootMargin: '',
           thresholds: [],
@@ -822,10 +822,8 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const hostNameLinks = await renderResult.findAllByTestId('hostnameCellLink');
-        if (hostNameLinks.length) {
-          reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
-        }
+        const hostNameLinks = await renderResult.getAllByTestId('hostnameCellLink');
+        reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
       });
 
       afterEach(reactTestingLibrary.cleanup);
