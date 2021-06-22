@@ -11,10 +11,10 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormLabel,
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM } from './translations';
@@ -48,6 +48,13 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
               id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
               defaultMessage="Isolate host {hostName} from network."
               values={{ hostName: <b>{hostName}</b> }}
+            />
+            <br />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHostAbout"
+              defaultMessage="Isolating a host will disconnect it from the network. The host will only be able to communicate with the Kibana platform."
             />{' '}
             {messageAppend}
           </p>
@@ -55,9 +62,9 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
 
         <EuiSpacer size="m" />
 
-        <EuiTitle size="xs">
-          <h4>{COMMENT}</h4>
-        </EuiTitle>
+        <EuiFormLabel>
+          <span>{COMMENT}</span>
+        </EuiFormLabel>
         <EuiTextArea
           data-test-subj="host_isolation_comment"
           fullWidth
