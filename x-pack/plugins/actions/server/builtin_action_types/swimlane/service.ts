@@ -99,9 +99,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create record in application with id ${appId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
+          `Unable to create record in application with id ${appId}. Status: ${
+            error.response?.status ?? 500
+          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -134,9 +134,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to update record in application with id ${appId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
+          `Unable to update record in application with id ${appId}. Status: ${
+            error.response?.status ?? 500
+          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -180,9 +180,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create comment in application with id ${appId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
+          `Unable to create comment in application with id ${appId}. Status: ${
+            error.response?.status ?? 500
+          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }

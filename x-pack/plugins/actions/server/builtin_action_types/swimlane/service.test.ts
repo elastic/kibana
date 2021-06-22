@@ -202,7 +202,7 @@ describe('Swimlane Service', () => {
       });
 
       await expect(service.createRecord({ incident })).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred.`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
   });
@@ -271,7 +271,7 @@ describe('Swimlane Service', () => {
       });
 
       await expect(service.updateRecord({ incident, incidentId })).rejects.toThrow(
-        `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Error: An error has occurred.`
+        `[Action][Swimlane]: Unable to update record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
   });
@@ -338,7 +338,7 @@ describe('Swimlane Service', () => {
       });
 
       await expect(service.createComment({ comment, incidentId, createdDate })).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create comment in application with id ${config.appId}. Error: An error has occurred.`
+        `[Action][Swimlane]: Unable to create comment in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
   });
@@ -359,7 +359,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: Invalid field (1)`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: Invalid field (1)`
       );
     });
 
@@ -376,7 +376,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
 
@@ -393,7 +393,7 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
       );
     });
 
@@ -410,7 +410,24 @@ describe('Swimlane Service', () => {
           incident,
         })
       ).rejects.toThrow(
-        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Error: An error has occurred. Reason: unknown`
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 500. Error: An error has occurred. Reason: unknown`
+      );
+    });
+
+    test('it shows the status code', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore
+        error.response = { data: errorResponse, status: 400 };
+        throw error;
+      });
+
+      await expect(
+        service.createRecord({
+          incident,
+        })
+      ).rejects.toThrow(
+        `[Action][Swimlane]: Unable to create record in application with id ${config.appId}. Status: 400. Error: An error has occurred. Reason: Invalid field (1)`
       );
     });
   });
