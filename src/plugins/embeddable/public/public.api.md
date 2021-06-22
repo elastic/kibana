@@ -365,6 +365,7 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;
 }
@@ -467,6 +468,7 @@ export interface EmbeddablePackageState {
     embeddableId?: string;
     // (undocumented)
     input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+    searchSessionId?: string;
     // (undocumented)
     type: string;
 }
