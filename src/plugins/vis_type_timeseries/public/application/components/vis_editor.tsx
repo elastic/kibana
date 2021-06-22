@@ -12,7 +12,8 @@ import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { IUiSettingsClient } from 'kibana/public';
 import {
   Vis,
@@ -165,6 +166,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   render() {
     const { model, visFields } = this.state;
+    const indexPatternModeLink = getCoreStart().docLinks.links.visualize.tsvbIndexPatternMode;
 
     if (!visFields) {
       // wait for fields initialization
@@ -182,6 +184,26 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       >
         <DefaultIndexPatternContext.Provider value={this.state.defaultIndex}>
           <div className="tvbEditor" data-test-subj="tvbVisEditor">
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="visTypeTimeseries.visEditorVisualization.indexPatternMode.message"
+                  defaultMessage="Introduced on 7.13.0, TSVB supports a new mode of creating charts, the index pattern mode. Check it out {indexPatternModeLink}."
+                  values={{
+                    indexPatternModeLink: (
+                      <EuiLink href={indexPatternModeLink} target="_blank" external>
+                        <FormattedMessage
+                          id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
+                          defaultMessage="here."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+              iconType="pin"
+              size="s"
+            />
             <div className="tvbEditor--hideForReporting">
               <VisPicker currentVisType={model.type} onChange={this.handleChange} />
             </div>
