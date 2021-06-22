@@ -411,7 +411,7 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
-    logger.info(`Rescheduling ${task.id} to retry after error.`);
+    logger.info(`Rescheduling task:${task.id} to retry after error.`);
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
@@ -419,7 +419,7 @@ export class ExecuteReportTask implements ReportingTask {
       params: task,
     };
     const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
-    logger.debug(`Rescheduled ${task.id}. New task: ${newTask.id}`);
+    logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);
     return newTask;
   }
 
