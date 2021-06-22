@@ -35,7 +35,6 @@ export const {
   setEventsDeleted,
   setEventsLoading,
   setSelected,
-  setTGridIsLoading,
   setTGridSelectAll,
   toggleDetailPanel,
   updateColumns,

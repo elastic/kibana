@@ -66,10 +66,12 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
-    timelineActions.initializeTGridSettings({
-      id: TimelineId.hostsPageEvents,
-      defaultColumns: eventsDefaultModel.columns,
-    });
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        id: TimelineId.hostsPageEvents,
+        defaultColumns: eventsDefaultModel.columns,
+      })
+    );
   }, [dispatch]);
 
   useEffect(() => {

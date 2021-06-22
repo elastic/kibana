@@ -328,7 +328,7 @@ export const FooterComponent = ({
           dataTestSubj: 'LoadingPanelTimeline',
           height: '35px',
           showBorder: false,
-          text: `${loadingText}...`,
+          text: loadingText,
           width: '100%',
         })}
       </LoadingPanelContainer>

@@ -134,6 +134,7 @@ export const EventColumnView = React.memo<Props>(
                   isEventPinned={isEventPinned}
                   isEventViewer={isEventViewer}
                   onRuleChange={onRuleChange}
+                  refetch={refetch}
                   showNotes={showNotes}
                   tabType={tabType}
                   timelineId={timelineId}
@@ -159,6 +160,7 @@ export const EventColumnView = React.memo<Props>(
         onEventDetailsPanelOpened,
         onRowSelected,
         onRuleChange,
+        refetch,
         selectedEventIds,
         showCheckboxes,
         showNotes,

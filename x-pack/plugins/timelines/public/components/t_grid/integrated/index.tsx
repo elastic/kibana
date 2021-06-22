@@ -182,7 +182,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   );
 
   useEffect(() => {
-    dispatch(tGridActions.setTGridIsLoading({ id, isTGridLoading: isQueryLoading }));
+    dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);

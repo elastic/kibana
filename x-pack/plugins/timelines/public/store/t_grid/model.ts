@@ -28,7 +28,6 @@ export interface TGridModelSettings {
   filterManager?: FilterManager;
   footerText: string;
   loadingText: string;
-  isTGridLoading: boolean;
   queryFields: string[];
   selectAll: boolean;
   showCheckboxes?: boolean;

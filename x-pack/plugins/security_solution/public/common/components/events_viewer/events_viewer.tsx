@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { useDispatch } from 'react-redux';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -165,14 +166,15 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
+  const dispatch = useDispatch();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   useEffect(() => {
-    timelineActions.updateIsLoading({ id, isLoading: isQueryLoading });
-  }, [id, isQueryLoading]);
+    dispatch(timelineActions.updateIsLoading({ id, isLoading: isQueryLoading }));
+  }, [dispatch, id, isQueryLoading]);
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);

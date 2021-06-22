@@ -16,7 +16,6 @@ import {
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
-  setTGridIsLoading,
   setTGridSelectAll,
   setSelected,
   toggleDetailPanel,
@@ -199,16 +198,6 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       timelineById: state.timelineById,
       tGridSettingsProps,
     }),
-  }))
-  .case(setTGridIsLoading, (state, { id, isTGridLoading }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isTGridLoading,
-      },
-    },
   }))
   .case(setTGridSelectAll, (state, { id, selectAll }) => ({
     ...state,

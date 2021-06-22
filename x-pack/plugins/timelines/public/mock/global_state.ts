@@ -45,7 +45,6 @@ export const mockGlobalState: TimelineState = {
       defaultColumns: defaultHeaders,
       footerText: 'total of events',
       loadingText: 'loading events',
-      isTGridLoading: false,
       queryFields: [],
       selectAll: false,
       title: 'Events',

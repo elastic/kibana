@@ -73,7 +73,6 @@ export const createInitTGrid = ({
       ...tGridDefaults,
       ...tGridProps,
       isLoading: false,
-      isTGridLoading: false,
       savedObjectId: null,
       version: null,
     },

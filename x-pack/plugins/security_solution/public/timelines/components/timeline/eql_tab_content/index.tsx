@@ -237,9 +237,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.setTGridIsLoading({
+      timelineActions.updateIsLoading({
         id: timelineId,
-        isTGridLoading: isQueryLoading || loadingSourcerer,
+        isLoading: isQueryLoading || loadingSourcerer,
       })
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);

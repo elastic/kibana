@@ -157,7 +157,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
   const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
   useEffect(() => {
-    dispatch(tGridActions.setTGridIsLoading({ id: STANDALONE_ID, isTGridLoading: isQueryLoading }));
+    dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -174,12 +174,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   });
 
   const canQueryTimeline = useMemo(
-    () =>
-      combinedQueries != null &&
-      // isLoadingIndexPattern != null &&
-      // !isLoadingIndexPattern &&
-      !isEmpty(start) &&
-      !isEmpty(end),
+    () => combinedQueries != null && !isEmpty(start) && !isEmpty(end),
     [combinedQueries, start, end]
   );
 

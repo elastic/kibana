@@ -98,9 +98,6 @@ export const clearEventsDeleted = actionCreator<{
 
 export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
 
-export const setTGridIsLoading = actionCreator<{ id: string; isTGridLoading: boolean }>(
-  'SET_TGRID_IS_LOADING'
-);
 export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
   'SET_TGRID_SELECT_ALL'
 );
