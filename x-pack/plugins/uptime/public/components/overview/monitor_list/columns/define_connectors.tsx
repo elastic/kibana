@@ -14,8 +14,8 @@ import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
-  defaultMessage: 'Settings',
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.defineConnector', {
+  defaultMessage: 'Define a default connector',
 });
 
 export const DefineAlertConnectors = () => {
@@ -44,16 +44,16 @@ export const DefineAlertConnectors = () => {
       closePopover={closePopover}
     >
       <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
-        <FormattedMessage
-          id="xpack.uptime.monitorList.defineConnector.description"
-          defaultMessage="To start enabling alerts, please define a default alert action connector in"
-        />{' '}
         <ReactRouterEuiLink
           to={SETTINGS_ROUTE + '?focusConnectorField=true'}
           data-test-subj={'uptimeSettingsLink'}
         >
           {SETTINGS_LINK_TEXT}
-        </ReactRouterEuiLink>
+        </ReactRouterEuiLink>{' '}
+        <FormattedMessage
+          id="xpack.uptime.monitorList.defineConnector.description"
+          defaultMessage="to receive status alerts."
+        />
       </EuiText>
     </EuiPopover>
   );
