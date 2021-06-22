@@ -306,6 +306,9 @@ test('uses relatedSavedObjects when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 });
 
@@ -329,7 +332,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
   });
 
   await taskRunner.run();
-
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
@@ -340,6 +342,9 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 });
 
