@@ -12,7 +12,7 @@ import {
   CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
-  kibanaTestUser
+  kibanaTestUser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { resolve } from 'path';
