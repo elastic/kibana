@@ -90,24 +90,18 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'accessItems',
     name: accessHeader,
-    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => (
-      <span data-test-subj="AccessItemsList">
-        {accessAllEngines ? (
-          ALL_LABEL
-        ) : (
-          <>
-            {accessItems.length === 0
-              ? noItemsPlaceholder
-              : accessItems.map(({ name }) => (
-                  <Fragment key={name}>
-                    {name}
-                    <br />
-                  </Fragment>
-                ))}
-          </>
-        )}
-      </span>
-    ),
+    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => {
+      // Design calls for showing the first 2 items followed by a +x after those 2.
+      // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
+      const numItems = accessItems.length;
+      if (accessAllEngines || numItems === 0)
+        return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
+      const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
+      const names = accessItems.map((item) => item.name);
+      return (
+        <span data-test-subj="AccessItems">{names.slice(0, 2).join(', ') + additionalItems}</span>
+      );
+    },
   };
 
   const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
