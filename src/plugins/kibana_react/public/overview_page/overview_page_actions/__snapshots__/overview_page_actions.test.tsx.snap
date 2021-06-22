@@ -5,63 +5,12 @@ Array [
   <mockConstructor
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_isScalar": false,
-          "_value": Map {},
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentActionMenu$": BehaviorSubject {
-          "_isScalar": false,
-          "_value": undefined,
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "currentAppId$": Observable {
-          "_isScalar": false,
-          "source": Subject {
-            "_isScalar": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
+          "navLinks": Object {
+            "dev_tools": true,
+            "management": true,
           },
         },
-        "getComponent": [MockFunction],
-        "getUrlForApp": [MockFunction],
-        "history": Object {
-          "action": "PUSH",
-          "block": [MockFunction],
-          "createHref": [MockFunction],
-          "go": [MockFunction],
-          "goBack": [MockFunction],
-          "goForward": [MockFunction],
-          "length": 1,
-          "listen": [MockFunction],
-          "location": Object {
-            "hash": "",
-            "key": "",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-          "push": [MockFunction],
-          "replace": [MockFunction],
-        },
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
   >
@@ -75,6 +24,50 @@ Array [
       Add data
     </EuiButtonEmpty>
   </mockConstructor>,
+  <mockConstructor
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "dev_tools": true,
+            "management": true,
+          },
+        },
+      }
+    }
+  >
+    <EuiButtonEmpty
+      className="kbnOverviewPageHeader__actionButton"
+      data-test-subj="homeManage"
+      flush="both"
+      href="/app/management"
+      iconType="gear"
+    >
+      Manage
+    </EuiButtonEmpty>
+  </mockConstructor>,
+  <mockConstructor
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "dev_tools": true,
+            "management": true,
+          },
+        },
+      }
+    }
+  >
+    <EuiButtonEmpty
+      className="kbnOverviewPageHeader__actionButton"
+      data-test-subj="homeDevTools"
+      flush="both"
+      href="/app/dev_tools#/console"
+      iconType="wrench"
+    >
+      Dev tools
+    </EuiButtonEmpty>
+  </mockConstructor>,
 ]
 `;
 
@@ -85,63 +78,12 @@ Array [
   <mockConstructor
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_isScalar": false,
-          "_value": Map {},
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentActionMenu$": BehaviorSubject {
-          "_isScalar": false,
-          "_value": undefined,
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "currentAppId$": Observable {
-          "_isScalar": false,
-          "source": Subject {
-            "_isScalar": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
+          "navLinks": Object {
+            "dev_tools": true,
+            "management": true,
           },
         },
-        "getComponent": [MockFunction],
-        "getUrlForApp": [MockFunction],
-        "history": Object {
-          "action": "PUSH",
-          "block": [MockFunction],
-          "createHref": [MockFunction],
-          "go": [MockFunction],
-          "goBack": [MockFunction],
-          "goForward": [MockFunction],
-          "length": 1,
-          "listen": [MockFunction],
-          "location": Object {
-            "hash": "",
-            "key": "",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-          "push": [MockFunction],
-          "replace": [MockFunction],
-        },
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
   >

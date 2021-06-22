@@ -7,25 +7,19 @@
  */
 
 import { overviewPageActions } from './overview_page_actions';
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { ApplicationStart } from 'kibana/public';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 
-jest.mock('../../context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
-
 afterAll(() => jest.clearAllMocks());
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
-const applicationStartMock = applicationServiceMock.createInternalStartContract();
+
+const applicationStartMock = ({
+  capabilities: { navLinks: { management: true, dev_tools: true } },
+} as unknown) as ApplicationStart;
 
 describe('overviewPageActions', () => {
   test('only add data button', () => {
