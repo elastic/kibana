@@ -88,8 +88,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   position: relative;
 }
 
-.lnsFrameLayout-isFullscreen .lnsFrameLayout__sidebar--left,
-.lnsFrameLayout-isFullscreen .lnsFrameLayout__suggestionPanel {
+.lnsFrameLayout-isFullscreen .lnsFrameLayout__sidebar--left {
   // Hide the datapanel and suggestions in fullscreen mode. Using display: none does trigger
   // a rerender when the container becomes visible again, maybe pushing offscreen is better
   display: none;
