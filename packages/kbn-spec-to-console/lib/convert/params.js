@@ -37,6 +37,7 @@ module.exports = (params) => {
       case 'string':
       case 'number':
       case 'number|string':
+      case 'boolean|long':
         result[param] = defaultValue || '';
         break;
       case 'list':

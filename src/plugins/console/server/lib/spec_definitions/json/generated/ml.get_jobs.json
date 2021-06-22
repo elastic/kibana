@@ -1,0 +1,17 @@
+{
+  "ml.get_jobs": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "allow_no_jobs": "__flag__",
+      "exclude_generated": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}",
+      "_ml/anomaly_detectors"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job.html"
+  }
+}

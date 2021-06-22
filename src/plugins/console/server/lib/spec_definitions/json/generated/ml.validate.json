@@ -1,0 +1,11 @@
+{
+  "ml.validate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/_validate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html"
+  }
+}

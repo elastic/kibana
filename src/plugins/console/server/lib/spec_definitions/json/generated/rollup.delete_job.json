@@ -1,0 +1,11 @@
+{
+  "rollup.delete_job": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_rollup/job/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-delete-job.html"
+  }
+}

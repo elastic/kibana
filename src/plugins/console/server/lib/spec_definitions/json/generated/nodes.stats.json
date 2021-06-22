@@ -12,7 +12,8 @@
       ],
       "types": [],
       "timeout": "",
-      "include_segment_file_sizes": "__flag__"
+      "include_segment_file_sizes": "__flag__",
+      "include_unloaded_segments": "__flag__"
     },
     "methods": [
       "GET"
@@ -43,6 +44,7 @@
       ],
       "index_metric": [
         "_all",
+        "bulk",
         "completion",
         "docs",
         "fielddata",
@@ -56,7 +58,6 @@
         "search",
         "segments",
         "store",
-        "suggest",
         "warmer"
       ]
     },

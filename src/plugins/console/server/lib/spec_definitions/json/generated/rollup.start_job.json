@@ -1,0 +1,11 @@
+{
+  "rollup.start_job": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_rollup/job/{id}/_start"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html"
+  }
+}

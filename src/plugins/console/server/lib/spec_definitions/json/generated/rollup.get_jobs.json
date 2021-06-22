@@ -1,0 +1,12 @@
+{
+  "rollup.get_jobs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_rollup/job/{id}",
+      "_rollup/job/"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-job.html"
+  }
+}

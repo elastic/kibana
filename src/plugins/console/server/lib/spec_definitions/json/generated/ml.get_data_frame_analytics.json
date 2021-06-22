@@ -1,0 +1,18 @@
+{
+  "ml.get_data_frame_analytics": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "from": 0,
+      "size": 0,
+      "exclude_generated": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}",
+      "_ml/data_frame/analytics"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics.html"
+  }
+}
