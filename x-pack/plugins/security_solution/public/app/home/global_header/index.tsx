@@ -48,7 +48,6 @@ export const GlobalHeader = React.memo(
       };
     }, [portalNode, setHeaderActionMenu]);
 
-    const basePath = http.basePath.get();
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
@@ -62,7 +61,7 @@ export const GlobalHeader = React.memo(
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"
-                href={`${basePath}${ADD_DATA_PATH}`}
+                href={http.basePath.prepend(ADD_DATA_PATH)}
                 iconType="indexOpen"
               >
                 {BUTTON_ADD_DATA}

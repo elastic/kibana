@@ -43,12 +43,10 @@ const NeedAdminForUpdateCallOutComponent = (): JSX.Element | null => {
   const userDoesntHaveIndexManage = hasIndexManage != null && !hasIndexManage;
   const shouldShowCallout = signalIndexMappingIsOutdated && userDoesntHaveIndexManage;
 
+  // Passing shouldShowCallout to the condition param will end up with an unecessary spacer being rendered
   return shouldShowCallout ? (
     <>
-      <CallOutPersistentSwitcher
-        condition={shouldShowCallout}
-        message={needAdminForUpdateRulesMessage}
-      />
+      <CallOutPersistentSwitcher condition={true} message={needAdminForUpdateRulesMessage} />
       <EuiSpacer size="l" />
     </>
   ) : null;

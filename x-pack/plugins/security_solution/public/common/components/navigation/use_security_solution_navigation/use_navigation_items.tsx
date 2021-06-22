@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
@@ -25,7 +24,6 @@ export const usePrimaryNavigationItems = ({
   timeline,
   timerange,
 }: PrimaryNavigationItemsProps) => {
-  const history = useHistory();
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
   const navItems = Object.values(navTabs).map((tab) => {
@@ -44,16 +42,10 @@ export const usePrimaryNavigationItems = ({
       timeline,
       timerange,
     });
-    const hrefWithSearch =
-      tab.href + getSearch(tab, { filters, query, savedQuery, sourcerer, timeline, timerange });
 
     const handleClick = (ev: React.MouseEvent) => {
       ev.preventDefault();
-      if (id in SecurityPageName && pageId == null) {
-        navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
-      } else {
-        history.push(hrefWithSearch);
-      }
+      navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     };
 
