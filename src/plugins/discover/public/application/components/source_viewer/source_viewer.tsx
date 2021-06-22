@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './source_viewer.scss';
+
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
@@ -72,10 +74,9 @@ export const SourceViewer = ({
   }, [editor, jsonValue]);
 
   const loadingState = (
-    <div className="euiDataGrid__loading">
+    <div className="sourceViewer__loading">
+      <EuiLoadingSpinner className="sourceViewer__loadingSpinner" />
       <EuiText size="xs" color="subdued">
-        <EuiLoadingSpinner />
-        <EuiSpacer size="s" />
         <FormattedMessage id="discover.loadingJSON" defaultMessage="Loading JSON" />
       </EuiText>
     </div>
@@ -91,7 +92,7 @@ export const SourceViewer = ({
   const errorMessage = (
     <p>
       {i18n.translate('discover.sourceViewer.errorMessage', {
-        defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
+        defaultMessage: 'Could not fetch data at this time.',
       })}
     </p>
   );

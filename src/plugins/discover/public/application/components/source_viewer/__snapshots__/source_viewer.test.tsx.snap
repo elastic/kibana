@@ -645,8 +645,15 @@ exports[`Source Viewer component renders loading state 1`] = `
   width={123}
 >
   <div
-    className="euiDataGrid__loading"
+    className="sourceViewer__loading"
   >
+    <EuiLoadingSpinner
+      className="sourceViewer__loadingSpinner"
+    >
+      <span
+        className="euiLoadingSpinner euiLoadingSpinner--medium sourceViewer__loadingSpinner"
+      />
+    </EuiLoadingSpinner>
     <EuiText
       color="subdued"
       size="xs"
@@ -661,18 +668,6 @@ exports[`Source Viewer component renders loading state 1`] = `
           <div
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiLoadingSpinner>
-              <span
-                className="euiLoadingSpinner euiLoadingSpinner--medium"
-              />
-            </EuiLoadingSpinner>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
             <FormattedMessage
               defaultMessage="Loading JSON"
               id="discover.loadingJSON"
