@@ -35,9 +35,9 @@ export interface AddCommentRefObject {
   setComment: (newComment: string) => void;
 }
 
-interface AddCommentProps {
+export interface AddCommentProps {
   caseId: string;
-  disabled?: boolean;
+  userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
@@ -47,7 +47,7 @@ interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { caseId, disabled, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
+      { caseId, userCanCrud, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
       ref
     ) => {
       const editorRef = useRef();
@@ -103,32 +103,34 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          <Form form={form}>
-            <UseField
-              path={fieldName}
-              component={MarkdownEditorForm}
-              componentProps={{
-                ref: editorRef,
-                idAria: 'caseComment',
-                isDisabled: isLoading,
-                dataTestSubj: 'add-comment',
-                placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-                bottomRightContent: (
-                  <EuiButton
-                    data-test-subj="submit-comment"
-                    iconType="plusInCircle"
-                    isDisabled={isLoading || disabled}
-                    isLoading={isLoading}
-                    onClick={onSubmit}
-                    size="s"
-                  >
-                    {i18n.ADD_COMMENT}
-                  </EuiButton>
-                ),
-              }}
-            />
-            <InsertTimeline fieldName="comment" />
-          </Form>
+          {userCanCrud && (
+            <Form form={form}>
+              <UseField
+                path={fieldName}
+                component={MarkdownEditorForm}
+                componentProps={{
+                  ref: editorRef,
+                  idAria: 'caseComment',
+                  isDisabled: isLoading,
+                  dataTestSubj: 'add-comment',
+                  placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+                  bottomRightContent: (
+                    <EuiButton
+                      data-test-subj="submit-comment"
+                      iconType="plusInCircle"
+                      isDisabled={isLoading}
+                      isLoading={isLoading}
+                      onClick={onSubmit}
+                      size="s"
+                    >
+                      {i18n.ADD_COMMENT}
+                    </EuiButton>
+                  ),
+                }}
+              />
+              <InsertTimeline fieldName="comment" />
+            </Form>
+          )}
         </span>
       );
     }
