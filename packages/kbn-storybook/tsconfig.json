@@ -1,14 +1,15 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
+    "incremental": true,
     "outDir": "target",
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-storybook",
+    "target": "es2015",
     "types": ["node"]
   },
-  "include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx", "../../typings/index.d.ts"]
+  "include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx"]
 }
