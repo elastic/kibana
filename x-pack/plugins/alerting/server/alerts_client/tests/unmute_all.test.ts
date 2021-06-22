@@ -155,7 +155,7 @@ describe('unmuteAll()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when unmuting an alert', async () => {
+    test('logs audit event when unmuting a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -181,7 +181,7 @@ describe('unmuteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_unmute',
+            action: 'rule_unmute',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -189,7 +189,7 @@ describe('unmuteAll()', () => {
       );
     });
 
-    test('logs audit event when not authorised to unmute an alert', async () => {
+    test('logs audit event when not authorised to unmute a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -217,7 +217,7 @@ describe('unmuteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_unmute',
+            action: 'rule_unmute',
             outcome: 'failure',
           }),
           kibana: {
