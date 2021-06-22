@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseStatus } from '../public/application/sections/license_dashboard/license_status';
+import { LicensePageHeader } from '../public/application/sections/license_dashboard/license_page_header';
 import { createMockLicense, getComponent } from './util';
 
 describe('LicenseStatus component', () => {
@@ -14,7 +14,7 @@ describe('LicenseStatus component', () => {
       {
         license: createMockLicense('gold'),
       },
-      LicenseStatus
+      LicensePageHeader
     );
     expect(rendered.html()).toMatchSnapshot();
   });
@@ -23,7 +23,7 @@ describe('LicenseStatus component', () => {
       {
         license: createMockLicense('platinum', 0),
       },
-      LicenseStatus
+      LicensePageHeader
     );
     expect(rendered.html()).toMatchSnapshot();
   });

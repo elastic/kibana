@@ -12,23 +12,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { LaunchAppSearchButton } from './';
 
-import { EnginesOverviewHeader } from './';
-
-describe('EnginesOverviewHeader', () => {
-  const wrapper = shallow(<EnginesOverviewHeader />)
-    .find(EuiPageHeader)
-    .dive()
-    .children()
-    .dive();
-
-  it('renders', () => {
-    expect(wrapper.find('h1').text()).toEqual('Engines overview');
-  });
-
+describe('LaunchAppSearchButton', () => {
   it('renders a launch app search button that sends telemetry on click', () => {
-    const button = wrapper.find('[data-test-subj="launchButton"]');
+    const button = shallow(<LaunchAppSearchButton />);
 
     expect(button.prop('href')).toBe('http://localhost:3002/as');
     expect(button.prop('isDisabled')).toBeFalsy();
