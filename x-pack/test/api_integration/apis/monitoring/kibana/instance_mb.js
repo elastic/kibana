@@ -14,7 +14,8 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('instance detail mb', () => {
-    const archive = 'monitoring/singlecluster_yellow_platinum_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_mb';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
       max: '2017-08-29T17:26:08.000Z',

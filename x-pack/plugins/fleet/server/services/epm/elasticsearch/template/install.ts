@@ -183,6 +183,7 @@ function putComponentTemplate(
     };
 
     return {
+      // @ts-expect-error body expected to be ClusterPutComponentTemplateRequest
       clusterPromise: esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
       name,
     };

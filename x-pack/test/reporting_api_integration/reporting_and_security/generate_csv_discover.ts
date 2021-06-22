@@ -32,13 +32,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Generation from Job Params', () => {
     before(async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await reportingAPI.deleteAllReports();
     });
 

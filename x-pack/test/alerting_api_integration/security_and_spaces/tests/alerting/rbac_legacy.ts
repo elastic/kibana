@@ -35,7 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esTestIndexTool.destroy();
-      await esArchiver.load('alerts_legacy');
+      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       await setupSpacesAndUsers(getService);
@@ -44,7 +44,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await esArchiver.unload('alerts_legacy');
+      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy');
     });
 
     for (const scenario of UserAtSpaceScenarios) {

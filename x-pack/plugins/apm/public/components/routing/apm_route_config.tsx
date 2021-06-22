@@ -14,17 +14,14 @@ import { toQuery } from '../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../app/ErrorGroupDetails';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceNodeMetrics } from '../app/service_node_metrics';
-import { Settings } from '../app/Settings';
+import { SettingsTemplate } from './templates/settings_template';
 import { AgentConfigurations } from '../app/Settings/AgentConfigurations';
 import { AnomalyDetection } from '../app/Settings/anomaly_detection';
 import { ApmIndices } from '../app/Settings/ApmIndices';
 import { CustomizeUI } from '../app/Settings/CustomizeUI';
 import { TraceLink } from '../app/TraceLink';
+import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
-import {
-  CreateAgentConfigurationRouteHandler,
-  EditAgentConfigurationRouteHandler,
-} from './route_handlers/agent_configuration';
 import { enableServiceOverview } from '../../../common/ui_settings_keys';
 import { redirectTo } from './redirect_to';
 import { ApmMainTemplate } from './templates/apm_main_template';
@@ -38,6 +35,8 @@ import { ServiceOverview } from '../app/service_overview';
 import { TransactionOverview } from '../app/transaction_overview';
 import { ServiceInventory } from '../app/service_inventory';
 import { TraceOverview } from '../app/trace_overview';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { AgentConfigurationCreateEdit } from '../app/Settings/AgentConfigurations/AgentConfigurationCreateEdit';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -221,41 +220,77 @@ function TransactionDetailsRouteView(
 
 function SettingsAgentConfigurationRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <Settings>
-        <AgentConfigurations />
-      </Settings>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="agent-configurations">
+      <AgentConfigurations />
+    </SettingsTemplate>
   );
 }
 
 function SettingsAnomalyDetectionRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <Settings>
-        <AnomalyDetection />
-      </Settings>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="anomaly-detection">
+      <AnomalyDetection />
+    </SettingsTemplate>
   );
 }
 
 function SettingsApmIndicesRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <Settings>
-        <ApmIndices />
-      </Settings>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="apm-indices">
+      <ApmIndices />
+    </SettingsTemplate>
   );
 }
 
 function SettingsCustomizeUI() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <Settings>
-        <CustomizeUI />
-      </Settings>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="customize-ui">
+      <CustomizeUI />
+    </SettingsTemplate>
+  );
+}
+
+export function EditAgentConfigurationRouteView(props: RouteComponentProps) {
+  const { search } = props.history.location;
+
+  // typescript complains because `pageStop` does not exist in `APMQueryParams`
+  // Going forward we should move away from globally declared query params and this is a first step
+  // @ts-expect-error
+  const { name, environment, pageStep } = toQuery(search);
+
+  const res = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        endpoint: 'GET /api/apm/settings/agent-configuration/view',
+        params: { query: { name, environment } },
+      });
+    },
+    [name, environment]
+  );
+
+  return (
+    <SettingsTemplate selectedTab="agent-configurations" {...props}>
+      <AgentConfigurationCreateEdit
+        pageStep={pageStep || 'choose-settings-step'}
+        existingConfigResult={res}
+      />
+    </SettingsTemplate>
+  );
+}
+
+export function CreateAgentConfigurationRouteView(props: RouteComponentProps) {
+  const { search } = props.history.location;
+
+  // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
+  // @ts-expect-error
+  const { pageStep } = toQuery(search);
+
+  return (
+    <SettingsTemplate selectedTab="agent-configurations" {...props}>
+      <AgentConfigurationCreateEdit
+        pageStep={pageStep || 'choose-service-step'}
+      />
+    </SettingsTemplate>
   );
 }
 
@@ -339,14 +374,14 @@ export const apmRouteConfig: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/settings/agent-configuration/create',
-    component: CreateAgentConfigurationRouteHandler,
+    component: CreateAgentConfigurationRouteView,
     breadcrumb: CreateAgentConfigurationTitle,
   },
   {
     exact: true,
     path: '/settings/agent-configuration/edit',
     breadcrumb: EditAgentConfigurationTitle,
-    component: EditAgentConfigurationRouteHandler,
+    component: EditAgentConfigurationRouteView,
   },
   {
     exact: true,
@@ -462,6 +497,12 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     exact: true,
     path: '/link-to/trace/:traceId',
     component: TraceLink,
+    breadcrumb: null,
+  },
+  {
+    exact: true,
+    path: '/link-to/transaction/:transactionId',
+    component: TransactionLink,
     breadcrumb: null,
   },
 ];

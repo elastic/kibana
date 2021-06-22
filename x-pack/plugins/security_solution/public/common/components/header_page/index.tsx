@@ -43,7 +43,13 @@ const Header = styled.header.attrs({
 Header.displayName = 'Header';
 
 const FlexItem = styled(EuiFlexItem)`
-  display: block;
+  ${({ theme }) => css`
+    display: block;
+
+    @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
+      max-width: 50%;
+    }
+  `}
 `;
 FlexItem.displayName = 'FlexItem';
 
@@ -112,7 +118,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
   return (
     <Header border={border} {...rest}>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <FlexItem>
           {backOptions && (
             <LinkBack>

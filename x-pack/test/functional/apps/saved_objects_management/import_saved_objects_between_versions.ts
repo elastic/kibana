@@ -22,17 +22,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Export import saved objects between versions', function () {
     beforeEach(async function () {
-      await esArchiver.load('logstash_functional');
-      await esArchiver.load('getting_started/shakespeare');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('getting_started/shakespeare');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     it('should be able to import 7.13 saved objects into 8.0.0', async function () {
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.savedObjects.clickImportDone();
       const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
       // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 72 objects');
+      await expect(importedSavedObjects).to.be('Export 88 objects');
     });
   });
 }

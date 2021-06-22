@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Loading } from '../../../../shared/loading';
 import { EuiPanelTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
@@ -78,8 +77,10 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { SourceLayout } from './source_layout';
+
 export const Overview: React.FC = () => {
-  const { contentSource, dataLoading } = useValues(SourceLogic);
+  const { contentSource } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   const {
@@ -96,8 +97,6 @@ export const Overview: React.FC = () => {
     hasPermissions,
     isFederatedSource,
   } = contentSource;
-
-  if (dataLoading) return <Loading />;
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
@@ -450,8 +449,9 @@ export const Overview: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout pageViewTelemetry="source_overview">
       <ViewContentHeader title="Source overview" />
+
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xl" direction="column">
@@ -513,6 +513,6 @@ export const Overview: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </SourceLayout>
   );
 };

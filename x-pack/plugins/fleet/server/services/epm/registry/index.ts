@@ -255,3 +255,15 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     elasticsearch: assets.elasticsearch,
   };
 }
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
+}

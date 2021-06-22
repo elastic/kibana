@@ -40,7 +40,7 @@ import * as RuleI18n from '../translations';
 import {
   redirectToDetections,
   getActionMessageParams,
-  userHasNoPermissions,
+  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
@@ -280,7 +280,7 @@ const CreateRulePageComponent: React.FC = () => {
   ) {
     history.replace(getDetectionEngineUrl());
     return null;
-  } else if (userHasNoPermissions(canUserCRUD)) {
+  } else if (!userHasPermissions(canUserCRUD)) {
     history.replace(getRulesUrl());
     return null;
   }

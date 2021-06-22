@@ -177,7 +177,7 @@ export const enhancedEsSearchStrategyProvider = (
         const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
         await client.asyncSearch.get({
           id,
-          body: { keep_alive: keepAlive },
+          keep_alive: keepAlive,
         });
       } catch (e) {
         throw getKbnServerError(e);

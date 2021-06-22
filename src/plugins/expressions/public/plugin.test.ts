@@ -8,7 +8,7 @@
 
 import { expressionsPluginMock } from './mocks';
 import { add } from '../common/test_helpers/expression_functions/add';
-import { ExpressionsService } from '../common';
+import { ExpressionsService } from './services';
 
 describe('ExpressionsPublicPlugin', () => {
   test('can instantiate from mocks', async () => {

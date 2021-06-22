@@ -135,7 +135,7 @@ export function SearchBar({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
     </>
   );
 }

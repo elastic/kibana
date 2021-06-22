@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       let savedObjectTypes: SavedObjectsType[] = [
         {
@@ -357,7 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
       const mappingProperties = {
         'fleet-agent-event': { properties: { name: { type: 'text' } } },
         bar: { properties: { mynum: { type: 'integer' } } },
-      };
+      } as const;
 
       let savedObjectTypes: SavedObjectsType[] = [
         FLEET_AGENT_EVENT_TYPE,
@@ -417,7 +417,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -510,7 +510,7 @@ export default ({ getService }: FtrProviderContext) => {
         foo: { properties: { name: { type: 'text' } } },
         bar: { properties: { nomnom: { type: 'integer' } } },
         baz: { properties: { title: { type: 'keyword' } } },
-      };
+      } as const;
 
       const savedObjectTypes: SavedObjectsType[] = [
         {
@@ -677,7 +677,7 @@ async function createIndex({
     coreMigrationVersion: {
       type: 'keyword',
     },
-  };
+  } as const;
   await esClient.indices.create({
     index,
     body: { mappings: { dynamic: 'strict', properties } },

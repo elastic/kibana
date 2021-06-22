@@ -13,9 +13,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   describe('Lists API', () => {
-    before(async () => await esArchiver.load('lists'));
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/lists'));
 
-    after(async () => await esArchiver.unload('lists'));
+    after(async () => await esArchiver.unload('x-pack/test/functional/es_archives/lists'));
 
     it('should return a 400 if an endpoint exception item with a list-based entry is provided', async () => {
       const badItem = {

@@ -15,7 +15,6 @@ import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
-  switchViewMode?: (newViewMode: ViewMode) => void;
   container: DashboardContainer;
 }
 
@@ -120,7 +119,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 isReadonlyMode={
                   this.props.container.getInput().dashboardCapabilities?.hideWriteControls
                 }
-                onLinkClick={() => this.props.switchViewMode?.(ViewMode.EDIT)}
                 isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}
                 http={this.context.services.http}

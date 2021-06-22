@@ -38,16 +38,19 @@ export const AlertMonitorStatus: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(
-      fetchOverviewFilters({
-        dateRangeStart: 'now-24h',
-        dateRangeEnd: 'now',
-        locations: alertParams.filters?.['observer.geo.name'] ?? [],
-        ports: alertParams.filters?.['url.port'] ?? [],
-        tags: alertParams.filters?.tags ?? [],
-        schemes: alertParams.filters?.['monitor.type'] ?? [],
-      })
-    );
+    if (!window.location.pathname.includes('/app/uptime')) {
+      // filters inside uptime app already loaded
+      dispatch(
+        fetchOverviewFilters({
+          dateRangeStart: 'now-24h',
+          dateRangeEnd: 'now',
+          locations: alertParams.filters?.['observer.geo.name'] ?? [],
+          ports: alertParams.filters?.['url.port'] ?? [],
+          tags: alertParams.filters?.tags ?? [],
+          schemes: alertParams.filters?.['monitor.type'] ?? [],
+        })
+      );
+    }
   }, [alertParams, dispatch]);
 
   const overviewFilters = useSelector(overviewFiltersSelector);

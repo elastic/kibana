@@ -20,17 +20,10 @@ import { IIndexPattern } from '../../../../../../../src/plugins/data/common/inde
 import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export const ReportViewTypes = {
-  pld: 'page-load-dist',
-  kpi: 'kpi-trends',
+  dist: 'data-distribution',
+  kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
-  upd: 'uptime-duration',
-  upp: 'uptime-pings',
-  svl: 'service-latency',
-  tpt: 'service-throughput',
-  logs: 'logs-frequency',
-  cpu: 'cpu-usage',
-  mem: 'memory-usage',
-  nwk: 'network-activity',
+  mdd: 'mobile-device-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -53,14 +46,14 @@ export interface ReportDefinition {
     field?: string;
     label: string;
     description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
+    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
     columnFilters?: ColumnFilter[];
+    timeScale?: string;
   }>;
 }
 
 export interface DataSeries {
   reportType: ReportViewType;
-  id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
 
@@ -100,21 +93,21 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  seriesId: string;
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number';
+type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {

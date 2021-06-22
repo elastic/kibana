@@ -673,8 +673,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Timeline Details', () => {
-    before(() => esArchiver.load('filebeat/default'));
-    after(() => esArchiver.unload('filebeat/default'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
 
     it('Make sure that we get Event Details data', async () => {
       await retry.try(async () => {

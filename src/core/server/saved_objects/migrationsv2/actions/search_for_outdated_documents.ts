@@ -24,7 +24,7 @@ export interface SearchResponse {
 export interface SearchForOutdatedDocumentsOptions {
   batchSize: number;
   targetIndex: string;
-  outdatedDocumentsQuery?: estypes.QueryContainer;
+  outdatedDocumentsQuery?: estypes.QueryDslQueryContainer;
 }
 
 /**

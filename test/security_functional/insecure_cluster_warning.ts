@@ -20,17 +20,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('home');
       await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
       // starting without user data
-      await esArchiver.unload('hamlet');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/hamlet');
     });
 
     after(async () => {
-      await esArchiver.unload('hamlet');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/hamlet');
     });
 
     describe('without user data', () => {
       before(async () => {
         await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
-        await esArchiver.unload('hamlet');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/hamlet');
         await esArchiver.emptyKibanaIndex();
       });
 
@@ -48,11 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await pageObjects.common.navigateToApp('home');
         await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
-        await esArchiver.load('hamlet');
+        await esArchiver.load('test/functional/fixtures/es_archiver/hamlet');
       });
 
       after(async () => {
-        await esArchiver.unload('hamlet');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/hamlet');
       });
 
       it('should warn about an insecure cluster, and hide when dismissed', async () => {

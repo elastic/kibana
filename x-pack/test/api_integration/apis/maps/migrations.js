@@ -51,11 +51,11 @@ export default function ({ getService }) {
 
     describe('embeddable migrations', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('maps/kibana');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/maps/kibana');
       });
 
       after(async () => {
-        await esArchiver.unload('maps/kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
       });
 
       it('should apply embeddable migrations', async () => {

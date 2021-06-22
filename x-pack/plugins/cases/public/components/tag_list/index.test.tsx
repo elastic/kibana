@@ -14,6 +14,7 @@ import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../containers/use_get_tags');
@@ -37,6 +38,7 @@ const defaultProps = {
   isLoading: false,
   onSubmit,
   tags: [],
+  owner: [SECURITY_SOLUTION_OWNER],
 };
 
 describe('TagList ', () => {
