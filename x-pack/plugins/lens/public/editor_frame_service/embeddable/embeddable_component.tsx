@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, useEffect } from 'react';
 import { CoreStart } from 'kibana/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -71,15 +71,12 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
 
     if (embeddable && hasActions) {
       return (
-        <EmbeddablePanel
-          hideHeader={false}
+        <EmbeddablePanelWrapper
           embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
-          getActions={uiActions.getTriggerCompatibleActions}
+          uiActions={uiActions}
           inspector={inspector}
-          filterActions={() => hasActions}
-          showShadow={false}
-          showBadges={false}
-          showNotifications={false}
+          actionPredicate={() => hasActions}
+          input={input}
         />
       );
     }
@@ -87,3 +84,36 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
   };
 }
+
+interface EmbeddablePanelWrapperProps {
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  uiActions: PluginsStartDependencies['uiActions'];
+  inspector: PluginsStartDependencies['inspector'];
+  actionPredicate: (id: string) => boolean;
+  input: EmbeddableComponentProps;
+}
+
+const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
+  embeddable,
+  uiActions,
+  actionPredicate,
+  inspector,
+  input,
+}) => {
+  useEffect(() => {
+    embeddable.updateInput(input);
+  }, [embeddable, input]);
+
+  return (
+    <EmbeddablePanel
+      hideHeader={false}
+      embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
+      getActions={uiActions.getTriggerCompatibleActions}
+      inspector={inspector}
+      actionPredicate={actionPredicate}
+      showShadow={false}
+      showBadges={false}
+      showNotifications={false}
+    />
+  );
+};
