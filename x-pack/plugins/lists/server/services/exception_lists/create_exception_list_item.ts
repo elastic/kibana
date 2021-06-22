@@ -21,11 +21,11 @@ import type {
   OsTypeArray,
   Tags,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
-  getSavedObjectType,
   transformCreateCommentsToComments,
   transformSavedObjectToExceptionListItem,
 } from './utils';

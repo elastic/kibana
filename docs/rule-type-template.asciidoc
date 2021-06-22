@@ -6,7 +6,7 @@ Include a short description of the rule type.
 [float]
 ==== Create the rule
 
-Fill in the <<defining-alerts-general-details, rule details>>, then select *<RULE TYPE>*.
+Fill in the <<defining-rules-general-details, rule details>>, then select *<RULE TYPE>*.
 
 [float]
 ==== Define the conditions
@@ -25,7 +25,7 @@ Condition2:: This is another condition the user must define.
 [float]
 ==== Add action variables
 
-<<defining-alerts-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the <RULE TYPE> rule. You can also specify <<defining-alerts-actions-variables, variables common to all rules>>.
+<<defining-rules-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the <RULE TYPE> rule. You can also specify <<defining-rules-actions-variables, variables common to all rules>>.
 
 `context.variableA`:: A short description of the context variable defined by the rule type.
 `context.variableB`:: A short description of the context variable defined by the rule type with an example. Example: `this is what variableB outputs`.

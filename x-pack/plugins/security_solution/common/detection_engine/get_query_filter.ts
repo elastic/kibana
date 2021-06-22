@@ -10,6 +10,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import {
   Filter,
   IIndexPattern,
@@ -17,7 +18,6 @@ import {
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionFilter } from '../shared_imports';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (

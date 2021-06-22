@@ -18,6 +18,10 @@ import type {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
 
 import type { OperatorOption } from '../autocomplete_operators/types';
 
@@ -98,3 +102,9 @@ export type CreateExceptionListItemBuilderSchema = Omit<
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE;
+export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
+export type SavedObjectType =
+  | typeof EXCEPTION_LIST_NAMESPACE
+  | typeof EXCEPTION_LIST_NAMESPACE_AGNOSTIC;

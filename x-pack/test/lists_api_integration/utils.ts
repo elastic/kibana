@@ -16,8 +16,8 @@ import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
-import { LIST_INDEX, LIST_ITEM_URL } from '../../plugins/lists/common/constants';
 import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
@@ -161,7 +161,6 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:exception-list or type:exception-list-agnostic',
       wait_for_completion: true,
       refresh: true,

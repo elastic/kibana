@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { RestoreRequest } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
@@ -108,7 +108,7 @@ export function registerRestoreRoutes({
           repository,
           snapshot,
           // TODO: Bring {@link RestoreSettingsEs} in line with {@link RestoreRequest['body']}
-          body: serializeRestoreSettings(restoreSettings) as RestoreRequest['body'],
+          body: serializeRestoreSettings(restoreSettings) as estypes.SnapshotRestoreRequest['body'],
         });
 
         return res.ok({ body: response.body });

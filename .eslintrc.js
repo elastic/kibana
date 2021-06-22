@@ -876,6 +876,16 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -1370,7 +1380,7 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1461,7 +1471,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },

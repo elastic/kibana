@@ -19,6 +19,7 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
@@ -27,7 +28,6 @@ import {
   FullResponseSchema,
   QueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
@@ -412,7 +412,6 @@ export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): 
 export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -429,7 +428,6 @@ export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> =>
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
@@ -1009,7 +1007,7 @@ export const waitForRuleSuccessOrStatus = async (
       .send({ ids: [id] })
       .expect(200);
     return body[id]?.current_status?.status === status;
-  }, 'waitForRuleSuccess');
+  }, 'waitForRuleSuccessOrStatus');
 };
 
 /**

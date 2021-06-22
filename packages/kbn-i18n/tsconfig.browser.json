@@ -8,7 +8,10 @@
     "isolatedModules": true,
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-i18n/src",
-    "types": ["node"],
+    "types": [
+      "jest",
+      "node"
+    ],
   },
   "include": [
     "src/**/*.ts",

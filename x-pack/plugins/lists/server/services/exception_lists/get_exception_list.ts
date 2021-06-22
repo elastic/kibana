@@ -11,6 +11,7 @@ import type {
   ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import {
   SavedObjectsClientContract,
@@ -18,7 +19,7 @@ import {
 } from '../../../../../../src/core/server/';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
+import { transformSavedObjectToExceptionList } from './utils';
 
 interface GetExceptionListOptions {
   id: IdOrUndefined;

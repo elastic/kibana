@@ -177,6 +177,44 @@ describe('config validation', () => {
       `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
     );
   });
+
+  test('action with tls configuration', () => {
+    const config: Record<string, unknown> = {
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'none',
+      },
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
+        "tls": Object {
+          "proxyVerificationMode": "none",
+          "verificationMode": "none",
+        },
+      }
+    `);
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

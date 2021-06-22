@@ -28,11 +28,15 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListTypeEnum,
+  ExceptionListIdentifiers,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -61,11 +65,12 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
+  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
-import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
+import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
@@ -84,7 +89,6 @@ import { ExceptionsViewer } from '../../../../../common/components/exceptions/vi
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
-import type { ExceptionListIdentifiers } from '../../../../../shared_imports';
 
 import {
   focusUtilityBarAction,
@@ -220,6 +224,9 @@ const RuleDetailsPageComponent = () => {
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const { globalFullScreen } = useGlobalFullScreen();
 
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const {
@@ -305,10 +312,12 @@ const RuleDetailsPageComponent = () => {
   const alertDefaultFilters = useMemo(
     () => [
       ...buildAlertsRuleIdFilter(ruleId),
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...(ruleRegistryEnabled
+        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
+        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -452,7 +461,7 @@ const RuleDetailsPageComponent = () => {
       <LinkButton
         onClick={goToEditRule}
         iconType="controlsHorizontal"
-        isDisabled={!isExistingRule || (userHasNoPermissions(canUserCRUD) ?? true)}
+        isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
         href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
       >
         {ruleI18n.EDIT_RULE_SETTINGS}
@@ -599,7 +608,7 @@ const RuleDetailsPageComponent = () => {
                           isDisabled={
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                            userHasNoPermissions(canUserCRUD) ||
+                            !userHasPermissions(canUserCRUD) ||
                             (!hasMlPermissions && !rule?.enabled)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
@@ -616,9 +625,7 @@ const RuleDetailsPageComponent = () => {
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
-                          userHasNoPermissions={
-                            !isExistingRule || userHasNoPermissions(canUserCRUD)
-                          }
+                          userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
                           canDuplicateRuleWithActions={canEditRuleWithActions(
                             rule,
                             hasActionsPrivileges

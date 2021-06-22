@@ -379,16 +379,12 @@ describe('<FollowerIndicesList />', () => {
       test('should have a section to render the follower index shards stats', async () => {
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
-      });
 
-      test('should render a EuiCodeEditor for each shards stats', async () => {
-        await actions.clickFollowerIndexAt(0);
+        const codeBlocks = find('shardsStats');
 
-        const codeEditors = component.find(`EuiCodeEditor`);
-
-        expect(codeEditors.length).toBe(index1.shards.length);
-        codeEditors.forEach((codeEditor, i) => {
-          expect(JSON.parse(codeEditor.props().value)).toEqual(index1.shards[i]);
+        expect(codeBlocks.length).toBe(index1.shards.length);
+        codeBlocks.forEach((codeBlock, i) => {
+          expect(JSON.parse(codeBlock.props().children)).toEqual(index1.shards[i]);
         });
       });
     });

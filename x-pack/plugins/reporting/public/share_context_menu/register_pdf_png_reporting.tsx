@@ -11,7 +11,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
-import type { ShareContext } from '../../../../../src/plugins/share/public';
+import { ShareContext } from 'src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
 import type { LayoutParams } from '../../common/types';
 import type { JobParamsPNG } from '../../server/export_types/png/types';
@@ -167,6 +167,7 @@ export const reportingScreenshotShareProvider = ({
             toasts={toasts}
             reportType="png"
             objectId={objectId}
+            requiresSavedState={true}
             getJobParams={getPngJobParams({
               shareableUrl,
               apiClient,
@@ -203,6 +204,8 @@ export const reportingScreenshotShareProvider = ({
             toasts={toasts}
             reportType="printablePdf"
             objectId={objectId}
+            requiresSavedState={true}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
             getJobParams={getPdfJobParams({
               shareableUrl,
               apiClient,

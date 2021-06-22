@@ -22,7 +22,6 @@ export * from './non_empty_string';
 export * from './non_empty_string_array';
 export * from './operator';
 export * from './only_false_allowed';
-export * from './parse_schedule_dates';
 export * from './positive_integer';
 export * from './positive_integer_greater_than_zero';
 export * from './string_to_positive_number';

@@ -12,9 +12,9 @@ import {
   findListItemSchema,
   foundListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
 import { decodeCursor } from '../services/utils';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';

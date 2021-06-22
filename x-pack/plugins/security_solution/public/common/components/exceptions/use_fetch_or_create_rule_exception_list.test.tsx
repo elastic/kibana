@@ -9,7 +9,7 @@ import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks'
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import * as rulesApi from '../../../detections/containers/detection_engine/rules/api';
-import * as listsApi from '../../../../../lists/public/exceptions/api';
+import * as listsApi from '@kbn/securitysolution-list-api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
 import type {
@@ -26,6 +26,7 @@ import {
 
 const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('../../../detections/containers/detection_engine/rules/api');
+jest.mock('@kbn/securitysolution-list-api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;

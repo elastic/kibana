@@ -9,75 +9,59 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiEmptyPrompt,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPanel,
-} from '@elastic/eui';
+import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import { AppSearchPageTemplate } from '../layout';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
-import {
-  EMPTY_ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from '../../../shared/role_mapping/constants';
-
-import { ROLE_MAPPING_NEW_PATH } from '../../routes';
-
-import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING, EMPTY_ROLE_MAPPINGS_BODY } from './constants';
+import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
-import { generateRoleMappingPath } from './utils';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, resetState } = useActions(RoleMappingsLogic);
-  const { roleMappings, multipleAuthProvidersConfig, dataLoading } = useValues(RoleMappingsLogic);
+  const {
+    initializeRoleMappings,
+    initializeRoleMapping,
+    handleDeleteMapping,
+    resetState,
+  } = useActions(RoleMappingsLogic);
+  const {
+    roleMappings,
+    multipleAuthProvidersConfig,
+    dataLoading,
+    roleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
     return resetState;
   }, []);
 
-  if (dataLoading) return <Loading />;
-
-  const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
-
-  const roleMappingEmptyState = (
-    <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
-      <EuiEmptyPrompt
-        iconType="usersRolesApp"
-        title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
-        body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
-        actions={addMappingButton}
+  const roleMappingsSection = (
+    <section>
+      <RoleMappingsHeading
+        productName={APP_SEARCH_PLUGIN.NAME}
+        onClick={() => initializeRoleMapping()}
       />
-    </EuiPanel>
-  );
-
-  const roleMappingsTable = (
-    <RoleMappingsTable
-      roleMappings={roleMappings}
-      accessItemKey="engines"
-      accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
-      addMappingButton={addMappingButton}
-      getRoleMappingPath={generateRoleMappingPath}
-      shouldShowAuthProvider={multipleAuthProvidersConfig}
-    />
+      <RoleMappingsTable
+        roleMappings={roleMappings}
+        accessItemKey="engines"
+        accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
+        initializeRoleMapping={initializeRoleMapping}
+        shouldShowAuthProvider={multipleAuthProvidersConfig}
+        handleDeleteMapping={handleDeleteMapping}
+      />
+    </section>
   );
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
-      <EuiPageHeader pageTitle={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
-      <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
-        <EuiPageContentBody>
-          <FlashMessages />
-          {roleMappings.length === 0 ? roleMappingEmptyState : roleMappingsTable}
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </>
+    <AppSearchPageTemplate
+      pageChrome={[ROLE_MAPPINGS_TITLE]}
+      pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
+      isLoading={dataLoading}
+    >
+      {roleMappingFlyoutOpen && <RoleMapping />}
+      {roleMappingsSection}
+    </AppSearchPageTemplate>
   );
 };

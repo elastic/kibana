@@ -47,42 +47,31 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-
-  let resp: SpacesAggregationResponse | undefined;
-  try {
-    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
-    ({ body: resp } = await esClient.search({
-      index: kibanaIndex,
-      body: {
-        track_total_hits: true,
-        query: {
-          term: {
-            type: {
-              value: 'space',
-            },
+  const { body: resp } = (await esClient.search({
+    index: kibanaIndex,
+    body: {
+      track_total_hits: true,
+      query: {
+        term: {
+          type: {
+            value: 'space',
           },
         },
-        aggs: {
-          disabledFeatures: {
-            terms: {
-              field: 'space.disabledFeatures',
-              include: knownFeatureIds,
-              size: knownFeatureIds.length,
-            },
-          },
-        },
-        size: 0,
       },
-    }));
-  } catch (err) {
-    if (err.status === 404) {
-      return null;
-    }
+      aggs: {
+        disabledFeatures: {
+          terms: {
+            field: 'space.disabledFeatures',
+            include: knownFeatureIds,
+            size: knownFeatureIds.length,
+          },
+        },
+      },
+      size: 0,
+    },
+  })) as { body: SpacesAggregationResponse };
 
-    throw err;
-  }
-
-  const { hits, aggregations } = resp!;
+  const { hits, aggregations } = resp;
 
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];

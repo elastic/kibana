@@ -19,16 +19,17 @@ import type {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
 } from '@kbn/securitysolution-io-ts-types';
-
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
-} from '../../../common/types';
+  getSavedObjectTypes,
+} from '@kbn/securitysolution-list-utils';
+
 import { escapeQuotes } from '../utils/escape_query';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemsOptions {

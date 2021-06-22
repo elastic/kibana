@@ -5,27 +5,4 @@
  * 2.0.
  */
 
-export { getFlattenedObject } from '@kbn/std';
-
-export {
-  AgentStatusKueryHelper,
-  agentPolicyRouteService,
-  packagePolicyRouteService,
-  dataStreamRouteService,
-  fleetSetupRouteService,
-  agentRouteService,
-  enrollmentAPIKeyRouteService,
-  epmRouteService,
-  setupRouteService,
-  outputRoutesService,
-  settingsRoutesService,
-  appRoutesService,
-  packageToPackagePolicyInputs,
-  storedPackagePoliciesToAgentInputs,
-  fullAgentPolicyToYaml,
-  isPackageLimited,
-  doesAgentPolicyAlreadyIncludePackage,
-  isValidNamespace,
-  LicenseService,
-  isAgentUpgradeable,
-} from '../../../../common';
+export * from '../../../services';

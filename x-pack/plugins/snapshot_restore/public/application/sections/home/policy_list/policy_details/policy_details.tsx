@@ -40,6 +40,7 @@ import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigatio
 
 import {
   SectionLoading,
+  InlineLoading,
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
@@ -318,7 +319,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
           <>
             <EuiSpacer size="s" />
-            <SectionLoading inline={true} size="s">
+            <InlineLoading size="s">
               <EuiLink
                 {...reactRouterNavigate(
                   history,
@@ -335,7 +336,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                   values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
                 />
               </EuiLink>
-            </SectionLoading>
+            </InlineLoading>
           </>
         ) : null}
         {renderTabs()}

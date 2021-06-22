@@ -68,7 +68,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo300,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -121,7 +121,7 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo300();
+    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {

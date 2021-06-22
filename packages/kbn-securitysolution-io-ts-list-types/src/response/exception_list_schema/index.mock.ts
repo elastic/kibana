@@ -25,7 +25,7 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '../..';
+} from '@kbn/securitysolution-list-constants';
 
 import { ExceptionListSchema } from '.';
 

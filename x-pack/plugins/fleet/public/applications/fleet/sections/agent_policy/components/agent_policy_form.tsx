@@ -29,6 +29,7 @@ import styled from 'styled-components';
 import { dataTypes } from '../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
+import { useStartServices } from '../../../hooks';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
@@ -83,6 +84,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   isEditing = false,
   onDelete = () => {},
 }) => {
+  const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
@@ -174,10 +176,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             defaultMessage="Namespaces are a user-configurable arbitrary grouping that makes it easier to search for data and manage user permissions. A policy namespace is used to name its integration's data streams. {fleetUserGuide}."
             values={{
               fleetUserGuide: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme"
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
                   {i18n.translate(
                     'xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel',
                     { defaultMessage: 'Learn more' }
@@ -223,7 +222,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.monitoringDescription"
-            defaultMessage="Collect data about your agents for debugging and tracking performance."
+            defaultMessage="Collect data about your agents for debugging and tracking performance. Monitoring data will be written to the default namespace specified above."
           />
         }
       >

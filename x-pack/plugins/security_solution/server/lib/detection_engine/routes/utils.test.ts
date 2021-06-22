@@ -25,7 +25,7 @@ import {
   getFailingRules,
 } from './utils';
 import { responseMock } from './__mocks__';
-import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
+import { exampleRuleStatus } from '../signals/__mocks__/es_results';
 import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
@@ -301,8 +301,8 @@ describe('utils', () => {
       const statusTwo = exampleRuleStatus();
       statusTwo.attributes.status = 'failed';
       const currentStatus = exampleRuleStatus();
-      const foundRules = exampleFindRuleStatusResponse([currentStatus, statusOne, statusTwo]);
-      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules.saved_objects, {
+      const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
+      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
             alert_id: 'myfakealertid-8cfac',

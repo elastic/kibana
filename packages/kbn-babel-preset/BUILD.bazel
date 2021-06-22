@@ -34,6 +34,7 @@ DEPS = [
   "@npm//@babel/preset-typescript",
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
+  "@npm//babel-plugin-transform-react-remove-prop-types",
 ]
 
 js_library(

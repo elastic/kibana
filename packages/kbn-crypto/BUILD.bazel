@@ -38,6 +38,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/node-forge",
   "@npm//@types/testing-library__jest-dom",
+  "@npm//resize-observer-polyfill"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
@@ -67,7 +68,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":tsc"] + DEPS,
+  deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -85,4 +86,4 @@ filegroup(
     ":npm_module",
   ],
   visibility = ["//visibility:public"],
-) 
+)

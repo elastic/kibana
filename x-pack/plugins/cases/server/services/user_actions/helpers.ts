@@ -10,24 +10,21 @@ import { get, isPlainObject, isString } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
   CaseUserActionAttributes,
+  ESCaseAttributes,
+  OWNER_FIELD,
+  SUB_CASE_SAVED_OBJECT,
+  SubCaseAttributes,
+  User,
   UserAction,
   UserActionField,
-  ESCaseAttributes,
-  User,
   UserActionFieldType,
-  SubCaseAttributes,
 } from '../../../common';
-import {
-  isTwoArraysDifference,
-  transformESConnectorToCaseConnector,
-} from '../../routes/api/cases/helpers';
+import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
-import {
-  CASE_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
+import { transformESConnectorToCaseConnector } from '../../common';
 
 export const transformNewUserAction = ({
   actionField,
@@ -36,6 +33,7 @@ export const transformNewUserAction = ({
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
+  owner,
   newValue = null,
   oldValue = null,
   username,
@@ -43,6 +41,7 @@ export const transformNewUserAction = ({
   actionField: UserActionField;
   action: UserAction;
   actionAt: string;
+  owner: string;
   email?: string | null;
   full_name?: string | null;
   newValue?: string | null;
@@ -55,6 +54,7 @@ export const transformNewUserAction = ({
   action_by: { email, full_name, username },
   new_value: newValue,
   old_value: oldValue,
+  owner,
 });
 
 interface BuildCaseUserAction {
@@ -62,6 +62,7 @@ interface BuildCaseUserAction {
   actionAt: string;
   actionBy: User;
   caseId: string;
+  owner: string;
   fields: UserActionField | unknown[];
   newValue?: string | unknown;
   oldValue?: string | unknown;
@@ -82,11 +83,13 @@ export const buildCommentUserActionItem = ({
   newValue,
   oldValue,
   subCaseId,
+  owner,
 }: BuildCommentUserActionItem): UserActionItem => ({
   attributes: transformNewUserAction({
     actionField: fields as UserActionField,
     action,
     actionAt,
+    owner,
     ...actionBy,
     newValue: newValue as string,
     oldValue: oldValue as string,
@@ -123,11 +126,13 @@ export const buildCaseUserActionItem = ({
   newValue,
   oldValue,
   subCaseId,
+  owner,
 }: BuildCaseUserAction): UserActionItem => ({
   attributes: transformNewUserAction({
     actionField: fields as UserActionField,
     action,
     actionAt,
+    owner,
     ...actionBy,
     newValue: newValue as string,
     oldValue: oldValue as string,
@@ -159,6 +164,7 @@ const userActionFieldsAllowed: UserActionField = [
   'status',
   'settings',
   'sub_case',
+  OWNER_FIELD,
 ];
 
 interface CaseSubIDs {
@@ -181,7 +187,14 @@ interface Getters {
   getCaseAndSubID: GetCaseAndSubID;
 }
 
-const buildGenericCaseUserActions = <T>({
+interface OwnerEntity {
+  owner: string;
+}
+
+/**
+ * The entity associated with the user action must contain an owner field
+ */
+const buildGenericCaseUserActions = <T extends OwnerEntity>({
   actionDate,
   actionBy,
   originalCases,
@@ -222,6 +235,7 @@ const buildGenericCaseUserActions = <T>({
                 fields: [field],
                 newValue: updatedValue,
                 oldValue: origValue,
+                owner: originalItem.attributes.owner,
               }),
             ];
           } else if (Array.isArray(origValue) && Array.isArray(updatedValue)) {
@@ -237,6 +251,7 @@ const buildGenericCaseUserActions = <T>({
                   subCaseId,
                   fields: [field],
                   newValue: compareValues.addedItems.join(', '),
+                  owner: originalItem.attributes.owner,
                 }),
               ];
             }
@@ -252,6 +267,7 @@ const buildGenericCaseUserActions = <T>({
                   subCaseId,
                   fields: [field],
                   newValue: compareValues.deletedItems.join(', '),
+                  owner: originalItem.attributes.owner,
                 }),
               ];
             }
@@ -271,6 +287,7 @@ const buildGenericCaseUserActions = <T>({
                 fields: [field],
                 newValue: JSON.stringify(updatedValue),
                 oldValue: JSON.stringify(origValue),
+                owner: originalItem.attributes.owner,
               }),
             ];
           }

@@ -7,14 +7,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiButton,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-} from '@elastic/eui';
+import { EuiButton, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface HeaderProps {
@@ -26,6 +19,21 @@ interface HeaderProps {
   onDeleteClick: () => void;
 }
 
+const renderConditionalTitle = (canEdit: boolean, type: string) =>
+  canEdit ? (
+    <FormattedMessage
+      id="savedObjectsManagement.view.editItemTitle"
+      defaultMessage="Edit {title}"
+      values={{ title: type }}
+    />
+  ) : (
+    <FormattedMessage
+      id="savedObjectsManagement.view.viewItemTitle"
+      defaultMessage="View {title}"
+      values={{ title: type }}
+    />
+  );
+
 export const Header = ({
   canEdit,
   canDelete,
@@ -35,65 +43,40 @@ export const Header = ({
   onDeleteClick,
 }: HeaderProps) => {
   return (
-    <EuiPageContentHeader>
-      <EuiPageContentHeaderSection>
-        <EuiTitle>
-          {canEdit ? (
-            <h1>
-              <FormattedMessage
-                id="savedObjectsManagement.view.editItemTitle"
-                defaultMessage="Edit {title}"
-                values={{ title: type }}
-              />
-            </h1>
-          ) : (
-            <h1>
-              <FormattedMessage
-                id="savedObjectsManagement.view.viewItemTitle"
-                defaultMessage="View {title}"
-                values={{ title: type }}
-              />
-            </h1>
-          )}
-        </EuiTitle>
-      </EuiPageContentHeaderSection>
-      <EuiPageContentHeaderSection>
-        <EuiFlexGroup responsive={false}>
-          {canViewInApp && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                href={viewUrl}
-                iconType="eye"
-                data-test-subj="savedObjectEditViewInApp"
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.view.viewItemButtonLabel"
-                  defaultMessage="View {title}"
-                  values={{ title: type }}
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          {canDelete && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="danger"
-                size="s"
-                iconType="trash"
-                onClick={() => onDeleteClick()}
-                data-test-subj="savedObjectEditDelete"
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.view.deleteItemButtonLabel"
-                  defaultMessage="Delete {title}"
-                  values={{ title: type }}
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPageContentHeaderSection>
-    </EuiPageContentHeader>
+    <EuiPageHeader
+      bottomBorder
+      pageTitle={renderConditionalTitle(canEdit, type)}
+      rightSideItems={[
+        canViewInApp && (
+          <EuiButton
+            size="s"
+            href={viewUrl}
+            iconType="eye"
+            data-test-subj="savedObjectEditViewInApp"
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.view.viewItemButtonLabel"
+              defaultMessage="View {title}"
+              values={{ title: type }}
+            />
+          </EuiButton>
+        ),
+        canDelete && (
+          <EuiButton
+            color="danger"
+            size="s"
+            iconType="trash"
+            onClick={() => onDeleteClick()}
+            data-test-subj="savedObjectEditDelete"
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.view.deleteItemButtonLabel"
+              defaultMessage="Delete {title}"
+              values={{ title: type }}
+            />
+          </EuiButton>
+        ),
+      ]}
+    />
   );
 };

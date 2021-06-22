@@ -19,10 +19,11 @@ import type {
   Tags,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Version } from '@kbn/securitysolution-io-ts-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
+import { transformSavedObjectToExceptionList } from './utils';
 
 interface CreateExceptionListOptions {
   listId: ListId;

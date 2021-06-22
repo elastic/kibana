@@ -38,6 +38,7 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
+import { InsufficientLicensePage } from '../insufficient_license_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
 import type { SpacesPluginStart } from '../../../../../../../spaces/public';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
@@ -128,6 +129,7 @@ export const JobsListPage: FC<{
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesApi);
@@ -139,7 +141,11 @@ export const JobsListPage: FC<{
       const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
       setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
     } catch (e) {
-      setAccessDenied(true);
+      if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
+        setIsPlatinumOrTrialLicense(false);
+      } else {
+        setAccessDenied(true);
+      }
     }
     setInitialized(true);
   };
@@ -189,6 +195,10 @@ export const JobsListPage: FC<{
 
   if (accessDenied) {
     return <AccessDeniedPage />;
+  }
+
+  if (isPlatinumOrTrialLicense === false) {
+    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
   }
 
   return (

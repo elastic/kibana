@@ -268,6 +268,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                             <EuiButtonContent
                               className="euiButtonEmpty__content"
                               iconSide="right"
+                              iconSize="m"
                               iconType="arrowDown"
                               textProps={
                                 Object {
@@ -280,11 +281,13 @@ exports[`InspectorPanel should render as expected 1`] = `
                               >
                                 <EuiIcon
                                   className="euiButtonContent__icon"
+                                  color="inherit"
                                   size="m"
                                   type="arrowDown"
                                 >
                                   <span
                                     className="euiButtonContent__icon"
+                                    color="inherit"
                                     data-euiicon-type="arrowDown"
                                     size="m"
                                   />

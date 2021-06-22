@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export interface LegendSettingsPopoverProps {
   /**
@@ -44,6 +45,22 @@ export interface LegendSettingsPopoverProps {
    * Callback on nested switch status change
    */
   onNestedLegendChange?: (event: EuiSwitchEvent) => void;
+  /**
+   * value in legend status
+   */
+  valueInLegend?: boolean;
+  /**
+   * Callback on value in legend status change
+   */
+  onValueInLegendChange?: (event: EuiSwitchEvent) => void;
+  /**
+   * If true, value in legend switch is rendered
+   */
+  renderValueInLegendSwitch?: boolean;
+  /**
+   * Button group position
+   */
+  groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
 const toggleButtonsIcons = [
@@ -86,6 +103,10 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   renderNestedLegendSwitch,
   nestedLegend,
   onNestedLegendChange = () => {},
+  valueInLegend,
+  onValueInLegendChange = () => {},
+  renderValueInLegendSwitch,
+  groupPosition = 'right',
 }) => {
   return (
     <ToolbarPopover
@@ -93,7 +114,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         defaultMessage: 'Legend',
       })}
       type="legend"
-      groupPosition="right"
+      groupPosition={groupPosition}
       buttonDataTestSubj="lnsLegendButton"
     >
       <EuiFormRow
@@ -152,6 +173,26 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             disabled={mode === 'hide'}
             checked={!!nestedLegend}
             onChange={onNestedLegendChange}
+          />
+        </EuiFormRow>
+      )}
+      {renderValueInLegendSwitch && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+            defaultMessage: 'Show value',
+          })}
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+              defaultMessage: 'Show value',
+            })}
+            data-test-subj="lens-legend-show-value"
+            showLabel={false}
+            disabled={mode === 'hide'}
+            checked={!!valueInLegend}
+            onChange={onValueInLegendChange}
           />
         </EuiFormRow>
       )}

@@ -420,7 +420,7 @@ export class VisualizeEmbeddable
   };
 
   public supportedTriggers(): string[] {
-    return this.vis.type.getSupportedTriggers?.() ?? [];
+    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

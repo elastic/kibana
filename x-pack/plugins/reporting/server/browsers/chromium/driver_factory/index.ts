@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import del from 'del';
 import fs from 'fs';
@@ -23,6 +24,7 @@ import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
+import { Metrics, getMetrics } from './metrics';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -74,6 +76,9 @@ export class HeadlessChromiumDriverFactory {
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;
+      let devTools: puppeteer.CDPSession | undefined;
+      let startMetrics: Metrics | undefined;
+
       try {
         browser = await puppeteer.launch({
           pipe: !this.browserConfig.inspect,
@@ -87,10 +92,13 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
+        devTools = await page.target().createCDPSession();
+
+        await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
+        startMetrics = await devTools.send('Performance.getMetrics');
 
         // Log version info for debugging / maintenance
-        const client = await page.target().createCDPSession();
-        const versionInfo = await client.send('Browser.getVersion');
+        const versionInfo = await devTools.send('Browser.getVersion');
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
         await page.emulateTimezone(browserTimezone);
@@ -108,6 +116,24 @@ export class HeadlessChromiumDriverFactory {
 
       const childProcess = {
         async kill() {
+          try {
+            if (devTools && startMetrics) {
+              const endMetrics = await devTools.send('Performance.getMetrics');
+              const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
+                startMetrics,
+                endMetrics
+              );
+
+              apm.currentTransaction?.setLabel('cpu', cpu, false);
+              apm.currentTransaction?.setLabel('memory', memory, false);
+              logger.debug(
+                `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
+              );
+            }
+          } catch (error) {
+            logger.error(error);
+          }
+
           try {
             await browser.close();
           } catch (err) {
@@ -169,10 +195,14 @@ export class HeadlessChromiumDriverFactory {
   getBrowserLogger(page: puppeteer.Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
+        const formatLine = () => `{ text: "${line.text()?.trim()}", url: ${line.location()?.url} }`;
+
         if (line.type() === 'error') {
-          logger.error(line.text(), ['headless-browser-console']);
+          logger.error(`Error in browser console: ${formatLine()}`, ['headless-browser-console']);
         } else {
-          logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
+          logger.debug(`Message in browser console: ${formatLine()}`, [
+            `headless-browser-console:${line.type()}`,
+          ]);
         }
       })
     );

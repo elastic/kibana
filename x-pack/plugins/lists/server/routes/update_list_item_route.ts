@@ -8,9 +8,9 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { listItemSchema, updateListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 

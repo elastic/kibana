@@ -1,0 +1,39 @@
+{
+  "type": "index",
+  "value": {
+    "index": "myfakeindex-5",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "epoch_second"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "ingested": {
+              "type": "date",
+              "format": "epoch_second"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

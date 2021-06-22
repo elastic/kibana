@@ -87,6 +87,7 @@ image:concepts/images/refresh-every.png["section of time filter where you can co
 
 
 [float]
+[[semi-structured-search]]
 ==== Semi-structured search
 
 Combine free text search with field-based search using the Kibana Query Language (KQL).

@@ -15,10 +15,10 @@ import {
   exceptionListItemSchema,
   listSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_URL } from '../../common/constants';
-import { getSavedObjectType } from '../services/exception_lists/utils';
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../services/utils/escape_query';
 

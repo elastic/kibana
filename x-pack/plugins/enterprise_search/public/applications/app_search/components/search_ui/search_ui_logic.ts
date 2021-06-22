@@ -7,9 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setErrorMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
+
+import { NO_SEARCH_KEY_ERROR } from './i18n';
 
 import { ActiveField } from './types';
 
@@ -84,7 +86,12 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
   listeners: ({ actions }) => ({
     loadFieldData: async () => {
       const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
+      const { searchKey, engineName } = EngineLogic.values;
+
+      if (!searchKey) {
+        setErrorMessage(NO_SEARCH_KEY_ERROR(engineName));
+        return;
+      }
 
       const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
 

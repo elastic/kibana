@@ -25,7 +25,8 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
           "default_field": [
             "long.nested.foo"
           ]
-        }
+        },
+        "final_pipeline": ".fleet_final_pipeline"
       }
     },
     "mappings": {
@@ -139,7 +140,8 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
             "coredns.response.code",
             "coredns.response.flags"
           ]
-        }
+        },
+        "final_pipeline": ".fleet_final_pipeline"
       }
     },
     "mappings": {
@@ -281,7 +283,8 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
             "system.users.scope",
             "system.users.remote_host"
           ]
-        }
+        },
+        "final_pipeline": ".fleet_final_pipeline"
       }
     },
     "mappings": {

@@ -111,6 +111,7 @@ readonly links: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
             readonly fieldFormattersString: string;
+            readonly runtimeFields: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -184,5 +185,18 @@ readonly links: {
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
+        readonly fleet: Readonly<{
+            guide: string;
+            fleetServer: string;
+            fleetServerAddFleetServer: string;
+            settings: string;
+            settingsFleetServerHostSettings: string;
+            troubleshooting: string;
+            elasticAgent: string;
+            datastreams: string;
+            datastreamsNamingScheme: string;
+            upgradeElasticAgent: string;
+            upgradeElasticAgent712lower: string;
+        }>;
     };
 ```

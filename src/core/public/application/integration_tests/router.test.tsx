@@ -96,7 +96,7 @@ describe('AppRouter', () => {
 
     expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -108,7 +108,7 @@ describe('AppRouter', () => {
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app2
       html: <div>App 2</div>
       </div></div>"
@@ -122,7 +122,7 @@ describe('AppRouter', () => {
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -134,7 +134,7 @@ describe('AppRouter', () => {
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -146,7 +146,7 @@ describe('AppRouter', () => {
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -160,7 +160,7 @@ describe('AppRouter', () => {
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -172,7 +172,7 @@ describe('AppRouter', () => {
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-b/path
       html: <div>Chromeless B</div>
       </div></div>"
@@ -184,7 +184,7 @@ describe('AppRouter', () => {
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
+      "<span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge appContainer__loading\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"

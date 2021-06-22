@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { DocumentCreationButton } from './components';
 import { SearchExperience } from './search_experience';
@@ -22,6 +22,7 @@ import { Documents } from '.';
 describe('Documents', () => {
   const values = {
     isMetaEngine: false,
+    engine: { document_count: 1 },
     myRole: { canManageEngineDocuments: true },
   };
 
@@ -36,9 +37,6 @@ describe('Documents', () => {
   });
 
   describe('DocumentCreationButton', () => {
-    const getHeader = (wrapper: ShallowWrapper) =>
-      wrapper.find(EuiPageHeader).dive().children().dive();
-
     it('renders a DocumentCreationButton if the user can manage engine documents', () => {
       setMockValues({
         ...values,
@@ -46,7 +44,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents />);
-      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(true);
+      expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(true);
     });
 
     it('does not render a DocumentCreationButton if the user cannot manage engine documents', () => {
@@ -56,7 +54,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents />);
-      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+      expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
 
     it('does not render a DocumentCreationButton for meta engines even if the user can manage engine documents', () => {
@@ -67,7 +65,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents />);
-      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+      expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
   });
 

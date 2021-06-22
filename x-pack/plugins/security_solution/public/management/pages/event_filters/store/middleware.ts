@@ -10,6 +10,7 @@ import type {
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -18,8 +19,6 @@ import {
 } from '../../../../common/store';
 
 import { EventFiltersHttpService } from '../service';
-
-import { transformNewItemOutput, transformOutput } from '../../../../shared_imports';
 
 import {
   getCurrentListPageDataState,
@@ -58,7 +57,8 @@ const addNewComments = (
 ): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
   if (newComment) {
     if (!entry.comments) entry.comments = [];
-    entry.comments.push({ comment: newComment });
+    const trimmedComment = newComment.trim();
+    if (trimmedComment) entry.comments.push({ comment: trimmedComment });
   }
   return entry;
 };

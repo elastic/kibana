@@ -41,13 +41,7 @@
             "label": "placement",
             "description": [],
             "signature": [
-              {
-                "pluginId": "banners",
-                "scope": "common",
-                "docId": "kibBannersPluginApi",
-                "section": "def-common.BannerPlacement",
-                "text": "BannerPlacement"
-              }
+              "\"top\" | \"disabled\""
             ],
             "source": {
               "path": "x-pack/plugins/banners/common/types.ts",

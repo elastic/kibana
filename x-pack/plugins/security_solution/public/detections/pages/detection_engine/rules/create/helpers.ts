@@ -20,10 +20,10 @@ import {
   ThreatTechnique,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   AboutStepRule,

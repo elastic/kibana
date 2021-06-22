@@ -8,6 +8,8 @@
 import type {
   ExceptionListType,
   ExceptionListItemSchema,
+  ExceptionListIdentifiers,
+  Pagination,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   FilterOptions,
@@ -15,7 +17,6 @@ import type {
   ExceptionListItemIdentifiers,
   Filter,
 } from '../types';
-import type { ExceptionListIdentifiers, Pagination } from '../../../../../public/shared_imports';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 

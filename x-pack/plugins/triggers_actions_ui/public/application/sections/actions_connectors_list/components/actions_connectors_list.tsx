@@ -25,10 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
-import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import ConnectorEditFlyout, {
-  EditConectorTabs,
-} from '../../action_connector_form/connector_edit_flyout';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -37,13 +33,20 @@ import {
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
-import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import {
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
+  EditConectorTabs,
+} from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 
-export const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     http,
     notifications: { toasts },
@@ -440,6 +443,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
+export { ActionsConnectorsList as default };
+
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;
 }
@@ -455,7 +461,7 @@ const DeleteOperation: React.FunctionComponent<{
         <EuiBetaBadge
           data-test-subj="preConfiguredTitleMessage"
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTitleMessage',
             {
               defaultMessage: 'Preconfigured',
             }

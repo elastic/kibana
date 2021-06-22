@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiForm,
   EuiCallOut,
@@ -51,11 +51,11 @@ export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
   return validationResult;
 }
 
-export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+export async function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
   actionTypeModel: ActionTypeModel
 ) {
-  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const connectorValidationResult = await actionTypeModel?.validateConnector(connector);
   const configErrors = (connectorValidationResult.config
     ? connectorValidationResult.config.errors
     : {}) as IErrorObject;
@@ -137,7 +137,7 @@ export const ActionConnectorForm = ({
   const actionTypeRegistered = actionTypeRegistry.get(connector.actionTypeId);
   if (!actionTypeRegistered)
     return (
-      <Fragment>
+      <>
         <EuiCallOut
           title={i18n.translate(
             'xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningTitleText',
@@ -169,11 +169,12 @@ export const ActionConnectorForm = ({
           </EuiText>
         </EuiCallOut>
         <EuiSpacer />
-      </Fragment>
+      </>
     );
 
   const FieldsComponent = actionTypeRegistered.actionConnectorFields;
-
+  const isNameInvalid: boolean =
+    connector.name !== undefined && errors.name !== undefined && errors.name.length > 0;
   return (
     <EuiForm isInvalid={!!serverError} error={serverError?.body.message}>
       <EuiFormRow
@@ -185,13 +186,13 @@ export const ActionConnectorForm = ({
             defaultMessage="Connector name"
           />
         }
-        isInvalid={errors.name.length > 0 && connector.name !== undefined}
+        isInvalid={isNameInvalid}
         error={errors.name}
       >
         <EuiFieldText
           fullWidth
           readOnly={!canSave}
-          isInvalid={errors.name.length > 0 && connector.name !== undefined}
+          isInvalid={isNameInvalid}
           name="name"
           placeholder="Untitled"
           data-test-subj="nameInput"

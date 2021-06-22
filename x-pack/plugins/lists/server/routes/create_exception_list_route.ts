@@ -12,9 +12,9 @@ import {
   createExceptionListSchema,
   exceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_URL } from '../../common/constants';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';

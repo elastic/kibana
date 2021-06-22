@@ -11,10 +11,17 @@ import type { applyDeprecations } from './deprecation/apply_deprecations';
 
 jest.mock('../../../package.json', () => mockPackage);
 
+const changedPaths = {
+  set: ['foo'],
+  unset: ['bar.baz'],
+};
+
+export { changedPaths as mockedChangedPaths };
+
 export const mockApplyDeprecations = jest.fn<
-  Record<string, any>,
+  ReturnType<typeof applyDeprecations>,
   Parameters<typeof applyDeprecations>
->((config, deprecations, createAddDeprecation) => config);
+>((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
 
 jest.mock('./deprecation/apply_deprecations', () => ({
   applyDeprecations: mockApplyDeprecations,

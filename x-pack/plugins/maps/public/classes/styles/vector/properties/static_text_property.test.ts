@@ -7,7 +7,7 @@
 
 import { StaticTextProperty } from './static_text_property';
 import { VECTOR_STYLES } from '../../../../../common/constants';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];

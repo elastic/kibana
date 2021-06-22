@@ -66,12 +66,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('E-Commerce Data', () => {
       before(async () => {
-        await esArchiver.load('reporting/ecommerce');
-        await esArchiver.load('reporting/ecommerce_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       });
       after(async () => {
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       });
 
       it('Download CSV export of a saved search panel', async function () {
@@ -116,10 +116,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Field Formatters and Scripted Fields', () => {
       before(async () => {
-        await esArchiver.load('reporting/hugedata');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
       });
       after(async () => {
-        await esArchiver.unload('reporting/hugedata');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
       it('Download CSV export of a saved search panel', async () => {

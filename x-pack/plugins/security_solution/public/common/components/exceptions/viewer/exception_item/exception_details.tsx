@@ -82,7 +82,9 @@ const ExceptionDetailsComponent = ({
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
                 <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
-                <MyDescriptionListDescription>{item.description}</MyDescriptionListDescription>
+                <MyDescriptionListDescription className="eui-textBreakWord">
+                  {item.description}
+                </MyDescriptionListDescription>
               </Fragment>
             ))}
           </EuiDescriptionList>

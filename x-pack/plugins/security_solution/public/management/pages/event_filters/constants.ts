@@ -12,7 +12,7 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-} from '../../../../common/shared_imports';
+} from '@kbn/securitysolution-list-constants';
 
 export const EVENT_FILTER_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_EVENTS;
 export const EVENT_FILTER_LIST = {

@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { overwrite } from '../../helpers';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
-import { UI_SETTINGS } from '../../../../../../data/common';
 
-export function metricBuckets(req, panel, esQueryConfig, seriesIndex, capabilities, uiSettings) {
+export function metricBuckets(req, panel) {
   return (next) => async (doc) => {
-    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
-    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
-
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       column.metrics
@@ -27,7 +21,9 @@ export function metricBuckets(req, panel, esQueryConfig, seriesIndex, capabiliti
           const fn = bucketTransform[metric.type];
           if (fn) {
             try {
+              const intervalString = get(doc, aggRoot.replace(/\.aggs$/, '.meta.intervalString'));
               const bucket = fn(metric, column.metrics, intervalString);
+
               overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, bucket);
             } catch (e) {
               // meh

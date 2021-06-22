@@ -15,6 +15,7 @@ export interface ApiKey {
   creation: number;
   expiration: number;
   invalidated: boolean;
+  metadata: Record<string, any>;
 }
 
 export interface ApiKeyToInvalidate {

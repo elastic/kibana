@@ -108,9 +108,10 @@ class PackagePolicyService {
       else {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
+            esClient,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
-            esClient,
+            pkgVersion: packagePolicy.package.version,
           }),
           pkgInfoPromise,
         ]);
@@ -128,7 +129,7 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     const isoDate = new Date().toISOString();
@@ -356,7 +357,7 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -432,7 +433,7 @@ class PackagePolicyService {
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
-      const [pkgInfo, defaultOutputId] = await Promise.all([
+      const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: pkgInstall.name,
@@ -440,23 +441,24 @@ class PackagePolicyService {
         }),
         outputService.getDefaultOutputId(soClient),
       ]);
-      if (pkgInfo) {
+      if (packageInfo) {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToPackagePolicy(pkgInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
       }
     }
   }
 
   public async compilePackagePolicyInputs(
     pkgInfo: PackageInfo,
+    vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, input);
-      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, input);
+      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
+      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
       return {
         ...input,
         compiled_input: compiledInput,
@@ -506,13 +508,20 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 async function _compilePackagePolicyInput(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
-  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
+  const packagePolicyTemplate = input.policy_template
+    ? pkgInfo.policy_templates?.find(
+        (policyTemplate) => policyTemplate.name === input.policy_template
+      )
+    : pkgInfo.policy_templates?.[0];
+
+  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
     return undefined;
   }
 
-  const packageInputs = pkgInfo.policy_templates[0].inputs;
+  const packageInputs = packagePolicyTemplate.inputs;
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
@@ -531,8 +540,8 @@ async function _compilePackagePolicyInput(
   }
 
   return compileTemplate(
-    // Populate template variables from input vars
-    Object.assign({}, input.vars),
+    // Populate template variables from package- and input-level vars
+    Object.assign({}, vars, input.vars),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -540,10 +549,11 @@ async function _compilePackagePolicyInput(
 async function _compilePackageStreams(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, input, stream)
+    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -552,6 +562,7 @@ async function _compilePackageStreams(
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   stream: PackagePolicyInputStream
 ) {
@@ -600,8 +611,8 @@ async function _compilePackageStream(
   }
 
   const yaml = compileTemplate(
-    // Populate template variables from input vars and stream vars
-    Object.assign({}, input.vars, stream.vars),
+    // Populate template variables from package-, input-, and stream-level vars
+    Object.assign({}, vars, input.vars, stream.vars),
     pkgStreamTemplate.buffer.toString()
   );
 
@@ -638,11 +649,16 @@ function _enforceFrozenVars(
   newVars: Record<string, PackagePolicyConfigRecordEntry>
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
-  for (const [key, val] of Object.entries(oldVars)) {
-    if (val.frozen) {
-      resultVars[key] = val;
+  for (const [key, val] of Object.entries(newVars)) {
+    if (oldVars[key]?.frozen) {
+      resultVars[key] = oldVars[key];
     } else {
-      resultVars[key] = newVars[key];
+      resultVars[key] = val;
+    }
+  }
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (!newVars[key] && val.frozen) {
+      resultVars[key] = val;
     }
   }
   return resultVars;

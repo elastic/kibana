@@ -7,7 +7,6 @@
  */
 
 export * from './actions';
-export * from './constants';
 export * from './default_actions_array';
 export * from './default_export_file_name';
 export * from './default_from_string';

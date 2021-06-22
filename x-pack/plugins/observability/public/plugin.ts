@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -31,9 +31,13 @@ import type {
 import type { LensPublicStart } from '../../lens/public';
 import { registerDataHandler } from './data_handler';
 import { createCallObservabilityApi } from './services/call_observability_api';
+import { createNavigationRegistry } from './services/navigation_registry';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createLazyObservabilityPageTemplate } from './components/shared';
+import { CASES_APP_ID } from './components/app/cases/constants';
+import { CasesUiStart } from '../../cases/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -44,13 +48,14 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  cases: CasesUiStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
 }
 
-export type ObservabilityPublicStart = void;
+export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
   implements
@@ -61,13 +66,15 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
   public setup(
-    coreSetup: CoreSetup<ObservabilityPublicPluginsStart>,
+    coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
@@ -84,7 +91,7 @@ export class Plugin
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       return renderApp({
         config,
@@ -92,6 +99,7 @@ export class Plugin
         plugins: pluginsStart,
         appMountParameters: params,
         observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: navigation.PageTemplate,
       });
     };
 
@@ -107,7 +115,6 @@ export class Plugin
       mount,
       updater$,
     });
-
     if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
@@ -119,16 +126,18 @@ export class Plugin
         mount,
         updater$,
       });
+    }
 
+    if (config.unsafe.cases.enabled) {
       coreSetup.application.register({
-        id: 'observability-cases',
+        id: CASES_APP_ID,
         title: 'Cases',
         appRoute: '/app/observability/cases',
         order: 8050,
         category,
         euiIconType,
         mount,
-        updater$,
+        updater$: this.casesAppUpdater$,
       });
     }
 
@@ -162,13 +171,39 @@ export class Plugin
       });
     }
 
+    this.navigationRegistry.registerSections(
+      of([
+        {
+          label: '',
+          sortKey: 100,
+          entries: [{ label: 'Overview', app: 'observability-overview', path: '/overview' }],
+        },
+      ])
+    );
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry,
       isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
+      navigation: {
+        registerSections: this.navigationRegistry.registerSections,
+      },
     };
   }
   public start({ application }: CoreStart) {
-    toggleOverviewLinkInNav(this.appUpdater$, application);
+    toggleOverviewLinkInNav(this.appUpdater$, this.casesAppUpdater$, application);
+
+    const PageTemplate = createLazyObservabilityPageTemplate({
+      currentAppId$: application.currentAppId$,
+      getUrlForApp: application.getUrlForApp,
+      navigateToApp: application.navigateToApp,
+      navigationSections$: this.navigationRegistry.sections$,
+    });
+
+    return {
+      navigation: {
+        PageTemplate,
+      },
+    };
   }
 }

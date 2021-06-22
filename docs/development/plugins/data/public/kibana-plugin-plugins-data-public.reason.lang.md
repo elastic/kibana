@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-lang?: string;
+lang?: estypes.ScriptLanguage;
 ```

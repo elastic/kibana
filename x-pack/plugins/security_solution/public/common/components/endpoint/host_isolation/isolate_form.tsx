@@ -70,12 +70,22 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
 
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} disabled={isLoading}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              disabled={isLoading}
+              data-test-subj="hostIsolateCancelButton"
+            >
               {CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onConfirm} disabled={isLoading} isLoading={isLoading}>
+            <EuiButton
+              fill
+              onClick={onConfirm}
+              disabled={isLoading}
+              isLoading={isLoading}
+              data-test-subj="hostIsolateConfirmButton"
+            >
               {CONFIRM}
             </EuiButton>
           </EuiFlexItem>

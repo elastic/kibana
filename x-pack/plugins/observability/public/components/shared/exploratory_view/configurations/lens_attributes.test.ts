@@ -15,9 +15,9 @@ describe('Lens Attribute', () => {
   mockAppIndexPattern();
 
   const reportViewConfig = getDefaultConfigs({
-    reportType: 'pld',
+    reportType: 'dist',
+    dataType: 'ux',
     indexPattern: mockIndexPattern,
-    seriesId: 'series-id',
   });
 
   let lnsAttr: LensAttributes;
@@ -73,6 +73,7 @@ describe('Lens Attribute', () => {
           readFromDocValues: true,
         },
         fieldName: 'transaction.duration.us',
+        columnLabel: 'Page load time',
       })
     );
   });
@@ -95,6 +96,7 @@ describe('Lens Attribute', () => {
           readFromDocValues: true,
         },
         fieldName: LCP_FIELD,
+        columnLabel: 'Largest contentful paint',
       })
     );
   });
@@ -342,7 +344,7 @@ describe('Lens Attribute', () => {
               orderBy: { columnId: 'y-axis-column', type: 'column' },
               orderDirection: 'desc',
               otherBucket: true,
-              size: 3,
+              size: 10,
             },
             scale: 'ordinal',
             sourceField: 'user_agent.name',

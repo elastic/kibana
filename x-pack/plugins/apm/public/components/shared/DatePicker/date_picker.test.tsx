@@ -32,7 +32,7 @@ function MockUrlParamsProvider({
         rangeId: 0,
         refreshTimeRange: mockRefreshTimeRange,
         urlParams,
-        uiFilters: {},
+        uxUiFilters: {},
       }}
       children={children}
     />

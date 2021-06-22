@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiText,
   EuiSteps,
-  EuiSpacer,
   EuiButton,
   EuiModal,
   EuiModalBody,
@@ -38,7 +37,7 @@ interface Props {
 const i18nTexts = {
   getModalTitle: (domainId: string) =>
     i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.stepsModal.modalTitle', {
-      defaultMessage: "Fix '{domainId}'",
+      defaultMessage: "Resolve deprecation in '{domainId}'",
       values: {
         domainId,
       },
@@ -50,12 +49,6 @@ const i18nTexts = {
         step,
       },
     }),
-  modalDescription: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.stepsModal.modalDescription',
-    {
-      defaultMessage: 'Follow the steps below to address this deprecation.',
-    }
-  ),
   docLinkLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.stepsModal.docLinkLabel',
     {
@@ -84,28 +77,20 @@ export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent 
       </EuiModalHeader>
 
       <EuiModalBody>
-        <>
-          <EuiText>
-            <p>{i18nTexts.modalDescription}</p>
-          </EuiText>
-
-          <EuiSpacer />
-
-          <EuiSteps
-            titleSize="xs"
-            data-test-subj="fixDeprecationSteps"
-            steps={steps.map((step, index) => {
-              return {
-                title: i18nTexts.getStepTitle(index + 1),
-                children: (
-                  <EuiText>
-                    <p>{step}</p>
-                  </EuiText>
-                ),
-              };
-            })}
-          />
-        </>
+        <EuiSteps
+          titleSize="xs"
+          data-test-subj="fixDeprecationSteps"
+          steps={steps.map((step, index) => {
+            return {
+              title: i18nTexts.getStepTitle(index + 1),
+              children: (
+                <EuiText>
+                  <p>{step}</p>
+                </EuiText>
+              ),
+            };
+          })}
+        />
       </EuiModalBody>
 
       <EuiModalFooter>

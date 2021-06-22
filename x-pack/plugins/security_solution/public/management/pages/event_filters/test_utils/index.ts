@@ -10,13 +10,13 @@ import type {
   FoundExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Ecs } from '../../../../../common/ecs';
 
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
 } from '../../../common/constants';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../../../shared_imports';
 
 import { eventFiltersPageReducer } from '../store/reducer';
 import {

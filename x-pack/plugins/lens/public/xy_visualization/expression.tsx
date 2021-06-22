@@ -58,6 +58,7 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -196,11 +197,24 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
     },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+        defaultMessage: 'Define the area chart fill opacity',
+      }),
+    },
     hideEndzones: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
         defaultMessage: 'Hide endzone markers for partial data',
+      }),
+    },
+    valuesInLegend: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+        defaultMessage: 'Show values in legend',
       }),
     },
   },
@@ -216,7 +230,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -274,7 +288,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config)}
+          minInterval={calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -359,6 +373,7 @@ export function XYChart({
     hideEndzones,
     yLeftExtent,
     yRightExtent,
+    valuesInLegend,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -376,6 +391,7 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
@@ -596,7 +612,6 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend.position}
-        showLegendExtra={false}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -616,6 +631,14 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        legendAction={getLegendAction(
+          filteredLayers,
+          data.tables,
+          onClickValue,
+          formatFactory,
+          layersAlreadyFormatted
+        )}
+        showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
       <Axis
@@ -792,7 +815,7 @@ export function XYChart({
                   ),
                 },
               ];
-              return paletteService.get(palette.name).getColor(
+              return paletteService.get(palette.name).getCategoricalColor(
                 seriesLayers,
                 {
                   maxDepth: 1,
@@ -812,6 +835,7 @@ export function XYChart({
                 visible: !xAccessor,
                 radius: 5,
               },
+              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
             },
             lineSeriesStyle: {
               point: {

@@ -6,8 +6,8 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 
 import {
   DeleteTrustedAppsRequestParams,

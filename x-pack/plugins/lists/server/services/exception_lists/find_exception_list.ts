@@ -15,11 +15,11 @@ import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectType, getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
-import { SavedObjectType } from '../../../common/types';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
+import { transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceTypeArray;

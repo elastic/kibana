@@ -185,10 +185,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('rollup', () => {
       before(async () => {
-        await esArchiver.load('hybrid/rollup');
+        await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
       });
       after(async () => {
-        await esArchiver.unload('hybrid/rollup');
+        await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
       });
 
       it('should return 400 if rollup search is called without index', async () => {
