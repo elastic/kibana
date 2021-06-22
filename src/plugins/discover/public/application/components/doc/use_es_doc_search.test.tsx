@@ -7,11 +7,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
+import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 import { IndexPattern } from 'src/plugins/data/common';
+import { ElasticRequestState } from './elastic_request_state';
 
 const mockSearchResult = new Observable();
 
@@ -67,6 +68,36 @@ describe('Test of <Doc /> helper / hook', () => {
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
+            },
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+          "runtime_mappings": Object {},
+          "script_fields": Array [],
+          "stored_fields": Array [],
+        },
+      }
+    `);
+  });
+
+  test('buildSearchBody with requestSource', () => {
+    const indexPattern = ({
+      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+    } as unknown) as IndexPattern;
+    const actual = buildSearchBody('1', indexPattern, true, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "_source": true,
           "fields": Array [
             Object {
               "field": "*",
@@ -155,7 +186,11 @@ describe('Test of <Doc /> helper / hook', () => {
     await act(async () => {
       hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
     });
-    expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, indexPattern]);
+    expect(hook.result.current.slice(0, 3)).toEqual([
+      ElasticRequestState.Loading,
+      null,
+      indexPattern,
+    ]);
     expect(getMock).toHaveBeenCalled();
   });
 });
