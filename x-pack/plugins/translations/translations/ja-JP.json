@@ -12756,7 +12756,6 @@
     "xpack.lens.indexPattern.terms.orderByHelp": "上位の値がランク付けされる条件となるディメンションを指定します。",
     "xpack.lens.indexPattern.terms.orderDescending": "降順",
     "xpack.lens.indexPattern.terms.orderDirection": "ランク方向",
-    "xpack.lens.indexPattern.terms.orderDirectionHelp": "上位の値のランク順序を指定します。",
     "xpack.lens.indexPattern.terms.otherBucketDescription": "他の値を「その他」としてグループ化",
     "xpack.lens.indexPattern.terms.otherLabel": "その他",
     "xpack.lens.indexPattern.terms.size": "値の数",

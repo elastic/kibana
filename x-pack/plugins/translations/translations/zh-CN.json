@@ -12927,7 +12927,6 @@
     "xpack.lens.indexPattern.terms.orderByHelp": "指定排名靠前值排名所依据的维度。",
     "xpack.lens.indexPattern.terms.orderDescending": "降序",
     "xpack.lens.indexPattern.terms.orderDirection": "排名方向",
-    "xpack.lens.indexPattern.terms.orderDirectionHelp": "指定排名靠前值的排名顺序。",
     "xpack.lens.indexPattern.terms.otherBucketDescription": "将其他值分组为“其他”",
     "xpack.lens.indexPattern.terms.otherLabel": "其他",
     "xpack.lens.indexPattern.terms.size": "值数目",
