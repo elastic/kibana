@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -13,7 +15,14 @@ const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/has_data',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
-    const fleetPluginStart = await plugins.fleet.start();
+    const fleetPluginStart = await plugins.fleet?.start();
+    if (!fleetPluginStart) {
+      throw Boom.internal(
+        i18n.translate('xpack.apm.fleet_has_data.fleetRequired', {
+          defaultMessage: `Fleet plugin is required`,
+        })
+      );
+    }
     const packagePolicies = await getApmPackgePolicies({
       core,
       fleetPluginStart,
