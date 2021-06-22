@@ -9,3 +9,4 @@
 export * from './types';
 export * from './locator';
 export * from './locator_client';
+export { useLocatorUrl } from './use_locator_url';
