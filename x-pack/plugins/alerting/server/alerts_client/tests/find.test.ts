@@ -277,13 +277,13 @@ describe('find()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when searching alerts', async () => {
+    test('logs audit event when searching rules', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       await alertsClient.find();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -291,7 +291,7 @@ describe('find()', () => {
       );
     });
 
-    test('logs audit event when not authorised to search alerts', async () => {
+    test('logs audit event when not authorised to search rules', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
@@ -299,7 +299,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'failure',
           }),
           error: {
@@ -310,7 +310,7 @@ describe('find()', () => {
       );
     });
 
-    test('logs audit event when not authorised to search alert type', async () => {
+    test('logs audit event when not authorised to search rule type', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized: jest.fn(() => {
@@ -323,7 +323,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_find',
+            action: 'rule_find',
             outcome: 'failure',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
