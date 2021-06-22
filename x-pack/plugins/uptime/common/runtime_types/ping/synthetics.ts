@@ -172,3 +172,33 @@ export type ScreenshotRefImageData = t.TypeOf<typeof ScreenshotRefImageDataType>
 export function isScreenshotRef(data: unknown): data is ScreenshotRefImageData {
   return isRight(ScreenshotRefImageDataType.decode(data));
 }
+
+export const SyntheticsJourneyApiResponseType = t.intersection([
+  t.type({
+    checkGroup: t.string,
+    steps: t.array(JourneyStepType),
+  }),
+  t.partial({
+    details: t.union([
+      t.intersection([
+        t.type({
+          timestamp: t.string,
+          journey: JourneyStepType,
+        }),
+        t.partial({
+          next: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+          previous: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+        }),
+      ]),
+      t.null,
+    ]),
+  }),
+]);
+
+export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;

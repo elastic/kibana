@@ -7,8 +7,29 @@
 
 import * as t from 'io-ts';
 import { DateRangeType } from '../common';
-import { PingErrorType } from '../monitor';
-import { JourneyStepType } from './synthetics';
+
+// IO type for validation
+export const PingErrorType = t.intersection([
+  t.partial({
+    code: t.string,
+    id: t.string,
+    stack_trace: t.string,
+    type: t.string,
+  }),
+  t.type({
+    // this is _always_ on the error field
+    message: t.string,
+  }),
+]);
+
+// Typescript type for type checking
+export type PingError = t.TypeOf<typeof PingErrorType>;
+
+export const MonitorDetailsType = t.intersection([
+  t.type({ monitorId: t.string }),
+  t.partial({ error: PingErrorType, timestamp: t.string, alerts: t.unknown }),
+]);
+export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -242,36 +263,6 @@ export const PingType = t.intersection([
     }),
   }),
 ]);
-
-export const SyntheticsJourneyApiResponseType = t.intersection([
-  t.type({
-    checkGroup: t.string,
-    steps: t.array(JourneyStepType),
-  }),
-  t.partial({
-    details: t.union([
-      t.intersection([
-        t.type({
-          timestamp: t.string,
-          journey: JourneyStepType,
-        }),
-        t.partial({
-          next: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-          previous: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-        }),
-      ]),
-      t.null,
-    ]),
-  }),
-]);
-
-export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
 
 export type Ping = t.TypeOf<typeof PingType>;
 
