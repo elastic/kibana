@@ -28,6 +28,12 @@ export function getUiSettings(
       description: i18n.translate('timelion.uiSettings.legacyChartsLibraryDescription', {
         defaultMessage: 'Enables legacy charts library for Timelion visualizations',
       }),
+      deprecation: {
+        message: i18n.translate('timelion.uiSettings.legacyChartsLibraryDeprication', {
+          defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+        }),
+        docLinksKey: 'timelionSettings',
+      },
       value: false,
       category: ['timelion'],
       schema: schema.boolean(),
