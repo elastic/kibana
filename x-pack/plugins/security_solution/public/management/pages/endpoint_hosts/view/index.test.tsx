@@ -790,7 +790,7 @@ describe('when on the endpoint list page', () => {
           disconnect: jest.fn(),
         }));
 
-        const fleetActionGenerator = new FleetActionGenerator(Math.random().toString());
+        const fleetActionGenerator = new FleetActionGenerator('seed');
         const responseData = fleetActionGenerator.generateResponse({
           agent_id: agentId,
         });
