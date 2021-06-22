@@ -78,6 +78,7 @@ export function SaveModalContainer({
   }, [initLastKnowDoc]);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadPersistedDoc() {
       if (initialInput) {
         getPersistedDoc({
@@ -87,12 +88,15 @@ export function SaveModalContainer({
           notifications,
           attributeService,
         }).then((doc) => {
-          if (doc) setLastKnownDoc(doc);
+          if (doc && isMounted) setLastKnownDoc(doc);
         });
       }
     }
 
     loadPersistedDoc();
+    return () => {
+      isMounted = false;
+    };
   }, [chrome, data, initialInput, notifications, attributeService]);
 
   const tagsIds =

@@ -38,7 +38,7 @@ interface DataPanelWrapperProps {
 }
 
 const getExternals = createSelector(
-  (state: LensState) => state.app,
+  (state: LensState) => state.lens,
   ({ resolvedDateRange, query, filters, datasourceStates, activeDatasourceId }) => ({
     dateRange: resolvedDateRange,
     query,

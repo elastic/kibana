@@ -99,7 +99,10 @@ export function createMockDatasource(id: string): DatasourceMock {
     getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
-    getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
+    getPersistableState: jest.fn((x) => ({
+      state: x,
+      savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
+    })),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
@@ -378,10 +381,10 @@ export function mockLensStore({
   const lensStore = makeConfigureStore(
     getPreloadedState({
       activeDatasourceId: 'testDatasource',
-      visualization: { activeId: 'testVis', state: null },
+      visualization: { activeId: 'testVis', state: {} },
       datasourceStates: {
         testDatasource: {
-          isLoading: false, // todo
+          isLoading: false,
           state: '',
         },
       },

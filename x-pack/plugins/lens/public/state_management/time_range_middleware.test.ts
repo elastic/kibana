@@ -17,7 +17,7 @@ import { timeRangeMiddleware } from './time_range_middleware';
 import { Observable, Subject } from 'rxjs';
 import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
 import moment from 'moment';
-import { initialState } from './app_slice';
+import { initialState } from './lens_slice';
 import { LensAppState } from './types';
 import { PayloadAction } from '@reduxjs/toolkit';
 
@@ -131,7 +131,7 @@ function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
 const createMiddleware = (data: DataPublicPluginStart) => {
   const middleware = timeRangeMiddleware(data);
   const store = {
-    getState: jest.fn(() => ({ app: initialState })),
+    getState: jest.fn(() => ({ lens: initialState })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
@@ -156,7 +156,7 @@ describe('timeRangeMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'app/setState',
+        type: 'lens/setState',
         payload: {
           visualization: {
             state: {},
@@ -173,7 +173,7 @@ describe('timeRangeMiddleware', () => {
           },
           searchSessionId: 'sessionId-1',
         },
-        type: 'app/setState',
+        type: 'lens/setState',
       });
       expect(next).toHaveBeenCalledWith(action);
     });
@@ -191,7 +191,7 @@ describe('timeRangeMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'app/setState',
+        type: 'lens/setState',
         payload: {
           visualization: {
             state: {},
@@ -203,7 +203,7 @@ describe('timeRangeMiddleware', () => {
       expect(store.dispatch).not.toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(action);
     });
-    it('does not trigger another update the searchSessionId when the update already contains searchSessionId', () => {
+    it('does not trigger another update when the update already contains searchSessionId', () => {
       const data = makeDefaultData();
       (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
       (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
@@ -216,7 +216,7 @@ describe('timeRangeMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'app/setState',
+        type: 'lens/setState',
         payload: {
           visualization: {
             state: {},

@@ -24,7 +24,7 @@ import { LensByReferenceInput } from '../editor_frame_service/embeddable';
 import { EditorFrameInstance } from '../types';
 import { Document } from '../persistence/saved_object_store';
 import {
-  setState as setAppState,
+  setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -74,11 +74,10 @@ export function App({
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
-    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
 
-  const appState = useLensSelector((state) => state.app);
   const {
     datasourceStates,
     visualization,
@@ -86,7 +85,11 @@ export function App({
     query,
     activeDatasourceId,
     persistedDoc,
-  } = appState;
+    isLinkedToOriginatingApp,
+    searchSessionId,
+    isLoading,
+    isSaveable,
+  } = useLensSelector((state) => state.lens);
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
@@ -104,6 +107,7 @@ export function App({
       return;
     }
     setLastKnownDoc(
+      // todo: that should be redux store selector
       getSavedObjectFormat({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
@@ -142,17 +146,17 @@ export function App({
     if (indicateNoData) {
       setIndicateNoData(false);
     }
-  }, [setIndicateNoData, indicateNoData, appState.searchSessionId]);
+  }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
         dashboardFeatureFlag.allowByValueEmbeddables &&
-          appState.isLinkedToOriginatingApp &&
+          isLinkedToOriginatingApp &&
           !(initialInput as LensByReferenceInput)?.savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, appState.isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
   );
 
   useEffect(() => {
@@ -175,13 +179,11 @@ export function App({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
+
       if (
         application.capabilities.visualize.save &&
-        !isEqual(
-          appState.persistedDoc?.state,
-          getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state
-        ) &&
-        (appState.isSaveable || appState.persistedDoc)
+        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -195,19 +197,13 @@ export function App({
         return actions.default();
       }
     });
-  }, [
-    onAppLeave,
-    lastKnownDoc,
-    appState.isSaveable,
-    appState.persistedDoc,
-    application.capabilities.visualize.save,
-  ]);
+  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
     const breadcrumbs: EuiBreadcrumb[] = [];
-    if (appState.isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
+    if (isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
       breadcrumbs.push({
         onClick: () => {
           redirectToOrigin();
@@ -230,10 +226,10 @@ export function App({
     let currentDocTitle = i18n.translate('xpack.lens.breadcrumbsCreate', {
       defaultMessage: 'Create',
     });
-    if (appState.persistedDoc) {
+    if (persistedDoc) {
       currentDocTitle = isByValueMode
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
-        : appState.persistedDoc.title;
+        : persistedDoc.title;
     }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
@@ -244,8 +240,8 @@ export function App({
     getIsByValueMode,
     application,
     chrome,
-    appState.isLinkedToOriginatingApp,
-    appState.persistedDoc,
+    isLinkedToOriginatingApp,
+    persistedDoc,
   ]);
 
   const runSave = useCallback(
@@ -257,7 +253,7 @@ export function App({
           savedObjectsTagging,
           initialInput,
           redirectToOrigin,
-          persistedDoc: appState.persistedDoc,
+          persistedDoc,
           onAppLeave,
           redirectTo,
           originatingApp: incomingState?.originatingApp,
@@ -281,7 +277,7 @@ export function App({
     [
       incomingState?.originatingApp,
       lastKnownDoc,
-      appState.persistedDoc,
+      persistedDoc,
       getIsByValueMode,
       savedObjectsTagging,
       initialInput,
@@ -307,9 +303,9 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
-          title={lastKnownDoc?.title}
+          title={persistedDoc?.title}
         />
-        {(!appState.isAppLoading || appState.persistedDoc) && (
+        {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
@@ -319,10 +315,8 @@ export function App({
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
-          originatingApp={
-            appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
-          }
-          isSaveable={appState.isSaveable}
+          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          isSaveable={isSaveable}
           runSave={runSave}
           onClose={() => {
             setIsSaveModalVisible(false);
@@ -330,7 +324,7 @@ export function App({
           getAppNameFromId={() => getOriginatingAppName()}
           lastKnownDoc={lastKnownDoc}
           onAppLeave={onAppLeave}
-          persistedDoc={appState.persistedDoc}
+          persistedDoc={persistedDoc}
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}

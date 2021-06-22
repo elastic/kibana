@@ -183,7 +183,7 @@ describe('suggestion_panel', () => {
       instance.update();
 
       expect(lensStore.dispatch).toHaveBeenCalledWith({
-        type: 'app/rollbackSuggestion',
+        type: 'lens/rollbackSuggestion',
       });
     });
   });
@@ -198,7 +198,7 @@ describe('suggestion_panel', () => {
 
     expect(lensStore.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'app/selectSuggestion',
+        type: 'lens/selectSuggestion',
         payload: {
           datasourceId: undefined,
           datasourceState: {},

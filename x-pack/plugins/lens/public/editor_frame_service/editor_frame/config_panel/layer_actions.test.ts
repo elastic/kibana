@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initialState } from '../../../state_management/app_slice';
+import { initialState } from '../../../state_management/lens_slice';
 import { removeLayer, appendLayer } from './layer_actions';
 
 function createTestArgs(initialLayerIds: string[]) {

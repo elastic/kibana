@@ -454,7 +454,7 @@ export const VisualizationWrapper = ({
   const onData$ = useCallback(
     (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
-        dispatchLens(onActiveDataChange({ activeData: { ...inspectorAdapters.tables.tables } }));
+        dispatchLens(onActiveDataChange({ ...inspectorAdapters.tables.tables }));
       }
     },
     [dispatchLens]

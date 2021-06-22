@@ -262,8 +262,8 @@ describe('workspace_panel', () => {
     onData(undefined, { tables: { tables: tableData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/onActiveDataChange',
-      payload: { activeData: tableData },
+      type: 'lens/onActiveDataChange',
+      payload: tableData,
     });
   });
 
@@ -877,7 +877,7 @@ describe('workspace_panel', () => {
       instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
       expect(lensStore.dispatch).toHaveBeenCalledWith({
-        type: 'app/switchVisualization',
+        type: 'lens/switchVisualization',
         payload: {
           newVisualizationId: 'vis',
           initialState: {},

@@ -15,7 +15,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
-  setState as setAppState,
+  setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -141,7 +141,7 @@ export const LensTopNavMenu = ({
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = React.useCallback(
-    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
 
@@ -155,7 +155,7 @@ export const LensTopNavMenu = ({
     savedQuery,
     activeDatasourceId,
     datasourceStates,
-  } = useLensSelector((state) => state.app);
+  } = useLensSelector((state) => state.lens);
 
   useEffect(() => {
     const activeDatasource =

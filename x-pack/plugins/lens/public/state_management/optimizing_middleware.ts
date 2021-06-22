@@ -12,8 +12,8 @@ import { LensAppState } from './types';
 /** cancels updates to the store that don't change the state */
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (action.type === 'app/onActiveDataChange') {
-      if (isEqual(store.getState().app.activeData, action.payload?.activeData)) {
+    if (action.type === 'lens/onActiveDataChange') {
+      if (isEqual(store.getState().lens.activeData, action.payload)) {
         return;
       }
     }

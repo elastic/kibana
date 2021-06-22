@@ -18,7 +18,7 @@ import { getResolvedDateRange, containsDynamicMath, TIME_LAG_PERCENTAGE_LIMIT } 
  */
 export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (!action.payload.searchSessionId) {
+    if (!action.payload?.searchSessionId) {
       updateTimeRange(data, store.dispatch);
     }
     next(action);

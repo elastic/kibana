@@ -6,6 +6,7 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { LensAppState } from './types';
 
 export const initialState: LensAppState = {
@@ -15,7 +16,7 @@ export const initialState: LensAppState = {
   resolvedDateRange: { fromDate: '', toDate: '' },
   isFullscreenDatasource: false,
   isSaveable: false,
-  isAppLoading: false,
+  isLoading: false,
   isLinkedToOriginatingApp: false,
   activeDatasourceId: null,
   datasourceStates: {},
@@ -25,8 +26,8 @@ export const initialState: LensAppState = {
   },
 };
 
-export const appSlice = createSlice({
-  name: 'app',
+export const lensSlice = createSlice({
+  name: 'lens',
   initialState,
   reducers: {
     setState: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
@@ -35,10 +36,10 @@ export const appSlice = createSlice({
         ...payload,
       };
     },
-    setLoadedDocument: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+    onActiveDataChange: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
       return {
         ...state,
-        ...payload,
+        activeData: payload,
       };
     },
     setSaveable: (state, { payload }: PayloadAction<boolean>) => {
@@ -252,16 +253,10 @@ export const appSlice = createSlice({
         activeDatasourceId: payload.newDatasourceId,
       };
     },
-    onActiveDataChange: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-      return {
-        ...state,
-        ...payload,
-      };
-    },
     navigateAway: (state) => state,
   },
 });
 
 export const reducer = {
-  app: appSlice.reducer,
+  lens: lensSlice.reducer,
 };

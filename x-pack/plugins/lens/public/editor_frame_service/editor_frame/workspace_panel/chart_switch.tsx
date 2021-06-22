@@ -105,9 +105,9 @@ function getCurrentVisualizationId(
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
-  const activeDatasourceId = useLensSelector((state) => state.app.activeDatasourceId);
-  const visualization = useLensSelector((state) => state.app.visualization);
-  const datasourceStates = useLensSelector((state) => state.app.datasourceStates);
+  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
+  const visualization = useLensSelector((state) => state.lens.visualization);
+  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
 
   function removeLayers(layerIds: string[]) {
     const activeVisualization =

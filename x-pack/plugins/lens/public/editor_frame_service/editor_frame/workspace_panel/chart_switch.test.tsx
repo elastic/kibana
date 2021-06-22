@@ -206,7 +206,7 @@ describe('chart_switch', () => {
     switchTo('visB', instance);
 
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         initialState: 'suggestion visB',
         newVisualizationId: 'visB',
@@ -244,14 +244,14 @@ describe('chart_switch', () => {
     switchTo('visB', instance);
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'a');
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         initialState: 'visB initial state',
         newVisualizationId: 'visB',
       },
     });
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/updateLayer',
+      type: 'lens/updateLayer',
       payload: expect.objectContaining({
         datasourceId: 'testDatasource',
         layerId: 'a',
@@ -526,7 +526,7 @@ describe('chart_switch', () => {
     );
 
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         datasourceId: undefined,
         datasourceState: undefined,
@@ -602,7 +602,7 @@ describe('chart_switch', () => {
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', { type: 'subvisC3' });
 
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         datasourceId: 'testDatasource',
         datasourceState: {},
@@ -698,7 +698,7 @@ describe('chart_switch', () => {
     switchTo('visB', instance);
 
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         newVisualizationId: 'visB',
         datasourceId: 'testDatasource',
@@ -735,7 +735,7 @@ describe('chart_switch', () => {
     switchTo('visB', instance);
 
     expect(lensStore.dispatch).toHaveBeenCalledWith({
-      type: 'app/switchVisualization',
+      type: 'lens/switchVisualization',
       payload: {
         initialState: 'suggestion visB visB',
         newVisualizationId: 'visB',

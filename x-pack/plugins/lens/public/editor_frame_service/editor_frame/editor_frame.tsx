@@ -42,7 +42,7 @@ export function EditorFrame(props: EditorFrameProps) {
     datasourceStates,
     stagedPreview,
     isFullscreenDatasource,
-  } = useLensSelector((state) => state.app);
+  } = useLensSelector((state) => state.lens);
 
   const dispatchLens = useLensDispatch();
 

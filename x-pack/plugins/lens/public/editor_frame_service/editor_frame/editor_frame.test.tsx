@@ -789,8 +789,6 @@ describe('editor_frame', () => {
       instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
         .instance;
 
-      // TODO why is this necessary?
-      instance.update();
       expect(
         instance
           .find('[data-test-subj="lnsSuggestion"]')
@@ -838,15 +836,12 @@ describe('editor_frame', () => {
       instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
         .instance;
 
-      // TODO why is this necessary?
-      instance.update();
-
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -898,9 +893,6 @@ describe('editor_frame', () => {
       };
       instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
         .instance;
-
-      // TODO why is this necessary?
-      instance.update();
 
       act(() => {
         instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
@@ -971,7 +963,6 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -983,8 +974,6 @@ describe('editor_frame', () => {
           },
         })
       ).instance;
-      // TODO why is this necessary?
-      instance.update();
 
       act(() => {
         instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
@@ -1089,9 +1078,6 @@ describe('editor_frame', () => {
           data: props.plugins.data,
         })
       ).instance;
-
-      // TODO why is this necessary?
-      instance.update();
 
       act(() => {
         instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(

@@ -8,7 +8,7 @@
 import { configureStore, DeepPartial, getDefaultMiddleware } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { appSlice, initialState } from './app_slice';
+import { lensSlice, initialState } from './lens_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { externalContextMiddleware } from './external_context_middleware';
@@ -18,7 +18,7 @@ import { LensAppState, LensState } from './types';
 export * from './types';
 
 export const reducer = {
-  app: appSlice.reducer,
+  lens: lensSlice.reducer,
 };
 
 export const {
@@ -26,7 +26,6 @@ export const {
   navigateAway,
   setSaveable,
   onActiveDataChange,
-  setLoadedDocument,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -37,11 +36,11 @@ export const {
   submitSuggestion,
   switchDatasource,
   setToggleFullscreen,
-} = appSlice.actions;
+} = lensSlice.actions;
 
 export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
   const state = {
-    app: {
+    lens: {
       ...initialState,
       ...initializedState,
     },

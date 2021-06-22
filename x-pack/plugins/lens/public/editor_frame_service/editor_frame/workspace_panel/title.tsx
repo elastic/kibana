@@ -13,7 +13,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { LensState, useLensSelector } from '../../../state_management';
 
 export function WorkspaceTitle() {
-  const title = useLensSelector((state: LensState) => state.app.persistedDoc?.title);
+  const title = useLensSelector((state: LensState) => state.lens.persistedDoc?.title);
   return (
     <EuiScreenReaderOnly>
       <h1 id="lns_ChartTitle" data-test-subj="lns_ChartTitle">

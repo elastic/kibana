@@ -90,6 +90,14 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
   return firstDatasourceFromDoc || null;
 }
+
+export const getInitialDatasourceId = (
+  datasourceMap: Record<string, Datasource>,
+  doc?: Document
+) => {
+  return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
+};
+
 export interface GetIndexPatternsObjects {
   activeDatasources: Record<string, Datasource>;
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;

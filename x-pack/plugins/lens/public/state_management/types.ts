@@ -31,7 +31,7 @@ export interface LensAppState extends EditorFrameState {
   isSaveable: boolean;
   activeData?: TableInspectorAdapter;
 
-  isAppLoading: boolean;
+  isLoading: boolean;
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
@@ -47,5 +47,5 @@ export type DispatchSetState = (
 };
 
 export interface LensState {
-  app: LensAppState;
+  lens: LensAppState;
 }
