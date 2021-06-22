@@ -10,6 +10,7 @@ import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ConfigSchema } from '.';
 import {
+  AppDeepLink,
   AppMountParameters,
   AppNavLinkStatus,
   AppUpdater,
@@ -33,13 +34,12 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { CASES_APP_ID } from './components/app/cases/constants';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry } from './services/navigation_registry';
-import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
+import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
+import { updateGlobalNavigation } from './update_global_navigation';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -68,8 +68,30 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly casesAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
+
+  // Define deep links as constant and hidden. Whether they are shown or hidden
+  // in the global navigation will happen in `updateGlobalNavigation`.
+  private readonly deepLinks: AppDeepLink[] = [
+    {
+      id: 'alerts',
+      title: i18n.translate('xpack.observability.alertsLinkTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      order: 8001,
+      path: '/alerts',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
+    {
+      id: 'cases',
+      title: i18n.translate('xpack.observability.casesLinkTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 8002,
+      path: '/cases',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
+  ];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -83,9 +105,6 @@ export class Plugin
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initializerContext.config.get();
-
-    const shouldShowAlerts = config.unsafe.alertingExperience.enabled;
-    const shouldShowCases = config.unsafe.cases.enabled;
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -110,63 +129,21 @@ export class Plugin
     };
 
     const updater$ = this.appUpdater$;
-
-    coreSetup.application.register({
+    const app = {
+      appRoute: '/app/observability',
+      category,
+      deepLinks: this.deepLinks,
+      euiIconType,
       id: observabilityAppId,
+      mount,
+      order: 8000,
       title: i18n.translate('xpack.observability.overviewLinkTitle', {
         defaultMessage: 'Overview',
       }),
-      appRoute: '/app/observability',
-      order: 8000,
-      category,
-      euiIconType,
-      mount,
       updater$,
-      deepLinks: [
-        {
-          id: 'alerts',
-          title: i18n.translate('xpack.observability.alertsLinkTitle', {
-            defaultMessage: 'Alerts',
-          }),
-          path: '/alerts',
-          navLinkStatus: shouldShowAlerts ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-        },
-        {
-          id: 'cases',
-          title: i18n.translate('xpack.observability.casesLinkTitle', {
-            defaultMessage: 'Cases',
-          }),
-          path: '/cases',
-          navLinkStatus: shouldShowCases ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-        },
-      ],
-    });
+    };
 
-    // if (config.unsafe.alertingExperience.enabled) {
-    //   coreSetup.application.register({
-    //     id: 'observability-alerts',
-    //     title: 'Alerts',
-    //     appRoute: '/app/observability/alerts',
-    //     order: 8025,
-    //     category,
-    //     euiIconType,
-    //     mount,
-    //     updater$: this.alertsAppUpdater$,
-    //   });
-    // }
-
-    // if (config.unsafe.cases.enabled) {
-    //   coreSetup.application.register({
-    //     id: CASES_APP_ID,
-    //     title: 'Cases',
-    //     appRoute: '/app/observability/cases',
-    //     order: 8050,
-    //     category,
-    //     euiIconType,
-    //     mount,
-    //     updater$: this.casesAppUpdater$,
-    //   });
-    // }
+    coreSetup.application.register(app);
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -199,39 +176,35 @@ export class Plugin
     }
 
     this.navigationRegistry.registerSections(
-      from(coreSetup.getStartServices()).pipe(
-        map(([coreStart]) => {
-          // const shouldShowCases =
-          //   config.unsafe.cases.enabled &&
-          //   coreStart.application.capabilities.observabilityCases.read_cases;
+      from(updater$).pipe(
+        map((value) => {
+          const deepLinks = value(app)?.deepLinks ?? [];
+
+          const overviewLink = {
+            label: i18n.translate('xpack.observability.overviewLinkTitle', {
+              defaultMessage: 'Overview',
+            }),
+            app: observabilityAppId,
+            path: '/overview',
+          };
+
+          // Reformat the visible links to be NavigationEntry objects instead of
+          // AppDeepLink objects.
+          const otherLinks = deepLinks
+            .map((link) => {
+              if (link.navLinkStatus === AppNavLinkStatus.visible) {
+                return { app: observabilityAppId, label: link.title, path: link.path };
+              } else {
+                return undefined;
+              }
+            })
+            .filter((link) => link !== undefined) as NavigationEntry[];
 
           return [
             {
               label: '',
               sortKey: 100,
-              entries: [
-                {
-                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
-                    defaultMessage: 'Overview',
-                  }),
-                  app: observabilityAppId,
-                  path: '/overview',
-                },
-                ...(shouldShowAlerts
-                  ? [
-                      {
-                        label: i18n.translate('xpack.observability.alertsLinkTitle', {
-                          defaultMessage: 'Alerts',
-                        }),
-                        app: observabilityAppId,
-                        path: '/alerts',
-                      },
-                    ]
-                  : []),
-                ...(shouldShowCases
-                  ? [{ label: 'Cases', app: observabilityAppId, path: '/cases' }]
-                  : []),
-              ],
+              entries: [overviewLink, ...otherLinks],
             },
           ];
         })
@@ -249,7 +222,14 @@ export class Plugin
   }
 
   public start({ application }: CoreStart) {
-    toggleOverviewLinkInNav(this.appUpdater$, this.casesAppUpdater$, application);
+    const config = this.initializerContext.config.get();
+
+    updateGlobalNavigation({
+      capabilities: application.capabilities,
+      config,
+      deepLinks: this.deepLinks,
+      updater$: this.appUpdater$,
+    });
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
