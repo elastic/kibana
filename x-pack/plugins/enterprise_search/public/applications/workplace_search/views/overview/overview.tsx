@@ -53,17 +53,15 @@ export const Overview: React.FC = () => {
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 
-  const headerTitle = dataLoading || hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
-  const headerDescription =
-    dataLoading || hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
+  const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
+  const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
     <WorkplaceSearchPageTemplate
       pageChrome={[]}
-      pageHeader={{
-        pageTitle: headerTitle,
-        description: headerDescription,
-      }}
+      pageHeader={
+        dataLoading ? undefined : { pageTitle: headerTitle, description: headerDescription }
+      }
       pageViewTelemetry="overview"
       isLoading={dataLoading}
     >
