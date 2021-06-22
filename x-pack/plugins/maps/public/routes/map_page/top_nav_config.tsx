@@ -151,9 +151,8 @@ export function getTopNavConfig({
         const saveModalProps = {
           onSave: async (
             props: OnSaveProps & {
-              returnToOrigin?: boolean;
               dashboardId?: string | null;
-              addToLibrary?: boolean;
+              addToLibrary: boolean;
             }
           ) => {
             try {
@@ -181,7 +180,7 @@ export function getTopNavConfig({
             await savedMap.save({
               ...props,
               newTags: selectedTags,
-              saveByReference: Boolean(props.addToLibrary),
+              saveByReference: props.addToLibrary,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -204,6 +203,9 @@ export function getTopNavConfig({
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
+              onSave={async (props: OnSaveProps) => {
+                return saveModalProps.onSave({ ...props, addToLibrary: true });
+              }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
               options={tagSelector}
