@@ -14,6 +14,7 @@ import {
 } from '../../../../task_manager/server';
 import { getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
+import { FullAgentPolicyInput } from '../../../../fleet/common/types/models/agent_policy';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '1m',
@@ -101,21 +102,56 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    // 1. [PH] Get the fleet agents
-    const agents = await this.sender.fetchFleetAgents();
-    this.logger.debug(`total agents: ${agents}`);
-
-    // 2. [PH] Get the fleet policy configurations
-    const policies = await this.sender.fetchEndpointPolicyConfigs();
-    this.logger.debug(`policy configs: ${policies}`);
-
-    // 3. [PH] Get the endpoint policy failure responses
     const failedPolicyResponses = await this.sender.fetchFailedEndpointPolicyResponses();
     this.logger.debug(`ep policy responses: ${failedPolicyResponses}`);
 
-    // 4. [PH/CD] Document restructuring / Join on agent / host id
-    // 5. [PH/CD] Send to dedicated infra web channel
+    if (failedPolicyResponses.hits.hits.length === 0) {
+      this.logger.debug('No failed policy responses');
+      return 0;
+    }
 
-    return 0; // hits
+    const agents = await this.sender.fetchFleetAgents();
+    const agentCache = new Map(
+      agents?.agents.map((agent) => [
+        agent.id,
+        { policy_id: agent.policy_id, policy_version: agent.policy_revision },
+      ])
+    );
+
+    const endpointPolicyCache = new Map<string, FullAgentPolicyInput>();
+    for (const policyInfo of agentCache.values()) {
+      if (policyInfo.policy_id !== null && policyInfo.policy_id !== undefined) {
+        if (!endpointPolicyCache.has(policyInfo.policy_id)) {
+          const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(
+            policyInfo.policy_id
+          );
+          packagePolicies?.inputs.forEach((input) => {
+            if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
+              endpointPolicyCache.set(policyInfo.policy_id, input);
+            }
+          });
+        }
+      }
+    }
+
+    const failedPolicyResponseTelemetry = failedPolicyResponses.hits.hits.map((hit) => {
+      const agentId = hit._source?.elastic.agent.id;
+      if (agentId === undefined) {
+        // agent no longer available
+        return null;
+      }
+      const policyInformation = agentCache.get(agentId);
+      const policyConfig = endpointPolicyCache.get(policyInformation?.policy_id!);
+
+      return {
+        policy_response_failure: hit._source?.Endpoint.policy.applied,
+        policy_config: policyConfig,
+      };
+    });
+
+    // TODO:@pjhampton - Send to dedicated infra web channel
+    this.logger.debug(`${failedPolicyResponseTelemetry}`);
+
+    return failedPolicyResponseTelemetry.length; // hits
   };
 }

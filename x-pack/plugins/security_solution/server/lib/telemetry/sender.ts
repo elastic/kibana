@@ -155,14 +155,12 @@ export class TelemetryEventsSender {
     });
   }
 
-  public async fetchEndpointPolicyConfigs() {
+  public async fetchEndpointPolicyConfigs(id: string) {
     if (this.savedObjectClient === undefined) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.list(this.savedObjectClient, {
-      perPage: this.max_records,
-    });
+    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
   }
 
   public async fetchFailedEndpointPolicyResponses() {

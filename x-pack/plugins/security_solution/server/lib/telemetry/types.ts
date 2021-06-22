@@ -6,8 +6,8 @@
  */
 
 export interface EndpointMetricsPolicyResponse {
-  endpoint: EndpointPolicyResponse;
-  agent: EndpointPolicyAgent;
+  Endpoint: EndpointPolicyResponse;
+  elastic: EndpointPolicyAgent;
   host: EndpointPolicyHost;
   event: EndpointPolicyEvent;
 }
@@ -17,6 +17,7 @@ interface EndpointPolicyResponse {
     applied: {
       response: EndpointPolicyResponseDetail;
       artifacts: EndpointPolicyResponseArtifacts;
+      actions: EndpointPolicyResponseAction[];
       name: string;
       id: string;
       endpoint_policy_version: string;
@@ -40,6 +41,12 @@ interface EndpointPolicyResponseArtifacts {
   };
 }
 
+interface EndpointPolicyResponseAction {
+  name: string;
+  message: string;
+  status: string;
+}
+
 interface EndpointPolicyAgent {
   agent: {
     id: string;
@@ -60,4 +67,9 @@ interface EndpointPolicyEvent {
   agent_id_status: string;
   created: string;
   action: string;
+}
+
+export interface FleetAgentCacheItem {
+  policy_id: string | undefined;
+  policy_version: string | undefined;
 }
