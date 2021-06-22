@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('rbac', () => {
     before(async () => {
-      await esArchiver.load('rule_registry/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
     describe('Users:', () => {
       it(`${superUser.username} should be able to access the APM alert in ${SPACE1}`, async () => {

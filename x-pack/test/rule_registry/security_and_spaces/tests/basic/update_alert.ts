@@ -45,10 +45,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('rbac', () => {
     describe('Users update:', () => {
       beforeEach(async () => {
-        await esArchiver.load('rule_registry/alerts');
+        await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
       });
       afterEach(async () => {
-        await esArchiver.unload('rule_registry/alerts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
       });
       it(`${superUser.username} should be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(superUser.username, superUser.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', indexName: apmIndex })
+          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
           .expect(200);
       });
 
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsOnlySpacesAll.username, obsOnlySpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', indexName: apmIndex })
+          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
           .expect(200);
       });
       it(`${obsOnlyReadSpacesAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsOnlyReadSpacesAll.username, obsOnlyReadSpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', indexName: apmIndex })
+          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
           .expect(403);
       });
 
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send({
               ids: ['NoxgpHkBqbdrfX07MqXV'],
               status: 'closed',
-              indexName: apmIndex,
+              index: apmIndex,
             })
             .expect(403);
         });
