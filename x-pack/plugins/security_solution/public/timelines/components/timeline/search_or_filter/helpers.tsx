@@ -65,6 +65,7 @@ export const options = [
         </EuiText>
       </>
     ),
+    'data-test-subj': 'kqlModePopoverFilter',
   },
   {
     value: modes.search.mode,
@@ -84,6 +85,7 @@ export const options = [
         </EuiText>
       </>
     ),
+    'data-test-subj': 'kqlModePopoverSearch',
   },
 ];
 

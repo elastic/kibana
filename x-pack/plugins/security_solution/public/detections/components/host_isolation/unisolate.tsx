@@ -15,23 +15,28 @@ import {
   EndpointUnisolateForm,
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
+import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const UnisolateHost = React.memo(
   ({
     endpointId,
     hostName,
     cases,
-    caseIds,
+    casesInfo,
     cancelCallback,
   }: {
     endpointId: string;
     hostName: string;
     cases: ReactNode;
-    caseIds: string[];
+    casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
   }) => {
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
+
+    const caseIds: string[] = casesInfo.map((caseInfo): string => {
+      return caseInfo.id;
+    });
 
     const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
@@ -47,7 +52,7 @@ export const UnisolateHost = React.memo(
       []
     );
 
-    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
+    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
     const hostUnisolatedSuccess = useMemo(() => {
       return (
