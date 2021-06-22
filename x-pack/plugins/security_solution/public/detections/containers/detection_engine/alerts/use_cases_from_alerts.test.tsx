@@ -35,7 +35,7 @@ describe('useCasesFromAlerts hook', () => {
     expect(spyOnCases).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual({
       loading: false,
-      caseIds: mockCaseIdsFromAlertId,
+      casesInfo: mockCaseIdsFromAlertId,
     });
   });
 });
