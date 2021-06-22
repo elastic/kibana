@@ -6,18 +6,28 @@
  */
 
 import { keyBy } from 'lodash';
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { getFleetAgents } from '../lib/fleet/get_agents';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
-const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
+const FLEET_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.apm.fleet_has_data.fleetRequired',
+  {
+    defaultMessage: `Fleet plugin is required`,
+  }
+);
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/has_data',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
-    const fleetPluginStart = await plugins.fleet.start();
+    const fleetPluginStart = await plugins.fleet?.start();
+    if (!fleetPluginStart) {
+      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
+    }
     const packagePolicies = await getApmPackgePolicies({
       core,
       fleetPluginStart,
@@ -38,7 +48,10 @@ const fleetAgentsRoute = createApmServerRoute({
         }
       : undefined;
 
-    const fleetPluginStart = await plugins.fleet.start();
+    const fleetPluginStart = await plugins.fleet?.start();
+    if (!fleetPluginStart) {
+      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
+    }
     // fetches package policies that contains APM integrations
     const packagePolicies = await getApmPackgePolicies({
       core,
