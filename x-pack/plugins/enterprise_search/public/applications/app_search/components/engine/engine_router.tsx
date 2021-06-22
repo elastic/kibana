@@ -94,6 +94,11 @@ export const EngineRouter: React.FC = () => {
       <Route exact path={ENGINE_PATH}>
         <EngineOverview />
       </Route>
+      {canViewEngineAnalytics && (
+        <Route path={ENGINE_ANALYTICS_PATH}>
+          <AnalyticsRouter />
+        </Route>
+      )}
       {canViewEngineDocuments && (
         <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
           <DocumentDetail />
@@ -102,6 +107,11 @@ export const EngineRouter: React.FC = () => {
       {canViewEngineDocuments && (
         <Route path={ENGINE_DOCUMENTS_PATH}>
           <Documents />
+        </Route>
+      )}
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
         </Route>
       )}
       {canManageEngineRelevanceTuning && (
@@ -114,18 +124,18 @@ export const EngineRouter: React.FC = () => {
           <ResultSettings />
         </Route>
       )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
+        </Route>
+      )}
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs />
+        </Route>
+      )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
-        {canViewEngineAnalytics && (
-          <Route path={ENGINE_ANALYTICS_PATH}>
-            <AnalyticsRouter />
-          </Route>
-        )}
-        {canViewEngineSchema && (
-          <Route path={ENGINE_SCHEMA_PATH}>
-            <SchemaRouter />
-          </Route>
-        )}
         {canManageEngineCurations && (
           <Route path={ENGINE_CURATIONS_PATH}>
             <CurationsRouter />
@@ -134,16 +144,6 @@ export const EngineRouter: React.FC = () => {
         {canManageEngineSynonyms && (
           <Route path={ENGINE_SYNONYMS_PATH}>
             <Synonyms />
-          </Route>
-        )}
-        {canViewEngineApiLogs && (
-          <Route path={ENGINE_API_LOGS_PATH}>
-            <ApiLogs />
-          </Route>
-        )}
-        {canManageEngineSearchUi && (
-          <Route path={ENGINE_SEARCH_UI_PATH}>
-            <SearchUI />
           </Route>
         )}
         {canViewMetaEngineSourceEngines && (
