@@ -46,7 +46,7 @@ interface Props {
   isCloudEnabled: boolean;
 }
 
-function TutorialAgentSecretTokenSelector({
+function TutorialConfigAgent({
   variantId,
   http,
   basePath,
@@ -138,4 +138,4 @@ function TutorialAgentSecretTokenSelector({
 }
 
 // eslint-disable-next-line import/no-default-export
-export default TutorialAgentSecretTokenSelector;
+export default TutorialConfigAgent;

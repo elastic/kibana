@@ -6,7 +6,7 @@
  */
 import { HttpStart } from 'kibana/public';
 import React from 'react';
-import TutorialAgentSecretTokenSelector from './';
+import TutorialConfigAgent from './';
 
 interface Props {
   http: HttpStart;
@@ -20,7 +20,7 @@ function TutorialConfigAgentRumScript({
   isCloudEnabled,
 }: Props) {
   return (
-    <TutorialAgentSecretTokenSelector
+    <TutorialConfigAgent
       variantId="js_script"
       http={http}
       basePath={basePath}

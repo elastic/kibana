@@ -7,7 +7,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { HttpStart } from 'kibana/public';
 import React from 'react';
-import TutorialAgentSecretTokenSelector from './';
+import TutorialConfigAgent from './';
 
 const policyElasticAgentOnCloudAgent = {
   id: 'policy-elastic-agent-on-cloud',
@@ -31,7 +31,7 @@ const agents = [
   },
 ];
 
-describe('TutorialAgentSecretTokenSelector', () => {
+describe('TutorialConfigAgent', () => {
   beforeAll(() => {
     jest.spyOn(console, 'error').mockImplementation(() => null);
   });
@@ -41,7 +41,7 @@ describe('TutorialAgentSecretTokenSelector', () => {
   });
   it('renders loading component while API is being called', () => {
     const component = render(
-      <TutorialAgentSecretTokenSelector
+      <TutorialConfigAgent
         variantId="java"
         http={
           ({
@@ -56,7 +56,7 @@ describe('TutorialAgentSecretTokenSelector', () => {
   });
   it('updates commands when a different policy is selected', async () => {
     const component = render(
-      <TutorialAgentSecretTokenSelector
+      <TutorialConfigAgent
         variantId="java"
         http={
           ({
@@ -102,7 +102,7 @@ describe('TutorialAgentSecretTokenSelector', () => {
   describe('running on prem', () => {
     it('selects defaul standalone by defauls', async () => {
       const component = render(
-        <TutorialAgentSecretTokenSelector
+        <TutorialConfigAgent
           variantId="java"
           http={
             ({
@@ -138,7 +138,7 @@ describe('TutorialAgentSecretTokenSelector', () => {
   describe('running on cloud', () => {
     it('selects defaul standalone by defauls', async () => {
       const component = render(
-        <TutorialAgentSecretTokenSelector
+        <TutorialConfigAgent
           variantId="java"
           http={
             ({
@@ -175,7 +175,7 @@ describe('TutorialAgentSecretTokenSelector', () => {
     });
     it('selects policy elastic agent on cloud when available by default', async () => {
       const component = render(
-        <TutorialAgentSecretTokenSelector
+        <TutorialConfigAgent
           variantId="java"
           http={
             ({
