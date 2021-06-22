@@ -13,8 +13,7 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 import * as observabilityPublic from '../../../../../../../observability/public';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import moment from 'moment';
-import * as composeScreenshotImages from '../../../../../hooks/use_composite_image';
-import { ScreenshotRefImageData } from '../../../../../../common/runtime_types/ping/synthetics';
+import '../../../../../lib/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/screenshot_ref.mock';
 
 mockReduxHooks();
@@ -98,20 +97,6 @@ describe('Ping Timestamp component', () => {
   });
 
   it('handles screenshot ref data', async () => {
-    jest
-      .spyOn(composeScreenshotImages, 'useCompositeImage')
-      .mockImplementation(
-        (
-          _imgRef: ScreenshotRefImageData,
-          callback: React.Dispatch<string | undefined>,
-          url?: string
-        ) => {
-          if (!url) {
-            callback('img src');
-          }
-        }
-      );
-
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { ...mockRef },
