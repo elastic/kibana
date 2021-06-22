@@ -7,14 +7,12 @@
  */
 
 import React from 'react';
-import { action } from '@storybook/addon-actions';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Selectable1A } from '../selectable1a';
-import { Selectable1B } from '../selectable1b';
 
 import { decorators } from './decorators';
-import { getEuiSelectableOptions, FlightField, flightFieldLabels, flightFields } from './flights';
+import { getEuiSelectableOptions, FlightField, flightFields } from './flights';
+import { OptionsListControl } from '../options_list/options_list_control';
 
 export default {
   title: 'Input Controls',
@@ -22,12 +20,21 @@ export default {
   decorators,
 };
 
+interface OptionsListStorybookArgs {
+  fields: FlightField[];
+  twoLine: boolean;
+}
+
 const storybookArgs = {
+  twoLine: false,
   fields: ['OriginCityName', 'OriginWeather', 'DestCityName', 'DestWeather'],
 };
 
 const storybookArgTypes = {
   fields: {
+    twoLine: {
+      control: { type: 'bool' },
+    },
     control: {
       type: 'check',
       options: flightFields,
@@ -35,35 +42,19 @@ const storybookArgTypes = {
   },
 };
 
-export const Option1a = ({ fields }: { fields: FlightField[] }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s">
+export const OptionsListStory = ({ fields, twoLine }: OptionsListStorybookArgs) => (
+  <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
     {fields.map((field) => (
-      <EuiFlexItem grow={false} key={field}>
-        <Selectable1A
-          onChange={action('onChange')}
+      <EuiFlexItem key={field}>
+        <OptionsListControl
+          twoLine={twoLine}
+          title={field}
           options={getEuiSelectableOptions(field)}
-          label={flightFieldLabels[field]}
         />
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
 );
 
-export const Option1b = ({ fields }: { fields: FlightField[] }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
-    {fields.map((field) => (
-      <EuiFlexItem key={field} style={{ width: '33%' }}>
-        <Selectable1B
-          onChange={action('onChange')}
-          options={getEuiSelectableOptions(field)}
-          label={flightFieldLabels[field]}
-        />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
-
-Option1a.args = storybookArgs;
-Option1a.argTypes = storybookArgTypes;
-Option1b.args = storybookArgs;
-Option1b.argTypes = storybookArgTypes;
+OptionsListStory.args = storybookArgs;
+OptionsListStory.argTypes = storybookArgTypes;
