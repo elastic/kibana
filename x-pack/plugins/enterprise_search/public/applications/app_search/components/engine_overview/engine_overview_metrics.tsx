@@ -7,23 +7,24 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
   return (
-    <>
-      <EuiPageHeader
-        pageTitle={i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs()}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
           defaultMessage: 'Engine overview',
-        })}
-      />
-      <FlashMessages />
-
+        }),
+      }}
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <TotalStats />
@@ -34,6 +35,6 @@ export const EngineOverviewMetrics: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <RecentApiLogs />
-    </>
+    </AppSearchPageTemplate>
   );
 };
