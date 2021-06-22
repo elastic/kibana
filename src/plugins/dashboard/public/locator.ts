@@ -123,7 +123,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
-    let route = setStateToKbnUrl(
+    let path = setStateToKbnUrl(
       '_a',
       cleanEmptyKeys({
         query: params.query,
@@ -136,7 +136,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       `#/${hash}`
     );
 
-    route = setStateToKbnUrl<QueryState>(
+    path = setStateToKbnUrl<QueryState>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,
@@ -144,16 +144,16 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
         refreshInterval: params.refreshInterval,
       }),
       { useHash },
-      route
+      path
     );
 
     if (params.searchSessionId) {
-      route = `${route}&${DashboardConstants.SEARCH_SESSION_ID}=${params.searchSessionId}`;
+      path = `${path}&${DashboardConstants.SEARCH_SESSION_ID}=${params.searchSessionId}`;
     }
 
     return {
       app: DashboardConstants.DASHBOARDS_ID,
-      route,
+      path,
       state: {},
     };
   };

@@ -23,9 +23,10 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({});
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: '#/create?_a=()&_g=()',
+      path: '#/create?_a=()&_g=()',
       state: {},
     });
   });
@@ -38,9 +39,10 @@ describe('dashboard locator', () => {
     const location = await definition.getLocation({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: '#/create?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))',
+      path: '#/create?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))',
       state: {},
     });
   });
@@ -77,9 +79,10 @@ describe('dashboard locator', () => {
       ],
       query: { query: 'bye', language: 'kuery' },
     });
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: `#/view/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
+      path: `#/view/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
       state: {},
     });
   });
@@ -97,9 +100,10 @@ describe('dashboard locator', () => {
       query: { query: 'bye', language: 'kuery' },
       searchSessionId: '__sessionSearchId__',
     });
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: `#/view/123?_a=(filters:!(),query:(language:kuery,query:bye))&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
+      path: `#/view/123?_a=(filters:!(),query:(language:kuery,query:bye))&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
       state: {},
     });
   });
@@ -112,12 +116,13 @@ describe('dashboard locator', () => {
     const location = await definition.getLocation({
       savedQuery: '__savedQueryId__',
     });
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: `#/create?_a=(savedQuery:__savedQueryId__)&_g=()`,
+      path: `#/create?_a=(savedQuery:__savedQueryId__)&_g=()`,
       state: {},
     });
-    expect(location.route).toContain('__savedQueryId__');
+    expect(location.path).toContain('__savedQueryId__');
   });
 
   test('panels', async () => {
@@ -128,9 +133,10 @@ describe('dashboard locator', () => {
     const location = await definition.getLocation({
       panels: [{ fakePanelContent: 'fakePanelContent' }] as any,
     });
+
     expect(location).toMatchObject({
       app: 'dashboards',
-      route: `#/create?_a=(panels:!((fakePanelContent:fakePanelContent)))&_g=()`,
+      path: `#/create?_a=(panels:!((fakePanelContent:fakePanelContent)))&_g=()`,
       state: {},
     });
   });
@@ -143,7 +149,8 @@ describe('dashboard locator', () => {
     const location = await definition.getLocation({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
-    expect(location.route.indexOf('relative')).toBe(-1);
+
+    expect(location.path.indexOf('relative')).toBe(-1);
   });
 
   test('can override a false useHash ui setting', async () => {
@@ -155,7 +162,8 @@ describe('dashboard locator', () => {
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: true,
     });
-    expect(location.route.indexOf('relative')).toBe(-1);
+
+    expect(location.path.indexOf('relative')).toBe(-1);
   });
 
   test('can override a true useHash ui setting', async () => {
@@ -167,7 +175,8 @@ describe('dashboard locator', () => {
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: false,
     });
-    expect(location.route.indexOf('relative')).toBeGreaterThan(1);
+
+    expect(location.path.indexOf('relative')).toBeGreaterThan(1);
   });
 
   describe('preserving saved filters', () => {
@@ -215,16 +224,16 @@ describe('dashboard locator', () => {
         filters: [appliedFilter],
       });
 
-      expect(location1.route).toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location1.route).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location1.path).toEqual(expect.stringContaining('query:savedfilter1'));
+      expect(location1.path).toEqual(expect.stringContaining('query:appliedfilter'));
 
       const location2 = await definition.getLocation({
         dashboardId: 'dashboard2',
         filters: [appliedFilter],
       });
 
-      expect(location2.route).toEqual(expect.stringContaining('query:savedfilter2'));
-      expect(location2.route).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location2.path).toEqual(expect.stringContaining('query:savedfilter2'));
+      expect(location2.path).toEqual(expect.stringContaining('query:appliedfilter'));
     });
 
     test("doesn't fail if can't retrieve filters from destination dashboard", async () => {
@@ -243,8 +252,8 @@ describe('dashboard locator', () => {
         filters: [appliedFilter],
       });
 
-      expect(location.route).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.route).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
+      expect(location.path).toEqual(expect.stringContaining('query:appliedfilter'));
     });
 
     test('can enforce empty filters', async () => {
@@ -264,9 +273,9 @@ describe('dashboard locator', () => {
         preserveSavedFilters: false,
       });
 
-      expect(location.route).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.route).not.toEqual(expect.stringContaining('query:appliedfilter'));
-      expect(location.route).toMatchInlineSnapshot(
+      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
+      expect(location.path).not.toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location.path).toMatchInlineSnapshot(
         `"#/view/dashboard1?_a=(filters:!())&_g=(filters:!())"`
       );
     });
@@ -286,8 +295,8 @@ describe('dashboard locator', () => {
         dashboardId: 'dashboard1',
       });
 
-      expect(location.route).not.toEqual(expect.stringContaining('filters'));
-      expect(location.route).toMatchInlineSnapshot(`"#/view/dashboard1?_a=()&_g=()"`);
+      expect(location.path).not.toEqual(expect.stringContaining('filters'));
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_a=()&_g=()"`);
     });
 
     test('can turn off preserving filters', async () => {
@@ -307,8 +316,8 @@ describe('dashboard locator', () => {
         preserveSavedFilters: false,
       });
 
-      expect(location.route).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.route).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
+      expect(location.path).toEqual(expect.stringContaining('query:appliedfilter'));
     });
   });
 });

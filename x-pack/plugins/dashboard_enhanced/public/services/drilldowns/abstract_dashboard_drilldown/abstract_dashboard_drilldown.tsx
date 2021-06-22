@@ -65,18 +65,18 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly getHref = async (config: Config, context: Context): Promise<string> => {
-    const { app, route } = await this.getLocation(config, context);
+    const { app, path } = await this.getLocation(config, context);
     const url = await this.params.start().core.application.getUrlForApp(app, {
-      path: route,
+      path,
       absolute: true,
     });
     return url;
   };
 
   public readonly execute = async (config: Config, context: Context) => {
-    const { app, route, state } = await this.getLocation(config, context);
+    const { app, path, state } = await this.getLocation(config, context);
     await this.params.start().core.application.navigateToApp(app, {
-      path: route,
+      path,
       state,
     });
   };
