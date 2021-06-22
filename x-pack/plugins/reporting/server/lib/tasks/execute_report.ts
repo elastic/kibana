@@ -140,9 +140,7 @@ export class ExecuteReportTask implements ReportingTask {
     const maxAttempts = task.max_attempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
-      const resp = await this._failJob(report, err);
-      report._seq_no = resp._seq_no;
-      report._primary_term = resp._primary_term;
+      await this._failJob(report, err);
       throw err;
     }
 
