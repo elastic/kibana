@@ -13,12 +13,13 @@ import {
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
   FCP_LABEL,
   FID_LABEL,
   HOST_NAME_LABEL,
-  KIP_OVER_TIME_LABEL,
+  KPI_OVER_TIME_LABEL,
   KPI_LABEL,
   LCP_LABEL,
   LOCATION_LABEL,
@@ -31,6 +32,7 @@ import {
   OS_LABEL,
   PERF_DIST_LABEL,
   PORT_LABEL,
+  REQUEST_METHOD,
   SERVICE_NAME_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
@@ -72,14 +74,17 @@ export const FieldLabels: Record<string, string> = {
 
   'performance.metric': METRIC_LABEL,
   'Business.KPI': KPI_LABEL,
+  'http.request.method': REQUEST_METHOD,
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
   dist: PERF_DIST_LABEL,
-  kpi: KIP_OVER_TIME_LABEL,
+  kpi: KPI_OVER_TIME_LABEL,
   cwv: CORE_WEB_VITALS_LABEL,
+  mdd: DEVICE_DISTRIBUTION_LABEL,
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const TERMS_COLUMN = 'TERMS_COLUMN';
 export const OPERATION_COLUMN = 'operation';

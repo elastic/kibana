@@ -11,7 +11,7 @@ See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdef
 <b>Signature:</b>
 
 ```typescript
-registerType: (type: SavedObjectsType) => void;
+registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
 ```
 
 ## Example
