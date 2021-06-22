@@ -92,7 +92,7 @@ export const SourceViewer = ({
   const errorMessage = (
     <div>
       {i18n.translate('discover.sourceViewer.errorMessage', {
-        defaultMessage: 'Could not fetch data at this time.',
+        defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
       })}
       <EuiSpacer size="s" />
       <EuiButton iconType="refresh" onClick={requestData}>
