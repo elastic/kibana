@@ -11,15 +11,16 @@ import { useParams } from 'react-router-dom';
 import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
-import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { useReadonlyHeader } from '../../hooks/use_readonly_header';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { observabilityAppId } from '../../../common/const';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const casesUrl = getUrlForApp(CASES_APP_ID);
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;

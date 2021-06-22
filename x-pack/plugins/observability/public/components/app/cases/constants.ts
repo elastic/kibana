@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { CASES_APP_ID } from '../../../../common/const';
-
-export { CASES_APP_ID };
 export const CASES_OWNER = 'observability';

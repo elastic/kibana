@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const CASES_APP_ID = 'observabilityCases';
-export const OBSERVABILITY = 'observability';
+export const casesFeatureId = 'observabilityCases';
+export const observabilityAppId = 'observability';

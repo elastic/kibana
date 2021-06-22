@@ -14,7 +14,7 @@ import {
   AppNavLinkStatus,
   AppUpdater,
 } from '../../../../src/core/public';
-import { CASES_APP_ID } from '../common/const';
+import { casesFeatureId } from '../common/const';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
@@ -69,7 +69,7 @@ describe('updateGlobalNavigation', () => {
     describe('when cases are enabled', () => {
       it('shows the cases deep link', () => {
         const capabilities = ({
-          [CASES_APP_ID]: { read_cases: true },
+          [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown) as ApplicationStart['capabilities'];
         const config = {
@@ -109,7 +109,7 @@ describe('updateGlobalNavigation', () => {
     describe('when cases are disabled', () => {
       it('hides the cases deep link', () => {
         const capabilities = ({
-          [CASES_APP_ID]: { read_cases: true },
+          [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown) as ApplicationStart['capabilities'];
         const config = {
@@ -149,7 +149,7 @@ describe('updateGlobalNavigation', () => {
     describe('with no case read capabilities', () => {
       it('hides the cases deep link', () => {
         const capabilities = ({
-          [CASES_APP_ID]: { read_cases: false },
+          [casesFeatureId]: { read_cases: false },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown) as ApplicationStart['capabilities'];
         const config = {
@@ -189,7 +189,7 @@ describe('updateGlobalNavigation', () => {
     describe('when alerts are enabled', () => {
       it('shows the alerts deep link', () => {
         const capabilities = ({
-          [CASES_APP_ID]: { read_cases: true },
+          [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown) as ApplicationStart['capabilities'];
         const config = {
@@ -229,7 +229,7 @@ describe('updateGlobalNavigation', () => {
     describe('when alerts are disabled', () => {
       it('hides the alerts deep link', () => {
         const capabilities = ({
-          [CASES_APP_ID]: { read_cases: true },
+          [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown) as ApplicationStart['capabilities'];
         const config = {

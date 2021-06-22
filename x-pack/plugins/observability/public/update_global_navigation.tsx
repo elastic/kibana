@@ -13,7 +13,7 @@ import {
   ApplicationStart,
   AppDeepLink,
 } from '../../../../src/core/public';
-import { CASES_APP_ID } from '../common/const';
+import { casesFeatureId } from '../common/const';
 
 export function updateGlobalNavigation({
   capabilities,
@@ -35,7 +35,7 @@ export function updateGlobalNavigation({
         return {
           ...link,
           navLinkStatus:
-            config.unsafe.cases.enabled && capabilities[CASES_APP_ID].read_cases && someVisible
+            config.unsafe.cases.enabled && capabilities[casesFeatureId].read_cases && someVisible
               ? AppNavLinkStatus.visible
               : AppNavLinkStatus.hidden,
         };
