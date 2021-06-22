@@ -139,6 +139,15 @@ export const DrawCircle = {
 
     geojson.properties!.active = 'true';
 
+    let radiusLabel = '';
+    if (state.circle.properties.radiusKm <= 1) {
+      radiusLabel = `${Math.round(state.circle.properties.radiusKm * 1000)} m`;
+    } else if (state.circle.properties.radiusKm <= 10) {
+      radiusLabel = `${state.circle.properties.radiusKm.toFixed(1)} km`;
+    } else {
+      radiusLabel = `${Math.round(state.circle.properties.radiusKm)} km`;
+    }
+
     // display line from center vertex to edge
     // custom draw style displays label in center of line
     display({
@@ -146,10 +155,7 @@ export const DrawCircle = {
       properties: {
         meta: DRAW_CIRCLE_RADIUS,
         parent: state.circle.id,
-        radiusLabel:
-          state.circle.properties.radiusKm > 1
-            ? `${Math.round(state.circle.properties.radiusKm)} km`
-            : `${Math.round(state.circle.properties.radiusKm * 1000)} m`,
+        radiusLabel,
         active: 'true',
       },
       geometry: {
