@@ -49,8 +49,6 @@ export function isCategorizationJobCreator(
   return jobCreator.type === JOB_TYPE.CATEGORIZATION;
 }
 
-export function isRareJobCreator(
-  jobCreator: JobCreatorType
-): jobCreator is CategorizationJobCreator {
+export function isRareJobCreator(jobCreator: JobCreatorType): jobCreator is RareJobCreator {
   return jobCreator.type === JOB_TYPE.RARE;
 }

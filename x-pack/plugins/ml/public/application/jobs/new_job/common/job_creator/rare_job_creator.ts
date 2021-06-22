@@ -7,8 +7,8 @@
 
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
-import { Field, SplitField } from '../../../../../../common/types/fields';
-import { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import { Field, SplitField, Aggregation } from '../../../../../../common/types/fields';
+import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
@@ -23,6 +23,8 @@ export class RareJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.RARE;
   private _rareInPopulation: boolean = false;
   private _frequentlyRare: boolean = false;
+  private _rareAgg: Aggregation;
+  private _freqRareAgg: Aggregation;
 
   constructor(
     indexPattern: IndexPattern,
@@ -32,6 +34,16 @@ export class RareJobCreator extends JobCreator {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.RARE;
     this._wizardInitialized$.next(true);
+    this._rareAgg = {} as Aggregation;
+    this._freqRareAgg = {} as Aggregation;
+  }
+
+  public setDefaultDetectorProperties(rare: Aggregation | null, freqRare: Aggregation | null) {
+    if (rare === null || freqRare === null) {
+      return;
+    }
+    this._rareAgg = rare;
+    this._freqRareAgg = freqRare;
   }
 
   public setRareField(field: Field | null) {
@@ -40,12 +52,21 @@ export class RareJobCreator extends JobCreator {
     if (field === null) {
       this.removePopulationField();
       this.removeSplitField();
+      this._removeDetector(0);
       this._detectors.length = 0;
+      this._fields.length = 0;
       return;
     }
 
+    const agg = this._frequentlyRare ? this._freqRareAgg : this._rareAgg;
+
+    const dtr: Detector = {
+      function: agg.id,
+    };
     if (this._detectors.length === 0) {
-      this._detectors.push({ function: ML_JOB_AGGREGATION.RARE });
+      this._addDetector(dtr, agg, field);
+    } else {
+      this._editDetector(dtr, agg, field, 0);
     }
 
     this._detectors[0].by_field_name = field.id;
@@ -73,7 +94,9 @@ export class RareJobCreator extends JobCreator {
   public set frequentlyRare(bool: boolean) {
     this._frequentlyRare = bool;
     if (this._detectors.length) {
-      this._detectors[0].function = bool ? ML_JOB_AGGREGATION.FREQ_RARE : ML_JOB_AGGREGATION.RARE;
+      const agg = bool ? this._freqRareAgg : this._rareAgg;
+      this._detectors[0].function = agg.id;
+      this._aggs[0] = agg;
     }
   }
 

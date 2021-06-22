@@ -19,7 +19,7 @@ export const Description: FC = memo(({ children }) => {
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
+          id="xpack.ml.newJob.wizard.pickFieldsStep.rareField.description"
           defaultMessage="Select a field in which to detect rare values."
         />
       }

@@ -14,6 +14,7 @@ import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
+  isRareJobCreator,
 } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../../../contexts/ml';
@@ -49,6 +50,13 @@ export function useEstimateBucketSpan() {
     data.splitField = jobCreator.splitField.id;
   } else if (isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null) {
     data.splitField = jobCreator.populationField.id;
+  } else if (isRareJobCreator(jobCreator)) {
+    data.fields = [null];
+    if (jobCreator.populationField) {
+      data.splitField = jobCreator.populationField.id;
+    } else {
+      data.splitField = jobCreator.rareField?.id;
+    }
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {
