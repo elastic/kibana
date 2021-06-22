@@ -23,7 +23,11 @@ export { ReportApiJSON, ReportSource };
 const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
-export class Report implements Partial<ReportSource> {
+/*
+ * The public fields are a flattened version what Elasticsearch returns when you
+ * `GET` a document.
+ */
+export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _index?: string;
   public _id: string;
   public _primary_term?: number; // set by ES
