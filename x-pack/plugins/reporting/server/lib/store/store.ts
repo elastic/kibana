@@ -16,7 +16,7 @@ import { mapping } from './mapping';
 import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 
 /*
- * When the instance claims a job, we like to know which instance it is
+ * When an instance of Kibana claims a report job, this information tells us about that instance
  */
 export type ReportProcessingFields = Required<{
   kibana_id: Report['kibana_id'];
