@@ -33,6 +33,7 @@ interface LensMarkDownRendererProps {
   startDate?: string | null;
   endDate?: string | null;
   onBrushEnd?: EmbeddableComponentProps['onBrushEnd'];
+  viewMode?: boolean | undefined;
 }
 
 const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
@@ -41,6 +42,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   startDate,
   endDate,
   onBrushEnd,
+  viewMode = true,
 }) => {
   const location = useLocation();
   const {
@@ -63,35 +65,34 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="lensApp"
-                fullWidth={false}
-                isDisabled={!canUseEditor() || attributes === null}
-                onClick={() => {
-                  if (attributes) {
-                    navigateToPrefilledEditor(
-                      {
-                        id: '',
-                        timeRange: {
-                          from: startDate ?? 'now-5d',
-                          to: endDate ?? 'now',
-                          mode: startDate ? 'absolute' : 'relative',
+              {viewMode ? (
+                <EuiButton
+                  iconType="lensApp"
+                  fullWidth={false}
+                  isDisabled={!canUseEditor() || attributes === null}
+                  onClick={() => {
+                    if (attributes) {
+                      navigateToPrefilledEditor(
+                        {
+                          id: '',
+                          timeRange: {
+                            from: startDate ?? 'now-5d',
+                            to: endDate ?? 'now',
+                            mode: startDate ? 'absolute' : 'relative',
+                          },
+                          attributes,
                         },
-                        attributes: {
-                          ...attributes.attributes,
-                          references: attributes.references,
-                        },
-                      },
-                      {
-                        originatingApp: 'securitySolution:case',
-                        originatingPath: `${location.pathname}${location.search}`,
-                      }
-                    );
-                  }
-                }}
-              >
-                {`Open in Lens`}
-              </EuiButton>
+                        {
+                          originatingApp: 'securitySolution:case',
+                          originatingPath: `${location.pathname}${location.search}`,
+                        }
+                      );
+                    }
+                  }}
+                >
+                  {`Open in Lens`}
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -106,10 +107,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
                 to: endDate ?? 'now',
                 mode: startDate ? 'absolute' : 'relative',
               }}
-              attributes={{
-                ...attributes.attributes,
-                references: attributes.references,
-              }}
+              attributes={attributes}
               onBrushEnd={onBrushEnd}
             />
           ) : null}

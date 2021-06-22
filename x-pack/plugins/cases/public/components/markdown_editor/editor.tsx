@@ -42,29 +42,9 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
     const markdownContext = useContext(EuiMarkdownContext);
 
     console.error('markdownContext', markdownContext);
-    console.error('useRef', ref.current);
+    console.error('useRef', ref?.current);
 
-    const onParse = useCallback(
-      (err, { messages }) => {
-        console.error('onParse', markdownContext);
-        markdownContext.openPluginEditor(uiPlugins[2]);
-        markdownContext.replaceNode(
-          {
-            start: {
-              offset: 0,
-            },
-            end: {
-              offset: 0,
-            },
-          },
-          'dupa'
-        );
-        setMarkdownErrorMessages(err ? [err] : messages);
-      },
-      [markdownContext, uiPlugins]
-    );
-
-    useImperativeHandle(ref, (payload) => {
+    useImperativeHandle(ref, () => {
       console.error('reft', ref, editorRef);
       return {
         ...editorRef.current,
@@ -84,34 +64,25 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
         uiPlugins={uiPlugins}
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
-        onParse={onParse}
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
       />
     );
 
-    // useEffect(() => {
-    //   if (markdownContext) {
-    //     console.error('uiPlugins', uiPlugins[2]);
-    //     markdownContext.openPluginEditor(uiPlugins[2]);
-    //   }
-    //   document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus();
-    // }, []);
-
-    // if (LensContextProvider) {
-    //   return (
-    //     <LensContextProvider
-    //       value={{
-    //         editorId,
-    //         onChange,
-    //         value,
-    //       }}
-    //     >
-    //       {editor}
-    //     </LensContextProvider>
-    //   );
-    // }
+    if (LensContextProvider) {
+      return (
+        <LensContextProvider
+          value={{
+            editorId,
+            onChange,
+            value,
+          }}
+        >
+          {editor}
+        </LensContextProvider>
+      );
+    }
 
     return editor;
   }

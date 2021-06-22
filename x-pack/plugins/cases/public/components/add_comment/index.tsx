@@ -19,6 +19,7 @@ import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useOwnerContext } from '../owner_context/use_owner_context';
+
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
@@ -31,6 +32,7 @@ const initialCommentValue: AddCommentFormSchema = {
 
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
+  setComment: (newComment: string) => void;
 }
 
 interface AddCommentProps {
@@ -69,8 +71,16 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
+      const setComment = useCallback(
+        (newComment) => {
+          setFieldValue(fieldName, newComment);
+        },
+        [setFieldValue]
+      );
+
       useImperativeHandle(ref, () => ({
         addQuote,
+        setComment,
         editorRef: editorRef.current,
       }));
 
@@ -89,8 +99,6 @@ export const AddComment = React.memo(
           reset();
         }
       }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
-
-      console.error('aaaaaaa', editorRef, ref);
 
       return (
         <span id="add-comment-permLink">

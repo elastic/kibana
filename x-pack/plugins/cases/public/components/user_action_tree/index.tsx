@@ -22,7 +22,7 @@ import { isRight } from 'fp-ts/Either';
 import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { useCurrentUser } from '../../common/lib/kibana';
+import { useCurrentUser, useKibana } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
@@ -134,6 +134,7 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
+    const { embeddable, storage } = useKibana().services;
     const { detailName: caseId, commentId, subCaseId } = useParams<{
       detailName: string;
       commentId?: string;
@@ -588,12 +589,34 @@ export const UserActionTree = React.memo(
     const comments = [...userActions, ...bottomActions];
 
     useEffect(() => {
-      console.error('addCommentRef', addCommentRef.current);
-      const buttons = addCommentRef.current?.editorRef?.toolbar?.querySelector(
-        '[aria-label="Insert lens link"]'
-      );
-      buttons.click();
-      console.error('buttons', buttons);
+      console.error('commentDraft', storage.get('xpack.cases.commentDraft'));
+      const incomingEmbeddablePackage = embeddable
+        .getStateTransfer()
+        .getIncomingEmbeddablePackage('securitySolution:case');
+      let draftComment;
+      if (storage.get('xpack.cases.commentDraft')) {
+        try {
+          draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+        } catch (e) {}
+      }
+
+      if (incomingEmbeddablePackage) {
+        console.error('incomingEmbeddablePackage', incomingEmbeddablePackage);
+
+        if (draftComment) {
+          if (!draftComment.commentId) {
+            addCommentRef.current?.setComment(draftComment.comment);
+            const buttons = addCommentRef.current?.editorRef?.toolbar?.querySelector(
+              '[aria-label="Insert lens link"]'
+            );
+            buttons.click();
+          }
+
+          if (draftComment.commentId) {
+            setManangeMarkdownEditIds([draftComment.commentId]);
+          }
+        }
+      }
     }, []);
 
     return (
