@@ -27,8 +27,9 @@ import {
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { CustomPaletteParams, CUSTOM_PALETTE } from '../shared_components';
+import { CustomPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
+import { getSafePaletteParams } from './utils';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -152,6 +153,17 @@ export const getHeatmapVisualization = ({
       return { groups: [] };
     }
 
+    const { displayStops, activePalette } = state.valueAccessor
+      ? getSafePaletteParams(
+          paletteService,
+          frame.activeData?.[state.layerId],
+          state.valueAccessor,
+          state?.palette && state.palette.accessor === state.valueAccessor
+            ? state.palette
+            : undefined
+        )
+      : { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+
     return {
       groups: [
         {
@@ -180,7 +192,15 @@ export const getHeatmapVisualization = ({
           groupLabel: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
             defaultMessage: 'Cell value',
           }),
-          accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
+          accessors: state.valueAccessor
+            ? [
+                {
+                  columnId: state.valueAccessor,
+                  triggerIcon: 'colorBy',
+                  palette: getStopsForFixedMode(displayStops, activePalette?.params?.colorStops),
+                },
+              ]
+            : [],
           filterOperations: isCellValueSupported,
           supportsMoreColumns: !state.valueAccessor,
           enableDimensionEditor: true,

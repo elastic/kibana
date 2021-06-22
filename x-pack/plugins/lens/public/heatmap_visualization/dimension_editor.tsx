@@ -18,15 +18,13 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../types';
 import {
   CustomizablePalette,
-  applyPaletteParams,
   FIXED_PROGRESSION,
   getStopsForFixedMode,
   PalettePanelContainer,
-  findMinMaxByColumnId,
 } from '../shared_components/';
 import './dimension_editor.scss';
 import { HeatmapVisualizationState } from './types';
-import { DEFAULT_PALETTE_NAME } from './constants';
+import { getSafePaletteParams } from './utils';
 
 export function HeatmapDimensionEditor(
   props: VisualizationDimensionEditorProps<HeatmapVisualizationState> & {
@@ -40,20 +38,13 @@ export function HeatmapDimensionEditor(
 
   const currentData = frame.activeData?.[state.layerId];
 
-  const columnsToCheck = [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId[accessor];
-
-  const activePalette =
-    state?.palette && state.palette.accessor === accessor
-      ? state.palette
-      : {
-          type: 'palette' as const,
-          name: DEFAULT_PALETTE_NAME,
-          accessor,
-        };
   // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const { displayStops, activePalette, currentMinMax } = getSafePaletteParams(
+    props.paletteService,
+    currentData,
+    accessor,
+    state?.palette && state.palette.accessor === accessor ? state.palette : undefined
+  );
 
   return (
     <EuiFormRow
