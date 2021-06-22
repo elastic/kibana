@@ -60,7 +60,7 @@ export const StepScreenshots = ({ step }: Props) => {
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
           isScreenshotRef={!!step.synthetics?.isScreenshotRef}
-          screenshotExists={!!step.synthetics?.screenshotExists}
+          isScreenshotBlob={!!step.synthetics?.screenshotExists}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
           lazyLoad={false}
@@ -74,7 +74,7 @@ export const StepScreenshots = ({ step }: Props) => {
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
             isScreenshotRef={!!step.synthetics?.isScreenshotRef}
-            screenshotExists={!!step.synthetics?.screenshotExists}
+            isScreenshotBlob={!!step.synthetics?.screenshotExists}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}
