@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRef, isScreenshot, ScreenshotBlockDoc } from '../../../common/runtime_types';
+import { isRefResult, isScreenshot, ScreenshotBlockDoc } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
@@ -58,7 +58,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
           ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
         },
       });
-    } else if (isRef(result)) {
+    } else if (isRefResult(result)) {
       const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
       const blocks: ScreenshotBlockDoc[] = await libs.requests.getJourneyScreenshotBlocks({
         uptimeEsClient,

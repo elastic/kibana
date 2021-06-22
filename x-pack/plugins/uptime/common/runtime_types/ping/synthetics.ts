@@ -126,7 +126,7 @@ export const RefResultType = t.type({
 
 export type RefResult = t.TypeOf<typeof RefResultType>;
 
-export function isRef(data: unknown): data is RefResult {
+export function isRefResult(data: unknown): data is RefResult {
   return isRight(RefResultType.decode(data));
 }
 
