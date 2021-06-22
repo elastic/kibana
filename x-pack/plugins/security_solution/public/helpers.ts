@@ -58,25 +58,29 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     case 'ml-hosts':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         replace: true,
         path: `/ml-hosts${path}`,
       });
       break;
     case SecurityPageName.hosts:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         replace: true,
         path,
       });
       break;
     case 'ml-network':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path: `/ml-network${path}`,
       });
       break;
     case SecurityPageName.network:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path,
       });

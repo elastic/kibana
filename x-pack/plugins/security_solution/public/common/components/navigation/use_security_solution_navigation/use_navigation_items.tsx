@@ -41,7 +41,7 @@ export const usePrimaryNavigationItems = ({
 
       // TODO: [1101] remove conditional and use always deepLinkId
       const appHref =
-        id === 'overview'
+        id === 'overview' || id === 'hosts' || id === 'network'
           ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
           : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
 
@@ -67,8 +67,6 @@ export const usePrimaryNavigationItems = ({
         getSideNav(navTabs.overview),
         // TODO: [1101] Move the following nav items to its group
         getSideNav(navTabs.detections),
-        getSideNav(navTabs.hosts),
-        getSideNav(navTabs.network),
         getSideNav(navTabs.timelines),
         getSideNav(navTabs.case),
         getSideNav(navTabs.administration),
@@ -84,7 +82,7 @@ export const usePrimaryNavigationItems = ({
     },
     {
       ...navTabGroups.explore,
-      items: [],
+      items: [getSideNav(navTabs.hosts), getSideNav(navTabs.network)],
     },
     {
       ...navTabGroups.investigate,

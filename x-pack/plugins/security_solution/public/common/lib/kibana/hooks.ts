@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import { APP_ID, DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { StartServices } from '../../../types';
@@ -159,4 +159,44 @@ export const useGetUserCasesPermissions = () => {
   }, [uiCapabilities]);
 
   return casesPermissions;
+};
+
+/**
+ * Returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
+export const useAppUrl = () => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getAppUrl = useCallback(
+    ({ appId = APP_ID, ...options }: { appId?: string; deepLinkId?: string; path?: string }) =>
+      getUrlForApp(appId, options),
+    [getUrlForApp]
+  );
+  return { getAppUrl };
+};
+
+/**
+ * Navigate to any url using kibana's `getUrlForApp()`
+ *
+ */
+export const useNavigateTo = () => {
+  const { navigateToApp } = useKibana().services.application;
+
+  const navigateTo = useCallback(
+    ({ appId = APP_ID, ...options }: { appId?: string; deepLinkId?: string; path?: string }) =>
+      navigateToApp(appId, options),
+    [navigateToApp]
+  );
+  return { navigateTo };
+};
+
+/**
+ * Returns navigateTo and getAppUrl navigation hooks
+ *
+ */
+export const useNavigation = () => {
+  const { navigateTo } = useNavigateTo();
+  const { getAppUrl } = useAppUrl();
+  return { navigateTo, getAppUrl };
 };
