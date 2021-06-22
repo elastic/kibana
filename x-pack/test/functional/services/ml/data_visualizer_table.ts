@@ -19,6 +19,7 @@ export function MachineLearningDataVisualizerTableProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
@@ -153,22 +154,25 @@ export function MachineLearningDataVisualizerTableProvider(
       );
     }
 
-    public async ensureActionsMenuOpen(fieldName: string) {
-      await retry.tryForTime(30 * 1000, async () => {
-        const panel = await find.existsByCssSelector('euiContextMenuPanel');
-        if (!panel) {
-          await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
-          await find.existsByCssSelector('euiContextMenuPanel');
-        }
+    public async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
       });
     }
 
-    public async ensureActionsMenuClosed(fieldName: string, action: string) {
+    public async ensureActionsMenuOpen(fieldName: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if (await testSubjects.exists(action)) {
-          await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
-          await testSubjects.missingOrFail(action, { timeout: 5000 });
-        }
+        await this.ensureAllMenuPopoversClosed();
+        await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
+        await find.existsByCssSelector('euiContextMenuPanel');
+      });
+    }
+
+    public async assertActionsMenuClosed(fieldName: string, action: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail(action, { timeout: 5000 });
       });
     }
 
@@ -204,22 +208,19 @@ export function MachineLearningDataVisualizerTableProvider(
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
     }
+
     public async clickActionMenuDeleteIndexPatternFieldButton(fieldName: string) {
       const testSubj = 'dataVisualizerActionDeleteIndexPatternFieldButton';
       await retry.tryForTime(5000, async () => {
         await this.ensureActionsMenuOpen(fieldName);
 
         const button = await find.byCssSelector(
-          '[data-test-subj="dataVisualizerActionDeleteIndexPatternFieldButton"][class="euiContextMenuItem"]'
+          `[data-test-subj="${testSubj}"][class="euiContextMenuItem"]`
         );
         await button.click();
-        await this.ensureActionsMenuClosed(fieldName, testSubj);
+        await this.assertActionsMenuClosed(fieldName, testSubj);
+        await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
       });
-    }
-
-    public async assertActionMenuExists(fieldName: string) {
-      const actionButton = this.rowSelector(fieldName, 'euiCollapsedItemActionsButton');
-      await testSubjects.existOrFail(actionButton);
     }
 
     public async assertViewInLensActionEnabled(fieldName: string, expectedValue: boolean) {
@@ -228,7 +229,7 @@ export function MachineLearningDataVisualizerTableProvider(
       const isEnabled = await testSubjects.isEnabled(actionButton);
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected "Edit index pattern" button for '${fieldName}' to be '${
+        `Expected "Explore in lens" button for '${fieldName}' to be '${
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
@@ -263,6 +264,7 @@ export function MachineLearningDataVisualizerTableProvider(
         await testSubjects.click(
           this.rowSelector(fieldName, 'dataVisualizerActionEditIndexPatternFieldButton')
         );
+        await testSubjects.existOrFail('indexPatternFieldEditorForm');
       });
     }
 

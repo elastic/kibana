@@ -15,7 +15,6 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
   const fieldEditor = getService('fieldEditor');
   const comboBox = getService('comboBox');
 
@@ -27,7 +26,11 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
       await testSubjects.existOrFail('dataVisualizerIndexPatternManagementMenu');
     },
     async assertIndexPatternFieldEditorExists() {
-      await find.byClassName('indexPatternFieldEditor__form');
+      await testSubjects.existOrFail('indexPatternFieldEditorForm');
+    },
+
+    async assertIndexPatternFieldEditorNotExist() {
+      await testSubjects.missingOrFail('indexPatternFieldEditorForm');
     },
 
     async clickIndexPatternManagementButton() {
@@ -71,10 +74,10 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
     },
 
     async addRuntimeField(name: string, script: string, fieldType: string) {
-      await this.clickIndexPatternManagementButton();
-      await this.clickAddIndexPatternFieldAction();
-
       await retry.tryForTime(5000, async () => {
+        await this.clickIndexPatternManagementButton();
+        await this.clickAddIndexPatternFieldAction();
+
         await this.assertIndexPatternFieldEditorExists();
         await fieldEditor.setName(name);
         await fieldEditor.enableValue();
@@ -82,6 +85,7 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
         await this.setIndexPatternFieldEditorFieldType(fieldType);
 
         await fieldEditor.save();
+        await this.assertIndexPatternFieldEditorNotExist();
       });
     },
 
@@ -92,6 +96,7 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
         await fieldEditor.enableCustomLabel();
         await fieldEditor.setCustomLabel(newName);
         await fieldEditor.save();
+        await this.assertIndexPatternFieldEditorNotExist();
       });
     },
 
