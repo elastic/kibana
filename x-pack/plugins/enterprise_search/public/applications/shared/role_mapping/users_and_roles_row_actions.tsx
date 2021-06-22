@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonIcon, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 
 import { CANCEL_BUTTON_LABEL, MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../constants';
 
@@ -39,22 +39,20 @@ export const UsersAndRolesRowActions: React.FC<Props> = ({
   const confirmButton = username ? REMOVE_USER_BUTTON : REMOVE_ROLE_MAPPING_BUTTON;
 
   const deleteModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={closeDeleteModal}
-        onConfirm={() => {
-          onDeleteClick();
-          closeDeleteModal();
-        }}
-        cancelButtonText={CANCEL_BUTTON_LABEL}
-        confirmButtonText={confirmButton}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        <p>{text}</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={closeDeleteModal}
+      onConfirm={() => {
+        onDeleteClick();
+        closeDeleteModal();
+      }}
+      cancelButtonText={CANCEL_BUTTON_LABEL}
+      confirmButtonText={confirmButton}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>{text}</p>
+    </EuiConfirmModal>
   );
 
   return (
