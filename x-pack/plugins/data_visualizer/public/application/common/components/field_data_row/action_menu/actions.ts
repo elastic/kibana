@@ -28,6 +28,12 @@ export function getActions(
 
   const actions: Array<Action<FieldVisConfig>> = [];
 
+  const refreshPage = () => {
+    const refresh: Refresh = {
+      lastRefresh: Date.now(),
+    };
+    dataVisualizerRefresh$.next(refresh);
+  };
   // Navigate to Lens with prefilled chart for data field
   if (lensPlugin !== undefined) {
     const canUseLensEditor = lensPlugin?.canUseEditor();
@@ -73,12 +79,7 @@ export function getActions(
         actionFlyoutRef.current = indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern },
           fieldName: item.fieldName,
-          onSave: () => {
-            const refresh: Refresh = {
-              lastRefresh: Date.now(),
-            };
-            dataVisualizerRefresh$.next(refresh);
-          },
+          onSave: refreshPage,
         });
       },
       'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
@@ -102,12 +103,7 @@ export function getActions(
         actionFlyoutRef.current = indexPatternFieldEditor?.openDeleteModal({
           ctx: { indexPattern },
           fieldName: item.fieldName!,
-          onDelete: () => {
-            const refresh: Refresh = {
-              lastRefresh: Date.now(),
-            };
-            dataVisualizerRefresh$.next(refresh);
-          },
+          onDelete: refreshPage,
         });
       },
       'data-test-subj': 'dataVisualizerActionDeleteIndexPatternFieldButton',
