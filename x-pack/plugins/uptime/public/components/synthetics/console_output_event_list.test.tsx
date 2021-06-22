@@ -83,7 +83,7 @@ describe('ConsoleOutputEventList component', () => {
   });
 
   it('renders a component per console event', () => {
-    const { getByRole, getByText } = render(
+    const { getByRole, getByText, queryByText } = render(
       <ConsoleOutputEventList
         journey={{
           checkGroup: 'check_group',
@@ -100,5 +100,6 @@ describe('ConsoleOutputEventList component', () => {
         expect(getByText(step['@timestamp']));
         expect(getByText(step.synthetics.type));
       });
+    expect(queryByText('step/end')).toBeNull();
   });
 });
