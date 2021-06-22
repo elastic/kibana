@@ -7,10 +7,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { flashErrorToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { ApiTokenTypes } from '../credentials/constants';
 import { ApiToken } from '../credentials/types';
 
+import { POLLING_DURATION, POLLING_ERROR_TITLE, POLLING_ERROR_TEXT } from './constants';
 import { EngineDetails, EngineTypes } from './types';
 
 interface EngineValues {
@@ -26,6 +28,7 @@ interface EngineValues {
   hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
   searchKey: string;
+  intervalId: number | null;
 }
 
 interface EngineActions {
@@ -34,6 +37,10 @@ interface EngineActions {
   setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
+  pollEmptyEngine(): void;
+  onPollStart(intervalId: number): { intervalId: number };
+  stopPolling(): void;
+  onPollStop(): void;
 }
 
 export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
@@ -44,6 +51,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     setEngineNotFound: (notFound) => ({ notFound }),
     clearEngine: true,
     initializeEngine: true,
+    pollEmptyEngine: true,
+    onPollStart: (intervalId) => ({ intervalId }),
+    stopPolling: true,
+    onPollStop: true,
   },
   reducers: {
     dataLoading: [
@@ -72,6 +83,13 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineNotFound: (_, { notFound }) => notFound,
         clearEngine: () => false,
+      },
+    ],
+    intervalId: [
+      null,
+      {
+        onPollStart: (_, { intervalId }) => intervalId,
+        onPollStop: () => null,
       },
     ],
   },
@@ -107,7 +125,9 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeEngine: async () => {
+    initializeEngine: async (_, breakpoint) => {
+      breakpoint(); // Prevents errors if logic unmounts while fetching
+
       const { engineName } = values;
       const { http } = HttpLogic.values;
 
@@ -115,8 +135,39 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         const response = await http.get(`/api/app_search/engines/${engineName}`);
         actions.setEngineData(response);
       } catch (error) {
-        actions.setEngineNotFound(true);
+        if (error?.response?.status >= 400 && error?.response?.status < 500) {
+          actions.setEngineNotFound(true);
+        } else {
+          flashErrorToast(POLLING_ERROR_TITLE, {
+            text: POLLING_ERROR_TEXT,
+            toastLifeTimeMs: POLLING_DURATION * 0.75,
+          });
+        }
       }
+    },
+    pollEmptyEngine: () => {
+      if (values.intervalId) return; // Ensure we only have one poll at a time
+
+      const id = window.setInterval(() => {
+        if (values.isEngineEmpty && values.isEngineSchemaEmpty) {
+          actions.initializeEngine(); // Re-fetch engine data when engine is empty
+        } else {
+          actions.stopPolling();
+        }
+      }, POLLING_DURATION);
+
+      actions.onPollStart(id);
+    },
+    stopPolling: () => {
+      if (values.intervalId !== null) {
+        clearInterval(values.intervalId);
+        actions.onPollStop();
+      }
+    },
+  }),
+  events: ({ actions }) => ({
+    beforeUnmount: () => {
+      actions.stopPolling();
     },
   }),
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -17,8 +21,9 @@ import { EngineTypes } from './types';
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
-  const { mount } = new LogicMounter(EngineLogic);
+  const { mount, unmount } = new LogicMounter(EngineLogic);
   const { http } = mockHttpValues;
+  const { flashErrorToast } = mockFlashMessageHelpers;
 
   const mockEngineData = {
     name: 'some-engine',
@@ -53,6 +58,7 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
     searchKey: '',
+    intervalId: null,
   };
 
   const DEFAULT_VALUES_WITH_ENGINE = {
@@ -164,6 +170,34 @@ describe('EngineLogic', () => {
         });
       });
     });
+
+    describe('onPollStart', () => {
+      it('should set intervalId', () => {
+        mount({ intervalId: null });
+        EngineLogic.actions.onPollStart(123);
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          intervalId: 123,
+        });
+      });
+
+      describe('onPollStop', () => {
+        // Note: This does have to be a separate action following stopPolling(), rather
+        // than using stopPolling: () => null as a reducer. If you do that, then the ID
+        // gets cleared before the actual poll interval does & the poll interval never clears :doh:
+
+        it('should reset intervalId', () => {
+          mount({ intervalId: 123 });
+          EngineLogic.actions.onPollStop();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            intervalId: null,
+          });
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -180,7 +214,18 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
       });
 
-      it('handles errors', async () => {
+      it('handles 4xx errors', async () => {
+        mount();
+        jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
+        http.get.mockReturnValue(Promise.reject({ response: { status: 404 } }));
+
+        EngineLogic.actions.initializeEngine();
+        await nextTick();
+
+        expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
+      });
+
+      it('handles 5xx errors', async () => {
         mount();
         jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
         http.get.mockReturnValue(Promise.reject('An error occured'));
@@ -188,7 +233,80 @@ describe('EngineLogic', () => {
         EngineLogic.actions.initializeEngine();
         await nextTick();
 
-        expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
+        expect(flashErrorToast).toHaveBeenCalledWith('Could not fetch engine data', {
+          text: expect.stringContaining('Please check your connection'),
+          toastLifeTimeMs: 3750,
+        });
+      });
+    });
+
+    describe('pollEmptyEngine', () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.clearAllTimers());
+
+      it('starts a poll', () => {
+        mount();
+        jest.spyOn(global, 'setInterval');
+        jest.spyOn(EngineLogic.actions, 'onPollStart');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        expect(global.setInterval).toHaveBeenCalled();
+        expect(EngineLogic.actions.onPollStart).toHaveBeenCalled();
+      });
+
+      it('polls for engine data if the current engine is empty', () => {
+        mount({ engine: {} });
+        jest.spyOn(EngineLogic.actions, 'initializeEngine');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(2);
+      });
+
+      it('cancels the poll if the current engine changed from empty to non-empty', () => {
+        mount({ engine: mockEngineData });
+        jest.spyOn(EngineLogic.actions, 'stopPolling');
+        jest.spyOn(EngineLogic.actions, 'initializeEngine');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.stopPolling).toHaveBeenCalled();
+        expect(EngineLogic.actions.initializeEngine).not.toHaveBeenCalled();
+      });
+
+      it('does not create new polls if one already exists', () => {
+        jest.spyOn(global, 'setInterval');
+        mount({ intervalId: 123 });
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        expect(global.setInterval).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('stopPolling', () => {
+      it('clears the poll interval and unsets the intervalId', () => {
+        jest.spyOn(global, 'clearInterval');
+        mount({ intervalId: 123 });
+
+        EngineLogic.actions.stopPolling();
+
+        expect(global.clearInterval).toHaveBeenCalledWith(123);
+        expect(EngineLogic.values.intervalId).toEqual(null);
+      });
+
+      it('does not clearInterval if a poll has not been started', () => {
+        jest.spyOn(global, 'clearInterval');
+        mount({ intervalId: null });
+
+        EngineLogic.actions.stopPolling();
+
+        expect(global.clearInterval).not.toHaveBeenCalled();
       });
     });
   });
@@ -371,6 +489,17 @@ describe('EngineLogic', () => {
           searchKey: '',
         });
       });
+    });
+  });
+
+  describe('events', () => {
+    it('calls stopPolling before unmount', () => {
+      mount();
+      // Has to be a const to check state after unmount
+      const stopPollingSpy = jest.spyOn(EngineLogic.actions, 'stopPolling');
+
+      unmount();
+      expect(stopPollingSpy).toHaveBeenCalled();
     });
   });
 });
