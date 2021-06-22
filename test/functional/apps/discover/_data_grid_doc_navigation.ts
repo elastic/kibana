@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('hit loaded', async () => {
         const hasDocHit = await testSubjects.exists('doc-hit');
-        return !!hasDocHit;
+        return hasDocHit === true;
       });
     });
 
