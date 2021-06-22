@@ -43,7 +43,7 @@ interface CreateIncidentArgs {
   actionsClient: ActionsClient;
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
-  caseUrl?: string;
+  caseUrl: string;
   connector: ActionConnector;
   mappings: ConnectorMappingsAttributes[];
   theCase: CaseResponse;
@@ -235,12 +235,8 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${
-      caseUrl != null
-        ? `[${FIELD_INFORMATION('create', date, user)}](${caseUrl} )`
-        : FIELD_INFORMATION('create', date, user)
-    }`,
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
+    value: `${value} [${FIELD_INFORMATION('create', date, user)}](${caseUrl} )`,
     ...rest,
   }),
   informationUpdated: ({
@@ -249,12 +245,8 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${
-      caseUrl != null
-        ? `[${FIELD_INFORMATION('update', date, user)}](${caseUrl} )`
-        : FIELD_INFORMATION('update', date, user)
-    }`,
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
+    value: `${value} [${FIELD_INFORMATION('update', date, user)}](${caseUrl} )`,
     ...rest,
   }),
   informationAdded: ({
@@ -263,15 +255,16 @@ export const transformers: Record<string, Transformer> = {
     user,
     value,
     ...rest
-  }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${
-      caseUrl != null
-        ? `[${FIELD_INFORMATION('add', date, user)}](${caseUrl} )`
-        : FIELD_INFORMATION('add', date, user)
-    }`,
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
+    value: `${value} [${FIELD_INFORMATION('add', date, user)}](${caseUrl} )`,
     ...rest,
   }),
-  append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
+  append: ({
+    caseUrl,
+    value,
+    previousValue,
+    ...rest
+  }: TransformerArgs): Omit<TransformerArgs, 'caseUrl'> => ({
     value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
     ...rest,
   }),
@@ -335,7 +328,7 @@ export const transformFields = <
 export const transformComments = (
   comments: CaseResponse['comments'] = [],
   pipes: string[],
-  caseUrl?: string
+  caseUrl: string
 ): ExternalServiceComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
@@ -347,7 +340,7 @@ export const transformComments = (
         updatedAt: c.updated_at,
         updatedBy: c.updated_by,
       }),
-      ...(caseUrl != null ? { caseUrl: `${caseUrl}/${c.id}` } : {}),
+      caseUrl: `${caseUrl}/${c.id}`,
     }).value,
     commentId: c.id,
   }));

@@ -19,7 +19,7 @@ import { navTabs } from '../../../app/home/home_navigations';
 export const Create = React.memo(() => {
   const {
     cases,
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
   const search = useGetUrlSearch(navTabs.case);
   const onSuccess = useCallback(
@@ -40,6 +40,7 @@ export const Create = React.memo(() => {
   return (
     <EuiPanel>
       {cases.getCreateCase({
+        casesUrl: getUrlForApp(CASES_APP_ID),
         onCancel: handleSetIsCancel,
         onSuccess,
         timelineIntegration: {

@@ -57,16 +57,16 @@ export interface EntityInformation {
   updatedBy: CaseResponse['updated_by'];
 }
 export interface TransformerArgs {
-  caseUrl?: string;
+  caseUrl: string;
   date?: string;
   previousValue?: string;
   user?: string;
   value: string;
 }
 
-export type Transformer = (args: TransformerArgs) => TransformerArgs;
+export type Transformer = (args: TransformerArgs) => Omit<TransformerArgs, 'caseUrl'>;
 export interface TransformFieldsArgs<P, S> {
-  caseUrl?: string;
+  caseUrl: string;
   currentIncident?: S;
   fields: PipedField[];
   params: P;

@@ -10,9 +10,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { getCaseUrl, wrapError, escapeHatch } from '../utils';
+import { wrapError, escapeHatch } from '../utils';
 
-import { throwErrors, CasePushRequestParamsRt, CASE_PUSH_URL } from '../../../../common';
+import {
+  throwErrors,
+  CasePushRequestParamsRt,
+  CasePushRequestRt,
+  CASE_PUSH_URL,
+} from '../../../../common';
 import { RouteDeps } from '../types';
 
 export function initPushCaseApi({ router, logger }: RouteDeps) {
@@ -30,6 +35,11 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
+        const body = pipe(
+          CasePushRequestRt.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
         const casesClient = await context.cases.getCasesClient();
 
         const params = pipe(
@@ -37,13 +47,11 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const url = getCaseUrl(request.headers.referer, params.case_id);
-
         return response.ok({
           body: await casesClient.cases.push({
             caseId: params.case_id,
             connectorId: params.connector_id,
-            ...(url != null ? { caseUrl: url } : {}),
+            caseUrl: body.case_url,
           }),
         });
       } catch (error) {

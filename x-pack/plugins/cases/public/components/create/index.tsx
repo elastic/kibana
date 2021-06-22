@@ -34,6 +34,7 @@ const Container = styled.div`
 export interface CreateCaseProps extends Owner {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
+  casesUrl: string;
   disableAlerts?: boolean;
   hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
@@ -45,6 +46,7 @@ export interface CreateCaseProps extends Owner {
 const CreateCaseComponent = ({
   afterCaseCreated,
   caseType,
+  casesUrl,
   hideConnectorServiceNowSir,
   disableAlerts,
   onCancel,
@@ -56,6 +58,7 @@ const CreateCaseComponent = ({
     <FormContext
       afterCaseCreated={afterCaseCreated}
       caseType={caseType}
+      casesUrl={casesUrl}
       hideConnectorServiceNowSir={hideConnectorServiceNowSir}
       onSuccess={onSuccess}
     >

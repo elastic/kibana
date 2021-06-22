@@ -29,6 +29,8 @@ describe('Create case', () => {
   const mockCreateCase = jest.fn();
   const mockNavigateToApp = jest.fn();
   const mockRes = 'coolstring';
+  const mockCasesUrl = 'https://elastic.co/app/security/cases';
+  const mockApplication = { navigateToApp: mockNavigateToApp, getUrlForApp: () => mockCasesUrl };
   beforeEach(() => {
     jest.resetAllMocks();
     (useGetUrlSearch as jest.Mock).mockReturnValue(mockRes);
@@ -37,7 +39,7 @@ describe('Create case', () => {
         cases: {
           getCreateCase: mockCreateCase,
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: mockApplication,
       },
     });
   });
@@ -61,7 +63,7 @@ describe('Create case', () => {
             onCancel();
           },
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: mockApplication,
       },
     });
     mount(
@@ -85,7 +87,7 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
-        application: { navigateToApp: mockNavigateToApp },
+        application: mockApplication,
       },
     });
     mount(

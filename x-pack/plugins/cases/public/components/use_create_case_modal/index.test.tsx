@@ -26,9 +26,14 @@ describe('useCreateCaseModal', () => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
+  const defaultArgs = {
+    onCaseCreated,
+    casesUrl: `https://elastic.co`,
+  };
+
   it('init', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useCreateCaseModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -39,7 +44,7 @@ describe('useCreateCaseModal', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useCreateCaseModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -54,7 +59,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useCreateCaseModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -72,7 +77,7 @@ describe('useCreateCaseModal', () => {
     const { result, rerender } = renderHook<
       UseCreateCaseModalProps,
       UseCreateCaseModalReturnedValues
-    >(() => useCreateCaseModal({ onCaseCreated }), {
+    >(() => useCreateCaseModal(defaultArgs), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -85,7 +90,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal when creating a case', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useCreateCaseModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }

@@ -46,12 +46,14 @@ const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServ
 
 interface PushToServiceRequest {
   caseId: string;
+  caseUrl: string;
   connector: CaseConnector;
 }
 
 export interface UsePostPushToService extends PushToServiceState {
   pushCaseToExternalService: ({
     caseId,
+    caseUrl,
     connector,
   }: PushToServiceRequest) => Promise<Case | undefined>;
 }
@@ -66,14 +68,17 @@ export const usePostPushToService = (): UsePostPushToService => {
   const abortCtrlRef = useRef(new AbortController());
 
   const pushCaseToExternalService = useCallback(
-    async ({ caseId, connector }: PushToServiceRequest) => {
+    async ({ caseId, caseUrl, connector }: PushToServiceRequest) => {
       try {
         abortCtrlRef.current.abort();
         cancel.current = false;
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await pushCase(caseId, connector.id, abortCtrlRef.current.signal);
+        const response = await pushCase(
+          { caseId, caseUrl, connectorId: connector.id },
+          abortCtrlRef.current.signal
+        );
 
         if (!cancel.current) {
           dispatch({ type: 'FETCH_SUCCESS' });

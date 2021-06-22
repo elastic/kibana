@@ -246,6 +246,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
+      caseUrl: caseDetailsNavigation.href,
       configureCasesNavigation,
       connector: {
         ...caseData.connector,

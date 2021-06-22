@@ -31,6 +31,7 @@ export const Create = React.memo(() => {
   return (
     <EuiPanel>
       {cases.getCreateCase({
+        casesUrl,
         disableAlerts: true,
         onCancel: handleSetIsCancel,
         onSuccess,

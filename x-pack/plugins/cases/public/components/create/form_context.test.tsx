@@ -142,12 +142,16 @@ describe('Create case', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  const defaultProps = {
+    onSuccess: onFormSubmitSuccess,
+    casesUrl: 'https://elastic.co/app/security/cases',
+  };
 
   describe('Step 1 - Case Fields', () => {
     it('it renders', async () => {
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -171,7 +175,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -191,7 +195,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -226,7 +230,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -276,7 +280,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -301,7 +305,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -345,6 +349,7 @@ describe('Create case', () => {
           },
         });
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'jira-1',
@@ -368,7 +373,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -412,6 +417,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'resilient-2',
@@ -436,7 +442,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -496,6 +502,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'servicenow-1',
@@ -526,7 +533,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext {...defaultProps}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -591,6 +598,7 @@ describe('Create case', () => {
         });
 
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseUrl: `${defaultProps.casesUrl}/${sampleId}`,
           caseId: sampleId,
           connector: {
             id: 'servicenow-sir',
@@ -624,7 +632,7 @@ describe('Create case', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <FormContext {...defaultProps} afterCaseCreated={afterCaseCreated}>
           <CreateCaseForm {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -661,7 +669,7 @@ describe('Create case', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <FormContext {...defaultProps} afterCaseCreated={afterCaseCreated}>
           <CreateCaseForm {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>

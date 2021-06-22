@@ -35,6 +35,7 @@ const initialCaseValue: FormProps = {
 interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
+  casesUrl: string;
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
@@ -43,6 +44,7 @@ interface Props {
 export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   caseType = CaseType.individual,
+  casesUrl,
   children,
   hideConnectorServiceNowSir,
   onSuccess,
@@ -97,6 +99,7 @@ export const FormContext: React.FC<Props> = ({
 
         if (updatedCase?.id && dataConnectorId !== 'none') {
           await pushCaseToExternalService({
+            caseUrl: `${casesUrl}/${updatedCase.id}`,
             caseId: updatedCase.id,
             connector: connectorToUpdate,
           });
@@ -116,6 +119,7 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       postComment,
       pushCaseToExternalService,
+      casesUrl,
     ]
   );
 

@@ -23,6 +23,7 @@ import { ErrorMessage } from '../callout/types';
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
+  caseUrl: string;
   configureCasesNavigation: CasesNavigation;
   connector: CaseConnector;
   caseServices: CaseServices;
@@ -38,6 +39,7 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
+  caseUrl,
   configureCasesNavigation: { href },
   connector,
   caseId,
@@ -56,6 +58,7 @@ export const usePushToService = ({
     if (connector.id != null && connector.id !== 'none') {
       const theCase = await pushCaseToExternalService({
         caseId,
+        caseUrl,
         connector,
       });
 
@@ -63,7 +66,7 @@ export const usePushToService = ({
         updateCase(theCase);
       }
     }
-  }, [caseId, connector, pushCaseToExternalService, updateCase]);
+  }, [caseId, caseUrl, connector, pushCaseToExternalService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: ErrorMessage[] = [];

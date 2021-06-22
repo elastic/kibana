@@ -465,19 +465,25 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      await pushCase(
+        { caseId: basicCase.id, connectorId, caseUrl: `${CASES_URL}/${basicCase.id}` },
+        abortCtrl.signal
+      );
       expect(fetchMock).toHaveBeenCalledWith(
         `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
         {
           method: 'POST',
-          body: JSON.stringify({}),
+          body: JSON.stringify({ case_url: `${CASES_URL}/${basicCase.id}` }),
           signal: abortCtrl.signal,
         }
       );
     });
 
     test('happy path', async () => {
-      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      const resp = await pushCase(
+        { caseId: basicCase.id, connectorId, caseUrl: `${CASES_URL}/${basicCase.id}` },
+        abortCtrl.signal
+      );
       expect(resp).toEqual(pushedCase);
     });
   });

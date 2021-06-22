@@ -38,9 +38,15 @@ cases: CasesUiStart;
 
 - From the UI component, get the component from the `useKibana` hook start services
 ```tsx
-  const { cases } = useKibana().services;
+
+  const {
+    cases,
+    application: { getUrlForApp },
+  } = useKibana().services;
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   // call in the return as you would any component
   cases.getCreateCase({
+    casesUrl,
     onCancel: handleSetIsCancel,
     onSuccess,
     timelineIntegration?: {
