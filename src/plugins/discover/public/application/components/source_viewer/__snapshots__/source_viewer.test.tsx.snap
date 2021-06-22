@@ -112,9 +112,17 @@ exports[`Source Viewer component renders error state 1`] = `
 >
   <EuiEmptyPrompt
     body={
-      <p>
-        Could not fetch data at this time. Refresh the tab to try again.
-      </p>
+      <div>
+        Could not fetch data at this time.
+        <EuiSpacer
+          size="s"
+        />
+        <EuiButton
+          iconType="refresh"
+        >
+          Refresh
+        </EuiButton>
+      </div>
     }
     iconType="alert"
     title={
@@ -170,9 +178,73 @@ exports[`Source Viewer component renders error state 1`] = `
             <div
               className="euiText euiText--medium"
             >
-              <p>
-                Could not fetch data at this time. Refresh the tab to try again.
-              </p>
+              <div>
+                Could not fetch data at this time.
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+                <EuiButton
+                  iconType="refresh"
+                >
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
+                    disabled={false}
+                    element="button"
+                    iconType="refresh"
+                    isDisabled={false}
+                    type="button"
+                  >
+                    <button
+                      className="euiButton euiButton--primary"
+                      disabled={false}
+                      style={
+                        Object {
+                          "minWidth": undefined,
+                        }
+                      }
+                      type="button"
+                    >
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        iconType="refresh"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
+                      >
+                        <span
+                          className="euiButtonContent euiButton__content"
+                        >
+                          <EuiIcon
+                            className="euiButtonContent__icon"
+                            color="inherit"
+                            size="m"
+                            type="refresh"
+                          >
+                            <span
+                              className="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="refresh"
+                              size="m"
+                            />
+                          </EuiIcon>
+                          <span
+                            className="euiButton__text"
+                          >
+                            Refresh
+                          </span>
+                        </span>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </div>
             </div>
           </EuiText>
         </span>

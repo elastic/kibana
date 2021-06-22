@@ -186,7 +186,11 @@ describe('Test of <Doc /> helper / hook', () => {
     await act(async () => {
       hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
     });
-    expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, indexPattern]);
+    expect(hook.result.current.slice(0, 3)).toEqual([
+      ElasticRequestState.Loading,
+      null,
+      indexPattern,
+    ]);
     expect(getMock).toHaveBeenCalled();
   });
 });

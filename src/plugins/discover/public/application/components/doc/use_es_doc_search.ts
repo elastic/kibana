@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPattern, getServices } from '../../../kibana_services';
+import { getServices, IndexPattern } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
@@ -65,47 +65,49 @@ export function useEsDocSearch({
   indexPatternId,
   indexPatternService,
   requestSource,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
+}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null, () => void] {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
   const { data, uiSettings } = useMemo(() => getServices(), []);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  useEffect(() => {
-    async function requestData() {
-      try {
-        const indexPatternEntity = await indexPatternService.get(indexPatternId);
-        setIndexPattern(indexPatternEntity);
+  const requestData = useCallback(async () => {
+    try {
+      const indexPatternEntity = await indexPatternService.get(indexPatternId);
+      setIndexPattern(indexPatternEntity);
 
-        const { rawResponse } = await data.search
-          .search({
-            params: {
-              index,
-              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestSource)?.body,
-            },
-          })
-          .toPromise();
+      const { rawResponse } = await data.search
+        .search({
+          params: {
+            index,
+            body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestSource)?.body,
+          },
+        })
+        .toPromise();
 
-        const hits = rawResponse.hits;
+      const hits = rawResponse.hits;
 
-        if (hits?.hits?.[0]) {
-          setStatus(ElasticRequestState.Found);
-          setHit(hits.hits[0]);
-        } else {
-          setStatus(ElasticRequestState.NotFound);
-        }
-      } catch (err) {
-        if (err.savedObjectId) {
-          setStatus(ElasticRequestState.NotFoundIndexPattern);
-        } else if (err.status === 404) {
-          setStatus(ElasticRequestState.NotFound);
-        } else {
-          setStatus(ElasticRequestState.Error);
-        }
+      if (hits?.hits?.[0]) {
+        setStatus(ElasticRequestState.Found);
+        setHit(hits.hits[0]);
+      } else {
+        setStatus(ElasticRequestState.NotFound);
+      }
+    } catch (err) {
+      if (err.savedObjectId) {
+        setStatus(ElasticRequestState.NotFoundIndexPattern);
+      } else if (err.status === 404) {
+        setStatus(ElasticRequestState.NotFound);
+      } else {
+        setStatus(ElasticRequestState.Error);
       }
     }
-    requestData();
   }, [id, index, indexPatternId, indexPatternService, data.search, useNewFieldsApi, requestSource]);
-  return [status, hit, indexPattern];
+
+  useEffect(() => {
+    requestData();
+  }, [requestData]);
+
+  return [status, hit, indexPattern, requestData];
 }

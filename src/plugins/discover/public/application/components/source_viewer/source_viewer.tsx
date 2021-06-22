@@ -10,7 +10,7 @@ import './source_viewer.scss';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
@@ -37,7 +37,7 @@ export const SourceViewer = ({
   const [jsonValue, setJsonValue] = useState<string>('');
   const indexPatternService = getServices().data.indexPatterns;
   const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const [reqState, hit] = useEsDocSearch({
+  const [reqState, hit, , requestData] = useEsDocSearch({
     id,
     index,
     indexPatternId,
@@ -90,11 +90,17 @@ export const SourceViewer = ({
     </h2>
   );
   const errorMessage = (
-    <p>
+    <div>
       {i18n.translate('discover.sourceViewer.errorMessage', {
         defaultMessage: 'Could not fetch data at this time.',
       })}
-    </p>
+      <EuiSpacer size="s" />
+      <EuiButton iconType="refresh" onClick={requestData}>
+        {i18n.translate('discover.sourceViewer.refresh', {
+          defaultMessage: 'Refresh',
+        })}
+      </EuiButton>
+    </div>
   );
   const errorState = (
     <EuiEmptyPrompt iconType="alert" title={errorMessageTitle} body={errorMessage} />
