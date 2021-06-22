@@ -68,10 +68,10 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     if (!shared.hasExactlyOneIndexPattern(context.embeddable)) return;
 
     const { core } = this.params.start();
-    const { app, route } = await this.getLocation(context);
+    const { app, path } = await this.getLocation(context);
 
     await core.application.navigateToApp(app, {
-      path: route,
+      path,
     });
   }
 
@@ -83,8 +83,8 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     }
 
     const { core } = this.params.start();
-    const { app, route } = await this.getLocation(context);
-    const url = await core.application.getUrlForApp(app, { path: route, absolute: false });
+    const { app, path } = await this.getLocation(context);
+    const url = await core.application.getUrlForApp(app, { path, absolute: false });
 
     return url;
   }

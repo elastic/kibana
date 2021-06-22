@@ -129,17 +129,17 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
-    let route = `#/${savedSearchPath}`;
-    route = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, route);
-    route = setStateToKbnUrl('_a', appState, { useHash }, route);
+    let path = `#/${savedSearchPath}`;
+    path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (searchSessionId) {
-      route = `${route}&searchSessionId=${searchSessionId}`;
+      path = `${path}&searchSessionId=${searchSessionId}`;
     }
 
     return {
       app: 'discover',
-      route,
+      path,
       state: {},
     };
   };

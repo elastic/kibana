@@ -37,8 +37,8 @@ beforeEach(() => {
 describe('Discover url generator', () => {
   test('can create a link to Discover with no state and no saved search', async () => {
     const { locator } = await setup();
-    const { app, route } = await locator.getLocation({});
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { app, path } = await locator.getLocation({});
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(app).toBe('discover');
     expect(_a).toEqual({});
@@ -47,20 +47,20 @@ describe('Discover url generator', () => {
 
   test('can create a link to a saved search in Discover', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({ savedSearchId });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { path } = await locator.getLocation({ savedSearchId });
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
-    expect(route.startsWith(`#/view/${savedSearchId}`)).toBe(true);
+    expect(path.startsWith(`#/view/${savedSearchId}`)).toBe(true);
     expect(_a).toEqual({});
     expect(_g).toEqual({});
   });
 
   test('can specify specific index pattern', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       indexPatternId,
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
       index: indexPatternId,
@@ -70,10 +70,10 @@ describe('Discover url generator', () => {
 
   test('can specify specific time range', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({
@@ -87,13 +87,13 @@ describe('Discover url generator', () => {
 
   test('can specify query', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       query: {
         language: 'kuery',
         query: 'foo',
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
       query: {
@@ -106,7 +106,7 @@ describe('Discover url generator', () => {
 
   test('can specify local and global filters', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       filters: [
         {
           meta: {
@@ -130,7 +130,7 @@ describe('Discover url generator', () => {
         },
       ],
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
       filters: [
@@ -164,13 +164,13 @@ describe('Discover url generator', () => {
 
   test('can set refresh interval', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       refreshInterval: {
         pause: false,
         value: 666,
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({
@@ -183,13 +183,13 @@ describe('Discover url generator', () => {
 
   test('can set time range', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       timeRange: {
         from: 'now-3h',
         to: 'now',
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(route, ['_a', '_g']);
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({
@@ -202,24 +202,24 @@ describe('Discover url generator', () => {
 
   test('can specify a search session id', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       searchSessionId: '__test__',
     });
 
-    expect(route).toMatchInlineSnapshot(`"#/?_g=()&_a=()&searchSessionId=__test__"`);
-    expect(route).toContain('__test__');
+    expect(path).toMatchInlineSnapshot(`"#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(path).toContain('__test__');
   });
 
   test('can specify columns, interval, sort and savedQuery', async () => {
     const { locator } = await setup();
-    const { route } = await locator.getLocation({
+    const { path } = await locator.getLocation({
       columns: ['_source'],
       interval: 'auto',
       sort: [['timestamp, asc']] as string[][] & SerializableState,
       savedQuery: '__savedQueryId__',
     });
 
-    expect(route).toMatchInlineSnapshot(
+    expect(path).toMatchInlineSnapshot(
       `"#/?_g=()&_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
     );
   });
@@ -228,42 +228,42 @@ describe('Discover url generator', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets index pattern ID in the generated URL', async () => {
         const { locator } = await setup();
-        const { route } = await locator.getLocation({
+        const { path } = await locator.getLocation({
           indexPatternId,
         });
 
-        expect(route.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(indexPatternId) > -1).toBe(true);
       });
 
       test('when enabling useHash, does not set index pattern ID in the generated URL', async () => {
         const { locator } = await setup();
-        const { route } = await locator.getLocation({
+        const { path } = await locator.getLocation({
           useHash: true,
           indexPatternId,
         });
 
-        expect(route.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(indexPatternId) > -1).toBe(false);
       });
     });
 
     describe('when default useHash is set to true', () => {
       test('when using default, does not set index pattern ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
-        const { route } = await locator.getLocation({
+        const { path } = await locator.getLocation({
           indexPatternId,
         });
 
-        expect(route.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(indexPatternId) > -1).toBe(false);
       });
 
       test('when disabling useHash, sets index pattern ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
-        const { route } = await locator.getLocation({
+        const { path } = await locator.getLocation({
           useHash: false,
           indexPatternId,
         });
 
-        expect(route.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(indexPatternId) > -1).toBe(true);
       });
     });
   });
