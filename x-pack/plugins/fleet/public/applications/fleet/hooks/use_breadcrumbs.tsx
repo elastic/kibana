@@ -147,14 +147,6 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  upgrade_policies: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePoliciesPageTItle', {
-        defaultMessage: 'Upgrade policies',
-      }),
-    },
-  ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

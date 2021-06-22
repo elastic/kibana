@@ -17,7 +17,6 @@ import { AgentPolicyListPage } from './list_page';
 import { AgentPolicyDetailsPage } from './details_page';
 import { CreatePackagePolicyPage } from './create_package_policy_page';
 import { EditPackagePolicyPage } from './edit_package_policy_page';
-import { UpgradePoliciesPage } from './upgrade_policies';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');
@@ -25,9 +24,6 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
   return (
     <Router>
       <Switch>
-        <Route path={FLEET_ROUTING_PATHS.upgrade_policies}>
-          <UpgradePoliciesPage />
-        </Route>
         <Route path={FLEET_ROUTING_PATHS.edit_integration}>
           <EditPackagePolicyPage />
         </Route>
