@@ -112,7 +112,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   const {
     derivedIndexPattern,
-    isLoadingSourceConfiguration,
+    isLoading: isLoadingSource,
     loadSource,
     sourceConfiguration,
   } = useLogSource({
@@ -198,7 +198,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
       items={streamItems}
       scale="medium"
       wrap={true}
-      isReloading={isLoadingSourceConfiguration || isReloading}
+      isReloading={isLoadingSource || isReloading}
       isLoadingMore={isLoadingMore}
       hasMoreBeforeStart={hasMoreBefore}
       hasMoreAfterEnd={hasMoreAfter}
