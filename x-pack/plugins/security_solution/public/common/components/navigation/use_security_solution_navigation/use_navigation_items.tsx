@@ -11,8 +11,6 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
 import { useKibana } from '../../../lib/kibana';
-import { SecurityPageName } from '../../../../app/types';
-import { useFormatUrl } from '../../link_to';
 
 export const usePrimaryNavigationItems = ({
   filters,
