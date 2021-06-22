@@ -65,7 +65,7 @@ interface RoleMappingsActions {
   }): { roleMappings: ASRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   openRoleMappingFlyout(): void;
-  closeRoleMappingFlyout(): void;
+  closeUsersAndRolesFlyout(): void;
   setRoleMappingErrors(errors: string[]): { errors: string[] };
   enableRoleBasedAccess(): void;
 }
@@ -114,7 +114,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     handleDeleteMapping: (roleMappingId: string) => ({ roleMappingId }),
     handleSaveMapping: true,
     openRoleMappingFlyout: true,
-    closeRoleMappingFlyout: false,
+    closeUsersAndRolesFlyout: false,
   },
   reducers: {
     dataLoading: [
@@ -172,7 +172,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
         resetState: () => null,
-        closeRoleMappingFlyout: () => null,
+        closeUsersAndRolesFlyout: () => null,
       },
     ],
     roleType: [
@@ -198,7 +198,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           value === 'role' ? firstElasticsearchRole : '',
         handleAttributeValueChange: (_, { value }) => value,
         resetState: () => '',
-        closeRoleMappingFlyout: () => '',
+        closeUsersAndRolesFlyout: () => '',
       },
     ],
     attributeName: [
@@ -207,7 +207,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMapping: (_, { roleMapping }) => getFirstAttributeName(roleMapping),
         handleAttributeSelectorChange: (_, { value }) => value,
         resetState: () => 'username',
-        closeRoleMappingFlyout: () => 'username',
+        closeUsersAndRolesFlyout: () => 'username',
       },
     ],
     selectedEngines: [
@@ -251,7 +251,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       false,
       {
         openRoleMappingFlyout: () => true,
-        closeRoleMappingFlyout: () => false,
+        closeUsersAndRolesFlyout: () => false,
         initializeRoleMappings: () => false,
         initializeRoleMapping: () => true,
       },
@@ -261,7 +261,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       {
         setRoleMappingErrors: (_, { errors }) => errors,
         handleSaveMapping: () => [],
-        closeRoleMappingFlyout: () => [],
+        closeUsersAndRolesFlyout: () => [],
       },
     ],
   },
@@ -357,7 +357,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     resetState: () => {
       clearFlashMessages();
     },
-    closeRoleMappingFlyout: () => {
+    closeUsersAndRolesFlyout: () => {
       clearFlashMessages();
     },
     openRoleMappingFlyout: () => {

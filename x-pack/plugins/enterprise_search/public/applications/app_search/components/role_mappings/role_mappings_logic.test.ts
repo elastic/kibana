@@ -260,12 +260,12 @@ describe('RoleMappingsLogic', () => {
       expect(clearFlashMessages).toHaveBeenCalled();
     });
 
-    it('closeRoleMappingFlyout', () => {
+    it('closeUsersAndRolesFlyout', () => {
       mount({
         ...mappingsServerProps,
         roleMappingFlyoutOpen: true,
       });
-      RoleMappingsLogic.actions.closeRoleMappingFlyout();
+      RoleMappingsLogic.actions.closeUsersAndRolesFlyout();
 
       expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(false);
       expect(clearFlashMessages).toHaveBeenCalled();
