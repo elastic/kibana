@@ -53,6 +53,10 @@ describe('RoleMappingsLogic', () => {
     roleMappingErrors: [],
     singleUserRoleMapping: null,
     singleUserRoleMappings: [],
+    singleUserRoleMappingFlyoutOpen: false,
+    userCreated: false,
+    userFormIsNewUser: true,
+    userFormUserIsExisting: true,
   };
   const roleGroup = {
     id: '123',
@@ -179,6 +183,12 @@ describe('RoleMappingsLogic', () => {
       expect(RoleMappingsLogic.values.includeInAllGroups).toEqual(true);
     });
 
+    it('setUserExistingRadioValue', () => {
+      RoleMappingsLogic.actions.setUserExistingRadioValue(false);
+
+      expect(RoleMappingsLogic.values.userFormUserIsExisting).toEqual(false);
+    });
+
     describe('handleAttributeSelectorChange', () => {
       const elasticsearchRoles = ['foo', 'bar'];
 
@@ -274,6 +284,14 @@ describe('RoleMappingsLogic', () => {
       expect(clearFlashMessages).toHaveBeenCalled();
     });
 
+    it('openSingleUserRoleMappingFlyout', () => {
+      mount(mappingsServerProps);
+      RoleMappingsLogic.actions.openSingleUserRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.singleUserRoleMappingFlyoutOpen).toEqual(true);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
     it('closeUsersAndRolesFlyout', () => {
       mount({
         ...mappingsServerProps,
@@ -283,6 +301,32 @@ describe('RoleMappingsLogic', () => {
 
       expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(false);
       expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
+    it('setElasticsearchUsernameValue', () => {
+      const username = 'newName';
+      RoleMappingsLogic.actions.setElasticsearchUsernameValue(username);
+
+      expect(RoleMappingsLogic.values.elasticsearchUser).toEqual({
+        ...RoleMappingsLogic.values.elasticsearchUser,
+        username,
+      });
+    });
+
+    it('setElasticsearchEmailValue', () => {
+      const email = 'newEmail@foo.cats';
+      RoleMappingsLogic.actions.setElasticsearchEmailValue(email);
+
+      expect(RoleMappingsLogic.values.elasticsearchUser).toEqual({
+        ...RoleMappingsLogic.values.elasticsearchUser,
+        email,
+      });
+    });
+
+    it('setUserCreated', () => {
+      RoleMappingsLogic.actions.setUserCreated();
+
+      expect(RoleMappingsLogic.values.userCreated).toEqual(true);
     });
   });
 
@@ -487,6 +531,53 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    describe('handleUsernameSelectChange', () => {
+      it('sets elasticsearchUser when match found', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.handleUsernameSelectChange(elasticsearchUsers[0].username);
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(elasticsearchUsers[0]);
+      });
+
+      it('does not set elasticsearchUser when no match found', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.handleUsernameSelectChange('bogus');
+
+        expect(setElasticsearchUserSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('setUserExistingRadioValue', () => {
+      it('handles existing user', () => {
+        RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.setUserExistingRadioValue(true);
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(elasticsearchUsers[0]);
+      });
+
+      it('handles new user', () => {
+        const setElasticsearchUserSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'setElasticsearchUser'
+        );
+        RoleMappingsLogic.actions.setUserExistingRadioValue(false);
+
+        expect(setElasticsearchUserSpy).toHaveBeenCalledWith(emptyUser);
       });
     });
   });
