@@ -159,6 +159,10 @@ export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityL
   payload: EndpointState['endpointDetails']['activityLog']['logData'];
 };
 
+export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
+  payload: EndpointState['endpointPendingActions'];
+};
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -186,4 +190,5 @@ export type EndpointAction =
   | ServerFailedToReturnAgenstWithEndpointsTotal
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
-  | EndpointIsolationRequestStateChange;
+  | EndpointIsolationRequestStateChange
+  | EndpointPendingActionsStateChanged;

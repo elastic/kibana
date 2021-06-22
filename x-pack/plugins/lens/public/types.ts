@@ -49,6 +49,7 @@ export interface EditorFrameProps {
   initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
 }
@@ -570,9 +571,9 @@ export interface VisualizationType {
    */
   sortPriority?: number;
   /**
-   * Indicates if visualization is in the beta stage.
+   * Indicates if visualization is in the experimental stage.
    */
-  showBetaBadge?: boolean;
+  showExperimentalBadge?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -734,6 +735,7 @@ interface LensEditContextMapping {
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
 }
+
 type LensEditSupportedActions = keyof LensEditContextMapping;
 
 export type LensEditPayload<T extends LensEditSupportedActions> = {
@@ -746,6 +748,7 @@ export interface LensEditEvent<T> {
   name: 'edit';
   data: EditPayloadContext<T>;
 }
+
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];

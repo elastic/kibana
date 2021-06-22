@@ -9,17 +9,17 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCode, EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
-
 import { Loading } from '../../../shared/loading';
 
+import { DomainsTable } from './components/domains_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
 
 export const CrawlerOverview: React.FC = () => {
-  const { dataLoading, domains } = useValues(CrawlerOverviewLogic);
+  const { dataLoading } = useValues(CrawlerOverviewLogic);
 
   const { fetchCrawlerData } = useActions(CrawlerOverviewLogic);
 
@@ -35,7 +35,7 @@ export const CrawlerOverview: React.FC = () => {
     <>
       <EuiPageHeader pageTitle={CRAWLER_TITLE} />
       <FlashMessages />
-      <EuiCode language="json">{JSON.stringify(domains, null, 2)}</EuiCode>
+      <DomainsTable />
     </>
   );
 };

@@ -7,6 +7,7 @@
  */
 
 import { SortDirection } from '../../../../../../../data/public';
+import { SurrDocType } from '../context';
 
 export type IntervalValue = number | null;
 
@@ -31,12 +32,12 @@ export function* asPairs(iterable: Iterable<IntervalValue>): IterableIterator<In
 export function generateIntervals(
   offsets: number[],
   startTime: number,
-  type: string,
+  type: SurrDocType,
   sort: SortDirection
 ): IterableIterator<IntervalValue[]> {
   const offsetSign =
-    (sort === SortDirection.asc && type === 'successors') ||
-    (sort === SortDirection.desc && type === 'predecessors')
+    (sort === SortDirection.asc && type === SurrDocType.SUCCESSORS) ||
+    (sort === SortDirection.desc && type === SurrDocType.PREDECESSORS)
       ? 1
       : -1;
   // ending with `null` opens the last interval

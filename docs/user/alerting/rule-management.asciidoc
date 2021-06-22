@@ -1,5 +1,0 @@
-[role="xpack"]
-[[alert-management]]
-== Managing rules
-
-This content has been moved to <<create-and-manage-rules>>.

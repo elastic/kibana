@@ -25,6 +25,7 @@ import {
   BaseHit,
   RuleAlertAction,
   SearchTypes,
+  EqlSequence,
 } from '../../../../common/detection_engine/types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger, SavedObject } from '../../../../../../../src/core/server';
@@ -257,16 +258,18 @@ export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<Signa
 
 export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
 
-export type WrapHits = (
-  hits: Array<estypes.SearchHit<unknown>>
-) => Array<BaseHit<{ '@timestamp': string }>>;
+export type SimpleHit = BaseHit<{ '@timestamp': string }>;
+
+export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleHit[];
+
+export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
+  };
   ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;

@@ -11,6 +11,7 @@ import { map, catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver } from './driver';
+import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';
 import { NewsfeedStorage } from './storage';
 
 export enum NewsfeedApiEndpoint {
@@ -40,13 +41,23 @@ export interface NewsfeedApi {
 export function getApi(
   config: NewsfeedPluginBrowserConfig,
   kibanaVersion: string,
-  newsfeedId: string
+  newsfeedId: string,
+  isScreenshotMode: boolean
 ): NewsfeedApi {
-  const userLanguage = i18n.getLocale();
-  const fetchInterval = config.fetchInterval.asMilliseconds();
-  const mainInterval = config.mainInterval.asMilliseconds();
   const storage = new NewsfeedStorage(newsfeedId);
-  const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
+  const mainInterval = config.mainInterval.asMilliseconds();
+
+  const createNewsfeedApiDriver = () => {
+    if (isScreenshotMode) {
+      return new NeverFetchNewsfeedApiDriver();
+    }
+
+    const userLanguage = i18n.getLocale();
+    const fetchInterval = config.fetchInterval.asMilliseconds();
+    return new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
+  };
+
+  const driver = createNewsfeedApiDriver();
 
   const results$ = timer(0, mainInterval).pipe(
     filter(() => driver.shouldFetch()),
