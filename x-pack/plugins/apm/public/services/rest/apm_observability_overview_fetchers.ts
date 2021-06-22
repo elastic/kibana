@@ -53,10 +53,8 @@ export const fetchObservabilityOverviewPageData = async ({
 };
 
 export async function getHasData() {
-  const res = await callApmApi({
+  return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_data',
     signal: null,
   });
-
-  return res.hasData;
 }

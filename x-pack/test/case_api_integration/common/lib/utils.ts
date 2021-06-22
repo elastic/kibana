@@ -45,6 +45,8 @@ import {
   CasesStatusResponse,
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
+  AlertResponse,
+  CasesByAlertId,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -1016,7 +1018,7 @@ export const findCases = async ({
   return res;
 };
 
-export const getCaseIDsByAlert = async ({
+export const getCasesByAlert = async ({
   supertest,
   alertID,
   query = {},
@@ -1028,7 +1030,7 @@ export const getCaseIDsByAlert = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<string[]> => {
+}): Promise<CasesByAlertId> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/alerts/${alertID}`)
     .auth(auth.user.username, auth.user.password)
@@ -1101,4 +1103,23 @@ export const pushCase = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getAlertsAttachedToCase = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<AlertResponse> => {
+  const { body: theCase } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theCase;
 };
