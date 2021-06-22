@@ -17,7 +17,7 @@ import { init as initNotification } from './application/services/notification';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
 import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
-import { registerUrlGenerator } from './url_generator';
+import { IlmLocatorDefinition } from './locator';
 
 export class IndexLifecycleManagementPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
@@ -38,7 +38,7 @@ export class IndexLifecycleManagementPlugin
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement, home, cloud, share } = plugins;
+      const { usageCollection, management, indexManagement, home, cloud } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -110,7 +110,11 @@ export class IndexLifecycleManagementPlugin
         addAllExtensions(indexManagement.extensionsService);
       }
 
-      registerUrlGenerator(coreSetup, management, share);
+      plugins.share.url.locators.create(
+        new IlmLocatorDefinition({
+          managementAppLocator: plugins.management.locator,
+        })
+      );
     }
   }
 

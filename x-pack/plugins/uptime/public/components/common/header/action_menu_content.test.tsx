@@ -14,12 +14,12 @@ describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
-    const alertsDropdown = getByLabelText('Open alert context menu');
+    const alertsDropdown = getByLabelText('Open alerts and rules context menu');
     fireEvent.click(alertsDropdown);
 
     await waitFor(() => {
-      expect(getByText('Create alert'));
-      expect(getByText('Manage alerts'));
+      expect(getByText('Create rule'));
+      expect(getByText('Manage rules'));
     });
   });
 
