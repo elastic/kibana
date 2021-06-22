@@ -94,7 +94,7 @@ describe('send_email module', () => {
           "port": 1025,
           "proxy": "https://example.com",
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },
@@ -142,7 +142,7 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },
@@ -192,7 +192,7 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": true,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": true,
           },
         },
@@ -254,7 +254,7 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },
@@ -290,7 +290,7 @@ describe('send_email module', () => {
           "port": 1025,
           "proxy": "https://proxy.com",
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },
@@ -326,7 +326,7 @@ describe('send_email module', () => {
           "port": 1025,
           "proxy": "https://proxy.com",
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },
@@ -358,7 +358,7 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
-          "ssl": Object {
+          "tls": Object {
             "rejectUnauthorized": false,
           },
         },

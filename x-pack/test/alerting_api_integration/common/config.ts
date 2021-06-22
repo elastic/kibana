@@ -205,21 +205,21 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 url: tlsWebhookServers.noCustom,
               },
             },
-            'custom.tls.rejectUnauthorizedFalse': {
+            'custom.ssl.rejectUnauthorizedFalse': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedFalse,
               },
             },
-            'custom.tls.rejectUnauthorizedTrue': {
+            'custom.ssl.rejectUnauthorizedTrue': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedTrue,
               },
             },
-            'custom.tls.caFile': {
+            'custom.ssl.caFile': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.caFile}`,
               config: {
