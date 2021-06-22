@@ -464,7 +464,7 @@
     "@kbn/eslint-import-resolver-kibana": "link:bazel-bin/packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-eslint": "link:bazel-bin/packages/kbn-eslint-plugin-eslint",
     "@kbn/expect": "link:bazel-bin/packages/kbn-expect",
-    "@kbn/optimizer": "link:packages/kbn-optimizer",
+    "@kbn/optimizer": "link:bazel-bin/packages/kbn-optimizer",
     "@kbn/plugin-generator": "link:bazel-bin/packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
