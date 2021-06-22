@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
+import { EuiCopy, EuiLoadingContent } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { externalUrl } from '../../../shared/enterprise_search_url';
@@ -20,6 +20,7 @@ import { externalUrl } from '../../../shared/enterprise_search_url';
 import { Credentials } from './credentials';
 
 import { CredentialsFlyout } from './credentials_flyout';
+import { CredentialsList } from './credentials_list';
 
 describe('Credentials', () => {
   // Kea mocks
@@ -42,7 +43,7 @@ describe('Credentials', () => {
 
   it('renders', () => {
     const wrapper = shallow(<Credentials />);
-    expect(wrapper.find(EuiPageContentBody)).toHaveLength(1);
+    expect(wrapper.find(CredentialsList)).toHaveLength(1);
   });
 
   it('fetches data on mount', () => {

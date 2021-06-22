@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
-import { ESSearchResponse } from 'typings/elasticsearch';
+import { ESSearchResponse } from 'src/core/types/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
