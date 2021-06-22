@@ -48,11 +48,13 @@ const setup = (
     getLocation: jest.fn(() =>
       Promise.resolve({
         app: 'discover',
-        route: '/foo#bar',
+        path: '/foo#bar',
         state: {},
       })
     ),
     navigate: jest.fn(async () => {}),
+    getUrl: jest.fn(),
+    useUrl: jest.fn(),
   };
 
   const plugins: PluginDeps = {
