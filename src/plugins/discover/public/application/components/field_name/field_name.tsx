@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import './field_name.scss';
 import React, { Fragment } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +50,7 @@ export function FieldName({
             position="top"
             content={tooltip}
             delay="long"
-            anchorClassName="eui-textBreakAll"
+            anchorClassName="kbnDocViewer__fieldName eui-textBreakAll"
           >
             <span>{displayName}</span>
           </EuiToolTip>
