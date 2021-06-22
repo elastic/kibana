@@ -16,6 +16,10 @@ const createSetupContract = (): Setup => {
     docViews: {
       addDocView: jest.fn(),
     },
+    locator: {
+      getLocation: jest.fn(),
+      navigate: jest.fn(),
+    },
   };
   return setupContract;
 };
@@ -26,6 +30,10 @@ const createStartContract = (): Start => {
     urlGenerator: ({
       createUrl: jest.fn(),
     } as unknown) as DiscoverStart['urlGenerator'],
+    locator: {
+      getLocation: jest.fn(),
+      navigate: jest.fn(),
+    },
   };
   return startContract;
 };
