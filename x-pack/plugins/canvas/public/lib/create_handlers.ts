@@ -13,61 +13,53 @@ import {
 // @ts-expect-error untyped local
 import { setFilter } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
-import { RendererHandlers, CanvasElement } from '../../types';
+import {
+  RendererHandlers,
+  CanvasElement,
+  getDefaultHandlers,
+  InterpreterRenderHandlers,
+} from '../../types';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
 
 // We need to move towards only using these handlers and ditching our canvas specific ones
-export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
-  done() {},
-  reload() {},
-  update() {},
-  event() {},
-  onDestroy() {},
-  getRenderMode: () => 'display',
-  isSyncColorsEnabled: () => false,
-  on: (event: any, fn: (...args: any) => void) => {},
-});
 
 interface RenderEmitters {
-  done: () => boolean | void;
   resize: (_size: { height: number; width: number }) => boolean | void;
   embeddableDestroyed: () => boolean | void;
   embeddableInputChange: (embeddableExpression: string) => boolean | void;
+  hasCompatibleActions: () => Promise<boolean>;
 }
 
-interface RenderListeners {
-  complete: Pick<RenderEmitters, 'done'>;
-  resize: Pick<RenderEmitters, 'resize'>;
-  embeddableDestroyed: Pick<RenderEmitters, 'embeddableDestroyed'>;
-  embeddableInputChange: Pick<RenderEmitters, 'embeddableInputChange'>;
-}
+export const createHandlers = (): RendererHandlers & InterpreterRenderHandlers<RenderEmitters> => {
+  const defaultHandlers: IInterpreterRenderHandlers &
+    RenderEmitters = getDefaultHandlers<RenderEmitters>();
 
-export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHandlers => ({
-  ...baseHandlers,
-  destroy() {},
+  const handlers = {
+    ...defaultHandlers,
+    destroy() {},
+    getElementId() {
+      return '';
+    },
+    getFilter() {
+      return '';
+    },
+    setFilter() {},
+    onComplete(fn: () => void) {
+      this.done = fn;
+    },
 
-  getElementId() {
-    return '';
-  },
-  getFilter() {
-    return '';
-  },
+    onResize(fn: (size: { height: number; width: number }) => void) {
+      this.resize = fn;
+    },
 
-  onComplete(fn: () => void) {
-    this.done = fn;
-  },
-
-  onResize(fn: (size: { height: number; width: number }) => void) {
-    this.resize = fn;
-  },
-
-  embeddableDestroyed() {},
-  embeddableInputChange() {},
-  resize(_size: { height: number; width: number }) {},
-  setFilter() {},
-});
+    embeddableDestroyed() {},
+    embeddableInputChange() {},
+    resize(_size: { height: number; width: number }) {},
+  };
+  return Object.assign(defaultHandlers, handlers);
+};
 
 export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
   Object.assign(createHandlers(), handlers);
@@ -86,11 +78,12 @@ export const createDispatchedHandlerFactory = (
       oldElement = element;
     }
 
+    const defaultHandlers = createHandlers();
     const handlers: RendererHandlers & {
       event: IInterpreterRenderHandlers['event'];
       done: IInterpreterRenderHandlers['done'];
     } & RenderEmitters = {
-      ...createHandlers(),
+      ...defaultHandlers,
       event(event: ExpressionRendererEvent) {
         switch (event.name) {
           case 'embeddableInputChange':
@@ -107,30 +100,6 @@ export const createDispatchedHandlerFactory = (
             break;
         }
       },
-      on(event: keyof RenderListeners, fn: (...args: any[]) => void) {
-        const listenerToEvent: { [k in keyof RenderListeners]: keyof RenderEmitters } = {
-          complete: 'done',
-          resize: 'resize',
-          embeddableDestroyed: 'embeddableDestroyed',
-          embeddableInputChange: 'embeddableInputChange',
-        };
-
-        if (listenerToEvent[event]) {
-          const eventCall: ((...args: any[]) => boolean | void) | null =
-            typeof this[listenerToEvent[event]] === 'function'
-              ? this[listenerToEvent[event]]
-              : null;
-
-          if (!eventCall) return true;
-
-          this[listenerToEvent[event]] = (...args: any[]) => {
-            const preventFromCallingListener: void | boolean = eventCall(...args);
-            if (fn && typeof fn === 'function' && !preventFromCallingListener) {
-              fn(...args);
-            }
-          };
-        }
-      },
 
       setFilter(text: string) {
         dispatch(setFilter(text, element.id, true));
@@ -141,7 +110,7 @@ export const createDispatchedHandlerFactory = (
       },
 
       onComplete(fn: () => void | boolean) {
-        this.on('complete', fn);
+        defaultHandlers.on('done', fn);
       },
 
       getElementId: () => element.id,
@@ -162,13 +131,6 @@ export const createDispatchedHandlerFactory = (
       },
     };
 
-    Object.keys(handlers).forEach((value: string) => {
-      const key = value as keyof typeof handlers;
-      if (handlers[key] && typeof handlers[key] === 'function') {
-        handlers[key] = (handlers[key] as Function).bind(handlers);
-      }
-    });
-
-    return handlers;
+    return Object.assign(defaultHandlers, handlers);
   };
 };

@@ -7,12 +7,17 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
+import { InterpreterRenderHandlers } from 'src/plugins/expressions';
+import {
+  NodeDimensions,
+  RevealImageRendererConfig,
+  OriginString,
+  HandlerEmitters,
+} from '../../common/types';
 import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
-  handlers: IInterpreterRenderHandlers;
+  handlers: InterpreterRenderHandlers<HandlerEmitters>;
   parentNode: HTMLElement;
 }
 

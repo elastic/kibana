@@ -8,10 +8,10 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, InterpreterRenderHandlers } from 'src/plugins/expressions';
 import { withSuspense } from '../../../presentation_util/public';
 import { getRendererStrings } from '../../common/i18n';
-import { RevealImageRendererConfig } from '../../common/types';
+import { HandlerEmitters, RevealImageRendererConfig } from '../../common/types';
 import './reveal_image.scss';
 
 const { revealImage: revealImageStrings } = getRendererStrings();
@@ -27,7 +27,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
   render: async (
     domNode: HTMLElement,
     config: RevealImageRendererConfig,
-    handlers: IInterpreterRenderHandlers
+    handlers: InterpreterRenderHandlers<HandlerEmitters>
   ) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);

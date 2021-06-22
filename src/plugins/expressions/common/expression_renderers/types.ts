@@ -97,14 +97,14 @@ export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpr
   }
   hasCompatibleActions?: (event: any) => Promise<boolean>;
 
-  on(event: keyof Emitters | keyof DefaultEmitters<this>, fn: (...args: any) => void) {
+  on(event: keyof Emitters | keyof DefaultEmitters<this>, fn: (...args: any) => void): void {
     if (this[event as keyof this]) {
       const eventCall = this[event as keyof this];
-      if (!eventCall || typeof eventCall !== 'function') return true;
+      if (!eventCall || typeof eventCall !== 'function') return;
 
       const updatedEvent = (...args: unknown[]) => {
         const preventFromCallingListener: void | boolean = eventCall(...args);
-        if (fn && typeof fn === 'function' && preventFromCallingListener === null) {
+        if (fn && typeof fn === 'function' && !preventFromCallingListener) {
           fn(...args);
         }
         return preventFromCallingListener;

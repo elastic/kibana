@@ -18,3 +18,7 @@ export interface NodeDimensions {
   width: number;
   height: number;
 }
+
+export interface HandlerEmitters {
+  resize?: (size: { height: number; width: number }) => void;
+}
