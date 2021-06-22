@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/api/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
@@ -82,7 +82,10 @@ export const getUptimeESMockClient = (
   };
 };
 
-export function mockSearchResult(data: unknown): UptimeESClient {
+export function mockSearchResult(
+  data: unknown,
+  aggregations: Record<string, AggregationsAggregate> = {}
+): UptimeESClient {
   const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
   // @ts-expect-error incomplete search response
@@ -99,8 +102,12 @@ export function mockSearchResult(data: unknown): UptimeESClient {
       hits: {
         hits: Array.isArray(data) ? data : [data],
         max_score: 0.0,
-        total: 0,
+        total: {
+          value: Array.isArray(data) ? data.length : 0,
+          relation: 'gte',
+        },
       },
+      aggregations,
     },
   });
   return uptimeEsClient;
