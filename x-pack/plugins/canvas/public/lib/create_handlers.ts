@@ -105,7 +105,7 @@ export const createDispatchedHandlerFactory = (
       },
 
       getFilter() {
-        return element.filter;
+        return element.filter || '';
       },
 
       onComplete(fn: () => void) {
