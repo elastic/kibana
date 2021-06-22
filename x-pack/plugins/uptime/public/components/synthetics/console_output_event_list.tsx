@@ -16,8 +16,10 @@ interface Props {
   journey: JourneyState;
 }
 
+const CONSOLE_STEP_TYPES = ['stderr', 'stdout', 'cmd/status'];
+
 const isConsoleStep = (step: JourneyStep) =>
-  ['stderr', 'stdout', 'cmd/status'].some((type) => type === step.synthetics.type);
+  CONSOLE_STEP_TYPES.some((type) => type === step.synthetics.type);
 
 export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
   <div>
