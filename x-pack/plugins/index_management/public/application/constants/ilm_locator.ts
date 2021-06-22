@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { LicenseStatus } from './license_status.container';
+export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
+export const ILM_PAGES_POLICY_EDIT = 'policy_edit';
