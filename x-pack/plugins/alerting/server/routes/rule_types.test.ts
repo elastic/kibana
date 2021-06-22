@@ -48,6 +48,7 @@ describe('ruleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -70,6 +71,7 @@ describe('ruleTypesRoute', () => {
         ],
         default_action_group_id: 'default',
         minimum_license_required: 'basic',
+        is_exportable: true,
         recovery_action_group: RecoveredActionGroup,
         authorized_consumers: {},
         action_variables: {
@@ -143,6 +145,7 @@ describe('ruleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -195,6 +198,7 @@ describe('ruleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {

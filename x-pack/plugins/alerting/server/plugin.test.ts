@@ -65,6 +65,7 @@ describe('Alerting Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         actionGroups: [],
         defaultActionGroupId: 'default',
         producer: 'test',
