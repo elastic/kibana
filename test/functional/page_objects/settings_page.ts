@@ -536,8 +536,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
+    await this.testSubjects.click('closeFlyoutButton');
+
+    // We might have unsaved changes and we need to confirm inside the modal
+    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+      this.log.debug('Unsaved changes for the field: need to confirm');
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
+
     await this.retry.waitFor('field editor flyout to close', async () => {
-      return !(await this.testSubjects.exists('euiFlyoutCloseButton'));
+      return !(await this.testSubjects.exists('fieldEditor'));
     });
   }
 

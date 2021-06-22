@@ -61,7 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await a11y.testAppSnapshot();
 
-      await testSubjects.click('euiFlyoutCloseButton');
       await PageObjects.settings.closeIndexPatternFieldEditor();
     });
 
@@ -82,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Edit field type', async () => {
       await PageObjects.settings.clickEditFieldFormat();
       await a11y.testAppSnapshot();
+      await PageObjects.settings.closeIndexPatternFieldEditor();
     });
 
     it('Advanced settings', async () => {

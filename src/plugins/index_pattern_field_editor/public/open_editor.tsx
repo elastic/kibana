@@ -60,6 +60,13 @@ export const getFieldEditorOpener = ({
   });
 
   let overlayRef: OverlayRef | null = null;
+  const canCloseValidator = {
+    current: () => true,
+  };
+
+  const onMounted = (args: { canCloseValidator: () => boolean }) => {
+    canCloseValidator.current = args.canCloseValidator;
+  };
 
   const openEditor = ({
     onSave,
@@ -103,6 +110,7 @@ export const getFieldEditorOpener = ({
           <FieldEditorLoader
             onSave={onSaveField}
             onCancel={closeEditor}
+            onMounted={onMounted}
             docLinks={docLinks}
             field={field}
             fieldTypeToProcess={fieldTypeToProcess}
@@ -118,7 +126,19 @@ export const getFieldEditorOpener = ({
           />
         </KibanaReactContextProvider>
       ),
-      { className: euiFlyoutClassname, maxWidth: 708, size: 'l' }
+      {
+        className: euiFlyoutClassname,
+        maxWidth: 708,
+        size: 'l',
+        ownFocus: true,
+        hideCloseButton: true,
+        onClose: (flyout) => {
+          const canClose = canCloseValidator.current();
+          if (canClose) {
+            flyout.close();
+          }
+        },
+      }
     );
 
     return closeEditor;

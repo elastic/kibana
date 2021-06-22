@@ -13,7 +13,7 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
@@ -44,13 +44,31 @@ export const setupEnvironment = () => {
   };
 };
 
+export const indexPatternFields = [
+  {
+    name: 'field1',
+    displayName: 'field1',
+  },
+  {
+    name: 'field2',
+    displayName: 'field2',
+  },
+  {
+    name: 'field3',
+    displayName: 'field3',
+  },
+];
+
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
   overridingDependencies?: Partial<Context>
 ) => (props: T) => {
   const dependencies: Context = {
-    indexPattern: { title: 'testIndexPattern' } as any,
-    uiSettings: {} as any,
+    indexPattern: {
+      title: 'testIndexPattern',
+      fields: { getAll: () => indexPatternFields },
+    } as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     fieldTypeToProcess: 'runtime',
     existingConcreteFields: [],
     namesNotAllowed: [],

@@ -23,6 +23,7 @@ import {
   Form,
   useForm,
   useFormData,
+  useFormIsModified,
   FormHook,
   UseField,
   TextField,
@@ -67,6 +68,8 @@ export interface Props {
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
+  /** Handler to receive update on the form "isModified" state */
+  onFormModifiedChange?: (isModified: boolean) => void;
   syntaxError: ScriptSyntaxError;
 }
 
@@ -147,7 +150,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
   const {
     links,
     namesNotAllowed,
@@ -155,10 +158,8 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     fieldTypeToProcess,
   } = useFieldEditorContext();
   const {
-    fields,
-    error,
-    updateParams: updatePreviewParams,
-    setIsPanelVisible,
+    params: { update: updatePreviewParams },
+    panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -166,19 +167,28 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted } = form;
+  const { submit, isValid: isFormValid, isSubmitted, getFields } = form;
   const { clear: clearSyntaxError } = syntaxError;
-
-  const [{ type }] = useFormData<FieldFormInternal>({ form });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
   const [formData] = useFormData({ form });
+  const isFormModified = useFormIsModified({
+    form,
+    discard: [
+      '__meta__.isCustomLabelVisible',
+      '__meta__.isValueVisible',
+      '__meta__.isFormatVisible',
+      '__meta__.isPopularityVisible',
+    ],
+  });
+
   const { name: updatedName, type: updatedType, script: updatedScript } = formData;
-  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
-  const typeHasChanged =
-    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+  const { name: nameField, type: typeField } = getFields();
+  const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
+  const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
+
   const isValueVisible = get(formData, '__meta__.isValueVisible');
   const isFormatVisible = get(formData, '__meta__.isFormatVisible');
 
@@ -192,24 +202,18 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     // Whenever the field "type" changes we clear any possible painless syntax
     // error as it is possibly stale.
     clearSyntaxError();
-  }, [type, clearSyntaxError]);
-
-  useEffect(() => {
-    // TODO: remove console.log
-    if (error) {
-      console.log('Preview error', error); // eslint-disable-line no-console
-    } else {
-      console.log('Field preview:', JSON.stringify(fields[0], null, 4)); // eslint-disable-line no-console
-    }
-  }, [fields, error]);
+  }, [updatedType, clearSyntaxError]);
 
   useEffect(() => {
     updatePreviewParams({
-      name: updatedName,
+      name: Boolean(updatedName?.trim()) ? updatedName : null,
       type: updatedType?.[0].value,
-      script: Boolean(updatedScript?.source.trim()) ? updatedScript : null,
+      script:
+        isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
+          ? null
+          : updatedScript,
     });
-  }, [updatedName, updatedType, updatedScript, updatePreviewParams]);
+  }, [updatedName, updatedType, updatedScript, isValueVisible, updatePreviewParams]);
 
   useEffect(() => {
     if (isValueVisible || isFormatVisible) {
@@ -218,6 +222,12 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
       setIsPanelVisible(false);
     }
   }, [isValueVisible, isFormatVisible, setIsPanelVisible]);
+
+  useEffect(() => {
+    if (onFormModifiedChange) {
+      onFormModifiedChange(isFormModified);
+    }
+  }, [isFormModified, onFormModifiedChange]);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">

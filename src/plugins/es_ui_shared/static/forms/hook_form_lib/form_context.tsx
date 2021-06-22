@@ -21,9 +21,15 @@ export const FormProvider = ({ children, form }: Props) => (
   <FormContext.Provider value={form}>{children}</FormContext.Provider>
 );
 
-export const useFormContext = function <T extends FormData = FormData>() {
+interface Options {
+  throwIfNotFound?: boolean;
+}
+
+export const useFormContext = function <T extends FormData = FormData>({
+  throwIfNotFound = true,
+}: Options = {}) {
   const context = useContext(FormContext) as FormHook<T>;
-  if (context === undefined) {
+  if (throwIfNotFound && context === undefined) {
     throw new Error('useFormContext must be used within a <FormProvider />');
   }
   return context;

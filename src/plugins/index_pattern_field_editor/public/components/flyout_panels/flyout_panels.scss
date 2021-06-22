@@ -1,5 +1,10 @@
 .fieldEditor__flyoutPanels {
   height: 100%;
+
+  &__column {
+    height: 100%;
+    overflow: hidden;
+  }
 }
 
 .fieldEditor__flyoutPanel {

@@ -27,13 +27,13 @@ describe('<FieldEditorFlyoutContent />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['Set by Jest test'] });
   });
 
-  test('should have the correct title', () => {
-    const { exists, find } = setup();
+  test('should have the correct title', async () => {
+    const { exists, find } = await setup();
     expect(exists('flyoutTitle')).toBe(true);
     expect(find('flyoutTitle').text()).toBe('Create field');
   });
 
-  test('should allow a field to be provided', () => {
+  test('should allow a field to be provided', async () => {
     const field = {
       name: 'foo',
       type: 'ip',
@@ -42,7 +42,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = setup({ field });
+    const { find } = await setup({ field });
 
     expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
@@ -58,7 +58,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = setup({ onSave, field });
+    const { find } = await setup({ onSave, field });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');
@@ -75,9 +75,9 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(fieldReturned).toEqual(field);
   });
 
-  test('should accept an onCancel prop', () => {
+  test('should accept an onCancel prop', async () => {
     const onCancel = jest.fn();
-    const { find } = setup({ onCancel });
+    const { find } = await setup({ onCancel });
 
     find('closeFlyoutButton').simulate('click');
 
@@ -88,7 +88,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const { find, exists, form, component } = setup({ onSave });
+      const { find, exists, form, component } = await setup({ onSave });
 
       expect(find('fieldSaveButton').props().disabled).toBe(false);
 
@@ -117,7 +117,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         component,
         form,
         actions: { toggleFormRow, changeFieldType },
-      } = setup({ onSave });
+      } = await setup({ onSave });
 
       act(() => {
         form.setInputValue('nameField.input', 'someName');

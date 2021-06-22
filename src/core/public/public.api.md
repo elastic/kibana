@@ -983,7 +983,10 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     closeButtonAriaLabel?: string;
     // (undocumented)
+    hideCloseButton?: boolean;
+    // (undocumented)
     maxWidth?: boolean | number | string;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)

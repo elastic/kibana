@@ -12,6 +12,8 @@ import { PanelContent } from './flyout_panels_content';
 import { Panel } from './flyout_panel';
 import { Panels } from './flyout_panels';
 
+export { useFlyoutPanelContext } from './flyout_panel';
+
 export const FlyoutPanels = {
   Group: Panels,
   Item: Panel,

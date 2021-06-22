@@ -24,7 +24,7 @@ import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/delete_field_modal';
+import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { IndexPattern } from './shared_imports';
 
 const noop = () => {};

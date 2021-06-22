@@ -61,6 +61,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
 
   const fieldsRefs = useRef<FieldsMap>({});
+  const fieldsRemovedRefs = useRef<FieldsMap>({});
   const formUpdateSubscribers = useRef<Subscription[]>([]);
   const isMounted = useRef<boolean>(false);
   const defaultValueDeserialized = useRef(defaultValueMemoized);
@@ -213,6 +214,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     (field) => {
       const fieldExists = fieldsRefs.current[field.path] !== undefined;
       fieldsRefs.current[field.path] = field;
+      delete fieldsRemovedRefs.current[field.path];
 
       updateFormDataAt(field.path, field.value);
 
@@ -235,6 +237,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       const currentFormData = { ...getFormData$().value };
 
       fieldNames.forEach((name) => {
+        // Keep a track of the fields that have been removed from the form
+        // This will allow us to know if the form has been modified
+        fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
+
         delete fieldsRefs.current[name];
         delete currentFormData[name];
       });
@@ -257,6 +263,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [getFormData$, updateFormData$, fieldsToArray]
   );
 
+  const getFormDefaultValue: FormHook<T, I>['__getFormDefaultValue'] = useCallback(
+    () => defaultValueDeserialized.current,
+    []
+  );
+
   const getFieldDefaultValue: FormHook<T, I>['__getFieldDefaultValue'] = useCallback(
     (fieldName) => get(defaultValueDeserialized.current, fieldName),
     []
@@ -269,6 +280,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       return config;
     },
     [schema]
+  );
+
+  const getFieldsRemoved: FormHook<T, I>['getFields'] = useCallback(
+    () => fieldsRemovedRefs.current,
+    []
   );
 
   // ----------------------------------
@@ -438,9 +454,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
+      __getFormDefaultValue: getFormDefaultValue,
       __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
+      __getFieldsRemoved: getFieldsRemoved,
       __validateFields: validateFields,
     };
   }, [
@@ -453,8 +471,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     setFieldValue,
     setFieldErrors,
     getFields,
+    getFieldsRemoved,
     getFormData,
     getErrors,
+    getFormDefaultValue,
     getFieldDefaultValue,
     reset,
     formOptions,

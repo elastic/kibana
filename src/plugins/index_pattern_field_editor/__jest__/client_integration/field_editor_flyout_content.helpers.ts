@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
 import { Context } from '../../public/components/field_editor_context';
@@ -22,16 +22,22 @@ const defaultProps: Props = {
   isSavingField: false,
 };
 
-export const setup = (props?: Partial<Props>, deps?: Partial<Context>) => {
-  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-  })({ ...defaultProps, ...props }) as TestBed;
+export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
+  let testBed: TestBed;
+
+  await act(async () => {
+    testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
+      memoryRouter: {
+        wrapComponent: false,
+      },
+    })({ ...defaultProps, ...props });
+  });
+
+  testBed!.component.update();
 
   const actions = {
-    ...getCommonActions(testBed),
+    ...getCommonActions(testBed!),
   };
 
-  return { ...testBed, actions };
+  return { ...testBed!, actions };
 };

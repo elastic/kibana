@@ -18,7 +18,7 @@ import {
 
 import { CloseEditor } from './types';
 
-import { DeleteFieldModal } from './components/delete_field_modal';
+import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { removeFields } from './lib/remove_fields';
 
 export interface OpenFieldDeleteModalOptions {

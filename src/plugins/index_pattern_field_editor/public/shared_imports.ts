@@ -23,6 +23,7 @@ export {
   useForm,
   useFormData,
   useFormContext,
+  useFormIsModified,
   Form,
   FormSchema,
   UseField,

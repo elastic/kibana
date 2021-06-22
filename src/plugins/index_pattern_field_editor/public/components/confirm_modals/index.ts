@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { useField, InternalFieldConfig } from './use_field';
-export { useForm } from './use_form';
-export { useFormData } from './use_form_data';
-export { useFormIsModified } from './use_form_is_modified';
+export { DeleteFieldModal } from './delete_field_modal';
+
+export { ModifiedFieldModal } from './modified_field_modal';
+
+export { SaveFieldTypeOrNameChangedModal } from './save_field_type_or_name_changed_modal';

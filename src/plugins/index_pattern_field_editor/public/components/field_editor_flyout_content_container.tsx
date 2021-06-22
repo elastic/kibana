@@ -21,7 +21,10 @@ import {
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
-import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
+import {
+  FieldEditorFlyoutContent,
+  Props as FieldEditorFlyoutContentProps,
+} from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
 
@@ -30,6 +33,7 @@ export interface Props {
   onSave: (field: IndexPatternField) => void;
   /** Handler for the "cancel" footer button */
   onCancel: () => void;
+  onMounted?: FieldEditorFlyoutContentProps['onMounted'];
   /** The docLinks start service from core */
   docLinks: DocLinksStart;
   /** The index pattern where the field will be added  */
@@ -61,6 +65,7 @@ export const FieldEditorFlyoutContentContainer = ({
   field,
   onSave,
   onCancel,
+  onMounted,
   docLinks,
   fieldTypeToProcess,
   indexPattern,
@@ -200,6 +205,7 @@ export const FieldEditorFlyoutContentContainer = ({
         <FieldEditorFlyoutContent
           onSave={saveField}
           onCancel={onCancel}
+          onMounted={onMounted}
           field={fieldToEdit}
           runtimeFieldValidator={validateRuntimeField}
           isSavingField={isSaving}
