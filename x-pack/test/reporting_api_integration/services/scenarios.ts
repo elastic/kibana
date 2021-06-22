@@ -25,6 +25,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -33,15 +34,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await kibanaServer.importExport.load(
-      'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
-    );
+    await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-    await kibanaServer.importExport.unload(
-      'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
-    );
+    await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
   };
 

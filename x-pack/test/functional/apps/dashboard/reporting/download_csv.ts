@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'timePicker']);
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const getCsvPath = (name: string) =>
     path.resolve(REPO_ROOT, `target/functional-tests/downloads/${name}.csv`);
@@ -68,15 +69,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('E-Commerce Data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
-        );
+        await kibanaServer.importExport.load(ecommerceSOPath);
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json'
-        );
+        await kibanaServer.importExport.unload(ecommerceSOPath);
       });
 
       it('Download CSV export of a saved search panel', async function () {
