@@ -20,6 +20,7 @@ import {
   superUser,
   noKibanaPrivileges,
 } from '../../../common/lib/authentication/users';
+import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
@@ -34,13 +35,15 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
 
-  const getAPMIndexName = async (user) => {
-    const { body: indexNames } = await supertestWithoutAuth
+  const getAPMIndexName = async (user: User) => {
+    const {
+      body: indexNames,
+    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
       .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(200);
-    const observabilityIndex = indexNames.index_name.find(
+    const observabilityIndex = indexNames?.index_name?.find(
       (indexName) => indexName === '.alerts-observability-apm'
     );
     expect(observabilityIndex).to.eql('.alerts-observability-apm');

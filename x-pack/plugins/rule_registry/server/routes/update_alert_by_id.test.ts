@@ -57,7 +57,7 @@ describe('updateAlertByIdRoute', () => {
             body: {
               status: 'closed',
               ids: 'alert-1',
-              indexName: '.alerts-observability-apm*',
+              index: '.alerts-observability-apm*',
             },
           }),
           context
@@ -76,7 +76,7 @@ describe('updateAlertByIdRoute', () => {
             body: {
               notStatus: 'closed',
               ids: ['alert-1'],
-              indexName: '.alerts-observability-apm*',
+              index: '.alerts-observability-apm*',
             },
           }),
           context
