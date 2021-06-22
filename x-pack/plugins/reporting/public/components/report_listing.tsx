@@ -9,11 +9,10 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -139,38 +138,29 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <div>
-        <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.reporting.listing.reportstitle"
-                    defaultMessage="Reports"
-                  />
-                </h1>
-              </EuiTitle>
-              <EuiText color="subdued" size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.reporting.listing.reports.subtitle"
-                    defaultMessage="Get reports generated in Kibana applications."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          {this.renderTable()}
-        </EuiPageContent>
+      <>
+        <EuiPageHeader
+          pageTitle={
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.reporting.listing.reports.subtitle"
+              defaultMessage="Get reports generated in Kibana applications."
+            />
+          }
+        />
+
+        <EuiSpacer size={'l'} />
+        {this.renderTable()}
+
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </>
     );
   }
 

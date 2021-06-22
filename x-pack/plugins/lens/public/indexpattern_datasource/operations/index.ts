@@ -31,4 +31,8 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
 } from './definitions';

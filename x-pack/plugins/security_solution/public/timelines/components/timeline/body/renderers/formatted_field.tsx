@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -30,11 +32,13 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
+  HOST_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
+import { AgentStatuses } from './agent_statuses';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -115,6 +119,15 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
     return (
       <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+    );
+  } else if (fieldName === HOST_STATUS_FIELD_NAME) {
+    return (
+      <AgentStatuses
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        value={value as string}
+      />
     );
   } else if (
     [

@@ -22,6 +22,7 @@ export class DocLinksService {
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+    const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
@@ -142,7 +143,7 @@ export class DocLinksService {
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
-          indexTemplates: `${ELASTICSEARCH_DOCS}indices-templates.html`,
+          indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
           mappingCoerce: `${ELASTICSEARCH_DOCS}coerce.html`,
@@ -253,7 +254,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
         },
         alerting: {
-          guide: `${KIBANA_DOCS}alert-management.html`,
+          guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
           actionTypes: `${KIBANA_DOCS}action-types.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
@@ -265,7 +266,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
-          setupPrerequisites: `${KIBANA_DOCS}alerting-getting-started.html#alerting-setup-prerequisites`,
+          setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
           slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
           teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
         },
@@ -399,6 +400,19 @@ export class DocLinksService {
           uriParts: `${ELASTICSEARCH_DOCS}uri-parts-processor.html`,
           urlDecode: `${ELASTICSEARCH_DOCS}urldecode-processor.html`,
           userAgent: `${ELASTICSEARCH_DOCS}user-agent-processor.html`,
+        },
+        fleet: {
+          guide: `${FLEET_DOCS}index.html`,
+          fleetServer: `${FLEET_DOCS}fleet-server.html`,
+          fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
+          settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          datastreams: `${FLEET_DOCS}data-streams.html`,
+          datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
+          upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
         },
       },
     });
@@ -587,5 +601,18 @@ export interface DocLinksStart {
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
+    readonly fleet: Readonly<{
+      guide: string;
+      fleetServer: string;
+      fleetServerAddFleetServer: string;
+      settings: string;
+      settingsFleetServerHostSettings: string;
+      troubleshooting: string;
+      elasticAgent: string;
+      datastreams: string;
+      datastreamsNamingScheme: string;
+      upgradeElasticAgent: string;
+      upgradeElasticAgent712lower: string;
+    }>;
   };
 }

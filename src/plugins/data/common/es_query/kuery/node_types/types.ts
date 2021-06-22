@@ -10,8 +10,8 @@
  * WARNING: these typings are incomplete
  */
 
+import { JsonValue } from '@kbn/common-utils';
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../kibana_utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =

@@ -29,6 +29,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
+import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from './constants';
 
 import { Error, Loading } from './components';
@@ -190,6 +191,18 @@ export const IntegrationsAppContext: React.FC<{
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
 
+    // Sync our hash history with Kibana scoped history
+    useEffect(() => {
+      const unlistenParentHistory = history.listen(() => {
+        const newHash = createHashHistory();
+        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
+          routerHistoryInstance.replace(newHash.location.pathname);
+        }
+      });
+
+      return unlistenParentHistory;
+    }, [history, routerHistoryInstance]);
+
     return (
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>
@@ -201,9 +214,11 @@ export const IntegrationsAppContext: React.FC<{
                     <FleetStatusProvider>
                       <IntraAppStateProvider kibanaScopedHistory={history}>
                         <Router history={routerHistoryInstance}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
+                          <AgentPolicyContextProvider>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </AgentPolicyContextProvider>
                         </Router>
                       </IntraAppStateProvider>
                     </FleetStatusProvider>

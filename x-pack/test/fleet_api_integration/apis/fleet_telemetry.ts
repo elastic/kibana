@@ -21,8 +21,11 @@ export default function (providerContext: FtrProviderContext) {
     let data: any = {};
 
     switch (status) {
-      case 'unhealthy':
+      case 'error':
         data = { last_checkin_status: 'error' };
+        break;
+      case 'degraded':
+        data = { last_checkin_status: 'degraded' };
         break;
       case 'offline':
         data = { last_checkin: '2017-06-07T18:59:04.498Z' };
@@ -85,12 +88,13 @@ export default function (providerContext: FtrProviderContext) {
       // Default Fleet Server
       await generateAgent('healthy', defaultFleetServerPolicy.id);
       await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('unhealthy', defaultFleetServerPolicy.id);
+      await generateAgent('error', defaultFleetServerPolicy.id);
 
       // Default policy
       await generateAgent('healthy', defaultServerPolicy.id);
       await generateAgent('offline', defaultServerPolicy.id);
-      await generateAgent('unhealthy', defaultServerPolicy.id);
+      await generateAgent('error', defaultServerPolicy.id);
+      await generateAgent('degraded', defaultServerPolicy.id);
     });
 
     it('should return the correct telemetry values for fleet', async () => {
@@ -105,12 +109,12 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.agents).eql({
-        total_enrolled: 6,
+        total_enrolled: 7,
         healthy: 3,
-        unhealthy: 2,
+        unhealthy: 3,
         offline: 1,
         updating: 0,
-        total_all_statuses: 6,
+        total_all_statuses: 7,
       });
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.fleet_server).eql({
