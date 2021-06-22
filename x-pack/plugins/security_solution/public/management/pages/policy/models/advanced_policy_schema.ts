@@ -659,22 +659,33 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.memory.signature',
+    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
     first_supported_version: '7.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory.signature',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
       {
-        defaultMessage: "A value of 'false' disables Memory signature protection. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables Memory shellcode enhanced PE parsing protection. Default: true.",
       }
     ),
   },
   {
-    key: 'windows.advanced.memory.shellcode',
+    key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory.shellcode',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
       {
         defaultMessage: "A value of 'false' disables Memory Shellcode protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
+      {
+        defaultMessage: "A value of 'false' disables Memory signature protection. Default: true.",
       }
     ),
   },
