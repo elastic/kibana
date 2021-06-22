@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const ILM_URL_GENERATOR_ID = 'ILM_URL_GENERATOR_ID';
-export const ILM_PAGES_POLICY_EDIT = 'policy_edit';
+export { LicensePageHeader } from './license_page_header';
