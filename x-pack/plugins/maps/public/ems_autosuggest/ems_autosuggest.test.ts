@@ -31,10 +31,6 @@ class MockFileLayer {
     return this._fields;
   }
 
-  getGeoJson() {
-    return this._geoJson;
-  }
-
   hasId(id: string) {
     return id === this._id;
   }
@@ -44,33 +40,18 @@ jest.mock('../util', () => {
   return {
     async getEmsFileLayers() {
       return [
-        new MockFileLayer(
-          'world_countries',
-          [
-            {
-              id: 'iso2',
-              alias: ['(geo\\.){0,}country_iso_code$', '(country|countries)'],
-              values: ['CA', 'US'],
-            },
-            { id: 'iso3', values: ['CAN', 'USA'] },
-            { id: 'name', alias: ['(country|countries)'] },
-          ],
-          ({
-            type: 'FeatureCollection',
-            features: [
-              { properties: { iso2: 'CA', iso3: 'CAN', name: 'Canada' } },
-              { properties: { iso2: 'US', iso3: 'USA', name: 'United States of America' } },
-            ],
-          } as unknown) as FeatureCollection
-        ),
-        new MockFileLayer(
-          'usa_zip_codes',
-          [{ id: 'zip', alias: ['zip'], values: ['40204', '40205'] }],
-          ({
-            type: 'FeatureCollection',
-            features: [{ properties: { zip: '40204' } }, { properties: { zip: '40205' } }],
-          } as unknown) as FeatureCollection
-        ),
+        new MockFileLayer('world_countries', [
+          {
+            id: 'iso2',
+            alias: ['(geo\\.){0,}country_iso_code$', '(country|countries)'],
+            values: ['CA', 'US'],
+          },
+          { id: 'iso3', values: ['CAN', 'USA'] },
+          { id: 'name', alias: ['(country|countries)'] },
+        ]),
+        new MockFileLayer('usa_zip_codes', [
+          { id: 'zip', alias: ['zip'], values: ['40204', '40205'] },
+        ]),
       ];
     },
   };
@@ -148,46 +129,6 @@ describe('suggestEMSTermJoinConfig', () => {
     test('Should not validate mismatches', async () => {
       const termJoinConfig = await suggestEMSTermJoinConfig({
         sampleValues: ['90201', 'foobar'],
-      });
-      expect(termJoinConfig).toEqual(null);
-    });
-  });
-
-  describe('validate based on EMS data', () => {
-    test('Should validate with zip codes layer', async () => {
-      const termJoinConfig = await suggestEMSTermJoinConfig({
-        sampleValues: ['40204', 40205],
-        emsLayerIds: ['world_countries', 'usa_zip_codes'],
-      });
-      expect(termJoinConfig).toEqual({
-        layerId: 'usa_zip_codes',
-        field: 'zip',
-      });
-    });
-
-    test('Should not validate with faulty zip codes', async () => {
-      const termJoinConfig = await suggestEMSTermJoinConfig({
-        sampleValues: ['40204', '00000'],
-        emsLayerIds: ['world_countries', 'usa_zip_codes'],
-      });
-      expect(termJoinConfig).toEqual(null);
-    });
-
-    test('Should validate against countries', async () => {
-      const termJoinConfig = await suggestEMSTermJoinConfig({
-        sampleValues: ['USA', 'USA', 'CAN'],
-        emsLayerIds: ['world_countries', 'usa_zip_codes'],
-      });
-      expect(termJoinConfig).toEqual({
-        layerId: 'world_countries',
-        field: 'iso3',
-      });
-    });
-
-    test('Should not validate against missing countries', async () => {
-      const termJoinConfig = await suggestEMSTermJoinConfig({
-        sampleValues: ['USA', 'BEL', 'CAN'],
-        emsLayerIds: ['world_countries', 'usa_zip_codes'],
       });
       expect(termJoinConfig).toEqual(null);
     });

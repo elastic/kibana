@@ -9,7 +9,6 @@ import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 
 export interface SampleValuesConfig {
-  emsLayerIds?: string[];
   sampleValues?: Array<string | number>;
   sampleValuesColumnName?: string;
 }
@@ -98,16 +97,6 @@ export async function suggestEMSTermJoinConfig(
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     // Only looks at id-values in main manifest
     matches.push(...suggestByIdValues(sampleValuesConfig.sampleValues));
-
-    // Looks at _all_ columns for EMS-layers.
-    if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
-      matches.push(
-        ...(await suggestsByAllEMSColumns(
-          sampleValuesConfig.emsLayerIds,
-          sampleValuesConfig.sampleValues
-        ))
-      );
-    }
   }
 
   const uniqMatches: UniqueMatch[] = matches.reduce((accum: UniqueMatch[], match) => {
@@ -186,69 +175,5 @@ function suggestByIdValues(sampleValues: SampleValues): EMSTermJoinConfig[] {
       matches.push(wellKnownId.emsConfig);
     }
   });
-  return matches;
-}
-
-function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boolean {
-  for (let i = 0; i < emsJson.features.length; i++) {
-    const emsFieldValue = emsJson.features[i].properties[emsFieldId].toString();
-    if (emsFieldValue.toString() === sampleValue) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: SampleValues) {
-  for (let j = 0; j < sampleValues.length; j++) {
-    const sampleValue = sampleValues[j].toString();
-    if (!existsInEMS(emsJson, emsFieldId, sampleValue)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-async function getMatchesForEMSLayer(
-  emsLayerId: string,
-  sampleValues: SampleValues
-): Promise<EMSTermJoinConfig[]> {
-  const fileLayers: FileLayer[] = await getEmsFileLayers();
-  const emsFileLayer: FileLayer | undefined = fileLayers.find((fl: FileLayer) =>
-    fl.hasId(emsLayerId)
-  );
-
-  if (!emsFileLayer) {
-    return [];
-  }
-
-  const emsFields = emsFileLayer.getFields();
-
-  try {
-    const emsJson = await emsFileLayer.getGeoJson();
-    const matches: EMSTermJoinConfig[] = [];
-    for (let f = 0; f < emsFields.length; f++) {
-      if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
-        matches.push({
-          layerId: emsLayerId,
-          field: emsFields[f].id,
-        });
-      }
-    }
-    return matches;
-  } catch (e) {
-    return [];
-  }
-}
-
-async function suggestsByAllEMSColumns(
-  emsLayerIds: string[],
-  values: SampleValues
-): Promise<EMSTermJoinConfig[]> {
-  const matches = [];
-  for (const emsLayerId of emsLayerIds) {
-    const layerIdMathes = await getMatchesForEMSLayer(emsLayerId, values);
-    matches.push(...layerIdMathes);
-  }
   return matches;
 }
