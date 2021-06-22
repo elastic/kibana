@@ -748,7 +748,8 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toBe('Dang diggity!');
+        expect(error.message).toEqual('Migration function for version 1.2.3 threw an error');
+        expect(error.stack.includes(`Caused by:\nError: Dang diggity!`)).toBe(true);
         expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
       }
     });

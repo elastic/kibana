@@ -9,9 +9,9 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 import { EngineLogic } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyEngineOverview } from './engine_overview_empty';
 
@@ -32,9 +32,7 @@ export const EngineOverview: React.FC = () => {
     pollForOverviewMetrics();
   }, []);
 
-  if (dataLoading) {
-    return <Loading />;
-  }
+  if (dataLoading) return <AppSearchPageTemplate isLoading />;
 
   const engineHasDocuments = documentCount > 0;
   const canAddDocuments = canManageEngineDocuments && canViewEngineCredentials;
