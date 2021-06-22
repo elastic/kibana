@@ -15,6 +15,7 @@ interface Props {
   field: {
     key: string;
     value: string;
+    formattedValue?: string;
     isPinned?: boolean;
   };
   toggleIsPinned?: (name: string) => void;
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export const PreviewListItem: React.FC<Props> = ({
-  field: { key, value, isPinned },
+  field: { key, value, formattedValue, isPinned },
   highlighted,
   toggleIsPinned,
 }) => {
@@ -40,16 +41,25 @@ export const PreviewListItem: React.FC<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
         <EuiToolTip position="top" content={value}>
-          <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-            {value}
-          </span>
+          {Boolean(formattedValue) ? (
+            <span
+              className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
+              // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
+              dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
+            />
+          ) : (
+            <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
+              {value}
+            </span>
+          )}
         </EuiToolTip>
       </EuiFlexItem>
-      {toggleIsPinned && (
-        <EuiFlexItem
-          className="indexPatternFieldEditor__previewFieldList__item__actions"
-          grow={false}
-        >
+
+      <EuiFlexItem
+        className="indexPatternFieldEditor__previewFieldList__item__actions"
+        grow={false}
+      >
+        {toggleIsPinned && (
           <EuiButtonIcon
             onClick={() => {
               toggleIsPinned(key);
@@ -61,8 +71,8 @@ export const PreviewListItem: React.FC<Props> = ({
             })}
             className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
           />
-        </EuiFlexItem>
-      )}
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

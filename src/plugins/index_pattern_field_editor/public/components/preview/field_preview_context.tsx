@@ -48,8 +48,14 @@ interface Params {
   document: EsDocument | null;
 }
 
+interface FieldPreview {
+  key: string;
+  value: string;
+  formattedValue?: string;
+}
+
 interface Context {
-  fields: Array<{ key: string; value: unknown }>;
+  fields: FieldPreview[];
   error: PreviewError | null;
   // The preview count will help us decide when to display the empty prompt
   previewCount: number;
@@ -102,6 +108,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       notifications,
       api: { getFieldPreview },
     },
+    fieldFormats,
   } = useFieldEditorContext();
 
   /** Response from the Painless _execute API */
@@ -146,6 +153,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         .filter(([key]) => key !== 'name' && key !== 'format')
         .every(([_, value]) => Boolean(value)),
     [params]
+  );
+
+  const valueFormatter = useCallback(
+    (value: unknown): string => {
+      if (format?.id) {
+        const formatter = fieldFormats.getInstance(format.id, format.params);
+        if (formatter) {
+          return formatter.convertObject?.html(value) ?? JSON.stringify(value);
+        }
+      }
+      return JSON.stringify(value);
+    },
+    [format, fieldFormats]
   );
 
   const fetchSampleDocuments = useCallback(
@@ -292,8 +312,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
       });
     } else {
+      const [value] = values;
+      const formattedValue = valueFormatter(value);
+
       setPreviewResponse({
-        fields: [{ key: params.name!, value: values[0] }],
+        fields: [{ key: params.name!, value: JSON.stringify(value), formattedValue }],
         error: null,
       });
     }
@@ -304,6 +327,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     currentDocIndex,
     getFieldPreview,
     notifications.toasts,
+    valueFormatter,
   ]);
 
   const goToNextDoc = useCallback(() => {

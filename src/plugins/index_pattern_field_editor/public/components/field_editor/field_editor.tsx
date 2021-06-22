@@ -184,7 +184,12 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
     ],
   });
 
-  const { name: updatedName, type: updatedType, script: updatedScript } = formData;
+  const {
+    name: updatedName,
+    type: updatedType,
+    script: updatedScript,
+    format: updatedFormat,
+  } = formData;
   const { name: nameField, type: typeField } = getFields();
   const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
@@ -212,8 +217,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
         isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
           ? null
           : updatedScript,
+      format: updatedFormat,
     });
-  }, [updatedName, updatedType, updatedScript, isValueVisible, updatePreviewParams]);
+  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
 
   useEffect(() => {
     if (isValueVisible || isFormatVisible) {
