@@ -298,10 +298,10 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(1);
       });
 
-      it('memory card and user notification checkbox are shown', () => {
+      it('memory protection card and user notification checkbox are shown', () => {
         const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
         const userNotificationCheckbox = policyView.find(
-          'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
+          'EuiCheckbox[data-test-subj="memory_protectionUserNotificationCheckbox"]'
         );
 
         expect(memory).toHaveLength(1);
@@ -332,7 +332,7 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
-      it('memory card, and user notification checkbox are hidden', () => {
+      it('memory protection card, and user notification checkbox are hidden', () => {
         const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
         expect(memory).toHaveLength(0);
         const userNotificationCheckbox = policyView.find(

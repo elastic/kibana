@@ -24,11 +24,11 @@ import { ProtectionSwitch } from '../components/protection_switch';
  */
 export const MemoryProtection = React.memo(() => {
   const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows];
-  const protection = 'memory';
+  const protection = 'memory_protection';
   return (
     <ConfigForm
-      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory', {
-        defaultMessage: 'Memory',
+      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
+        defaultMessage: 'Memory Protection',
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="memoryProtectionsForm"

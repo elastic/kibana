@@ -83,7 +83,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'off' } },
       windowsRansomware: { ransomware: { mode: 'off', supported: true } },
       // new memory protection
-      windowsMemory: { memory: { mode: 'off', supported: true } },
+      windowsMemory: { memory_protection: { mode: 'off', supported: true } },
       windowsPopup: {
         popup: {
           malware: {
@@ -95,7 +95,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
             enabled: true,
           },
           // new memory popup setup
-          memory: {
+          memory_protection: {
             message: '',
             enabled: false,
           },

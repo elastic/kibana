@@ -31,8 +31,8 @@ export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, 
     if (input && input.config) {
       const policy = input.config.policy.value;
 
-      policy.windows.memory = memory;
-      policy.windows.popup.memory = memoryPopup;
+      policy.windows.memory_protection = memory;
+      policy.windows.popup.memory_protection = memoryPopup;
     }
   }
 

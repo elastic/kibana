@@ -46,8 +46,10 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
           policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message = DefaultPolicyNotificationMessage;
         }
-        if (policyItem.inputs[0].config.policy.value.windows.popup.memory.message === '') {
-          policyItem.inputs[0].config.policy.value.windows.popup.memory.message = DefaultPolicyNotificationMessage;
+        if (
+          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message = DefaultPolicyNotificationMessage;
         }
       } catch (error) {
         dispatch({

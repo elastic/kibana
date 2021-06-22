@@ -29,7 +29,7 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
-      memory: {
+      memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
       },
@@ -42,7 +42,7 @@ export const policyFactory = (): PolicyConfig => {
           message: '',
           enabled: true,
         },
-        memory: {
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -109,7 +109,7 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
-      memory: {
+      memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
       },
@@ -123,7 +123,7 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
-        memory: {
+        memory_protection: {
           message: '',
           enabled: false,
         },
@@ -166,8 +166,8 @@ export const policyFactoryWithSupportedFeatures = (
         ...policy.windows.ransomware,
         supported: true,
       },
-      memory: {
-        ...policy.windows.memory,
+      memory_protection: {
+        ...policy.windows.memory_protection,
         supported: true,
       },
     },
