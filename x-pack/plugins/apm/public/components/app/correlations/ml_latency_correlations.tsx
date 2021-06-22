@@ -46,7 +46,10 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ServiceOrTransactionsOverviewLink } from '../../shared/Links/apm/service_transactions_overview_link';
 import { getNextEnvironmentUrlParam } from '../../../../common/environment_filter_values';
-import { StickyProperties } from '../../shared/StickyProperties';
+import {
+  IStickyProperty,
+  StickyProperties,
+} from '../../shared/StickyProperties';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
@@ -117,13 +120,13 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     },
   });
 
-  const stickyProperties = useMemo(() => {
+  const stickyProperties: IStickyProperty[] = useMemo(() => {
     const nextEnvironment = getNextEnvironmentUrlParam({
       requestedEnvironment: serviceName,
       currentEnvironmentUrlParam: urlParams.environment,
     });
 
-    const properties = [];
+    const properties: IStickyProperty[] = [];
     if (serviceName !== undefined && nextEnvironment !== undefined) {
       properties.push({
         label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
@@ -165,9 +168,9 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         ),
       });
     }
-    if (nextEnvironment) {
+    if (urlParams.environment) {
       properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
+        label: i18n.translate('xpack.apm.transactionDetails.environmentLabel', {
           defaultMessage: 'Environment',
         }),
         fieldName: SERVICE_ENVIRONMENT,
