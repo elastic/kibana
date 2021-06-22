@@ -6,14 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { licensingMock } from '../../../../../licensing/public/mocks';
+import { setupEnvironment } from '../../helpers';
 import {
   getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { licensingMock } from '../../../../../licensing/public/mocks';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;

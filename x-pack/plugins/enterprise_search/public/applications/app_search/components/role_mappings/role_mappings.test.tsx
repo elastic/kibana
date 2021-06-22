@@ -6,13 +6,12 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
 import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
@@ -42,13 +41,6 @@ describe('RoleMappings', () => {
     const wrapper = shallow(<RoleMappings />);
 
     expect(wrapper.find(RoleMappingsTable)).toHaveLength(1);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<RoleMappings />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders RoleMapping flyout', () => {

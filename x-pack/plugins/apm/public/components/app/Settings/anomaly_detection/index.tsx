@@ -6,8 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -66,20 +64,6 @@ export function AnomalyDetection() {
 
   return (
     <>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.apm.settings.anomalyDetection.titleText', {
-            defaultMessage: 'Anomaly detection',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
-          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying anomalies in latency.`,
-        })}
-      </EuiText>
-      <EuiSpacer size="l" />
       {viewAddEnvironments ? (
         <AddEnvironments
           currentEnvironments={data.jobs.map(({ environment }) => environment)}

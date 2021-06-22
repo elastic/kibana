@@ -6,8 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { setupEnvironment } from '../../helpers';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { setupEnvironment } from '../../helpers/setup_environment';
 
 describe('<EditPolicy /> request flyout', () => {
   let testBed: EditPolicyTestBed;

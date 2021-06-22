@@ -49,7 +49,7 @@ describe('When migrating artifacts to fleet', () => {
           type: '',
           id: 'abc123',
           references: [],
-          attributes: await getInternalArtifactMock('windows', 'v1', { compress: true }),
+          attributes: await getInternalArtifactMock('windows', 'v1'),
         },
       ])
     );

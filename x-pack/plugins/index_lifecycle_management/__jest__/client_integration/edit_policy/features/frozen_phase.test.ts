@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { licensingMock } from '../../../../../licensing/public/mocks';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { setupEnvironment } from '../../helpers';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 
 describe('<EditPolicy /> frozen phase', () => {

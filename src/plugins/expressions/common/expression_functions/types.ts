@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
-import { TypeToString } from '../types/common';
+import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
@@ -19,6 +18,7 @@ import {
   ExpressionFunctionCumulativeSum,
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
+  ExpressionFunctionOverallMetric,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 import { PersistableStateDefinition } from '../../../kibana_utils/common';
@@ -47,7 +47,7 @@ export interface ExpressionFunctionDefinition<
   /**
    * Name of type of value this function outputs.
    */
-  type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+  type?: TypeString<Output> | UnmappedTypeStrings;
 
   /**
    * List of allowed type names for input value of this function. If this
@@ -120,6 +120,7 @@ export interface ExpressionFunctionDefinitions {
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
   cumulative_sum: ExpressionFunctionCumulativeSum;
+  overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
 }

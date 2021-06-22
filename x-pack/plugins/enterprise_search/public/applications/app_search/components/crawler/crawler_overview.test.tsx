@@ -5,59 +5,53 @@
  * 2.0.
  */
 
-import { rerender, setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiCode } from '@elastic/eui';
-
 import { Loading } from '../../../shared/loading';
+import { rerender } from '../../../test_helpers';
 
+import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
 
-const actions = {
-  fetchCrawlerData: jest.fn(),
-};
-
-const values = {
-  dataLoading: false,
-  domains: [],
-};
-
 describe('CrawlerOverview', () => {
+  const mockActions = {
+    fetchCrawlerData: jest.fn(),
+  };
+
+  const mockValues = {
+    dataLoading: false,
+    domains: [],
+  };
+
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues(values);
-    setMockActions(actions);
+    setMockValues(mockValues);
+    setMockActions(mockActions);
     wrapper = shallow(<CrawlerOverview />);
   });
 
-  it('renders', () => {
-    expect(wrapper.find(EuiCode)).toHaveLength(1);
-  });
-
   it('calls fetchCrawlerData on page load', () => {
-    expect(actions.fetchCrawlerData).toHaveBeenCalledTimes(1);
+    expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
-  // TODO after DomainsTable is built in a future PR
-  // it('contains a DomainsTable', () => {})
+  it('renders', () => {
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
 
-  // TODO after CrawlRequestsTable is built in a future PR
-  // it('containss a CrawlRequestsTable,() => {})
+    // TODO test for CrawlRequestsTable after it is built in a future PR
 
-  // TODO after AddDomainForm is built in a future PR
-  // it('contains an AddDomainForm' () => {})
+    // TODO test for AddDomainForm after it is built in a future PR
 
-  // TODO after empty state is added in a future PR
-  // it('has an empty state',  () => {} )
+    // TODO test for empty state after it is built in a future PR
+  });
 
-  it('shows an empty state when data is loading', () => {
+  it('shows a loading state when data is loading', () => {
     setMockValues({ dataLoading: true });
     rerender(wrapper);
 

@@ -19,6 +19,7 @@
     "lens"
   ],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "maps",
     "esUiShared"

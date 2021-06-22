@@ -109,9 +109,7 @@ describe('when on integration detail', () => {
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
-      expect(testRenderer.history.location.pathname).toEqual(
-        '/app/integrations/detail/nginx-0.3.7/overview'
-      );
+      expect(testRenderer.history.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
     });
   });
 
@@ -204,11 +202,29 @@ describe('when on integration detail', () => {
       expect(firstRowAgentCount.tagName).not.toEqual('A');
     });
 
+    it('should show add agent button if agent count is zero', async () => {
+      await mockedApi.waitForApi();
+      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
+      expect(firstRowAgentCount.textContent).toEqual('0');
+
+      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[0];
+      expect(addAgentButton).not.toBeNull();
+    });
+
     it('should show link for agent count if greater than zero', async () => {
       await mockedApi.waitForApi();
       const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
       expect(secondRowAgentCount.textContent).toEqual('100');
       expect(secondRowAgentCount.tagName).toEqual('A');
+    });
+
+    it('should NOT show add agent button if agent count is greater than zero', async () => {
+      await mockedApi.waitForApi();
+      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
+      expect(secondRowAgentCount.textContent).toEqual('100');
+
+      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[1];
+      expect(addAgentButton).toBeUndefined();
     });
   });
 });

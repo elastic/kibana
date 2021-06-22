@@ -24,3 +24,5 @@ export * from './use_url_params';
 export * from './use_fleet_status';
 export * from './use_ui_extension';
 export * from './use_intra_app_state';
+export * from './use_platform';
+export * from './use_agent_policy_refresh';

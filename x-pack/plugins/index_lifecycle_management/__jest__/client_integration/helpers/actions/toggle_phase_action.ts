@@ -6,9 +6,9 @@
  */
 
 import { TestBed } from '@kbn/test/jest';
-
 import { act } from 'react-dom/test-utils';
-import { Phase } from '../types';
+
+import { Phase } from '../../../../common/types';
 
 const toggleDeletePhase = async (testBed: TestBed) => {
   const { find, component } = testBed;

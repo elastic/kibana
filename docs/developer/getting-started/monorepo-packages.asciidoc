@@ -87,6 +87,7 @@ yarn kbn watch-bazel
 - @kbn/monaco
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
+- @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types
 - @kbn/securitysolution-io-ts-list-types
 - @kbn/securitysolution-io-ts-types
@@ -97,8 +98,11 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-list-utils
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
+- @kbn/server-route-repository
 - @kbn/std
+- @kbn/storybook
 - @kbn/telemetry-utils
 - @kbn/tinymath
+- @kbn/ui-shared-deps
 - @kbn/utility-types
 - @kbn/utils

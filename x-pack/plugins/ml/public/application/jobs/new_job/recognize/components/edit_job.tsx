@@ -51,9 +51,9 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
   );
 
   const handleValidation = () => {
-    const jobGroupsValidationResult =
-      formState.jobGroups ??
-      [].map((group) => groupValidator(group)).filter((result) => result !== null);
+    const jobGroupsValidationResult = (formState.jobGroups ?? [])
+      .map((group) => groupValidator(group))
+      .filter((result) => result !== null);
 
     setValidationResult({
       jobGroups: jobGroupsValidationResult,

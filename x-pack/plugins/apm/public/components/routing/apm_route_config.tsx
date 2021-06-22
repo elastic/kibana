@@ -20,6 +20,7 @@ import { AnomalyDetection } from '../app/Settings/anomaly_detection';
 import { ApmIndices } from '../app/Settings/ApmIndices';
 import { CustomizeUI } from '../app/Settings/CustomizeUI';
 import { TraceLink } from '../app/TraceLink';
+import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
 import { enableServiceOverview } from '../../../common/ui_settings_keys';
 import { redirectTo } from './redirect_to';
@@ -219,41 +220,33 @@ function TransactionDetailsRouteView(
 
 function SettingsAgentConfigurationRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate>
-        <AgentConfigurations />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="agent-configurations">
+      <AgentConfigurations />
+    </SettingsTemplate>
   );
 }
 
 function SettingsAnomalyDetectionRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate>
-        <AnomalyDetection />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="anomaly-detection">
+      <AnomalyDetection />
+    </SettingsTemplate>
   );
 }
 
 function SettingsApmIndicesRouteView() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate>
-        <ApmIndices />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="apm-indices">
+      <ApmIndices />
+    </SettingsTemplate>
   );
 }
 
 function SettingsCustomizeUI() {
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate>
-        <CustomizeUI />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="customize-ui">
+      <CustomizeUI />
+    </SettingsTemplate>
   );
 }
 
@@ -276,14 +269,12 @@ export function EditAgentConfigurationRouteView(props: RouteComponentProps) {
   );
 
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate {...props}>
-        <AgentConfigurationCreateEdit
-          pageStep={pageStep || 'choose-settings-step'}
-          existingConfigResult={res}
-        />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="agent-configurations" {...props}>
+      <AgentConfigurationCreateEdit
+        pageStep={pageStep || 'choose-settings-step'}
+        existingConfigResult={res}
+      />
+    </SettingsTemplate>
   );
 }
 
@@ -295,13 +286,11 @@ export function CreateAgentConfigurationRouteView(props: RouteComponentProps) {
   const { pageStep } = toQuery(search);
 
   return (
-    <ApmMainTemplate pageTitle="Settings">
-      <SettingsTemplate {...props}>
-        <AgentConfigurationCreateEdit
-          pageStep={pageStep || 'choose-service-step'}
-        />
-      </SettingsTemplate>
-    </ApmMainTemplate>
+    <SettingsTemplate selectedTab="agent-configurations" {...props}>
+      <AgentConfigurationCreateEdit
+        pageStep={pageStep || 'choose-service-step'}
+      />
+    </SettingsTemplate>
   );
 }
 
@@ -508,6 +497,12 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     exact: true,
     path: '/link-to/trace/:traceId',
     component: TraceLink,
+    breadcrumb: null,
+  },
+  {
+    exact: true,
+    path: '/link-to/transaction/:transactionId',
+    component: TransactionLink,
     breadcrumb: null,
   },
 ];

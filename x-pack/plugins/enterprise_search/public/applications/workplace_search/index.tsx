@@ -28,19 +28,18 @@ import {
   ORG_SETTINGS_PATH,
   ROLE_MAPPINGS_PATH,
   SECURITY_PATH,
+  PERSONAL_SETTINGS_PATH,
+  PERSONAL_PATH,
 } from './routes';
+import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
-import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
-import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
-import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
-import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
 import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
@@ -55,10 +54,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
-
-  // We don't want so show the subnavs on the container root pages.
-  const showSourcesSubnav = pathname !== SOURCES_PATH && pathname !== PERSONAL_SOURCES_PATH;
-  const showGroupsSubnav = pathname !== GROUPS_PATH;
 
   /**
    * Personal dashboard urls begin with /p/
@@ -90,55 +85,32 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SourceAdded />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? (
-          <ErrorState />
-        ) : (
-          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-            <Overview />
-          </Layout>
-        )}
+        <Overview />
       </Route>
-      <Route path={PERSONAL_SOURCES_PATH}>
-        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
-          <SourcesRouter />
-        </PrivateSourcesLayout>
+      <Route path={PERSONAL_PATH}>
+        <Switch>
+          <Route path={PERSONAL_SOURCES_PATH}>
+            <SourcesRouter />
+          </Route>
+          <Route path={PERSONAL_SETTINGS_PATH}>
+            <AccountSettings />
+          </Route>
+        </Switch>
       </Route>
       <Route path={SOURCES_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav sourcesSubNav={showSourcesSubnav && <SourceSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <SourcesRouter />
-        </Layout>
+        <SourcesRouter />
       </Route>
       <Route path={GROUPS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav groupsSubNav={showGroupsSubnav && <GroupSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <GroupsRouter />
-        </Layout>
+        <GroupsRouter />
       </Route>
       <Route path={ROLE_MAPPINGS_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <RoleMappings />
-        </Layout>
+        <RoleMappings />
       </Route>
       <Route path={SECURITY_PATH}>
-        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
-          <Security />
-        </Layout>
+        <Security />
       </Route>
       <Route path={ORG_SETTINGS_PATH}>
-        <Layout
-          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
-          restrictWidth
-          readOnlyMode={readOnlyMode}
-        >
-          <SettingsRouter />
-        </Layout>
+        <SettingsRouter />
       </Route>
       <Route>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>

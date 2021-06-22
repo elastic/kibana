@@ -6,8 +6,8 @@
  */
 
 import { TestBed } from '@kbn/test/jest';
+import { Phase } from '../../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
-import { Phase } from '../types';
 
 export const createFreezeActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;

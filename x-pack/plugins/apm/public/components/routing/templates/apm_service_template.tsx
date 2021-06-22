@@ -33,23 +33,21 @@ import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: string;
+  key:
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'overview'
+    | 'service-map'
+    | 'profiling'
+    | 'transactions';
   hidden?: boolean;
 };
-
-type TabKey =
-  | 'errors'
-  | 'metrics'
-  | 'nodes'
-  | 'overview'
-  | 'service-map'
-  | 'profiling'
-  | 'transactions';
 
 interface Props {
   children: React.ReactNode;
   serviceName: string;
-  selectedTab: TabKey;
+  selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
 
@@ -107,7 +105,7 @@ function useTabs({
   selectedTab,
 }: {
   serviceName: string;
-  selectedTab: TabKey;
+  selectedTab: Tab['key'];
 }) {
   const { agentName, transactionType } = useApmServiceContext();
   const { core, config } = useApmPluginContext();

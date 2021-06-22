@@ -36,7 +36,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with basic data existing', () => {
       before(async () => {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
-        await kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID });
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+          { space: SPACE_ID }
+        );
       });
       after(() => kibanaServer.spaces.delete(SPACE_ID));
 

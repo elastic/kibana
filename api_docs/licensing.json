@@ -3074,7 +3074,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 225
+                "lineNumber": 229
               }
             },
             {

@@ -31,6 +31,7 @@ export function ApmMainTemplate({
   children: React.ReactNode;
 } & EuiPageTemplateProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
+
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 

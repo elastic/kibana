@@ -1007,7 +1007,7 @@ export const waitForRuleSuccessOrStatus = async (
       .send({ ids: [id] })
       .expect(200);
     return body[id]?.current_status?.status === status;
-  }, 'waitForRuleSuccess');
+  }, 'waitForRuleSuccessOrStatus');
 };
 
 /**

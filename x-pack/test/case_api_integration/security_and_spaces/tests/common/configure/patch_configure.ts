@@ -8,14 +8,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 
 import {
-  getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   deleteConfiguration,
   createConfiguration,
   updateConfiguration,
+  getConfigurationRequest,
+  getConfiguration,
 } from '../../../../common/lib/utils';
 import {
   secOnly,
@@ -50,6 +52,39 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
+    });
+
+    it('should update mapping when changing connector', async () => {
+      const configuration = await createConfiguration(supertest);
+      await updateConfiguration(supertest, configuration.id, {
+        connector: {
+          id: 'serviceNowITSM',
+          name: 'ServiceNow ITSM',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+        version: configuration.version,
+      });
+      const newConfiguration = await getConfiguration({ supertest });
+
+      expect(configuration.mappings).to.eql([]);
+      expect(newConfiguration[0].mappings).to.eql([
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'short_description',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'description',
+          target: 'description',
+        },
+        {
+          action_type: 'append',
+          source: 'comments',
+          target: 'work_notes',
+        },
+      ]);
     });
 
     it('should not patch a configuration with unsupported connector type', async () => {

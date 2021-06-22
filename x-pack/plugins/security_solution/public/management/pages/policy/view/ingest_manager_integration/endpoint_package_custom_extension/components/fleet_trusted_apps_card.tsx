@@ -17,10 +17,10 @@ import {
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getTrustedAppsListPath } from '../../../../../../common/routing';
 import {
-  TrustedAppsListPageRouteState,
+  ListPageRouteState,
   GetExceptionSummaryResponse,
 } from '../../../../../../../../common/endpoint/types';
-import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
@@ -67,25 +67,27 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   }, [toasts, trustedAppsApi]);
   const trustedAppsListUrlPath = getTrustedAppsListPath();
 
-  const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
-    const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
+  const trustedAppRouteState = useMemo<ListPageRouteState>(() => {
+    const fleetPackageCustomUrlPath = `#${
+      pagePathGetters.integration_details_custom({ pkgkey })[1]
+    }`;
+
     return {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
         { defaultMessage: 'Back to Endpoint Integration' }
       ),
       onBackButtonNavigateTo: [
-        FLEET_PLUGIN_ID,
+        INTEGRATIONS_PLUGIN_ID,
         {
           path: fleetPackageCustomUrlPath,
         },
       ],
-      backButtonUrl: getUrlForApp(FLEET_PLUGIN_ID, {
+      backButtonUrl: getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
         path: fleetPackageCustomUrlPath,
       }),
     };
   }, [getUrlForApp, pkgkey]);
-
   return (
     <EuiPanel paddingSize="l">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">

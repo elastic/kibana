@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { CaseConnector } from '../../../common';
+
 export interface MappingsArgs {
-  connectorType: string;
-  connectorId: string;
+  connector: CaseConnector;
 }
 
 export interface CreateMappingsArgs extends MappingsArgs {
@@ -16,9 +17,4 @@ export interface CreateMappingsArgs extends MappingsArgs {
 
 export interface UpdateMappingsArgs extends MappingsArgs {
   mappingId: string;
-}
-
-export interface ConfigurationGetFields {
-  connectorId: string;
-  connectorType: string;
 }

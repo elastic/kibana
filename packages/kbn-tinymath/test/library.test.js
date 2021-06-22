@@ -41,6 +41,35 @@ describe('Parser', () => {
     });
   });
 
+  describe('Math', () => {
+    it('converts basic symbols into left-to-right pairs', () => {
+      expect(parse('a + b + c - d')).toEqual({
+        args: [
+          {
+            name: 'add',
+            type: 'function',
+            args: [
+              {
+                name: 'add',
+                type: 'function',
+                args: [
+                  expect.objectContaining({ location: { min: 0, max: 2 } }),
+                  expect.objectContaining({ location: { min: 3, max: 6 } }),
+                ],
+              },
+              expect.objectContaining({ location: { min: 7, max: 10 } }),
+            ],
+          },
+          expect.objectContaining({ location: { min: 11, max: 13 } }),
+        ],
+        name: 'subtract',
+        type: 'function',
+        text: 'a + b + c - d',
+        location: { min: 0, max: 13 },
+      });
+    });
+  });
+
   describe('Variables', () => {
     it('strings', () => {
       expect(parse('f')).toEqual(variableEqual('f'));
@@ -263,6 +292,8 @@ describe('Evaluate', () => {
     expect(evaluate('5/20')).toEqual(0.25);
     expect(evaluate('1 + 1 + 2 + 3 + 12')).toEqual(19);
     expect(evaluate('100 / 10 / 10')).toEqual(1);
+    expect(evaluate('0 * 1 - 100 / 10 / 10')).toEqual(-1);
+    expect(evaluate('100 / (10 / 10)')).toEqual(100);
   });
 
   it('equations with functions', () => {

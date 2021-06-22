@@ -37,8 +37,8 @@ describe('manifest', () => {
   let ARTIFACT_COPY_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
   beforeAll(async () => {
-    ARTIFACTS = await getMockArtifacts({ compress: true });
-    ARTIFACTS_COPY = await getMockArtifacts({ compress: true });
+    ARTIFACTS = await getMockArtifacts();
+    ARTIFACTS_COPY = await getMockArtifacts();
     ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
     ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
     ARTIFACT_EXCEPTIONS_LINUX = ARTIFACTS[2];

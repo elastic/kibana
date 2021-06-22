@@ -6,7 +6,6 @@
  */
 
 import { createHash } from 'crypto';
-import { deflate } from 'zlib';
 import type {
   Entry,
   EntryNested,
@@ -21,9 +20,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
-  internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
-  InternalArtifactSchema,
   TranslatedEntry,
   translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
@@ -58,28 +55,6 @@ export async function buildArtifact(
     encodedSize: exceptionsBuffer.byteLength,
     body: exceptionsBuffer.toString('base64'),
   };
-}
-
-export async function maybeCompressArtifact(
-  uncompressedArtifact: InternalArtifactSchema
-): Promise<InternalArtifactSchema> {
-  const compressedArtifact = { ...uncompressedArtifact };
-  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
-    const compressedArtifactBody = await compressExceptionList(
-      Buffer.from(uncompressedArtifact.body, 'base64')
-    );
-    compressedArtifact.body = compressedArtifactBody.toString('base64');
-    compressedArtifact.encodedSize = compressedArtifactBody.byteLength;
-    compressedArtifact.compressionAlgorithm = 'zlib';
-    compressedArtifact.encodedSha256 = createHash('sha256')
-      .update(compressedArtifactBody)
-      .digest('hex');
-  }
-  return compressedArtifact;
-}
-
-export function isCompressed(artifact: InternalArtifactSchema) {
-  return artifact.compressionAlgorithm === 'zlib';
 }
 
 export async function getFilteredEndpointExceptionList(
@@ -296,16 +271,4 @@ function translateEntry(
         : undefined;
     }
   }
-}
-
-export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    deflate(buffer, function (err, buf) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buf);
-      }
-    });
-  });
 }

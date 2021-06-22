@@ -64,6 +64,8 @@ const defaultProps = {
     data: mockDataPlugin(),
   },
   getSuggestionForField: () => undefined,
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
 };
 
 describe('workspace_panel', () => {

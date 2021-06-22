@@ -7,7 +7,7 @@
 
 import { TestBed } from '@kbn/test/jest';
 
-import { Phase } from '../types';
+import { Phase } from '../../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
 

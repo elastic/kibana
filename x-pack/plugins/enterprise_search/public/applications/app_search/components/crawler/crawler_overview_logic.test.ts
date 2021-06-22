@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
-import { CrawlerPolicies, CrawlerRules, CrawlRule } from './types';
+import {
+  CrawlerDataFromServer,
+  CrawlerDomain,
+  CrawlerPolicies,
+  CrawlerRules,
+  CrawlRule,
+} from './types';
+import { crawlerDataServerToClient } from './utils';
 
 const DEFAULT_VALUES = {
   dataLoading: true,
@@ -25,10 +36,26 @@ const DEFAULT_CRAWL_RULE: CrawlRule = {
   pattern: '.*',
 };
 
+const MOCK_SERVER_DATA: CrawlerDataFromServer = {
+  domains: [
+    {
+      id: '507f1f77bcf86cd799439011',
+      name: 'elastic.co',
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      document_count: 13,
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+    },
+  ],
+};
+
+const MOCK_CLIENT_DATA = crawlerDataServerToClient(MOCK_SERVER_DATA);
+
 describe('CrawlerOverviewLogic', () => {
   const { mount } = new LogicMounter(CrawlerOverviewLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,13 +67,13 @@ describe('CrawlerOverviewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onFetchCrawlerData', () => {
+    describe('onReceiveCrawlerData', () => {
       const crawlerData = {
         domains: [
           {
             id: '507f1f77bcf86cd799439011',
             createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-            url: 'moviedatabase.com',
+            url: 'elastic.co',
             documentCount: 13,
             sitemaps: [],
             entryPoints: [],
@@ -57,7 +84,7 @@ describe('CrawlerOverviewLogic', () => {
       };
 
       beforeEach(() => {
-        CrawlerOverviewLogic.actions.onFetchCrawlerData(crawlerData);
+        CrawlerOverviewLogic.actions.onReceiveCrawlerData(crawlerData);
       });
 
       it('should set all received data as top-level values', () => {
@@ -72,46 +99,51 @@ describe('CrawlerOverviewLogic', () => {
 
   describe('listeners', () => {
     describe('fetchCrawlerData', () => {
-      it('calls onFetchCrawlerData with retrieved data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'onFetchCrawlerData');
+      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
 
-        http.get.mockReturnValue(
-          Promise.resolve({
-            domains: [
-              {
-                id: '507f1f77bcf86cd799439011',
-                name: 'moviedatabase.com',
-                created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
-                document_count: 13,
-                sitemaps: [],
-                entry_points: [],
-                crawl_rules: [],
-              },
-            ],
-          })
-        );
+        http.get.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
-        expect(CrawlerOverviewLogic.actions.onFetchCrawlerData).toHaveBeenCalledWith({
-          domains: [
-            {
-              id: '507f1f77bcf86cd799439011',
-              createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-              url: 'moviedatabase.com',
-              documentCount: 13,
-              sitemaps: [],
-              entryPoints: [],
-              crawlRules: [],
-            },
-          ],
-        });
+        expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
+          MOCK_CLIENT_DATA
+        );
       });
 
       it('calls flashApiErrors when there is an error', async () => {
         http.get.mockReturnValue(Promise.reject('error'));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('deleteDomain', () => {
+      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
+
+        http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
+        CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith(
+          '/api/app_search/engines/some-engine/crawler/domains/1234',
+          {
+            query: { respond_with: 'crawler_details' },
+          }
+        );
+        expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
+          MOCK_CLIENT_DATA
+        );
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('calls flashApiErrors when there is an error', async () => {
+        http.delete.mockReturnValue(Promise.reject('error'));
+        CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

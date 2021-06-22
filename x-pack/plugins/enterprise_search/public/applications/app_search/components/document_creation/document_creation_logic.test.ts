@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import dedent from 'dedent';
 

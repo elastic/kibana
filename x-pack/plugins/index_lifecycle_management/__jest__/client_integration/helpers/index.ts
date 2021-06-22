@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { Phase } from './types';
-
 export * from './actions';
+
+export { setupEnvironment } from './setup_environment';

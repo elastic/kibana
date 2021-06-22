@@ -165,13 +165,13 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
+export const SUCCESSFULLY_EXPORTED_RULES = (exportedRules: number, totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedRulesTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedXofYRulesTitle',
     {
-      values: { totalRules },
+      values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
     }
   );
 
@@ -201,6 +201,19 @@ export const SHOWING_RULES = (totalRules: number) =>
     values: { totalRules },
     defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
+
+export const SELECT_ALL_RULES = (totalRules: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle', {
+    values: { totalRules },
+    defaultMessage: 'Select all {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+
+export const CLEAR_SELECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);
 
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
@@ -250,6 +263,13 @@ export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
   {
     defaultMessage: 'Error duplicating rule',
+  }
+);
+
+export const BULK_ACTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription',
+  {
+    defaultMessage: 'Failed to execte bulk action',
   }
 );
 
@@ -574,6 +594,35 @@ export const REFRESH_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
   {
     defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const DELETE_CONFIRMATION_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
+  {
+    defaultMessage:
+      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 

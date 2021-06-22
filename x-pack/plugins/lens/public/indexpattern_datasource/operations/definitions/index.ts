@@ -33,6 +33,14 @@ import {
   DerivativeIndexPatternColumn,
   movingAverageOperation,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  overallSumOperation,
+  OverallMinIndexPatternColumn,
+  overallMinOperation,
+  OverallMaxIndexPatternColumn,
+  overallMaxOperation,
+  OverallAverageIndexPatternColumn,
+  overallAverageOperation,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import {
@@ -71,6 +79,10 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn
   | LastValueIndexPatternColumn
   | CumulativeSumIndexPatternColumn
+  | OverallSumIndexPatternColumn
+  | OverallMinIndexPatternColumn
+  | OverallMaxIndexPatternColumn
+  | OverallAverageIndexPatternColumn
   | CounterRateIndexPatternColumn
   | DerivativeIndexPatternColumn
   | MovingAverageIndexPatternColumn
@@ -98,6 +110,10 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
 } from './calculations';
 export { CountIndexPatternColumn } from './count';
 export { LastValueIndexPatternColumn } from './last_value';
@@ -126,6 +142,10 @@ const internalOperationDefinitions = [
   movingAverageOperation,
   mathOperation,
   formulaOperation,
+  overallSumOperation,
+  overallMinOperation,
+  overallMaxOperation,
+  overallAverageOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -141,6 +161,10 @@ export {
   counterRateOperation,
   derivativeOperation,
   movingAverageOperation,
+  overallSumOperation,
+  overallAverageOperation,
+  overallMaxOperation,
+  overallMinOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 
@@ -153,7 +177,11 @@ export interface ParamEditorProps<C> {
   updateLayer: (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
+  toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
+  isFullscreen: boolean;
   columnId: string;
+  layerId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
@@ -279,6 +307,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
+  documentation?: {
+    signature: string;
+    description: string;
+    section: 'elasticsearch' | 'calculation';
+  };
 }
 
 interface BaseBuildColumnArgs {
@@ -290,6 +323,7 @@ interface OperationParam {
   name: string;
   type: string;
   required?: boolean;
+  defaultValue?: string | number;
 }
 
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
@@ -348,7 +382,11 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params'] & { kql?: string; lucene?: string }
+    columnParams?: (IndexPatternColumn & C)['params'] & {
+      kql?: string;
+      lucene?: string;
+      shift?: string;
+    }
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -454,6 +492,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       kql?: string;
       lucene?: string;
+      shift?: string;
     }
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

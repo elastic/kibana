@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+import { API_BASE_PATH } from '../../../../common/constants';
+import { setupEnvironment } from '../../helpers';
+import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import {
   DELETE_PHASE_POLICY,
   getDefaultHotPhasePolicy,
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
 } from '../constants';
-import { act } from 'react-dom/test-utils';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { API_BASE_PATH } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers/setup_environment';
 
 describe('<EditPolicy /> delete phase', () => {
   let testBed: EditPolicyTestBed;

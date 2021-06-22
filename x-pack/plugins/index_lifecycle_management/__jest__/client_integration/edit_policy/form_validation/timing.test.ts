@@ -8,8 +8,9 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 
+import { PhaseWithTiming } from '../../../../common/types';
+import { setupEnvironment } from '../../helpers';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { setupEnvironment } from '../../helpers/setup_environment';
 
 describe('<EditPolicy /> timing validation', () => {
   let testBed: EditPolicyTestBed;
@@ -69,12 +70,12 @@ describe('<EditPolicy /> timing validation', () => {
     ['warm', 'cold', 'delete', 'frozen'].forEach((phase: string) => {
       const { name, value, error } = testConfig;
       test(`${phase}: ${name}`, async () => {
-        await actions.togglePhase(phase as 'warm' | 'cold' | 'delete' | 'frozen');
+        await actions.togglePhase(phase as PhaseWithTiming);
         // 1. We first set as dummy value to have a starting min_age value
-        await actions[phase as 'warm' | 'cold' | 'delete' | 'frozen'].setMinAgeValue('111');
+        await actions[phase as PhaseWithTiming].setMinAgeValue('111');
         // 2. At this point we are sure there will be a change of value and that any validation
         // will be displayed under the field.
-        await actions[phase as 'warm' | 'cold' | 'delete' | 'frozen'].setMinAgeValue(value);
+        await actions[phase as PhaseWithTiming].setMinAgeValue(value);
 
         actions.errors.waitForValidation();
 

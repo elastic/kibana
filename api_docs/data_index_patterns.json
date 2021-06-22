@@ -6118,34 +6118,6 @@
             }
           },
           {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/page.tsx",
-              "lineNumber": 25
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/page.tsx",
-              "lineNumber": 162
-            }
-          },
-          {
             "plugin": "infra",
             "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx",
@@ -6619,6 +6591,20 @@
             "link": {
               "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts",
               "lineNumber": 11
+            }
+          },
+          {
+            "plugin": "ml",
+            "link": {
+              "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts",
+              "lineNumber": 11
+            }
+          },
+          {
+            "plugin": "ml",
+            "link": {
+              "path": "x-pack/plugins/ml/public/application/util/field_types_utils.ts",
+              "lineNumber": 16
             }
           },
           {
@@ -9533,20 +9519,6 @@
             }
           },
           {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/actions_panel/actions_panel.tsx",
-              "lineNumber": 25
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/actions_panel/actions_panel.tsx",
-              "lineNumber": 28
-            }
-          },
-          {
             "plugin": "infra",
             "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx",
@@ -10153,48 +10125,6 @@
             "link": {
               "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/tabs/custom_urls.tsx",
               "lineNumber": 57
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/lens_utils.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/lens_utils.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/lens_utils.ts",
-              "lineNumber": 213
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/lens_utils.ts",
-              "lineNumber": 234
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/actions.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "ml",
-            "link": {
-              "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/components/field_data_row/action_menu/actions.ts",
-              "lineNumber": 17
             }
           },
           {

@@ -11,6 +11,16 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 import securityObj from './security.json';
 
+
+
+
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| 95 | 0 | 45 | 11 |
+
 ## Client
 
 ### Setup
@@ -26,6 +36,12 @@ import securityObj from './security.json';
 <DocDefinitionList data={securityObj.client.misc}/>
 
 ## Server
+
+### Setup
+<DocDefinitionList data={[securityObj.server.setup]}/>
+
+### Start
+<DocDefinitionList data={[securityObj.server.start]}/>
 
 ### Interfaces
 <DocDefinitionList data={securityObj.server.interfaces}/>

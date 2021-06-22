@@ -120,10 +120,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[idxToClick].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
-      const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
-      expect(runtimeFieldsRow).to.be(true);
+      await retry.waitFor('doc viewer is displayed with runtime field', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        if (!hasDocHit) {
+          // Maybe loading has not completed
+          throw new Error('test subject doc-hit is not yet displayed');
+        }
+        const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
+
+        return hasDocHit && runtimeFieldsRow;
+      });
     });
   });
 }

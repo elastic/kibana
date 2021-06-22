@@ -8,8 +8,9 @@
 import { TestBedConfig } from '@kbn/test/jest';
 import { AppServicesContext } from '../../../public/types';
 
+import { Phase } from '../../../common/types';
+
 import {
-  Phase,
   createNodeAllocationActions,
   createFormToggleAction,
   createFormSetValueAction,
@@ -27,7 +28,6 @@ import {
   createReadonlyActions,
   createIndexPriorityActions,
 } from '../helpers';
-
 import { initTestBed } from './init_test_bed';
 
 type SetupReturn = ReturnType<typeof setup>;

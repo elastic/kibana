@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../../helpers/setup_environment';
+import { setupEnvironment } from '../../../helpers';
 import { NodeAllocationTestBed, setupWarmPhaseNodeAllocation } from './warm_phase.helpers';
 
 describe('<EditPolicy /> node allocation in the warm phase', () => {
