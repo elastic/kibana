@@ -40,7 +40,7 @@ export function PolicySelector({
     <EuiFormRow
       label={i18n.translate(
         'xpack.apm.tutorial.agent_config.choosePolicyLabel',
-        { defaultMessage: 'Choose a policy' }
+        { defaultMessage: 'Choose policy' }
       )}
       labelAppend={
         <EuiText size="xs">
@@ -49,6 +49,7 @@ export function PolicySelector({
       }
     >
       <EuiComboBox
+        data-test-subj={`policySelector_${selectedOption?.key}`}
         isClearable={false}
         singleSelection={{ asPlainText: true }}
         options={options}

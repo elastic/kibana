@@ -64,7 +64,9 @@ function TutorialAgentSecretTokenSelector({
       setIsLoading(true);
       try {
         const response = await http.get('/api/apm/fleet/agents');
-        setData(response as APIResponseType);
+        if (response) {
+          setData(response as APIResponseType);
+        }
       } catch (e) {
         console.error('Error while fetching fleet agents.', e);
       }
@@ -85,7 +87,7 @@ function TutorialAgentSecretTokenSelector({
 
   if (isLoading) {
     return (
-      <CentralizedContainer>
+      <CentralizedContainer data-test-subj="loading">
         <EuiLoadingSpinner />
       </CentralizedContainer>
     );
@@ -107,7 +109,7 @@ function TutorialAgentSecretTokenSelector({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/fleet#/integrations/detail/apm-0.2.0/overview`,
+        href: `${basePath}/app/integrations#/detail/apm-0.2.0/overview`,
       };
 
   return (
