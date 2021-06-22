@@ -295,13 +295,13 @@ describe('updateApiKey()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when updating the API key of an alert', async () => {
+    test('logs audit event when updating the API key of a rule', async () => {
       await alertsClient.updateApiKey({ id: '1' });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_update_api_key',
+            action: 'rule_update_api_key',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -309,7 +309,7 @@ describe('updateApiKey()', () => {
       );
     });
 
-    test('logs audit event when not authorised to update the API key of an alert', async () => {
+    test('logs audit event when not authorised to update the API key of a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrow();
@@ -317,7 +317,7 @@ describe('updateApiKey()', () => {
         expect.objectContaining({
           event: expect.objectContaining({
             outcome: 'failure',
-            action: 'alert_update_api_key',
+            action: 'rule_update_api_key',
           }),
           kibana: {
             saved_object: {

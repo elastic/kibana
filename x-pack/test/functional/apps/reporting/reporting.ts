@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('Reporting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/102722
+  describe.skip('Reporting', function () {
     this.tags(['smoke', 'ciGroup2']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/packaging');

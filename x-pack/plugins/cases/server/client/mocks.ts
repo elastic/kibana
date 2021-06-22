@@ -28,7 +28,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     delete: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
-    getCaseIDsByAlertID: jest.fn(),
+    getCasesByAlertID: jest.fn(),
   };
 };
 
@@ -43,6 +43,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
+    getAllAlertsAttachToCase: jest.fn(),
   };
 };
 

@@ -58,6 +58,7 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -390,6 +391,7 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
@@ -560,9 +562,9 @@ export function XYChart({
         value: pointValue,
       });
     }
-
-    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-    const timeFieldName = xDomain && xAxisFieldName;
+    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
+    const xAxisFieldName = currentColumnMeta?.field;
+    const isDateField = currentColumnMeta?.type === 'date';
 
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
@@ -571,7 +573,7 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName,
+      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
     onClickValue(desanitizeFilterContext(context));
   };
@@ -629,6 +631,13 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        legendAction={getLegendAction(
+          filteredLayers,
+          data.tables,
+          onClickValue,
+          formatFactory,
+          layersAlreadyFormatted
+        )}
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 

@@ -29,6 +29,7 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
