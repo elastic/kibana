@@ -258,12 +258,12 @@ describe('delete()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when deleting an alert', async () => {
+    test('logs audit event when deleting a rule', async () => {
       await alertsClient.delete({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_delete',
+            action: 'rule_delete',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -271,14 +271,14 @@ describe('delete()', () => {
       );
     });
 
-    test('logs audit event when not authorised to delete an alert', async () => {
+    test('logs audit event when not authorised to delete a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(alertsClient.delete({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_delete',
+            action: 'rule_delete',
             outcome: 'failure',
           }),
           kibana: {
