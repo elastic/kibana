@@ -402,17 +402,16 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               </EuiFlexItem>
                               <EuiFlexItem grow={false}>
                                 <EuiButtonEmpty
-                                  onClick={async () => {
-                                    const ingestPipelinesAppUrlGenerator = share.urlGenerators.getUrlGenerator(
-                                      'INGEST_PIPELINES_APP_URL_GENERATOR'
+                                  onClick={() => {
+                                    const locator = share.url.locators.get(
+                                      'INGEST_PIPELINES_APP_LOCATOR'
                                     );
-                                    await navigateToUrl(
-                                      await ingestPipelinesAppUrlGenerator.createUrl({
-                                        page: 'pipeline_edit',
-                                        pipelineId: pipelineName,
-                                        absolute: true,
-                                      })
-                                    );
+                                    if (!locator) return;
+                                    locator.navigate({
+                                      page: 'pipeline_edit',
+                                      pipelineId: pipelineName,
+                                      absolute: true,
+                                    });
                                   }}
                                 >
                                   <FormattedMessage
