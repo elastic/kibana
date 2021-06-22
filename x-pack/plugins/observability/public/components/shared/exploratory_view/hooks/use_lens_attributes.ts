@@ -67,6 +67,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
           operationType: seriesT.operationType,
           seriesType: seriesT.seriesType,
           reportDefinitions: seriesT.reportDefinitions ?? {},
+          time: seriesT.time,
         });
       }
     });
