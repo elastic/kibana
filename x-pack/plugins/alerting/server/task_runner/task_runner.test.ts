@@ -355,6 +355,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1118,6 +1126,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1659,6 +1675,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1851,6 +1875,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",

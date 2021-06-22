@@ -22,6 +22,7 @@ import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
+import { RelatedSavedObjects } from './related_saved_objects';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -50,6 +51,7 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -77,6 +79,7 @@ export class ActionExecutor {
     request,
     source,
     taskInfo,
+    relatedSavedObjects,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -172,6 +175,16 @@ export class ActionExecutor {
             ],
           },
         };
+
+        for (const relatedSavedObject of relatedSavedObjects || []) {
+          event.kibana?.saved_objects?.push({
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: relatedSavedObject.type,
+            id: relatedSavedObject.id,
+            type_id: relatedSavedObject.typeId,
+            namespace: relatedSavedObject.namespace,
+          });
+        }
 
         eventLogger.startTiming(event);
         let rawResult: ActionTypeExecutorResult<unknown>;
