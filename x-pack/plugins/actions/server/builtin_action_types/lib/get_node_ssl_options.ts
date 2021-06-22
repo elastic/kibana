@@ -6,10 +6,10 @@
  */
 
 import { PeerCertificate } from 'tls';
-import { TLSSettings } from '../../types';
+import { SSLSettings } from '../../types';
 import { Logger } from '../../../../../../src/core/server';
 
-export function getNodeTLSOptions(
+export function getNodeSSLOptions(
   logger: Logger,
   verificationMode?: string
 ): {
@@ -44,10 +44,10 @@ export function getNodeTLSOptions(
   return agentOptions;
 }
 
-export function getTLSSettingsFromConfig(
+export function getSSLSettingsFromConfig(
   verificationMode?: 'none' | 'certificate' | 'full',
   rejectUnauthorized?: boolean
-): TLSSettings {
+): SSLSettings {
   if (verificationMode) {
     return { verificationMode };
   } else if (rejectUnauthorized !== undefined) {

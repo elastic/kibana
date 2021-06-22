@@ -22,7 +22,7 @@ interface CreateTestConfigOptions {
   verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
-  customizeLocalHostTls?: boolean;
+  customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
 }
 
@@ -52,7 +52,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     ssl = false,
     verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
-    customizeLocalHostTls = false,
+    customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
   } = options;
 
@@ -102,25 +102,25 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const customHostSettingsValue = [
       {
         url: tlsWebhookServers.rejectUnauthorizedFalse,
-        tls: {
+        ssl: {
           verificationMode: 'none',
         },
       },
       {
         url: tlsWebhookServers.rejectUnauthorizedTrue,
-        tls: {
+        ssl: {
           verificationMode: 'full',
         },
       },
       {
         url: tlsWebhookServers.caFile,
-        tls: {
+        ssl: {
           verificationMode: 'certificate',
           certificateAuthoritiesFiles: [CA_CERT_PATH],
         },
       },
     ];
-    const customHostSettings = customizeLocalHostTls
+    const customHostSettings = customizeLocalHostSsl
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
@@ -153,7 +153,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.healthCheck.interval="1s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
-          `--xpack.actions.tls.verificationMode=${verificationMode}`,
+          `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           '--xpack.eventLog.logEntries=true',
@@ -198,7 +198,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
-            'custom.tls.noCustom': {
+            'custom.ssl.noCustom': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.noCustom}`,
               config: {
