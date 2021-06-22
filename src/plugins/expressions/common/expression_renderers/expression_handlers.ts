@@ -6,8 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { DefaultInterpreterRenderHandlers, InterpreterRenderHandlers } from './types';
+import { InterpreterRenderHandlers, RenderMode } from './types';
 
-export function getDefaultHandlers<T = {}>(): InterpreterRenderHandlers<T> {
-  return new DefaultInterpreterRenderHandlers<T>() as InterpreterRenderHandlers<T>;
+function on<T>(this: T, event: keyof T, fn: (...args: any) => void): void {
+  const eventCall = this[event];
+  if (typeof eventCall !== 'function') return;
+
+  const updatedEvent = (...args: unknown[]) => {
+    const preventFromCallingListener: void | boolean = eventCall(...args);
+    if (typeof fn === 'function' && !preventFromCallingListener) {
+      fn(...args);
+    }
+    return preventFromCallingListener;
+  };
+  this[event] = (updatedEvent as unknown) as typeof eventCall;
+}
+
+export function getDefaultHandlers<T>(): InterpreterRenderHandlers<T> {
+  const handlers = {
+    done() {},
+    onDestroy(fn: () => void) {},
+    reload() {},
+    update(params: any) {},
+    event(event: any) {},
+    getRenderMode() {
+      return 'noInteractivity' as RenderMode;
+    },
+    isSyncColorsEnabled() {
+      return false;
+    },
+    on,
+  } as InterpreterRenderHandlers<T>;
+
+  return handlers;
 }

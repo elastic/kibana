@@ -72,7 +72,7 @@ export interface IInterpreterRenderHandlers {
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   isSyncColorsEnabled: () => boolean;
-  on: (event: any, fn: (...args: any) => void) => void;
+  on: (this: any, event: any, fn: (...args: any) => void) => void;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.
@@ -83,37 +83,16 @@ export interface IInterpreterRenderHandlers {
 
 type DefaultEmitters<T extends IInterpreterRenderHandlers> = Pick<T, 'done' | 'reload' | 'update'>;
 
-export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpreterRenderHandlers {
-  done() {}
-  onDestroy(fn: () => void) {}
-  reload() {}
-  update(params: any) {}
-  event(event: any) {}
-  getRenderMode() {
-    return 'noInteractivity' as RenderMode;
-  }
-  isSyncColorsEnabled() {
-    return false;
-  }
-  hasCompatibleActions?: (event: any) => Promise<boolean>;
-
-  on(event: keyof Emitters | keyof DefaultEmitters<this>, fn: (...args: any) => void): void {
-    const eventName = event as keyof this;
-    const eventCall = this[eventName];
-    if (typeof eventCall !== 'function') return;
-
-    const updatedEvent = (...args: unknown[]) => {
-      const preventFromCallingListener: void | boolean = eventCall(...args);
-      if (typeof fn === 'function' && !preventFromCallingListener) {
-        fn(...args);
-      }
-      return preventFromCallingListener;
-    };
-    this[eventName] = (updatedEvent as unknown) as typeof eventCall;
-  }
-
-  uiState?: unknown;
-}
+type DefaultInterpreterRenderHandlers<Emitters = {}> = IInterpreterRenderHandlers &
+  {
+    [K in keyof Emitters]: Emitters[K];
+  } & {
+    on: (
+      this: any,
+      event: keyof Emitters | keyof DefaultEmitters<IInterpreterRenderHandlers>,
+      fn: (...args: any) => void
+    ) => void;
+  };
 
 export type InterpreterRenderHandlers<Emitters = {}> = Emitters &
   DefaultInterpreterRenderHandlers<Emitters>;

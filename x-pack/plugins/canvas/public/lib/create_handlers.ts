@@ -22,10 +22,8 @@ import {
 
 // We need to move towards only using these handlers and ditching our canvas specific ones
 export const createHandlers = (): InterpreterRenderHandlers<CanvasSpecificRendererHandlers> => {
-  const defaultHandlers = getDefaultHandlers<CanvasSpecificRendererHandlers>();
-
-  const handlers: Partial<typeof defaultHandlers> = {
-    ...defaultHandlers,
+  return {
+    ...getDefaultHandlers<CanvasSpecificRendererHandlers>(),
     destroy() {},
     getElementId() {
       return '';
@@ -46,7 +44,6 @@ export const createHandlers = (): InterpreterRenderHandlers<CanvasSpecificRender
     embeddableInputChange() {},
     resize(_size: { height: number; width: number }) {},
   };
-  return Object.assign(defaultHandlers, handlers);
 };
 
 export const assignHandlers = (

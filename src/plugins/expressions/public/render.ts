@@ -76,8 +76,9 @@ export class ExpressionRenderHandler {
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
-    this.handlers = getDefaultHandlers();
-    this.handlers = Object.assign(this.handlers, {
+    const handlers = getDefaultHandlers();
+    this.handlers = {
+      ...handlers,
       onDestroy: (fn: any) => {
         this.destroyFn = fn;
       },
@@ -102,7 +103,7 @@ export class ExpressionRenderHandler {
         return syncColors || false;
       },
       hasCompatibleActions,
-    });
+    };
   }
 
   render = async (value: any, uiState?: any) => {
