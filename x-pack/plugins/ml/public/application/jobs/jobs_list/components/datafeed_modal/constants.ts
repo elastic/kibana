@@ -15,7 +15,7 @@ export const CHART_DIRECTION = {
 export type ChartDirectionType = typeof CHART_DIRECTION[keyof typeof CHART_DIRECTION];
 
 // [width, height]
-export const CHART_SIZE: ChartSizeArray = ['100%', 300];
+export const CHART_SIZE: ChartSizeArray = ['100%', 380];
 
 export const TAB_IDS = {
   CHART: 'chart',
