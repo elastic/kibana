@@ -18,32 +18,31 @@ import { ReportBreakdowns } from './columns/report_breakdowns';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
+import {
+  CORE_WEB_VITALS_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
+  KPI_OVER_TIME_LABEL,
+  PERF_DIST_LABEL,
+} from '../configurations/constants/labels';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
-    { id: 'upd', label: 'Monitor duration' },
-    { id: 'upp', label: 'Pings histogram' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
   ],
   ux: [
-    { id: 'pld', label: 'Performance distribution' },
-    { id: 'kpi', label: 'KPI over time' },
-    { id: 'cwv', label: 'Core Web Vitals' },
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'cwv', label: CORE_WEB_VITALS_LABEL },
   ],
-  apm: [
-    { id: 'svl', label: 'Latency' },
-    { id: 'tpt', label: 'Throughput' },
+  mobile: [
+    { id: 'kpi', label: KPI_OVER_TIME_LABEL },
+    { id: 'dist', label: PERF_DIST_LABEL },
+    { id: 'mdd', label: DEVICE_DISTRIBUTION_LABEL },
   ],
-  infra_logs: [
-    {
-      id: 'logs',
-      label: 'Logs Frequency',
-    },
-  ],
-  infra_metrics: [
-    { id: 'cpu', label: 'CPU usage' },
-    { id: 'mem', label: 'Memory usage' },
-    { id: 'nwk', label: 'Network activity' },
-  ],
+  apm: [],
+  infra_logs: [],
+  infra_metrics: [],
 };
 
 export function SeriesBuilder({
@@ -72,7 +71,7 @@ export function SeriesBuilder({
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
-      seriesId,
+      dataType,
       indexPattern,
       reportType: reportType!,
     });

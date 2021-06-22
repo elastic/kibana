@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { SearchHit } from 'typings/elasticsearch/search';
+import { SearchHit } from 'src/core/types/elasticsearch/search';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';

@@ -106,7 +106,7 @@ describe('task', () => {
     let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      const artifacts = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts();
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
       ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
@@ -167,7 +167,7 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([], newManifest);
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);
@@ -192,10 +192,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -221,10 +221,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -251,10 +251,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -284,7 +284,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_TRUSTED_APPS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([ARTIFACT_ID_1]);
@@ -314,7 +317,7 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([], newManifest);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);

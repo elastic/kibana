@@ -83,13 +83,13 @@ export function WaterfallWithSummmary({
       />
     );
 
-    return <EuiPanel paddingSize="m">{content}</EuiPanel>;
+    return <EuiPanel hasBorder={true}>{content}</EuiPanel>;
   }
 
   const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
-    <EuiPanel paddingSize="m">
+    <EuiPanel hasBorder={true}>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">

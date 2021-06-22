@@ -18,7 +18,7 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends FormData, I extends FormData> {
+export interface UseFormReturn<T extends FormData, I extends FormData> {
   form: FormHook<T, I>;
 }
 

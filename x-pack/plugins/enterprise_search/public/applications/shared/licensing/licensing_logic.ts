@@ -16,6 +16,7 @@ interface LicensingValues {
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
   isTrial: boolean;
+  canManageLicense: boolean;
 }
 interface LicensingActions {
   setLicense(license: ILicense): ILicense;
@@ -28,7 +29,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
     setLicense: (license) => license,
     setLicenseSubscription: (licenseSubscription) => licenseSubscription,
   },
-  reducers: {
+  reducers: ({ props }) => ({
     license: [
       null,
       {
@@ -41,7 +42,8 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
         setLicenseSubscription: (_, licenseSubscription) => licenseSubscription,
       },
     ],
-  },
+    canManageLicense: [props.canManageLicense || false, {}],
+  }),
   selectors: {
     hasPlatinumLicense: [
       (selectors) => [selectors.license],
@@ -80,6 +82,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
  */
 interface LicensingLogicProps {
   license$: Observable<ILicense>;
+  canManageLicense: boolean;
 }
 export const mountLicensingLogic = (props: LicensingLogicProps) => {
   LicensingLogic(props);

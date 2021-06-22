@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
 import { RuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
@@ -36,6 +36,7 @@ export async function getServiceAlerts({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [EVENT_KIND]: 'signal' } },
           ],
           should: [
             {
@@ -64,9 +65,6 @@ export async function getServiceAlerts({
       },
       size: 100,
       fields: ['*'],
-      collapse: {
-        field: ALERT_UUID,
-      },
       sort: {
         '@timestamp': 'desc',
       },
