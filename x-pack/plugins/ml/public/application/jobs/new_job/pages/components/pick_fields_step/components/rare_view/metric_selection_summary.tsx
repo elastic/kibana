@@ -72,7 +72,7 @@ export const RareDetectorsSummary: FC<Props> = ({ rareDetectorType }) => {
 
   return (
     <>
-      <DetectorDescription detectorType={rareDetectorType} isSummary={true} />
+      <DetectorDescription detectorType={rareDetectorType} />
       <EuiSpacer size="s" />
       <EventRateChart
         eventRateChartData={eventRateChartData}

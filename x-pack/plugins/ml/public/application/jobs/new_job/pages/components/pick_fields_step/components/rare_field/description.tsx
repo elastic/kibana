@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
-          defaultMessage="Select a field to partition analysis by. Each value of this field will be modeled independently individually."
+          defaultMessage="Select a field in which to detect rare values."
         />
       }
     >
