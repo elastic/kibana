@@ -145,7 +145,10 @@ export const PingList = () => {
             field: 'timestamp',
             name: TIMESTAMP_LABEL,
             render: (timestamp: string, item: Ping) => (
-              <PingTimestamp label={getShortTimeStamp(moment(timestamp))} ping={item} />
+              <PingTimestamp
+                checkGroup={item.monitor.check_group}
+                label={getShortTimeStamp(moment(timestamp))}
+              />
             ),
           },
         ]

@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
-  Ping,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
@@ -32,12 +31,12 @@ const StepDiv = styled.div`
 `;
 
 interface Props {
+  checkGroup?: string;
   label?: string;
-  ping: Ping;
   initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -47,7 +46,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath = `${basePath}/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNumber}`;
+  const imgPath = `${basePath}/api/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
