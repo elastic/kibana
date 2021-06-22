@@ -77,7 +77,7 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param docs The parent signals/events of the new signal to be built.
  * @param rule The rule that is generating the new signal.
  */
-export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
+export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema, owner: string): Signal => {
   const _meta = {
     version: SIGNALS_TEMPLATE_VERSION,
   };
@@ -93,6 +93,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
     parents,
     ancestors,
     status: 'open',
+    owner,
     rule,
     depth,
   };

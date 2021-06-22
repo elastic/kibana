@@ -2893,6 +2893,9 @@ Object {
           "original_time": Object {
             "type": "date",
           },
+          "owner": Object {
+            "type": "keyword",
+          },
           "parent": Object {
             "properties": Object {
               "depth": Object {

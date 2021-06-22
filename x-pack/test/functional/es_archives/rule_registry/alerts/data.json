@@ -1,0 +1,29 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-observability-apm",
+    "id": "NoxgpHkBqbdrfX07MqXV",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "apm.error_rate",
+      "message": "hello world 1",
+      "kibana.rac.alert.owner": "apm",
+      "kibana.rac.alert.status": "open"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security-solution",
+    "id": "020202",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "siem.signals",
+      "message": "hello world security",
+      "kibana.rac.alert.owner": "siem",
+      "kibana.rac.alert.status": "open"
+    }
+  }
+}

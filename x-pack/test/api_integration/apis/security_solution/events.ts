@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { secOnly } from '../../../rule_registry/common/lib/authentication/users';
+import {
+  createSpacesAndUsers,
+  deleteSpacesAndUsers,
+} from '../../../rule_registry/common/lib/authentication/';
 import {
   Direction,
   TimelineEventsQueries,
@@ -407,10 +412,19 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('Timeline', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts'));
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await createSpacesAndUsers(getService);
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await deleteSpacesAndUsers(getService);
+    });
 
     it('Make sure that we get Timeline data', async () => {
       await retry.try(async () => {
@@ -451,6 +465,60 @@ export default function ({ getService }: FtrProviderContext) {
         expect(timeline.totalCount).to.be(TOTAL_COUNT);
         expect(timeline.pageInfo.activePage).to.equal(ACTIVE_PAGE);
         expect(timeline.pageInfo.querySize).to.equal(PAGE_SIZE);
+      });
+    });
+
+    // TODO: unskip this test once authz is added to search strategy
+    it.skip('Make sure that we get Timeline data using the hunter role and do not receive observability alerts', async () => {
+      await retry.try(async () => {
+        const requestBody = {
+          defaultIndex: ['.alerts*'], // query both .alerts-observability-apm and .alerts-security-solution
+          docValueFields: [],
+          factoryQueryType: TimelineEventsQueries.all,
+          fieldRequested: FIELD_REQUESTED,
+          // fields: [],
+          filterQuery: {
+            bool: {
+              filter: [
+                {
+                  match_all: {},
+                },
+              ],
+            },
+          },
+          pagination: {
+            activePage: 0,
+            querySize: 25,
+          },
+          language: 'kuery',
+          sort: [
+            {
+              field: '@timestamp',
+              direction: Direction.desc,
+              type: 'number',
+            },
+          ],
+          timerange: {
+            from: FROM,
+            to: TO,
+            interval: '12h',
+          },
+        };
+        const resp = await supertestWithoutAuth
+          .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+          .auth(secOnly.username, secOnly.password) // using security 'hunter' role
+          .set('kbn-xsrf', 'true')
+          .set('Content-Type', 'application/json')
+          .send(requestBody)
+          .expect(200);
+
+        const timeline = resp.body;
+
+        // we inject one alert into the security solutions alerts index and another alert into the observability alerts index
+        // therefore when accessing the .alerts* index with the security solution user,
+        // only security solution alerts should be returned since the security solution user
+        // is not authorized to view observability alerts.
+        expect(timeline.totalCount).to.be(1);
       });
     });
 

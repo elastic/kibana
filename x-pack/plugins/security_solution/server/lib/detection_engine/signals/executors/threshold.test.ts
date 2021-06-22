@@ -31,6 +31,7 @@ describe('threshold_executor', () => {
       actions: [],
       enabled: true,
       name: 'rule-name',
+      consumer: 'siem',
       tags: ['some fake tag 1', 'some fake tag 2'],
       createdBy: 'sample user',
       createdAt: '2020-03-27T22:55:59.577Z',

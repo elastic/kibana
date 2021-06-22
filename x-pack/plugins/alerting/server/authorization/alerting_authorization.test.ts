@@ -1944,4 +1944,169 @@ describe('AlertingAuthorization', () => {
               `);
     });
   });
+
+  describe('getAugmentRuleTypesWithAuthorization', () => {
+    const myOtherAppAlertType: RegistryAlertType = {
+      actionGroups: [],
+      actionVariables: undefined,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
+      id: 'myOtherAppAlertType',
+      name: 'myOtherAppAlertType',
+      producer: 'alerts',
+      enabledInLicense: true,
+    };
+    const myAppAlertType: RegistryAlertType = {
+      actionGroups: [],
+      actionVariables: undefined,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
+      id: 'myAppAlertType',
+      name: 'myAppAlertType',
+      producer: 'myApp',
+      enabledInLicense: true,
+    };
+    const mySecondAppAlertType: RegistryAlertType = {
+      actionGroups: [],
+      actionVariables: undefined,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
+      id: 'mySecondAppAlertType',
+      name: 'mySecondAppAlertType',
+      producer: 'myApp',
+      enabledInLicense: true,
+    };
+    const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
+
+    test('it returns authorized rule types given a set of feature ids', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'find'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds,
+      });
+      alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+      await expect(alertAuthorization.getAugmentRuleTypesWithAuthorization(['myApp'])).resolves
+        .toMatchInlineSnapshot(`
+              Object {
+                "authorizedRuleTypes": Set {
+                  Object {
+                    "actionGroups": Array [],
+                    "actionVariables": undefined,
+                    "authorizedConsumers": Object {
+                      "myApp": Object {
+                        "all": false,
+                        "read": true,
+                      },
+                    },
+                    "defaultActionGroupId": "default",
+                    "enabledInLicense": true,
+                    "id": "myOtherAppAlertType",
+                    "minimumLicenseRequired": "basic",
+                    "name": "myOtherAppAlertType",
+                    "producer": "alerts",
+                    "recoveryActionGroup": Object {
+                      "id": "recovered",
+                      "name": "Recovered",
+                    },
+                  },
+                },
+                "hasAllRequested": false,
+                "username": "some-user",
+              }
+            `);
+    });
+
+    test('it returns all authorized if user has read, get and update alert privileges', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'update'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds,
+      });
+      alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+      await expect(alertAuthorization.getAugmentRuleTypesWithAuthorization(['myApp'])).resolves
+        .toMatchInlineSnapshot(`
+              Object {
+                "authorizedRuleTypes": Set {
+                  Object {
+                    "actionGroups": Array [],
+                    "actionVariables": undefined,
+                    "authorizedConsumers": Object {
+                      "myApp": Object {
+                        "all": true,
+                        "read": true,
+                      },
+                    },
+                    "defaultActionGroupId": "default",
+                    "enabledInLicense": true,
+                    "id": "myOtherAppAlertType",
+                    "minimumLicenseRequired": "basic",
+                    "name": "myOtherAppAlertType",
+                    "producer": "alerts",
+                    "recoveryActionGroup": Object {
+                      "id": "recovered",
+                      "name": "Recovered",
+                    },
+                  },
+                },
+                "hasAllRequested": false,
+                "username": "some-user",
+              }
+            `);
+    });
+  });
 });

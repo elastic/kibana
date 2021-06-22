@@ -124,18 +124,37 @@ export class AlertingAuthorization {
         return new Set();
       });
 
-    this.allPossibleConsumers = this.featuresIds.then((featuresIds) =>
-      featuresIds.size
+    this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
+      return featuresIds.size
         ? asAuthorizedConsumers([...this.exemptConsumerIds, ...featuresIds], {
             read: true,
             all: true,
           })
-        : {}
-    );
+        : {};
+    });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
+  }
+
+  /*
+   * This method exposes the private 'augmentRuleTypesWithAuthorization' to be
+   * used by the RAC/Alerts client
+   */
+  public async getAugmentRuleTypesWithAuthorization(
+    featureIds: string[]
+  ): Promise<{
+    username?: string;
+    hasAllRequested: boolean;
+    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
+  }> {
+    return this.augmentRuleTypesWithAuthorization(
+      this.alertTypeRegistry.list(),
+      [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+      AlertingAuthorizationEntity.Alert,
+      new Set(featureIds)
+    );
   }
 
   public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
@@ -339,13 +358,14 @@ export class AlertingAuthorization {
   private async augmentRuleTypesWithAuthorization(
     ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
-    authorizationEntity: AlertingAuthorizationEntity
+    authorizationEntity: AlertingAuthorizationEntity,
+    featuresIds?: Set<string>
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const featuresIds = await this.featuresIds;
+    const fIds = featuresIds ?? (await this.featuresIds);
     if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -363,7 +383,7 @@ export class AlertingAuthorization {
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and ruleType in the system whether this user has this privilege
       for (const ruleType of ruleTypesWithAuthorization) {
-        for (const feature of featuresIds) {
+        for (const feature of fIds) {
           for (const operation of operations) {
             privilegeToRuleType.set(
               this.authorization!.actions.alerting.get(
@@ -420,7 +440,7 @@ export class AlertingAuthorization {
       return {
         hasAllRequested: true,
         authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
-          new Set([...ruleTypes].filter((ruleType) => featuresIds.has(ruleType.producer))),
+          new Set([...ruleTypes].filter((ruleType) => fIds.has(ruleType.producer))),
           await this.allPossibleConsumers
         ),
       };

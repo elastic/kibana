@@ -111,7 +111,7 @@ export const buildSignalFromSequence = (
   ruleSO: SavedObject<AlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = buildSignal(events, rule);
+  const signal: Signal = buildSignal(events, rule, ruleSO.attributes.consumer);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
     ...mergedEvents,

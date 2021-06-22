@@ -190,6 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
             depth: 0,
           },
           original_time: '2020-11-16T22:58:08.000Z',
+          owner: 'siem',
         },
         all_field_values: [
           'store',

@@ -222,6 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
               origin: '/var/log/wtmp',
             },
             original_time: fullSignal.signal.original_time,
+            owner: 'siem',
             parent: {
               depth: 0,
               id: 'UBXOBmkBR346wHgnLP8T',
