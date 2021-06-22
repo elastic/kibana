@@ -143,7 +143,9 @@ export class AlertingAuthorization {
    * used by the RAC/Alerts client
    */
   public async getAugmentRuleTypesWithAuthorization(
-    featureIds: string[]
+    featureIds: string[],
+    operations: Array<ReadOperations | WriteOperations>,
+    authorizationEntity: AlertingAuthorizationEntity
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -151,8 +153,8 @@ export class AlertingAuthorization {
   }> {
     return this.augmentRuleTypesWithAuthorization(
       this.alertTypeRegistry.list(),
-      [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
-      AlertingAuthorizationEntity.Alert,
+      operations,
+      authorizationEntity,
       new Set(featureIds)
     );
   }

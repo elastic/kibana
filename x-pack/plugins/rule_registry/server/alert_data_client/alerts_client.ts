@@ -64,9 +64,14 @@ export class AlertsClient {
     this.auditLogger = auditLogger;
   }
 
-  public async getAlertsIndex(featureIds: string[]) {
+  public async getAlertsIndex(
+    featureIds: string[],
+    operations: Array<ReadOperations | WriteOperations>
+  ) {
     return this.authorization.getAugmentRuleTypesWithAuthorization(
-      featureIds.length !== 0 ? featureIds : ['apm', 'siem']
+      featureIds.length !== 0 ? featureIds : ['apm', 'siem'],
+      operations,
+      AlertingAuthorizationEntity.Alert
     );
   }
 
@@ -186,7 +191,9 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     const augmentedRuleTypes = await this.authorization.getAugmentRuleTypesWithAuthorization(
-      featureIds
+      featureIds,
+      [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+      AlertingAuthorizationEntity.Alert
     );
 
     const arrayOfAuthorizedRuleTypes = Array.from(augmentedRuleTypes.authorizedRuleTypes);
