@@ -24,6 +24,7 @@ import { rerender } from '../test_helpers';
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
 
+import { Credentials } from './components/credentials';
 import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
@@ -31,6 +32,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappings } from './components/role_mappings';
+import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -103,52 +105,28 @@ describe('AppSearchConfigured', () => {
     expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
-  describe('ability checks', () => {
-    describe('canViewRoleMappings', () => {
-      it('renders RoleMappings when canViewRoleMappings is true', () => {
-        setMockValues({ myRole: { canViewRoleMappings: true } });
-        rerender(wrapper);
-        expect(wrapper.find(RoleMappings)).toHaveLength(1);
+  describe('routes with ability checks', () => {
+    const runRouteAbilityCheck = (routeAbility: string, View: React.FC) => {
+      describe(View.name, () => {
+        it(`renders ${View.name} when user ${routeAbility} is true`, () => {
+          setMockValues({ myRole: { [routeAbility]: true } });
+          rerender(wrapper);
+          expect(wrapper.find(View)).toHaveLength(1);
+        });
+
+        it(`does not render ${View.name} when user ${routeAbility} is false`, () => {
+          setMockValues({ myRole: { [routeAbility]: false } });
+          rerender(wrapper);
+          expect(wrapper.find(View)).toHaveLength(0);
+        });
       });
+    };
 
-      it('does not render RoleMappings when user canViewRoleMappings is false', () => {
-        setMockValues({ myRole: { canManageEngines: false } });
-        rerender(wrapper);
-        expect(wrapper.find(RoleMappings)).toHaveLength(0);
-      });
-    });
-
-    describe('canManageEngines', () => {
-      it('renders EngineCreation when user canManageEngines is true', () => {
-        setMockValues({ myRole: { canManageEngines: true } });
-        rerender(wrapper);
-
-        expect(wrapper.find(EngineCreation)).toHaveLength(1);
-      });
-
-      it('does not render EngineCreation when user canManageEngines is false', () => {
-        setMockValues({ myRole: { canManageEngines: false } });
-        rerender(wrapper);
-
-        expect(wrapper.find(EngineCreation)).toHaveLength(0);
-      });
-    });
-
-    describe('canManageMetaEngines', () => {
-      it('renders MetaEngineCreation when user canManageMetaEngines is true', () => {
-        setMockValues({ myRole: { canManageMetaEngines: true } });
-        rerender(wrapper);
-
-        expect(wrapper.find(MetaEngineCreation)).toHaveLength(1);
-      });
-
-      it('does not render MetaEngineCreation when user canManageMetaEngines is false', () => {
-        setMockValues({ myRole: { canManageMetaEngines: false } });
-        rerender(wrapper);
-
-        expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
-      });
-    });
+    runRouteAbilityCheck('canViewSettings', Settings);
+    runRouteAbilityCheck('canViewAccountCredentials', Credentials);
+    runRouteAbilityCheck('canViewRoleMappings', RoleMappings);
+    runRouteAbilityCheck('canManageEngines', EngineCreation);
+    runRouteAbilityCheck('canManageMetaEngines', MetaEngineCreation);
   });
 
   describe('library', () => {
