@@ -25,7 +25,7 @@ export class FieldNotFoundError extends Error {
     return this.constructor.name;
   }
 
-  public get body() {
+  public get errBody() {
     return this.message;
   }
 }
