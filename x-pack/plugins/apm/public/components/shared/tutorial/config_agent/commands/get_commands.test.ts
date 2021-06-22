@@ -12,7 +12,7 @@ describe('getCommands', () => {
     it('renders empty command', () => {
       const commands = getCommands({
         variantId: 'foo',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -24,7 +24,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'java',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
@@ -39,7 +39,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'java',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -60,7 +60,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'js',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -84,7 +84,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'js',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -113,7 +113,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'node',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -138,7 +138,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'node',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -168,7 +168,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'django',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -203,7 +203,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'django',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -243,7 +243,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'flask',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -275,7 +275,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'flask',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -312,7 +312,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'rails',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -335,7 +335,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'rails',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -363,7 +363,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'rack',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -386,7 +386,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'rack',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -414,7 +414,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'go',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -438,7 +438,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'go',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -467,7 +467,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'dotnet',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -484,7 +484,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'dotnet',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
@@ -506,7 +506,7 @@ describe('getCommands', () => {
     it('renders empty commands', () => {
       const commands = getCommands({
         variantId: 'php',
-        environmentDetails: {},
+        policyDetails: {},
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -519,7 +519,7 @@ describe('getCommands', () => {
     it('renders with secret token and url', () => {
       const commands = getCommands({
         variantId: 'php',
-        environmentDetails: {
+        policyDetails: {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },

@@ -54,12 +54,7 @@ const fleetAgentsRoute = createApmServerRoute({
       fleetPluginStart,
     });
 
-    const hasPolicyElasticOnCloud = agents.some(
-      ({ name }) => name === POLICY_ELASTIC_AGENT_ON_CLOUD
-    );
-
     return {
-      hasPolicyElasticOnCloud,
       cloudStandaloneSetup,
       agents: agents.map((agent) => {
         const packagePolicy = policiesGroupedById[agent.id];

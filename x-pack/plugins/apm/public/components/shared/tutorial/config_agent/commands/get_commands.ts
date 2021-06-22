@@ -32,10 +32,10 @@ const commandsMap: Record<string, string> = {
 
 export function getCommands({
   variantId,
-  environmentDetails,
+  policyDetails,
 }: {
   variantId: string;
-  environmentDetails: {
+  policyDetails: {
     apmServerUrl?: string;
     secretToken?: string;
   };
@@ -44,5 +44,5 @@ export function getCommands({
   if (!commands) {
     return '';
   }
-  return Mustache.render(commands, environmentDetails);
+  return Mustache.render(commands, policyDetails);
 }
