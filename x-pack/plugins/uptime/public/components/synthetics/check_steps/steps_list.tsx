@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
-import { JourneyStep, Ping } from '../../../../common/runtime_types';
+import { JourneyStep } from '../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
 import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
 import { StatusBadge } from '../status_badge';
@@ -75,15 +81,15 @@ function reduceStepStatus(prev: StepStatusCount, cur: JourneyStep): StepStatusCo
 }
 
 export const StepsList = ({ data, error, loading }: Props) => {
-  const steps = data.filter(isStepEnd);
+  const steps: JourneyStep[] = data.filter(isStepEnd);
 
   const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
 
-  const columns: any[] = [
+  const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     {
       field: 'synthetics.payload.status',
       name: STATUS_LABEL,
-      render: (pingStatus: string, item: Ping) => (
+      render: (pingStatus: string, item) => (
         <StatusBadge status={pingStatus} stepNo={item.synthetics?.step?.index!} />
       ),
     },
@@ -91,13 +97,13 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (_timestamp: string, item: Ping) => <StepImage step={item} />,
+      render: (_timestamp: string, item) => <StepImage step={item} />,
     },
     {
       align: 'left',
       field: 'timestamp',
       name: '',
-      render: (val: string, item: Ping) => (
+      render: (_val: string, item) => (
         <StepDetailLink
           checkGroupId={item.monitor.check_group!}
           stepIndex={item.synthetics?.step?.index!}
