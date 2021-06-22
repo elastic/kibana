@@ -190,15 +190,13 @@ export class Plugin
 
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
-          const otherLinks = deepLinks
-            .map((link) => {
-              if (link.navLinkStatus === AppNavLinkStatus.visible) {
-                return { app: observabilityAppId, label: link.title, path: link.path };
-              } else {
-                return undefined;
-              }
-            })
-            .filter((link) => link !== undefined) as NavigationEntry[];
+          const otherLinks: NavigationEntry[] = deepLinks
+            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .map((link) => ({
+              app: observabilityAppId,
+              label: link.title,
+              path: link.path ?? '',
+            }));
 
           return [
             {
