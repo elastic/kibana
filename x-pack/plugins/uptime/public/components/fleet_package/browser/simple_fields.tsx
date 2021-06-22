@@ -28,6 +28,33 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   return (
     <>
       <EuiFormRow
+        id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
+        label={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+            defaultMessage="Monitor interval"
+          />
+        }
+        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
+        error={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+            defaultMessage="Monitor interval is required"
+          />
+        }
+      >
+        <ScheduleField
+          onChange={(schedule) =>
+            handleInputChange({
+              value: schedule,
+              configKey: ConfigKeys.SCHEDULE,
+            })
+          }
+          number={fields[ConfigKeys.SCHEDULE].number}
+          unit={fields[ConfigKeys.SCHEDULE].unit}
+        />
+      </EuiFormRow>
+      <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label"
@@ -59,33 +86,6 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
             }),
             [defaultValues]
           )}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
-          />
-        }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
-        error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
-          />
-        }
-      >
-        <ScheduleField
-          onChange={(schedule) =>
-            handleInputChange({
-              value: schedule,
-              configKey: ConfigKeys.SCHEDULE,
-            })
-          }
-          number={fields[ConfigKeys.SCHEDULE].number}
-          unit={fields[ConfigKeys.SCHEDULE].unit}
         />
       </EuiFormRow>
       <EuiFormRow

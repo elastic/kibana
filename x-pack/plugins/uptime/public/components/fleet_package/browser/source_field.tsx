@@ -75,6 +75,12 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 defaultMessage="Zip URL is required"
               />
             }
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.helpText"
+                defaultMessage="Location of the synthetics project repository zip file."
+              />
+            }
           >
             <EuiFieldText
               onChange={({ target: { value } }) =>
@@ -86,27 +92,17 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername"
-                defaultMessage="Zip URL Username"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-          >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, username: value }))
-              }
-              value={config.username}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder"
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.label"
                 defaultMessage="Folder"
               />
             }
             labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.helpText"
+                defaultMessage="Relative directory path where the synthetic journey files are located in the repository."
+              />
+            }
           >
             <EuiFieldText
               onChange={({ target: { value } }) =>
@@ -118,11 +114,39 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword"
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.label"
+                defaultMessage="Zip URL Username"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.helpText"
+                defaultMessage="The username for authenticating with the zip endpoint."
+              />
+            }
+          >
+            <EuiFieldText
+              onChange={({ target: { value } }) =>
+                setConfig((prevConfig) => ({ ...prevConfig, username: value }))
+              }
+              value={config.username}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.abel"
                 defaultMessage="Zip URL Password"
               />
             }
             labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.helpText"
+                defaultMessage="The password for authenticating with the zip endpoint."
+              />
+            }
           >
             <EuiFieldText
               onChange={({ target: { value } }) =>
@@ -149,6 +173,12 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
               defaultMessage="Script is required"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
+              defaultMessage="Runs Synthetic test scripts that are defined inline."
             />
           }
         >
