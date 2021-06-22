@@ -31,6 +31,7 @@ export interface TGridModelSettings {
   isTGridLoading: boolean;
   queryFields: string[];
   selectAll: boolean;
+  showCheckboxes?: boolean;
   title: string;
 }
 export interface TGridModel extends TGridModelSettings {

@@ -160,6 +160,7 @@ export const setInitializeTgridSettings = ({
   return {
     ...timelineById,
     [id]: {
+      ...tGridDefaults,
       ...timeline,
       ...getTGridManageDefaults(id),
       ...tGridSettingsProps,

@@ -346,6 +346,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         selectAll: false,
         queryFields: requiredFieldsForActions,
         title: '',
+        showCheckboxes: true,
       })
     );
   }, [dispatch, defaultTimelineModel, filterManager, timelineId]);

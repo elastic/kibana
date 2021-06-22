@@ -63,4 +63,5 @@ export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridM
   };
   columns: ColumnHeaderOptions[];
   indexNames: string[];
+  showCheckboxes?: boolean;
 }

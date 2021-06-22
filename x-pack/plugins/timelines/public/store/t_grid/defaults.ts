@@ -98,6 +98,6 @@ export const getTGridManageDefaults = (id: string) => ({
   id,
   isLoading: false,
   queryFields: [],
-  title: i18n.EVENTS,
+  title: '',
   unit: (n: number) => i18n.UNIT(n),
 });

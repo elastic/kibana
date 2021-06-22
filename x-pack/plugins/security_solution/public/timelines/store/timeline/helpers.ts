@@ -196,8 +196,8 @@ export const addNewTimeline = ({
     ...timelineById,
     [id]: {
       id,
-      ...timelineDefaults,
       ...(timeline ? timeline : {}),
+      ...timelineDefaults,
       ...timelineProps,
       dateRange,
       savedObjectId: null,
