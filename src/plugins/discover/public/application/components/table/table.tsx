@@ -28,6 +28,7 @@ export function DocViewTable({
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
   const [multiFields, setMultiFields] = useState({} as Record<string, string[]>);
   const [fieldsWithParents, setFieldsWithParents] = useState([] as string[]);
+  const [childParentFieldsMap, setChildParentFieldsMap] = useState({} as Record<string, string>);
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   useEffect(() => {
@@ -38,10 +39,10 @@ export function DocViewTable({
     const flattened = indexPattern.flattenHit(hit);
     const map: Record<string, string[]> = {};
     const arr: string[] = [];
+    const childParentMap: Record<string, string> = {};
 
     Object.keys(flattened).forEach((key) => {
       const field = mapping(key);
-
       if (field && field.spec?.subType?.multi?.parent) {
         const parent = field.spec.subType.multi.parent;
         if (!map[parent]) {
@@ -51,10 +52,12 @@ export function DocViewTable({
         value.push(key);
         map[parent] = value;
         arr.push(key);
+        childParentMap[field.name] = parent;
       }
     });
     if (showMultiFields) {
       setMultiFields(map);
+      setChildParentFieldsMap(childParentMap);
     }
     setFieldsWithParents(arr);
   }, [indexPattern, hit, showMultiFields]);
@@ -90,7 +93,11 @@ export function DocViewTable({
       <tbody>
         {Object.keys(flattened)
           .filter((field) => {
-            return !fieldsWithParents.includes(field);
+            const parent = childParentFieldsMap[field];
+            return (
+              !fieldsWithParents.includes(field) ||
+              (parent && !Object.keys(flattened).includes(parent))
+            );
           })
           .sort((fieldA, fieldB) => {
             const mappingA = mapping(fieldA);
