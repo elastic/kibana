@@ -244,6 +244,7 @@ export const buildExpression = (
           ],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
+          valuesInLegend: [state?.valuesInLegend || false],
           layers: validLayers.map((layer) => {
             const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 

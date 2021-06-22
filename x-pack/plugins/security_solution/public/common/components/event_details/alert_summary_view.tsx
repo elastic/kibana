@@ -12,7 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -53,6 +53,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
+  { id: 'host.status' },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -177,6 +178,24 @@ const AlertSummaryViewComponent: React.FC<{
     timelineId,
   ]);
 
+  const agentId = useMemo(() => {
+    const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
+    return findAgentId ? findAgentId[0] : '';
+  }, [data]);
+
+  const agentStatusRow = {
+    title: i18n.AGENT_STATUS,
+    description: {
+      contextId: timelineId,
+      eventId,
+      fieldName: 'host.status',
+      value: agentId,
+      linkValue: undefined,
+    },
+  };
+
+  const summaryRowsWithAgentStatus = [...summaryRows, agentStatusRow];
+
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');
     return Array.isArray(item?.originalValue)
@@ -188,7 +207,11 @@ const AlertSummaryViewComponent: React.FC<{
   return (
     <>
       <EuiSpacer size="l" />
-      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
+      <SummaryView
+        summaryColumns={summaryColumns}
+        summaryRows={summaryRowsWithAgentStatus}
+        title={title}
+      />
       {maybeRule?.note && (
         <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>

@@ -17,6 +17,7 @@ import {
   getCurrentListPageDataState,
   getListApiSuccessResponse,
   getListItems,
+  getTotalCountListItems,
   getCurrentListItemsQuery,
   getListPagination,
   getListFetchError,
@@ -117,6 +118,19 @@ describe('event filters selectors', () => {
 
     it('should return empty array if no api response', () => {
       expect(getListItems(initialState)).toEqual([]);
+    });
+  });
+
+  describe('getTotalCountListItems()', () => {
+    it('should return the list items from api response', () => {
+      setToLoadedState();
+      expect(getTotalCountListItems(initialState)).toEqual(
+        getLastLoadedResourceState(initialState.listPage.data)?.data.content.total
+      );
+    });
+
+    it('should return empty array if no api response', () => {
+      expect(getTotalCountListItems(initialState)).toEqual(0);
     });
   });
 

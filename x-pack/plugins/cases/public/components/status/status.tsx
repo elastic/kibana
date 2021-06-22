@@ -14,12 +14,18 @@ import * as i18n from './translations';
 import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
 
 interface Props {
+  disabled?: boolean;
   type: CaseStatusWithAllStatus;
   withArrow?: boolean;
   onClick?: () => void;
 }
 
-const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = noop }) => {
+const StatusComponent: React.FC<Props> = ({
+  type,
+  disabled = false,
+  withArrow = false,
+  onClick = noop,
+}) => {
   const props = useMemo(
     () => ({
       color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
@@ -34,6 +40,7 @@ const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = n
       iconOnClick={onClick}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
+      isDisabled={disabled}
     >
       {type === StatusAll ? allCaseStatus[StatusAll].label : statuses[type].label}
     </EuiBadge>

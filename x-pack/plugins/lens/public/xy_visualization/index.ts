@@ -5,27 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, IUiSettingsClient } from 'kibana/public';
-import moment from 'moment-timezone';
+import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { LensPluginStartDependencies } from '../plugin';
+import { getTimeZone } from '../utils';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
-}
-
-function getTimeZone(uiSettings: IUiSettingsClient) {
-  const configuredTimeZone = uiSettings.get('dateFormat:tz');
-  if (configuredTimeZone === 'Browser') {
-    return moment.tz.guess();
-  }
-
-  return configuredTimeZone;
 }
 
 export class XyVisualization {

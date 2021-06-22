@@ -16,7 +16,7 @@ import {
   withNotifyOnErrors,
   ReduxLikeStateContainer,
 } from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+import { esFilters, FilterManager, Filter, SortDirection } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
 
 export interface AppState {
@@ -35,12 +35,11 @@ export interface AppState {
   /**
    * Sorting of the records to be fetched, assumed to be a legacy parameter
    */
-  sort: string[];
+  sort: string[][];
   /**
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
-  query?: Query;
 }
 
 interface GlobalState {
@@ -50,11 +49,11 @@ interface GlobalState {
   filters: Filter[];
 }
 
-interface GetStateParams {
+export interface GetStateParams {
   /**
    * Number of records to be fetched when 'Load' link/button is clicked
    */
-  defaultStepSize: string;
+  defaultSize: number;
   /**
    * The timefield used for sorting
    */
@@ -81,7 +80,7 @@ interface GetStateParams {
   uiSettings: IUiSettingsClient;
 }
 
-interface GetStateReturn {
+export interface GetStateReturn {
   /**
    * Global state, the _g part of the URL
    */
@@ -124,7 +123,7 @@ const APP_STATE_URL_KEY = '_a';
  * provides helper functions to start/stop syncing with URL
  */
 export function getState({
-  defaultStepSize,
+  defaultSize,
   timeFieldName,
   storeInSessionStorage = false,
   history,
@@ -142,7 +141,7 @@ export function getState({
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   const appStateInitial = createInitialAppState(
-    defaultStepSize,
+    defaultSize,
     timeFieldName,
     appStateFromUrl,
     uiSettings
@@ -190,7 +189,7 @@ export function getState({
       const mergedState = { ...oldState, ...newState };
 
       if (!isEqualState(oldState, mergedState)) {
-        appStateContainer.set(mergedState);
+        stateStorage.set(APP_STATE_URL_KEY, mergedState, { replace: true });
       }
     },
     getFilters: () => [
@@ -267,17 +266,17 @@ function getFilters(state: AppState | GlobalState): Filter[] {
  * default state. The default size is the default number of successor/predecessor records to fetch
  */
 function createInitialAppState(
-  defaultSize: string,
+  defaultSize: number,
   timeFieldName: string,
   urlState: AppState,
   uiSettings: IUiSettingsClient
 ): AppState {
-  const defaultState = {
+  const defaultState: AppState = {
     columns: ['_source'],
     filters: [],
-    predecessorCount: parseInt(defaultSize, 10),
-    sort: [timeFieldName, 'desc'],
-    successorCount: parseInt(defaultSize, 10),
+    predecessorCount: defaultSize,
+    successorCount: defaultSize,
+    sort: [[timeFieldName, SortDirection.desc]],
   };
   if (typeof urlState !== 'object') {
     return defaultState;

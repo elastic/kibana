@@ -98,6 +98,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
       <span
         aria-hidden="true"
         class="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
       />
     </button>
@@ -132,6 +133,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
               <span
                 aria-hidden="true"
                 class="euiCallOutHeader__icon"
+                color="inherit"
                 data-euiicon-type="help"
               />
               <span

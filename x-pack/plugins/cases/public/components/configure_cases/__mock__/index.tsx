@@ -45,6 +45,7 @@ export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   setCurrentConfiguration: jest.fn(),
   setMappings: jest.fn(),
   version: '',
+  id: '',
 };
 
 export const useConnectorsResponse: UseConnectorsResponse = {

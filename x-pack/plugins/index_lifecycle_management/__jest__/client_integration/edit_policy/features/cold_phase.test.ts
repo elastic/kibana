@@ -8,7 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { getDefaultHotPhasePolicy } from '../constants';
 
 describe('<EditPolicy /> cold phase', () => {
   let testBed: EditPolicyTestBed;
@@ -24,16 +23,7 @@ describe('<EditPolicy /> cold phase', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: { data: ['node1'] },
-      nodesByAttributes: { 'attribute:true': ['node1'] },
-      isUsingDeprecatedDataRoleConfig: true,
-    });
-    httpRequestsMockHelpers.setNodesDetails('attribute:true', [
-      { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
-    ]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
       testBed = await setup();
@@ -46,7 +36,7 @@ describe('<EditPolicy /> cold phase', () => {
   test('shows timing only when enabled', async () => {
     const { actions } = testBed;
     expect(actions.cold.hasMinAgeInput()).toBeFalsy();
-    await actions.cold.enable(true);
+    await actions.togglePhase('cold');
     expect(actions.cold.hasMinAgeInput()).toBeTruthy();
   });
 });

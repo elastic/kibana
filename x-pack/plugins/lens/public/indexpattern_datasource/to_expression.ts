@@ -54,6 +54,22 @@ function getExpressionForLayer(
         }
       });
     }
+
+    if (
+      'references' in column &&
+      rootDef.shiftable &&
+      rootDef.input === 'fullReference' &&
+      column.timeShift
+    ) {
+      // inherit time shift to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.shiftable) {
+          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+        }
+      });
+    }
   });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -106,6 +122,7 @@ function getExpressionForLayer(
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+              timeShift: col.timeShift,
             }
           ).toAst();
         }

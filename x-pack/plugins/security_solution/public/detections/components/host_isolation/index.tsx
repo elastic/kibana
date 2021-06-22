@@ -26,20 +26,14 @@ export const HostIsolationPanel = React.memo(
     cancelCallback: () => void;
     isolateAction: string;
   }) => {
-    const agentId = useMemo(() => {
-      const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
-      return findAgentId ? findAgentId[0] : '';
+    const endpointId = useMemo(() => {
+      const findEndpointId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
+      return findEndpointId ? findEndpointId[0] : '';
     }, [details]);
 
     const hostName = useMemo(() => {
       const findHostName = find({ category: 'host', field: 'host.name' }, details)?.values;
       return findHostName ? findHostName[0] : '';
-    }, [details]);
-
-    const alertRule = useMemo(() => {
-      const findAlertRule = find({ category: 'signal', field: 'signal.rule.name' }, details)
-        ?.values;
-      return findAlertRule ? findAlertRule[0] : '';
     }, [details]);
 
     const alertId = useMemo(() => {
@@ -93,18 +87,16 @@ export const HostIsolationPanel = React.memo(
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
-        alertRule={alertRule}
         cases={associatedCases}
         caseIds={caseIds}
         cancelCallback={cancelCallback}
       />
     ) : (
       <UnisolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
-        alertRule={alertRule}
         cases={associatedCases}
         caseIds={caseIds}
         cancelCallback={cancelCallback}

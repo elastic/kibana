@@ -10,8 +10,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
-import { isNestedFieldParent } from '../../helpers/nested_fields';
+import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { SHOW_MULTIFIELDS } from '../../../../common';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -26,6 +28,7 @@ export function DocViewTable({
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
   const [multiFields, setMultiFields] = useState({} as Record<string, string[]>);
   const [fieldsWithParents, setFieldsWithParents] = useState([] as string[]);
+  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   useEffect(() => {
     if (!indexPattern) {
@@ -50,9 +53,11 @@ export function DocViewTable({
         arr.push(key);
       }
     });
-    setMultiFields(map);
+    if (showMultiFields) {
+      setMultiFields(map);
+    }
     setFieldsWithParents(arr);
-  }, [indexPattern, hit]);
+  }, [indexPattern, hit, showMultiFields]);
 
   const toggleColumn = useCallback(
     (field: string) => {

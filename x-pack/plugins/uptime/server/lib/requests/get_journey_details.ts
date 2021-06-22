@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
@@ -31,7 +31,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               'synthetics.type': 'journey/start',
             },
           },
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 1,
@@ -56,7 +56,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
                 'synthetics.type': 'journey/start',
               },
             },
-          ] as QueryContainer[],
+          ] as QueryDslQueryContainer[],
         },
       },
       _source: ['@timestamp', 'monitor.check_group'],

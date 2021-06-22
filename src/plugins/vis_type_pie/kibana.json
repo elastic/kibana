@@ -1,0 +1,13 @@
+{
+    "id": "visTypePie",
+    "version": "kibana",
+    "ui": true,
+    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
+    "requiredBundles": ["visDefaultEditor"],
+    "owner": {
+      "name": "Kibana App",
+      "githubTeam": "kibana-app"
+    },
+    "description": "Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting."
+  }
+  

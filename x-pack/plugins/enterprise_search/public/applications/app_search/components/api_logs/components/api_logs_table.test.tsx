@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 // NOTE: We're mocking FormattedRelative here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
@@ -21,6 +21,7 @@ import { shallow } from 'enzyme';
 import { EuiBasicTable, EuiBadge, EuiHealth, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
+import { mountWithIntl } from '../../../../test_helpers';
 
 import { ApiLogsTable } from './';
 

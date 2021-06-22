@@ -9,10 +9,10 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
 import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
-import { CASE_ALERTS_URL } from '../../../../../common/constants';
+import { escapeHatch, wrapError } from '../../utils';
+import { CASE_ALERTS_URL, CasesByAlertIDRequest } from '../../../../../common';
 
-export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: RouteDeps) {
+export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_ALERTS_URL,
@@ -20,22 +20,20 @@ export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: Rout
         params: schema.object({
           alert_id: schema.string(),
         }),
+        query: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
-        const alertId = request.params.alert_id;
-        if (alertId == null || alertId === '') {
+        const alertID = request.params.alert_id;
+        if (alertID == null || alertID === '') {
           throw Boom.badRequest('The `alertId` is not valid');
         }
-        const client = context.core.savedObjects.client;
-        const caseIds = await caseService.getCaseIdsByAlertId({
-          client,
-          alertId,
-        });
+        const casesClient = await context.cases.getCasesClient();
+        const options = request.query as CasesByAlertIDRequest;
 
         return response.ok({
-          body: caseIds,
+          body: await casesClient.cases.getCaseIDsByAlertID({ alertID, options }),
         });
       } catch (error) {
         logger.error(

@@ -91,26 +91,6 @@ class JobService {
     };
   }
 
-  getBlankJob() {
-    return {
-      job_id: '',
-      description: '',
-      groups: [],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [],
-      },
-      data_description: {
-        time_field: '',
-        time_format: '', // 'epoch',
-        field_delimiter: '',
-        quote_character: '"',
-        format: 'delimited',
-      },
-    };
-  }
-
   loadJobs() {
     return new Promise((resolve, reject) => {
       jobs = [];
@@ -347,11 +327,6 @@ class JobService {
     return job;
   }
 
-  searchPreview(combinedJob) {
-    const { datafeed_config: datafeed, ...job } = combinedJob;
-    return ml.jobs.datafeedPreview(job, datafeed);
-  }
-
   openJob(jobId) {
     return ml.openJob({ jobId });
   }
@@ -433,10 +408,6 @@ class JobService {
       datafeedId = `datafeed-${jobId}`;
     }
     return datafeedId;
-  }
-
-  getDatafeedPreview(datafeedId) {
-    return ml.datafeedPreview({ datafeedId });
   }
 
   // get the list of job group ids as well as how many jobs are in each group

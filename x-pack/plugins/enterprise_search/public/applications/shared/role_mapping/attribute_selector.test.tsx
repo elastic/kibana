@@ -23,6 +23,7 @@ const handleAuthProviderChange = jest.fn();
 const baseProps = {
   attributeName: 'username' as AttributeName,
   attributeValue: 'Something',
+  attributeValueInvalid: false,
   attributes: ['a', 'b', 'c'],
   availableAuthProviders: ['ees_saml', 'kbn_saml'],
   selectedAuthProviders: ['ees_saml'],
@@ -112,6 +113,14 @@ describe('AttributeSelector', () => {
       select.simulate('change', [{ label: 'kbn_saml', value: 'kbn_saml' }]);
 
       expect(handleAuthProviderChange).toHaveBeenCalledWith(['kbn_saml']);
+    });
+
+    it('should call the "handleAuthProviderChange" prop with fallback when a value not present', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} />);
+      const select = findAuthProvidersSelect(wrapper);
+      select.simulate('change', [{ label: 'kbn_saml' }]);
+
+      expect(handleAuthProviderChange).toHaveBeenCalledWith(['']);
     });
 
     it('should call the "handleAttributeSelectorChange" prop when a value is selected', () => {

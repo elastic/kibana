@@ -18,6 +18,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -36,6 +37,7 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { Alert } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -105,6 +107,13 @@ export const getPatchBulkRequest = () =>
     method: 'patch',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     body: [getCreateRulesSchemaMock()],
+  });
+
+export const getBulkActionRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>

@@ -30,6 +30,16 @@ const createSetupContract = (): ManagementSetup => ({
       stack: createManagementSectionMock(),
     } as unknown) as DefinedSections,
   },
+  locator: {
+    getLocation: jest.fn(async () => ({
+      app: 'MANAGEMENT',
+      path: '',
+      state: {},
+    })),
+    getUrl: jest.fn(),
+    useUrl: jest.fn(),
+    navigate: jest.fn(),
+  },
 });
 
 const createStartContract = (): ManagementStart => ({

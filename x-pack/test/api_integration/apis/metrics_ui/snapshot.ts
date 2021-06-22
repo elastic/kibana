@@ -33,8 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('waffle nodes', () => {
     describe('6.6.0', () => {
       const { min, max } = DATES['6.6.0'].docker;
-      before(() => esArchiver.load('infra/6.6.0/docker'));
-      after(() => esArchiver.unload('infra/6.6.0/docker'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('should basically work', async () => {
         const resp = fetchSnapshot({
@@ -80,8 +80,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('8.0.0', () => {
       const { min, max } = DATES['8.0.0'].logs_and_metrics;
-      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
-      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
 
       it("should use the id for the label when the name doesn't exist", async () => {
         const resp = fetchSnapshot({
@@ -151,8 +155,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('7.0.0', () => {
       const { min, max } = DATES['7.0.0'].hosts;
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('should basically work', async () => {
         const resp = fetchSnapshot({

@@ -28,6 +28,7 @@ export type WrappedPageTemplateProps = Pick<
   | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
+  | 'isEmptyState'
 > &
   // recreate the exclusivity of bottomBar-related props
   ExclusiveUnion<
@@ -71,6 +72,8 @@ export function ObservabilityPageTemplate({
             entry.app === currentAppId &&
             matchPath(currentPath, {
               path: entry.path,
+              exact: !!entry.matchFullPath,
+              strict: !entry.ignoreTrailingSlash,
             }) != null;
 
           return {

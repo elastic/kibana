@@ -169,7 +169,7 @@ function getAxisDomain<S extends XScaleType | YScaleType>(
 
   const { min, max, defaultYExtents, boundsMargin } = scale;
   const fit = defaultYExtents;
-  const padding = boundsMargin;
+  const padding = boundsMargin || undefined;
 
   if (!isNil(min) && !isNil(max)) {
     return { fit, padding, min, max };

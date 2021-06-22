@@ -18,6 +18,7 @@ exports[`TransactionActionMenu component matches the snapshot 1`] = `
         >
           <span
             class="euiButtonContent__icon"
+            color="inherit"
             data-euiicon-type="arrowDown"
           />
           <span

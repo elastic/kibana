@@ -22,5 +22,6 @@
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../vis_default_editor/tsconfig.json" },
     { "path": "../vis_type_xy/tsconfig.json" },
+    { "path": "../vis_type_pie/tsconfig.json" },
   ]
 }

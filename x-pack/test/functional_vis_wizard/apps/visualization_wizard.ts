@@ -14,13 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens and maps disabled', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
 
     after(async function () {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('visualize/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
     });
 
     it('should not display lens and maps cards', async function () {

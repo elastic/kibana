@@ -19,6 +19,7 @@ import {
   CommentResponse,
   CommentType,
   ConnectorTypes,
+  SECURITY_SOLUTION_OWNER,
   UserAction,
   UserActionField,
 } from '../../common';
@@ -47,6 +48,7 @@ export const basicComment: Comment = {
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
   pushedAt: null,
   pushedBy: null,
   updatedAt: null,
@@ -62,6 +64,7 @@ export const alertComment: Comment = {
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
   pushedAt: null,
   pushedBy: null,
   rule: {
@@ -75,6 +78,7 @@ export const alertComment: Comment = {
 
 export const basicCase: Case = {
   type: CaseType.individual,
+  owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
   id: basicCaseId,
@@ -105,6 +109,7 @@ export const basicCase: Case = {
 
 export const collectionCase: Case = {
   type: CaseType.collection,
+  owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
   id: 'collection-id',
@@ -181,6 +186,7 @@ const basicAction = {
   newValue: 'what a cool value',
   caseId: basicCaseId,
   commentId: null,
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 export const cases: Case[] = [
@@ -230,6 +236,7 @@ export const basicCommentSnake: CommentResponse = {
   id: basicCommentId,
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  owner: SECURITY_SOLUTION_OWNER,
   pushed_at: null,
   pushed_by: null,
   updated_at: null,
@@ -254,6 +261,7 @@ export const basicCaseSnake: CaseResponse = {
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
+  owner: SECURITY_SOLUTION_OWNER,
 } as CaseResponse;
 
 export const casesStatusSnake: CasesStatusResponse = {
@@ -311,6 +319,7 @@ const basicActionSnake = {
   new_value: 'what a cool value',
   case_id: basicCaseId,
   comment_id: null,
+  owner: SECURITY_SOLUTION_OWNER,
 };
 export const getUserActionSnake = (af: UserActionField, a: UserAction) => ({
   ...basicActionSnake,

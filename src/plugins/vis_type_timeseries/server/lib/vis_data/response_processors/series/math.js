@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
+
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
@@ -82,13 +84,15 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
           if (someNull) return [ts, null];
           try {
             // calculate the result based on the user's script and return the value
+            const inMsInterval = convertIntervalToUnit(split.meta?.intervalString || 0, 'ms');
+
             const result = evaluate(mathMetric.script, {
               params: {
                 ...params,
                 _index: index,
                 _timestamp: ts,
                 _all: all,
-                _interval: split.meta.bucketSize * 1000,
+                _interval: inMsInterval?.value,
               },
             });
             // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.

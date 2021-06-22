@@ -195,10 +195,14 @@ export class HeadlessChromiumDriverFactory {
   getBrowserLogger(page: puppeteer.Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
+        const formatLine = () => `{ text: "${line.text()?.trim()}", url: ${line.location()?.url} }`;
+
         if (line.type() === 'error') {
-          logger.error(line.text(), ['headless-browser-console']);
+          logger.error(`Error in browser console: ${formatLine()}`, ['headless-browser-console']);
         } else {
-          logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
+          logger.debug(`Message in browser console: ${formatLine()}`, [
+            `headless-browser-console:${line.type()}`,
+          ]);
         }
       })
     );

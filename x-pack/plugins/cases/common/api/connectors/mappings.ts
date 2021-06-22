@@ -31,6 +31,7 @@ export const ConnectorMappingsAttributesRT = rt.type({
 
 export const ConnectorMappingsRt = rt.type({
   mappings: rt.array(ConnectorMappingsAttributesRT),
+  owner: rt.string,
 });
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRT>;

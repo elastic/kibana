@@ -6,26 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function MonacoEditorProvider({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
-  const browser = getService('browser');
+export class MonacoEditorService extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
-  return new (class MonacoEditor {
-    public async getCodeEditorValue(nthIndex: number = 0) {
-      let values: string[] = [];
+  public async getCodeEditorValue(nthIndex: number = 0) {
+    let values: string[] = [];
 
-      await retry.try(async () => {
-        values = await browser.execute(
-          () =>
-            (window as any).MonacoEnvironment.monaco.editor
-              .getModels()
-              .map((model: any) => model.getValue()) as string[]
-        );
-      });
+    await this.retry.try(async () => {
+      values = await this.browser.execute(
+        () =>
+          (window as any).MonacoEnvironment.monaco.editor
+            .getModels()
+            .map((model: any) => model.getValue()) as string[]
+      );
+    });
 
-      return values[nthIndex] as string;
-    }
-  })();
+    return values[nthIndex] as string;
+  }
 }
