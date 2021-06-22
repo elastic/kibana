@@ -133,7 +133,7 @@
     "@kbn/crypto": "link:bazel-bin/packages/kbn-crypto",
     "@kbn/mapbox-gl": "link:bazel-bin/packages/kbn-mapbox-gl",
     "@kbn/i18n": "link:bazel-bin/packages/kbn-i18n",
-    "@kbn/interpreter": "link:packages/kbn-interpreter",
+    "@kbn/interpreter": "link:bazel-bin/packages/kbn-interpreter",
     "@kbn/io-ts-utils": "link:bazel-bin/packages/kbn-io-ts-utils",
     "@kbn/legacy-logging": "link:bazel-bin/packages/kbn-legacy-logging",
     "@kbn/logging": "link:bazel-bin/packages/kbn-logging",

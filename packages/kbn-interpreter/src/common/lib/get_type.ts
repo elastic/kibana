@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-require('../tasks/build/cli');
+export function getType(node: any): string {
+  if (node == null) return 'null';
+  if (typeof node === 'object') {
+    if (!node.type) throw new Error('Objects must have a type property');
+    return node.type;
+  }
+
+  return typeof node;
+}
