@@ -18,6 +18,7 @@ import {
   OperationType,
   IndexPatternColumn,
   RequiredReference,
+  OperationDefinition,
 } from './definitions';
 import type {
   IndexPattern,
@@ -502,20 +503,15 @@ export function replaceColumn({
       );
     }
 
-    // This logic comes after the transitions because they need to look at previous columns
-    if (previousDefinition.input === 'fullReference') {
-      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({
-          layer: tempLayer,
-          columnId: id,
-          indexPattern,
-        });
-      });
-    }
-
     if (operationDefinition.input === 'none') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       newColumn = copyCustomLabel(newColumn, previousColumn);
+      tempLayer = removeOrphanedColumns(
+        previousDefinition,
+        previousColumn,
+        tempLayer,
+        indexPattern
+      );
 
       const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
       return updateDefaultLabels(
@@ -530,9 +526,9 @@ export function replaceColumn({
 
     if (!field) {
       // if no field is available perform a full clean of the column from the layer
-      if (previousDefinition.input === 'fullReference') {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
-      }
+      // if (previousDefinition.input === 'fullReference') {
+      //   tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+      // }
       return {
         ...tempLayer,
         incompleteColumns: {
@@ -552,6 +548,8 @@ export function replaceColumn({
         },
       };
     }
+
+    tempLayer = removeOrphanedColumns(previousDefinition, previousColumn, tempLayer, indexPattern);
 
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
     if (!shouldResetLabel) {
@@ -590,6 +588,27 @@ export function replaceColumn({
   } else {
     throw new Error('nothing changed');
   }
+}
+
+function removeOrphanedColumns(
+  previousDefinition:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'none'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+  previousColumn: IndexPatternColumn,
+  tempLayer: IndexPatternLayer,
+  indexPattern: IndexPattern
+) {
+  if (previousDefinition.input === 'fullReference') {
+    (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+      tempLayer = deleteColumn({
+        layer: tempLayer,
+        columnId: id,
+        indexPattern,
+      });
+    });
+  }
+  return tempLayer;
 }
 
 export function canTransition({
