@@ -78,7 +78,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     error,
     histograms,
     percentileThresholdValue,
-    isComplete,
     isRunning,
     progress,
     startFetch,
@@ -103,12 +102,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     startFetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (isComplete) {
-      notifications.toasts.addSuccess('Finished');
-    }
-  }, [isComplete, notifications.toasts]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
