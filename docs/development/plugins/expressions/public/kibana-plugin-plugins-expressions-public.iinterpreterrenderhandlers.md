@@ -19,6 +19,7 @@ export interface IInterpreterRenderHandlers
 |  [getRenderMode](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.getrendermode.md) | <code>() =&gt; RenderMode</code> |  |
 |  [hasCompatibleActions](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.hascompatibleactions.md) | <code>(event: any) =&gt; Promise&lt;boolean&gt;</code> |  |
 |  [isSyncColorsEnabled](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.issynccolorsenabled.md) | <code>() =&gt; boolean</code> |  |
+|  [on](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.on.md) | <code>(event: any, fn: (...args: any) =&gt; void) =&gt; void</code> |  |
 |  [onDestroy](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.ondestroy.md) | <code>(fn: () =&gt; void) =&gt; void</code> |  |
 |  [reload](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.reload.md) | <code>() =&gt; void</code> |  |
 |  [uiState](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.uistate.md) | <code>unknown</code> | This uiState interface is actually <code>PersistedState</code> from the visualizations plugin, but expressions cannot know about vis or it creates a mess of circular dependencies. Downstream consumers of the uiState handler will need to cast for now. |

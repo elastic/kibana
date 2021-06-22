@@ -937,6 +937,8 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     isSyncColorsEnabled: () => boolean;
     // (undocumented)
+    on: (event: any, fn: (...args: any) => void) => void;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
