@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
   // FLAKY: https://github.com/elastic/kibana/issues/84440
-  describe('grok debugger app', function () {
+  describe.only('grok debugger app', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
