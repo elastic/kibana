@@ -8,7 +8,13 @@
 import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  CoreStart,
+} from '../../../../src/core/public';
 import type { TimelinesUIStart, TGridProps } from './types';
 import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
 import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
@@ -23,14 +29,18 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
 
   public setup(core: CoreSetup) {}
 
-  public start(): TimelinesUIStart {
+  public start(core: CoreStart, { data }: { data: DataPublicPluginStart }): TimelinesUIStart {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
       return {} as TimelinesUIStart;
     }
     return {
       getTGrid: (props: TGridProps) => {
-        return getTGridLazy(props, { store: this._store, storage: this._storage });
+        return getTGridLazy(props, {
+          store: this._store,
+          storage: this._storage,
+          data,
+        });
       },
       getTGridReducer: () => {
         return tGridReducer;

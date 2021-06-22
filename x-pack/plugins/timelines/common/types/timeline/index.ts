@@ -266,6 +266,7 @@ export enum TimelineType {
 export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineType.template),
   runtimeTypes.literal(TimelineType.default),
+  runtimeTypes.literal(TimelineType.test),
 ]);
 
 export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);

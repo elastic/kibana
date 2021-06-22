@@ -19,7 +19,7 @@ import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public'
 export function renderApp(
   coreStart: CoreStart,
   parameters: AppMountParameters,
-  timelinesPluginSetup: TimelinesUIStart
+  timelinesPluginSetup: TimelinesUIStart | null
 ) {
   ReactDOM.render(
     <AppRoot
@@ -43,13 +43,14 @@ const AppRoot = React.memo(
   }: {
     coreStart: CoreStart;
     parameters: AppMountParameters;
-    timelinesPluginSetup: TimelinesUIStart;
+    timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
     return (
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            {(timelinesPluginSetup.getTGrid &&
+            {(timelinesPluginSetup &&
+              timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
                 type: 'standalone',
                 columns: [],
@@ -59,13 +60,13 @@ const AppRoot = React.memo(
                 itemsPerPage: 50,
                 itemsPerPageOptions: [1, 2, 3],
                 end: '',
-                renderCellValue: () => <div />,
+                renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
                 sort: [],
                 leadingControlColumns: [],
                 trailingControlColumns: [],
                 query: {
                   query: '',
-                  language: '',
+                  language: 'kuery',
                 },
                 start: '',
                 rowRenderers: [],

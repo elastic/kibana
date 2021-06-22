@@ -23,7 +23,12 @@ import type {
   RowRenderer,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
+import {
+  esQuery,
+  Filter,
+  Query,
+  DataPublicPluginStart,
+} from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -114,6 +119,7 @@ export interface TGridStandaloneProps {
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  data?: DataPublicPluginStart;
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -135,6 +141,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
+  data,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -212,6 +219,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     startDate: start,
     endDate: end,
     skip: !canQueryTimeline,
+    data,
   });
 
   const totalCountMinusDeleted = useMemo(

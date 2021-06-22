@@ -9,17 +9,18 @@ import { Store } from 'redux';
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
 import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
   props: TGridProps,
-  { store, storage }: { store?: Store; storage: Storage }
+  { store, storage, data }: { store?: Store; storage: Storage; data: DataPublicPluginStart }
 ) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <TimelineLazy {...props} store={store} storage={storage} />
+      <TimelineLazy {...props} store={store} storage={storage} data={data} />
     </Suspense>
   );
 };

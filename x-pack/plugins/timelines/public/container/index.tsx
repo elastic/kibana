@@ -17,8 +17,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -82,6 +80,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
+  data?: DataPublicPluginStart;
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -122,9 +121,9 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
-  const { data } = useKibana<{ data: DataPublicPluginStart }>().services;
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -185,42 +184,44 @@ export const useTimelineEvents = ({
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
-        searchSubscription$.current = data.search
-          .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
-            strategy:
-              request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
+        if (data && data.search) {
+          searchSubscription$.current = data.search
+            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
+              strategy:
+                request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
+              abortSignal: abortCtrl.current.signal,
+            })
+            .subscribe({
+              next: (response) => {
+                if (isCompleteResponse(response)) {
+                  setLoading(false);
+                  setTimelineResponse((prevResponse) => {
+                    const newTimelineResponse = {
+                      ...prevResponse,
+                      events: getTimelineEvents(response.edges),
+                      inspect: getInspectResponse(response, prevResponse.inspect),
+                      pageInfo: response.pageInfo,
+                      totalCount: response.totalCount,
+                      updatedAt: Date.now(),
+                    };
+                    return newTimelineResponse;
+                  });
+                  searchSubscription$.current.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  setLoading(false);
+                  addWarning(i18n.ERROR_TIMELINE_EVENTS);
+                  searchSubscription$.current.unsubscribe();
+                }
+              },
+              error: (msg) => {
                 setLoading(false);
-                setTimelineResponse((prevResponse) => {
-                  const newTimelineResponse = {
-                    ...prevResponse,
-                    events: getTimelineEvents(response.edges),
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    totalCount: response.totalCount,
-                    updatedAt: Date.now(),
-                  };
-                  return newTimelineResponse;
+                addError(msg, {
+                  title: i18n.FAIL_TIMELINE_EVENTS,
                 });
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_TIMELINE_EVENTS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_TIMELINE_EVENTS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
+              },
+            });
+        }
       };
 
       searchSubscription$.current.unsubscribe();
@@ -228,7 +229,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addWarning, addError, skip]
+    [data, addWarning, addError, skip]
   );
 
   useEffect(() => {

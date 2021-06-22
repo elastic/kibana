@@ -17,8 +17,9 @@ import {
 
 import { createEpicMiddleware } from 'redux-observable';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { TimelineState, tGridSelectors, TGridEpicDependencies } from '../../types';
+import { TimelineState, TGridEpicDependencies } from '../../types';
 import { tGridReducer } from './reducer';
+import { getTGridByIdSelector } from './selectors';
 
 export * from './model';
 export * as tGridActions from './actions';
@@ -44,7 +45,7 @@ export const createStore = (
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies: TGridEpicDependencies<State> = {
-    tGridByIdSelector: tGridSelectors.getTGridByIdSelector,
+    tGridByIdSelector: getTGridByIdSelector,
     storage,
   };
 

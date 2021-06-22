@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { Store } from 'redux';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { createStore } from '../store/t_grid';
 
 import { TGrid as TGridComponent } from './tgrid';
@@ -24,6 +25,7 @@ const EMPTY_BROWSER_FIELDS = {};
 type TGridComponent = TGridProps & {
   store?: Store;
   storage: Storage;
+  data?: DataPublicPluginStart;
 };
 
 export const TGrid = (props: TGridComponent) => {

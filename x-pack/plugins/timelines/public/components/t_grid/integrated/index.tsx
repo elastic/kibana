@@ -30,6 +30,7 @@ import {
   Filter,
   IIndexPattern,
   Query,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { Refetch } from '../../../store/t_grid/inputs';
@@ -135,6 +136,7 @@ export interface TGridIntegratedProps {
   graphEventId: string | undefined;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  data?: DataPublicPluginStart;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -166,6 +168,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
+  data,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -245,6 +248,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     startDate: start,
     endDate: end,
     skip: !canQueryTimeline,
+    data,
   });
 
   const totalCountMinusDeleted = useMemo(
