@@ -15,15 +15,13 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiIcon,
   EuiIconTip,
   EuiLoadingChart,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiSpacer,
-  EuiTabs,
-  EuiTab,
+  EuiPortal,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -52,14 +50,7 @@ import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
-import {
-  CHART_DIRECTION,
-  ChartDirectionType,
-  CHART_SIZE,
-  tabs,
-  TAB_IDS,
-  TabIdsType,
-} from './constants';
+import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
@@ -83,7 +74,6 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
     isInitialized: boolean;
   }>({ datafeedConfig: undefined, bucketSpan: undefined, isInitialized: false });
   const [endDate, setEndDate] = useState<any>(moment(end));
-  const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
   const [annotationData, setAnnotationData] = useState<{
@@ -100,25 +90,6 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentEuiTheme();
-
-  const onSelectedTabChanged = (id: TabIdsType) => {
-    setSelectedTabId(id);
-  };
-
-  const renderTabs = useCallback(
-    () =>
-      tabs.map((tab, index) => (
-        <EuiTab
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          disabled={tab.disabled}
-          key={index}
-        >
-          {tab.name}
-        </EuiTab>
-      )),
-    [selectedTabId]
-  );
 
   const handleChange = (date: moment.Moment) => setEndDate(date);
 
@@ -200,65 +171,62 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
 
   return (
-    <EuiModal
-      onClose={onClose.bind(null, false)}
-      className="mlDatafeedModal"
-      style={{ height: '600px', minWidth: '800px' }}
-    >
-      <EuiModalHeader>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  color="primary"
-                  type="help"
-                  content={
-                    <FormattedMessage
-                      id="xpack.ml.jobsList.datafeedModal.headerTooltipContent"
-                      defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
-                    />
-                  }
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.ml.jobsList.datafeedModal.header"
-                      defaultMessage="Datafeed chart for {jobId}"
-                      values={{
-                        jobId,
-                      }}
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiDatePicker
-              aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.chartIntervalEndTime', {
-                defaultMessage: 'Chart interval end time',
-              })}
-              showTimeSelect
-              selected={endDate}
-              onChange={handleChange}
-              popoverPlacement="left-start"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <EuiTabs size="s">{renderTabs()}</EuiTabs>
-        <EuiSpacer size="m" />
-        {isLoadingChartData || isInitialized === false ? <EuiLoadingChart size="l" /> : null}
-        {!isLoadingChartData &&
-          isInitialized &&
-          selectedTabId === TAB_IDS.CHART &&
-          datafeedConfig !== undefined &&
-          bucketSpan && (
+    <EuiPortal>
+      <EuiFlyout
+        size="l"
+        ownFocus
+        onClose={onClose.bind(null, false)}
+        aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.datafeedChartFlyoutAriaLabel', {
+          defaultMessage: 'Datafeed chart flyout',
+        })}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    color="primary"
+                    type="help"
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.datafeedModal.headerTooltipContent"
+                        defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.datafeedModal.header"
+                        defaultMessage="Datafeed chart for {jobId}"
+                        values={{
+                          jobId,
+                        }}
+                      />
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ padding: '10px' }}>
+              <EuiDatePicker
+                aria-label={i18n.translate('xpack.ml.jobsList.datafeedModal.chartIntervalEndTime', {
+                  defaultMessage: 'Chart interval end time',
+                })}
+                showTimeSelect
+                selected={endDate}
+                onChange={handleChange}
+                popoverPlacement="left-start"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {isLoadingChartData || isInitialized === false ? <EuiLoadingChart size="l" /> : null}
+          {!isLoadingChartData && isInitialized && datafeedConfig !== undefined && bucketSpan ? (
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="spaceBetween">
@@ -474,12 +442,13 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <JobMessagesPane jobId={jobId} />
+              </EuiFlexItem>
             </EuiFlexGroup>
-          )}
-        {!isLoadingChartData && selectedTabId === TAB_IDS.MESSAGES ? (
-          <JobMessagesPane jobId={jobId} />
-        ) : null}
-      </EuiModalBody>
-    </EuiModal>
+          ) : null}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };

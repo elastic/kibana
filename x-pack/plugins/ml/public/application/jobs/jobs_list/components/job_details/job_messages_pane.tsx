@@ -16,7 +16,7 @@ interface JobMessagesPaneProps {
   jobId: string;
 }
 
-export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
+export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(({ jobId }) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -54,4 +54,4 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
       error={errorMessage}
     />
   );
-};
+});
