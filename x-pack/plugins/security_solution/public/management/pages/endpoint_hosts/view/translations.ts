@@ -46,13 +46,13 @@ export const ACTIVITY_LOG = {
       unisolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'release host successful',
+          defaultMessage: 'host release successful',
         }
       ),
       unisolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'release host failed',
+          defaultMessage: 'host release failed',
         }
       ),
     },
