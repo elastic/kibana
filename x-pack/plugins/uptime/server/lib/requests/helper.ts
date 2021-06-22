@@ -81,3 +81,27 @@ export const getUptimeESMockClient = (
     }),
   };
 };
+
+export function mockSearchResult(data: unknown): UptimeESClient {
+  const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+  // @ts-expect-error incomplete search response
+  mockEsClient.search.mockResolvedValue({
+    body: {
+      took: 18,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: Array.isArray(data) ? data : [data],
+        max_score: 0.0,
+        total: 0,
+      },
+    },
+  });
+  return uptimeEsClient;
+}
