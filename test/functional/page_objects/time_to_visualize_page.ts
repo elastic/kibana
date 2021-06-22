@@ -51,7 +51,10 @@ export class TimeToVisualizePageObject extends FtrService {
     vizName: string,
     { saveAsNew, redirectToOrigin, addToDashboard, dashboardId, saveToLibrary }: SaveModalArgs = {}
   ) {
-    await this.testSubjects.setValue('savedObjectTitle', vizName);
+    await this.testSubjects.setValue('savedObjectTitle', vizName, {
+      typeCharByChar: true,
+      clearWithKeyboard: true,
+    });
 
     const hasSaveAsNew = await this.testSubjects.exists('saveAsNewCheckbox');
     if (hasSaveAsNew && saveAsNew !== undefined) {
