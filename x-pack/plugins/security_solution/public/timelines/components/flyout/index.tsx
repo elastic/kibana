@@ -124,7 +124,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
         <EuiFocusTrap disabled={!focusOwnership}>
-          <Visible show={show}>
+          <Visible show={show} data-test-subj="flyout-pane-wrapper">
             <Pane timelineId={timelineId} />
           </Visible>
         </EuiFocusTrap>
