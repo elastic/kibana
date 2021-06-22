@@ -97,7 +97,7 @@ export class ContextMenu extends PureComponent {
         anchorPosition={anchorPosition}
         repositionOnScroll
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndex.contextMenu.title"
             defaultMessage="Follower {followerIndicesLength, plural, one {index} other {indices}} options"
