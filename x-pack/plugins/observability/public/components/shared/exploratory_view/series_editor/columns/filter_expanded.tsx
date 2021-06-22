@@ -59,7 +59,7 @@ export function FilterExpanded({
     }
     const asExistFilter = qFilter as ExistsFilter;
     if (asExistFilter?.exists) {
-      queryFilters.push(asExistFilter.exists as QueryDslQueryContainer);
+      queryFilters.push({ exists: asExistFilter.exists } as QueryDslQueryContainer);
     }
   });
 

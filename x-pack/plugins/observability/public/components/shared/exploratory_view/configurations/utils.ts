@@ -90,25 +90,14 @@ export function urlFilterToPersistedFilter({
 
   urlFilters.forEach(({ field, values = [], notValues = [] }) => {
     if (values?.length > 0) {
-      if (values?.length > 1) {
-        const multiFilter = buildPhrasesFilter(field, values, indexPattern);
-        parsedFilters.push(multiFilter[0]);
-      } else {
-        const filter = buildPhraseFilter(field, values[0], indexPattern);
-        parsedFilters.push(filter[0]);
-      }
+      const filter = buildPhrasesFilter(field, values, indexPattern);
+      parsedFilters.push(...filter);
     }
 
     if (notValues?.length > 0) {
-      if (notValues?.length > 1) {
-        const multiFilter = buildPhrasesFilter(field, notValues, indexPattern)[0];
-        multiFilter.meta.negate = true;
-        parsedFilters.push(multiFilter);
-      } else {
-        const filter = buildPhraseFilter(field, notValues[0], indexPattern)[0];
-        filter.meta.negate = true;
-        parsedFilters.push(filter);
-      }
+      const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
+      filter.meta.negate = true;
+      parsedFilters.push(filter);
     }
   });
 

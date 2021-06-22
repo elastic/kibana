@@ -195,7 +195,7 @@ export function SeriesBuilder({
       const { reportType, reportDefinitions, isNew, ...restSeries } = series;
 
       if (reportType && !isEmpty(reportDefinitions)) {
-        const reportDefId = Object.entries(reportDefinitions ?? {})[0][1];
+        const reportDefId = Object.values(reportDefinitions ?? {})[0];
         const newSeriesId = `${reportDefId}-${reportType}`;
 
         const newSeriesN: SeriesUrl = {
@@ -228,7 +228,14 @@ export function SeriesBuilder({
             <LastUpdated lastUpdated={lastUpdated} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSwitch label="Auto Apply" checked={true} onChange={(e) => {}} compressed />
+            <EuiSwitch
+              label={i18n.translate('xpack.observability.expView.seriesBuilder.autoApply', {
+                defaultMessage: 'Auto apply',
+              })}
+              checked={true}
+              onChange={(e) => {}}
+              compressed
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={() => applySeries()} isDisabled={true} size="s">
@@ -246,7 +253,7 @@ export function SeriesBuilder({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <StyledScrollDiv>
+      <div>
         {multiSeries && <SeriesEditor />}
         {editorItems.length > 0 && (
           <EuiBasicTable
@@ -257,14 +264,11 @@ export function SeriesBuilder({
           />
         )}
         <EuiSpacer />
-      </StyledScrollDiv>
+      </div>
     </Wrapper>
   );
 }
 
-const StyledScrollDiv = euiStyled.div`
-
-`;
 const Wrapper = euiStyled.div`
   max-height: 50vh;
   overflow-y: scroll;

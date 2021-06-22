@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
@@ -18,25 +18,25 @@ import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesBuilder } from './series_builder/series_builder';
-import { AppDataType, SeriesUrl } from './types';
+import { SeriesUrl } from './types';
 
-const combineTimeRanges = (allSeries: Record<string, SeriesUrl>) => {
+export const combineTimeRanges = (
+  allSeries: Record<string, SeriesUrl>,
+  firstSeries?: SeriesUrl
+) => {
   let to: string = '';
   let from: string = '';
-  const allKeys = Object.keys(allSeries ?? {});
-  allKeys.forEach((seriesId) => {
-    const series = allSeries[seriesId];
+  if (firstSeries?.reportType === 'kpi-over-time') {
+    return firstSeries.time;
+  }
+  Object.values(allSeries ?? {}).forEach((series) => {
     if (series.dataType && series.reportType && !isEmpty(series.reportDefinitions)) {
       const seriesTo = new Date(series.time.to);
       const seriesFrom = new Date(series.time.from);
-      if (!to) {
-        to = series.time.to;
-      } else if (seriesTo > new Date(to)) {
+      if (!to || seriesTo > new Date(to)) {
         to = series.time.to;
       }
-      if (!from) {
-        from = series.time.from;
-      } else if (seriesFrom < new Date(from)) {
+      if (!from || seriesFrom < new Date(from)) {
         from = series.time.from;
       }
     }
@@ -87,20 +87,13 @@ export function ExploratoryView({
     }
   };
 
-  const allDataTypes: AppDataType[] = [];
-
-  Object.entries(allSeries).forEach(([_sId, seriesT]) => {
-    allDataTypes.push(seriesT.dataType);
-  });
-
   useEffect(() => {
-    allDataTypes.forEach((dataTypeT) => {
+    Object.values(allSeries).forEach((seriesT) => {
       loadIndexPattern({
-        dataType: dataTypeT,
+        dataType: seriesT.dataType,
       });
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(allDataTypes), loadIndexPattern]);
+  }, [allSeries, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
@@ -115,7 +108,32 @@ export function ExploratoryView({
     setHeightOffset();
   });
 
-  const timeRange = combineTimeRanges(allSeries);
+  const timeRange = combineTimeRanges(allSeries, series);
+
+  const onLensLoad = useCallback(() => {
+    setLastUpdated(Date.now());
+  }, []);
+
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (series?.reportType !== 'data-distribution') {
+        setSeries(seriesId, {
+          ...series,
+          time: {
+            from: new Date(range[0]).toISOString(),
+            to: new Date(range[1]).toISOString(),
+          },
+        });
+      } else {
+        notifications?.toasts.add(
+          i18n.translate('xpack.observability.exploratoryView.noBrusing', {
+            defaultMessage: 'Zoom by brush selection is only available on time series charts.',
+          })
+        );
+      }
+    },
+    [notifications?.toasts, series, seriesId, setSeries]
+  );
 
   return (
     <Wrapper>
@@ -128,27 +146,8 @@ export function ExploratoryView({
                 id="exploratoryView"
                 timeRange={timeRange}
                 attributes={lensAttributes}
-                onLoad={() => {
-                  setLastUpdated(Date.now());
-                }}
-                onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'data-distribution') {
-                    setSeries(seriesId, {
-                      ...series,
-                      time: {
-                        from: new Date(range[0]).toISOString(),
-                        to: new Date(range[1]).toISOString(),
-                      },
-                    });
-                  } else {
-                    notifications?.toasts.add(
-                      i18n.translate('xpack.observability.exploratoryView.noBrusing', {
-                        defaultMessage:
-                          'Zoom by brush selection is only available on time series charts.',
-                      })
-                    );
-                  }
-                }}
+                onLoad={onLensLoad}
+                onBrushEnd={onBrushEnd}
               />
             ) : (
               <EmptyView series={series} loading={loading} height={height} />

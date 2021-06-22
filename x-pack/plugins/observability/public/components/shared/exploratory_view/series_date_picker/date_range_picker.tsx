@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Moment } from 'moment';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
 };
 export function DateRangePicker({ seriesId }: { seriesId: string }) {
   const { firstSeriesId, getSeries, setSeries } = useSeriesStorage();
+  const dateFormat = useUiSetting<string>('dateFormat');
 
   const {
     time: { from, to },
@@ -77,6 +79,7 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
 
   return (
     <EuiDatePickerRange
+      fullWidth
       startDateControl={
         <EuiDatePicker
           selected={startDate}
@@ -84,7 +87,10 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
           startDate={startDate}
           endDate={endDate}
           isInvalid={startDate > endDate}
-          aria-label="Start date"
+          aria-label={i18n.translate('xpack.observability.expView.dateRanger.startEnd', {
+            defaultMessage: 'Start date',
+          })}
+          dateFormat={dateFormat}
           showTimeSelect
         />
       }
@@ -95,7 +101,10 @@ export function DateRangePicker({ seriesId }: { seriesId: string }) {
           startDate={startDate}
           endDate={endDate}
           isInvalid={startDate > endDate}
-          aria-label="End date"
+          aria-label={i18n.translate('xpack.observability.expView.dateRanger.startEnd', {
+            defaultMessage: 'End date',
+          })}
+          dateFormat={dateFormat}
           showTimeSelect
         />
       }
