@@ -39,22 +39,19 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { REPO_ROOT } = require('@kbn/utils');
 
-  const rawConfigService = new RawConfigService(configs, applyConfigOverrides);
-  rawConfigService.loadConfig();
-
-  const clusterInfo = await getClusteringInfo(rawConfigService);
-  const isDevCliParent =
-    cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild;
-
   const env = Env.createDefault(REPO_ROOT, {
     // TODO: do we want to add clusterInfo to Env ?
     configs,
     cliArgs,
-    isDevCliParent
   });
 
+  const rawConfigService = new RawConfigService(configs, applyConfigOverrides);
+  rawConfigService.loadConfig();
+
+  const clusterInfo = await getClusteringInfo(rawConfigService);
+
   let root: KibanaRoot;
-  if (clusterInfo.isCoordinator && !isDevCliParent) {
+  if (clusterInfo.isCoordinator) {
     root = new KibanaCoordinator(rawConfigService, env, clusterInfo, onRootShutdown);
   } else {
     root = new KibanaWorker(rawConfigService, env, clusterInfo, onRootShutdown);

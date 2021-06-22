@@ -7,7 +7,7 @@
  */
 
 import { Logger, LoggerFactory } from '@kbn/logging';
-import { ConnectableObservable, of, Subscription } from 'rxjs';
+import { ConnectableObservable, Subscription } from 'rxjs';
 import { Env, RawConfigService } from '@kbn/config';
 import { concatMap, first, publishReplay, switchMap, tap } from 'rxjs/operators';
 import { Server } from '../server';
@@ -36,15 +36,12 @@ export class KibanaWorker implements KibanaRoot {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(rawConfigService, env, this.loggingSystem);
+    this.server = new Server(this.rawConfigService, this.env, this.loggingSystem);
   }
 
   public async setup() {
     if (this.clusteringInfo.isEnabled && this.clusteringInfo.isWorker) {
       process.on('message', (message) => {
-        if (message?.type === 'reload-logging-config') {
-          this.reloadLoggingConfig();
-        }
         if (message?.type === 'shutdown-worker') {
           this.shutdown();
         }
@@ -97,28 +94,13 @@ export class KibanaWorker implements KibanaRoot {
     }
   }
 
-  reloadLoggingConfig() {
-    const cliLogger = this.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
-
-    try {
-      this.rawConfigService.reloadConfig();
-    } catch (err) {
-      return this.shutdown(err);
-    }
-
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  }
-
   private async setupLogging() {
     const { configService } = this.server;
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       // except for the CLI process where we only apply the default logging config once
-      switchMap(() =>
-        this.env.isDevCliParent ? of(undefined) : configService.atPath<LoggingConfigType>('logging')
-      ),
+      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

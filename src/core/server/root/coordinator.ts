@@ -7,7 +7,6 @@
  */
 
 import { Logger, LoggerFactory } from '@kbn/logging';
-import { Subscription } from 'rxjs';
 import { Env, RawConfigurationProvider, ConfigService } from '@kbn/config';
 import { LoggingSystem } from '../logging';
 import { ClusterManager, ClusteringInfo, clusteringConfig } from '../clustering';
@@ -22,7 +21,6 @@ export class KibanaCoordinator implements KibanaRoot {
   private readonly loggingSystem: LoggingSystem;
   private readonly configService: ConfigService;
   private clusterManager: ClusterManager;
-  private loggingConfigSubscription?: Subscription;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -32,7 +30,7 @@ export class KibanaCoordinator implements KibanaRoot {
   ) {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
-    this.configService = new ConfigService(rawConfigProvider, env, this.logger);
+    this.configService = new ConfigService(rawConfigProvider, this.env, this.logger);
 
     this.log = this.logger.get('root');
     this.clusterManager = new ClusterManager(this.configService, this.logger);
