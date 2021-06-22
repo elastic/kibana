@@ -18,8 +18,7 @@ import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
-import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
+import { parseExistingEnrichments } from './cti_details/helpers';
 
 interface EventViewTab {
   id: EventViewId;
@@ -91,20 +90,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     [setSelectedTabId]
   );
 
-  const threatData = useMemo(() => {
-    if (isAlert && data) {
-      const threatIndicator = data.find(
-        ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
-      );
-      if (!threatIndicator) return [];
-      const { originalValue } = threatIndicator;
-      const values = Array.isArray(originalValue) ? originalValue : [originalValue];
-      return values.map((value) => getDataFromSourceHits(JSON.parse(value)));
-    }
-    return [];
-  }, [data, isAlert]);
-
-  const threatCount = useMemo(() => threatData.length, [threatData.length]);
+  const threatData = useMemo(() => (isAlert ? parseExistingEnrichments(data) : []), [
+    data,
+    isAlert,
+  ]);
+  const threatCount = threatData.length;
 
   const summaryTab = useMemo(
     () =>
