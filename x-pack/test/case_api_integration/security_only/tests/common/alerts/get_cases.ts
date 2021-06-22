@@ -239,7 +239,8 @@ export default ({ getService }: FtrProviderContext): void => {
         query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
       });
 
-      expect(res).to.eql([case1.id]);
+      const cases = getCaseIDsFromCases(res);
+      expect(cases).to.eql([case1.id]);
     });
   });
 };
