@@ -168,7 +168,7 @@ export const isolationRequestHandler = function (
         caseId,
         comment: {
           comment: commentLines.join('\n'),
-          type: CommentType.user, // TODO: Will be new comment type, actions.
+          type: CommentType.actions, // TODO: Will be new comment type, actions.
           owner: APP_ID,
         },
       });

@@ -79,11 +79,33 @@ export const AlertCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+export const ActionsCommentRequestRt = rt.type({
+  type: rt.literal(CommentType.actions),
+  actions: rt.type({
+    hostname: rt.string,
+    endpointId: rt.string,
+    type: rt.string,
+  }),
+  owner: rt.string,
+});
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
-const CommentAttributesRt = rt.union([AttributesTypeUserRt, AttributesTypeAlertsRt]);
+const AttributesTypeActionsRt = rt.intersection([
+  ActionsCommentRequestRt,
+  CommentAttributesBasicRt,
+]);
+const CommentAttributesRt = rt.union([
+  AttributesTypeUserRt,
+  AttributesTypeAlertsRt,
+  AttributesTypeActionsRt,
+]);
 
-export const CommentRequestRt = rt.union([ContextTypeUserRt, AlertCommentRequestRt]);
+export const CommentRequestRt = rt.union([
+  ContextTypeUserRt,
+  AlertCommentRequestRt,
+  ActionsCommentRequestRt,
+]);
 
 export const CommentResponseRt = rt.intersection([
   CommentAttributesRt,
@@ -95,6 +117,14 @@ export const CommentResponseRt = rt.intersection([
 
 export const CommentResponseTypeAlertsRt = rt.intersection([
   AttributesTypeAlertsRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export const CommentResponseTypeActionsRt = rt.intersection([
+  AttributesTypeActionsRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -141,16 +171,19 @@ export const FindQueryParamsRt = rt.partial({
 });
 
 export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
+export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;
+export type CommentRequestActionsType = rt.TypeOf<typeof ActionsCommentRequestRt>;
 export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
