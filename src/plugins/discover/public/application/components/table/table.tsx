@@ -57,8 +57,8 @@ export function DocViewTable({
     });
     if (showMultiFields) {
       setMultiFields(map);
-      setChildParentFieldsMap(childParentMap);
     }
+    setChildParentFieldsMap(childParentMap);
     setFieldsWithParents(arr);
   }, [indexPattern, hit, showMultiFields]);
 
