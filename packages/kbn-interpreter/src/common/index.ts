@@ -6,11 +6,19 @@
  * Side Public License, v 1.
  */
 
-export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
+export {
+  fromExpression,
+  toExpression,
+  safeElementFromExpression,
+  Ast,
+  ExpressionFunctionAST,
+} from './lib/ast';
 export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
 export { castProvider } from './lib/cast';
-export { parse } from './lib/grammar';
+// @ts-expect-error
+// @internal
+export { parse } from '../../grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';
 export { addRegistries, register, registryFactory } from './registries';
