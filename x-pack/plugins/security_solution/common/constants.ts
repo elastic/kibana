@@ -78,6 +78,8 @@ export enum SecurityPageGroupName {
 }
 
 export const OVERVIEW_PATH = '/overview';
+export const HOSTS_PATH = '/hosts';
+export const NETWORK_PATH = '/network';
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
 export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
