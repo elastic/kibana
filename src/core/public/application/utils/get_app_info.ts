@@ -42,9 +42,6 @@ function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
     ({ navLinkStatus = AppNavLinkStatus.default, ...rawDeepLink }): PublicAppDeepLinkInfo => {
       return {
         ...rawDeepLink,
-        id: rawDeepLink.id,
-        title: rawDeepLink.title,
-        path: rawDeepLink.path,
         keywords: rawDeepLink.keywords ?? [],
         navLinkStatus:
           navLinkStatus === AppNavLinkStatus.default ? AppNavLinkStatus.hidden : navLinkStatus,
