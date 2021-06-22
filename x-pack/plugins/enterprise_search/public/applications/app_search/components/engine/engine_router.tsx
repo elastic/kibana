@@ -109,6 +109,11 @@ export const EngineRouter: React.FC = () => {
           <Documents />
         </Route>
       )}
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
+        </Route>
+      )}
       {canManageEngineSearchUi && (
         <Route path={ENGINE_SEARCH_UI_PATH}>
           <SearchUI />
@@ -121,11 +126,6 @@ export const EngineRouter: React.FC = () => {
       )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
-        {canViewEngineSchema && (
-          <Route path={ENGINE_SCHEMA_PATH}>
-            <SchemaRouter />
-          </Route>
-        )}
         {canManageEngineCurations && (
           <Route path={ENGINE_CURATIONS_PATH}>
             <CurationsRouter />
