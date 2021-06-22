@@ -49,7 +49,7 @@ export const Synonyms: React.FC = () => {
           }
         ),
         rightSideItems: [
-          <EuiButton fill onClick={() => openModal(null)}>
+          <EuiButton fill iconType="plusInCircle" onClick={() => openModal(null)}>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.synonyms.createSynonymSetButtonLabel',
               { defaultMessage: 'Create a synonym set' }
