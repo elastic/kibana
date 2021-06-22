@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-on: (event: any, fn: (...args: any) => void) => void;
+on: (this: any, event: any, fn: (...args: any) => void) => void;
 ```
