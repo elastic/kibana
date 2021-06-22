@@ -121,7 +121,7 @@ export async function ensureFleetGlobalEsAssets(
       packages.saved_objects.map(async ({ attributes: installation }) => {
         if (installation.install_source !== 'registry') {
           logger.error(
-            `Package need to manually be reinstalled ${installation.name} after installing Fleet global assets`
+            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
           );
           return;
         }
@@ -134,7 +134,7 @@ export async function ensureFleetGlobalEsAssets(
           force: true,
         }).catch((err) => {
           logger.error(
-            `Package need to manually be reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
+            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );
         });
       })
