@@ -57,6 +57,14 @@ describe('AnalyticsLayout', () => {
 
     expect(getPageTitle(wrapper)).toEqual('Hello');
     expect(wrapper.find('[data-test-subj="world"]').text()).toEqual('World!');
+
+    expect(wrapper.prop('pageChrome')).toEqual(['Engines', 'some-engine', 'Analytics']);
+  });
+
+  it('passes analytics breadcrumbs', () => {
+    const wrapper = shallow(<AnalyticsLayout title="Some page" breadcrumbs={['Queries']} />);
+
+    expect(wrapper.prop('pageChrome')).toEqual(['Engines', 'some-engine', 'Analytics', 'Queries']);
   });
 
   describe('data loading', () => {
