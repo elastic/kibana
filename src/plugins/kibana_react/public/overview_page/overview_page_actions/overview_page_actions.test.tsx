@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { OverviewPageHeader } from './overview_page_header';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { overviewPageActions } from './overview_page_actions';
+import { applicationServiceMock } from 'src/core/public/mocks';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
@@ -25,14 +24,34 @@ jest.mock('../../context', () => ({
 
 afterAll(() => jest.clearAllMocks());
 
-const mockTitle = 'Page Title';
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const applicationStartMock = applicationServiceMock.createInternalStartContract();
 
-describe('OverviewPageHeader', () => {
-  test('render', () => {
-    const component = shallowWithIntl(
-      <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} />
-    );
-    expect(component).toMatchSnapshot();
+describe('overviewPageActions', () => {
+  test('only add data button', () => {
+    const array = overviewPageActions({
+      addBasePath: addBasePathMock,
+      application: applicationStartMock,
+    });
+    expect(array).toMatchSnapshot();
+  });
+
+  test('all buttons', () => {
+    const array = overviewPageActions({
+      addBasePath: addBasePathMock,
+      application: applicationStartMock,
+      showDevToolsLink: true,
+      showManagementLink: true,
+    });
+    expect(array).toMatchSnapshot();
+  });
+
+  test('no buttons', () => {
+    const array = overviewPageActions({
+      addBasePath: addBasePathMock,
+      application: applicationStartMock,
+      hidden: true,
+    });
+    expect(array).toMatchSnapshot();
   });
 });

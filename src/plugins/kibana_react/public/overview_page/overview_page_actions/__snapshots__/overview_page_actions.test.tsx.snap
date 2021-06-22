@@ -1,0 +1,159 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`overviewPageActions all buttons 1`] = `
+Array [
+  <mockConstructor
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentActionMenu$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": undefined,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getComponent": [MockFunction],
+        "getUrlForApp": [MockFunction],
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": "",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
+  >
+    <EuiButtonEmpty
+      className="kbnOverviewPageHeader__actionButton"
+      data-test-subj="homeAddData"
+      flush="both"
+      href="/app/home#/tutorial_directory"
+      iconType="indexOpen"
+    >
+      Add data
+    </EuiButtonEmpty>
+  </mockConstructor>,
+]
+`;
+
+exports[`overviewPageActions no buttons 1`] = `Array []`;
+
+exports[`overviewPageActions only add data button 1`] = `
+Array [
+  <mockConstructor
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentActionMenu$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": undefined,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getComponent": [MockFunction],
+        "getUrlForApp": [MockFunction],
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": "",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
+  >
+    <EuiButtonEmpty
+      className="kbnOverviewPageHeader__actionButton"
+      data-test-subj="homeAddData"
+      flush="both"
+      href="/app/home#/tutorial_directory"
+      iconType="indexOpen"
+    >
+      Add data
+    </EuiButtonEmpty>
+  </mockConstructor>,
+]
+`;
