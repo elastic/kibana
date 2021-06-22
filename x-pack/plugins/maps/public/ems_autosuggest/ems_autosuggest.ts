@@ -176,7 +176,7 @@ function violatesIdValues(sampleValues: SampleValues, termConfig: EMSTermJoinCon
       return !allSamplesMatch(sampleValues, wellKnownIds[i].values);
     }
   }
-  return false;
+  return true; // If sample values are provided, there needs to be at least one check. Otherwise it's a violation.
 }
 
 function suggestByIdValues(sampleValues: SampleValues): EMSTermJoinConfig[] {

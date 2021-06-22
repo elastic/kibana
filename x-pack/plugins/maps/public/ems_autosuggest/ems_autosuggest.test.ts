@@ -93,15 +93,12 @@ describe('suggestEMSTermJoinConfig', () => {
       });
     });
 
-    test('should reject match if sampleValues not in id-list, but select one that does not violate', async () => {
+    test('When sampleValues are provided, should reject match if no sampleValues for a layer, even though the name matches', async () => {
       const termJoinConfig = await suggestEMSTermJoinConfig({
         sampleValuesColumnName: 'country_iso_code',
         sampleValues: ['FO', 'US', 'CA'],
       });
-      expect(termJoinConfig).toEqual({
-        layerId: 'world_countries',
-        field: 'name',
-      });
+      expect(termJoinConfig).toEqual(null);
     });
 
     test('should reject match if sampleValues not in id-list', async () => {
