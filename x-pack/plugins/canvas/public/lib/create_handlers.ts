@@ -6,37 +6,25 @@
  */
 
 import { isEqual } from 'lodash';
-import {
-  ExpressionRendererEvent,
-  IInterpreterRenderHandlers,
-} from 'src/plugins/expressions/public';
+import { ExpressionRendererEvent } from 'src/plugins/expressions/public';
 // @ts-expect-error untyped local
 import { setFilter } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import {
-  RendererHandlers,
   CanvasElement,
   getDefaultHandlers,
   InterpreterRenderHandlers,
+  CanvasSpecificRendererHandlers,
 } from '../../types';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
 
 // We need to move towards only using these handlers and ditching our canvas specific ones
+export const createHandlers = (): InterpreterRenderHandlers<CanvasSpecificRendererHandlers> => {
+  const defaultHandlers = getDefaultHandlers<CanvasSpecificRendererHandlers>();
 
-interface RenderEmitters {
-  resize: (_size: { height: number; width: number }) => boolean | void;
-  embeddableDestroyed: () => boolean | void;
-  embeddableInputChange: (embeddableExpression: string) => boolean | void;
-  hasCompatibleActions: () => Promise<boolean>;
-}
-
-export const createHandlers = (): RendererHandlers & InterpreterRenderHandlers<RenderEmitters> => {
-  const defaultHandlers: IInterpreterRenderHandlers &
-    RenderEmitters = getDefaultHandlers<RenderEmitters>();
-
-  const handlers = {
+  const handlers: Partial<typeof defaultHandlers> = {
     ...defaultHandlers,
     destroy() {},
     getElementId() {
@@ -61,13 +49,15 @@ export const createHandlers = (): RendererHandlers & InterpreterRenderHandlers<R
   return Object.assign(defaultHandlers, handlers);
 };
 
-export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
+export const assignHandlers = (
+  handlers: Partial<InterpreterRenderHandlers<CanvasSpecificRendererHandlers>> = {}
+): InterpreterRenderHandlers<CanvasSpecificRendererHandlers> =>
   Object.assign(createHandlers(), handlers);
 
 // TODO: this is a legacy approach we should unravel in the near future.
 export const createDispatchedHandlerFactory = (
   dispatch: (action: any) => void
-): ((element: CanvasElement) => RendererHandlers) => {
+): ((element: CanvasElement) => InterpreterRenderHandlers<CanvasSpecificRendererHandlers>) => {
   let isComplete = false;
   let oldElement: CanvasElement | undefined;
 
@@ -79,10 +69,7 @@ export const createDispatchedHandlerFactory = (
     }
 
     const defaultHandlers = createHandlers();
-    const handlers: RendererHandlers & {
-      event: IInterpreterRenderHandlers['event'];
-      done: IInterpreterRenderHandlers['done'];
-    } & RenderEmitters = {
+    const handlers = {
       ...defaultHandlers,
       event(event: ExpressionRendererEvent) {
         switch (event.name) {

@@ -116,4 +116,5 @@ export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpr
   uiState?: unknown;
 }
 
-export type InterpreterRenderHandlers<T = {}> = T & DefaultInterpreterRenderHandlers<T>;
+export type InterpreterRenderHandlers<Emitters = {}> = Emitters &
+  DefaultInterpreterRenderHandlers<Emitters>;
