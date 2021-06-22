@@ -24,7 +24,6 @@ export const usePrimaryNavigation = ({
   pageName,
   savedQuery,
   sourcerer,
-  tabName,
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
@@ -33,13 +32,9 @@ export const usePrimaryNavigation = ({
       getOr(
         '',
         'id',
-        Object.values(navTabs).find(
-          (item) =>
-            (tabName === item.id && item.pageId != null) ||
-            (pageName === item.id && item.pageId == null)
-        )
+        Object.values(navTabs).find((item) => pageName === item.id && item.pageId == null)
       ),
-    [pageName, tabName, navTabs]
+    [pageName, navTabs]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
@@ -52,7 +47,7 @@ export const usePrimaryNavigation = ({
     }
 
     // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
-  }, [pageName, tabName, navTabs, mapLocationToTab, selectedTabId]);
+  }, [pageName, navTabs, mapLocationToTab, selectedTabId]);
 
   const navItems = usePrimaryNavigationItems({
     filters,

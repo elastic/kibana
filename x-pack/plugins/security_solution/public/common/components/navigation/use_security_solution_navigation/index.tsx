@@ -73,7 +73,6 @@ export const useSecuritySolutionNavigation = () => {
     pageName,
     sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,
-    tabName,
     timeline: urlState.timeline,
     timerange: urlState.timerange,
   });

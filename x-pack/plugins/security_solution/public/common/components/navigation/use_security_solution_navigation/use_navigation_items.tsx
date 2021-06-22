@@ -27,12 +27,7 @@ export const usePrimaryNavigationItems = ({
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
   const navItems = Object.values(navTabs).map((tab) => {
-    const { id, href, name, disabled, pageId } = tab;
-    // Rules of hooks prevents hooks from being called in callbacks as the order of the hooks
-    // should be consistent across every render. The primary nav tabs here are from a constants file
-    // not dynamically generated, so their order will remain consistent across renders.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SecurityPageName);
+    const { id, name, disabled } = tab;
     const isSelected = selectedTabId === id;
     const urlSearch = getSearch(tab, {
       filters,
@@ -49,12 +44,7 @@ export const usePrimaryNavigationItems = ({
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     };
 
-    const appHref =
-      pageId != null
-        ? formatUrl(href)
-        : getUrlForApp(`${APP_ID}:${id}`, {
-            path: urlSearch,
-          });
+    const appHref = getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
 
     return {
       'data-href': appHref,
