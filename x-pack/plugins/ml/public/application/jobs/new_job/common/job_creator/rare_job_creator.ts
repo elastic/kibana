@@ -40,7 +40,7 @@ export class RareJobCreator extends JobCreator {
 
   public setDefaultDetectorProperties(rare: Aggregation | null, freqRare: Aggregation | null) {
     if (rare === null || freqRare === null) {
-      return;
+      throw Error('rare or freq_rare aggregations missing');
     }
     this._rareAgg = rare;
     this._freqRareAgg = freqRare;

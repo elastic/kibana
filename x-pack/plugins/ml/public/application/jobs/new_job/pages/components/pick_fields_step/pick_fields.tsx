@@ -33,7 +33,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
-  }, [jobValidatorUpdated]);
+  }, [jobValidatorUpdated, selectionValid]);
 
   return (
     <Fragment>
