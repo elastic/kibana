@@ -48,7 +48,7 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  DryRunPackagePolicyInput,
+  DryRunPackagePolicy,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -537,56 +537,23 @@ class PackagePolicyService {
       id
     );
 
-    let hasErrors = false;
-
-    let inputs: DryRunPackagePolicyInput[] = packagePolicy.inputs.map((input) =>
-      assignStreamIdToInput(packagePolicy.id, input)
+    const updatedPackagePolicy = overridePackageInputs(
+      {
+        ...omit(packagePolicy, 'id'),
+        inputs: packageToPackagePolicyInputs(installedPkgInfo),
+        package: {
+          ...packagePolicy.package,
+          version: installedPkgInfo.version,
+        },
+      },
+      packagePolicy.inputs as InputsOverride[],
+      true
     );
-    const registryPkgInfo = await Registry.fetchInfo(
-      installedPkgInfo.name,
-      installedPkgInfo.version
-    );
-    const inputsPromises = (inputs as PackagePolicyInput[]).map(async (input) => {
-      const vars = packagePolicy.vars || {};
-      try {
-        await _compilePackagePolicyInput(registryPkgInfo, installedPkgInfo, vars, input);
-      } catch (e) {
-        hasErrors = true;
-        return String(e);
-      }
-      const compiledStreamsResults = await _compilePackageStreamsDryRun(
-        registryPkgInfo,
-        installedPkgInfo,
-        vars,
-        input
-      );
-      const streamsOrErrors = compiledStreamsResults.map((result) => {
-        if (result.status === 'fulfilled') return result.value;
-        else {
-          hasErrors = true;
-          return String(result.reason);
-        }
-      });
 
-      return {
-        ...input,
-        streams: streamsOrErrors,
-      };
-    });
-    inputs = await Promise.all(inputsPromises);
+    const hasErrors = 'errors' in updatedPackagePolicy;
 
     return {
-      diff: [
-        packagePolicy,
-        {
-          ...packagePolicy,
-          inputs,
-          package: {
-            ...packagePolicy.package,
-            version: installedPkgInfo.version,
-          },
-        },
-      ],
+      diff: [packagePolicy, updatedPackagePolicy],
       hasErrors,
     };
   }
@@ -722,19 +689,6 @@ async function _compilePackageStreams(
   return await Promise.all(streamsPromises);
 }
 
-async function _compilePackageStreamsDryRun(
-  registryPkgInfo: RegistryPackage,
-  pkgInfo: PackageInfo,
-  vars: PackagePolicy['vars'],
-  input: PackagePolicyInput
-) {
-  const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
-  );
-
-  return await Promise.allSettled(streamsPromises);
-}
-
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
@@ -847,12 +801,14 @@ export type { PackagePolicyService };
 
 export function overridePackageInputs(
   basePackagePolicy: NewPackagePolicy,
-  inputsOverride?: InputsOverride[]
-) {
+  inputsOverride?: InputsOverride[],
+  dryRun?: boolean
+): DryRunPackagePolicy {
   if (!inputsOverride) return basePackagePolicy;
 
   const inputs = [...basePackagePolicy.inputs];
   const packageName = basePackagePolicy.package!.name;
+  const errors = [];
 
   for (const override of inputsOverride) {
     const originalInput = inputs.find((i) => i.type === override.type);
@@ -869,7 +825,13 @@ export function overridePackageInputs(
         ),
         package: { name: packageName, version: basePackagePolicy.package!.version },
       };
-      throw e;
+      if (dryRun) {
+        errors.push({
+          key: override.type,
+          message: String(e.error),
+        });
+        continue;
+      } else throw e;
     }
 
     if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
@@ -880,13 +842,14 @@ export function overridePackageInputs(
       try {
         deepMergeVars(override, originalInput);
       } catch (e) {
+        const varName = e.message;
         const err = {
           error: new Error(
             i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
               defaultMessage:
                 'Var {varName} does not exist on {inputType} of package {packageName}',
               values: {
-                varName: e.message,
+                varName,
                 inputType: override.type,
                 packageName,
               },
@@ -894,7 +857,12 @@ export function overridePackageInputs(
           ),
           package: { name: packageName, version: basePackagePolicy.package!.version },
         };
-        throw err;
+        if (dryRun) {
+          errors.push({
+            key: `${override.type}.${varName}`,
+            message: String(err.error),
+          });
+        } else throw err;
       }
     }
 
@@ -904,13 +872,14 @@ export function overridePackageInputs(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
         if (!originalStream) {
+          const streamSet = stream.data_stream.dataset;
           const e = {
             error: new Error(
               i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
                 defaultMessage:
                   'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
                 values: {
-                  streamSet: stream.data_stream.dataset,
+                  streamSet,
                   inputType: override.type,
                   packageName,
                 },
@@ -918,7 +887,13 @@ export function overridePackageInputs(
             ),
             package: { name: packageName, version: basePackagePolicy.package!.version },
           };
-          throw e;
+          if (dryRun) {
+            errors.push({
+              key: `${override.type}.${streamSet}`,
+              message: String(e.error),
+            });
+            continue;
+          } else throw e;
         }
 
         if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
@@ -927,14 +902,16 @@ export function overridePackageInputs(
           try {
             deepMergeVars(stream as InputsOverride, originalStream);
           } catch (e) {
+            const varName = e.message;
+            const streamSet = stream.data_stream.dataset;
             const err = {
               error: new Error(
                 i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
                   defaultMessage:
                     'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
                   values: {
-                    varName: e.message,
-                    streamSet: stream.data_stream.dataset,
+                    varName,
+                    streamSet,
                     inputType: override.type,
                     packageName,
                   },
@@ -942,21 +919,33 @@ export function overridePackageInputs(
               ),
               package: { name: packageName, version: basePackagePolicy.package!.version },
             };
-            throw err;
+            if (dryRun) {
+              errors.push({
+                key: `${override.type}.${streamSet}.${varName}`,
+                message: String(err.error),
+              });
+            } else throw err;
           }
         }
       }
     }
   }
 
+  if (dryRun && errors.length) return { ...basePackagePolicy, inputs, errors };
   return { ...basePackagePolicy, inputs };
 }
 
 function deepMergeVars(
-  override: InputsOverride,
+  override: NewPackagePolicyInput | InputsOverride,
   original: NewPackagePolicyInput | NewPackagePolicyInputStream
 ) {
-  for (const { name, ...val } of override.vars!) {
+  const overrideVars = Array.isArray(override.vars)
+    ? override.vars
+    : Object.entries(override.vars!).map(([key, rest]) => ({
+        name: key,
+        ...rest,
+      }));
+  for (const { name, ...val } of overrideVars) {
     if (!original.vars || !Reflect.has(original.vars, name)) {
       throw new Error(name);
     }
