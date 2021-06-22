@@ -34,7 +34,7 @@ export type EndpointTypes =
   | 'msearch'
   | 'transport.request'
   | 'cluster.putSettings'
-  | 'cluster.getSettigns'
+  | 'cluster.getSettings'
   | string;
 export type ClientParams = estypes.SearchRequest | undefined;
 
