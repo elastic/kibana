@@ -231,7 +231,7 @@ export class FollowerIndexEdit extends PureComponent {
     /* remove non-editable properties */
     const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
 
-    if (apiStatus.get === API_STATUS.LOADING) {
+    if (apiStatus.get === API_STATUS.LOADING || !followerIndex) {
       return this.renderLoading(
         i18n.translate(
           'xpack.crossClusterReplication.followerIndexEditForm.loadingFollowerIndexTitle',

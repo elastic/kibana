@@ -141,7 +141,7 @@ export class AutoFollowPatternEdit extends PureComponent {
       match: { url: currentUrl },
     } = this.props;
 
-    if (apiStatus.get === API_STATUS.LOADING) {
+    if (apiStatus.get === API_STATUS.LOADING || !autoFollowPattern) {
       return this.renderLoading(
         i18n.translate('xpack.crossClusterReplication.autoFollowPatternEditForm.loadingTitle', {
           defaultMessage: 'Loading auto-follow pattern…',
