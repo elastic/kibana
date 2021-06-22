@@ -56,3 +56,7 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlert
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
 });
+
+export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
+  defaultMessage: 'isolated host',
+});

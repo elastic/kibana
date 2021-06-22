@@ -445,6 +445,8 @@ export const UserActionTree = React.memo(
                       ]
                     : []),
                 ];
+              } else if (comment !== null && comment.type === CommentType.actions) {
+                console.log('do something');
               }
             }
 

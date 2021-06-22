@@ -27,6 +27,7 @@ import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
+import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -346,6 +347,70 @@ export const getGeneratedAlertsAttachment = ({
       {renderInvestigateInTimelineActionComponent ? (
         <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
       ) : null}
+    </EuiFlexGroup>
+  ),
+});
+
+export const getHostIsolationAttachment = ({
+  action,
+  alertId,
+  getCaseDetailHrefWithCommentId,
+  getRuleDetailsHref,
+  index,
+  loadingAlertData,
+  onRuleDetailsClick,
+  onShowAlertDetails,
+  ruleId,
+  ruleName,
+}: {
+  action: CaseUserActions;
+  alertId: string;
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getRuleDetailsHref: RuleDetailsNavigation['href'];
+  index: string;
+  loadingAlertData: boolean;
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  onShowAlertDetails: (alertId: string, index: string) => void;
+  ruleId?: string | null;
+  ruleName?: string | null;
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={action.actionBy.username}
+      fullName={action.actionBy.fullName}
+    />
+  ),
+  className: 'comment-alert',
+  type: 'update',
+  event: (
+    <HostIsolationCommentEvent
+      commentType={CommentType.actions}
+      getHostDetailsHref={getRuleDetailsHref}
+      onHostDetailsClick={onRuleDetailsClick}
+      hostId={ruleId}
+      hostName={ruleName}
+      loadingAlertData={loadingAlertData}
+    />
+  ),
+  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: 'lock',
+  actions: (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UserActionCopyLink
+          id={action.actionId}
+          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UserActionShowAlert
+          id={action.actionId}
+          alertId={alertId}
+          index={index}
+          onShowAlertDetails={onShowAlertDetails}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   ),
 });
