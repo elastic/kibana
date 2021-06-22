@@ -12,15 +12,13 @@ import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import moment, { Moment } from 'moment';
 
-import { EuiPageHeader, EuiSelect, EuiDatePickerRange, EuiButton } from '@elastic/eui';
-
-import { LogRetentionTooltip } from '../../log_retention';
+import { EuiSelect, EuiDatePickerRange, EuiButton } from '@elastic/eui';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from '../constants';
 
-import { AnalyticsHeader } from './';
+import { AnalyticsFilters } from './';
 
-describe('AnalyticsHeader', () => {
+describe('AnalyticsFilters', () => {
   const { history } = mockKibanaValues;
 
   const values = {
@@ -45,18 +43,14 @@ describe('AnalyticsHeader', () => {
   });
 
   it('renders', () => {
-    wrapper = shallow(<AnalyticsHeader title="Hello world" />);
+    wrapper = shallow(<AnalyticsFilters />);
 
-    expect(wrapper.type()).toEqual(EuiPageHeader);
-    expect(wrapper.find('h1').text()).toEqual('Hello world');
-
-    expect(wrapper.find(LogRetentionTooltip)).toHaveLength(1);
     expect(wrapper.find(EuiSelect)).toHaveLength(1);
     expect(wrapper.find(EuiDatePickerRange)).toHaveLength(1);
   });
 
   it('renders tags & dates with default values when no search query params are present', () => {
-    wrapper = shallow(<AnalyticsHeader title="" />);
+    wrapper = shallow(<AnalyticsFilters />);
 
     expect(getTagsSelect().prop('value')).toEqual('');
     expect(getStartDatePicker().props.startDate._i).toEqual(DEFAULT_START_DATE);
@@ -69,7 +63,7 @@ describe('AnalyticsHeader', () => {
       const allTags = [...values.allTags, 'tag1', 'tag2', 'tag3'];
       setMockValues({ ...values, allTags });
 
-      wrapper = shallow(<AnalyticsHeader title="" />);
+      wrapper = shallow(<AnalyticsFilters />);
     });
 
     it('renders the tags select with currentTag value and allTags options', () => {
@@ -95,7 +89,7 @@ describe('AnalyticsHeader', () => {
     beforeEach(() => {
       history.location.search = '?start=1970-01-01&end=1970-01-02';
 
-      wrapper = shallow(<AnalyticsHeader title="" />);
+      wrapper = shallow(<AnalyticsFilters />);
     });
 
     it('renders the start date picker', () => {
@@ -127,7 +121,7 @@ describe('AnalyticsHeader', () => {
     beforeEach(() => {
       history.location.search = '?start=1970-01-02&end=1970-01-01';
 
-      wrapper = shallow(<AnalyticsHeader title="" />);
+      wrapper = shallow(<AnalyticsFilters />);
     });
 
     it('renders the date pickers as invalid', () => {
@@ -148,7 +142,7 @@ describe('AnalyticsHeader', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallow(<AnalyticsHeader title="" />);
+      wrapper = shallow(<AnalyticsFilters />);
     });
 
     it('pushes up new tag & date state to the search query', () => {
