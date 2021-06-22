@@ -17,48 +17,411 @@ describe('config.validate()', () => {
     );
   });
 
-  it('throws if both `rules` and `script_src` are specified', () => {
-    expect(() =>
-      config.schema.validate({
-        rules: [
-          `script-src 'unsafe-eval' 'self'`,
-          `worker-src 'unsafe-eval' 'self'`,
-          `style-src 'unsafe-eval' 'self'`,
-        ],
-        script_src: [`'self'`],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-    );
+  describe(`"script_src"`, () => {
+    it(`throws if containing 'unsafe-inline' when 'strict' is true`, () => {
+      expect(() =>
+        config.schema.validate({
+          strict: true,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+
+      expect(() =>
+        config.schema.validate({
+          strict: true,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+    });
+
+    it(`does not throw if containing 'unsafe-inline' when 'strict' is false`, () => {
+      expect(() =>
+        config.schema.validate({
+          strict: false,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          strict: false,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).not.toThrow();
+    });
+
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          script_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          script_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          script_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        config.schema.validate({
+          script_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
   });
 
-  it('throws if both `rules` and `worker_src` are specified', () => {
-    expect(() =>
-      config.schema.validate({
-        rules: [
-          `script-src 'unsafe-eval' 'self'`,
-          `worker-src 'unsafe-eval' 'self'`,
-          `style-src 'unsafe-eval' 'self'`,
-        ],
-        worker_src: [`'self'`],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-    );
+  describe(`"worker_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          worker_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          worker_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          worker_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        config.schema.validate({
+          worker_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
   });
 
-  it('throws if both `rules` and `style_src` are specified', () => {
-    expect(() =>
-      config.schema.validate({
-        rules: [
-          `script-src 'unsafe-eval' 'self'`,
-          `worker-src 'unsafe-eval' 'self'`,
-          `style-src 'unsafe-eval' 'self'`,
-        ],
-        style_src: [`'self'`],
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-    );
+  describe(`"style_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          style_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          style_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          style_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        config.schema.validate({
+          style_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"connect_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          connect_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          connect_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[connect_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          connect_src: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          connect_src: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe(`"default_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          default_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          default_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[default_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          default_src: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          default_src: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe(`"font_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          font_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          font_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[font_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          font_src: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          font_src: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe(`"frame_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          frame_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          frame_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          frame_src: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          frame_src: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe(`"img_src"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          img_src: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          img_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[img_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          img_src: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          img_src: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe(`"frame_ancestors"`, () => {
+    it(`throws if 'rules' is also specified`, () => {
+      expect(() =>
+        config.schema.validate({
+          rules: [
+            `script-src 'unsafe-eval' 'self'`,
+            `worker-src 'unsafe-eval' 'self'`,
+            `style-src 'unsafe-eval' 'self'`,
+          ],
+          frame_ancestors: [`'self'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
+      );
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        config.schema.validate({
+          frame_ancestors: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_ancestors]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+    it("allows using `none` or `'none'`", () => {
+      expect(() =>
+        config.schema.validate({
+          frame_ancestors: [`hello`, `none`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        config.schema.validate({
+          frame_ancestors: [`hello`, `'none'`],
+        })
+      ).not.toThrow();
+    });
   });
 });

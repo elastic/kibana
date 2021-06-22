@@ -9,27 +9,81 @@
 import { TypeOf, schema } from '@kbn/config-schema';
 import { ServiceConfigDescriptor } from '../internal_types';
 
-const validateDirectiveValues = (values: string[]) => {};
+interface DirectiveValidationOptions {
+  allowNone: boolean;
+  allowNonce: boolean;
+}
 
-const cspDirectiveSchema = schema.arrayOf(schema.string(), {
-  defaultValue: [],
-  validate: validateDirectiveValues,
-});
+const getDirectiveValidator = (options: DirectiveValidationOptions) => {
+  const validateValue = getDirectiveValueValidator(options);
+  return (values: string[]) => {
+    for (const value of values) {
+      const error = validateValue(value);
+      if (error) {
+        return error;
+      }
+    }
+  };
+};
+
+const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidationOptions) => {
+  return (value: string) => {
+    if (!allowNonce && value.startsWith('nonce-')) {
+      return `using "nonce-*" is considered insecure and is not allowed`;
+    }
+    if (!allowNone && (value === `none` || value === `'none'`)) {
+      return `using "none" would conflict with Kibana's default csp configuration and is not allowed`;
+    }
+  };
+};
 
 const configSchema = schema.object(
   {
     rules: schema.maybe(schema.arrayOf(schema.string())),
-    script_src: cspDirectiveSchema,
-    worker_src: cspDirectiveSchema,
-    style_src: cspDirectiveSchema,
-    connect_src: cspDirectiveSchema,
-    default_src: cspDirectiveSchema,
-    font_src: cspDirectiveSchema,
-    frame_src: cspDirectiveSchema,
-    img_src: cspDirectiveSchema,
-    frame_ancestors: cspDirectiveSchema,
-    report_uri: cspDirectiveSchema,
-    report_to: cspDirectiveSchema,
+    script_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
+    worker_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
+    style_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
+    connect_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    default_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    font_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    frame_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    img_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    frame_ancestors: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    report_uri: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
+    report_to: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+    }),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
     disableEmbedding: schema.oneOf([schema.literal<boolean>(false)], { defaultValue: false }),
@@ -38,6 +92,13 @@ const configSchema = schema.object(
     validate: (cspConfig) => {
       if (cspConfig.rules && hasDirectiveSpecified(cspConfig)) {
         return `"csp.rules" cannot be used when specifying per-directive additions such as "script_src", "worker_src" or "style_src"`;
+      }
+      if (
+        cspConfig.strict &&
+        (cspConfig.script_src.includes(`unsafe-inline`) ||
+          cspConfig.script_src.includes(`'unsafe-inline'`))
+      ) {
+        return 'cannot use `unsafe-inline` for `script_src` when `csp.strict` is true';
       }
     },
   }
