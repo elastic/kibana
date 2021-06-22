@@ -8,7 +8,6 @@
 
 import Path from 'path';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
@@ -134,59 +133,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: /node_modules/,
-          oneOf: [
-            ...worker.themeTags.map((theme) => ({
-              resourceQuery: `?${theme}`,
-              use: [
-                {
-                  loader: 'style-loader',
-                },
-                {
-                  loader: 'css-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                  },
-                },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
-                    },
-                  },
-                },
-                {
-                  loader: 'sass-loader',
-                  options: {
-                    prependData(loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        )
-                      )};\n`;
-                    },
-                    webpackImporter: false,
-                    implementation: require('node-sass'),
-                    sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
-                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                    },
-                  },
-                },
-              ],
-            })),
-            {
-              loader: require.resolve('./theme_loader'),
-              options: {
-                bundleId: bundle.id,
-                themeTags: worker.themeTags,
-              },
-            },
-          ],
+          loader: require.resolve('./theme_loader'),
+          options: {
+            dist: worker.dist,
+            repoRoot: worker.repoRoot,
+            sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+            themeTags: worker.themeTags,
+          },
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
