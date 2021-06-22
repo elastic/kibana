@@ -12,8 +12,9 @@ import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/
 import {
   createCase,
   createComment,
-  getCaseIDsByAlert,
+  getCasesByAlert,
   deleteAllCaseItems,
+  getCaseIDsFromCases,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -92,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseIDs: [case1.id, case2.id, case3.id],
         },
       ]) {
-        const res = await getCaseIDsByAlert({
+        const res = await getCasesByAlert({
           supertest: supertestWithoutAuth,
           // cast because the official type is string | string[] but the ids will always be a single value in the tests
           alertID: postCommentAlertReq.alertId as string,
@@ -101,9 +102,10 @@ export default ({ getService }: FtrProviderContext): void => {
             space: null,
           },
         });
-        expect(res.length).to.eql(scenario.caseIDs.length);
+        const cases = getCaseIDsFromCases(res);
+        expect(cases.length).to.eql(scenario.caseIDs.length);
         for (const caseID of scenario.caseIDs) {
-          expect(res).to.contain(caseID);
+          expect(cases).to.contain(caseID);
         }
       }
     });
@@ -123,7 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: superUserDefaultSpaceAuth,
       });
 
-      await getCaseIDsByAlert({
+      await getCasesByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
         auth: { user: noKibanaPrivileges, space: null },
@@ -157,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      await getCaseIDsByAlert({
+      await getCasesByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
         auth: { user: obsSecSpacesAll, space: 'space1' },
@@ -192,14 +194,15 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const res = await getCaseIDsByAlert({
+      const res = await getCasesByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
         auth: obsSecDefaultSpaceAuth,
         query: { owner: 'securitySolutionFixture' },
       });
 
-      expect(res).to.eql([case1.id]);
+      const cases = getCaseIDsFromCases(res);
+      expect(cases).to.eql([case1.id]);
     });
 
     it('should return the correct case IDs when the owner query parameter contains unprivileged values', async () => {
@@ -228,7 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const res = await getCaseIDsByAlert({
+      const res = await getCasesByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
         auth: secOnlyDefaultSpaceAuth,
