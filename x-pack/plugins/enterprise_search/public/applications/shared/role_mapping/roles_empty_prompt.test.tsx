@@ -26,6 +26,7 @@ describe('RolesEmptyPrompt', () => {
     const wrapper = shallow(<RolesEmptyPrompt {...props} />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(EuiEmptyPrompt).dive().find(EuiLink).prop('href')).toEqual(props.docsLink);
   });
 
   it('calls onEnable on change', () => {
@@ -34,6 +35,5 @@ describe('RolesEmptyPrompt', () => {
     prompt.find(EuiButton).simulate('click');
 
     expect(onEnable).toHaveBeenCalled();
-    expect(prompt.find(EuiLink).prop('href')).toEqual(props.docsLink);
   });
 });
