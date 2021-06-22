@@ -99,3 +99,7 @@ export const NESTED_COLUMN = (field: string) =>
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as column',
   });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});

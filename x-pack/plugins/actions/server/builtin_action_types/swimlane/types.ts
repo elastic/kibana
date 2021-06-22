@@ -21,7 +21,6 @@ export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfi
 export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;
 
 export type MappingConfigType = TypeOf<typeof ConfigMappingSchema>;
-
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
