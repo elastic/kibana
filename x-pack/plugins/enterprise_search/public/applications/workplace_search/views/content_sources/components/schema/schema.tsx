@@ -20,11 +20,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
 import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 import { AppLogic } from '../../../../app_logic';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { NAV } from '../../../../constants';
 import { getReindexJobRoute } from '../../../../routes';
+import { SourceLayout } from '../source_layout';
 
 import {
   SCHEMA_ADD_FIELD_BUTTON,
@@ -65,8 +66,6 @@ export const Schema: React.FC = () => {
     initializeSchema();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const hasSchemaFields = Object.keys(activeSchema).length > 0;
   const { hasErrors, activeReindexJobId } = mostRecentIndexJob;
 
@@ -77,7 +76,11 @@ export const Schema: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout
+      pageChrome={[NAV.SCHEMA]}
+      pageViewTelemetry="source_schema"
+      isLoading={dataLoading}
+    >
       <ViewContentHeader
         title={SCHEMA_MANAGE_SCHEMA_TITLE}
         description={SCHEMA_MANAGE_SCHEMA_DESCRIPTION}
@@ -141,6 +144,6 @@ export const Schema: React.FC = () => {
           closeAddFieldModal={closeAddFieldModal}
         />
       )}
-    </>
+    </SourceLayout>
   );
 };
