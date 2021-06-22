@@ -70,6 +70,12 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
             },
           ],
         },
+        // reporting loads headless browser, that prevents nodejs process from exiting.
+        xpack: {
+          reporting: {
+            enabled: false,
+          },
+        },
       },
       {
         oss,
