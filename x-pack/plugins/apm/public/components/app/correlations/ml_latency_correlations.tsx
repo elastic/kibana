@@ -364,6 +364,10 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           significantTerms={histogramTerms}
           status={FETCH_STATUS.SUCCESS}
           setSelectedSignificantTerm={setSelectedSignificantTerm}
+          selectedTerm={{
+            fieldName: selectedHistogram.field,
+            fieldValue: selectedHistogram.value,
+          }}
           onFilter={onClose}
         />
       )}

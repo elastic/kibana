@@ -22,6 +22,7 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
+import { useTheme } from '../../../hooks/use_theme';
 
 export const FILTER_LABEL = i18n.translate(
   'xpack.apm.correlations.correlationsTable.filterLabel',
@@ -65,6 +66,7 @@ interface Props<T> {
   status: FETCH_STATUS;
   percentageColumnName?: string;
   setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
+  selectedTerm?: { fieldName: string; fieldValue: string };
   onFilter: () => void;
   columns?: Array<EuiBasicTableColumn<T>>;
 }
@@ -76,7 +78,9 @@ export function CorrelationsTable<T extends SignificantTerm>({
   setSelectedSignificantTerm,
   onFilter,
   columns,
+  selectedTerm,
 }: Props<T>) {
+  const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantTerm = useCallback(
     () =>
@@ -242,6 +246,14 @@ export function CorrelationsTable<T extends SignificantTerm>({
             trackSelectSignificantTerm();
           },
           onMouseLeave: () => setSelectedSignificantTerm(null),
+          style:
+            selectedTerm &&
+            selectedTerm.fieldValue === term.fieldValue &&
+            selectedTerm.fieldName === term.fieldName
+              ? {
+                  backgroundColor: euiTheme.eui.euiColorLightestShade,
+                }
+              : null,
         };
       }}
       pagination={pagination}
