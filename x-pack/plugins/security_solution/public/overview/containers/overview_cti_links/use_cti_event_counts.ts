@@ -6,26 +6,49 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { usePrevious } from 'react-use';
-import { i18n } from '@kbn/i18n';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import { useKibana } from '../../../common/lib/kibana';
 import { ThreatIntelLinkPanelProps } from '../../components/overview_cti_links';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
-import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
-import { EVENT_DATASET } from '../../../../common/cti/constants';
-import { TimeRange } from '../../../resolver/types';
+import { useRequestEventCounts } from './use_request_event_counts';
+import { emptyEventCountsByDataset } from './helpers';
 
 export const ID = 'ctiEventCountQuery';
 const PREFIX = 'threatintel.';
 
-export const useCTIEventCounts = (
-  { deleteQuery, filters, from, indexNames, indexPattern, setQuery, to }: ThreatIntelLinkPanelProps,
-  timeRange: TimeRange
-) => {
+export const useCTIEventCounts = ({
+  deleteQuery,
+  from,
+  setQuery,
+  to,
+}: ThreatIntelLinkPanelProps) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const { uiSettings } = useKibana().services;
+
+  const [loading, { data, inspect, totalCount, refetch }] = useRequestEventCounts(to, from);
+
+  const eventCountsByDataset = useMemo(
+    () =>
+      data.reduce(
+        (acc, item) => {
+          if (item.y && item.g) {
+            const id = item.g.replace(PREFIX, '');
+            acc[id] += item.y;
+          }
+          return acc;
+        },
+        { ...emptyEventCountsByDataset } as { [key: string]: number }
+      ),
+    [data]
+  );
+
+  useEffect(() => {
+    if (isInitialLoading && data) {
+      setIsInitialLoading(false);
+    }
+  }, [isInitialLoading, data]);
+
+  useEffect(() => {
+    if (!loading && !isInitialLoading) {
+      setQuery({ id: ID, inspect, loading, refetch });
+    }
+  }, [setQuery, inspect, loading, refetch, isInitialLoading, setIsInitialLoading]);
 
   useEffect(() => {
     return () => {
@@ -35,61 +58,13 @@ export const useCTIEventCounts = (
     };
   }, [deleteQuery]);
 
-  const matrixHistogramRequest = useMemo(
-    () => ({
-      endDate: to,
-      errorMessage: i18n.translate('xpack.securitySolution.overview.errorFetchingEvents', {
-        defaultMessage: 'Error fetching events',
-      }),
-      filterQuery: convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
-        indexPattern,
-        queries: [{ query: `event.kind = "enrichment"`, language: 'kql' }],
-        filters,
-      }),
-      histogramType: MatrixHistogramType.events,
-      indexNames,
-      stackByField: EVENT_DATASET,
-      startDate: from,
-    }),
-    [filters, from, indexPattern, uiSettings, to, indexNames]
-  );
-
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram(
-    matrixHistogramRequest
-  );
-
   useEffect(() => {
-    if (!loading && !isInitialLoading) {
-      setQuery({ id: ID, inspect, loading, refetch });
-    }
-  }, [setQuery, inspect, loading, refetch, isInitialLoading, setIsInitialLoading]);
-
-  useEffect(() => {
-    if (isInitialLoading && data) {
-      setIsInitialLoading(false);
-    }
-  }, [isInitialLoading, data]);
-
-  const prevTimeRangeString = usePrevious(JSON.stringify(timeRange));
-  useEffect(() => {
-    if (prevTimeRangeString !== JSON.stringify(timeRange)) {
-      refetch();
-    }
-  }, [timeRange, prevTimeRangeString, refetch]);
+    refetch();
+  }, [to, from, refetch]);
 
   return {
-    eventCounts: data.reduce((acc, item) => {
-      if (item.y && item.g) {
-        const id = item.g.replace(PREFIX, '');
-        if (typeof acc[id] === 'number') {
-          acc[id]! += item.y;
-        } else {
-          acc[id] = item.y;
-        }
-      }
-      return acc;
-    }, {} as { id: number | undefined; [key: string]: number | undefined }),
-    total: totalCount,
+    eventCountsByDataset,
+    loading,
+    totalCount,
   };
 };

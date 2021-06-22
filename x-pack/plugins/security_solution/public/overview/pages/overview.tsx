@@ -140,10 +140,7 @@ const OverviewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <ThreatIntelLinkPanel
                       deleteQuery={deleteQuery}
-                      filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
                       setQuery={setQuery}
                       to={to}
                     />

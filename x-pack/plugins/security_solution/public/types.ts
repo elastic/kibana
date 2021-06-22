@@ -50,7 +50,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
-  dashboard: DashboardStart;
+  dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
