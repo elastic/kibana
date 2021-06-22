@@ -24,22 +24,13 @@ import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
 
-interface RuleRegistryPluginSetupDependencies {
+export interface RuleRegistryPluginSetupDependencies {
   security: SecurityPluginSetup;
 }
 
-interface RuleRegistryPluginStartDependencies {
+export interface RuleRegistryPluginStartDependencies {
   spaces: SpacesPluginStart;
   alerting: AlertingStart;
-}
-
-export interface RuleRegistryPluginsStart {
-  alerting: AlertingStart;
-  spaces?: SpacesPluginStart;
-}
-
-export interface RuleRegistryPluginsSetup {
-  security?: SecurityPluginSetup;
 }
 
 export interface RuleRegistryPluginSetupContract {
@@ -74,7 +65,7 @@ export class RuleRegistryPlugin
 
   public setup(
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
-    plugins: RuleRegistryPluginsSetup
+    plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
     const { logger } = this;
 
@@ -132,7 +123,7 @@ export class RuleRegistryPlugin
     return { ruleDataService: this.ruleDataService, eventLogService };
   }
 
-  public start(core: CoreStart, plugins: RuleRegistryPluginsStart) {
+  public start(core: CoreStart, plugins: RuleRegistryPluginStartDependencies) {
     const { logger, alertsClientFactory, security } = this;
 
     alertsClientFactory.initialize({

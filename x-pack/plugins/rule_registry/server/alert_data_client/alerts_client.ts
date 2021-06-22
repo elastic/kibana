@@ -196,15 +196,13 @@ export class AlertsClient {
       AlertingAuthorizationEntity.Alert
     );
 
-    const arrayOfAuthorizedRuleTypes = Array.from(augmentedRuleTypes.authorizedRuleTypes);
-
     // As long as the user can read a minimum of one type of rule type produced by the provided feature,
     // the user should be provided that features' alerts index.
     // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
-    const authorizedFeatures = arrayOfAuthorizedRuleTypes.reduce(
-      (acc, ruleType) => acc.add(ruleType.producer),
-      new Set<string>()
-    );
+    const authorizedFeatures = new Set();
+    for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+      authorizedFeatures.add(ruleType.producer);
+    }
 
     const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
       switch (feature) {
