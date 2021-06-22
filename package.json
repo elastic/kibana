@@ -151,7 +151,7 @@
     "@kbn/server-route-repository": "link:bazel-bin/packages/kbn-server-route-repository",
     "@kbn/std": "link:bazel-bin/packages/kbn-std",
     "@kbn/tinymath": "link:bazel-bin/packages/kbn-tinymath",
-    "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@kbn/ui-framework": "link:bazel-bin/packages/kbn-ui-framework",
     "@kbn/ui-shared-deps": "link:bazel-bin/packages/kbn-ui-shared-deps",
     "@kbn/utility-types": "link:bazel-bin/packages/kbn-utility-types",
     "@kbn/common-utils": "link:bazel-bin/packages/kbn-common-utils",
