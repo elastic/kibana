@@ -73,7 +73,7 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
 };
 
 const jobDebugMessage = (report: Report) =>
-  report._id +
+  `${report._id} ` +
   `[_index: ${report._index}] ` +
   `[_seq_no: ${report._seq_no}]  ` +
   `[_primary_term: ${report._primary_term}]` +
