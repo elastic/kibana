@@ -31,72 +31,23 @@ interface FileLayerFieldShim {
 
 type SampleValues = Array<string | number>;
 
-let isMetaLoaded = false;
-let wellKnownColumnNames: Array<{
-  regex: RegExp;
-  emsConfig: EMSTermJoinConfig;
-  emsField: FileLayerFieldShim;
-}>;
-let wellKnownIds: Array<{
-  emsConfig: EMSTermJoinConfig;
-  values: string[];
-}>;
-
-async function loadMeta() {
-  if (isMetaLoaded) {
-    return;
-  }
-
-  const fileLayers: FileLayer[] = await getEmsFileLayers();
-
-  wellKnownColumnNames = [];
-  wellKnownIds = [];
-
-  fileLayers.forEach((fileLayer: FileLayer) => {
-    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
-    emsFields.forEach((emsField: FileLayerFieldShim) => {
-      const emsConfig = {
-        layerId: fileLayer.getId(),
-        field: emsField.id,
-      };
-
-      if (emsField.alias && emsField.alias.length) {
-        emsField.alias.forEach((alias: string) => {
-          wellKnownColumnNames.push({
-            regex: new RegExp(alias, 'i'),
-            emsConfig,
-            emsField,
-          });
-        });
-      }
-
-      if (emsField.values) {
-        wellKnownIds.push({
-          emsConfig,
-          values: emsField.values,
-        });
-      }
-    });
-  });
-
-  isMetaLoaded = true;
-}
-
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
 ): Promise<EMSTermJoinConfig | null> {
-  await loadMeta();
   const matches: EMSTermJoinConfig[] = [];
 
   if (sampleValuesConfig.sampleValuesColumnName) {
-    matches.push(
-      ...suggestByName(sampleValuesConfig.sampleValuesColumnName, sampleValuesConfig.sampleValues)
+    const matchesBasedOnColumnName = await suggestByName(
+      sampleValuesConfig.sampleValuesColumnName,
+      sampleValuesConfig.sampleValues
     );
+    matches.push(...matchesBasedOnColumnName);
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     // Only looks at id-values in main manifest
-    matches.push(...suggestByIdValues(sampleValuesConfig.sampleValues));
+    const matchesBasedOnIds = await suggestByIdValues(sampleValuesConfig.sampleValues);
+    matches.push(...matchesBasedOnIds);
   }
 
   const uniqMatches: UniqueMatch[] = matches.reduce((accum: UniqueMatch[], match) => {
@@ -123,24 +74,55 @@ export async function suggestEMSTermJoinConfig(
   return uniqMatches.length ? uniqMatches[0].config : null;
 }
 
-function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTermJoinConfig[] {
-  const matches = wellKnownColumnNames.filter((wellknown) => {
-    const nameMatchesAlias = columnName.match(wellknown.regex);
-    // Check if this violates any known id-values.
-    return sampleValues
-      ? nameMatchesAlias && !violatesIdValues(sampleValues, wellknown.emsConfig)
-      : nameMatchesAlias;
+async function suggestByName(
+  columnName: string,
+  sampleValues?: SampleValues
+): Promise<EMSTermJoinConfig[]> {
+  const fileLayers = await getEmsFileLayers();
+
+  const matches: EMSTermJoinConfig[] = [];
+  fileLayers.forEach((fileLayer) => {
+    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerFieldShim) => {
+      if (!emsField.alias || !emsField.alias.length) {
+        return;
+      }
+
+      const emsConfig = {
+        layerId: fileLayer.getId(),
+        field: emsField.id,
+      };
+      emsField.alias.forEach((alias: string) => {
+        const regex = new RegExp(alias, 'i');
+        const nameMatchesAlias = !!columnName.match(regex);
+        // Check if this violates any known id-values.
+
+        let isMatch: boolean;
+        if (sampleValues) {
+          if (emsField.values && emsField.values.length) {
+            isMatch = nameMatchesAlias && allSamplesMatch(sampleValues, emsField.values);
+          } else {
+            // requires validation against sample-values but EMS provides no meta to do so.
+            isMatch = false;
+          }
+        } else {
+          isMatch = nameMatchesAlias;
+        }
+
+        if (isMatch) {
+          matches.push(emsConfig);
+        }
+      });
+    });
   });
 
-  return matches.map((m) => {
-    return m.emsConfig;
-  });
+  return matches;
 }
 
-function allSamplesMatch(sampleValues: SampleValues, values: string[]) {
+function allSamplesMatch(sampleValues: SampleValues, ids: string[]) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
-    if (!existInIds(sampleValue, values)) {
+    if (!existInIds(sampleValue, ids)) {
       return false;
     }
   }
@@ -156,24 +138,23 @@ function existInIds(sampleValue: string, ids: string[]): boolean {
   return false;
 }
 
-function violatesIdValues(sampleValues: SampleValues, termConfig: EMSTermJoinConfig) {
-  for (let i = 0; i < wellKnownIds.length; i++) {
-    if (
-      wellKnownIds[i].emsConfig.field === termConfig.field &&
-      wellKnownIds[i].emsConfig.layerId === termConfig.layerId
-    ) {
-      return !allSamplesMatch(sampleValues, wellKnownIds[i].values);
-    }
-  }
-  return true; // If sample values are provided, there needs to be at least one check. Otherwise it's a violation.
-}
-
-function suggestByIdValues(sampleValues: SampleValues): EMSTermJoinConfig[] {
+async function suggestByIdValues(sampleValues: SampleValues): Promise<EMSTermJoinConfig[]> {
   const matches: EMSTermJoinConfig[] = [];
-  wellKnownIds.forEach((wellKnownId) => {
-    if (allSamplesMatch(sampleValues, wellKnownId.values)) {
-      matches.push(wellKnownId.emsConfig);
-    }
+  const fileLayers: FileLayer[] = await getEmsFileLayers();
+  fileLayers.forEach((fileLayer) => {
+    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerFieldShim) => {
+      if (!emsField.values || !emsField.values.length) {
+        return;
+      }
+      const emsConfig = {
+        layerId: fileLayer.getId(),
+        field: emsField.id,
+      };
+      if (allSamplesMatch(sampleValues, emsField.values)) {
+        matches.push(emsConfig);
+      }
+    });
   });
   return matches;
 }

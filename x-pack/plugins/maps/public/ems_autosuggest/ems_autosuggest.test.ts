@@ -6,21 +6,14 @@
  */
 
 import { suggestEMSTermJoinConfig } from './ems_autosuggest';
-import { FeatureCollection } from 'geojson';
 
 class MockFileLayer {
   private readonly _id: string;
-  private readonly _geoJson: FeatureCollection;
   private readonly _fields: Array<{ id: string }>;
 
-  constructor(
-    id: string,
-    fields: Array<{ id: string; alias?: string[]; values?: string[] }>,
-    geoJson: FeatureCollection
-  ) {
+  constructor(id: string, fields: Array<{ id: string; alias?: string[]; values?: string[] }>) {
     this._id = id;
     this._fields = fields;
-    this._geoJson = geoJson;
   }
 
   getId() {
