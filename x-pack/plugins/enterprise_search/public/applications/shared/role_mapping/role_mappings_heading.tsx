@@ -35,7 +35,7 @@ interface Props {
 const ROLE_MAPPINGS_DOCS_HREF = '#TODO';
 
 export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) => (
-  <>
+  <header>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiTitle>
@@ -58,5 +58,5 @@ export const RoleMappingsHeading: React.FC<Props> = ({ productName, onClick }) =
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer />
-  </>
+  </header>
 );

@@ -6,7 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
+
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 import {

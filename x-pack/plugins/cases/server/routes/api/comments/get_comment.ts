@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../common';
 
 export function initGetCommentApi({ router, logger }: RouteDeps) {
   router.get(

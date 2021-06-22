@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
@@ -114,6 +115,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
         saveError={saveError}
         clearSaveError={clearSaveError}
         isLegacy={isLegacy}
+        history={history as ScopedHistory}
       />
     );
   }

@@ -23,7 +23,7 @@ export function ChartEditOptions({ series, seriesId, breakdowns }: Props) {
         <Breakdowns seriesId={seriesId} breakdowns={breakdowns} reportViewConfig={series} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartOptions series={series} />
+        <ChartOptions series={series} seriesId={seriesId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

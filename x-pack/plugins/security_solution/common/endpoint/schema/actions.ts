@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const HostIsolationRequestSchema = {
   body: schema.object({
@@ -22,12 +22,17 @@ export const HostIsolationRequestSchema = {
 };
 
 export const EndpointActionLogRequestSchema = {
-  // TODO improve when using pagination with query params
-  query: schema.object({}),
+  query: schema.object({
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+  }),
   params: schema.object({
     agent_id: schema.string(),
   }),
 };
+
+export type EndpointActionLogRequestParams = TypeOf<typeof EndpointActionLogRequestSchema.params>;
+export type EndpointActionLogRequestQuery = TypeOf<typeof EndpointActionLogRequestSchema.query>;
 
 export const ActionStatusRequestSchema = {
   query: schema.object({

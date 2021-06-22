@@ -10,11 +10,12 @@ import testSubjSelector from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraHomePageProvider({ getService }: FtrProviderContext) {
+export function InfraHomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
+  const pageObjects = getPageObjects(['common']);
 
   return {
     async goToTime(time: string) {
@@ -87,15 +88,30 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     },
 
     async goToSettings() {
-      await testSubjects.click('infrastructureNavLink_/settings');
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/settings`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
     },
 
     async goToInventory() {
-      await testSubjects.click('infrastructureNavLink_/inventory');
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/inventory`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
     },
 
     async goToMetricExplorer() {
-      return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/explorer`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
     },
 
     async getSaveViewButton() {

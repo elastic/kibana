@@ -40,6 +40,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       const service = new ManagementService();
@@ -101,6 +102,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       service.setup({

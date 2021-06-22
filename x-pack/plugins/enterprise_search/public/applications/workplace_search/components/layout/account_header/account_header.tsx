@@ -47,7 +47,9 @@ export const AccountHeader: React.FC = () => {
       <EuiButtonEmptyTo to={PERSONAL_SETTINGS_PATH}>{ACCOUNT_NAV.SETTINGS}</EuiButtonEmptyTo>
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="logout">
-      <EuiButtonEmpty href={LOGOUT_ROUTE}>{ACCOUNT_NAV.LOGOUT}</EuiButtonEmpty>
+      <EuiButtonEmptyTo to={LOGOUT_ROUTE} shouldNotCreateHref>
+        {ACCOUNT_NAV.LOGOUT}
+      </EuiButtonEmptyTo>
     </EuiContextMenuItem>,
   ];
 

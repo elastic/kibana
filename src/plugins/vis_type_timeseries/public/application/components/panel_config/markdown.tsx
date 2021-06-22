@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
-  EuiCodeEditor,
 } from '@elastic/eui';
 // @ts-expect-error
 import less from 'less/lib/less-browser';
@@ -43,6 +42,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { CodeEditor, CssLang } from '../../../../../kibana_react/public';
 
 const lessC = less(window, { env: 'production' });
 
@@ -281,12 +281,10 @@ export class MarkdownPanelConfig extends Component<
               </span>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCodeEditor
-              mode="less"
-              theme="github"
-              width="100%"
-              name={`ace-css-${model.id}`}
-              setOptions={{ fontSize: '14px' }}
+            <CodeEditor
+              height="500px"
+              languageId={CssLang.ID}
+              options={{ fontSize: 14 }}
               value={model.markdown_less ?? ''}
               onChange={this.handleCSSChange}
             />

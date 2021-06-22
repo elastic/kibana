@@ -43,7 +43,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isLensPageOrFail() {
-      return await testSubjects.existOrFail('lnsApp');
+      return await testSubjects.existOrFail('lnsApp', { timeout: 1000 });
     },
 
     /**
@@ -1066,8 +1066,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
       const input = await find.activeElement();
-      await input.clearValueWithKeyboard();
+      await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
+    },
+
+    async filterLegend(value: string) {
+      await testSubjects.click(`legend-${value}`);
+      const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
+      await filterIn.click();
     },
   });
 }
