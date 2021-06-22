@@ -117,7 +117,3 @@ export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpr
 }
 
 export type InterpreterRenderHandlers<T = {}> = T & DefaultInterpreterRenderHandlers<T>;
-
-export function getDefaultHandlers<T = {}>(): InterpreterRenderHandlers<T> {
-  return new DefaultInterpreterRenderHandlers<T>() as InterpreterRenderHandlers<T>;
-}

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './expression_renderer';
-export * from './expression_renderer_registry';
-export * from './expression_handlers';
+import { DefaultInterpreterRenderHandlers, InterpreterRenderHandlers } from './types';
+
+export function getDefaultHandlers<T = {}>(): InterpreterRenderHandlers<T> {
+  return new DefaultInterpreterRenderHandlers<T>() as InterpreterRenderHandlers<T>;
+}
