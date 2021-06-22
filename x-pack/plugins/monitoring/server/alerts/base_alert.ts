@@ -283,7 +283,7 @@ export class BaseAlert {
 
       const key = this.alertOptions.accessorKey;
 
-      // for each node, update the alert's state with node states
+      // for each node, update the alert's state with node state
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         const instance = services.alertInstanceFactory(node.meta.nodeId || node.meta.instanceId);
