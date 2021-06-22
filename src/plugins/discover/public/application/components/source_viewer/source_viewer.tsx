@@ -106,16 +106,16 @@ export const SourceViewer = ({
     <EuiEmptyPrompt iconType="alert" title={errorMessageTitle} body={errorMessage} />
   );
 
-  if (reqState === ElasticRequestState.Loading) {
-    return loadingState;
-  }
-
   if (
     reqState === ElasticRequestState.Error ||
     reqState === ElasticRequestState.NotFound ||
     reqState === ElasticRequestState.NotFoundIndexPattern
   ) {
     return errorState;
+  }
+
+  if (reqState === ElasticRequestState.Loading || jsonValue === '') {
+    return loadingState;
   }
 
   return (

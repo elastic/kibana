@@ -113,12 +113,13 @@ exports[`Source Viewer component renders error state 1`] = `
   <EuiEmptyPrompt
     body={
       <div>
-        Could not fetch data at this time.
+        Could not fetch data at this time. Refresh the tab to try again.
         <EuiSpacer
           size="s"
         />
         <EuiButton
           iconType="refresh"
+          onClick={[Function]}
         >
           Refresh
         </EuiButton>
@@ -179,7 +180,7 @@ exports[`Source Viewer component renders error state 1`] = `
               className="euiText euiText--medium"
             >
               <div>
-                Could not fetch data at this time.
+                Could not fetch data at this time. Refresh the tab to try again.
                 <EuiSpacer
                   size="s"
                 >
@@ -189,6 +190,7 @@ exports[`Source Viewer component renders error state 1`] = `
                 </EuiSpacer>
                 <EuiButton
                   iconType="refresh"
+                  onClick={[Function]}
                 >
                   <EuiButtonDisplay
                     baseClassName="euiButton"
@@ -196,11 +198,13 @@ exports[`Source Viewer component renders error state 1`] = `
                     element="button"
                     iconType="refresh"
                     isDisabled={false}
+                    onClick={[Function]}
                     type="button"
                   >
                     <button
                       className="euiButton euiButton--primary"
                       disabled={false}
+                      onClick={[Function]}
                       style={
                         Object {
                           "minWidth": undefined,
