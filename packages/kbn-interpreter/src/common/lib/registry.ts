@@ -8,49 +8,59 @@
 
 import { clone } from 'lodash';
 
-export class Registry {
+export class Registry<ItemSpec, Item> {
+  private readonly _prop: string;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  private _indexed: Object;
+
   constructor(prop = 'name') {
     if (typeof prop !== 'string') throw new Error('Registry property name must be a string');
     this._prop = prop;
     this._indexed = new Object();
   }
 
-  wrapper(obj) {
+  wrapper(obj: ItemSpec): Item {
+    // @ts-ignore
     return obj;
   }
 
-  register(fn) {
+  register(fn: () => ItemSpec): void {
     const obj = typeof fn === 'function' ? fn() : fn;
 
+    // @ts-ignore
     if (typeof obj !== 'object' || !obj[this._prop]) {
       throw new Error(`Registered functions must return an object with a ${this._prop} property`);
     }
 
+    // @ts-ignore
     this._indexed[obj[this._prop].toLowerCase()] = this.wrapper(obj);
   }
 
-  toJS() {
+  toJS(): { [key: string]: any } {
     return Object.keys(this._indexed).reduce((acc, key) => {
+      // @ts-ignore
       acc[key] = this.get(key);
       return acc;
     }, {});
   }
 
-  toArray() {
+  toArray(): Item[] {
     return Object.keys(this._indexed).map((key) => this.get(key));
   }
 
-  get(name) {
+  get(name: string): Item {
+    // @ts-ignore
     if (name === undefined) return null;
     const lowerCaseName = name.toLowerCase();
+    // @ts-ignore
     return this._indexed[lowerCaseName] ? clone(this._indexed[lowerCaseName]) : null;
   }
 
-  getProp() {
+  getProp(): string {
     return this._prop;
   }
 
-  reset() {
+  reset(): void {
     this._indexed = new Object();
   }
 }

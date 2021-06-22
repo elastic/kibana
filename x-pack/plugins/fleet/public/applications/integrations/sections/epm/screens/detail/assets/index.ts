@@ -4,12 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-.analyticsHeader {
-  flex-wrap: wrap;
-
-  &__filters.euiPageHeaderSection {
-    width: 100%;
-    margin: $euiSizeM 0;
-  }
-}
+export { AssetsPage } from './assets';
