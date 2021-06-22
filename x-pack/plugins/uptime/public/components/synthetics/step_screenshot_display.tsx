@@ -28,7 +28,7 @@ import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
 
 interface StepScreenshotDisplayProps {
-  screenshotExists: boolean;
+  isScreenshotBlob: boolean;
   isScreenshotRef: boolean;
   checkGroup?: string;
   stepIndex?: number;
@@ -99,7 +99,7 @@ const ComposedStepImage = ({
 
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   checkGroup,
-  screenshotExists: isScreenshotBlob,
+  isScreenshotBlob: isScreenshotBlob,
   isScreenshotRef,
   stepIndex,
   stepName,
@@ -131,7 +131,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   const [url, setUrl] = useState<string | undefined>(undefined);
 
   // when the image is a composite, we need to fetch the data since we cannot specify a blob URL
-  const { data } = useFetcher(() => {
+  const { data: screenshotRef } = useFetcher(() => {
     if (isScreenshotRef) {
       return getJourneyScreenshot(
         `${basePath}/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`
@@ -155,9 +155,9 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
       {shouldRenderImage && isScreenshotBlob && (
         <BaseStepImage stepName={stepName} stepIndex={stepIndex} url={url} />
       )}
-      {shouldRenderImage && isScreenshotRef && isAScreenshotRef(data) && (
+      {shouldRenderImage && isScreenshotRef && isAScreenshotRef(screenshotRef) && (
         <ComposedStepImage
-          imgRef={data}
+          imgRef={screenshotRef}
           stepName={stepName}
           stepIndex={stepIndex}
           setUrl={setUrl}
