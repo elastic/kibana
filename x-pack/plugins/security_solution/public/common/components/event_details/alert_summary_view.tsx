@@ -54,7 +54,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
-  { id: 'host.status' },
+  { id: 'agent.status' },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -180,7 +180,7 @@ const AlertSummaryViewComponent: React.FC<{
   ]);
 
   const isEndpointAlert = useMemo(() => {
-    endpointAlertCheck({ data });
+    return endpointAlertCheck({ data });
   }, [data]);
 
   const agentId = useMemo(() => {
