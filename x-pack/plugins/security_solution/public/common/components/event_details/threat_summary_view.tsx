@@ -38,12 +38,12 @@ const getThreatSummaryRows = (
     return null;
   }).filter((item: ThreatSummaryRow | null): item is ThreatSummaryRow => !!item);
 
-const getDescription = ({
+const Description: React.FC<ThreatSummaryRow['description']> = ({
   contextId,
   eventId,
   fieldName,
   values,
-}: ThreatSummaryRow['description']): JSX.Element => (
+}) => (
   <>
     {values.map((value: string) => (
       <FormattedFieldValue
@@ -57,7 +57,7 @@ const getDescription = ({
   </>
 );
 
-const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(getDescription);
+const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(Description);
 
 const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
