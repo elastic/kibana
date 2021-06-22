@@ -13,12 +13,9 @@ import webpack from 'webpack';
 import PostCss from 'postcss';
 import NodeSass from 'node-sass';
 
-import { parseThemeTags, ALL_THEMES, ThemeTag, ThemeTags, Queue } from '../common';
+import { parseThemeTags, ALL_THEMES, ThemeTag, ThemeTags } from '../common';
 // @ts-expect-error required to be JS by other tools consuming it
 import postCssConfig from '../../postcss.config.js';
-
-// ensure that there is one thread available for libuv
-const nodeSassQueue = new Queue<NodeSass.Result>(Number(process.env.UV_THREADPOOL_SIZE || 4) - 1);
 
 const IS_NATIVE_WIN32_PATH = /^[a-z]:[/\\]|^\\\\/i;
 const ABSOLUTE_SCHEME = /^[A-Za-z0-9+\-.]+:/;
@@ -97,40 +94,37 @@ const processFile = async ({
   options: LoaderOptions;
 }) => {
   // process the code with node-sass, which needs to be limited in concurrency
-  const nodeSassResult = await nodeSassQueue.run(
-    () =>
-      new Promise((resolve, reject) => {
-        NodeSass.render(
-          {
-            file: ctx.resourcePath,
-            data: css,
-            outputStyle: options.dist ? 'compressed' : 'nested',
-            includePaths: [Path.resolve(options.repoRoot, 'node_modules')],
-            ...(!options.dist
-              ? {
-                  sourceMap: !!options.dist,
-                  sourceMapRoot: options.sourceMapRoot,
-                  outFile: Path.join(ctx.rootContext, 'style.css.map'),
-                  sourceMapContents: true,
-                  omitSourceMapUrl: true,
-                  sourceMapEmbed: false,
-                }
-              : {}),
-          },
-          (error, result) => {
-            if (error) {
-              if (error.file) {
-                ctx.addDependency(Path.normalize(error.file));
-              }
-
-              reject(error);
-            } else {
-              resolve(result);
+  const nodeSassResult = await new Promise<NodeSass.Result>((resolve, reject) => {
+    NodeSass.render(
+      {
+        file: ctx.resourcePath,
+        data: css,
+        outputStyle: options.dist ? 'compressed' : 'nested',
+        includePaths: [Path.resolve(options.repoRoot, 'node_modules')],
+        ...(!options.dist
+          ? {
+              sourceMap: !!options.dist,
+              sourceMapRoot: options.sourceMapRoot,
+              outFile: Path.join(ctx.rootContext, 'style.css.map'),
+              sourceMapContents: true,
+              omitSourceMapUrl: true,
+              sourceMapEmbed: false,
             }
+          : {}),
+      },
+      (error, result) => {
+        if (error) {
+          if (error.file) {
+            ctx.addDependency(Path.normalize(error.file));
           }
-        );
-      })
-  );
+
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+  });
 
   for (const file of nodeSassResult.stats.includedFiles) {
     const normal = Path.normalize(file);
