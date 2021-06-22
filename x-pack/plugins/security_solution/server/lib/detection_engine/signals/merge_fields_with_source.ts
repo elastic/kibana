@@ -229,6 +229,16 @@ export const matchesExistingSubObject = (
   });
 };
 
+export const matchesTypeObject = (fieldsValue: FieldsType): boolean => {
+  return fieldsValue.some((value) => {
+    if (typeof value === 'object' && value != null) {
+      return get('type', value);
+    } else {
+      return false;
+    }
+  });
+};
+
 /**
  * Filters field entries by removing invalid field entries such as any invalid characters
  * in the keys or if there are sub-objects that are trying to override regular objects and
@@ -239,8 +249,12 @@ export const matchesExistingSubObject = (
 export const filterFieldEntries = (
   fieldEntries: Array<[string, FieldsType]>
 ): Array<[string, FieldsType]> => {
-  return fieldEntries.filter(([fieldsKey]: [string, FieldsType]) => {
-    return !matchesInvalidKey(fieldsKey) && !matchesExistingSubObject(fieldsKey, fieldEntries);
+  return fieldEntries.filter(([fieldsKey, fieldsValue]: [string, FieldsType]) => {
+    return (
+      !matchesInvalidKey(fieldsKey) &&
+      !matchesExistingSubObject(fieldsKey, fieldEntries) &&
+      !matchesTypeObject(fieldsValue)
+    );
   });
 };
 
