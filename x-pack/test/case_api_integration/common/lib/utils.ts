@@ -1097,7 +1097,7 @@ export const pushCase = async ({
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .send({})
+    .send({ caseUrl: `${CASES_URL}/${caseId}` })
     .expect(expectedHttpCode);
 
   return res;
