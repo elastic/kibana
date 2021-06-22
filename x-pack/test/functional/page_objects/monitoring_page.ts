@@ -32,6 +32,10 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
       return testSubjects.getVisibleText('accessDeniedTitle');
     }
 
+    async closeAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
+    }
+
     async clickBreadcrumb(subj: string) {
       return testSubjects.click(subj);
     }

@@ -142,7 +142,7 @@ export const EnableAlertsModal: React.FC<{}> = () => {
           />
         </EuiButtonEmpty>
 
-        <EuiButton onClick={confirmButtonClick} fill>
+        <EuiButton onClick={confirmButtonClick} fill data-test-subj="alerts-modal-button">
           Ok
         </EuiButton>
       </EuiModalFooter>
