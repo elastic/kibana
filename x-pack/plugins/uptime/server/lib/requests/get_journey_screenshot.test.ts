@@ -1,0 +1,169 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getJourneyScreenshot } from './get_journey_screenshot';
+import { mockSearchResult } from './helper';
+
+describe('getJourneyScreenshot', () => {
+  it('returns screenshot data', async () => {
+    const screenshotResult = {
+      _id: 'id',
+      _source: {
+        synthetics: {
+          blob_mime: 'image/jpeg',
+          blob: 'image data',
+          step: {
+            name: 'load homepage',
+          },
+          type: 'step/screenshot',
+        },
+      },
+    };
+    expect(
+      await getJourneyScreenshot({
+        uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incomplete search result
+          step: { image: { hits: { hits: [screenshotResult] } } },
+        }),
+        checkGroup: 'checkGroup',
+        stepIndex: 0,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "synthetics": Object {
+          "blob": "image data",
+          "blob_mime": "image/jpeg",
+          "step": Object {
+            "name": "load homepage",
+          },
+          "type": "step/screenshot",
+        },
+        "totalSteps": 0,
+      }
+    `);
+  });
+
+  it('returns ref data', async () => {
+    const screenshotRefResult = {
+      _id: 'id',
+      _source: {
+        '@timestamp': '123',
+        monitor: {
+          check_group: 'check_group',
+        },
+        screenshot_ref: {
+          width: 10,
+          height: 20,
+          blocks: [
+            {
+              hash: 'hash1',
+              top: 0,
+              left: 0,
+              height: 2,
+              width: 4,
+            },
+            {
+              hash: 'hash2',
+              top: 0,
+              left: 2,
+              height: 2,
+              width: 4,
+            },
+          ],
+        },
+        synthetics: {
+          package_version: 'v1.0.0',
+          step: {
+            name: 'name',
+            index: 0,
+          },
+          type: 'step/screenshot_ref',
+        },
+      },
+    };
+    expect(
+      await getJourneyScreenshot({
+        uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incomplete search result
+          step: { image: { hits: { hits: [screenshotRefResult] } } },
+        }),
+        checkGroup: 'checkGroup',
+        stepIndex: 0,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "@timestamp": "123",
+        "monitor": Object {
+          "check_group": "check_group",
+        },
+        "screenshot_ref": Object {
+          "blocks": Array [
+            Object {
+              "hash": "hash1",
+              "height": 2,
+              "left": 0,
+              "top": 0,
+              "width": 4,
+            },
+            Object {
+              "hash": "hash2",
+              "height": 2,
+              "left": 2,
+              "top": 0,
+              "width": 4,
+            },
+          ],
+          "height": 20,
+          "width": 10,
+        },
+        "synthetics": Object {
+          "package_version": "v1.0.0",
+          "step": Object {
+            "index": 0,
+            "name": "name",
+          },
+          "type": "step/screenshot_ref",
+        },
+        "totalSteps": 0,
+      }
+    `);
+  });
+
+  it('throws for malformed data', async () => {
+    let exception: unknown;
+    try {
+      await getJourneyScreenshot({
+        uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incorrect data format
+          step: { image: { hits: { hits: [{ foo: 'bar' }] } } },
+        }),
+        checkGroup: 'checkGroup',
+        stepIndex: 0,
+      });
+    } catch (e: unknown) {
+      exception = e;
+    } finally {
+      expect(exception).toBeDefined();
+      expect(exception).toMatchInlineSnapshot(
+        `[Error: Error parsing journey screenshot type. Malformed data.]`
+      );
+    }
+  });
+
+  it('returns null for empty set', async () => {
+    expect(
+      await getJourneyScreenshot({
+        uptimeEsClient: mockSearchResult([], {
+          // @ts-expect-error incomplete search result
+          step: { image: { hits: { hits: [] } } },
+        }),
+        checkGroup: 'checkGroup',
+        stepIndex: 0,
+      })
+    ).toBeNull();
+  });
+});
