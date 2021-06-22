@@ -66,13 +66,13 @@ export const AlertDropdown = () => {
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
-          defaultMessage="Manage alerts"
+          defaultMessage="Manage rules"
         />
       </EuiContextMenuItem>,
     ];
