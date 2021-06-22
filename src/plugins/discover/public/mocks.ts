@@ -18,6 +18,8 @@ const createSetupContract = (): Setup => {
     },
     locator: {
       getLocation: jest.fn(),
+      getUrl: jest.fn(),
+      useUrl: jest.fn(),
       navigate: jest.fn(),
     },
   };
@@ -32,6 +34,8 @@ const createStartContract = (): Start => {
     } as unknown) as DiscoverStart['urlGenerator'],
     locator: {
       getLocation: jest.fn(),
+      getUrl: jest.fn(),
+      useUrl: jest.fn(),
       navigate: jest.fn(),
     },
   };
