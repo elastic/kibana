@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         actionTypeId: 'test.index-record',
         outcome: 'success',
         message: `action executed: test.index-record:${createdAction.id}: My action`,
+        startMessage: `action started: test.index-record:${createdAction.id}: My action`,
       });
     });
 
@@ -339,7 +340,15 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, actionTypeId, outcome, message, errorMessage } = params;
+    const {
+      spaceId,
+      actionId,
+      actionTypeId,
+      outcome,
+      message,
+      startMessage,
+      errorMessage,
+    } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -392,7 +401,9 @@ export default function ({ getService }: FtrProviderContext) {
     expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
 
     expect(executeEvent?.message).to.eql(message);
-    expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
+    if (startMessage) {
+      expect(startExecuteEvent?.message).to.eql(startMessage);
+    }
 
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
