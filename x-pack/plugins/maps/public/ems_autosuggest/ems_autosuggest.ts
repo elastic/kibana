@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileLayer, FileLayerField } from '@elastic/ems-client';
+import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 
 export interface SampleValuesConfig {
@@ -19,22 +19,25 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
-export interface EMSMatch {
-  regex: RegExp;
-  emsConfig: EMSTermJoinConfig;
-  emsField: FileLayerField;
-}
-
 interface UniqueMatch {
   config: { layerId: string; field: string };
   count: number;
+}
+interface FileLayerFieldShim {
+  id: string;
+  values?: string[];
+  regex?: string;
+  alias?: string[];
 }
 
 type SampleValues = Array<string | number>;
 
 let isMetaLoaded = false;
-let wellKnownColumnNames: EMSMatch[];
-let wellKnownColumnFormats: EMSMatch[];
+let wellKnownColumnNames: Array<{
+  regex: RegExp;
+  emsConfig: EMSTermJoinConfig;
+  emsField: FileLayerFieldShim;
+}>;
 let wellKnownIds: Array<{
   emsConfig: EMSTermJoinConfig;
   values: string[];
@@ -48,24 +51,15 @@ async function loadMeta() {
   const fileLayers: FileLayer[] = await getEmsFileLayers();
 
   wellKnownColumnNames = [];
-  wellKnownColumnFormats = [];
   wellKnownIds = [];
 
   fileLayers.forEach((fileLayer: FileLayer) => {
-    const emsFields: FileLayerField[] = fileLayer.getFields();
-    emsFields.forEach((emsField: FileLayerField) => {
+    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerFieldShim) => {
       const emsConfig = {
         layerId: fileLayer.getId(),
         field: emsField.id,
       };
-
-      if (emsField.regex) {
-        wellKnownColumnFormats.push({
-          regex: new RegExp(emsField.regex, 'i'),
-          emsConfig,
-          emsField,
-        });
-      }
 
       if (emsField.alias && emsField.alias.length) {
         emsField.alias.forEach((alias: string) => {
@@ -143,7 +137,7 @@ export async function suggestEMSTermJoinConfig(
 function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
     const nameMatchesAlias = columnName.match(wellknown.regex);
-    // Check if there is matching known id-values
+    // Check if this violates any known id-values.
     return sampleValues
       ? nameMatchesAlias && !violatesIdValues(sampleValues, wellknown.emsConfig)
       : nameMatchesAlias;
@@ -157,16 +151,16 @@ function suggestByName(columnName: string, sampleValues?: SampleValues): EMSTerm
 function allSamplesMatch(sampleValues: SampleValues, values: string[]) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
-    if (!existInIdValues(sampleValue, values)) {
+    if (!existInIds(sampleValue, values)) {
       return false;
     }
   }
   return true;
 }
 
-function existInIdValues(sampleValue: string, values: string[]): boolean {
-  for (let i = 0; i < values.length; i++) {
-    if (values[i] === sampleValue) {
+function existInIds(sampleValue: string, ids: string[]): boolean {
+  for (let i = 0; i < ids.length; i++) {
+    if (ids[i] === sampleValue) {
       return true;
     }
   }
