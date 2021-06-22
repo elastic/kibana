@@ -337,6 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
     outcome: string;
     message: string;
     errorMessage?: string;
+    startMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
