@@ -391,6 +391,14 @@ export function getFunctionSignatureLabel(
         defaultMessage: '[kql]?: string, [lucene]?: string',
       });
     }
+    if (def.filterable && def.shiftable) {
+      extraArgs += ', ';
+    }
+    if (def.shiftable) {
+      extraArgs += i18n.translate('xpack.lens.formula.shiftExtraArguments', {
+        defaultMessage: '[shift]?: string',
+      });
+    }
     return `${name}(${def.documentation?.signature}${extraArgs})`;
   }
   return '';

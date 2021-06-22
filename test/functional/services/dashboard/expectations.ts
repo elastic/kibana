@@ -16,8 +16,10 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly tagCloud = this.ctx.getPageObject('tagCloud');
   private readonly findTimeout = 2500;
 
   async panelCount(expectedCount: number) {
@@ -166,8 +168,9 @@ export class DashboardExpectService extends FtrService {
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
     const matches = await Promise.all(
       tagCloudVisualizations.map(async (tagCloud) => {
+        const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
         for (let i = 0; i < values.length; i++) {
-          const valueExists = await this.testSubjects.descendantExists(values[i], tagCloud);
+          const valueExists = tagCloudData.includes(values[i]);
           if (!valueExists) {
             return false;
           }

@@ -34,10 +34,18 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import { isRequiredPackage, getInstallation, getInstallationObject } from './index';
+import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<boolean> {
+  const installedPackage = await getInstallation(options);
+  return installedPackage !== undefined;
+}
 
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -426,7 +434,7 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
+  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   const created = await savedObjectsClient.create<Installation>(

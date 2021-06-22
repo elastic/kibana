@@ -8,12 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import { SectionError, Error } from '../../../shared_imports';
+import { SectionError, Error, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
-import { SectionLoading, RestoreSnapshotForm } from '../../components';
+import { PageLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
@@ -76,12 +76,12 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
 
   const renderLoading = () => {
     return (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.restoreSnapshot.loadingSnapshotDescription"
           defaultMessage="Loading snapshot details…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   };
 
@@ -103,8 +103,9 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
           },
         }
       : snapshotError;
+
     return (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreSnapshot.loadingSnapshotErrorTitle"
@@ -134,15 +135,30 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     setSaveError(null);
   };
 
-  const renderContent = () => {
-    if (loadingSnapshot) {
-      return renderLoading();
-    }
-    if (snapshotError) {
-      return renderError();
-    }
+  if (loadingSnapshot) {
+    return renderLoading();
+  }
 
-    return (
+  if (snapshotError) {
+    return renderError();
+  }
+
+  return (
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreSnapshotTitle"
+              defaultMessage="Restore '{snapshot}'"
+              values={{ snapshot: snapshotId }}
+            />
+          </span>
+        }
+      />
+
+      <EuiSpacer size="l" />
+
       <RestoreSnapshotForm
         snapshotDetails={snapshotDetails as SnapshotDetails}
         isSaving={isSaving}
@@ -150,24 +166,6 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
         clearSaveError={clearSaveError}
         onSave={onSave}
       />
-    );
-  };
-
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="m">
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreSnapshotTitle"
-              defaultMessage="Restore '{snapshot}'"
-              values={{ snapshot: snapshotId }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {renderContent()}
-      </EuiPageContent>
-    </EuiPageBody>
+    </EuiPageContentBody>
   );
 };

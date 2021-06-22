@@ -18,11 +18,17 @@ import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
+import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { LogsPageTemplate } from '../page_template';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
+
+const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
+  defaultMessage: 'Categories',
+});
 
 export const LogEntryCategoriesPageContent = () => {
   const {
@@ -45,9 +51,20 @@ export const LogEntryCategoriesPageContent = () => {
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
   if (!hasLogAnalysisCapabilites) {
-    return <SubscriptionSplashContent />;
+    return (
+      <SubscriptionSplashPage
+        data-test-subj="logsLogEntryCategoriesPage"
+        pageHeader={{
+          pageTitle: logCategoriesTitle,
+        }}
+      />
+    );
   } else if (!hasLogAnalysisReadCapabilities) {
-    return <MissingResultsPrivilegesPrompt />;
+    return (
+      <CategoriesPageTemplate isEmptyState={true}>
+        <MissingResultsPrivilegesPrompt />
+      </CategoriesPageTemplate>
+    );
   } else if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
@@ -57,20 +74,33 @@ export const LogEntryCategoriesPageContent = () => {
       />
     );
   } else if (setupStatus.type === 'unknown') {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+    return (
+      <CategoriesPageTemplate isEmptyState={true}>
+        <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />
+      </CategoriesPageTemplate>
+    );
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
     return (
       <>
-        <LogEntryCategoriesResultsContent onOpenSetup={showCategoriesModuleSetup} />
+        <LogEntryCategoriesResultsContent
+          onOpenSetup={showCategoriesModuleSetup}
+          pageTitle={logCategoriesTitle}
+        />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
-    return <MissingSetupPrivilegesPrompt />;
+    return (
+      <CategoriesPageTemplate isEmptyState={true}>
+        <MissingSetupPrivilegesPrompt />
+      </CategoriesPageTemplate>
+    );
   } else {
     return (
       <>
-        <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+        <CategoriesPageTemplate isEmptyState={true}>
+          <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+        </CategoriesPageTemplate>
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
       </>
     );
@@ -78,3 +108,20 @@ export const LogEntryCategoriesPageContent = () => {
 };
 
 const allowedSetupModules = ['logs_ui_categories' as const];
+
+const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+  children,
+  ...rest
+}) => {
+  return (
+    <LogsPageTemplate
+      data-test-subj="logsLogEntryCategoriesPage"
+      pageHeader={{
+        pageTitle: logCategoriesTitle,
+      }}
+      {...rest}
+    >
+      {children}
+    </LogsPageTemplate>
+  );
+};

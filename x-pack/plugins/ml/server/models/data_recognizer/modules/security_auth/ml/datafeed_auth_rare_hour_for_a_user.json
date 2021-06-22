@@ -1,0 +1,26 @@
+{
+  "job_id": "auth_rare_hour_for_a_user",
+  "indices": [
+    "auditbeat-*",
+    "logs-*",
+    "filebeat-*",
+    "winlogbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
+        }
+      ]
+    }
+  }
+}

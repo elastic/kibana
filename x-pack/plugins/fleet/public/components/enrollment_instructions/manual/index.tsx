@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
+import { PLATFORM_OPTIONS, usePlatform, useStartServices } from '../../../hooks';
 import type { PLATFORM_TYPE } from '../../../hooks';
 
 interface Props {
@@ -34,6 +34,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   fleetServerHosts,
 }) => {
   const { platform, setPlatform } = usePlatform();
+  const { docLinks } = useStartServices();
 
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
@@ -85,11 +86,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
             defaultMessage="See the {link} for RPM / DEB deploy instructions."
             values={{
               link: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation-configuration.html"
-                >
+                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                     defaultMessage="Elastic Agent docs"
@@ -108,11 +105,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
           defaultMessage="If you are having trouble connecting, see our {link}."
           values={{
             link: (
-              <EuiLink
-                target="_blank"
-                external
-                href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
-              >
+              <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                   defaultMessage="troubleshooting guide"

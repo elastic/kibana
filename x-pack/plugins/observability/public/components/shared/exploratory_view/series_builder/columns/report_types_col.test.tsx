@@ -34,13 +34,13 @@ describe('ReportTypesCol', function () {
       <ReportTypesCol reportTypes={ReportTypes.synthetics} seriesId={seriesId} />
     );
 
-    fireEvent.click(screen.getByText(/monitor duration/i));
+    fireEvent.click(screen.getByText(/KPI over time/i));
 
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: 'user_agent.name',
       dataType: 'ux',
       reportDefinitions: {},
-      reportType: 'upd',
+      reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ describe('ReportTypesCol', function () {
       data: {
         [NEW_SERIES_KEY]: {
           dataType: 'synthetics' as const,
-          reportType: 'upp' as const,
+          reportType: 'kpi' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
@@ -64,7 +64,7 @@ describe('ReportTypesCol', function () {
     );
 
     const button = screen.getByRole('button', {
-      name: /pings histogram/i,
+      name: /KPI over time/i,
     });
 
     expect(button.classList).toContain('euiButton--fill');
