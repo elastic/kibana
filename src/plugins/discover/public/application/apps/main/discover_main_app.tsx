@@ -5,15 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
 import { DiscoverLayout } from './components/layout';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { useSavedSearch as useSavedSearchData } from './services/use_saved_search';
 import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
-import { useSearchSession } from './services/use_search_session';
 import { useUrl } from './services/use_url';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
@@ -55,18 +52,20 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { services, history, navigateTo, indexPatternList } = props.opts;
   const { chrome, docLinks, uiSettings: config, data } = services;
 
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-
   /**
    * State related logic
    */
   const {
-    stateContainer,
-    state,
+    data$,
     indexPattern,
-    searchSource,
-    savedSearch,
+    onChangeIndexPattern,
+    onUpdateQuery,
+    refetch$,
     resetSavedSearch,
+    savedSearch,
+    searchSource,
+    state,
+    stateContainer,
   } = useDiscoverState({
     services,
     history,
@@ -78,25 +77,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * Url / Routing logic
    */
   useUrl({ history, resetSavedSearch });
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
-
-  /**
-   * Data fetching logic
-   */
-  const { data$, refetch$ } = useSavedSearchData({
-    indexPattern,
-    savedSearch,
-    searchSessionManager,
-    searchSource,
-    services,
-    state,
-    stateContainer,
-    useNewFieldsApi,
-  });
 
   /**
    * SavedSearch depended initializing
@@ -115,11 +95,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
-    stateContainer.replaceUrlAppState({}).then(() => {
-      stateContainer.startSync();
-    });
-
-    return () => stateContainer.stopSync();
   }, [stateContainer, chrome, docLinks]);
 
   const resetQuery = useCallback(() => {
@@ -130,12 +105,13 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     <DiscoverLayoutMemoized
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
+      onChangeIndexPattern={onChangeIndexPattern}
+      onUpdateQuery={onUpdateQuery}
       resetQuery={resetQuery}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
       savedSearchData$={data$}
       savedSearchRefetch$={refetch$}
-      searchSessionManager={searchSessionManager}
       searchSource={searchSource}
       services={services}
       state={state}
