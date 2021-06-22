@@ -170,13 +170,11 @@ describe('KibanaRequest', () => {
 
         const nextSpy = jest.fn();
 
-        const done = new Promise((resolve) => {
+        const done = new Promise<void>((resolve) => {
           router.get({ path: '/', validate: false }, async (context, request, res) => {
             request.events.aborted$.subscribe({
               next: nextSpy,
-              complete: () => {
-                resolve();
-              },
+              complete: resolve,
             });
 
             // prevents the server to respond
@@ -310,13 +308,11 @@ describe('KibanaRequest', () => {
 
         const nextSpy = jest.fn();
 
-        const done = new Promise((resolve) => {
+        const done = new Promise<void>((resolve) => {
           router.get({ path: '/', validate: false }, async (context, req, res) => {
             req.events.completed$.subscribe({
               next: nextSpy,
-              complete: () => {
-                resolve();
-              },
+              complete: resolve,
             });
 
             expect(nextSpy).not.toHaveBeenCalled();
