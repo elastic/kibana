@@ -23,6 +23,10 @@ import type {
 } from 'src/core/server';
 import { SavedObjectsClient } from '../../../core/server';
 import {
+  startTrackingEventLoopDelaysUsage,
+  SAVED_OBJECTS_DAILY_TYPE,
+} from './collectors/event_loop_delays';
+import {
   registerApplicationUsageCollector,
   registerKibanaUsageCollector,
   registerManagementUsageCollector,
@@ -39,6 +43,7 @@ import {
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
   registerSavedObjectsCountUsageCollector,
+  registerEventLoopDelaysCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -54,46 +59,46 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
-  private stopUsingUiCounterIndicies$: Subject<void>;
+  private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
-    this.stopUsingUiCounterIndicies$ = new Subject();
+    this.pluginStop$ = new Subject();
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     usageCollection.createUsageCounter('uiCounters');
-
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,
       this.metric$,
-      this.stopUsingUiCounterIndicies$,
+      this.pluginStop$,
       coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
 
   public start(core: CoreStart) {
     const { savedObjects, uiSettings } = core;
-    this.savedObjectsClient = savedObjects.createInternalRepository();
+    this.savedObjectsClient = savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
+    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.pluginStop$.asObservable());
   }
 
   public stop() {
     this.metric$.complete();
-    this.stopUsingUiCounterIndicies$.complete();
+    this.pluginStop$.complete();
   }
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
     coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
-    stopUsingUiCounterIndicies$: Subject<void>,
+    pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
@@ -101,12 +106,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getCoreUsageDataService = () => this.coreUsageData!;
 
     registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(
-      this.logger.get('ui-counters'),
-      stopUsingUiCounterIndicies$,
-      getSavedObjectsClient
-    );
-    registerUiCountersUsageCollector(usageCollection, stopUsingUiCounterIndicies$);
+    registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
+    registerUiCountersUsageCollector(usageCollection, pluginStop$);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
     registerUsageCountersUsageCollector(usageCollection);
@@ -127,5 +128,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
     registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
+    registerEventLoopDelaysCollector(
+      this.logger.get('event-loop-delays'),
+      usageCollection,
+      registerType,
+      getSavedObjectsClient
+    );
   }
 }

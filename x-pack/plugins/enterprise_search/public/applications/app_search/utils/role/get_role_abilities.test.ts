@@ -10,7 +10,7 @@ import { DEFAULT_INITIAL_APP_DATA } from '../../../../../common/__mocks__';
 import { getRoleAbilities } from './';
 
 describe('getRoleAbilities', () => {
-  const mockRole = DEFAULT_INITIAL_APP_DATA.appSearch.role;
+  const mockRole = DEFAULT_INITIAL_APP_DATA.appSearch.role as any;
 
   it('transforms server role data into a flat role obj with helper shorthands', () => {
     expect(getRoleAbilities(mockRole)).toEqual({
@@ -53,9 +53,10 @@ describe('getRoleAbilities', () => {
 
   describe('can()', () => {
     it('sets view abilities to true if manage abilities are true', () => {
-      const role = { ...mockRole };
-      role.ability.view = [];
-      role.ability.manage = ['account_settings'];
+      const role = {
+        ...mockRole,
+        ability: { view: [], manage: ['account_settings'] },
+      };
 
       const myRole = getRoleAbilities(role);
 
@@ -68,6 +69,28 @@ describe('getRoleAbilities', () => {
 
       expect(myRole.can('hello' as any, 'world')).toEqual(false);
       expect(myRole.can('edit', 'fakeSubject')).toEqual(false);
+    });
+  });
+
+  describe('canManageMetaEngines', () => {
+    const canManageEngines = { ability: { manage: ['account_engines'] } };
+
+    it('returns true when the user can manage any engines and the account has a platinum license', () => {
+      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, true);
+
+      expect(myRole.canManageMetaEngines).toEqual(true);
+    });
+
+    it('returns false when the user can manage any engines but the account does not have a platinum license', () => {
+      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, false);
+
+      expect(myRole.canManageMetaEngines).toEqual(false);
+    });
+
+    it('returns false when has a platinum license but the user cannot manage any engines', () => {
+      const myRole = getRoleAbilities({ ...mockRole, ability: { manage: [] } }, true);
+
+      expect(myRole.canManageMetaEngines).toEqual(false);
     });
   });
 });

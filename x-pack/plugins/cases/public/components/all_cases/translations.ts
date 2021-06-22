@@ -12,10 +12,18 @@ export * from '../../common/translations';
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No Cases',
 });
+
 export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
   defaultMessage:
     'There are no cases to display. Please create a new case or change your filter settings above.',
 });
+
+export const NO_CASES_BODY_READ_ONLY = i18n.translate(
+  'xpack.cases.caseTable.noCases.readonly.body',
+  {
+    defaultMessage: 'There are no cases to display. Please change your filter settings above.',
+  }
+);
 
 export const ADD_NEW_CASE = i18n.translate('xpack.cases.caseTable.addNewCase', {
   defaultMessage: 'Add New Case',

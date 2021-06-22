@@ -165,12 +165,12 @@ describe('enable()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when enabling an alert', async () => {
+    test('logs audit event when enabling a rule', async () => {
       await alertsClient.enable({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_enable',
+            action: 'rule_enable',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -178,14 +178,14 @@ describe('enable()', () => {
       );
     });
 
-    test('logs audit event when not authorised to enable an alert', async () => {
+    test('logs audit event when not authorised to enable a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(alertsClient.enable({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_enable',
+            action: 'rule_enable',
             outcome: 'failure',
           }),
           kibana: {
