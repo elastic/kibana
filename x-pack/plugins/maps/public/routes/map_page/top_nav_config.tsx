@@ -208,6 +208,14 @@ export function getTopNavConfig({
               }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
+              returnToOriginSwitchLabel={
+                savedMap.isByValue()
+                  ? i18n.translate('xpack.maps.topNav.updatePanel', {
+                      defaultMessage: 'Update panel on {originatingAppName}',
+                      values: { originatingAppName: savedMap.getOriginatingAppName() },
+                    })
+                  : undefined
+              }
               options={tagSelector}
             />
           );
