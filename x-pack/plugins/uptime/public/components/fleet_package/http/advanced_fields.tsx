@@ -186,18 +186,12 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
-          }
+          isInvalid={!!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields)}
           error={
-            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(
-              fields[ConfigKeys.REQUEST_HEADERS_CHECK]
-            ) ? (
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
-                defaultMessage="Header key must be a valid HTTP token."
-              />
-            ) : undefined
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
+              defaultMessage="Header key must be a valid HTTP token."
+            />
           }
           helpText={
             <FormattedMessage
@@ -346,9 +340,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.RESPONSE_STATUS_CHECK]?.(fields[ConfigKeys.RESPONSE_STATUS_CHECK])
-          }
+          isInvalid={!!validate[ConfigKeys.RESPONSE_STATUS_CHECK]?.(fields)}
           error={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.error"
@@ -383,23 +375,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
-              fields[ConfigKeys.RESPONSE_HEADERS_CHECK]
-            )
-          }
-          error={
-            !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
-              fields[ConfigKeys.RESPONSE_HEADERS_CHECK]
-            )
-              ? [
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
-                    defaultMessage="Header key must be a valid HTTP token."
-                  />,
-                ]
-              : undefined
-          }
+          isInvalid={!!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(fields)}
+          error={[
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
+              defaultMessage="Header key must be a valid HTTP token."
+            />,
+          ]}
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"

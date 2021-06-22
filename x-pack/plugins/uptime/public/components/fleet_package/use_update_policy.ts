@@ -38,7 +38,7 @@ export const useUpdatePolicy = ({
     const validationKeys = Object.keys(validate[monitorType]) as ConfigKeys[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
-      !!newPolicy.name && !validationKeys.find((key) => validate[monitorType][key]?.(config[key]));
+      !!newPolicy.name && !validationKeys.find((key) => validate[monitorType][key]?.(config));
     const formattedPolicy = { ...newPolicy };
     const currentInput = formattedPolicy.inputs.find(
       (input) => input.type === `synthetics/${monitorType}`

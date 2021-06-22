@@ -33,7 +33,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="URL"
           />
         }
-        isInvalid={!!validate[ConfigKeys.URLS]?.(fields[ConfigKeys.URLS])}
+        isInvalid={!!validate[ConfigKeys.URLS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
@@ -57,7 +57,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Monitor interval"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])}
+        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
@@ -109,7 +109,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Max redirects"
           />
         }
-        isInvalid={!!validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])}
+        isInvalid={!!validate[ConfigKeys.MAX_REDIRECTS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
@@ -142,13 +142,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Timeout in seconds"
           />
         }
-        isInvalid={
-          !!validate[ConfigKeys.TIMEOUT]?.(
-            fields[ConfigKeys.TIMEOUT],
-            fields[ConfigKeys.SCHEDULE].number,
-            fields[ConfigKeys.SCHEDULE].unit
-          )
-        }
+        isInvalid={!!validate[ConfigKeys.TIMEOUT]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
