@@ -40,6 +40,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       },
     },
     size: 1,
+    _source: ['synthetics', 'monitor', '@timestamp'],
   };
 
   const { body: thisJourney } = await uptimeEsClient.search({ body: baseParams });
