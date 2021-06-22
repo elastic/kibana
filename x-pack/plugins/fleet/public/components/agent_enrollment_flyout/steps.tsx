@@ -138,3 +138,16 @@ export const AgentEnrollmentKeySelectionStep = ({
     ),
   };
 };
+
+/**
+ * Send users to assets installed by the package in Kibana so they can
+ * view their data.
+ */
+export const ViewDataStep = (content: JSX.Element) => {
+  return {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepViewDataTitle', {
+      defaultMessage: 'View your data',
+    }),
+    children: content,
+  };
+};
