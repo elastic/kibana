@@ -104,6 +104,16 @@ export const EngineRouter: React.FC = () => {
           <Documents />
         </Route>
       )}
+      {canViewMetaEngineSourceEngines && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
+        </Route>
+      )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
         {canViewEngineAnalytics && (
@@ -144,16 +154,6 @@ export const EngineRouter: React.FC = () => {
         {canManageEngineSearchUi && (
           <Route path={ENGINE_SEARCH_UI_PATH}>
             <SearchUI />
-          </Route>
-        )}
-        {canViewMetaEngineSourceEngines && (
-          <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
-            <SourceEngines />
-          </Route>
-        )}
-        {canViewEngineCrawler && (
-          <Route path={ENGINE_CRAWLER_PATH}>
-            <CrawlerRouter />
           </Route>
         )}
       </Layout>
