@@ -859,7 +859,7 @@ export function overridePackageInputs(
         };
         if (dryRun) {
           errors.push({
-            key: `${override.type}.${varName}`,
+            key: `${override.type}.vars.${varName}`,
             message: String(err.error),
           });
         } else throw err;
@@ -889,7 +889,7 @@ export function overridePackageInputs(
           };
           if (dryRun) {
             errors.push({
-              key: `${override.type}.${streamSet}`,
+              key: `${override.type}.streams.${streamSet}`,
               message: String(e.error),
             });
             continue;
@@ -921,7 +921,7 @@ export function overridePackageInputs(
             };
             if (dryRun) {
               errors.push({
-                key: `${override.type}.${streamSet}.${varName}`,
+                key: `${override.type}.streams.${streamSet}.${varName}`,
                 message: String(err.error),
               });
             } else throw err;
