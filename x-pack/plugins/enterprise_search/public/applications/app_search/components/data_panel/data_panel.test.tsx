@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiIcon, EuiButton } from '@elastic/eui';
+import { EuiIcon, EuiButton, EuiTitle, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { LoadingOverlay } from '../../../shared/loading';
 
@@ -25,6 +25,16 @@ describe('DataPanel', () => {
 
     expect(wrapper.find('[data-test-subj="title"]').text()).toEqual('Tabula Rasa');
     expect(wrapper.find('[data-test-subj="children"]').text()).toEqual('Look at this graph');
+  });
+
+  it('conditionally renders a spacer between the header and children', () => {
+    const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+
+    expect(wrapper.find(EuiSpacer)).toHaveLength(0);
+
+    wrapper.setProps({ children: 'hello world' });
+
+    expect(wrapper.find(EuiSpacer)).toHaveLength(1);
   });
 
   describe('components', () => {
@@ -70,6 +80,26 @@ describe('DataPanel', () => {
   });
 
   describe('props', () => {
+    it('passes titleSize to the title', () => {
+      const wrapper = shallow(<DataPanel title={<h2>Test</h2>} />);
+
+      expect(wrapper.find(EuiTitle).prop('size')).toEqual('xs'); // Default
+
+      wrapper.setProps({ titleSize: 's' });
+
+      expect(wrapper.find(EuiTitle).prop('size')).toEqual('s');
+    });
+
+    it('passes responsive to the header flex group', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+
+      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(false);
+
+      wrapper.setProps({ responsive: true });
+
+      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(true);
+    });
+
     it('renders panel color based on filled flag', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
