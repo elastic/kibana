@@ -150,7 +150,14 @@ export function CorrelationsChart({
           position={Position.Bottom}
           tickFormat={(d) => durationFormatter(d).formatted}
         />
-        <Axis id="y-axis" title="" position={Position.Left} />
+        <Axis
+          id="y-axis"
+          title={i18n.translate(
+            'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
+            { defaultMessage: '# transactions' }
+          )}
+          position={Position.Left}
+        />
         <AreaSeries
           id={i18n.translate(
             'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
