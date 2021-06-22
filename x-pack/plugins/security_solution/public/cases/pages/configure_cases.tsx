@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { SecurityPageName } from '../../app/types';
@@ -37,10 +37,13 @@ const ConfigureCasesPageComponent: React.FC = () => {
     [search]
   );
 
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(CASES_APP_ID, {
+        path: getCaseUrl(search),
+      });
+    }
+  }, [navigateToApp, userPermissions, search]);
 
   const HeaderWrapper = styled.div`
     padding-top: ${({ theme }) => theme.eui.paddingSizes.l};
