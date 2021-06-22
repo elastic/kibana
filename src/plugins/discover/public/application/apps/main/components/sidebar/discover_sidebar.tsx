@@ -21,6 +21,7 @@ import {
   EuiPageSideBar,
   useResizeObserver,
 } from '@elastic/eui';
+import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -205,7 +206,7 @@ export function DiscoverSidebar({
     return result;
   }, [fields]);
 
-  const multiFields = useMemo(() => {
+  const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
@@ -224,7 +225,13 @@ export function DiscoverSidebar({
       map.set(parent, value);
     });
     return map;
-  }, [fields, useNewFieldsApi, selectedFields]);
+  };
+
+  const [multiFields, setMultiFields] = useState(() => calculateMultiFields());
+
+  useShallowCompareEffect(() => {
+    setMultiFields(calculateMultiFields());
+  }, [fields, selectedFields, useNewFieldsApi]);
 
   const deleteField = useMemo(
     () =>
