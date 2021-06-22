@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, useCallback, useEffect } from 'react';
-import { EuiSpacer, EuiResizeObserver } from '@elastic/eui';
+import { EuiSpacer, EuiResizeObserver, EuiFieldSearch } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
@@ -20,6 +20,7 @@ import './field_preview.scss';
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
+  const [searchValue, setSearchValue] = useState('');
 
   const {
     params: {
@@ -79,7 +80,15 @@ export const FieldPreview = () => {
           <EuiSpacer />
 
           <DocumentsNavPreview />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
+
+          <EuiFieldSearch
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Filter fields"
+            fullWidth
+          />
+          <EuiSpacer size="s" />
 
           {error === null ? (
             <>
@@ -92,6 +101,7 @@ export const FieldPreview = () => {
                   <div ref={resizeRef} style={{ flex: 1 }}>
                     <PreviewFieldList
                       height={fieldListHeight}
+                      searchValue={searchValue}
                       // We add a key to force rerender the virtual list whenever the window height changes
                       key={fieldListHeight}
                     />

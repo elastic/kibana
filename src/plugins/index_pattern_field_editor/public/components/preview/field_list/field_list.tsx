@@ -29,9 +29,23 @@ export interface Field {
 
 interface Props {
   height: number;
+  searchValue?: string;
 }
 
-export const PreviewFieldList: React.FC<Props> = ({ height }) => {
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+function escapeRegExp(text: string) {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+function fuzzyMatch(searchValue: string, text: string) {
+  const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
+  const regex = new RegExp(pattern);
+  return regex.test(text);
+}
+
+export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) => {
   const { indexPattern } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
@@ -75,13 +89,26 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
     return [...pinned, ...notPinned];
   }, [fieldList, pinnedFields]);
 
-  const filteredFields = useMemo(
-    () =>
-      showAllFields
+  const { filteredFields, totalFields } = useMemo(() => {
+    const list =
+      searchValue.trim() === ''
         ? fieldListWithPinnedFields
-        : fieldListWithPinnedFields.filter((_, i) => i < INITIAL_MAX_NUMBER_OF_FIELDS),
-    [fieldListWithPinnedFields, showAllFields]
-  );
+        : fieldListWithPinnedFields.filter(({ key }) => fuzzyMatch(searchValue, key));
+
+    const total = list.length;
+
+    if (showAllFields) {
+      return {
+        filteredFields: list,
+        totalFields: total,
+      };
+    }
+
+    return {
+      filteredFields: list.filter((_, i) => i < INITIAL_MAX_NUMBER_OF_FIELDS),
+      totalFields: total,
+    };
+  }, [fieldListWithPinnedFields, showAllFields, searchValue]);
 
   // "height" corresponds to the total height of the flex item that occupies the remaining
   // vertical space up to the bottom of the flyout panel. We don't want to give that height
@@ -104,17 +131,20 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
     });
   }, []);
 
-  const renderToggleFieldsButton = () => (
-    <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
-      {showAllFields
-        ? i18n.translate('indexPatternFieldEditor.fieldPreview.showLessFieldsButtonLabel', {
-            defaultMessage: 'Show less',
-          })
-        : i18n.translate('indexPatternFieldEditor.fieldPreview.showMoreFieldsButtonLabel', {
-            defaultMessage: 'Show more',
-          })}
-    </EuiButtonEmpty>
-  );
+  const renderToggleFieldsButton = () =>
+    totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
+      <div className="indexPatternFieldEditor__previewFieldList__showMore">
+        <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
+          {showAllFields
+            ? i18n.translate('indexPatternFieldEditor.fieldPreview.showLessFieldsButtonLabel', {
+                defaultMessage: 'Show less',
+              })
+            : i18n.translate('indexPatternFieldEditor.fieldPreview.showMoreFieldsButtonLabel', {
+                defaultMessage: 'Show more',
+              })}
+        </EuiButtonEmpty>
+      </div>
+    );
 
   if (currentDocument === undefined || height === -1) {
     return null;
@@ -139,9 +169,8 @@ export const PreviewFieldList: React.FC<Props> = ({ height }) => {
           );
         }}
       />
-      <div className="indexPatternFieldEditor__previewFieldList__showMore">
-        {renderToggleFieldsButton()}
-      </div>
+
+      {renderToggleFieldsButton()}
     </div>
   );
 };

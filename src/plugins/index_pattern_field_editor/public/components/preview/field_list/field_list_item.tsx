@@ -15,9 +15,9 @@ interface Props {
   field: {
     key: string;
     value: string;
-    isPinned: boolean;
+    isPinned?: boolean;
   };
-  toggleIsPinned: (name: string) => void;
+  toggleIsPinned?: (name: string) => void;
   highlighted?: boolean;
 }
 
@@ -45,22 +45,24 @@ export const PreviewListItem: React.FC<Props> = ({
           </span>
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem
-        className="indexPatternFieldEditor__previewFieldList__item__actions"
-        grow={false}
-      >
-        <EuiButtonIcon
-          onClick={() => {
-            toggleIsPinned(key);
-          }}
-          color="text"
-          iconType="pinFilled"
-          aria-label={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
-            defaultMessage: 'Pin field',
-          })}
-          className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
-        />
-      </EuiFlexItem>
+      {toggleIsPinned && (
+        <EuiFlexItem
+          className="indexPatternFieldEditor__previewFieldList__item__actions"
+          grow={false}
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              toggleIsPinned(key);
+            }}
+            color="text"
+            iconType="pinFilled"
+            aria-label={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+              defaultMessage: 'Pin field',
+            })}
+            className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
