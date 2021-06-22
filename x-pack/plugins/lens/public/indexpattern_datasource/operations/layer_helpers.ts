@@ -151,7 +151,7 @@ export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   return insertNewColumn(args);
 }
 
-function ensureCompatibleFiltersAreMoved<T extends ColumnAdvancedParams>(
+function ensureCompatibleParamsAreMoved<T extends ColumnAdvancedParams>(
   column: T,
   referencedOperation: GenericOperationDefinition,
   previousColumn: ColumnAdvancedParams
@@ -448,7 +448,7 @@ export function replaceColumn({
 
           // do not forget to move over also any filter/shift/anything (if compatible)
           // from the reference definition to the new operation.
-          const column = ensureCompatibleFiltersAreMoved(
+          const column = ensureCompatibleParamsAreMoved(
             copyCustomLabel({ ...referenceColumn }, previousColumn),
             referencedOperation,
             previousColumn as ReferenceBasedIndexPatternColumn
@@ -571,7 +571,7 @@ export function replaceColumn({
         if (referenceColumn) {
           const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
 
-          incompleteColumn = ensureCompatibleFiltersAreMoved(
+          incompleteColumn = ensureCompatibleParamsAreMoved(
             incompleteColumn,
             referencedOperation,
             previousColumn
