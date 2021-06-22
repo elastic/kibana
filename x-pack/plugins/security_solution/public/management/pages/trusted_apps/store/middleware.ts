@@ -129,7 +129,7 @@ const refreshListIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  if (needsRefreshOfListData(store.getState())) refreshList(store, trustedAppsService);
+  if (needsRefreshOfListData(store.getState())) await refreshList(store, trustedAppsService);
 };
 
 const updateCreationDialogIfNeeded = (
