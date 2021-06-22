@@ -52,8 +52,8 @@ export const EndpointActivityLog = memo(
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
-        const isIntersecting = entries.some((entry) => entry.intersectionRatio > 0);
-        if (isIntersecting && activityLogLoaded && !isPagingDisabled) {
+        const isTargetIntersecting = entries.some((entry) => entry.isIntersecting);
+        if (isTargetIntersecting && activityLogLoaded && !isPagingDisabled) {
           dispatch({
             type: 'appRequestedEndpointActivityLog',
             payload: {
@@ -67,9 +67,7 @@ export const EndpointActivityLog = memo(
     );
 
     useEffect(() => {
-      const observer = new IntersectionObserver(getActivityLog, {
-        rootMargin: '-50px',
-      });
+      const observer = new IntersectionObserver(getActivityLog);
       const element = loadMoreTrigger.current;
       if (element) {
         observer.observe(element);
