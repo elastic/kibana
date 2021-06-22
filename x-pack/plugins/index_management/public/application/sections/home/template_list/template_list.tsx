@@ -220,7 +220,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     </>
   );
 
-  // Track component loaded
+  // Track this component mounted.
   useEffect(() => {
     uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);

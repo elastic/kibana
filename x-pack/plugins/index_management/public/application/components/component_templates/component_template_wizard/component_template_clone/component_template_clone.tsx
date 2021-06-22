@@ -30,6 +30,7 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
 
   useEffect(() => {
     if (error && !isLoading) {
+      // Toasts expects a generic Error object, which is typed as having a required name property.
       toasts.addError({ ...error, name: '' } as Error, {
         title: i18n.translate('xpack.idxMgmt.componentTemplateClone.loadComponentTemplateTitle', {
           defaultMessage: `Error loading component template '{sourceComponentTemplateName}'.`,

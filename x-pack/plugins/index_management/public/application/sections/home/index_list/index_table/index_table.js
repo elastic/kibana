@@ -452,7 +452,9 @@ export class IndexTable extends Component {
               />
             </PageLoading>
           );
-        } else if (indicesError) {
+        }
+
+        if (indicesError) {
           if (indicesError.status === 403) {
             return (
               <PageError

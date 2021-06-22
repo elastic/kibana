@@ -142,8 +142,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     }
   }, [componentTemplateName, removeContentFromGlobalFlyout]);
 
-  let content: React.ReactNode;
-
   if (isLoading) {
     return (
       <PageLoading data-test-subj="sectionLoading">
@@ -153,7 +151,11 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         />
       </PageLoading>
     );
-  } else if (data?.length) {
+  }
+
+  let content: React.ReactNode;
+
+  if (data?.length) {
     content = (
       <>
         <EuiText color="subdued">

@@ -9,11 +9,7 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText, EuiPageContent } from '@elastic/eui';
 
-interface Props {
-  children: React.ReactNode;
-}
-
-export const PageLoading: React.FunctionComponent<Props> = ({ children }) => {
+export const PageLoading: React.FunctionComponent = ({ children }) => {
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt

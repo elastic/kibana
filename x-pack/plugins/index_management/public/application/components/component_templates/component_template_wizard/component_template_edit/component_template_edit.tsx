@@ -76,7 +76,9 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
         />
       </PageLoading>
     );
-  } else if (error) {
+  }
+
+  if (error) {
     return (
       <PageError
         title={
