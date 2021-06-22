@@ -28,7 +28,7 @@ describe('RolesEmptyPrompt', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
-  it('calls method on change', () => {
+  it('calls onEnable on change', () => {
     const wrapper = shallow(<RolesEmptyPrompt {...props} />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
     prompt.find(EuiButton).simulate('click');
