@@ -208,7 +208,7 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
+    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
       esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
 
       const result = await store.fetch(opts);

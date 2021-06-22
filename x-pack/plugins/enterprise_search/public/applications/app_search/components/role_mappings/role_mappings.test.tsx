@@ -6,16 +6,13 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-
-import { Loading } from '../../../shared/loading';
-import { RoleMappingsTable } from '../../../shared/role_mapping';
+import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { RoleMapping } from './role_mapping';
@@ -46,20 +43,6 @@ describe('RoleMappings', () => {
     expect(wrapper.find(RoleMappingsTable)).toHaveLength(1);
   });
 
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<RoleMappings />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('renders empty state', () => {
-    setMockValues({ ...mockValues, roleMappings: [] });
-    const wrapper = shallow(<RoleMappings />);
-
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-  });
-
   it('renders RoleMapping flyout', () => {
     setMockValues({ ...mockValues, roleMappingFlyoutOpen: true });
     const wrapper = shallow(<RoleMappings />);
@@ -67,10 +50,9 @@ describe('RoleMappings', () => {
     expect(wrapper.find(RoleMapping)).toHaveLength(1);
   });
 
-  it('handles button click', () => {
-    setMockValues({ ...mockValues, roleMappings: [] });
+  it('handles onClick', () => {
     const wrapper = shallow(<RoleMappings />);
-    wrapper.find(EuiEmptyPrompt).dive().find(EuiButton).simulate('click');
+    wrapper.find(RoleMappingsHeading).prop('onClick')();
 
     expect(initializeRoleMapping).toHaveBeenCalled();
   });

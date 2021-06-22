@@ -7,7 +7,7 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
 
@@ -41,13 +40,6 @@ describe('PrivateSources', () => {
     const wrapper = shallow(<PrivateSources />);
 
     expect(wrapper.find(SourcesView)).toHaveLength(1);
-  });
-
-  it('renders Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<PrivateSources />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders only shared sources section when canCreatePersonalSources is false', () => {

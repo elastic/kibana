@@ -24,6 +24,7 @@ import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -186,6 +187,19 @@ export class APMPlugin
       ready,
     });
 
+    const resourcePlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[
+              key as keyof APMPluginStartDependencies
+            ];
+          }),
+      };
+    }) as APMRouteHandlerResources['plugins'];
+
     registerRoutes({
       core: {
         setup: core,
@@ -195,18 +209,7 @@ export class APMPlugin
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
-      plugins: mapValues(plugins, (value, key) => {
-        return {
-          setup: value,
-          start: () =>
-            core.getStartServices().then((services) => {
-              const [, pluginsStartContracts] = services;
-              return pluginsStartContracts[
-                key as keyof APMPluginStartDependencies
-              ];
-            }),
-        };
-      }) as APMRouteHandlerResources['plugins'],
+      plugins: resourcePlugins,
     });
 
     const boundGetApmIndices = async () =>
@@ -224,6 +227,13 @@ export class APMPlugin
         logger: this.logger!.get('rule'),
       });
     }
+
+    registerFleetPolicyCallbacks({
+      plugins: resourcePlugins,
+      ruleDataClient,
+      config: this.currentConfig,
+      logger: this.logger,
+    });
 
     return {
       config$: mergedConfig$,

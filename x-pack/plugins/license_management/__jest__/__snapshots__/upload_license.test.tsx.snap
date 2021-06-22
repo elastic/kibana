@@ -262,16 +262,18 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         uploadLicenseStatus={[Function]}
       >
         <EuiPageContent
+          color="subdued"
           horizontalPosition="center"
           verticalPosition="center"
         >
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+            color="subdued"
             paddingSize="l"
             role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
               role="main"
             >
               <EuiPageContentBody>
@@ -1301,16 +1303,18 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         uploadLicenseStatus={[Function]}
       >
         <EuiPageContent
+          color="subdued"
           horizontalPosition="center"
           verticalPosition="center"
         >
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+            color="subdued"
             paddingSize="l"
             role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
               role="main"
             >
               <EuiPageContentBody>
@@ -2031,16 +2035,18 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         uploadLicenseStatus={[Function]}
       >
         <EuiPageContent
+          color="subdued"
           horizontalPosition="center"
           verticalPosition="center"
         >
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+            color="subdued"
             paddingSize="l"
             role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
               role="main"
             >
               <EuiPageContentBody>
@@ -2761,16 +2767,18 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         uploadLicenseStatus={[Function]}
       >
         <EuiPageContent
+          color="subdued"
           horizontalPosition="center"
           verticalPosition="center"
         >
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+            color="subdued"
             paddingSize="l"
             role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
               role="main"
             >
               <EuiPageContentBody>
@@ -3491,16 +3499,18 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         uploadLicenseStatus={[Function]}
       >
         <EuiPageContent
+          color="subdued"
           horizontalPosition="center"
           verticalPosition="center"
         >
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+            color="subdued"
             paddingSize="l"
             role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
               role="main"
             >
               <EuiPageContentBody>

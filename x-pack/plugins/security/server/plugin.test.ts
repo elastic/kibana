@@ -83,6 +83,9 @@ describe('Security Plugin', () => {
               "app": AppActions {
                 "prefix": "app:version:",
               },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
+              },
               "login": "login:",
               "savedObject": SavedObjectActions {
                 "prefix": "saved_object:version:",
@@ -149,6 +152,9 @@ describe('Security Plugin', () => {
               },
               "app": AppActions {
                 "prefix": "app:version:",
+              },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {

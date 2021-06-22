@@ -265,6 +265,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { body } = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -301,6 +302,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.evaluateDataFrame(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -338,6 +340,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.explainDataFrameAnalytics(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)

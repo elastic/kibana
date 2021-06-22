@@ -16,7 +16,7 @@ import {
 } from './catch_retryable_es_client_errors';
 /** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason: string; index: string }>;
+  error: Option.Option<{ type: string; reason: string; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
@@ -84,7 +84,6 @@ export const waitForTask = ({
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
-        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,

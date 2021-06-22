@@ -107,13 +107,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend
       expect(debugState.legend!.items).to.eql([
-        { key: '6000', name: '> 6000', color: '#6092c0' },
-        { key: '8000', name: '> 8000', color: '#6092c0' },
-        { key: '10000', name: '> 10000', color: '#a8bfda' },
-        { key: '12000', name: '> 12000', color: '#ebeff5' },
-        { key: '14000', name: '> 14000', color: '#ebeff5' },
-        { key: '16000', name: '> 16000', color: '#ecb385' },
-        { key: '18000', name: '> 18000', color: '#e7664c' },
+        { key: '6000', name: '> 6,000', color: '#6092c0' },
+        { key: '8000', name: '> 8,000', color: '#6092c0' },
+        { key: '10000', name: '> 10,000', color: '#a8bfda' },
+        { key: '12000', name: '> 12,000', color: '#ebeff5' },
+        { key: '14000', name: '> 14,000', color: '#ebeff5' },
+        { key: '16000', name: '> 16,000', color: '#ecb385' },
+        { key: '18000', name: '> 18,000', color: '#e7664c' },
       ]);
     });
 

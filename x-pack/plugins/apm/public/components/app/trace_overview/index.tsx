@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -51,12 +50,10 @@ export function TraceOverview() {
     <>
       <SearchBar />
 
-      <EuiPanel hasShadow={false}>
-        <TraceList
-          items={data.items}
-          isLoading={status === FETCH_STATUS.LOADING}
-        />
-      </EuiPanel>
+      <TraceList
+        items={data.items}
+        isLoading={status === FETCH_STATUS.LOADING}
+      />
     </>
   );
 }

@@ -49,6 +49,7 @@ export interface EditorFrameProps {
   initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
 }
@@ -198,6 +199,11 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  /**
+   * The datasource is allowed to cancel a close event on the dimension editor,
+   * mainly used for formulas
+   */
+  canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
     dragging: DraggingIdentifier
@@ -300,11 +306,15 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   // Not a StateSetter because we have this unique use case of determining valid columns
   setState: (
     newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+    publishToVisualization?: {
+      isDimensionComplete?: boolean;
+    }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
+  toggleFullscreen: () => void;
+  isFullscreen: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -561,9 +571,9 @@ export interface VisualizationType {
    */
   sortPriority?: number;
   /**
-   * Indicates if visualization is in the beta stage.
+   * Indicates if visualization is in the experimental stage.
    */
-  showBetaBadge?: boolean;
+  showExperimentalBadge?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -725,6 +735,7 @@ interface LensEditContextMapping {
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
 }
+
 type LensEditSupportedActions = keyof LensEditContextMapping;
 
 export type LensEditPayload<T extends LensEditSupportedActions> = {
@@ -737,6 +748,7 @@ export interface LensEditEvent<T> {
   name: 'edit';
   data: EditPayloadContext<T>;
 }
+
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];

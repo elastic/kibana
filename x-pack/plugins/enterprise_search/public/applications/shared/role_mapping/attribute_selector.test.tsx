@@ -23,6 +23,7 @@ const handleAuthProviderChange = jest.fn();
 const baseProps = {
   attributeName: 'username' as AttributeName,
   attributeValue: 'Something',
+  attributeValueInvalid: false,
   attributes: ['a', 'b', 'c'],
   availableAuthProviders: ['ees_saml', 'kbn_saml'],
   selectedAuthProviders: ['ees_saml'],

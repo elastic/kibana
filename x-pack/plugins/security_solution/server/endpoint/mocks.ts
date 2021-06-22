@@ -88,7 +88,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
     cases: {
-      getCasesClientWithRequestAndContext: jest.fn(),
+      getCasesClientWithRequest: jest.fn(),
     },
   };
 };

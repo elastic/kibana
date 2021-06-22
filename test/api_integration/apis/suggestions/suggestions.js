@@ -13,12 +13,18 @@ export default function ({ getService }) {
 
   describe('Suggestions API', function () {
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
-      await kibanaServer.importExport.load('index_patterns/basic_kibana');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+      );
     });
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
-      await kibanaServer.importExport.unload('index_patterns/basic_kibana');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+      );
     });
 
     it('should return 200 with special characters', () =>

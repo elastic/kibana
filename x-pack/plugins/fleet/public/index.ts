@@ -15,9 +15,9 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };
 
-export type { NewPackagePolicy } from './applications/fleet/types';
-export * from './applications/fleet/types/intra_app_route_state';
-export * from './applications/fleet/types/ui_extensions';
+export type { NewPackagePolicy } from './types';
+export * from './types/intra_app_route_state';
+export * from './types/ui_extensions';
 
-export { pagePathGetters } from './applications/fleet/constants';
-export { pkgKeyFromPackageInfo } from './applications/fleet/services/pkg_key_from_package_info';
+export { pagePathGetters } from './constants';
+export { pkgKeyFromPackageInfo } from './services';

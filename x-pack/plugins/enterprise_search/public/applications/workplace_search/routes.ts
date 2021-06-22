@@ -13,7 +13,6 @@ export const SETUP_GUIDE_PATH = '/setup_guide';
 
 export const NOT_FOUND_PATH = '/404';
 export const LOGOUT_ROUTE = '/logout';
-export const KIBANA_ACCOUNT_ROUTE = '/security/account';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
@@ -89,7 +88,7 @@ export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
 export const SOURCE_SCHEMAS_PATH = `${SOURCES_PATH}/:sourceId/schemas`;
 export const SOURCE_DISPLAY_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/display_settings`;
 export const SOURCE_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/settings`;
-export const REINDEX_JOB_PATH = `${SOURCES_PATH}/:sourceId/schema_errors/:activeReindexJobId`;
+export const REINDEX_JOB_PATH = `${SOURCE_SCHEMAS_PATH}/:activeReindexJobId`;
 
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result_detail`;

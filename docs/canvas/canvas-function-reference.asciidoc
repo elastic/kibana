@@ -71,7 +71,7 @@ Alias: `condition`
 [[alterColumn_fn]]
 === `alterColumn`
 
-Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>> and <<staticColumn_fn>>.
+Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>>, <<mathColumn_fn>>, and <<staticColumn_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -1717,22 +1717,22 @@ Adds a column calculated as the result of other columns. Changes are made only w
 |===
 |Argument |Type |Description
 
+|`id`
+
+|`string`, `null`
+|An optional id of the resulting column. When no id is provided, the id will be looked up from the existing column by the provided name argument. If no column with this name exists yet, a new column with this name and an identical id will be added to the table.
+
 |_Unnamed_ ***
 
 Aliases: `column`, `name`
 |`string`
-|The name of the resulting column.
+|The name of the resulting column. Names are not required to be unique.
 
 |`expression` ***
 
 Aliases: `exp`, `fn`, `function`
 |`boolean`, `number`, `string`, `null`
 |A Canvas expression that is passed to each row as a single row `datatable`.
-
-|`id`
-
-|`string`, `null`
-|An optional id of the resulting column. When not specified or `null` the name argument is used as id.
 
 |`copyMetaFrom`
 
@@ -1806,6 +1806,47 @@ Default: `"throw"`
 |===
 
 *Returns:* `number` | `boolean` | `null`
+
+
+[float]
+[[mathColumn_fn]]
+=== `mathColumn`
+
+Adds a column by evaluating `TinyMath` on each row. This function is optimized for math, so it performs better than the <<mapColumn_fn>> with a <<math_fn>>.
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|id ***
+|`string`
+|id of the resulting column. Must be unique.
+
+|name ***
+|`string`
+|The name of the resulting column. Names are not required to be unique.
+
+|_Unnamed_
+
+Alias: `expression`
+|`string`
+|A `TinyMath` expression evaluated on each row. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
+
+|`onError`
+
+|`string`
+|In case the `TinyMath` evaluation fails or returns NaN, the return value is specified by onError. For example, `"null"`, `"zero"`, `"false"`, `"throw"`. When `"throw"`, it will throw an exception, terminating expression execution.
+
+Default: `"throw"`
+
+|`copyMetaFrom`
+
+|`string`, `null`
+|If set, the meta object from the specified column id is copied over to the specified target column. Throws an exception if the column doesn't exist
+|===
+
+*Returns:* `datatable`
 
 
 [float]
@@ -2581,7 +2622,7 @@ Default: `false`
 [[staticColumn_fn]]
 === `staticColumn`
 
-Adds a column with the same static value in every row. See also <<alterColumn_fn>> and <<mapColumn_fn>>.
+Adds a column with the same static value in every row. See also <<alterColumn_fn>>, <<mapColumn_fn>>, and <<mathColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -2892,6 +2933,33 @@ Alias: `type`
 [float]
 [[u_fns]]
 == U
+
+[float]
+[[uiSetting_fn]]
+=== `uiSetting`
+
+Returns a UI settings parameter value.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `parameter`
+|`string`
+|The parameter name.
+
+|`default`
+|`any`
+|A default value in case of the parameter is not set.
+
+Default: `null`
+|===
+
+*Returns:* `ui_setting`
 
 [float]
 [[urlparam_fn]]

@@ -9,14 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AdvanceRoleType } from '../../types';
 
-export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.emptyRoleMappingsBody',
-  {
-    defaultMessage:
-      'All users who successfully authenticate will be assigned the Owner role and have access to all engines. Add a new role to override the default.',
-  }
-);
-
 export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.deleteRoleMappingMessage',
   {

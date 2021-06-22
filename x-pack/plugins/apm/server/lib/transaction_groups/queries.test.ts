@@ -33,7 +33,7 @@ describe('transaction group queries', () => {
       )
     );
 
-    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+    const allParams = mock.spy.mock.calls.map((call) => call[1]);
 
     expect(allParams).toMatchSnapshot();
   });
@@ -51,7 +51,7 @@ describe('transaction group queries', () => {
       )
     );
 
-    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+    const allParams = mock.spy.mock.calls.map((call) => call[1]);
 
     expect(allParams).toMatchSnapshot();
   });

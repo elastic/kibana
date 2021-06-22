@@ -57,6 +57,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
     getErrorMessages: jest.fn((_state) => undefined),
+    renderDimensionEditor: jest.fn(),
   };
 }
 

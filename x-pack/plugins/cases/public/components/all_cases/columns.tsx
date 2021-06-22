@@ -55,6 +55,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 export interface GetCasesColumn {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
+  disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
@@ -64,6 +65,7 @@ export interface GetCasesColumn {
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
+  disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
@@ -203,15 +205,19 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(!disableAlerts
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     {
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
@@ -300,7 +306,6 @@ export const useCasesColumns = ({
                 <ConfirmDeleteCaseModal
                   caseTitle={deleteThisCase.title}
                   isModalVisible={isDisplayConfirmDeleteModal}
-                  isPlural={false}
                   onCancel={handleToggleModal}
                   onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
                 />

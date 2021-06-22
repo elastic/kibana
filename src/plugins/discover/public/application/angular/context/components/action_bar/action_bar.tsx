@@ -19,7 +19,10 @@ import {
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../api/context';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
+import {
+  MAX_CONTEXT_SIZE,
+  MIN_CONTEXT_SIZE,
+} from '../../../../components/context_app/utils/constants';
 
 export interface ActionBarProps {
   /**
@@ -45,9 +48,10 @@ export interface ActionBarProps {
   isLoading: boolean;
   /**
    * is triggered when the input containing count is changed
+   * @param type
    * @param count
    */
-  onChangeCount: (count: number) => void;
+  onChangeCount: (type: SurrDocType, count: number) => void;
   /**
    * can be `predecessors` or `successors`, usage in context:
    * predecessors action bar + records (these are newer records)
@@ -67,13 +71,13 @@ export function ActionBar({
   type,
 }: ActionBarProps) {
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
-  const isSuccessor = type === 'successors';
+  const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
   const isValid = (value: number) => value >= MIN_CONTEXT_SIZE && value <= MAX_CONTEXT_SIZE;
   const onSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
     if (newDocCount !== docCount && isValid(newDocCount)) {
-      onChangeCount(newDocCount);
+      onChangeCount(type, newDocCount);
     }
   };
   useEffect(() => {
@@ -100,7 +104,7 @@ export function ActionBar({
                 const value = newDocCount + defaultStepSize;
                 if (isValid(value)) {
                   setNewDocCount(value);
-                  onChangeCount(value);
+                  onChangeCount(type, value);
                 }
               }}
               flush="right"
@@ -131,7 +135,7 @@ export function ActionBar({
                 }}
                 onBlur={() => {
                   if (newDocCount !== docCount && isValid(newDocCount)) {
-                    onChangeCount(newDocCount);
+                    onChangeCount(type, newDocCount);
                   }
                 }}
                 type="number"

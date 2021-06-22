@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetReporters, UseGetReporters } from './use_get_reporters';
 import { reporters, respReporters } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../common';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -22,8 +25,11 @@ describe('useGetReporters', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(
+        () => useGetReporters(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -39,17 +45,22 @@ describe('useGetReporters', () => {
   it('calls getReporters api', async () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() => useGetReporters());
+      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() => useGetReporters(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal);
+      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
 
   it('fetch reporters', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(
+        () => useGetReporters(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -66,8 +77,11 @@ describe('useGetReporters', () => {
   it('refetch reporters', async () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(
+        () => useGetReporters(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -83,8 +97,11 @@ describe('useGetReporters', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(
+        () => useGetReporters(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

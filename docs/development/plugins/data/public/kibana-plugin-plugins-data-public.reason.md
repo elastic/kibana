@@ -15,7 +15,7 @@ export interface Reason
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [caused\_by](./kibana-plugin-plugins-data-public.reason.caused_by.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        reason: string;</code><br/><code>    }</code> |  |
-|  [lang](./kibana-plugin-plugins-data-public.reason.lang.md) | <code>string</code> |  |
+|  [lang](./kibana-plugin-plugins-data-public.reason.lang.md) | <code>estypes.ScriptLanguage</code> |  |
 |  [position](./kibana-plugin-plugins-data-public.reason.position.md) | <code>{</code><br/><code>        offset: number;</code><br/><code>        start: number;</code><br/><code>        end: number;</code><br/><code>    }</code> |  |
 |  [reason](./kibana-plugin-plugins-data-public.reason.reason.md) | <code>string</code> |  |
 |  [script\_stack](./kibana-plugin-plugins-data-public.reason.script_stack.md) | <code>string[]</code> |  |

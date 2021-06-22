@@ -73,14 +73,6 @@ export const GROUP_ASSIGNMENT_LABEL = i18n.translate(
   }
 );
 
-export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.emptyRoleMappingsBody',
-  {
-    defaultMessage:
-      'New team members are assigned the admin role by default. An admin can access everything. Create a new role to override the default.',
-  }
-);
-
 export const ROLE_MAPPINGS_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleMappingsTableHeader',
   {

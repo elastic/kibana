@@ -20,13 +20,18 @@ import { AttributeName, AttributeExamples } from '../types';
 import {
   ANY_AUTH_PROVIDER,
   ANY_AUTH_PROVIDER_OPTION_LABEL,
+  ATTRIBUTE_VALUE_LABEL,
+  ATTRIBUTE_VALUE_ERROR,
   AUTH_ANY_PROVIDER_LABEL,
   AUTH_INDIVIDUAL_PROVIDER_LABEL,
+  AUTH_PROVIDER_LABEL,
+  EXTERNAL_ATTRIBUTE_LABEL,
 } from './constants';
 
 interface Props {
   attributeName: AttributeName;
   attributeValue?: string;
+  attributeValueInvalid: boolean;
   attributes: string[];
   selectedAuthProviders?: string[];
   availableAuthProviders?: string[];
@@ -80,6 +85,7 @@ const getSelectedOptions = (selectedAuthProviders: string[], availableAuthProvid
 export const AttributeSelector: React.FC<Props> = ({
   attributeName,
   attributeValue = '',
+  attributeValueInvalid,
   attributes,
   availableAuthProviders,
   selectedAuthProviders = [ANY_AUTH_PROVIDER],
@@ -93,7 +99,7 @@ export const AttributeSelector: React.FC<Props> = ({
   return (
     <div data-test-subj="AttributeSelector">
       {availableAuthProviders && multipleAuthProvidersConfig && (
-        <EuiFormRow label="Auth Provider" fullWidth>
+        <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
           <EuiComboBox
             data-test-subj="AuthProviderSelect"
             selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
@@ -106,7 +112,7 @@ export const AttributeSelector: React.FC<Props> = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label="External Attribute" fullWidth>
+      <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
         <EuiSelect
           name="external-attribute"
           data-test-subj="ExternalAttributeSelect"
@@ -120,7 +126,12 @@ export const AttributeSelector: React.FC<Props> = ({
           disabled={disabled}
         />
       </EuiFormRow>
-      <EuiFormRow label="Attribute Value" fullWidth>
+      <EuiFormRow
+        label={ATTRIBUTE_VALUE_LABEL}
+        fullWidth
+        isInvalid={attributeValueInvalid}
+        error={[ATTRIBUTE_VALUE_ERROR]}
+      >
         {attributeName === 'role' ? (
           <EuiSelect
             value={attributeValue}

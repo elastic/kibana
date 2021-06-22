@@ -4,7 +4,6 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 def TASK_PARAM = params.TASK ?: params.CI_GROUP
-
 // Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke'
 def JOB_PARTS = TASK_PARAM.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
@@ -111,6 +110,8 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
       return kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh')
     } else if (job == 'apiIntegration') {
       return kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh')
+    } else if (job == 'pluginFunctional') {
+      return kibanaPipeline.functionalTestProcess('oss-pluginFunctional', './test/scripts/jenkins_plugin_functional.sh')
     } else {
       return kibanaPipeline.ossCiGroupProcess(ciGroup)
     }

@@ -37,7 +37,7 @@ export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   filterQuery: ESQuery | string | undefined;
-  aggregations?: Record<string, estypes.AggregationContainer>;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
 }

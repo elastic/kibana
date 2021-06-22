@@ -30,7 +30,7 @@ export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): 
   };
 }
 
-export function tasksOfType(taskTypes: string[]): estypes.QueryContainer {
+export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
     bool: {
       should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
@@ -40,7 +40,7 @@ export function tasksOfType(taskTypes: string[]): estypes.QueryContainer {
 
 export function tasksClaimedByOwner(
   taskManagerId: string,
-  ...taskFilters: estypes.QueryContainer[]
+  ...taskFilters: estypes.QueryDslQueryContainer[]
 ) {
   return mustBeAllOf(
     {
@@ -104,7 +104,7 @@ if (doc['task.runAt'].size()!=0) {
 };
 export const SortByRunAtAndRetryAt = (SortByRunAtAndRetryAtScript as unknown) as Record<
   string,
-  estypes.Sort
+  estypes.SearchSort
 >;
 
 export const updateFieldsAndMarkAsFailed = (

@@ -22,7 +22,7 @@ export interface KbnClientOptions {
   certificateAuthorities?: Buffer[];
   log: ToolingLog;
   uiSettingDefaults?: UiSettingValues;
-  importExportDir?: string;
+  importExportBaseDir?: string;
 }
 
 export class KbnClient {
@@ -67,7 +67,7 @@ export class KbnClient {
       this.log,
       this.requester,
       this.savedObjects,
-      options.importExportDir
+      options.importExportBaseDir
     );
   }
 

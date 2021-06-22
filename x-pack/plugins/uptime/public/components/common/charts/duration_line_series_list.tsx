@@ -29,7 +29,6 @@ export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
         xAccessor={0}
         xScaleType="time"
         yAccessors={[1]}
-        yScaleToDataExtent={false}
         yScaleType="linear"
         fit={Fit.Linear}
         tickFormat={(d) =>

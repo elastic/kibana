@@ -42,7 +42,7 @@ export const waitForReindexTask = flow(
         if (res.error.value.type === 'index_not_found_exception') {
           return TaskEither.left({
             type: 'index_not_found_exception' as const,
-            index: res.error.value.index,
+            index: res.error.value.index!,
           });
         } else {
           throw new Error('Reindex failed with the following error:\n' + JSON.stringify(res.error));

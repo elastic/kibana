@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
+  const filterBar = getService('filterBar');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -172,10 +173,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
 
+      await PageObjects.lens.closeDimensionEditor();
+
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
-      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
@@ -587,6 +589,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        undefined
+      );
+    });
+
+    it('should not leave an incomplete column in the visualization config with reference-based operations', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        field: 'Records',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Moving average of Count of records'
+      );
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'median',
+        isPreviousIncompatible: true,
+        keepOpen: true,
+      });
+
+      expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        undefined
+      );
+    });
+
     it('should transition from unique count to last value', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -633,6 +686,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
+    });
+
+    it('should allow filtering by legend on an xy chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.filterLegend('jpg');
+      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
+      expect(hasExtensionFilter).to.be(true);
+
+      await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should allow filtering by legend on a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'agent.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.filterLegend('jpg');
+      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
+      expect(hasExtensionFilter).to.be(true);
+
+      await filterBar.removeFilter('extension.raw');
     });
   });
 }

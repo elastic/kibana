@@ -7,7 +7,6 @@
  */
 
 /* eslint-disable @kbn/eslint/module_migration */
-
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
@@ -21,5 +20,9 @@ import 'monaco-editor/esm/vs/editor/contrib/folding/folding.js'; // Needed for f
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
+import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js'; // Needed for brackets matching highlight
+
+import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
+import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
 
 export { monaco };

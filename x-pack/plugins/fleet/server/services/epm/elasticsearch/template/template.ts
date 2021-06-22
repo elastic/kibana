@@ -527,7 +527,6 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream
@@ -549,7 +548,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { index: { default_pipeline: settings.index.default_pipeline } },
+      body: { settings: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

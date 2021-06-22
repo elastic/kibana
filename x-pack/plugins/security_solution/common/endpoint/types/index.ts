@@ -473,14 +473,14 @@ export type HostMetadata = Immutable<{
         version: number;
       };
     };
-    configuration: {
+    configuration?: {
       /**
        * Shows whether the endpoint is set up to be isolated. (e.g. a user has isolated a host,
        * and the endpoint successfully received that action and applied the setting)
        */
       isolation?: boolean;
     };
-    state: {
+    state?: {
       /**
        * Shows what the current state of the host is. This could differ from `Endpoint.configuration.isolation`
        * in some cases, but normally they will match
@@ -1113,4 +1113,16 @@ export interface GetExceptionSummaryResponse {
   windows: number;
   macos: number;
   linux: number;
+}
+
+/**
+ * Supported React-Router state for the Generic List page
+ */
+export interface ListPageRouteState {
+  /** Where the user should be redirected to when the `Back` button is clicked */
+  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+  /** The URL for the `Back` button */
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
 }

@@ -11,11 +11,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { Case, SubCase } from '../../../../../../cases/common';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_ID, CASES_APP_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import {
   getCreateCaseUrl,
@@ -55,7 +55,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const onRowClick = useCallback(
     async (theCase?: Case | SubCase) => {
       openCaseModal(false);
-      await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      await navigateToApp(CASES_APP_ID, {
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
       dispatch(
@@ -71,7 +71,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const goToCreateCase = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -88,7 +88,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleNewCaseClick = useCallback(() => {
     handlePopoverClose();
-    navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+    navigateToApp(CASES_APP_ID, {
       path: getCreateCaseUrl(),
     }).then(() => {
       dispatch(
@@ -177,6 +177,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           },
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );

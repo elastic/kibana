@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -19,8 +19,6 @@ jest.mock('../../../../shared/use_local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 import { useLocalStorage } from '../../../../shared/use_local_storage';
-
-import { EmptyState } from '../components';
 
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
@@ -56,14 +54,6 @@ describe('SearchExperience', () => {
 
     expect(wrapper.find(SearchProvider)).toHaveLength(1);
     expect(wrapper.find(SearchExperienceContent)).toHaveLength(1);
-  });
-
-  it('renders an empty state when the engine does not have documents', () => {
-    setMockValues({ ...values, engine: { ...values.engine, document_count: 0 } });
-    const wrapper = shallow(<SearchExperience />);
-
-    expect(wrapper.find(EmptyState)).toHaveLength(1);
-    expect(wrapper.find(SearchExperienceContent)).toHaveLength(0);
   });
 
   describe('when there are no selected filter fields', () => {

@@ -16,14 +16,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('timelion', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('timelion/feature_controls');
+        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('timelion/feature_controls');
+        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
       });
 
       it('shows timelion navlink', async () => {
@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('timelion/feature_controls');
+        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('timelion/feature_controls');
+        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
       });
 
       it(`doesn't show timelion navlink`, async () => {

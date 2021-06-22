@@ -17,6 +17,8 @@ import {
   HostPolicyResponseActionStatus,
   MetadataQueryStrategyVersions,
   HostStatus,
+  ActivityLog,
+  HostMetadata,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -27,12 +29,15 @@ import {
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 import {
+  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state';
+
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
+import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -359,9 +364,25 @@ export const getIsolationRequestError: (
   }
 });
 
+export const getActivityLogDataPaging = (
+  state: Immutable<EndpointState>
+): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
+  return {
+    page: state.endpointDetails.activityLog.page,
+    pageSize: state.endpointDetails.activityLog.pageSize,
+  };
+};
+
 export const getActivityLogData = (
   state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']> => state.endpointDetails.activityLog;
+): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
+  state.endpointDetails.activityLog.logData;
+
+export const getLastLoadedActivityLogData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
+  return getLastLoadedResourceState(activityLog)?.data;
+});
 
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>
@@ -375,6 +396,13 @@ export const getActivityLogRequestLoaded: (
   isLoadedResourceState(activityLog)
 );
 
+export const getActivityLogIterableData: (
+  state: Immutable<EndpointState>
+) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
+  const emptyArray: ActivityLog['data'] = [];
+  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
+});
+
 export const getActivityLogError: (
   state: Immutable<EndpointState>
 ) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
@@ -386,3 +414,40 @@ export const getActivityLogError: (
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
 });
+
+export const getEndpointPendingActionsState = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointPendingActions']> => {
+  return state.endpointPendingActions;
+};
+
+/**
+ * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
+ * component for a given Endpoint
+ */
+export const getEndpointHostIsolationStatusPropsCallback: (
+  state: Immutable<EndpointState>
+) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
+  getEndpointPendingActionsState,
+  (pendingActionsState) => {
+    return (endpoint: HostMetadata) => {
+      let pendingIsolate = 0;
+      let pendingUnIsolate = 0;
+
+      if (isLoadedResourceState(pendingActionsState)) {
+        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
+
+        if (endpointPendingActions) {
+          pendingIsolate = endpointPendingActions?.isolate ?? 0;
+          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+        }
+      }
+
+      return {
+        isIsolated: isEndpointHostIsolated(endpoint),
+        pendingIsolate,
+        pendingUnIsolate,
+      };
+    };
+  }
+);

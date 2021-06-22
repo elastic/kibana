@@ -129,24 +129,22 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-const securitySubPlugins = [
+const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
+
+/**
+ * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
+ */
+const securitySubPluginsNoCases = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.overview}`,
   `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
-const caseSavedObjects = [
-  'cases',
-  'cases-comments',
-  'cases-sub-case',
-  'cases-configure',
-  'cases-user-actions',
-];
+const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -216,8 +214,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
+
     let ruleDataClient: RuleDataClient | null = null;
-    if (experimentalFeatures.ruleRegistryEnabled) {
+    if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
@@ -268,6 +268,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ready,
       });
 
+      // sec
+
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
@@ -299,7 +301,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
-      ...(experimentalFeatures.ruleRegistryEnabled ? referenceRuleTypes : []),
+      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature({
@@ -309,26 +311,67 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
-      app: [...securitySubPlugins, 'kibana'],
+      app: [...allSecuritySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: ruleTypes,
+      cases: [APP_ID],
+      subFeatures: [
+        {
+          name: 'Cases',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  // if the user is granted access to the cases feature than the global nav will show the cases
+                  // sub plugin within the security solution navigation
+                  app: [casesSubPlugin],
+                  id: 'cases_all',
+                  includeIn: 'all',
+                  name: 'All',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
+                  cases: {
+                    all: [APP_ID],
+                  },
+                },
+                {
+                  app: [casesSubPlugin],
+                  id: 'cases_read',
+                  includeIn: 'read',
+                  name: 'Read',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['read_cases'], // uiCapabilities.siem.read_cases
+                  cases: {
+                    read: [APP_ID],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
       privileges: {
         all: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: [
-              'alert',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
-            read: ['config'],
+            all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
+            read: [],
           },
           alerting: {
             rule: {
@@ -344,18 +387,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: [
-              'config',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
+            read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
           },
           alerting: {
             rule: {
