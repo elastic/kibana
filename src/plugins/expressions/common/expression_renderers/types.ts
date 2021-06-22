@@ -99,19 +99,17 @@ export class DefaultInterpreterRenderHandlers<Emitters = {}> implements IInterpr
 
   on(event: keyof Emitters | keyof DefaultEmitters<this>, fn: (...args: any) => void): void {
     const eventName = event as keyof this;
-    if (this[eventName]) {
-      const eventCall = this[eventName];
-      if (typeof eventCall !== 'function') return;
+    const eventCall = this[eventName];
+    if (typeof eventCall !== 'function') return;
 
-      const updatedEvent = (...args: unknown[]) => {
-        const preventFromCallingListener: void | boolean = eventCall(...args);
-        if (typeof fn === 'function' && !preventFromCallingListener) {
-          fn(...args);
-        }
-        return preventFromCallingListener;
-      };
-      this[eventName] = (updatedEvent as unknown) as typeof eventCall;
-    }
+    const updatedEvent = (...args: unknown[]) => {
+      const preventFromCallingListener: void | boolean = eventCall(...args);
+      if (typeof fn === 'function' && !preventFromCallingListener) {
+        fn(...args);
+      }
+      return preventFromCallingListener;
+    };
+    this[eventName] = (updatedEvent as unknown) as typeof eventCall;
   }
 
   uiState?: unknown;
