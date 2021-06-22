@@ -42,7 +42,11 @@ export const Curations: React.FC = () => {
       pageHeader={{
         pageTitle: CURATIONS_OVERVIEW_TITLE,
         rightSideItems: [
-          <EuiButtonTo to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)} fill>
+          <EuiButtonTo
+            to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)}
+            iconType="plusInCircle"
+            fill
+          >
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
