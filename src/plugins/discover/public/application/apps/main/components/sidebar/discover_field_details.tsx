@@ -20,7 +20,6 @@ import {
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import './discover_field_details.scss';
-import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
 
 interface DiscoverFieldDetailsProps {
   field: IndexPatternField;
@@ -28,7 +27,6 @@ interface DiscoverFieldDetailsProps {
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  showFooter?: boolean;
 }
 
 export function DiscoverFieldDetails({
@@ -37,7 +35,6 @@ export function DiscoverFieldDetails({
   details,
   onAddFilter,
   trackUiMetric,
-  showFooter = true,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
@@ -111,14 +108,6 @@ export function DiscoverFieldDetails({
           </>
         )}
       </div>
-      {!details.error && showFooter && (
-        <DiscoverFieldDetailsFooter
-          field={field}
-          indexPattern={indexPattern}
-          details={details}
-          onAddFilter={onAddFilter}
-        />
-      )}
     </>
   );
 }
