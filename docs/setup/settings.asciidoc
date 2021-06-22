@@ -325,6 +325,9 @@ The time interval policy will rotate the log file every given interval of time. 
 When `includeElasticMapsService` is turned off, only the vector layers configured by <<regionmap-settings, `map.regionmap`>>
 and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are available in <<maps, Maps>>. *Default: `true`*
 
+| `map.emsUrl:`
+ | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
+
 | `map.proxyElasticMapsServiceInMaps:`
  | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
