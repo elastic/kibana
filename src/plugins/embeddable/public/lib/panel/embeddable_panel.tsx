@@ -66,6 +66,8 @@ interface Props {
   filterActions?: (actionId: string) => boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
   showShadow?: boolean;
+  showBadges?: boolean;
+  showNotifications?: boolean;
 }
 
 interface State {
@@ -132,10 +134,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
+    if (!this.mounted) {
+      return;
+    }
+    if (this.props.showBadges === false) {
+      return;
+    }
     let badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-    if (!this.mounted) return;
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -150,10 +157,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshNotifications() {
+    if (!this.mounted) {
+      return;
+    }
+    if (this.props.showNotifications === false) {
+      return;
+    }
     let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-    if (!this.mounted) return;
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
