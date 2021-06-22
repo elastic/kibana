@@ -104,6 +104,7 @@ describe('ruleTypesRoute', () => {
             "default_action_group_id": "default",
             "enabled_in_license": true,
             "id": "1",
+            "is_exportable": true,
             "minimum_license_required": "basic",
             "name": "name",
             "producer": "test",

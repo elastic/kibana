@@ -80,6 +80,7 @@ describe('listAlertTypesRoute', () => {
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
             "id": "1",
+            "isExportable": true,
             "minimumLicenseRequired": "basic",
             "name": "name",
             "producer": "test",

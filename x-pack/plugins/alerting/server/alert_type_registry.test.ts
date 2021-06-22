@@ -416,6 +416,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "enabledInLicense": false,
           "id": "test",
+          "isExportable": true,
           "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",
