@@ -33,7 +33,7 @@ export function buildSearchBody(
   useNewFieldsApi: boolean
 ): RequestBody | undefined {
   const computedFields = indexPattern.getComputedFields();
-  const runtimeFields = computedFields.runtimeFields as estypes.RuntimeFields;
+  const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
     body: {
       query: {

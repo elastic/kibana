@@ -12,6 +12,7 @@ import {
   InternalArtifactSchema,
   InternalManifestSchema,
   InternalManifestEntrySchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import {
   ManifestSchemaVersion,
@@ -137,6 +138,27 @@ export class Manifest {
 
   public getArtifactTargetPolicies(artifact: InternalArtifactSchema): Set<string> | undefined {
     return this.allEntries.get(getArtifactId(artifact))?.specificTargetPolicies;
+  }
+
+  /**
+   * Replaces an artifact from all the collections.
+   *
+   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
+   */
+  public replaceArtifact(artifact: InternalArtifactCompleteSchema) {
+    const existingEntry = this.allEntries.get(getArtifactId(artifact));
+    if (existingEntry) {
+      existingEntry.entry = new ManifestEntry(artifact);
+
+      this.allEntries.set(getArtifactId(artifact), existingEntry);
+      this.defaultEntries.set(getArtifactId(artifact), existingEntry.entry);
+
+      existingEntry.specificTargetPolicies.forEach((policyId) => {
+        const entries = this.policySpecificEntries.get(policyId) || new Map();
+        entries.set(existingEntry.entry.getDocId(), existingEntry.entry);
+        this.policySpecificEntries.set(policyId, entries);
+      });
+    }
   }
 
   public diff(manifest: Manifest): ManifestDiff {

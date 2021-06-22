@@ -21,7 +21,6 @@ import {
   kqlQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
-import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -68,121 +67,115 @@ export async function getServiceTransactionGroupDetailedStatistics({
     impact: number;
   }>
 > {
-  return withApmSpan(
+  const { apmEventClient } = setup;
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
+
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
+
+  const response = await apmEventClient.search(
     'get_service_transaction_group_detailed_statistics',
-    async () => {
-      const { apmEventClient } = setup;
-      const { intervalString } = getBucketSize({ start, end, numBuckets });
-
-      const field = getTransactionDurationFieldForAggregatedTransactions(
-        searchAggregatedTransactions
-      );
-
-      const response = await apmEventClient.search({
-        apm: {
-          events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          ],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: serviceName } },
-                { term: { [TRANSACTION_TYPE]: transactionType } },
-                ...getDocumentTypeFilterForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
-          },
-          aggs: {
-            total_duration: { sum: { field } },
-            transaction_groups: {
-              terms: {
-                field: TRANSACTION_NAME,
-                include: transactionNames,
-                size: transactionNames.length,
-              },
-              aggs: {
-                transaction_group_total_duration: {
-                  sum: { field },
-                },
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: start,
-                      max: end,
-                    },
-                  },
-                  aggs: {
-                    throughput_rate: {
-                      rate: {
-                        unit: 'minute',
-                      },
-                    },
-                    ...getLatencyAggregation(latencyAggregationType, field),
-                    [EVENT_OUTCOME]: {
-                      terms: {
-                        field: EVENT_OUTCOME,
-                        include: [EventOutcome.failure, EventOutcome.success],
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const buckets = response.aggregations?.transaction_groups.buckets ?? [];
-
-      const totalDuration = response.aggregations?.total_duration.value;
-      return buckets.map((bucket) => {
-        const transactionName = bucket.key as string;
-        const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-          x: timeseriesBucket.key,
-          y: getLatencyValue({
-            latencyAggregationType,
-            aggregation: timeseriesBucket.latency,
-          }),
-        }));
-        const throughput = bucket.timeseries.buckets.map(
-          (timeseriesBucket) => ({
-            x: timeseriesBucket.key,
-            y: timeseriesBucket.throughput_rate.value,
-          })
-        );
-        const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-          x: timeseriesBucket.key,
-          y: calculateTransactionErrorPercentage(
-            timeseriesBucket[EVENT_OUTCOME]
+    {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
           ),
-        }));
-        const transactionGroupTotalDuration =
-          bucket.transaction_group_total_duration.value || 0;
-        return {
-          transactionName,
-          latency,
-          throughput,
-          errorRate,
-          impact: totalDuration
-            ? (transactionGroupTotalDuration * 100) / totalDuration
-            : 0,
-        };
-      });
+        ],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
+          },
+        },
+        aggs: {
+          total_duration: { sum: { field } },
+          transaction_groups: {
+            terms: {
+              field: TRANSACTION_NAME,
+              include: transactionNames,
+              size: transactionNames.length,
+            },
+            aggs: {
+              transaction_group_total_duration: {
+                sum: { field },
+              },
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
+                  },
+                },
+                aggs: {
+                  throughput_rate: {
+                    rate: {
+                      unit: 'minute',
+                    },
+                  },
+                  ...getLatencyAggregation(latencyAggregationType, field),
+                  [EVENT_OUTCOME]: {
+                    terms: {
+                      field: EVENT_OUTCOME,
+                      include: [EventOutcome.failure, EventOutcome.success],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     }
   );
+
+  const buckets = response.aggregations?.transaction_groups.buckets ?? [];
+
+  const totalDuration = response.aggregations?.total_duration.value;
+  return buckets.map((bucket) => {
+    const transactionName = bucket.key as string;
+    const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y: getLatencyValue({
+        latencyAggregationType,
+        aggregation: timeseriesBucket.latency,
+      }),
+    }));
+    const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y: timeseriesBucket.throughput_rate.value,
+    }));
+    const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y: calculateTransactionErrorPercentage(timeseriesBucket[EVENT_OUTCOME]),
+    }));
+    const transactionGroupTotalDuration =
+      bucket.transaction_group_total_duration.value || 0;
+    return {
+      transactionName,
+      latency,
+      throughput,
+      errorRate,
+      impact: totalDuration
+        ? (transactionGroupTotalDuration * 100) / totalDuration
+        : 0,
+    };
+  });
 }
 
 export async function getServiceTransactionGroupDetailedStatisticsPeriods({

@@ -27,13 +27,12 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../constants/elasticsearch_fieldnames';
 
-export function getCoreWebVitalsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): DataSeries {
   const statusPallete = euiPaletteForStatus(3);
 
   return {
-    id: seriesId,
     defaultSeriesType: 'bar_horizontal_percentage_stacked',
-    reportType: 'kpi-trends',
+    reportType: 'core-web-vitals',
     seriesTypes: ['bar_horizontal_percentage_stacked'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,

@@ -13,5 +13,5 @@ import { HostMetadata } from '../../../../common/endpoint/types';
  * @param endpointMetadata
  */
 export const isEndpointHostIsolated = (endpointMetadata: HostMetadata): boolean => {
-  return Boolean(endpointMetadata.Endpoint.state.isolation);
+  return Boolean(endpointMetadata.Endpoint.state?.isolation);
 };

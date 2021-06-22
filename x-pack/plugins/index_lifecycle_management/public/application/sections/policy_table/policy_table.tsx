@@ -16,9 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiPageBody,
+  EuiPageHeader,
   EuiPageContent,
 } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
@@ -119,67 +117,60 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     );
   } else {
     return (
-      <EuiPageBody>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiEmptyPrompt
-            iconType="managementApp"
-            title={
-              <h1>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
+                defaultMessage="Create your first index lifecycle policy"
+              />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
-                  defaultMessage="Create your first index lifecycle policy"
+                  id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
+                  defaultMessage=" An index lifecycle policy helps you manage your indices as they age."
                 />
-              </h1>
-            }
-            body={
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
-                    defaultMessage=" An index lifecycle policy helps you manage your indices as they age."
-                  />
-                </p>
-              </Fragment>
-            }
-            actions={createPolicyButton}
-          />
-        </EuiPageContent>
-      </EuiPageBody>
+              </p>
+            </Fragment>
+          }
+          actions={createPolicyButton}
+        />
+      </EuiPageContent>
     );
   }
 
   return (
-    <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
-        {confirmModal}
+    <>
+      {confirmModal}
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 data-test-subj="sectionHeading">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                  defaultMessage="Index Lifecycle Policies"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{createPolicyButton}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="sectionHeading">
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-              defaultMessage="Manage your indices as they age.  Attach a policy to automate
-                        when and how to transition an index through its lifecycle."
+              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+              defaultMessage="Index Lifecycle Policies"
             />
-          </p>
-        </EuiText>
+          </span>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
+            defaultMessage="Manage your indices as they age.  Attach a policy to automate
+                        when and how to transition an index through its lifecycle."
+          />
+        }
+        bottomBorder
+        rightSideItems={[createPolicyButton]}
+      />
 
-        <EuiSpacer />
-        {content}
-      </EuiPageContent>
-    </EuiPageBody>
+      <EuiSpacer size="l" />
+
+      {content}
+    </>
   );
 };

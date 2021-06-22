@@ -90,7 +90,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageContent color="transparent">
         <EuiTitle size="m">
           <EuiFlexGroup>
             <EuiFlexItem>

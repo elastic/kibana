@@ -29,7 +29,7 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: estypes.ExcludeFrequent | null;
+  excludeFrequent: estypes.MlExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
   useNull: boolean | null;
@@ -58,7 +58,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
     useNull: boolean | null
   ) {
@@ -87,7 +87,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
     index: number,
     useNull: boolean | null
@@ -120,7 +120,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: estypes.ExcludeFrequent | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
     customRules: CustomRule[] | null,
     useNull: boolean | null
@@ -193,7 +193,6 @@ export class AdvancedJobCreator extends JobCreator {
       timeFieldName: this.timeFieldName,
       query: this.query,
       runtimeMappings: this.datafeedConfig.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       indicesOptions: this.datafeedConfig.indices_options,
     });
     this.setTimeRange(start.epoch, end.epoch);

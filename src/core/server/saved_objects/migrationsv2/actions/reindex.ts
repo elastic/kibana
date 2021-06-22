@@ -32,7 +32,7 @@ export interface ReindexParams {
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: estypes.QueryContainer;
+  unusedTypesQuery: estypes.QueryDslQueryContainer;
 }
 /**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a

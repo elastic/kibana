@@ -34,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
 
@@ -66,7 +66,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
@@ -112,14 +112,14 @@ export default function (providerContext: FtrProviderContext) {
       // @ts-expect-error
       const event = doc._source.event;
 
-      expect(event.agent_id_status).to.be('no_api_key');
+      expect(event.agent_id_status).to.be('auth_metadata_missing');
       expect(event).to.have.property('ingested');
     });
 
     const scenarios = [
       {
         name: 'API key without metadata',
-        expectedStatus: 'missing_metadata',
+        expectedStatus: 'auth_metadata_missing',
         event: { agent: { id: 'agent1' } },
       },
       {
@@ -134,7 +134,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         name: 'API key with agent id metadata and no agent id in event',
-        expectedStatus: 'missing_metadata',
+        expectedStatus: 'missing',
         apiKey: {
           metadata: {
             agent_id: 'agent1',
@@ -143,7 +143,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         name: 'API key with agent id metadata and tampered agent id in event',
-        expectedStatus: 'agent_id_mismatch',
+        expectedStatus: 'mismatch',
         apiKey: {
           metadata: {
             agent_id: 'agent2',

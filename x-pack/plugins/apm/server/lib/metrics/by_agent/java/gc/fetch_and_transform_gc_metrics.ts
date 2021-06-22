@@ -21,6 +21,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -30,6 +31,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName,
   chartBase,
   fieldName,
+  operationName,
 }: {
   environment?: string;
   kuery?: string;
@@ -38,6 +40,7 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName?: string;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  operationName: string;
 }) {
   const { start, end, apmEventClient, config } = setup;
 
@@ -63,7 +66,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [AGENT_NAME]: 'java' } },
+            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
       },
@@ -108,7 +111,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 

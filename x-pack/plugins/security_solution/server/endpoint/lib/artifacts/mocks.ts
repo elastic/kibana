@@ -17,49 +17,49 @@ import {
 import { ArtifactConstants } from './common';
 import { Manifest } from './manifest';
 
-export const getMockArtifacts = async (opts?: { compress: boolean }) => {
+export const getMockArtifacts = async () => {
   return Promise.all([
     // Exceptions items
     ...ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
-        return getInternalArtifactMock(os, 'v1', opts);
+        return getInternalArtifactMock(os, 'v1');
       }
     ),
     // Trusted Apps items
     ...ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS.map<
       Promise<InternalArtifactCompleteSchema>
     >(async (os) => {
-      return getInternalArtifactMock(os, 'v1', opts, ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
+      return getInternalArtifactMock(os, 'v1', ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
     }),
   ]);
 };
 
-export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => {
+export const getMockArtifactsWithDiff = async () => {
   return Promise.all(
     ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         if (os === 'macos') {
           return getInternalArtifactMockWithDiffs(os, 'v1');
         }
-        return getInternalArtifactMock(os, 'v1', opts);
+        return getInternalArtifactMock(os, 'v1');
       }
     )
   );
 };
 
-export const getEmptyMockArtifacts = async (opts?: { compress: boolean }) => {
+export const getEmptyMockArtifacts = async () => {
   return Promise.all(
     ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
-        return getEmptyInternalArtifactMock(os, 'v1', opts);
+        return getEmptyInternalArtifactMock(os, 'v1');
       }
     )
   );
 };
 
-export const getMockManifest = async (opts?: { compress: boolean }) => {
+export const getMockManifest = async () => {
   const manifest = new Manifest();
-  const artifacts = await getMockArtifacts(opts);
+  const artifacts = await getMockArtifacts();
   artifacts.forEach((artifact) => manifest.addEntry(artifact));
   return manifest;
 };

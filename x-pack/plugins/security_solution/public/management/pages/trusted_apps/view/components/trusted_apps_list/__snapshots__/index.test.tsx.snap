@@ -862,7 +862,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
                         >
-                          someone
+                          <span
+                            class="euiToolTipAnchor eui-textTruncate"
+                          >
+                            <span>
+                              someone
+                            </span>
+                          </span>
                         </dd>
                         <dt
                           class="euiDescriptionList__title c1"

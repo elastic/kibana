@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -21,12 +22,16 @@ import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
  */
 export function ApmMainTemplate({
   pageTitle,
+  pageHeader,
   children,
+  ...pageTemplateProps
 }: {
-  pageTitle: React.ReactNode;
+  pageTitle?: React.ReactNode;
+  pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-}) {
+} & EuiPageTemplateProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
+
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
@@ -35,7 +40,9 @@ export function ApmMainTemplate({
       pageHeader={{
         pageTitle,
         rightSideItems: [<EnvironmentFilter />],
+        ...pageHeader,
       }}
+      {...pageTemplateProps}
     >
       {children}
     </ObservabilityPageTemplate>

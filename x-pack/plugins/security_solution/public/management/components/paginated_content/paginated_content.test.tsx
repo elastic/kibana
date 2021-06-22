@@ -140,6 +140,22 @@ describe('when using PaginatedContent', () => {
     });
   });
 
+  it('should call onChange when page is empty', () => {
+    render({
+      pagination: {
+        pageIndex: 1,
+        pageSizeOptions: [5, 10, 20],
+        pageSize: 10,
+        totalItemCount: 10,
+      },
+    });
+    expect(onChangeHandler).toHaveBeenCalledWith({
+      pageIndex: 0,
+      pageSize: 10,
+    });
+    expect(onChangeHandler).toHaveBeenCalledTimes(1);
+  });
+
   it('should ignore items, error, noItemsMessage when `children` is used', () => {
     render({ children: <div data-test-subj="custom-content">{'children being used here'}</div> });
     expect(renderResult.getByTestId('custom-content')).not.toBeNull();

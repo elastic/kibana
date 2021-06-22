@@ -11,7 +11,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact } from 'lodash';
-import { JsonArray } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonArray } from '@kbn/common-utils';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,

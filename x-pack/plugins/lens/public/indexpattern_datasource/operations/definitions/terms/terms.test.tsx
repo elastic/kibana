@@ -35,6 +35,10 @@ const defaultProps = {
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('terms', () => {
@@ -992,8 +996,8 @@ describe('terms', () => {
         indexPatternId: '',
       };
     });
-    it('returns empty array', () => {
-      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([]);
+    it('returns undefined for no errors found', () => {
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
     });
     it('returns error message if the sourceField does not exist in index pattern', () => {
       layer = {

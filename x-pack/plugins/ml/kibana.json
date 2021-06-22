@@ -10,13 +10,12 @@
     "data",
     "cloud",
     "features",
-    "fileDataVisualizer",
+    "dataVisualizer",
     "licensing",
     "share",
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement",
     "discover",
     "triggersActionsUi"
   ],
@@ -40,7 +39,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

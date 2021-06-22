@@ -31,6 +31,10 @@
       overflow: hidden;
     }
   }
+
+  &.lnsWorkspacePanelWrapper--fullscreen {
+    margin-bottom: 0;
+  }
 }
 
 .lnsWorkspacePanel__dragDrop {
@@ -61,6 +65,10 @@
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
+  }
+
+  &.lnsWorkspacePanel__dragDrop--fullscreen {
+    border: none;
   }
 }
 

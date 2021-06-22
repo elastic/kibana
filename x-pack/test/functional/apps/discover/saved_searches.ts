@@ -19,13 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Discover Saved Searches', () => {
     before('initialize tests', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 

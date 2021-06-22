@@ -30,8 +30,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('reporting/ecommerce');
-      await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.loadIfNeeded(
+        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
+      );
       await browser.setWindowSize(1600, 850);
 
       await security.role.create('test_reporting_user', {
@@ -58,8 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await security.testUser.setRoles(['test_reporting_user']);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

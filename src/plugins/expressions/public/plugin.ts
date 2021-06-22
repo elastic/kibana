@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
+import { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import {
+  ExpressionsService,
+  setRenderersRegistry,
+  setNotifications,
+  setExpressionsService,
+} from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, IExpressionLoader, loader } from './loader';
 import { render, ExpressionRenderHandler } from './render';
@@ -51,7 +57,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     setRenderersRegistry(renderers);
     setExpressionsService(expressions);
 
-    const setup = expressions.setup();
+    const setup = expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }

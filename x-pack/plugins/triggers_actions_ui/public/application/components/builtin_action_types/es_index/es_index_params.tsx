@@ -57,6 +57,9 @@ export const IndexParamsFields = ({
 
   useEffect(() => {
     setDocumentToIndex(getDocumentToIndex(documents));
+    if (documents === null) {
+      setDocumentToIndex('{}');
+    }
   }, [documents]);
 
   useEffect(() => {

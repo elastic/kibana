@@ -320,7 +320,11 @@ const mockV2MigrationOptions = () => {
     )
   );
   options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      acknowledged: true,
+      shards_acknowledged: true,
+      indices: [],
+    })
   );
   options.client.reindex.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -333,7 +337,7 @@ const mockV2MigrationOptions = () => {
       error: undefined,
       failures: [],
       task: { description: 'task description' } as any,
-    } as estypes.GetTaskResponse)
+    } as estypes.TaskGetResponse)
   );
 
   options.client.search = jest

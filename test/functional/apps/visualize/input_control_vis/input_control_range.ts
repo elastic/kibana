@@ -22,7 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await esArchiver.load('kibana_sample_data_flights_index_pattern');
+      await esArchiver.load(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
     });
@@ -50,7 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('kibana_sample_data_flights_index_pattern');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await security.testUser.restoreDefaults();
     });
   });

@@ -32,7 +32,7 @@ export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
         if (elasticsearchRole) {
           return response.ok({
             body: transformElasticsearchRoleToRole(
-              // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
+              // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
               elasticsearchRole,
               request.params.name,
               authz.applicationName

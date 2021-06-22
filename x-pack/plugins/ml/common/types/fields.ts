@@ -28,7 +28,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
-  runtimeField?: estypes.RuntimeField;
+  runtimeField?: estypes.MappingRuntimeField;
 }
 
 export interface Aggregation {
@@ -112,4 +112,4 @@ export interface AggCardinality {
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
-export type RuntimeMappings = estypes.RuntimeFields;
+export type RuntimeMappings = estypes.MappingRuntimeFields;

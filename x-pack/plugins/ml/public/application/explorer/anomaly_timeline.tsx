@@ -8,20 +8,21 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
-  EuiPanel,
-  EuiPopover,
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiPopover,
   EuiSelect,
-  EuiTitle,
   EuiSpacer,
-  EuiContextMenuItem,
-  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
@@ -92,6 +93,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       overallSwimlaneData,
       viewBySwimlaneData,
     } = explorerState;
+
+    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
+
+    useDebounce(
+      () => {
+        if (severityUpdate === swimLaneSeverity) return;
+
+        explorerService.setSwimLaneSeverity(severityUpdate!);
+      },
+      500,
+      [severityUpdate, swimLaneSeverity]
+    );
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
@@ -194,9 +207,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
             <EuiFlexItem grow={true}>
               <SeverityControl
-                value={swimLaneSeverity ?? 0}
+                value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {
-                  explorerService.setSwimLaneSeverity(update);
+                  setSeverityUpdate(update);
                 }, [])}
               />
             </EuiFlexItem>

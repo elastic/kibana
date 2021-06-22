@@ -18,7 +18,7 @@ export interface ImpactBarProps extends Record<string, unknown> {
 
 export function ImpactBar({
   value,
-  size = 'l',
+  size = 'm',
   max = 100,
   color = 'primary',
   ...rest

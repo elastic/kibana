@@ -28,7 +28,7 @@ export interface ReadWithPit {
 export interface ReadWithPitParams {
   client: ElasticsearchClient;
   pitId: string;
-  query: estypes.QueryContainer;
+  query: estypes.QueryDslQueryContainer;
   batchSize: number;
   searchAfter?: number[];
   seqNoPrimaryTerm?: boolean;

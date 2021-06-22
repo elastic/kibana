@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { of } from 'rxjs';
+import { from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -86,19 +87,56 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    // register observability nav
+    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+      defaultMessage: 'Services',
+    });
+    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+      defaultMessage: 'Traces',
+    });
+    const serviceMapTitle = i18n.translate(
+      'xpack.apm.navigation.serviceMapTitle',
+      { defaultMessage: 'Service Map' }
+    );
+
+    // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
-      of([
-        {
-          label: 'APM',
-          sortKey: 200,
-          entries: [
-            { label: 'Services', app: 'apm', path: '/services' },
-            { label: 'Traces', app: 'apm', path: '/traces' },
-            { label: 'Service Map', app: 'apm', path: '/service-map' },
-          ],
-        },
-      ])
+      from(core.getStartServices()).pipe(
+        map(([coreStart]) => {
+          if (coreStart.application.capabilities.apm.show) {
+            return [
+              // APM navigation
+              {
+                label: 'APM',
+                sortKey: 400,
+                entries: [
+                  { label: servicesTitle, app: 'apm', path: '/services' },
+                  { label: tracesTitle, app: 'apm', path: '/traces' },
+                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
+                ],
+              },
+
+              // UX navigation
+              {
+                label: 'User Experience',
+                sortKey: 600,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.apm.ux.overview.heading', {
+                      defaultMessage: 'Overview',
+                    }),
+                    app: 'ux',
+                    path: '/',
+                    matchFullPath: true,
+                    ignoreTrailingSlash: true,
+                  },
+                ],
+              },
+            ];
+          }
+
+          return [];
+        })
+      )
     );
 
     const getApmDataHelper = async () => {
@@ -150,26 +188,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    plugins.observability.navigation.registerSections(
-      of([
-        {
-          label: 'User Experience',
-          sortKey: 201,
-          entries: [
-            {
-              label: i18n.translate('xpack.apm.ux.overview.heading', {
-                defaultMessage: 'Overview',
-              }),
-              app: 'ux',
-              path: '/',
-              matchFullPath: true,
-              ignoreTrailingSlash: true,
-            },
-          ],
-        },
-      ])
-    );
-
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -178,29 +196,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
-      // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
       deepLinks: [
-        {
-          id: 'services',
-          title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-            defaultMessage: 'Services',
-          }),
-          path: '/services',
-        },
-        {
-          id: 'traces',
-          title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-            defaultMessage: 'Traces',
-          }),
-          path: '/traces',
-        },
-        {
-          id: 'service-map',
-          title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-            defaultMessage: 'Service Map',
-          }),
-          path: '/service-map',
-        },
+        { id: 'services', title: servicesTitle, path: '/services' },
+        { id: 'traces', title: tracesTitle, path: '/traces' },
+        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

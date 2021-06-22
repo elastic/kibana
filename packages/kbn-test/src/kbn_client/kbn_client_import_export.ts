@@ -8,38 +8,26 @@
 
 import { inspect } from 'util';
 import Fs from 'fs/promises';
+import { existsSync } from 'fs';
 import Path from 'path';
 
 import FormData from 'form-data';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { parseArchive } from './import_export/parse_archive';
 
 interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
 }
-
-interface SavedObject {
-  id: string;
-  type: string;
-  [key: string]: unknown;
-}
-
-async function parseArchive(path: string): Promise<SavedObject[]> {
-  return (await Fs.readFile(path, 'utf-8'))
-    .split('\n\n')
-    .filter((line) => !!line)
-    .map((line) => JSON.parse(line));
-}
-
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,
     public readonly requester: KbnClientRequester,
     public readonly savedObjects: KbnClientSavedObjects,
-    public readonly dir?: string
+    public readonly baseDir: string = REPO_ROOT
   ) {}
 
   private resolvePath(path: string) {
@@ -47,18 +35,24 @@ export class KbnClientImportExport {
       path = `${path}.json`;
     }
 
-    if (!this.dir && !Path.isAbsolute(path)) {
+    return Path.resolve(this.baseDir, path);
+  }
+
+  private resolveAndValidatePath(path: string) {
+    const absolutePath = this.resolvePath(path);
+
+    if (!existsSync(absolutePath)) {
       throw new Error(
-        'unable to resolve relative path to import/export without a configured dir, either path absolute path or specify --dir'
+        `unable to resolve path [${path}] to import/export, resolved relative to [${this.baseDir}]`
       );
     }
 
-    return this.dir ? Path.resolve(this.dir, path) : path;
+    return absolutePath;
   }
 
-  async load(name: string, options?: { space?: string }) {
-    const src = this.resolvePath(name);
-    this.log.debug('resolved import for', name, 'to', src);
+  async load(path: string, options?: { space?: string }) {
+    const src = this.resolveAndValidatePath(path);
+    this.log.debug('resolved import for', path, 'to', src);
 
     const objects = await parseArchive(src);
     this.log.info('importing', objects.length, 'saved objects', { space: options?.space });
@@ -91,8 +85,8 @@ export class KbnClientImportExport {
     }
   }
 
-  async unload(name: string, options?: { space?: string }) {
-    const src = this.resolvePath(name);
+  async unload(path: string, options?: { space?: string }) {
+    const src = this.resolveAndValidatePath(path);
     this.log.debug('unloading docs from archive at', src);
 
     const objects = await parseArchive(src);
@@ -110,8 +104,8 @@ export class KbnClientImportExport {
     this.log.success(deleted, 'saved objects deleted');
   }
 
-  async save(name: string, options: { types: string[]; space?: string }) {
-    const dest = this.resolvePath(name);
+  async save(path: string, options: { types: string[]; space?: string }) {
+    const dest = this.resolvePath(path);
     this.log.debug('saving export to', dest);
 
     const resp = await this.req(options.space, {
@@ -141,6 +135,7 @@ export class KbnClientImportExport {
       })
       .join('\n\n');
 
+    await Fs.mkdir(Path.dirname(dest), { recursive: true });
     await Fs.writeFile(dest, fileContents, 'utf-8');
 
     this.log.success('Exported', objects.length, 'saved objects to', dest);

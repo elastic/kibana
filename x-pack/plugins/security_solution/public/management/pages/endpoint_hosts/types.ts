@@ -6,6 +6,7 @@
  */
 
 import {
+  ActivityLog,
   HostInfo,
   Immutable,
   HostMetadata,
@@ -14,8 +15,8 @@ import {
   PolicyData,
   MetadataQueryStrategyVersions,
   HostStatus,
-  EndpointAction,
   HostIsolationResponse,
+  EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
@@ -36,7 +37,11 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: AsyncResourceState<EndpointAction[]>;
+    activityLog: {
+      page: number;
+      pageSize: number;
+      logData: AsyncResourceState<ActivityLog>;
+    };
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
@@ -90,9 +95,17 @@ export interface EndpointState {
   policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
-  /* Host isolation state */
+  /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<HostIsolationResponse>;
+  /**
+   * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
+   * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async
+   * states other than Loaded
+   */
+  endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
 }
+
+export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;
 
 /**
  * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.

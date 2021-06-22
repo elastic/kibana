@@ -24,8 +24,8 @@ import {
 } from './constants';
 import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 
-function aliasArrayToRecord(aliases: string[]): Record<string, estypes.Alias> {
-  const result: Record<string, estypes.Alias> = {};
+function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
+  const result: Record<string, estypes.IndicesAlias> = {};
   for (const alias of aliases) {
     result[alias] = {};
   }

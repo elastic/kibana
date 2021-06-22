@@ -141,4 +141,17 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  getDatafeedResultChartData(jobId: string, start: number, end: number) {
+    const body = JSON.stringify({
+      jobId,
+      start,
+      end,
+    });
+    return httpService.http<any>({
+      path: `${basePath()}/results/datafeed_results_chart`,
+      method: 'POST',
+      body,
+    });
+  },
 });

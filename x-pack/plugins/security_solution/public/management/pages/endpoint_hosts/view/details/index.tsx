@@ -32,8 +32,6 @@ import {
   detailsError,
   detailsLoading,
   getActivityLogData,
-  getActivityLogError,
-  getActivityLogRequestLoading,
   showView,
   policyResponseConfigurations,
   policyResponseActions,
@@ -87,8 +85,6 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
 
   const activityLog = useEndpointSelector(getActivityLogData);
-  const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
-  const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
   const hostDetailsError = useEndpointSelector(detailsError);
@@ -121,12 +117,8 @@ export const EndpointDetailsFlyout = memo(() => {
     },
     {
       id: EndpointDetailsTabsTypes.activityLog,
-      name: i18.ACTIVITY_LOG,
-      content: activityLoading ? (
-        ContentLoadingMarkup
-      ) : (
-        <EndpointActivityLog endpointActions={activityLog} />
-      ),
+      name: i18.ACTIVITY_LOG.tabTitle,
+      content: <EndpointActivityLog activityLog={activityLog} />,
     },
   ];
 
@@ -154,17 +146,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-    if (activityError !== undefined) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorTitle', {
-          defaultMessage: 'Could not find activity log for host',
-        }),
-        text: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorBody', {
-          defaultMessage: 'Please exit the flyout and select another host with actions.',
-        }),
-      });
-    }
-  }, [hostDetailsError, activityError, toasts]);
+  }, [hostDetailsError, toasts]);
 
   return (
     <EuiFlyout
@@ -172,14 +154,14 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
-      paddingSize="m"
+      paddingSize="l"
     >
-      <EuiFlyoutHeader hasBorder>
-        {hostDetailsLoading || activityLoading ? (
+      <EuiFlyoutHeader>
+        {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">
-            <EuiTitle size="s">
+            <EuiTitle>
               <h2
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"

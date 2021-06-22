@@ -49,12 +49,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/89958
   describe.skip('visualize integration', () => {
     before(async () => {
-      await esArchiver.load('visualize');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize'
+      );
+      await esArchiver.loadIfNeeded(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
     after(async () => {
-      await esArchiver.unload('visualize');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize'
+      );
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('listing', () => {

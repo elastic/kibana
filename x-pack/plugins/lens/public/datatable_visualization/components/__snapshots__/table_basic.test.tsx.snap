@@ -126,7 +126,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -163,7 +167,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -200,7 +208,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -360,7 +372,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -397,7 +413,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -434,7 +454,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -463,7 +487,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
 </VisualizationContainer>
 `;
 
-exports[`DatatableComponent it should not render actions on header when it is in read only mode 1`] = `
+exports[`DatatableComponent it should render hide and reset actions on header even when it is in read only mode 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
   reportTitle="My fanci metric chart"
@@ -558,7 +582,26 @@ exports[`DatatableComponent it should not render actions on header when it is in
         Array [
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
@@ -566,13 +609,36 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
@@ -580,13 +646,36 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
@@ -594,7 +683,11 @@ exports[`DatatableComponent it should not render actions on header when it is in
               "showSortDesc": false,
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },

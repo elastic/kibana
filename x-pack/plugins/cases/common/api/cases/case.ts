@@ -31,13 +31,38 @@ const SettingsRt = rt.type({
 });
 
 const CaseBasicRt = rt.type({
+  /**
+   * The description of the case
+   */
   description: rt.string,
+  /**
+   * The current status of the case (open, closed, in-progress)
+   */
   status: CaseStatusRt,
+  /**
+   * The identifying strings for filter a case
+   */
   tags: rt.array(rt.string),
+  /**
+   * The title of a case
+   */
   title: rt.string,
+  /**
+   * The type of a case (individual or collection)
+   */
   [caseTypeField]: CaseTypeRt,
+  /**
+   * The external system that the case can be synced with
+   */
   connector: CaseConnectorRt,
+  /**
+   * The alert sync settings
+   */
   settings: SettingsRt,
+  /**
+   * The plugin owner of the case
+   */
+  owner: rt.string,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -73,11 +98,31 @@ export const CaseAttributesRt = rt.intersection([
 ]);
 
 const CasePostRequestNoTypeRt = rt.type({
+  /**
+   * Description of the case
+   */
   description: rt.string,
+  /**
+   * Identifiers for the case.
+   */
   tags: rt.array(rt.string),
+  /**
+   * Title of the case
+   */
   title: rt.string,
+  /**
+   * The external configuration for the case
+   */
   connector: CaseConnectorRt,
+  /**
+   * Sync settings for alerts
+   */
   settings: SettingsRt,
+  /**
+   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+   * creating this case must also be granted access to that plugin's feature.
+   */
+  owner: rt.string,
 });
 
 /**
@@ -95,23 +140,78 @@ export const CasesClientPostRequestRt = rt.type({
  * has all the necessary fields. CasesClientPostRequestRt is used for validation.
  */
 export const CasePostRequestRt = rt.intersection([
-  rt.partial({ type: CaseTypeRt }),
+  /**
+   * The case type: an individual case (one without children) or a collection case (one with children)
+   */
+  rt.partial({ [caseTypeField]: CaseTypeRt }),
   CasePostRequestNoTypeRt,
 ]);
 
 export const CasesFindRequestRt = rt.partial({
+  /**
+   * Type of a case (individual, or collection)
+   */
   type: CaseTypeRt,
+  /**
+   * Tags to filter by
+   */
   tags: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * The status of the case (open, closed, in-progress)
+   */
   status: CaseStatusRt,
+  /**
+   * The reporters to filter by
+   */
   reporters: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * Operator to use for the `search` field
+   */
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+  /**
+   * The fields in the entity to return in the response
+   */
   fields: rt.array(rt.string),
+  /**
+   * The page of objects to return
+   */
   page: NumberFromString,
+  /**
+   * The number of objects to include in each page
+   */
   perPage: NumberFromString,
+  /**
+   * An Elasticsearch simple_query_string
+   */
   search: rt.string,
-  searchFields: rt.array(rt.string),
+  /**
+   * The fields to perform the simple_query_string parsed query against
+   */
+  searchFields: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * The field to use for sorting the found objects.
+   *
+   * This only supports, `create_at`, `closed_at`, and `status`
+   */
   sortField: rt.string,
+  /**
+   * The order to sort by
+   */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  /**
+   * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+   * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+   * that the user has access to.
+   */
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
+export const CasesByAlertIDRequestRt = rt.partial({
+  /**
+   * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
+   * that the user has access to will be returned.
+   */
+  owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
 export const CaseResponseRt = rt.intersection([
@@ -141,6 +241,9 @@ export const CasesFindResponseRt = rt.intersection([
 
 export const CasePatchRequestRt = rt.intersection([
   rt.partial(CaseBasicRt.props),
+  /**
+   * The saved object ID and version
+   */
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
@@ -172,6 +275,16 @@ export const ExternalServiceResponseRt = rt.intersection([
   }),
 ]);
 
+export const AllTagsFindRequestRt = rt.partial({
+  /**
+   * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
+   * that the user has access to will be returned.
+   */
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
+export const AllReportersFindRequestRt = AllTagsFindRequestRt;
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 /**
  * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
@@ -183,6 +296,7 @@ export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
@@ -194,3 +308,6 @@ export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: 
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
   connector?: ESCaseConnector;
 };
+
+export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
+export type AllReportersFindRequest = AllTagsFindRequest;

@@ -25,13 +25,14 @@ import {
   FieldBasedIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
+  CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/common';
-import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN } from './constants';
+import { FieldLabels, FILTER_RECORDS, USE_BREAK_DOWN_COLUMN, TERMS_COLUMN } from './constants';
 import { ColumnFilter, DataSeries, UrlFilter, URLReportDefinition } from '../types';
 
 function getLayerReferenceName(layerId: string) {
@@ -55,6 +56,8 @@ export const parseCustomFieldName = (
   let fieldName = sourceField;
   let columnType;
   let columnFilters;
+  let timeScale;
+  let columnLabel;
 
   const rdf = reportViewConfig.reportDefinitions ?? [];
 
@@ -69,15 +72,19 @@ export const parseCustomFieldName = (
         );
         columnType = currField?.columnType;
         columnFilters = currField?.columnFilters;
+        timeScale = currField?.timeScale;
+        columnLabel = currField?.label;
       }
     } else if (customField.options?.[0].field || customField.options?.[0].id) {
       fieldName = customField.options?.[0].field || customField.options?.[0].id;
       columnType = customField.options?.[0].columnType;
       columnFilters = customField.options?.[0].columnFilters;
+      timeScale = customField.options?.[0].timeScale;
+      columnLabel = customField.options?.[0].label;
     }
   }
 
-  return { fieldName, columnType, columnFilters };
+  return { fieldName, columnType, columnFilters, timeScale, columnLabel };
 };
 
 export class LensAttributes {
@@ -164,10 +171,10 @@ export class LensAttributes {
     this.visualization.layers[0].splitAccessor = undefined;
   }
 
-  getNumberRangeColumn(sourceField: string): RangeIndexPatternColumn {
+  getNumberRangeColumn(sourceField: string, label?: string): RangeIndexPatternColumn {
     return {
       sourceField,
-      label: this.reportViewConfig.labels[sourceField],
+      label: this.reportViewConfig.labels[sourceField] ?? label,
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
@@ -180,6 +187,10 @@ export class LensAttributes {
     };
   }
 
+  getCardinalityColumn(sourceField: string, label?: string) {
+    return this.getNumberOperationColumn(sourceField, 'unique_count', label);
+  }
+
   getNumberColumn(
     sourceField: string,
     columnType?: string,
@@ -187,21 +198,30 @@ export class LensAttributes {
     label?: string
   ) {
     if (columnType === 'operation' || operationType) {
-      if (operationType === 'median' || operationType === 'average' || operationType === 'sum') {
+      if (
+        operationType === 'median' ||
+        operationType === 'average' ||
+        operationType === 'sum' ||
+        operationType === 'unique_count'
+      ) {
         return this.getNumberOperationColumn(sourceField, operationType, label);
       }
       if (operationType?.includes('th')) {
         return this.getPercentileNumberColumn(sourceField, operationType);
       }
     }
-    return this.getNumberRangeColumn(sourceField);
+    return this.getNumberRangeColumn(sourceField, label);
   }
 
   getNumberOperationColumn(
     sourceField: string,
-    operationType: 'average' | 'median' | 'sum',
+    operationType: 'average' | 'median' | 'sum' | 'unique_count',
     label?: string
-  ): AvgIndexPatternColumn | MedianIndexPatternColumn | SumIndexPatternColumn {
+  ):
+    | AvgIndexPatternColumn
+    | MedianIndexPatternColumn
+    | SumIndexPatternColumn
+    | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
       label:
@@ -244,6 +264,25 @@ export class LensAttributes {
     };
   }
 
+  getTermsColumn(sourceField: string, label?: string): TermsIndexPatternColumn {
+    return {
+      operationType: 'terms',
+      sourceField,
+      label: label || 'Top values of ' + sourceField,
+      dataType: 'string',
+      isBucketed: true,
+      scale: 'ordinal',
+      params: {
+        size: 10,
+        orderBy: {
+          type: 'alphabetical',
+          fallback: false,
+        },
+        orderDirection: 'desc',
+      },
+    };
+  }
+
   getXAxis() {
     const { xAxisColumn } = this.reportViewConfig;
 
@@ -260,13 +299,25 @@ export class LensAttributes {
     label?: string,
     colIndex?: number
   ) {
-    const { fieldMeta, columnType, fieldName, columnFilters } = this.getFieldMeta(sourceField);
+    const {
+      fieldMeta,
+      columnType,
+      fieldName,
+      columnFilters,
+      timeScale,
+      columnLabel,
+    } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
+
+    if (columnType === TERMS_COLUMN) {
+      return this.getTermsColumn(fieldName, columnLabel || label);
+    }
 
     if (fieldName === 'Records' || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
-        label,
-        colIndex !== undefined ? columnFilters?.[colIndex] : undefined
+        columnLabel || label,
+        colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
+        timeScale
       );
     }
 
@@ -274,7 +325,10 @@ export class LensAttributes {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      return this.getNumberColumn(fieldName, columnType, operationType, label);
+      return this.getNumberColumn(fieldName, columnType, operationType, columnLabel || label);
+    }
+    if (operationType === 'unique_count') {
+      return this.getCardinalityColumn(fieldName, columnLabel || label);
     }
 
     // FIXME review my approach again
@@ -286,11 +340,17 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string) {
-    const { fieldName, columnType, columnFilters } = this.getCustomFieldName(sourceField);
+    const {
+      fieldName,
+      columnType,
+      columnFilters,
+      timeScale,
+      columnLabel,
+    } = this.getCustomFieldName(sourceField);
 
     const fieldMeta = this.indexPattern.getFieldByName(fieldName);
 
-    return { fieldMeta, fieldName, columnType, columnFilters };
+    return { fieldMeta, fieldName, columnType, columnFilters, timeScale, columnLabel };
   }
 
   getMainYAxis() {
@@ -323,7 +383,11 @@ export class LensAttributes {
     return lensColumns;
   }
 
-  getRecordsColumn(label?: string, columnFilter?: ColumnFilter): CountIndexPatternColumn {
+  getRecordsColumn(
+    label?: string,
+    columnFilter?: ColumnFilter,
+    timeScale?: string
+  ): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
@@ -332,6 +396,7 @@ export class LensAttributes {
       scale: 'ratio',
       sourceField: 'Records',
       filter: columnFilter,
+      timeScale,
     } as CountIndexPatternColumn;
   }
 
