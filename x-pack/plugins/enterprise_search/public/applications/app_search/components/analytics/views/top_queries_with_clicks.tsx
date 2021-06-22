@@ -18,7 +18,11 @@ export const TopQueriesWithClicks: React.FC = () => {
   const { topQueriesWithClicks } = useValues(AnalyticsLogic);
 
   return (
-    <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_WITH_CLICKS}>
+    <AnalyticsLayout
+      isAnalyticsView
+      title={TOP_QUERIES_WITH_CLICKS}
+      breadcrumbs={[TOP_QUERIES_WITH_CLICKS]}
+    >
       <AnalyticsSearch />
       <AnalyticsTable items={topQueriesWithClicks} hasClicks />
     </AnalyticsLayout>
