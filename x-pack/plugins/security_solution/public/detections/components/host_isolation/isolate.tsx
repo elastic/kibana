@@ -18,13 +18,13 @@ import {
 
 export const IsolateHost = React.memo(
   ({
-    agentId,
+    endpointId,
     hostName,
     cases,
     caseIds,
     cancelCallback,
   }: {
-    agentId: string;
+    endpointId: string;
     hostName: string;
     cases: ReactNode;
     caseIds: string[];
@@ -33,7 +33,7 @@ export const IsolateHost = React.memo(
     const [comment, setComment] = useState('');
     const [isIsolated, setIsIsolated] = useState(false);
 
-    const { loading, isolateHost } = useHostIsolation({ agentId, comment, caseIds });
+    const { loading, isolateHost } = useHostIsolation({ endpointId, comment, caseIds });
 
     const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await isolateHost();
