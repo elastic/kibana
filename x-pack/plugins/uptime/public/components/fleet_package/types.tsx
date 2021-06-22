@@ -9,6 +9,7 @@ export enum DataStream {
   HTTP = 'http',
   TCP = 'tcp',
   ICMP = 'icmp',
+  BROWSER = 'browser',
 }
 
 export enum HTTPMethod {
@@ -87,6 +88,11 @@ export enum ConfigKeys {
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
+  SOURCE_INLINE = 'source.inline.script',
+  SOURCE_ZIP_URL = 'source.zip_url.url',
+  SOURCE_ZIP_USERNAME = 'source.zip_url.username',
+  SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
+  SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -183,13 +189,23 @@ export interface ITCPAdvancedFields {
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
 }
 
+export type IBrowserSimpleFields = {
+  [ConfigKeys.SOURCE_INLINE]: string;
+  [ConfigKeys.SOURCE_ZIP_URL]: string;
+  [ConfigKeys.SOURCE_ZIP_FOLDER]: string;
+  [ConfigKeys.SOURCE_ZIP_USERNAME]: string;
+  [ConfigKeys.SOURCE_ZIP_PASSWORD]: string;
+} & ICommonFields;
+
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
 export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
 export type ICMPFields = IICMPSimpleFields;
+export type BrowserFields = IBrowserSimpleFields;
 
 export type ICustomFields = HTTPFields &
   TCPFields &
-  ICMPFields & {
+  ICMPFields &
+  BrowserFields & {
     [ConfigKeys.NAME]: string;
   };
 
@@ -197,9 +213,12 @@ export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;
   [DataStream.TCP]: TCPFields;
   [DataStream.ICMP]: ICMPFields;
+  [DataStream.BROWSER]: BrowserFields;
 }
 
-export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => boolean>>;
+export type Validator = (config: Partial<ICustomFields>) => boolean;
+
+export type Validation = Partial<Record<ConfigKeys, Validator>>;
 
 export const contentTypesToMode = {
   [ContentType.FORM]: Mode.FORM,
