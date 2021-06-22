@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
 import { UserConfiguredActionConnector } from '../../../../types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
+import {
+  ExecutorSubActionPushParams,
+  MappingConfigType,
+} from '../../../../../../actions/server/builtin_action_types/swimlane/types';
 
 export type SwimlaneActionConnector = UserConfiguredActionConnector<
   SwimlaneConfig,
@@ -21,16 +25,8 @@ export interface SwimlaneConfig {
   mappings: SwimlaneMappingConfig;
 }
 
-export interface SwimlaneMappingConfig {
-  alertIdConfig: SwimlaneFieldMappingConfig;
-  severityConfig: SwimlaneFieldMappingConfig;
-  caseNameConfig: SwimlaneFieldMappingConfig;
-  caseIdConfig: SwimlaneFieldMappingConfig;
-  ruleNameConfig: SwimlaneFieldMappingConfig;
-  commentsConfig: SwimlaneFieldMappingConfig;
-  descriptionConfig: SwimlaneFieldMappingConfig;
-  [key: string]: SwimlaneFieldMappingConfig;
-}
+export type MappingConfigurationKeys = keyof MappingConfigType;
+export type SwimlaneMappingConfig = Record<keyof MappingConfigType, SwimlaneFieldMappingConfig>;
 
 export interface SwimlaneFieldMappingConfig {
   id: string;

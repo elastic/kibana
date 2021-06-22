@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType, SwimlaneMappingConfig } from './types';
+import { SwimlaneConnectorType, SwimlaneMappingConfig, MappingConfigurationKeys } from './types';
 import * as i18n from './translations';
 
-const casesRequiredFields = [
+const casesRequiredFields: MappingConfigurationKeys[] = [
   'caseNameConfig',
   'descriptionConfig',
   'commentsConfig',
   'caseIdConfig',
 ];
 const casesFields = [...casesRequiredFields];
-const alertsRequiredFields = ['ruleNameConfig', 'alertIdConfig'];
+const alertsRequiredFields: MappingConfigurationKeys[] = ['ruleNameConfig', 'alertIdConfig'];
 const alertsFields = ['severityConfig', 'commentsConfig', ...alertsRequiredFields];
 
 const translationMapping: Record<string, string> = {
@@ -30,7 +30,7 @@ const translationMapping: Record<string, string> = {
 
 export const isValidFieldForConnector = (
   connector: SwimlaneConnectorType,
-  field: string
+  field: MappingConfigurationKeys
 ): boolean => {
   if (connector === SwimlaneConnectorType.All) {
     return true;

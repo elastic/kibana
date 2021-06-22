@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { ConfigMappingSchema } from './schema';
-import { CreateRecordParams, Incident, MappingConfigType, SwimlaneRecordPayload } from './types';
+import { CreateRecordParams, Incident, SwimlaneRecordPayload, MappingConfigType } from './types';
 
-type ConfigMapping = Omit<TypeOf<typeof ConfigMappingSchema>, 'commentsConfig'>;
+type ConfigMapping = Omit<MappingConfigType, 'commentsConfig'>;
 
 const mappingKeysToIncidentKeys: Record<keyof ConfigMapping, keyof Incident> = {
   ruleNameConfig: 'ruleName',
