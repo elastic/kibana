@@ -10,12 +10,9 @@ import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
-  DEFAULT_SUPERUSER_PASS,
   esTestConfig,
-  kbnTestConfig,
   kibanaServerTestUser,
-  kibanaTestUser,
-  setupUsers,
+  kibanaTestUser
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { resolve } from 'path';
@@ -206,7 +203,6 @@ export function createTestServers({
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
-      password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
     })
   );
 
@@ -222,19 +218,7 @@ export function createTestServers({
       await es.start();
 
       if (['gold', 'trial'].includes(license)) {
-        await setupUsers({
-          log,
-          esPort: esTestConfig.getUrlParts().port,
-          updates: [
-            ...usersToBeAdded,
-            // user elastic
-            esTestConfig.getUrlParts() as { username: string; password: string },
-            // user kibana
-            kbnTestConfig.getUrlParts() as { username: string; password: string },
-          ],
-        });
-
-        // Override provided configs, we know what the elastic user is now
+        // Override provided configs
         kbnSettings.elasticsearch = {
           hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
