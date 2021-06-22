@@ -6,7 +6,7 @@
  */
 
 import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { ManagementAppLocator } from 'src/plugins/management/common/locator';
+import { ManagementAppLocator } from 'src/plugins/management/common';
 import {
   LocatorPublic,
   LocatorDefinition,
@@ -27,11 +27,30 @@ export enum INGEST_PIPELINES_PAGES {
   CLONE = 'pipeline_clone',
 }
 
-interface IngestPipelinesParams extends SerializableState {
-  page: INGEST_PIPELINES_PAGES;
+interface IngestPipelinesBaseParams extends SerializableState {
   pipelineId: string;
-  absolute?: boolean;
 }
+export interface IngestPipelinesListParams extends Partial<IngestPipelinesBaseParams> {
+  page: INGEST_PIPELINES_PAGES.LIST;
+}
+
+export interface IngestPipelinesEditParams extends IngestPipelinesBaseParams {
+  page: INGEST_PIPELINES_PAGES.EDIT;
+}
+
+export interface IngestPipelinesCloneParams extends IngestPipelinesBaseParams {
+  page: INGEST_PIPELINES_PAGES.CLONE;
+}
+
+export interface IngestPipelinesCreateParams extends IngestPipelinesBaseParams {
+  page: INGEST_PIPELINES_PAGES.CREATE;
+}
+
+export type IngestPipelinesParams =
+  | IngestPipelinesListParams
+  | IngestPipelinesEditParams
+  | IngestPipelinesCloneParams
+  | IngestPipelinesCreateParams;
 
 export type IngestPipelinesLocator = LocatorPublic<void>;
 
@@ -52,43 +71,32 @@ export class IngestPipelinesLocatorDefinition implements LocatorDefinition<Inges
       appId: PLUGIN_ID,
     });
 
+    let path: string = '';
+
     switch (params.page) {
-      case INGEST_PIPELINES_PAGES.EDIT: {
-        return {
-          ...location,
-          path:
-            location.path +
-            getEditPath({
-              pipelineName: params.pipelineId,
-            }),
-        };
-      }
-      case INGEST_PIPELINES_PAGES.CREATE: {
-        return {
-          ...location,
-          path: location.path + getCreatePath(),
-        };
-      }
-      case INGEST_PIPELINES_PAGES.LIST: {
-        return {
-          ...location,
-          path:
-            location.path +
-            getListPath({
-              inspectedPipelineName: params.pipelineId,
-            }),
-        };
-      }
-      case INGEST_PIPELINES_PAGES.CLONE: {
-        return {
-          ...location,
-          path:
-            location.path +
-            getClonePath({
-              clonedPipelineName: params.pipelineId,
-            }),
-        };
-      }
+      case INGEST_PIPELINES_PAGES.EDIT:
+        path = getEditPath({
+          pipelineName: params.pipelineId,
+        });
+        break;
+      case INGEST_PIPELINES_PAGES.CREATE:
+        path = getCreatePath();
+        break;
+      case INGEST_PIPELINES_PAGES.LIST:
+        path = getListPath({
+          inspectedPipelineName: params.pipelineId,
+        });
+        break;
+      case INGEST_PIPELINES_PAGES.CLONE:
+        path = getClonePath({
+          clonedPipelineName: params.pipelineId,
+        });
+        break;
     }
+
+    return {
+      ...location,
+      path: path === '/' ? location.path : location.path + path,
+    };
   };
 }
