@@ -309,7 +309,7 @@ export const ToggleFlyoutTranslations = {
   navigateToAlertingButtonContent: i18n.translate('xpack.uptime.navigateToAlertingButton.content', {
     defaultMessage: 'Manage rules',
   }),
-  toggleAlertFlyoutButtonLabel: i18n.translate('xpack.uptime.alerts.createRulesPanel.title', { 
+  toggleAlertFlyoutButtonLabel: i18n.translate('xpack.uptime.alerts.createRulesPanel.title', {
     defaultMessage: 'Create rules',
   }),
 };
