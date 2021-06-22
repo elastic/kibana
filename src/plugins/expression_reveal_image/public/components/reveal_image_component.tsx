@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
@@ -18,14 +19,11 @@ interface RevealImageComponentProps extends RevealImageRendererConfig {
   parentNode: HTMLElement;
 }
 
-interface ImageStyles {
-  width?: string;
-  height?: string;
-  clipPath?: string;
-}
-
-interface AlignerStyles {
-  backgroundImage?: string;
+function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
+  const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
+  const values: Array<number | string> = [0, 0, 0, 0];
+  values[directions[originParam]] = `${100 - percentParam * 100}%`;
+  return `inset(${values.join(' ')})`;
 }
 
 function RevealImageComponent({
@@ -66,66 +64,59 @@ function RevealImageComponent({
     updateImageView();
   }, [parentNodeDimensions, updateImageView]);
 
-  function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
-    const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
-    const values: Array<number | string> = [0, 0, 0, 0];
-    values[directions[originParam]] = `${100 - percentParam * 100}%`;
-    return `inset(${values.join(' ')})`;
-  }
-
-  function getImageSizeStyle() {
-    const imgStyles: ImageStyles = {};
-
-    const imgDimensions = {
-      height: dimensions.height,
-      width: dimensions.width,
-      ratio: dimensions.height / dimensions.width,
-    };
-
-    const domNodeDimensions = {
-      width: parentNode.clientWidth,
-      height: parentNode.clientHeight,
-      ratio: parentNode.clientHeight / parentNode.clientWidth,
-    };
-
-    if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = `${domNodeDimensions.height}px`;
-      imgStyles.width = 'initial';
-    } else {
-      imgStyles.width = `${domNodeDimensions.width}px`;
-      imgStyles.height = 'initial';
-    }
-
-    return imgStyles;
-  }
-
   const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
 
-  const alignerStyles: AlignerStyles = {};
+  const imgStyles = useMemo(() => {
+    if (!imgRef.current || !loaded) {
+      return;
+    }
 
-  if (isValidUrl(emptyImage ?? '')) {
-    // only use empty image if one is provided
-    alignerStyles.backgroundImage = `url(${emptyImage})`;
-  }
+    const imageAspectRatio = dimensions.height / dimensions.width;
+    const clipPath = getClipPath(percent, origin);
+    const containerHeight = parentNodeDimensions.height;
+    const containerWidth = parentNodeDimensions.width;
 
-  let imgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
+    return css`
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
 
-  imgStyles.clipPath = getClipPath(percent, origin);
-  if (imgRef.current && loaded) {
-    imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
-  }
+      -webkit-clip-path: ${clipPath};
+      clip-path: ${clipPath};
+
+      width: ${imageAspectRatio > containerHeight / containerWidth
+        ? 'intial'
+        : `${containerWidth}px`};
+      height: ${imageAspectRatio > containerHeight / containerWidth
+        ? `${containerHeight}px`
+        : 'initial'};
+    `;
+  }, [loaded, origin, percent, dimensions, parentNodeDimensions]);
+
+  const alignerStyles = useMemo(
+    () =>
+      isValidUrl(emptyImage ?? '')
+        && css`
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-image: url(${emptyImage});
+          `
+        ,
+    [emptyImage]
+  );
 
   return (
-    <div className="revealImageAligner" style={alignerStyles}>
+    <div css={alignerStyles}>
       <img
-        ref={imgRef}
+        alt={`${percent * 100} percent of the image is revealed`}
+        css={imgStyles}
         onLoad={updateImageView}
-        className="revealImage__image"
-        src={imgSrc ?? ''}
-        alt=""
+        ref={imgRef}
         role="presentation"
-        style={imgStyles}
+        src={imgSrc ?? ''}
       />
     </div>
   );
