@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -21,10 +21,10 @@ import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, APP_PATH, SecurityPageName } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
+import { MANAGEMENT_APP_ID } from '../../../../../../../src/plugins/management/common/contants';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -93,7 +93,7 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
  */
 export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
-  const coreStart = createCoreStartMock();
+  const coreStart = createCoreStartMock(history);
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
@@ -166,21 +166,33 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   };
 };
 
-const createCoreStartMock = (): ReturnType<typeof coreMock.createStart> => {
+const createCoreStartMock = (
+  history: MemoryHistory<never>
+): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
-  coreStart.application.getUrlForApp.mockImplementation((appId) => {
+  coreStart.application.getUrlForApp.mockImplementation((appId, options) => {
     switch (appId) {
       case PLUGIN_ID:
         return '/app/fleet';
       case APP_ID:
-        return '/app/security';
+        return options?.deepLinkId
+          ? options?.deepLinkId === SecurityPageName.administration
+            ? '/endpoints'
+            : `/${options?.deepLinkId}`
+          : '/app/security';
+
       case MANAGEMENT_APP_ID:
         return '/app/security/administration';
       default:
         return `${appId} not mocked!`;
     }
+  });
+
+  coreStart.application.navigateToUrl.mockImplementation((url) => {
+    history.push(url.replace(APP_PATH, ''));
+    return Promise.resolve();
   });
 
   return coreStart;

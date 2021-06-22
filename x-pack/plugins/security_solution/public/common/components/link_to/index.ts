@@ -49,11 +49,14 @@ export const useFormatUrl = (page: SecurityPageName) => {
           : `?${pathArr[1]}`
       }`;
 
-      return getUrlForApp(`${APP_ID}`, {
-        deepLinkId: page,
-        path: formattedPath,
-        absolute,
-      });
+      // TODO: [1101] remove conditional and use always deepLinkId
+      return page === 'overview' ||
+        page === 'alerts' ||
+        page === 'rules' ||
+        page === 'exceptions' ||
+        page === 'administration'
+        ? getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute })
+        : getUrlForApp(`${APP_ID}:${page}`, { path: formattedPath, absolute });
     },
     [getUrlForApp, page, search]
   );
