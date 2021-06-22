@@ -59,25 +59,26 @@ processors:
         }
 
         String verified(def ctx, def params) {
-          // Agents only use API keys.
-          if (ctx?._security?.authentication_type == null || ctx._security.authentication_type != 'API_KEY') {
-            return "no_api_key";
+          // No agent.id field to validate.
+          if (ctx?.agent?.id == null) {
+            return "missing";
           }
 
-          // Verify the API key owner before trusting any metadata it contains.
-          if (!is_user_trusted(ctx, params.trusted_users)) {
-            return "untrusted_user";
-          }
-
-          // API keys created by Fleet include metadata about the agent they were issued to.
-          if (ctx?._security?.api_key?.metadata?.agent_id == null || ctx?.agent?.id == null) {
-            return "missing_metadata";
+          // Check auth metadata from API key.
+          if (ctx?._security?.authentication_type == null
+              // Agents only use API keys.
+              || ctx._security.authentication_type != 'API_KEY'
+              // Verify the API key owner before trusting any metadata it contains.
+              || !is_user_trusted(ctx, params.trusted_users)
+              // Verify the API key has metadata indicating the assigned agent ID.
+              || ctx?._security?.api_key?.metadata?.agent_id == null) {
+            return "auth_metadata_missing";
           }
 
           // The API key can only be used represent the agent.id it was issued to.
           if (ctx._security.api_key.metadata.agent_id != ctx.agent.id) {
             // Potential masquerade attempt.
-            return "agent_id_mismatch";
+            return "mismatch";
           }
 
           return "verified";
