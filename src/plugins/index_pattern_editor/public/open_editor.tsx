@@ -76,7 +76,8 @@ export const getEditorOpener = ({
         </KibanaReactContextProvider>
       ),
       {
-        // hideCloseButton: true,
+        hideCloseButton: true,
+        size: 'l',
       }
     );
 

@@ -55,6 +55,7 @@ import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { IndexPatternCreationConfig } from '../service';
 import { IndicesList } from './indices_list';
 import { StatusMessage } from './status_message';
+import { LoadingIndices } from './loading_indices';
 
 export interface Props {
   /**
@@ -69,6 +70,7 @@ export interface Props {
   // uiSettings: CoreStart['uiSettings'];
   isSaving: boolean;
   existingIndexPatterns: string[];
+  defaultTypeIsRollup?: boolean;
 }
 
 export interface IndexPatternConfig {
@@ -81,7 +83,6 @@ export interface IndexPatternConfig {
 export interface TimestampOption {
   display: string;
   fieldName?: string;
-  isDisabled?: boolean;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
@@ -94,12 +95,17 @@ const geti18nTexts = () => {
       defaultMessage: 'Close',
     }),
     saveButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-      defaultMessage: 'Save',
+      defaultMessage: 'Create index pattern',
     }),
   };
 };
 
-const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }: Props) => {
+const IndexPatternEditorFlyoutContentComponent = ({
+  onSave,
+  onCancel,
+  isSaving,
+  defaultTypeIsRollup,
+}: Props) => {
   const {
     services: { http, indexPatternService, uiSettings, indexPatternCreateService },
   } = useKibana<IndexPatternEditorContext>();
@@ -107,11 +113,11 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
 
   // return type, interal type
   const { form } = useForm<IndexPatternConfig, FormInternal>({
-    defaultValue: { title: '' },
+    defaultValue: { type: defaultTypeIsRollup ? 'rollup' : 'default' },
     schema,
   });
 
-  const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
+  const [{ title, allowHidden, type, timestampField }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
   const [formState, setFormState] = useState<{ isSubmitted: boolean; isValid: boolean }>({
@@ -124,8 +130,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
       */
   });
   const [lastTitle, setLastTitle] = useState('');
-  const [exactMatchedIndices, setExactMatchedIndices] = useState<MatchedItem[]>([]);
-  const [timestampFields, setTimestampFields] = useState<TimestampOption[]>([]);
+  const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
@@ -149,7 +154,6 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
-  // loading main source list - but we need to filter out `.` indices
   const loadSources = useCallback(() => {
     getIndices(http, () => [], '*', allowHidden).then((dataSources) => {
       // todo why was this being done?
@@ -167,19 +171,6 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
   // loading list of index patterns
   useEffect(() => {
     let isMounted = true;
-    /*
-    getIndices(http, () => [], '*', false).then(async (dataSources) => {
-      if (isMounted) {
-        setSources(dataSources.filter(removeAliases));
-        setIsLoadingSources(false);
-      }
-    });
-    getIndices(http, () => [], '*:*', false).then((dataSources) => {
-      if (isMounted) {
-        setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
-      }
-    });
-    */
     loadSources();
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
@@ -203,6 +194,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     }
   }, [type, indexPatternCreateService.creation, form]);
 
+  // fetches indices and timestamp options
   useEffect(() => {
     const fetchIndices = async (query: string = '') => {
       /*
@@ -281,9 +273,9 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
           })
         );
         const timeFields = extractTimeFields(fields);
-        setTimestampFields(timeFields);
+        setTimestampFieldOptions(timeFields);
       } else {
-        setTimestampFields([]);
+        setTimestampFieldOptions([]);
       }
     };
 
@@ -301,12 +293,13 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     lastTitle,
     indexPatternCreationType,
     sources,
+    form,
   ]);
 
   const { isValid } = formState;
   const onClickSave = async () => {
     // todo display result
-    indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices);
+    indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices);
     const formData = form.getFormData();
     await onSave({
       title: formData.title,
@@ -377,7 +370,8 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
     partialMatchedIndices: MatchedItem[];
   }) => {
     // const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
-    // todo index patterns exist
+    // todo previously this code wouldn't show the status message if it was a dupe index pattern
+    // but I think we should just go ahead
     if (isLoadingSources) {
       // || indexPatternExists) {
       return null;
@@ -392,6 +386,25 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
       />
     );
   };
+
+  const disableSubmit =
+    !isValid ||
+    !matchedIndices.exactMatchedIndices.length ||
+    // todo display errors
+    !!indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices) ||
+    (!!timestampFieldOptions.length && timestampField === undefined) ||
+    // todo display error
+    existingIndexPatterns.includes(title);
+
+  const previewPanelContent = isLoadingIndexPatterns ? (
+    <LoadingIndices />
+  ) : (
+    <>
+      {renderStatusMessage(matchedIndices)}
+      <EuiSpacer />
+      {renderIndexList()}
+    </>
+  );
 
   return (
     <>
@@ -415,11 +428,11 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
             </EuiFlexGroup>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <TimestampField options={timestampFields} />
+                <TimestampField options={timestampFieldOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <div>{exactMatchedIndices.map((item) => item.name).join(', ')}</div>
+            <div>{matchedIndices.exactMatchedIndices.map((item) => item.name).join(', ')}</div>
             <AdvancedParametersSection>
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -482,11 +495,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
                   onClick={onClickSave}
                   data-test-subj="saveIndexPatternButton"
                   fill
-                  disabled={
-                    !isValid ||
-                    !exactMatchedIndices.length ||
-                    !!indexPatternCreationType.checkIndicesForErrors(exactMatchedIndices) // todo display errors
-                  }
+                  disabled={disableSubmit}
                   // isLoading={isSavingField || isValidating}
                 >
                   {i18nTexts.saveButtonLabel}
@@ -495,11 +504,7 @@ const IndexPatternEditorFlyoutContentComponent = ({ onSave, onCancel, isSaving }
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </FlyoutPanels.Item>
-        <FlyoutPanels.Item>
-          {renderStatusMessage(matchedIndices)}
-          <EuiSpacer />
-          {renderIndexList()}
-        </FlyoutPanels.Item>
+        <FlyoutPanels.Item>{previewPanelContent}</FlyoutPanels.Item>
       </FlyoutPanels.Group>
     </>
   );

@@ -16,12 +16,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { IndexPatternCreationOption, IndexPatternTableItem } from '../types';
+import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { IndexPatternEditor } from '../../../../index_pattern_editor/public';
@@ -94,6 +94,8 @@ export const IndexPatternTable = ({
 
   chrome.docTitle.change(title);
 
+  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+
   const columns = [
     {
       field: 'title',
@@ -125,19 +127,6 @@ export const IndexPatternTable = ({
       sortable: ({ sort }: { sort: string }) => sort,
     },
   ];
-
-  /*
-  const createButton = canSave ? (
-    <CreateButton options={creationOptions}>
-      <FormattedMessage
-        id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create index pattern"
-      />
-    </CreateButton>
-  ) : (
-    <></>
-  );
-  */
 
   const createButton = canSave ? (
     <EuiButton
@@ -174,6 +163,7 @@ export const IndexPatternTable = ({
         indexPatternService: data.indexPatterns,
         indexPatternCreateService: indexPatternEditor.indexPatternCreateService,
       }}
+      defaultTypeIsRollup={isRollup}
     />
   ) : (
     <></>

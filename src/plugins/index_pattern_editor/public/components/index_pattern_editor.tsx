@@ -16,17 +16,27 @@ export interface IndexPatternEditorProps {
   onSave: (indexPattern: IndexPattern) => void;
   closeEditor: () => void;
   services: IndexPatternEditorContext;
+  defaultTypeIsRollup?: boolean;
 }
 
-export const IndexPatternEditor = ({ onSave, closeEditor, services }: IndexPatternEditorProps) => {
+export const IndexPatternEditor = ({
+  onSave,
+  closeEditor,
+  services,
+  defaultTypeIsRollup,
+}: IndexPatternEditorProps) => {
   const {
     Provider: KibanaReactContextProvider,
   } = createKibanaReactContext<IndexPatternEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={closeEditor} hideCloseButton={false}>
-        <IndexPatternFlyoutContentContainer onSave={onSave} onCancel={closeEditor} />
+      <EuiFlyout onClose={closeEditor} hideCloseButton={true} size="l">
+        <IndexPatternFlyoutContentContainer
+          onSave={onSave}
+          onCancel={closeEditor}
+          defaultTypeIsRollup={defaultTypeIsRollup}
+        />
       </EuiFlyout>
     </KibanaReactContextProvider>
   );

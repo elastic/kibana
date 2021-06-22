@@ -28,12 +28,38 @@ import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 const standardSelectItem = (
   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
     <EuiDescriptionListTitle>
-      Standard
+      <FormattedMessage
+        id="indexPatternEditor.typeSelect.standardTitle"
+        defaultMessage="Standard index pattern"
+      />
+    </EuiDescriptionListTitle>
+    <EuiDescriptionListDescription>
+      <FormattedMessage
+        id="indexPatternEditor.typeSelect.standardDescription"
+        defaultMessage="Perform full aggregations against any data"
+      />
+    </EuiDescriptionListDescription>
+  </EuiDescriptionList>
+);
+
+const rollupSelectItem = (
+  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
+    <EuiDescriptionListTitle>
+      <FormattedMessage
+        id="indexPatternEditor.typeSelect.rollupTitle"
+        defaultMessage="Rollup index pattern"
+      />
+      &nbsp;
       <EuiBadge color={euiColorAccent}>
         <FormattedMessage id="indexPatternEditor.typeSelect.betaLabel" defaultMessage="Beta" />
       </EuiBadge>
     </EuiDescriptionListTitle>
-    <EuiDescriptionListDescription>Description</EuiDescriptionListDescription>
+    <EuiDescriptionListDescription>
+      <FormattedMessage
+        id="indexPatternEditor.typeSelect.rollupDescription"
+        defaultMessage="Perform limited aggregations against summarized data"
+      />
+    </EuiDescriptionListDescription>
   </EuiDescriptionList>
 );
 
@@ -55,7 +81,7 @@ export const TypeField = () => {
                     inputDisplay: 'Standard',
                     dropdownDisplay: standardSelectItem,
                   },
-                  { value: 'rollup', inputDisplay: 'Rollup' },
+                  { value: 'rollup', inputDisplay: 'Rollup', dropdownDisplay: rollupSelectItem },
                 ]}
                 valueOfSelected={value}
                 onChange={(newValue) => {

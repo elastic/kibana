@@ -25,6 +25,7 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
+  defaultTypeIsRollup?: boolean;
 }
 
 /**
@@ -34,7 +35,11 @@ export interface Props {
  * anything about where a field comes from and where it should be persisted.
  */
 
-export const IndexPatternFlyoutContentContainer = ({ onSave, onCancel }: Props) => {
+export const IndexPatternFlyoutContentContainer = ({
+  onSave,
+  onCancel,
+  defaultTypeIsRollup,
+}: Props) => {
   const {
     services: { indexPatternService, notifications },
   } = useKibana<IndexPatternEditorContext>();
@@ -71,6 +76,7 @@ export const IndexPatternFlyoutContentContainer = ({ onSave, onCancel }: Props) 
       onCancel={onCancel}
       isSaving={false}
       existingIndexPatterns={existingIndexPatterns}
+      defaultTypeIsRollup={defaultTypeIsRollup}
     />
   );
 };
