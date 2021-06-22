@@ -63,7 +63,7 @@ interface Props {
   SavedObjectFinder?: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
-  filterActions?: (actionId: string) => boolean;
+  actionPredicate?: (actionId: string) => boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
   showShadow?: boolean;
   showBadges?: boolean;
@@ -391,8 +391,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       .concat(Object.values(this.state.universalActions || {}) as Array<Action<object>>)
       .sort(sortByOrderField);
 
-    if (this.props.filterActions) {
-      sortedActions = sortedActions.filter(({ id }) => this.props.filterActions!(id));
+    if (this.props.actionPredicate) {
+      sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
     }
 
     return await buildContextMenuForActions({
