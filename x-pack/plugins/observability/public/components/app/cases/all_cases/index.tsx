@@ -28,19 +28,18 @@ interface AllCasesProps {
 export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const {
     cases: casesUi,
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
 
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   return casesUi.getAllCases({
     caseDetailsNavigation: {
       href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
       onClick: async ({ detailName, subCaseId, search }: AllCasesNavProps) =>
-        navigateToApp(`${CASES_APP_ID}`, {
-          path: getCaseDetailsUrl({ id: detailName, subCaseId }),
-        }),
+        navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id: detailName, subCaseId })}`),
     },
     configureCasesNavigation: {
       href: formatUrl(getConfigureCasesUrl()),
@@ -48,9 +47,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: getConfigureCasesUrl(),
-        });
+        return navigateToUrl(`${casesUrl}${getConfigureCasesUrl()}`);
       },
     },
     createCaseNavigation: {
@@ -59,9 +56,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: getCreateCaseUrl(),
-        });
+        return navigateToUrl(`${casesUrl}${getCreateCaseUrl()}`);
       },
     },
     disableAlerts: true,
