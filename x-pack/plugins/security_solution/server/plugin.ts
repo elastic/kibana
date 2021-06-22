@@ -132,8 +132,6 @@ export interface PluginStart {}
 // TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
 const securitySubPlugins = [
   APP_ID,
-  `${APP_ID}:${SecurityPageName.hosts}`,
-  `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,

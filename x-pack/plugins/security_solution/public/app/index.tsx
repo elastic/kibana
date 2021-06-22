@@ -56,22 +56,17 @@ export const renderApp = ({
       store={store}
     >
       <Switch>
-        {
+        {[
+          ...(subPlugins.overview.routes ?? []),
+          ...(subPlugins.hosts.routes ?? []),
+          ...(subPlugins.network.routes ?? []),
+          ...(subPlugins.alerts.routes ?? []),
+          ...(subPlugins.rules.routes ?? []),
+          ...(subPlugins.exceptions.routes ?? []),
           /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
-          subPlugins.overview.routes!.map((route, index) => (
-            <Route key={`subpligin-overview-route-${index}`} {...route} />
-          ))
-        }
-        {subPlugins.alerts.routes!.map((route, index) => (
-          <Route key={`subpligin-alerts-route-${index}`} {...route} />
+        ].map((route, index) => (
+          <Route key={`subpligin-route-${index}`} {...route} />
         ))}
-        {subPlugins.rules.routes!.map((route, index) => (
-          <Route key={`subpligin-rules-route-${index}`} {...route} />
-        ))}
-        {subPlugins.exceptions.routes!.map((route, index) => (
-          <Route key={`subpligin-exceptions-route-${index}`} {...route} />
-        ))}
-
         <Route>
           <NotFoundPage />
         </Route>

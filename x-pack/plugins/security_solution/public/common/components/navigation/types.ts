@@ -41,8 +41,7 @@ export interface NavTab {
   name: string;
   href: string;
   disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
+  urlKey?: UrlStateType;
   pageId?: SecurityPageName;
 }
 

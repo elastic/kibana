@@ -47,6 +47,13 @@ jest.mock('../../lib/kibana', () => {
 });
 jest.mock('../link_to');
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(() => ({
+    search: '',
+  })),
+  useHistory: jest.fn(),
+}));
+
 describe('SIEM Navigation', () => {
   const mockProps: TabNavigationComponentProps &
     SecuritySolutionTabNavigationProps &

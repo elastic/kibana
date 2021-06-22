@@ -76,6 +76,7 @@ export const getBreadcrumbsForRoute = (
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
+
     return [
       siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
