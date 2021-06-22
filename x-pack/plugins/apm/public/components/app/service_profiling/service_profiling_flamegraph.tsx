@@ -279,6 +279,9 @@ export function ServiceProfilingFlamegraph({
       return {
         groupByRollup: (d: Datum) => d.layers[depth],
         nodeLabel: (id: PrimitiveValue) => {
+          if (typeof id === 'string' && id in locations) {
+            return locations[id].function;
+          }
           return id;
         },
         showAccessor: (id: PrimitiveValue) => !!id,
