@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-require('../tasks/build/cli');
+export enum ElasticRequestState {
+  Loading,
+  NotFound,
+  Found,
+  Error,
+  NotFoundIndexPattern,
+}
