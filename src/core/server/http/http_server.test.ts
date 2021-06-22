@@ -7,7 +7,7 @@
  */
 
 import { Server } from 'http';
-import { readFileSync } from 'fs';
+import { rmdir, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 import { join } from 'path';
@@ -48,9 +48,9 @@ const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 let certificate: string;
 let key: string;
 
-beforeAll(() => {
-  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
-  key = readFileSync(KBN_KEY_PATH, 'utf8');
+beforeAll(async () => {
+  certificate = await readFile(KBN_CERT_PATH, 'utf8');
+  key = await readFile(KBN_KEY_PATH, 'utf8');
 });
 
 beforeEach(() => {
@@ -1411,6 +1411,17 @@ describe('setup contract', () => {
 
   describe('#registerStaticDir', () => {
     const assetFolder = join(__dirname, 'integration_tests', 'fixtures', 'static');
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await mkdtemp('cache-test');
+    });
+
+    afterAll(async () => {
+      if (tempDir) {
+        await rmdir(tempDir, { recursive: true });
+      }
+    });
 
     test('does not throw if called after stop', async () => {
       const { registerStaticDir } = await server.setup(config);
@@ -1427,7 +1438,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some_image.png')
+        .get('/static/some_json.json')
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('must-revalidate');
@@ -1441,7 +1452,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/compression_available.png')
+        .get('/static/compression_available.json')
         .set('accept-encoding', 'gzip')
         .expect(200);
 
@@ -1457,7 +1468,7 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some_image.png')
+        .get('/static/some_json.json')
         .set('accept-encoding', 'gzip')
         .expect(200);
 
@@ -1473,14 +1484,14 @@ describe('setup contract', () => {
 
       await server.start();
       const response = await supertest(innerServer.listener)
-        .get('/static/some_image.png')
+        .get('/static/some_json.json')
         .expect(200);
 
       const etag = response.get('etag');
       expect(etag).not.toBeUndefined();
 
       await supertest(innerServer.listener)
-        .get('/static/some_image.png')
+        .get('/static/some_json.json')
         .set('If-None-Match', etag)
         .expect(304);
     });
@@ -1493,9 +1504,36 @@ describe('setup contract', () => {
       await server.start();
 
       await supertest(innerServer.listener)
-        .get('/static/some_image.png')
+        .get('/static/some_json.json')
         .set('If-None-Match', `"definitely not a valid etag"`)
         .expect(200);
+    });
+
+    test('dynamically updates depending on the content of the file', async () => {
+      const tempFile = join(tempDir, 'some_file.json');
+
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      registerStaticDir('/static/{path*}', tempDir);
+
+      await server.start();
+
+      await supertest(innerServer.listener).get('/static/some_file.json').expect(404);
+
+      await writeFile(tempFile, `{ "over": 9000 }`);
+
+      let response = await supertest(innerServer.listener)
+        .get('/static/some_file.json')
+        .expect(200);
+
+      const etag1 = response.get('etag');
+
+      await writeFile(tempFile, `{ "over": 42 }`);
+
+      response = await supertest(innerServer.listener).get('/static/some_file.json').expect(200);
+
+      const etag2 = response.get('etag');
+
+      expect(etag1).not.toEqual(etag2);
     });
   });
 
