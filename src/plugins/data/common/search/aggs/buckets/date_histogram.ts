@@ -26,6 +26,7 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
 import { inferTimeZone } from '../utils';
+import { timerangeToAst } from '../../expressions';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
@@ -164,6 +165,7 @@ export const getDateHistogramBucketAgg = ({
         name: 'timeRange',
         default: null,
         write: noop,
+        toExpressionAst: timerangeToAst,
       },
       {
         name: 'useNormalizedEsInterval',

@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { KibanaTimerangeOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
@@ -17,7 +19,7 @@ export const aggDateHistogramFnName = 'aggDateHistogram';
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_HISTOGRAM>;
 
-type Arguments = Assign<AggArgs, { timeRange?: string; extended_bounds?: string }>;
+type Arguments = Assign<AggArgs, { timeRange?: KibanaTimerangeOutput; extended_bounds?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -90,7 +92,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
       }),
     },
     timeRange: {
-      types: ['string'],
+      types: ['timerange'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.timeRange.help', {
         defaultMessage: 'Time Range to use for this aggregation',
       }),
@@ -128,7 +130,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
     },
   },
   fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
+    const { id, enabled, schema, timeRange, ...rest } = args;
 
     return {
       type: 'agg_type',
@@ -139,7 +141,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
         type: BUCKET_TYPES.DATE_HISTOGRAM,
         params: {
           ...rest,
-          timeRange: getParsedValue(args, 'timeRange'),
+          timeRange: timeRange && omit(timeRange, 'type'),
           extended_bounds: getParsedValue(args, 'extended_bounds'),
         },
       },
