@@ -41,27 +41,27 @@ export const HostIsolationPanel = React.memo(
       return findAlertId ? findAlertId[0] : '';
     }, [details]);
 
-    const { caseIds } = useCasesFromAlerts({ alertId });
+    const { casesInfo } = useCasesFromAlerts({ alertId });
 
     // Cases related components to be used in both isolate and unisolate actions from the alert details flyout entry point
-    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
+    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
     const casesList = useMemo(
       () =>
-        caseIds.map((id, index) => {
+        casesInfo.map((caseInfo, index) => {
           return (
-            <li key={id}>
-              <CaseDetailsLink detailName={id}>
+            <li key={caseInfo.id}>
+              <CaseDetailsLink detailName={caseInfo.id}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                  defaultMessage="Case {caseIndex}"
-                  values={{ caseIndex: index + 1 }}
+                  defaultMessage="{caseName}"
+                  values={{ caseName: caseInfo.title }}
                 />
               </CaseDetailsLink>
             </li>
           );
         }),
-      [caseIds]
+      [casesInfo]
     );
 
     const associatedCases = useMemo(() => {
@@ -90,7 +90,7 @@ export const HostIsolationPanel = React.memo(
         endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
-        caseIds={caseIds}
+        casesInfo={casesInfo}
         cancelCallback={cancelCallback}
       />
     ) : (
@@ -98,7 +98,7 @@ export const HostIsolationPanel = React.memo(
         endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
-        caseIds={caseIds}
+        casesInfo={casesInfo}
         cancelCallback={cancelCallback}
       />
     );
