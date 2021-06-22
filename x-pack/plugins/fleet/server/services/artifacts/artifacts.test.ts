@@ -125,6 +125,7 @@ describe('When using the artifacts services', () => {
       expect(esClientMock.delete).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         id: '123',
+        refresh: 'wait_for',
       });
     });
 

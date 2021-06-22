@@ -44,6 +44,7 @@ filegroup(
       "//packages/kbn-server-http-tools:build",
       "//packages/kbn-server-route-repository:build",
       "//packages/kbn-std:build",
+      "//packages/kbn-storybook:build",
       "//packages/kbn-telemetry-tools:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-ui-shared-deps:build",
