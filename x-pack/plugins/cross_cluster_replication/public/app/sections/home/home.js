@@ -9,7 +9,7 @@ import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
 import { routing } from '../../services/routing';
@@ -66,40 +66,33 @@ export class CrossClusterReplicationHome extends PureComponent {
 
   render() {
     return (
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiTitle size="l" data-test-subj="appTitle">
-            <h1>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <span data-test-subj="appTitle">
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
                 defaultMessage="Cross-Cluster Replication"
               />
-            </h1>
-          </EuiTitle>
+            </span>
+          }
+          tabs={this.tabs.map((tab) => ({
+            onClick: () => this.onSectionChange(tab.id),
+            isSelected: tab.id === this.state.activeSection,
+            key: tab.id,
+            'data-test-subj': tab.testSubj,
+            label: tab.name,
+          }))}
+        />
 
-          <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
 
-          <EuiTabs>
-            {this.tabs.map((tab) => (
-              <EuiTab
-                onClick={() => this.onSectionChange(tab.id)}
-                isSelected={tab.id === this.state.activeSection}
-                key={tab.id}
-                data-test-subj={tab.testSubj}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-
-          <EuiSpacer size="m" />
-
-          <Switch>
-            <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
-            <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
-          </Switch>
-        </EuiPageContent>
-      </EuiPageBody>
+        <Switch>
+          <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
+          <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
+        </Switch>
+      </>
     );
   }
 }

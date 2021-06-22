@@ -146,14 +146,20 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
      */
     return (
       <>
-        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
+        <HideShowContainer
+          $isVisible={TimelineTabs.query === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.query}`}
+        >
           <QueryTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
         </HideShowContainer>
-        <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
+        <HideShowContainer
+          $isVisible={TimelineTabs.pinned === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
+        >
           <PinnedTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
@@ -161,7 +167,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           />
         </HideShowContainer>
         {timelineType === TimelineType.default && (
-          <HideShowContainer $isVisible={TimelineTabs.eql === activeTimelineTab}>
+          <HideShowContainer
+            $isVisible={TimelineTabs.eql === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
+          >
             <EqlTab
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
@@ -169,7 +178,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             />
           </HideShowContainer>
         )}
-        <HideShowContainer $isVisible={isGraphOrNotesTabs}>
+        <HideShowContainer
+          $isVisible={isGraphOrNotesTabs}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+        >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
       </>
