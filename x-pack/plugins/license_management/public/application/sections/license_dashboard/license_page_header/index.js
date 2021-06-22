@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LicenseStatus } from './license_status.container';
+export { LicensePageHeader } from './license_page_header';
