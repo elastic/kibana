@@ -18,7 +18,7 @@ export const RecentQueries: React.FC = () => {
   const { recentQueries } = useValues(AnalyticsLogic);
 
   return (
-    <AnalyticsLayout isAnalyticsView title={RECENT_QUERIES}>
+    <AnalyticsLayout isAnalyticsView title={RECENT_QUERIES} breadcrumbs={[RECENT_QUERIES]}>
       <AnalyticsSearch />
       <RecentQueriesTable items={recentQueries} />
     </AnalyticsLayout>

@@ -9,6 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
 
+import { LicensingLogic } from '../shared/licensing';
+
 import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
@@ -43,8 +45,8 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
   }),
   selectors: {
     myRole: [
-      (selectors) => [selectors.account],
-      ({ role }) => (role ? getRoleAbilities(role) : {}),
+      (selectors) => [selectors.account, LicensingLogic.selectors.hasPlatinumLicense],
+      ({ role }, hasPlatinumLicense) => (role ? getRoleAbilities(role, hasPlatinumLicense) : {}),
     ],
   },
 });
