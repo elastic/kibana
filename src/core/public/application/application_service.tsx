@@ -54,6 +54,7 @@ function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
     )
   );
 }
+
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 
@@ -401,6 +402,9 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     }
     const fields = wrapper.updater(app);
     if (fields) {
+      const deepLinks = fields.deepLinks
+        ? populateDeepLinkDefaults(fields.deepLinks)
+        : changes.deepLinks;
       changes = {
         ...changes,
         ...fields,
@@ -414,13 +418,11 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.navLinkStatus ?? AppNavLinkStatus.default,
           fields.navLinkStatus ?? AppNavLinkStatus.default
         ),
-        // deepLinks take the last defined update
-        deepLinks: fields.deepLinks
-          ? populateDeepLinkDefaults(fields.deepLinks)
-          : changes.deepLinks,
+        ...(deepLinks ? { deepLinks } : {}),
       };
     }
   });
+
   return {
     ...app,
     ...changes,
