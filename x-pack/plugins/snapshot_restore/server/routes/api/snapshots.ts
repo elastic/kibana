@@ -76,7 +76,6 @@ export function registerSnapshotsRoutes({
           const { snapshots: fetchedSnapshots = [] } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
-
           fetchedSnapshots.forEach((snapshot) => {
             snapshots.push(
               deserializeSnapshotDetails(

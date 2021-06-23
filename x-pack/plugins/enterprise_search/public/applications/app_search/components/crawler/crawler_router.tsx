@@ -8,18 +8,12 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
-import { getEngineBreadcrumbs } from '../engine';
-
-import { CRAWLER_TITLE } from './constants';
 import { CrawlerLanding } from './crawler_landing';
 
 export const CrawlerRouter: React.FC = () => {
   return (
     <Switch>
       <Route>
-        <SetPageChrome trail={getEngineBreadcrumbs([CRAWLER_TITLE])} />
         <CrawlerLanding />
       </Route>
     </Switch>

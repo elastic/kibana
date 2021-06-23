@@ -100,8 +100,10 @@ yarn kbn watch-bazel
 - @kbn/server-http-tools
 - @kbn/server-route-repository
 - @kbn/std
+- @kbn/storybook
 - @kbn/telemetry-utils
 - @kbn/tinymath
+- @kbn/ui-framework
 - @kbn/ui-shared-deps
 - @kbn/utility-types
 - @kbn/utils
