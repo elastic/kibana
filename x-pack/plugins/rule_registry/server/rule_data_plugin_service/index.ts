@@ -7,7 +7,7 @@
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { merge } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -132,6 +132,14 @@ export class RuleDataPluginService {
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing index template ${template.name}`);
+    const { body: simulateResponse } = await clusterClient.indices.simulateTemplate(template);
+    const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
+
+    if (isEmpty(mappings)) {
+      throw new Error(
+        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
+      );
+    }
     const mergedTemplate = merge(
       {
         body: {

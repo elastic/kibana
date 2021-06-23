@@ -188,6 +188,7 @@ export class RuleDataClient implements IRuleDataClient {
     const { body: aliasExists } = await clusterClient.indices.existsAlias({
       name: alias,
     });
+
     const concreteIndexName = `${alias}-000001`;
 
     if (!aliasExists) {
