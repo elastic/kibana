@@ -65,6 +65,13 @@ function FormulaHelp({
   });
 
   helpGroups.push({
+    label: i18n.translate('xpack.lens.formulaFrequentlyUsedHeading', {
+      defaultMessage: 'Common formulas',
+    }),
+    items: [],
+  });
+
+  helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
       defaultMessage: 'Elasticsearch',
     }),
@@ -78,7 +85,7 @@ function FormulaHelp({
   const availableFunctions = getPossibleFunctions(indexPattern);
 
   // Es aggs
-  helpGroups[1].items.push(
+  helpGroups[2].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -104,20 +111,20 @@ function FormulaHelp({
 
   helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
-      defaultMessage: 'Column-wise calculation',
+      defaultMessage: 'Column calculations',
     }),
     description: i18n.translate(
       'xpack.lens.formulaDocumentation.columnCalculationSectionDescription',
       {
         defaultMessage:
-          'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
+          'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
       }
     ),
     items: [],
   });
 
   // Calculations aggs
-  helpGroups[2].items.push(
+  helpGroups[3].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -170,7 +177,7 @@ function FormulaHelp({
       });
   }, [indexPattern]);
 
-  helpGroups[3].items.push(
+  helpGroups[4].items.push(
     ...tinymathFns.map(({ label, description, examples }) => {
       return {
         label,
@@ -312,9 +319,9 @@ round(100 * moving_average(
 \`\`\`
 
 Elasticsearch functions take a field name, which can be in quotes. \`sum(bytes)\` is the same
-as \`sum("bytes")\`.
+as \`sum('bytes')\`.
 
-Some functions take named arguments, like moving_average(count(), window=5)
+Some functions take named arguments, like \`moving_average(count(), window=5)\`.
 
 Elasticsearch metrics can be filtered using KQL or Lucene syntax. To add a filter, use the named
 parameter \`kql='field: value'\` or \`lucene=''\`. Always use single quotes when writing KQL or Lucene
@@ -325,12 +332,63 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 Use the symbols +, -, /, and * to perform basic math.
                   `,
                   description:
-                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+                    'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
                 })}
               />
             </section>
 
-            {helpGroups.slice(1).map((helpGroup, index) => {
+            <section
+              className="lnsFormula__docsTextGroup"
+              ref={(el) => {
+                if (el) {
+                  scrollTargets.current[helpGroups[1].label] = el;
+                }
+              }}
+            >
+              <Markdown
+                markdown={i18n.translate('xpack.lens.formulaCommonFormulaDocumentation', {
+                  defaultMessage: `
+## Common formulas
+
+The most common formulas are dividing two values to produce a percent.
+To display accurately, set *Value format* to *Percent*.
+
+### Filter ratio:
+
+Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
+For example, to see how the error rate changes over time:
+
+\`\`\`
+count(kql='response.status_code > 400') / count()
+\`\`\`
+
+### Week over week:
+
+Use \`shift='1w'\` to get the value of each grouping from
+the previous week. Time shift should not be used with the *Top values* function.
+
+\`\`\`
+percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')
+\`\`\`
+
+### Percent of total:
+
+Formulas can calculate \`overall_sum\` for all the groupings,
+which lets you convert each grouping into a percent of total:
+
+\`\`\`
+sum(products.base_price) / overall_sum(sum(products.base_price))
+\`\`\`
+
+                  `,
+                  description:
+                    'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+                })}
+              />
+            </section>
+
+            {helpGroups.slice(2).map((helpGroup, index) => {
               return (
                 <section
                   className="lnsFormula__docsTextGroup"
@@ -345,7 +403,7 @@ Use the symbols +, -, /, and * to perform basic math.
 
                   <p>{helpGroup.description}</p>
 
-                  {helpGroups[index + 1].items.map((helpItem) => {
+                  {helpGroups[index + 2].items.map((helpItem) => {
                     return (
                       <article
                         className="lnsFormula__docsTextItem"
