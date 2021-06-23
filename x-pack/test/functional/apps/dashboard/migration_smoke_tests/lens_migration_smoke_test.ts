@@ -29,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.savedObjects.importFile(
+        path.join(__dirname, 'exports', 'lens_dashboard_migration_test_7_12_1.ndjson')
+      );
     });
 
     after(async () => {
@@ -37,10 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to import dashboard with various Lens panels from 7.12.1', async () => {
-      await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', 'lens_dashboard_migration_test_7_12_1.ndjson')
-      );
-
       // this will catch cases where there is an error in the migrations.
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
