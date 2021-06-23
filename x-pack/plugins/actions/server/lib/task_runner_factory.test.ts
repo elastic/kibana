@@ -328,14 +328,15 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
     params: { baz: true },
-    relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    relatedSavedObjects: [],
   });
 });
 
