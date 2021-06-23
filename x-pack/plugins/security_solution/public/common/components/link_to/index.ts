@@ -17,7 +17,7 @@ export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detectio
 export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
-export { getTimelinesUrl, getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
+export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
 export {
   getCaseDetailsUrl,
   getCaseUrl,
@@ -54,11 +54,14 @@ export const useFormatUrl = (page: SecurityPageName) => {
         page === 'alerts' ||
         page === 'rules' ||
         page === 'exceptions' ||
-        page === 'administration'
+        page === 'administration' ||
+        page === 'timelines' ||
+        page === 'case'
         ? getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute })
         : getUrlForApp(`${APP_ID}:${page}`, { path: formattedPath, absolute });
     },
     [getUrlForApp, page, search]
   );
+
   return { formatUrl, search };
 };

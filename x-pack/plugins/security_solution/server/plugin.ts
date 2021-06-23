@@ -134,11 +134,7 @@ const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
  * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
  */
 // TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
-const securitySubPlugins = [
-  APP_ID,
-  `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.administration}`,
-];
+const securitySubPlugins = [APP_ID, `${APP_ID}:${SecurityPageName.administration}`];
 
 const allSecuritySubPlugins = [...securitySubPlugins, casesSubPlugin];
 
