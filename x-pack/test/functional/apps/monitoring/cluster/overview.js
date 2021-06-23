@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
           to: 'Aug 23, 2017 @ 21:47:25.556',
         });
 
-        await overview.closeAlertsPanel();
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
           to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
-        await overview.closeAlertsPanel();
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
           to: 'Aug 29, 2017 @ 18:01:34.958',
         });
 
-        await overview.closeAlertsPanel();
+        await overview.closeAlertsModal();
       });
 
       after(async () => {

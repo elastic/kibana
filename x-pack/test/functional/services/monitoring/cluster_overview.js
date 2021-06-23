@@ -75,7 +75,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.exists(SUBJ_CLUSTER_ALERTS);
     }
 
-    closeAlertsPanel() {
+    closeAlertsModal() {
       return testSubjects.click('alerts-modal-button');
     }
 
