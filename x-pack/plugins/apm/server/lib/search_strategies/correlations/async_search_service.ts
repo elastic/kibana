@@ -125,7 +125,8 @@ export const asyncSearchServiceProvider = (
         esClient,
         params,
         fieldCandidates,
-        progress
+        progress,
+        percentiles
       );
 
       if (isCancelled) {
@@ -140,45 +141,49 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const {
-            correlation,
-            ksTest,
-          } = await fetchTransactionDurationCorrelation(
-            esClient,
-            params,
-            percentiles,
-            totalHits,
-            item.field,
-            item.value
-          );
-
-          if (isCancelled) {
-            isRunning = false;
-            return;
-          }
-
-          if (
-            correlation !== null &&
-            correlation > CORRELATION_THRESHOLD &&
-            ksTest !== null &&
-            ksTest < KS_TEST_THRESHOLD
-          ) {
-            const logHistogram = await fetchTransactionDurationRanges(
+          // If one of the fields run into an error
+          // we don't want to stop the whole process
+          try {
+            const {
+              correlation,
+              ksTest,
+            } = await fetchTransactionDurationCorrelation(
               esClient,
               params,
-              histogramRangeSteps,
+              percentiles,
+              totalHits,
               item.field,
               item.value
             );
+            if (isCancelled) {
+              isRunning = false;
+              return;
+            }
 
-            yield {
-              ...item,
-              correlation,
-              ksTest,
-              histogram: logHistogram,
-            };
-          } else {
-            yield undefined;
+            if (
+              correlation !== null &&
+              correlation > CORRELATION_THRESHOLD &&
+              ksTest !== null &&
+              ksTest < KS_TEST_THRESHOLD
+            ) {
+              const logHistogram = await fetchTransactionDurationRanges(
+                esClient,
+                params,
+                histogramRangeSteps,
+                item.field,
+                item.value
+              );
+              yield {
+                ...item,
+                correlation,
+                ksTest,
+                histogram: logHistogram,
+              };
+            } else {
+              yield undefined;
+            }
+          } catch (e) {
+            error = e;
           }
         }
       }

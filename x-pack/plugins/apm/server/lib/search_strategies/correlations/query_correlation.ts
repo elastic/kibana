@@ -13,6 +13,7 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { PERCENTILES_STEP } from './constants';
 
 export interface HistogramItem {
   key: number;
@@ -69,7 +70,7 @@ export const getTransactionDurationCorrelationRequest = (
   );
   ranges.push({ from: ranges[ranges.length - 1].to });
 
-  const step = 2;
+  const step = PERCENTILES_STEP;
   const tempPercentiles = [percentileValues[0]];
   const tempFractions = [step / 100];
   // Collapse duplicates
