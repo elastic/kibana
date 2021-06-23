@@ -47,7 +47,7 @@ export const PrecisionSlider: React.FC = () => {
         </h2>
       </EuiTitle>
       <EuiSpacer />
-      <EuiPanel color="subdued" hasShadow={false}>
+      <EuiPanel hasShadow={false} paddingSize="none">
         <EuiText color="subdued">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.description',
@@ -104,7 +104,13 @@ export const PrecisionSlider: React.FC = () => {
         {stepDescription && (
           <>
             <EuiSpacer size="s" />
-            <EuiPanel data-test-subj="StepDescription">{stepDescription}</EuiPanel>
+            <EuiPanel
+              color="subdued"
+              data-test-subj="StepDescription"
+              style={{ minHeight: '4.7143rem' }}
+            >
+              {stepDescription}
+            </EuiPanel>
           </>
         )}
       </EuiPanel>

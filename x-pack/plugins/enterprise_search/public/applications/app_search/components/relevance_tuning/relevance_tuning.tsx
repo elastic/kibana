@@ -44,7 +44,7 @@ export const RelevanceTuning: React.FC = () => {
         pageTitle: RELEVANCE_TUNING_TITLE,
         description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-          { defaultMessage: 'Set field weights and boosts.' }
+          { defaultMessage: 'Manage precision and relevance settings for your engine' }
         ),
         rightSideItems: engineHasSchemaFields
           ? [
