@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('timelineTest');
       });
       it('shows the timeline component on navigation', async () => {
-        await testSubjects.existOrFail('timeline-wrapper');
+        await testSubjects.existOrFail('events-viewer-panel');
       });
     });
   });
