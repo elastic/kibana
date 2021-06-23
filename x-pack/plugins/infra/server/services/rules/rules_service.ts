@@ -9,7 +9,7 @@ import { CoreSetup, Logger } from 'src/core/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { createRuleDataClient } from './rule_data_client';
 import {
-  RuleConsumerNames,
+  RuleRegistrationContext,
   RulesServiceSetup,
   RulesServiceSetupDeps,
   RulesServiceStart,
@@ -17,14 +17,17 @@ import {
 } from './types';
 
 export class RulesService {
-  constructor(public readonly consumerName: RuleConsumerNames, private readonly logger: Logger) {}
+  constructor(
+    public readonly registrationContext: RuleRegistrationContext,
+    private readonly logger: Logger
+  ) {}
 
   public setup(
     core: CoreSetup<RulesServiceStartDeps>,
     setupDeps: RulesServiceSetupDeps
   ): RulesServiceSetup {
     const ruleDataClient = createRuleDataClient({
-      consumerName: this.consumerName,
+      registrationContext: this.registrationContext,
       getStartServices: core.getStartServices,
       logger: this.logger,
       ruleDataService: setupDeps.ruleRegistry.ruleDataService,

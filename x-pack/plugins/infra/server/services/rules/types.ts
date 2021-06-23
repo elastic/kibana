@@ -30,4 +30,4 @@ export interface RulesServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RulesServiceStart {}
 
-export type RuleConsumerNames = 'observability.logs' | 'observability.metrics';
+export type RuleRegistrationContext = 'observability.logs' | 'observability.metrics';

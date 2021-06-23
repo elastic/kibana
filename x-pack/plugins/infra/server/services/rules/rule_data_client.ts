@@ -9,21 +9,23 @@ import { once } from 'lodash';
 import { CoreSetup, Logger } from 'src/core/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../rule_registry/common/assets';
 import { RuleDataClient, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
-import { RuleConsumerNames, RulesServiceStartDeps } from './types';
+import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
 export const createRuleDataClient = ({
-  consumerName,
+  registrationContext,
   getStartServices,
   logger,
   ruleDataService,
 }: {
-  consumerName: RuleConsumerNames;
+  registrationContext: RuleRegistrationContext;
   getStartServices: CoreSetup<RulesServiceStartDeps>['getStartServices'];
   logger: Logger;
   ruleDataService: RuleRegistryPluginSetupContract['ruleDataService'];
 }) => {
   const ready = once(async () => {
-    const componentTemplateName = ruleDataService.getFullAssetName(`${consumerName}-mappings`);
+    const componentTemplateName = ruleDataService.getFullAssetName(
+      `${registrationContext}-mappings`
+    );
 
     if (!ruleDataService.isWriteEnabled()) {
       return;
@@ -42,9 +44,9 @@ export const createRuleDataClient = ({
     });
 
     await ruleDataService.createOrUpdateIndexTemplate({
-      name: ruleDataService.getFullAssetName(consumerName),
+      name: ruleDataService.getFullAssetName(registrationContext),
       body: {
-        index_patterns: [ruleDataService.getFullAssetName(`${consumerName}*`)],
+        index_patterns: [ruleDataService.getFullAssetName(`${registrationContext}*`)],
         composed_of: [
           ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
           componentTemplateName,
@@ -58,7 +60,7 @@ export const createRuleDataClient = ({
   });
 
   return new RuleDataClient({
-    alias: ruleDataService.getFullAssetName(consumerName),
+    alias: ruleDataService.getFullAssetName(registrationContext),
     getClusterClient: async () => {
       const [coreStart] = await getStartServices();
       return coreStart.elasticsearch.client.asInternalUser;
