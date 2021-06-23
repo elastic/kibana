@@ -17,7 +17,7 @@ const casesRequiredFields = [
 ];
 
 export const isAnyRequiredFieldNotSet = (mapping: Record<string, unknown> | undefined) =>
-  !casesRequiredFields.some((field) => mapping != null && mapping[field] != null);
+  casesRequiredFields.some((field) => mapping?.[field] == null);
 
 /**
  * The user can use either a connector of type cases or all.

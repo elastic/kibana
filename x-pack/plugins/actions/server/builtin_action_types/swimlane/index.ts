@@ -32,7 +32,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['application', 'createRecord', 'pushToService'];
+const supportedSubActions: string[] = ['pushToService'];
 
 // action type definition
 export function getActionType(

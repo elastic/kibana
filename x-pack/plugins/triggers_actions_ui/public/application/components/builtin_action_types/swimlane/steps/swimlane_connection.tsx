@@ -58,7 +58,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
     // fetch swimlane application configuration
     const application = await getApplication();
 
-    if (application != null && application.fields) {
+    if (application?.fields) {
       const allFields = application.fields;
       updateFields(allFields);
       updateCurrentStep(2);

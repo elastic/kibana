@@ -55,6 +55,8 @@ describe('Swimlane Service', () => {
     alertId: 'Alert Id',
   };
 
+  const url = config.apiUrl.slice(0, -1);
+
   beforeAll(() => {
     service = createExternalService(
       {
@@ -162,7 +164,7 @@ describe('Swimlane Service', () => {
         id: '123',
         title: 'title',
         pushedDate: '2021-06-01T17:29:51.092Z',
-        url: `${config.apiUrl.slice(0, -1)}/record/${config.appId}/123`,
+        url: `${url}/record/${config.appId}/123`,
       });
     });
 
@@ -190,7 +192,7 @@ describe('Swimlane Service', () => {
             [mappings.alertIdConfig.id]: 'Alert Id',
           },
         },
-        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record`,
+        url: `${url}/api/app/${config.appId}/record`,
         method: 'post',
         configurationUtilities,
       });
@@ -229,7 +231,7 @@ describe('Swimlane Service', () => {
         id: '123',
         title: 'title',
         pushedDate: '2021-06-01T17:29:51.092Z',
-        url: `${config.apiUrl.slice(0, -1)}/record/${config.appId}/123`,
+        url: `${url}/record/${config.appId}/123`,
       });
     });
 
@@ -259,7 +261,7 @@ describe('Swimlane Service', () => {
             [mappings.alertIdConfig.id]: 'Alert Id',
           },
         },
-        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record/${incidentId}`,
+        url: `${url}/api/app/${config.appId}/record/${incidentId}`,
         method: 'patch',
         configurationUtilities,
       });
@@ -324,9 +326,7 @@ describe('Swimlane Service', () => {
           isRichText: true,
           message: comment.comment,
         },
-        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record/${incidentId}/${
-          mappings.commentsConfig.id
-        }/comment`,
+        url: `${url}/api/app/${config.appId}/record/${incidentId}/${mappings.commentsConfig.id}/comment`,
         method: 'post',
         configurationUtilities,
       });
