@@ -72,10 +72,6 @@ export class TaskRunnerFactory {
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
-    const taskInfo = {
-      scheduled: taskInstance.runAt,
-    };
-
     return {
       async run() {
         const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
@@ -122,7 +118,6 @@ export class TaskRunnerFactory {
             actionId,
             request: fakeRequest,
             ...getSourceFromReferences(references),
-            taskInfo,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
