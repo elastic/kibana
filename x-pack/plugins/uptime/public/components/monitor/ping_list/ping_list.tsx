@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
-import { JourneyStep, Ping } from '../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
