@@ -10,9 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
 import { App, AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
-import { ADMINISTRATION, OVERVIEW } from '../translations';
+import { ADMINISTRATION, OVERVIEW, HOSTS, NETWORK } from '../translations';
 import {
   APP_ICON_SOLUTION,
+  HOSTS_PATH,
+  NETWORK_PATH,
   ENDPOINTS_PATH,
   OVERVIEW_PATH,
   TRUSTED_APPS_PATH,
@@ -26,6 +28,22 @@ export const topDeepLinks: AppDeepLink[] = [
     path: OVERVIEW_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
     order: 9000,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.hosts,
+    title: HOSTS,
+    path: HOSTS_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9002,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.network,
+    title: NETWORK,
+    path: NETWORK_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9002,
     euiIconType: APP_ICON_SOLUTION,
   },
   {

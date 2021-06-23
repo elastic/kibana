@@ -20,7 +20,7 @@ import {
 } from '../../../../../../../../common/endpoint/types';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 
-import { useAppUrl } from '../../../../../../components/hooks/use_app_url';
+import { useAppUrl } from '../../../../../../../common/lib/kibana/hooks';
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';

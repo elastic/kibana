@@ -36,9 +36,7 @@ import {
   APP_ID,
   APP_ICON_SOLUTION,
   APP_DETECTIONS_PATH,
-  APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
-  APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_PATH,
@@ -74,8 +72,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private detectionsUpdater$ = new Subject<AppUpdater>();
-  private hostsUpdater$ = new Subject<AppUpdater>();
-  private networkUpdater$ = new Subject<AppUpdater>();
   private caseUpdater$ = new Subject<AppUpdater>();
   // TODO: [1101] remove all previous updaters and use only appUpdater$
   private appUpdater$ = new Subject<AppUpdater>();
@@ -162,48 +158,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { detections: subPlugin } = await this.subPlugins();
         const { renderAppOld } = await this.lazyApplicationDependencies();
 
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: HOSTS,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_HOSTS_PATH,
-      updater$: this.hostsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { hosts: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.network}`,
-      title: NETWORK,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_NETWORK_PATH,
-      updater$: this.networkUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { network: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
         return renderAppOld({
           ...params,
           services: await startServices,

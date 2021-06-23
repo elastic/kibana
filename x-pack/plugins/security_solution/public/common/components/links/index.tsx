@@ -71,7 +71,8 @@ const HostDetailsLinkComponent: React.FC<{
   const goToHostDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getHostDetailsUrl(encodeURIComponent(hostName), search),
       });
     },
@@ -142,7 +143,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   const goToNetworkDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
       });
     },

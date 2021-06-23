@@ -30,7 +30,7 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
-import { useAppUrl } from '../../../../components/hooks/use_app_url';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;

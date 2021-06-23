@@ -17,7 +17,21 @@ import { endpointPageHttpMock } from '../../../mocks';
 import { fireEvent } from '@testing-library/dom';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 
-jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+  const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../../../../../common/hooks/use_license');
 
 describe('When using the Endpoint Details Actions Menu', () => {

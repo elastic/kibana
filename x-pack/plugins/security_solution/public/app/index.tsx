@@ -60,6 +60,12 @@ export const renderApp = ({
         {subPlugins.overview.routes!.map((route) => (
           <Route {...route} key="overview" />
         ))}
+        {subPlugins.hosts.routes!.map((route) => (
+          <Route {...route} key="hosts" />
+        ))}
+        {subPlugins.network.routes!.map((route) => (
+          <Route {...route} key="network" />
+        ))}
         {subPlugins.management.routes!.map((route) => (
           <Route {...route} key="management" />
         ))}

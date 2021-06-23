@@ -56,7 +56,8 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const goToHost = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getHostsUrl(urlSearch),
       });
     },

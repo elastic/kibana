@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDetailPath } from '../../../../../common/routing';
-import { useAppUrl } from '../../../../../components/hooks/use_app_url';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 

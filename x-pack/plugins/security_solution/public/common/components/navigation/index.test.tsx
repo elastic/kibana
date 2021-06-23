@@ -33,7 +33,7 @@ jest.mock('./breadcrumbs', () => ({
 }));
 const mockGetUrlForApp = jest.fn();
 const mockNavigateToUrl = jest.fn();
-jest.mock('../../lib/kibana', () => {
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
@@ -48,6 +48,13 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 jest.mock('../link_to');
+
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(() => ({
+    search: '',
+  })),
+  useHistory: jest.fn(),
+}));
 
 describe('SIEM Navigation', () => {
   const mockProps: TabNavigationComponentProps &

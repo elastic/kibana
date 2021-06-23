@@ -12,7 +12,7 @@ import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useEndpointSelector } from '../../hooks';
 import { uiQueryParams } from '../../../store/selectors';
-import { useAppUrl } from '../../../../../components/hooks/use_app_url';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 
 export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>(
   ({ endpointId }) => {

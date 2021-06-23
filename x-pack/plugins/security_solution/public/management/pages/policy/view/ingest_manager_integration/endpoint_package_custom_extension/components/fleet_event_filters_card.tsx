@@ -19,8 +19,8 @@ import {
   ListPageRouteState,
 } from '../../../../../../../../common/endpoint/types';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
-import { useAppUrl } from '../../../../../../components/hooks/use_app_url';
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
+import { useAppUrl } from '../../../../../../../common/lib/kibana/hooks';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { EventFiltersHttpService } from '../../../../../event_filters/service';
