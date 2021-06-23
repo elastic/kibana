@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export * from './date_range';
+export * from './date_range_to_ast';
 export * from './extended_bounds';
 export * from './extended_bounds_to_ast';
 export * from './kibana';

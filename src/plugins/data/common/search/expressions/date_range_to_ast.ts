@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DateRange } from '../../../expressions';
+import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { ExpressionFunctionDateRange, DateRange } from './date_range';
 
-export function convertDateRangeToString({ from, to }: DateRange, format: (val: any) => string) {
-  if (!from) {
-    return 'Before ' + format(to);
-  } else if (!to) {
-    return 'After ' + format(from);
-  } else {
-    return format(from) + ' to ' + format(to);
-  }
-}
+export const dateRangeToAst = (dateRange: DateRange) => {
+  return buildExpression([
+    buildExpressionFunction<ExpressionFunctionDateRange>('dateRange', dateRange),
+  ]).toAst();
+};

@@ -30,6 +30,7 @@ import {
   kqlFunction,
   fieldFunction,
   rangeFunction,
+  dateRangeFunction,
   existsFilterFunction,
   rangeFilterFunction,
   kibanaFilterFunction,
@@ -116,6 +117,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);

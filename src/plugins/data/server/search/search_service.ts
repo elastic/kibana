@@ -51,6 +51,7 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  dateRangeFunction,
   extendedBoundsFunction,
   kibana,
   kibanaContext,
@@ -184,6 +185,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
