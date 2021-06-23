@@ -98,6 +98,9 @@ const defaultParams: Params = {
   format: null,
 };
 
+export const defaultValueFormatter = (value: unknown) =>
+  `<span>${typeof value === 'object' ? JSON.stringify(value) : value}</span>`;
+
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
   const {
@@ -156,14 +159,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const valueFormatter = useCallback(
-    (value: unknown): string => {
+    (value: unknown) => {
       if (format?.id) {
         const formatter = fieldFormats.getInstance(format.id, format.params);
         if (formatter) {
           return formatter.convertObject?.html(value) ?? JSON.stringify(value);
         }
       }
-      return JSON.stringify(value);
+
+      return defaultValueFormatter(value);
     },
     [format, fieldFormats]
   );
@@ -462,19 +466,22 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       // either turned off or we have a blank script). If we have a format then we'll
       // preview the field with the format by reading the value from _source
       if (name && script === null) {
+        const nextValue = get(document, name);
+        const formattedValue = valueFormatter(nextValue);
+
         setPreviewResponse({
-          fields: [{ key: name, value: get(document, name) }],
+          fields: [{ key: name, value: nextValue, formattedValue }],
           error: null,
         });
       } else {
         // We immediately update the field preview whenever the name changes
-        setPreviewResponse((prev) => ({
-          fields: [{ key: name ?? '', value: prev.fields[0]?.value }],
+        setPreviewResponse(({ fields: { 0: field } }) => ({
+          fields: [{ ...field, key: name ?? '' }],
           error: null,
         }));
       }
     }
-  }, [name, document, script, format]);
+  }, [name, document, script, format, valueFormatter]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

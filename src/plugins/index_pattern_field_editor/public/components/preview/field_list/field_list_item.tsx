@@ -36,8 +36,11 @@ export const PreviewListItem: React.FC<Props> = ({
         <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
       </EuiFlexItem>
       <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
-        <EuiToolTip position="top" content={value}>
-          {Boolean(formattedValue) ? (
+        <EuiToolTip
+          position="top"
+          content={typeof value !== 'string' ? JSON.stringify(value) : value}
+        >
+          {formattedValue !== undefined ? (
             <span
               className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
               // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.

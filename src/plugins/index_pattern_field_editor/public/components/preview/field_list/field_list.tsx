@@ -12,7 +12,11 @@ import { get } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
-import { useFieldPreviewContext, FieldPreview } from '../field_preview_context';
+import {
+  useFieldPreviewContext,
+  defaultValueFormatter,
+  FieldPreview,
+} from '../field_preview_context';
 import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';
@@ -63,11 +67,17 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
   const fieldList: DocumentField[] = useMemo(
     () =>
       indexPatternFields
-        .map((field) => ({
-          key: field.displayName,
-          value: JSON.stringify(get(currentDocument?._source, field.name)),
-          isPinned: false,
-        }))
+        .map(({ name, displayName }) => {
+          const value = get(currentDocument?._source, name);
+          const formattedValue = defaultValueFormatter(value);
+
+          return {
+            key: displayName,
+            value,
+            formattedValue,
+            isPinned: false,
+          };
+        })
         .filter(({ value }) => value !== undefined),
     [indexPatternFields, currentDocument?._source]
   );
