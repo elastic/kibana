@@ -200,7 +200,7 @@ describe('AddToCaseAction', () => {
     ).toBeTruthy();
   });
 
-  it('disabled when user does not have crud permissions', () => {
+  it('hides the icon when user does not have crud permissions', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
       crud: false,
       read: true,
@@ -212,8 +212,6 @@ describe('AddToCaseAction', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().prop('isDisabled')
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).exists()).toBeFalsy();
   });
 });

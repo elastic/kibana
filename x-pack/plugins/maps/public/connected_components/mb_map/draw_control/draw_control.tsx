@@ -15,8 +15,10 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
-import { DrawCircle } from './draw_circle';
+import { DrawCircle, DRAW_CIRCLE_RADIUS_MB_FILTER } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
+
+const GL_DRAW_RADIUS_LABEL_LAYER_ID = 'gl-draw-radius-label';
 
 const mbModeEquivalencies = new Map<string, DRAW_SHAPE>([
   ['simple_select', DRAW_SHAPE.SIMPLE_SELECT],
@@ -105,6 +107,7 @@ export class DrawControl extends Component<Props> {
     if (this.props.onClick) {
       this.props.mbMap.off('click', this._onClick);
     }
+    this.props.mbMap.removeLayer(GL_DRAW_RADIUS_LABEL_LAYER_ID);
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
   }
@@ -116,6 +119,25 @@ export class DrawControl extends Component<Props> {
 
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
+      this.props.mbMap.addLayer({
+        id: GL_DRAW_RADIUS_LABEL_LAYER_ID,
+        type: 'symbol',
+        source: 'mapbox-gl-draw-hot',
+        filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
+        layout: {
+          'text-anchor': 'right',
+          'text-field': '{radiusLabel}',
+          'text-size': 16,
+          'text-offset': [-1, 0],
+          'text-ignore-placement': true,
+          'text-allow-overlap': true,
+        },
+        paint: {
+          'text-color': '#fbb03b',
+          'text-halo-color': 'rgba(255, 255, 255, 1)',
+          'text-halo-width': 2,
+        },
+      });
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);

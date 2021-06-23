@@ -232,6 +232,10 @@ export class MVTSingleLayerVectorSource
     return tooltips;
   }
 
+  async getTimesliceMaskFieldName() {
+    return null;
+  }
+
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
   }
