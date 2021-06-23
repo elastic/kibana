@@ -97,37 +97,37 @@ const parseRules = (rules: string[]): Partial<Record<CspDirectiveName, string[]>
 const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, string[]> => {
   const map = new Map<CspDirectiveName, string[]>();
 
-  if (cspConfig.script_src.length) {
+  if (cspConfig.script_src?.length) {
     map.set('script-src', cspConfig.script_src);
   }
-  if (cspConfig.worker_src.length) {
+  if (cspConfig.worker_src?.length) {
     map.set('worker-src', cspConfig.worker_src);
   }
-  if (cspConfig.style_src.length) {
+  if (cspConfig.style_src?.length) {
     map.set('style-src', cspConfig.style_src);
   }
-  if (cspConfig.connect_src.length) {
+  if (cspConfig.connect_src?.length) {
     map.set('connect-src', cspConfig.connect_src);
   }
-  if (cspConfig.default_src.length) {
+  if (cspConfig.default_src?.length) {
     map.set('default-src', cspConfig.default_src);
   }
-  if (cspConfig.font_src.length) {
+  if (cspConfig.font_src?.length) {
     map.set('font-src', cspConfig.font_src);
   }
-  if (cspConfig.frame_src.length) {
+  if (cspConfig.frame_src?.length) {
     map.set('frame-src', cspConfig.frame_src);
   }
-  if (cspConfig.img_src.length) {
+  if (cspConfig.img_src?.length) {
     map.set('img-src', cspConfig.img_src);
   }
-  if (cspConfig.frame_ancestors.length) {
+  if (cspConfig.frame_ancestors?.length) {
     map.set('frame-ancestors', cspConfig.frame_ancestors);
   }
-  if (cspConfig.report_uri.length) {
+  if (cspConfig.report_uri?.length) {
     map.set('report-uri', cspConfig.report_uri);
   }
-  if (cspConfig.report_to.length) {
+  if (cspConfig.report_to?.length) {
     map.set('report-to', cspConfig.report_to);
   }
 
