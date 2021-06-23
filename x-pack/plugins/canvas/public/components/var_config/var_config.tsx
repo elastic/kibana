@@ -18,16 +18,14 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasVariable } from '../../../types';
-import { ComponentStrings } from '../../../i18n';
 
 import { EditVar } from './edit_var';
 import { DeleteVar } from './delete_var';
 
 import './var_config.scss';
-
-const { VarConfig: strings } = ComponentStrings;
 
 enum PanelMode {
   List,
@@ -48,6 +46,58 @@ interface Props {
   onAddVar: (v: CanvasVariable) => void;
   onEditVar: (oldVar: CanvasVariable, newVar: CanvasVariable) => void;
 }
+
+const strings = {
+  getAddButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.addButtonLabel', {
+      defaultMessage: 'Add a variable',
+    }),
+  getAddTooltipLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.addTooltipLabel', {
+      defaultMessage: 'Add a variable',
+    }),
+  getCopyActionButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.copyActionButtonLabel', {
+      defaultMessage: 'Copy snippet',
+    }),
+  getCopyActionTooltipLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.copyActionTooltipLabel', {
+      defaultMessage: 'Copy variable syntax to clipboard',
+    }),
+  getDeleteActionButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.deleteActionButtonLabel', {
+      defaultMessage: 'Delete variable',
+    }),
+  getEditActionButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.editActionButtonLabel', {
+      defaultMessage: 'Edit variable',
+    }),
+  getEmptyDescription: () =>
+    i18n.translate('xpack.canvas.varConfig.emptyDescription', {
+      defaultMessage:
+        'This workpad has no variables currently. You may add variables to store and edit common values. These variables can then be used in elements or within the expression editor.',
+    }),
+  getTableNameLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.tableNameLabel', {
+      defaultMessage: 'Name',
+    }),
+  getTableTypeLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.tableTypeLabel', {
+      defaultMessage: 'Type',
+    }),
+  getTableValueLabel: () =>
+    i18n.translate('xpack.canvas.varConfig.tableValueLabel', {
+      defaultMessage: 'Value',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.varConfig.titleLabel', {
+      defaultMessage: 'Variables',
+    }),
+  getTitleTooltip: () =>
+    i18n.translate('xpack.canvas.varConfig.titleTooltip', {
+      defaultMessage: 'Add variables to store and edit common values',
+    }),
+};
 
 export const VarConfig: FC<Props> = ({
   variables,

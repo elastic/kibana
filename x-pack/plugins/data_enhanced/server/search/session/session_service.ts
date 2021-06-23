@@ -24,7 +24,11 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
-import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
+import {
+  esKuery,
+  ISearchSessionService,
+  NoSearchIdInSessionError,
+} from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
   TaskManagerSetupContract,
@@ -436,7 +440,7 @@ export class SearchSessionService
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
-      throw new Error('No search ID in this session matching the given search request');
+      throw new NoSearchIdInSessionError();
     }
     this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 
