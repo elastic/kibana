@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('updateFiltersOnChange is false', () => {
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
+        expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
       });
 
       it('should display staging control buttons', async () => {
