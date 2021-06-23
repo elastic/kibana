@@ -6,12 +6,12 @@
  */
 
 import { EuiPopover } from '@elastic/eui';
+import {
+  HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME,
+  IS_DRAGGING_CLASS_NAME,
+} from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
-
-export const HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME = 'hover-actions-always-show';
 
 /**
  * To avoid expensive changes to the DOM, delay showing the popover menu

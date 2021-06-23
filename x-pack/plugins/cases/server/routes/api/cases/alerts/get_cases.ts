@@ -12,7 +12,7 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError } from '../../utils';
 import { CASE_ALERTS_URL, CasesByAlertIDRequest } from '../../../../../common';
 
-export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
+export function initGetCasesByAlertIdApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_ALERTS_URL,
@@ -33,7 +33,7 @@ export function initGetCaseIdsByAlertIdApi({ router, logger }: RouteDeps) {
         const options = request.query as CasesByAlertIDRequest;
 
         return response.ok({
-          body: await casesClient.cases.getCaseIDsByAlertID({ alertID, options }),
+          body: await casesClient.cases.getCasesByAlertID({ alertID, options }),
         });
       } catch (error) {
         logger.error(

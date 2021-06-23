@@ -118,6 +118,14 @@ export interface GetStateReturn {
     data: DataPublicPluginStart
   ) => () => void;
   /**
+   * Function starting state sync when Discover main is loaded
+   */
+  initializeAndSync: (
+    indexPattern: IndexPattern,
+    filterManager: FilterManager,
+    data: DataPublicPluginStart
+  ) => () => void;
+  /**
    * Start sync between state and URL
    */
   startSync: () => void;
