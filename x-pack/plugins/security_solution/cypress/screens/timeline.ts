@@ -143,6 +143,8 @@ export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
 
 export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
 
+export const TIMELINE_BOTTOM_BAR_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
+
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
@@ -163,8 +165,6 @@ export const TIMELINE_DATA_PROVIDERS_EMPTY =
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
 export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
-
-export const TIMELINE_DROPPED_DATA_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 

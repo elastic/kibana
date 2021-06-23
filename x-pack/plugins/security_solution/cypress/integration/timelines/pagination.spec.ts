@@ -6,6 +6,7 @@
  */
 
 import {
+  TIMELINE_BOTTOM_BAR_CONTAINER,
   TIMELINE_EVENT,
   TIMELINE_EVENTS_COUNT_NEXT_PAGE,
   TIMELINE_EVENTS_COUNT_PER_PAGE,
@@ -48,12 +49,12 @@ describe('Pagination', () => {
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', itemsPerPage);
   });
 
-  it('should be able to go to next / previous page', () => {
+  it.only('should be able to go to next / previous page', () => {
     cy.intercept('POST', '/internal/bsearch').as('refetch');
-    cy.get(TIMELINE_EVENTS_COUNT_NEXT_PAGE).first().click();
+    cy.get(`${TIMELINE_BOTTOM_BAR_CONTAINER} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.wait('@refetch').its('response.statusCode').should('eq', 200);
 
-    cy.get(TIMELINE_EVENTS_COUNT_PREV_PAGE).first().click();
+    cy.get(`${TIMELINE_BOTTOM_BAR_CONTAINER} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
     cy.wait('@refetch').its('response.statusCode').should('eq', 200);
   });
 });
