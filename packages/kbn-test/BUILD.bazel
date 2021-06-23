@@ -7,11 +7,13 @@ PKG_REQUIRE_NAME = "@kbn/test"
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   exclude = [
     "**/*.test.*",
     "**/*.snap",
     "**/__fixture__/**",
+    "**/__fixtures__/**",
     "**/__snapshots__/**",
   ]
 )
@@ -31,6 +33,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
     "//packages/kbn-dev-utils",
+    "//packages/kbn-i18n",
     "//packages/kbn-std",
     "//packages/kbn-utils",
     "@npm//@elastic/elasticsearch",
@@ -52,6 +55,9 @@ SRC_DEPS = [
     "@npm//mustache",
     "@npm//parse-link-header",
     "@npm//prettier",
+    "@npm//react-dom",
+    "@npm//react-redux",
+    "@npm//react-router-dom",
     "@npm//redux",
     "@npm//rxjs",
     "@npm//strip-ansi",
@@ -70,6 +76,9 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/parse-link-header",
   "@npm//@types/prettier",
+  "@npm//@types/react-dom",
+  "@npm//@types/react-redux",
+  "@npm//@types/react-router-dom",
   "@npm//@types/xml2js",
 ]
 
