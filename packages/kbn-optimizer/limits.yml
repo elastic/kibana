@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 28222
   infra: 184320
-  fleet: 450005
+  fleet: 465774
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 76000
+  securitySolution: 217673
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -107,7 +107,7 @@ pageLoadAssetSize:
   dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 28613
+  timelines: 230410
   screenshotMode: 17856
   visTypePie: 35583
   expressionRevealImage: 25675

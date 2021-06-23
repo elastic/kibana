@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -16,7 +16,6 @@ import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
 import { CASES_APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
@@ -30,20 +29,15 @@ export const CaseDetailsPage = React.memo(() => {
   }>();
   const search = useGetUrlSearch(navTabs.case);
 
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
+    }
+  }, [navigateToApp, userPermissions, search]);
 
   return caseId != null ? (
     <>
       <WrapperPage noPadding>
-        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-          <CaseCallOut
-            title={permissionsReadOnlyErrorMessage.title}
-            messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
-          />
-        )}
         <CaseView
           caseId={caseId}
           subCaseId={subCaseId}

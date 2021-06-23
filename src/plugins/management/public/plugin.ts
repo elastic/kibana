@@ -25,7 +25,7 @@ import {
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
-import { ManagementAppLocator } from '../common/locator';
+import { ManagementAppLocatorDefinition } from '../common/locator';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -74,7 +74,7 @@ export class ManagementPlugin
 
   public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
-    const locator = share.url.locators.create(new ManagementAppLocator());
+    const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
 
     if (home) {
       home.featureCatalogue.register({
