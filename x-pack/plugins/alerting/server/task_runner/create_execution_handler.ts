@@ -220,6 +220,14 @@ export function createExecutionHandler<
             id: alertId,
             type: 'alert',
           }),
+          relatedSavedObjects: [
+            {
+              id: alertId,
+              type: 'alert',
+              namespace: namespace.namespace,
+              typeId: alertType.id,
+            },
+          ],
         });
       }
 
