@@ -99,7 +99,7 @@ const defaultParams: Params = {
 };
 
 export const defaultValueFormatter = (value: unknown) =>
-  `<span>${typeof value === 'object' ? JSON.stringify(value) : value}</span>`;
+  `<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>`;
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
@@ -301,7 +301,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
-    const data = response.data!;
+    const data = response.data ?? { values: [], error: {} };
     const { values, error } = data;
 
     if (error) {

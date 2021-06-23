@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiResizeObserver, EuiFieldSearch } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
@@ -84,7 +85,12 @@ export const FieldPreview = () => {
           <EuiFieldSearch
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="Filter fields"
+            placeholder={i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.filterFieldsPlaceholder',
+              {
+                defaultMessage: 'Filter fields',
+              }
+            )}
             fullWidth
           />
           <EuiSpacer size="s" />

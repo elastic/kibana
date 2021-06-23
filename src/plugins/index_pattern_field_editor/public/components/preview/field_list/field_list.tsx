@@ -131,7 +131,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
 
   const toggleIsPinnedField = useCallback((name) => {
     setPinnedFields((prev) => {
-      const isPinned = Boolean(prev[name]) ? !prev[name] : true;
+      const isPinned = !prev[name];
       return {
         ...prev,
         [name]: isPinned,
