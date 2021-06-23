@@ -59,6 +59,15 @@ jest.mock('../../../../common/lib/kibana', () => {
         savedObjects: {
           client: {},
         },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getUseDraggableKeyboardWrapper: () =>
+            jest.fn().mockReturnValue({
+              onBlur: jest.fn(),
+              onKeyDown: jest.fn(),
+            }),
+        },
       },
     }),
     useGetUserSavedObjectPermissions: jest.fn(),
