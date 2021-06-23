@@ -7,6 +7,7 @@
 
 import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from 'kibana/public';
+import { Query } from 'src/plugins/data/common';
 import type {
   FramePublicAPI,
   OperationMetadata,
@@ -18,6 +19,7 @@ import {
   OperationType,
   IndexPatternColumn,
   RequiredReference,
+  GenericOperationDefinition,
 } from './definitions';
 import type {
   IndexPattern,
@@ -29,6 +31,13 @@ import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import { TimeScaleUnit } from '../time_scale';
+
+interface ColumnAdvancedParams {
+  filter?: Query | undefined;
+  timeShift?: string | undefined;
+  timeScale?: TimeScaleUnit | undefined;
+}
 
 interface ColumnChange {
   op: OperationType;
@@ -39,6 +48,7 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
+  incompleteParams?: ColumnAdvancedParams;
 }
 
 interface ColumnCopy {
@@ -141,6 +151,24 @@ export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   return insertNewColumn(args);
 }
 
+function ensureCompatibleParamsAreMoved<T extends ColumnAdvancedParams>(
+  column: T,
+  referencedOperation: GenericOperationDefinition,
+  previousColumn: ColumnAdvancedParams
+) {
+  const newColumn = { ...column };
+  if (referencedOperation.filterable) {
+    newColumn.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
+  }
+  if (referencedOperation.shiftable) {
+    newColumn.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
+  }
+  if (referencedOperation.timeScalingMode !== 'disabled') {
+    newColumn.timeScale = (previousColumn as ReferenceBasedIndexPatternColumn).timeScale;
+  }
+  return newColumn;
+}
+
 // Insert a column into an empty ID. The field parameter is required when constructing
 // a field-based operation, but will cause the function to fail for any other type of operation.
 export function insertNewColumn({
@@ -152,6 +180,7 @@ export function insertNewColumn({
   visualizationGroups,
   targetGroup,
   shouldResetLabel,
+  incompleteParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -163,7 +192,10 @@ export function insertNewColumn({
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
 
-  const baseOptions = { indexPattern, previousColumn: layer.columns[columnId] };
+  const baseOptions = {
+    indexPattern,
+    previousColumn: { ...incompleteParams, ...layer.columns[columnId] },
+  };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
     if (field) {
@@ -414,15 +446,13 @@ export function replaceColumn({
             indexPattern,
           });
 
-          const column = copyCustomLabel({ ...referenceColumn }, previousColumn);
           // do not forget to move over also any filter/shift/anything (if compatible)
           // from the reference definition to the new operation.
-          if (referencedOperation.filterable) {
-            column.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
-          }
-          if (referencedOperation.shiftable) {
-            column.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
-          }
+          const column = ensureCompatibleParamsAreMoved(
+            copyCustomLabel({ ...referenceColumn }, previousColumn),
+            referencedOperation,
+            previousColumn as ReferenceBasedIndexPatternColumn
+          );
 
           tempLayer = {
             ...tempLayer,
@@ -529,15 +559,30 @@ export function replaceColumn({
     }
 
     if (!field) {
+      let incompleteColumn: {
+        operationType: OperationType;
+      } & ColumnAdvancedParams = { operationType: op };
       // if no field is available perform a full clean of the column from the layer
       if (previousDefinition.input === 'fullReference') {
         tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+        const previousReferenceId = (previousColumn as ReferenceBasedIndexPatternColumn)
+          .references[0];
+        const referenceColumn = layer.columns[previousReferenceId];
+        if (referenceColumn) {
+          const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
+
+          incompleteColumn = ensureCompatibleParamsAreMoved(
+            incompleteColumn,
+            referencedOperation,
+            previousColumn
+          );
+        }
       }
       return {
         ...tempLayer,
         incompleteColumns: {
           ...(tempLayer.incompleteColumns ?? {}),
-          [columnId]: { operationType: op },
+          [columnId]: incompleteColumn,
         },
       };
     }
@@ -627,7 +672,7 @@ export function canTransition({
       Boolean(newColumn) &&
       !newLayer.incompleteColumns?.[columnId] &&
       filterOperations(newColumn) &&
-      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)?.length
     );
   } catch (e) {
     return false;

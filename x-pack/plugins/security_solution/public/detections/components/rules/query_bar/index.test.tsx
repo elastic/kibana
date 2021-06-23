@@ -14,8 +14,8 @@ import {
   useFormFieldMock,
   mockOpenTimelineQueryResults,
 } from '../../../../common/mock';
-import { mockHistory, Router } from '../../../../cases/components/__mock__/router';
 import { useGetAllTimeline, getAllTimeline } from '../../../../timelines/containers/all';
+import { mockHistory, Router } from '../../../../common/mock/router';
 
 jest.mock('../../../../common/lib/kibana');
 
