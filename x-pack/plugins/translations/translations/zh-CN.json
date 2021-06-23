@@ -9908,8 +9908,6 @@
     "xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink": "了解详情。",
     "xpack.idxMgmt.home.componentTemplates.emptyPromptTitle": "首先创建组件模板",
     "xpack.idxMgmt.home.componentTemplates.list.componentTemplatesDescription": "使用组件模板可在多个索引模板中重复使用设置、映射和别名。{learnMoreLink}",
-    "xpack.idxMgmt.home.componentTemplates.list.loadErrorReloadLinkLabel": "请重试。",
-    "xpack.idxMgmt.home.componentTemplates.list.loadErrorTitle": "无法加载组件模板。{reloadLink}",
     "xpack.idxMgmt.home.componentTemplates.list.loadingMessage": "正在加载组件模板……",
     "xpack.idxMgmt.home.componentTemplatesTabTitle": "组件模板",
     "xpack.idxMgmt.home.dataStreamsTabTitle": "数据流",
