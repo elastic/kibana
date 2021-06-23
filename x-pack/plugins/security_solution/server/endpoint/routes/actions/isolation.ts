@@ -100,7 +100,6 @@ export const isolationRequestHandler = function (
     }
     agentIDs = [...new Set(agentIDs)]; // dedupe
 
-    // TODO: Add logic to API
     // convert any alert IDs into cases
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {

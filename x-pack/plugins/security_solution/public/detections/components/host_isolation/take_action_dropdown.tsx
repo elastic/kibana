@@ -11,7 +11,6 @@ import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 
-// TODO: Use logic here
 export const TakeActionDropdown = React.memo(
   ({
     onChange,
