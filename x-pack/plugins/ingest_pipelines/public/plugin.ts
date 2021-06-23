@@ -11,7 +11,7 @@ import { CoreSetup, Plugin } from 'src/core/public';
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { SetupDependencies, StartDependencies } from './types';
-import { registerUrlGenerator } from './url_generator';
+import { IngestPipelinesLocatorDefinition } from './locator';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
@@ -50,7 +50,11 @@ export class IngestPipelinesPlugin
       },
     });
 
-    registerUrlGenerator(coreSetup, management, share);
+    share.url.locators.create(
+      new IngestPipelinesLocatorDefinition({
+        managementAppLocator: management.locator,
+      })
+    );
   }
 
   public start() {}

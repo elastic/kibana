@@ -38,7 +38,7 @@ import {
   useGetOutputs,
   sendPutOutput,
 } from '../../hooks';
-import { isDiffPathProtocol } from '../../../common';
+import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
@@ -53,8 +53,20 @@ interface Props {
   onClose: () => void;
 }
 
-function isSameArrayValue(arrayA: string[] = [], arrayB: string[] = []) {
-  return arrayA.length === arrayB.length && arrayA.every((val, index) => val === arrayB[index]);
+function normalizeHosts(hostsInput: string[]) {
+  return hostsInput.map((host) => {
+    try {
+      return normalizeHostsForAgents(host);
+    } catch (err) {
+      return host;
+    }
+  });
+}
+
+function isSameArrayValueWithNormalizedHosts(arrayA: string[] = [], arrayB: string[] = []) {
+  const hostsA = normalizeHosts(arrayA);
+  const hostsB = normalizeHosts(arrayB);
+  return hostsA.length === hostsB.length && hostsA.every((val, index) => val === hostsB[index]);
 }
 
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
@@ -234,8 +246,11 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       return false;
     }
     return (
-      !isSameArrayValue(settings.fleet_server_hosts, inputs.fleetServerHosts.value) ||
-      !isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value) ||
+      !isSameArrayValueWithNormalizedHosts(
+        settings.fleet_server_hosts,
+        inputs.fleetServerHosts.value
+      ) ||
+      !isSameArrayValueWithNormalizedHosts(output.hosts, inputs.elasticsearchUrl.value) ||
       (output.config_yaml || '') !== inputs.additionalYamlConfig.value
     );
   }, [settings, inputs, output]);
@@ -246,32 +261,37 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
     }
 
     const tmpChanges: SettingsConfirmModalProps['changes'] = [];
-    if (!isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value)) {
+    if (!isSameArrayValueWithNormalizedHosts(output.hosts, inputs.elasticsearchUrl.value)) {
       tmpChanges.push(
         {
           type: 'elasticsearch',
           direction: 'removed',
-          urls: output.hosts || [],
+          urls: normalizeHosts(output.hosts || []),
         },
         {
           type: 'elasticsearch',
           direction: 'added',
-          urls: inputs.elasticsearchUrl.value,
+          urls: normalizeHosts(inputs.elasticsearchUrl.value),
         }
       );
     }
 
-    if (!isSameArrayValue(settings.fleet_server_hosts, inputs.fleetServerHosts.value)) {
+    if (
+      !isSameArrayValueWithNormalizedHosts(
+        settings.fleet_server_hosts,
+        inputs.fleetServerHosts.value
+      )
+    ) {
       tmpChanges.push(
         {
           type: 'fleet_server',
           direction: 'removed',
-          urls: settings.fleet_server_hosts,
+          urls: normalizeHosts(settings.fleet_server_hosts || []),
         },
         {
           type: 'fleet_server',
           direction: 'added',
-          urls: inputs.fleetServerHosts.value,
+          urls: normalizeHosts(inputs.fleetServerHosts.value),
         }
       );
     }
@@ -300,7 +320,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           helpText={
             <FormattedMessage
               id="xpack.fleet.settings.fleetServerHostsHelpTect"
-              defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Refer to the {link}."
+              defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Fleet Server uses port 8220 by default. Refer to the {link}."
               values={{
                 link: (
                   <EuiLink
@@ -327,7 +347,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             defaultMessage: 'Elasticsearch hosts',
           })}
           helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
-            defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
+            defaultMessage:
+              'Specify the Elasticsearch URLs where agents send data. Elasticsearch uses port 9200 by default.',
           })}
         />
       </EuiPanel>
