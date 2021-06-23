@@ -23,8 +23,8 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
-  defaultFilters: SeriesConfig['filterFields'];
-  filters: SeriesConfig['baseFilters'];
+  filterFields: SeriesConfig['filterFields'];
+  baseFilters: SeriesConfig['baseFilters'];
   seriesConfig: SeriesConfig;
   isNew?: boolean;
   labels?: Record<string, string>;
@@ -41,15 +41,15 @@ export function SeriesFilter({
   seriesConfig,
   isNew,
   seriesId,
-  defaultFilters = [],
-  filters,
+  filterFields = [],
+  baseFilters,
   labels,
 }: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
-  const options: Field[] = defaultFilters.map((field) => {
+  const options: Field[] = filterFields.map((field) => {
     if (typeof field === 'string') {
       return { label: labels?.[field] ?? FieldLabels[field], field };
     }
@@ -111,7 +111,7 @@ export function SeriesFilter({
       goBack={() => {
         setSelectedField(undefined);
       }}
-      filters={filters}
+      filters={baseFilters}
     />
   ) : null;
 

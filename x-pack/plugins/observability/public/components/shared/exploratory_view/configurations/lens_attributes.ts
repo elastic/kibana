@@ -522,7 +522,7 @@ export class LensAttributes {
   }
 
   getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
-    if (index === 0 || mainLayerConfig.reportConfig.reportType !== 'kpi-over-time') {
+    if (index === 0 || mainLayerConfig.seriesConfig.reportType !== 'kpi-over-time') {
       return null;
     }
 

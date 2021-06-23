@@ -14,13 +14,13 @@ import { ChartOptions } from './columns/chart_options';
 interface Props {
   seriesConfig: SeriesConfig;
   seriesId: string;
-  breakdowns: string[];
+  breakdownFields: string[];
 }
-export function ChartEditOptions({ seriesConfig, seriesId, breakdowns }: Props) {
+export function ChartEditOptions({ seriesConfig, seriesId, breakdownFields }: Props) {
   return (
     <EuiFlexGroup wrap>
       <EuiFlexItem>
-        <Breakdowns seriesId={seriesId} breakdowns={breakdowns} seriesConfig={seriesConfig} />
+        <Breakdowns seriesId={seriesId} breakdowns={breakdownFields} seriesConfig={seriesConfig} />
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartOptions seriesConfig={seriesConfig} seriesId={seriesId} />

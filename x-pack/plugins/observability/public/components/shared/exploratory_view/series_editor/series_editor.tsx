@@ -48,10 +48,10 @@ export function SeriesEditor() {
       width: '15%',
       render: (seriesId: string, { seriesConfig, id }: EditItem) => (
         <SeriesFilter
-          defaultFilters={seriesConfig.defaultFilters}
+          filterFields={seriesConfig.filterFields}
           seriesId={id}
           seriesConfig={seriesConfig}
-          filters={seriesConfig.baseFilters}
+          baseFilters={seriesConfig.baseFilters}
         />
       ),
     },
@@ -64,8 +64,8 @@ export function SeriesEditor() {
       render: (seriesId: string, { seriesConfig, id }: EditItem) => (
         <ChartEditOptions
           seriesId={id}
-          breakdowns={seriesConfig.breakdowns}
-          series={seriesConfig}
+          breakdownFields={seriesConfig.breakdownFields}
+          seriesConfig={seriesConfig}
         />
       ),
     },

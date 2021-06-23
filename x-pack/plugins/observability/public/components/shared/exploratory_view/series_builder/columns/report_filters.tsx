@@ -19,8 +19,8 @@ export function ReportFilters({
   return (
     <SeriesFilter
       seriesConfig={seriesConfig}
-      defaultFilters={seriesConfig.filterFields}
-      filters={seriesConfig.baseFilters}
+      filterFields={seriesConfig.filterFields}
+      baseFilters={seriesConfig.baseFilters}
       seriesId={seriesId}
       isNew={true}
       labels={seriesConfig.labels}
