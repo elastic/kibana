@@ -14,7 +14,7 @@ import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { openExceptionModalFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
+import { openExceptionModalFromRuleSettings, goToExceptionsPage } from '../../tasks/rule_details';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueOfItemX,
@@ -55,7 +55,7 @@ describe('Exceptions modal', () => {
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
 
-    goToExceptionsTab();
+    goToExceptionsPage();
   });
 
   after(() => {

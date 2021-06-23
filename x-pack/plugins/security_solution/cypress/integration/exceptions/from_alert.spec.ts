@@ -26,8 +26,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   activatesRule,
   addsException,
-  goToAlertsTab,
-  goToExceptionsTab,
+  goToAlertsPage,
+  goToExceptionsPage,
   removeException,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
@@ -85,9 +85,9 @@ describe('From alert', () => {
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
-    goToExceptionsTab();
+    goToExceptionsPage();
     removeException();
-    goToAlertsTab();
+    goToAlertsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
     refreshPage();

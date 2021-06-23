@@ -18,11 +18,11 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   addsExceptionFromRuleSettings,
   goBackToAllRulesTable,
-  goToExceptionsTab,
+  goToExceptionsPage,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
@@ -42,7 +42,7 @@ import { createExceptionList } from '../../tasks/api_calls/exceptions';
 describe('Exceptions Table', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule);
     goToManageAlertsDetectionRules();
@@ -53,7 +53,7 @@ describe('Exceptions Table', () => {
     esArchiverLoad('auditbeat_for_exceptions');
 
     // Add a detections exception list
-    goToExceptionsTab();
+    goToExceptionsPage();
     addsExceptionFromRuleSettings(exception);
     waitForTheRuleToBeExecuted();
 

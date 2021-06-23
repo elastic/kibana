@@ -25,8 +25,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   activatesRule,
   addsExceptionFromRuleSettings,
-  goToAlertsTab,
-  goToExceptionsTab,
+  goToAlertsPage,
+  goToExceptionsPage,
   removeException,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
@@ -63,11 +63,11 @@ describe('From rule', () => {
   });
 
   it('Creates an exception and deletes it', () => {
-    goToExceptionsTab();
+    goToExceptionsPage();
     addsExceptionFromRuleSettings(exception);
     esArchiverLoad('auditbeat_for_exceptions2');
     waitForTheRuleToBeExecuted();
-    goToAlertsTab();
+    goToAlertsPage();
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
@@ -86,10 +86,10 @@ describe('From rule', () => {
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
 
-    goToExceptionsTab();
+    goToExceptionsPage();
     removeException();
     refreshPage();
-    goToAlertsTab();
+    goToAlertsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
     refreshPage();
