@@ -20,7 +20,7 @@ import React, { useMemo, useCallback } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING, APP_ID, CASES_APP_ID } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -181,7 +181,8 @@ const CaseDetailsLinkComponent: React.FC<{
   const goToCaseDetails = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(CASES_APP_ID, {
+      return navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
@@ -208,7 +209,8 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(CASES_APP_ID, {
+      return navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(search),
       });
     },

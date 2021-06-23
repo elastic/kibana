@@ -14,7 +14,7 @@ import {
 } from '../../../common/components/link_to/redirect_to_case';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
+import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesNavProps } from '../../../cases/components/all_cases';
 
@@ -33,7 +33,7 @@ const RecentCasesComponent = () => {
         if (e) {
           e.preventDefault();
         }
-        return navigateToApp(CASES_APP_ID);
+        return navigateToApp(APP_ID, { deepLinkId: SecurityPageName.case });
       },
     },
     caseDetailsNavigation: {
@@ -44,7 +44,8 @@ const RecentCasesComponent = () => {
         if (e) {
           e.preventDefault();
         }
-        return navigateToApp(CASES_APP_ID, {
+        return navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
       },
@@ -55,7 +56,8 @@ const RecentCasesComponent = () => {
         if (e) {
           e.preventDefault();
         }
-        return navigateToApp(CASES_APP_ID, {
+        return navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.case,
           path: getCreateCaseUrl(),
         });
       },

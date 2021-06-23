@@ -63,6 +63,8 @@ export const renderApp = ({
           ...(subPlugins.alerts.routes ?? []),
           ...(subPlugins.rules.routes ?? []),
           ...(subPlugins.exceptions.routes ?? []),
+          ...(subPlugins.timelines.routes ?? []),
+          ...(subPlugins.cases.routes ?? []),
           /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
         ].map((route, index) => (
           <Route key={`subpligin-route-${index}`} {...route} />

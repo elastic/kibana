@@ -18,6 +18,7 @@ import { SecurityPageName } from '../../../app/types';
 import { Sourcerer } from '../sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useKibana } from '../../lib/kibana';
+import { SiemNavTabKey } from '../navigation/types';
 
 interface HeaderProps {
   border?: boolean;
@@ -53,7 +54,7 @@ interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
   dataTestSubj?: string;
-  pageId: SecurityPageName;
+  pageId: SiemNavTabKey;
 }
 
 export interface HeaderPageProps extends HeaderProps {

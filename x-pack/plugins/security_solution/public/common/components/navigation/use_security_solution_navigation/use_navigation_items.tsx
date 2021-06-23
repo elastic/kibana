@@ -28,8 +28,6 @@ export const usePrimaryNavigationItems = ({
       items: [
         useSideNavItem({ ...props, tab: navTabs.overview }),
         // TODO: [1101] Move the following nav items to its group
-        useSideNavItem({ ...props, tab: navTabs.timelines }),
-        useSideNavItem({ ...props, tab: navTabs.case }),
         useSideNavItem({ ...props, tab: navTabs.administration }),
       ],
     },
@@ -50,7 +48,10 @@ export const usePrimaryNavigationItems = ({
     },
     {
       ...navTabGroups.investigate,
-      items: [],
+      items: [
+        useSideNavItem({ ...props, tab: navTabs.timelines }),
+        useSideNavItem({ ...props, tab: navTabs.case }),
+      ],
     },
     {
       ...navTabGroups.manage,
@@ -97,7 +98,9 @@ const useSideNavItem = ({
         id === 'network' ||
         id === 'alerts' ||
         id === 'rules' ||
-        id === 'exceptions'
+        id === 'exceptions' ||
+        id === 'timelines' ||
+        id === 'case'
       ) {
         navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
       } else {
