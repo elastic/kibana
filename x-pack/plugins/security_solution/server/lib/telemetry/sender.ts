@@ -247,7 +247,7 @@ export class TelemetryEventsSender {
       }
 
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl(),
+        this.fetchTelemetryUrl('alerts-endpoint'),
         this.fetchClusterInfo(),
         this.fetchLicenseInfo(),
       ]);
@@ -279,6 +279,45 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
+  /**
+   * This function sends events to the elastic telemetry channel. Caution is required
+   * because it does no allowlist filtering. The caller is responsible for making sure
+   * that there is no sensitive material or PII in the records that are sent upstream.
+   *
+   * @param channel the elastic telemetry channel
+   * @param toSend telemetry events
+   */
+  public async sendOnDemand(
+    channel: string,
+    toSend: unknown[],
+    featureDisableSending: boolean = true
+  ) {
+    try {
+      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+        this.fetchTelemetryUrl(channel),
+        this.fetchClusterInfo(),
+        this.fetchLicenseInfo(),
+      ]);
+
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+      this.logger.debug(
+        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
+      );
+
+      if (!featureDisableSending) {
+        await this.sendEvents(
+          toSend,
+          telemetryUrl,
+          clusterInfo.cluster_uuid,
+          clusterInfo.version?.number,
+          licenseInfo?.uid
+        );
+      }
+    } catch (err) {
+      this.logger.warn(`Error sending telemetry events data: ${err}`);
+    }
+  }
+
   private async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (!this.core) {
       throw Error("Couldn't fetch cluster info because core is not available");
@@ -287,12 +326,12 @@ export class TelemetryEventsSender {
     return getClusterInfo(callCluster);
   }
 
-  private async fetchTelemetryUrl(): Promise<string> {
+  private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), 'alerts-endpoint');
+    return getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
   private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -326,7 +365,6 @@ export class TelemetryEventsSender {
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
-    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
     const ndjson = transformDataToNdjson(events);
     // this.logger.debug(`NDJSON: ${ndjson}`);
 

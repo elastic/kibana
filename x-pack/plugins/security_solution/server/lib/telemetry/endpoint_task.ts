@@ -151,8 +151,8 @@ export class TelemetryEndpointTask {
       };
     });
 
-    // TODO:@pjhampton - Send to dedicated infra web channel
     this.logger.debug(`${failedPolicyResponseTelemetry}`);
+    this.sender.sendOnDemand('endpoint-metadata', failedPolicyResponseTelemetry, true);
 
     return failedPolicyResponseTelemetry.length; // hits
   };
