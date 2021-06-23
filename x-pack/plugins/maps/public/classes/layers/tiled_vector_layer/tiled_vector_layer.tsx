@@ -72,12 +72,12 @@ export class TiledVectorLayer extends VectorLayer {
 
   getCustomIconAndTooltipContent() {
     const tileMetas = this.getMetaFromTiles();
-    if (!tileMetas) {
+    if (!tileMetas.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
     const totalFeatures: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
-      const count = !tileMeta || !tileMeta.properties ? 0 : tileMeta.properties[KBN_FEATURE_COUNT];
+      const count = tileMeta && tileMeta.properties ? tileMeta.properties[KBN_FEATURE_COUNT] : 0;
       return count + acc;
     }, 0);
 
@@ -85,8 +85,8 @@ export class TiledVectorLayer extends VectorLayer {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const isComplete: boolean = tileMetas.every((tileMeta: Feature) => {
-      return tileMeta && tileMeta.properties && tileMeta.properties[KBN_IS_TILE_COMPLETE];
+    const isIncomplete: boolean = tileMetas.some((tileMeta: Feature) => {
+      return !tileMeta?.properties?.[KBN_IS_TILE_COMPLETE];
     });
 
     const shapeTypeCountMeta: VectorShapeTypeCounts = tileMetas.reduce(
@@ -124,12 +124,12 @@ export class TiledVectorLayer extends VectorLayer {
 
     return {
       icon: this.getCurrentStyle().getIconFromGeometryTypes(isLinesOnly, isPointsOnly),
-      tooltipContent: !isComplete
+      tooltipContent: isIncomplete
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
             defaultMessage: `Layer shows incomplete results`,
           })
         : null,
-      areResultsTrimmed: !isComplete,
+      areResultsTrimmed: !isIncomplete,
     };
   }
 

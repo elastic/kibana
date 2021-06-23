@@ -136,33 +136,14 @@ export class MbMap extends Component<Props, State> {
   }
 
   // This keeps track of the latest update calls, per layerId
-  _queryForMeta = (() => {
-    const callMap = new Map<string, ILayer>();
-
-    let timerId: ReturnType<typeof setTimeout> | null = null;
-
-    const updateAllLayers = () => {
-      callMap.forEach((layer: ILayer, layerId: string) => {
-        if (this.state.mbMap) {
-          if (layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-            const mbFeatures = (layer as TiledVectorLayer).queryForTileMeta(this.state.mbMap);
-            if (mbFeatures !== null) {
-              this.props.updateMetaFromTiles(layerId, mbFeatures);
-            }
-          }
-        }
-      });
-      callMap.clear();
-      timerId = null;
-    };
-
-    return (layerId: string, layer: ILayer) => {
-      callMap.set(layerId, layer);
-      if (!timerId) {
-        timerId = setTimeout(updateAllLayers, 1200);
+  _queryForMeta = (layer: ILayer) => {
+    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
+      const mbFeatures = (layer as TiledVectorLayer).queryForTileMeta(this.state.mbMap);
+      if (mbFeatures !== null) {
+        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
       }
-    };
-  })();
+    }
+  };
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
@@ -235,9 +216,9 @@ export class MbMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean, layer: ILayer) => {
-          this.props.setAreTilesLoaded(layerId, areTilesLoaded);
-          this._queryForMeta(layerId, layer);
+        setAreTilesLoaded: (layer: ILayer, areTilesLoaded: boolean) => {
+          this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+          this._queryForMeta(layer);
         },
       });
 

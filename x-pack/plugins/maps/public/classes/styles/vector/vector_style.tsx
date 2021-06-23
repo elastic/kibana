@@ -511,8 +511,6 @@ export class VectorStyle implements IVectorStyle {
         styleMeta.fieldMeta[name] = {};
       }
 
-      styleMeta.fieldMeta[name] = {};
-
       let min = Infinity;
       let max = -Infinity;
       for (let i = 0; i < features.length; i++) {

@@ -24,11 +24,7 @@ interface Tile {
 export class TileStatusTracker {
   private _tileCache: Tile[];
   private readonly _mbMap: MapboxMap;
-  private readonly _setAreTilesLoaded: (
-    layerId: string,
-    areTilesLoaded: boolean,
-    layer: ILayer
-  ) => void;
+  private readonly _setAreTilesLoaded: (layer: ILayer, areTilesLoaded: boolean) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
   private readonly _onSourceDataLoading = (e: MapSourceDataEvent) => {
     if (
@@ -84,7 +80,7 @@ export class TileStatusTracker {
     getCurrentLayerList,
   }: {
     mbMap: MapboxMap;
-    setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean, layer: ILayer) => void;
+    setAreTilesLoaded: (layer: ILayer, areTilesLoaded: boolean) => void;
     getCurrentLayerList: () => ILayer[];
   }) {
     this._tileCache = [];
@@ -112,7 +108,7 @@ export class TileStatusTracker {
           break;
         }
       }
-      this._setAreTilesLoaded(layer.getId(), !atLeastOnePendingTile, layer);
+      this._setAreTilesLoaded(layer, !atLeastOnePendingTile);
     }
   }, 100);
 
