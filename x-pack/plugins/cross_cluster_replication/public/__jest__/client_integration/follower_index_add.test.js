@@ -42,10 +42,6 @@ describe('Create Follower index', () => {
       expect(exists('remoteClustersLoading')).toBe(true);
       expect(find('remoteClustersLoading').text()).toBe('Loading remote clusters…');
     });
-
-    test('should have a link to the documentation', () => {
-      expect(exists('docsButton')).toBe(true);
-    });
   });
 
   describe('when remote clusters are loaded', () => {
@@ -60,6 +56,10 @@ describe('Create Follower index', () => {
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
+    });
+
+    test('should have a link to the documentation', () => {
+      expect(exists('docsButton')).toBe(true);
     });
 
     test('should display the Follower index form', async () => {

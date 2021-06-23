@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -13,9 +14,7 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
-  defaultPackages,
   installationStatuses,
-  requiredPackages,
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
@@ -45,7 +44,7 @@ export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
+export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice';
@@ -301,8 +300,8 @@ export interface RegistryDataStream {
 }
 
 export interface RegistryElasticsearch {
-  'index_template.settings'?: object;
-  'index_template.mappings'?: object;
+  'index_template.settings'?: estypes.IndicesIndexSettings;
+  'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
 export interface RegistryDataStreamPermissions {
@@ -408,10 +407,6 @@ export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 };
 
-export type RequiredPackage = typeof requiredPackages;
-
-export type DefaultPackages = typeof defaultPackages;
-
 export interface IndexTemplateMappings {
   properties: any;
 }
@@ -431,7 +426,7 @@ export interface IndexTemplate {
   _meta: object;
 }
 
-export interface TemplateRef {
+export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }

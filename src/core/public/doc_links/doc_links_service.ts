@@ -22,6 +22,7 @@ export class DocLinksService {
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+    const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
@@ -136,6 +137,7 @@ export class DocLinksService {
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
         upgradeAssistant: `${KIBANA_DOCS}upgrade-assistant.html`,
+        rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
@@ -202,6 +204,7 @@ export class DocLinksService {
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
+          sessionLimits: `${KIBANA_DOCS}search-sessions.html#_limitations`,
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
@@ -400,6 +403,19 @@ export class DocLinksService {
           urlDecode: `${ELASTICSEARCH_DOCS}urldecode-processor.html`,
           userAgent: `${ELASTICSEARCH_DOCS}user-agent-processor.html`,
         },
+        fleet: {
+          guide: `${FLEET_DOCS}index.html`,
+          fleetServer: `${FLEET_DOCS}fleet-server.html`,
+          fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
+          settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          datastreams: `${FLEET_DOCS}data-streams.html`,
+          datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
+          upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+        },
       },
     });
   }
@@ -508,6 +524,7 @@ export interface DocLinksStart {
     };
     readonly search: {
       readonly sessions: string;
+      readonly sessionLimits: string;
     };
     readonly indexPatterns: {
       readonly introduction: string;
@@ -518,6 +535,7 @@ export interface DocLinksStart {
     readonly addData: string;
     readonly kibana: string;
     readonly upgradeAssistant: string;
+    readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
       readonly guide: string;
@@ -587,5 +605,18 @@ export interface DocLinksStart {
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
+    readonly fleet: Readonly<{
+      guide: string;
+      fleetServer: string;
+      fleetServerAddFleetServer: string;
+      settings: string;
+      settingsFleetServerHostSettings: string;
+      troubleshooting: string;
+      elasticAgent: string;
+      datastreams: string;
+      datastreamsNamingScheme: string;
+      upgradeElasticAgent: string;
+      upgradeElasticAgent712lower: string;
+    }>;
   };
 }

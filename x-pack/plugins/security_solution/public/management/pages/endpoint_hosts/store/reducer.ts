@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointDetailsActivityLogChanged } from './action';
+import { EndpointDetailsActivityLogChanged, EndpointPendingActionsStateChanged } from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -29,16 +29,40 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
   state,
   action
 ) => {
+  const pagingOptions =
+    action.payload.type === 'LoadedResourceState'
+      ? {
+          ...state.endpointDetails.activityLog,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            page: action.payload.data.page,
+            pageSize: action.payload.data.pageSize,
+          },
+        }
+      : { ...state.endpointDetails.activityLog };
   return {
     ...state!,
     endpointDetails: {
       ...state.endpointDetails!,
       activityLog: {
-        ...state.endpointDetails.activityLog,
+        ...pagingOptions,
         logData: action.payload,
       },
     },
   };
+};
+
+const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActionsStateChanged> = (
+  state,
+  action
+) => {
+  if (isOnEndpointPage(state)) {
+    return {
+      ...state,
+      endpointPendingActions: action.payload,
+    };
+  }
+  return state;
 };
 
 /* eslint-disable-next-line complexity */
@@ -125,7 +149,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       },
     };
   } else if (action.type === 'appRequestedEndpointActivityLog') {
-    const pageData = {
+    const paging = {
+      disabled: state.endpointDetails.activityLog.paging.disabled,
       page: action.payload.page,
       pageSize: action.payload.pageSize,
     };
@@ -135,12 +160,36 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          ...pageData,
+          paging,
         },
+      },
+    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
+    const paging = {
+      ...action.payload,
+    };
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          paging,
+        },
+      },
+    };
+  } else if (action.type === 'endpointDetailsFlyoutTabChanged') {
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        flyoutView: action.payload.flyoutView,
       },
     };
   } else if (action.type === 'endpointDetailsActivityLogChanged') {
     return handleEndpointDetailsActivityLogChanged(state, action);
+  } else if (action.type === 'endpointPendingActionsStateChanged') {
+    return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
@@ -240,8 +289,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
 
     const activityLog = {
       logData: createUninitialisedResourceState(),
-      page: 1,
-      pageSize: 50,
+      paging: {
+        disabled: false,
+        page: 1,
+        pageSize: 50,
+      },
     };
 
     // Reset `isolationRequestState` if needed

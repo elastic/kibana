@@ -34,8 +34,10 @@ import {
   getActivityLogData,
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
+  detailsData,
+  getEndpointDetailsFlyoutView,
 } from './selectors';
-import { EndpointState, PolicyIds } from '../types';
+import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
@@ -47,6 +49,7 @@ import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
@@ -59,8 +62,13 @@ import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isol
 import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ServerReturnedEndpointPackageInfo } from './action';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
+
+// eslint-disable-next-line no-console
+const logError = console.error;
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -110,6 +118,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: endpointResponse,
         });
 
+        loadEndpointsPendingActions(store);
+
         try {
           const endpointsTotalCount = await endpointsTotal(coreStart.http);
           dispatch({
@@ -156,8 +166,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
@@ -277,8 +286,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             }
           } catch (error) {
             // Ignore Errors, since this should not hinder the user's ability to use the UI
-            // eslint-disable-next-line no-console
-            console.error(error);
+            logError(error);
           }
         } catch (error) {
           dispatch({
@@ -323,8 +331,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           }
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
+          logError(error);
         }
       } catch (error) {
         dispatch({
@@ -333,6 +340,30 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
       }
 
+      loadEndpointsPendingActions(store);
+
+      // call the policy response api
+      try {
+        const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
+          query: { agentId: selectedEndpoint },
+        });
+        dispatch({
+          type: 'serverReturnedEndpointPolicyResponse',
+          payload: policyResponse,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnEndpointPolicyResponse',
+          payload: error,
+        });
+      }
+    }
+
+    if (
+      action.type === 'userChangedUrl' &&
+      hasSelectedEndpoint(getState()) === true &&
+      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+    ) {
       // call the activity log api
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
@@ -357,22 +388,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
           payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-        });
-      }
-
-      // call the policy response api
-      try {
-        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { agentId: selectedEndpoint },
-        });
-        dispatch({
-          type: 'serverReturnedEndpointPolicyResponse',
-          payload: policyResponse,
-        });
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointPolicyResponse',
-          payload: error,
         });
       }
     }
@@ -402,17 +417,24 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           ] as ActivityLog['data'];
 
           const updatedLogData = {
-            total: activityLog.total,
             page: activityLog.page,
             pageSize: activityLog.pageSize,
-            data: updatedLogDataItems,
+            data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
           };
           dispatch({
             type: 'endpointDetailsActivityLogChanged',
             payload: createLoadedResourceState<ActivityLog>(updatedLogData),
           });
-          // TODO dispatch 'noNewLogData' if !activityLog.length
-          // resets paging to previous state
+          if (!activityLog.data.length) {
+            dispatch({
+              type: 'endpointDetailsActivityLogUpdatePaging',
+              payload: {
+                disabled: true,
+                page: activityLog.page - 1,
+                pageSize: activityLog.pageSize,
+              },
+            });
+          }
         } else {
           dispatch({
             type: 'endpointDetailsActivityLogChanged',
@@ -512,10 +534,8 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
       })
     ).total;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check for total endpoints`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check for total endpoints`);
+    logError(error);
   }
   return 0;
 };
@@ -524,10 +544,8 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check if endpoints exist`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(`error while trying to check if endpoints exist`);
+    logError(error);
   }
   return false;
 };
@@ -586,7 +604,51 @@ async function getEndpointPackageInfo(
     });
   } catch (error) {
     // Ignore Errors, since this should not hinder the user's ability to use the UI
-    // eslint-disable-next-line no-console
-    console.error(error);
+    logError(error);
   }
 }
+
+/**
+ * retrieves the Endpoint pending actions for all of the existing endpoints being displayed on the list
+ * or the details tab.
+ *
+ * @param store
+ */
+const loadEndpointsPendingActions = async ({
+  getState,
+  dispatch,
+}: EndpointPageStore): Promise<void> => {
+  const state = getState();
+  const detailsEndpoint = detailsData(state);
+  const listEndpoints = listData(state);
+  const agentsIds = new Set<string>();
+
+  // get all agent ids for the endpoints in the list
+  if (detailsEndpoint) {
+    agentsIds.add(detailsEndpoint.elastic.agent.id);
+  }
+
+  for (const endpointInfo of listEndpoints) {
+    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
+  }
+
+  if (agentsIds.size === 0) {
+    return;
+  }
+
+  try {
+    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
+    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
+
+    for (const pendingAction of pendingActions) {
+      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
+    }
+
+    dispatch({
+      type: 'endpointPendingActionsStateChanged',
+      payload: createLoadedResourceState(agentIdToPendingActions),
+    });
+  } catch (error) {
+    logError(error);
+  }
+};
