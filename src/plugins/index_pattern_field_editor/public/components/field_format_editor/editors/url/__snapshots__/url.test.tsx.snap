@@ -153,7 +153,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             class="euiFieldText"
             data-test-subj="urlEditorUrlTemplate"
             id="generated-id"
@@ -164,7 +164,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
-        id="generated-id-help"
+        id="generated-id-help-0"
       >
         <a
           class="euiLink euiLink--primary"
@@ -216,7 +216,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             class="euiFieldText"
             data-test-subj="urlEditorLabelTemplate"
             id="generated-id"
@@ -227,7 +227,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
-        id="generated-id-help"
+        id="generated-id-help-0"
       >
         <a
           class="euiLink euiLink--primary"
