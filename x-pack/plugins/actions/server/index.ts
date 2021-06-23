@@ -64,19 +64,19 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (
         customHostSettings.find(
           (customHostSchema: CustomHostSettings) =>
-            !!customHostSchema.tls && !!customHostSchema.tls.rejectUnauthorized
+            !!customHostSchema.ssl && !!customHostSchema.ssl.rejectUnauthorized
         )
       ) {
         addDeprecation({
           message:
-            `"xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized" is deprecated.` +
-            `Use "xpack.actions.customHostSettings[<index>].tls.verificationMode" instead, ` +
+            `"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.` +
+            `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
             `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
-              `Remove "xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized" from your kibana configs.`,
-              `Use "xpack.actions.customHostSettings[<index>].tls.verificationMode" ` +
+              `Remove "xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" from your kibana configs.`,
+              `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" ` +
                 `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
                 `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
             ],
