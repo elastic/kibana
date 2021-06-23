@@ -25,6 +25,7 @@ describe('Create Record Mapping', () => {
     const data = getBodyForEventAction(appId, mappings, params);
     expect(data.applicationId).toEqual(appId);
     expect(data.id).not.toBeDefined();
+    expect(data.values?.[mappings.alertIdConfig?.id ?? 0]).toEqual(params.alertId);
     expect(data.values?.[mappings.ruleNameConfig.id]).toEqual(params.ruleName);
     expect(data.values?.[mappings.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
     expect(data.values?.[mappings.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
@@ -60,5 +61,30 @@ describe('Create Record Mapping', () => {
     // @ts-expect-error
     const data = getBodyForEventAction(appId, { ...mappings, test: null }, params);
     expect(data.values?.test).not.toBeDefined();
+  });
+
+  test('it converts a numeric values correctly', () => {
+    const params = {
+      alertId: 'thisIsNotANumber',
+      ruleName: 'Rule Name',
+      severity: 'Critical',
+      caseName: 'Case Name',
+      caseId: '123',
+      description: 'case desc',
+      externalId: null,
+    };
+
+    const data = getBodyForEventAction(
+      appId,
+      {
+        ...mappings,
+        caseIdConfig: { ...mappings.caseIdConfig, fieldType: 'numeric' },
+        alertIdConfig: { ...mappings.alertIdConfig, fieldType: 'numeric' },
+      },
+      params
+    );
+
+    expect(data.values?.[mappings.alertIdConfig?.id ?? 0]).toBe(0);
+    expect(data.values?.[mappings.caseIdConfig?.id ?? 0]).toBe(123);
   });
 });
