@@ -19,7 +19,7 @@ export type AlertExecutorOptionsWithExtraServices<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  TExtraServices = never
+  TExtraServices extends {} = never
 > = Omit<
   AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
   'services'
@@ -38,45 +38,34 @@ export type ExecutorType<
 ) => Promise<State | void>;
 
 export type ExecutorTypeWithExtraServices<
-  TExecutorType,
-  TExtraServices
-> = TExecutorType extends ExecutorType<
-  infer Params,
-  infer State,
-  infer InstanceState,
-  infer InstanceContext,
-  infer ActionGroupIds
->
-  ? (
-      options: AlertExecutorOptionsWithExtraServices<
-        Params,
-        State,
-        InstanceState,
-        InstanceContext,
-        ActionGroupIds,
-        TExtraServices
-      >
-    ) => Promise<State | void>
-  : never;
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  ExtraServices extends {} = never
+> = (
+  options: AlertExecutorOptionsWithExtraServices<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    ExtraServices
+  >
+) => Promise<State | void>;
 
 export type AlertTypeWithExecutor<
   TParams extends AlertTypeParams = never,
-  TState extends AlertTypeState = never,
   TInstanceState extends AlertInstanceState = never,
   TInstanceContext extends AlertInstanceContext = never,
   TActionGroupIds extends string = never,
   TRecoveryActionGroupId extends string = never,
-  TExecutorType extends (...args: any[]) => Promise<TState | void> = ExecutorType<
-    TParams,
-    TState,
-    TInstanceState,
-    TInstanceContext,
-    TActionGroupIds
-  >
+  TExecutorType extends (...args: any[]) => Promise<any> = never
 > = Omit<
   AlertType<
     TParams,
-    TState,
+    any,
     TInstanceState,
     TInstanceContext,
     TActionGroupIds,

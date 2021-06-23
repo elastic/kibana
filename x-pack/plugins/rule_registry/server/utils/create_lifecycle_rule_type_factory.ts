@@ -31,7 +31,7 @@ import {
   RULE_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { AlertTypeWithExecutor, ExecutorType, ExecutorTypeWithExtraServices } from '../types';
+import { AlertTypeWithExecutor, ExecutorTypeWithExtraServices } from '../types';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
 type LifecycleAlertService<
@@ -58,7 +58,11 @@ export type LifecycleRuleExecutor<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > = ExecutorTypeWithExtraServices<
-  ExecutorType<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+  Params,
+  State,
+  InstanceState,
+  InstanceContext,
+  ActionGroupIds,
   LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
 >;
 
@@ -105,13 +109,16 @@ export const createLifecycleRuleTypeFactory = ({
 >(
   type: AlertTypeWithExecutor<
     Params,
-    State,
     InstanceState,
     InstanceContext,
     ActionGroupIds,
     RecoveryActionGroupId,
     ExecutorTypeWithExtraServices<
-      ExecutorType<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
       LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
     >
   >

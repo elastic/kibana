@@ -6,31 +6,49 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../../alerting/server';
+import {
   RuleDataClient,
   createPersistenceRuleTypeFactory,
 } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
+
+const queryAlertTypeParamsSchema = schema.object({
+  indexPatterns: schema.arrayOf(schema.string()),
+  customQuery: schema.string(),
+});
+
+interface QueryAlertTypeState extends AlertTypeState {
+  lastChecked: Date;
+}
 
 export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
   const createPersistenceRuleType = createPersistenceRuleTypeFactory({
     ruleDataClient,
     logger,
   });
-  return createPersistenceRuleType({
+  return createPersistenceRuleType<
+    TypeOf<typeof queryAlertTypeParamsSchema>,
+    QueryAlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default',
+    string
+  >({
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
-      params: schema.object({
-        indexPatterns: schema.arrayOf(schema.string()),
-        customQuery: schema.string(),
-      }),
+      params: queryAlertTypeParamsSchema,
     },
     actionGroups: [
       {

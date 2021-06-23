@@ -8,10 +8,15 @@
 import moment from 'moment';
 import v4 from 'uuid/v4';
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 
-import { AlertServices } from '../../../../../alerting/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+  AlertTypeState,
+} from '../../../../../alerting/server';
 import {
   RuleDataClient,
   createPersistenceRuleTypeFactory,
@@ -80,27 +85,40 @@ const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] 
   });
 };
 
+const thresholdAlertTypeParamsSchema = schema.object({
+  indexPatterns: schema.arrayOf(schema.string()),
+  customQuery: schema.string(),
+  thresholdFields: schema.arrayOf(schema.string()),
+  thresholdValue: schema.number(),
+  thresholdCardinality: schema.arrayOf(
+    schema.object({
+      field: schema.string(),
+      value: schema.number(),
+    })
+  ),
+});
+
+interface ThresholdAlertTypeState extends AlertTypeState {
+  lastChecked: Date;
+}
+
 export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
   const createPersistenceRuleType = createPersistenceRuleTypeFactory({
     ruleDataClient,
     logger,
   });
-  return createPersistenceRuleType({
+  return createPersistenceRuleType<
+    TypeOf<typeof thresholdAlertTypeParamsSchema>,
+    ThresholdAlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default',
+    string
+  >({
     id: THRESHOLD_ALERT_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
-      params: schema.object({
-        indexPatterns: schema.arrayOf(schema.string()),
-        customQuery: schema.string(),
-        thresholdFields: schema.arrayOf(schema.string()),
-        thresholdValue: schema.number(),
-        thresholdCardinality: schema.arrayOf(
-          schema.object({
-            field: schema.string(),
-            value: schema.number(),
-          })
-        ),
-      }),
+      params: thresholdAlertTypeParamsSchema,
     },
     actionGroups: [
       {

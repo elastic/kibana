@@ -4,45 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Logger } from '@kbn/logging';
 import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import v4 from 'uuid/v4';
-import { Logger } from '@kbn/logging';
-
-import { AlertInstance } from '../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../alerting/common';
+import { AlertInstance, AlertType } from '../../../alerting/server';
 import { RuleDataClient } from '../rule_data_client';
-import { AlertTypeWithExecutor } from '../types';
+import { AlertTypeWithExecutor, ExecutorTypeWithExtraServices } from '../types';
 
 type PersistenceAlertService<TAlertInstanceContext extends Record<string, unknown>> = (
   alerts: Array<Record<string, unknown>>
 ) => Array<AlertInstance<AlertInstanceState, TAlertInstanceContext, string>>;
 
+export interface PersistenceAlertServices<InstanceContext extends AlertInstanceContext = never> {
+  alertWithPersistence: PersistenceAlertService<InstanceContext>;
+  findAlerts: PersistenceAlertQueryService;
+}
+
 type PersistenceAlertQueryService = (
   query: ESSearchRequest
 ) => Promise<Array<Record<string, unknown>>>;
 
-type CreatePersistenceRuleTypeFactory = (options: {
+export const createPersistenceRuleTypeFactory = ({
+  logger,
+  ruleDataClient,
+}: {
   ruleDataClient: RuleDataClient;
   logger: Logger;
 }) => <
-  TParams extends AlertTypeParams,
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends {
-    alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
-    findAlerts: PersistenceAlertQueryService;
-  }
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never,
+  RecoveryActionGroupId extends string = never
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
-
-export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
-  logger,
-  ruleDataClient,
-}) => (type) => {
+  type: AlertTypeWithExecutor<
+    Params,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    ExecutorTypeWithExtraServices<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      PersistenceAlertServices<InstanceContext>
+    >
+  >
+): AlertType<
+  Params,
+  any,
+  InstanceState,
+  InstanceContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+> => {
   return {
     ...type,
     executor: async (options) => {
@@ -72,7 +96,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               ignore_unavailable: true,
             });
             return body.hits.hits
-              .map((event: { _source: any }) => event._source!)
+              .map((event: { _source?: any }) => event._source!)
               .map((event: { [x: string]: any }) => {
                 const alertUuid = event['kibana.rac.alert.uuid'];
                 const isAlert = alertUuid != null;
