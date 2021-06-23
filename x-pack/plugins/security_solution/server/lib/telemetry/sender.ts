@@ -147,46 +147,6 @@ export class TelemetryEventsSender {
 
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.*`,
-      ignore_unavailable: false,
-      size: 0,
-      body: {
-        query: {
-          match: {
-            'Endpoint.policy.applied.status': 'failure',
-          },
-        },
-      },
-    };
-
-    const {
-      body: failedPolicyResponses,
-    } = await this.esClient.search<EndpointMetricsPolicyResponse>(query);
-    return failedPolicyResponses;
-  }
-
-  public async fetchFleetAgents() {
-    if (this.esClient === undefined) {
-      throw Error('could not fetch policy responses. es client is not available');
-    }
-
-    // require ALL fleet agents (inc inactive), not just the ones with EP Package.
-    // the reason for this is that the EP package could have failed to install.
-    return this.agentService?.listAgents(this.esClient, {
-      perPage: this.max_records,
-      showInactive: true,
-      sortField: 'enrolled_at',
-      sortOrder: 'desc',
-    });
-  }
-
-  public async fetchEndpointPolicyConfigs(id: string) {
-    if (this.esClient === undefined) {
-      throw Error('could not fetch policy responses. es client is not available');
-    }
-
-    const query = {
-      expand_wildcards: 'open,hidden',
       index: `.ds-metrics-endpoint.metrics*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
@@ -225,6 +185,29 @@ export class TelemetryEventsSender {
     };
 
     return this.esClient.search(query);
+  }
+
+  public async fetchFleetAgents() {
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
+    }
+
+    // require ALL fleet agents (inc inactive), not just the ones with EP Package.
+    // the reason for this is that the EP package could have failed to install.
+    return this.agentService?.listAgents(this.esClient, {
+      perPage: this.max_records,
+      showInactive: true,
+      sortField: 'enrolled_at',
+      sortOrder: 'desc',
+    });
+  }
+
+  public async fetchEndpointPolicyConfigs(id: string) {
+    if (this.savedObjectClient === undefined) {
+      throw Error('could not fetch endpoint policy configs. saved object client is not available');
+    }
+
+    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
   }
 
   public async fetchFailedEndpointPolicyResponses() {
