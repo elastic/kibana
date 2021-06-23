@@ -189,6 +189,8 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 }
 
 export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+  const { docLinks } = useStartServices();
+
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
   const outputsRequest = useGetOutputs();
@@ -302,7 +304,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               values={{
                 link: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/fleet/current/fleet-settings.html#fleet-server-hosts-setting"
+                    href={docLinks.links.fleet.settingsFleetServerHostSettings}
                     target="_blank"
                     external
                   >

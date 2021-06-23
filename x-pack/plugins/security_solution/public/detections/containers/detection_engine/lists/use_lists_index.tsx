@@ -6,10 +6,9 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-
+import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
-import { isSecurityAppError } from '../../../../common/utils/api';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';

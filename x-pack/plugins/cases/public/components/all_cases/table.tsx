@@ -121,19 +121,21 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
             titleSize="xs"
-            body={i18n.NO_CASES_BODY}
+            body={userCanCrud ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
             actions={
-              <LinkButton
-                isDisabled={!userCanCrud}
-                fill
-                size="s"
-                onClick={goToCreateCase}
-                href={createCaseNavigation.href}
-                iconType="plusInCircle"
-                data-test-subj="cases-table-add-case"
-              >
-                {i18n.ADD_NEW_CASE}
-              </LinkButton>
+              userCanCrud && (
+                <LinkButton
+                  isDisabled={!userCanCrud}
+                  fill
+                  size="s"
+                  onClick={goToCreateCase}
+                  href={createCaseNavigation.href}
+                  iconType="plusInCircle"
+                  data-test-subj="cases-table-add-case"
+                >
+                  {i18n.ADD_NEW_CASE}
+                </LinkButton>
+              )
             }
           />
         }

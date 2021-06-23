@@ -6,7 +6,6 @@
  */
 
 import { get, omit } from 'lodash';
-// @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
