@@ -452,7 +452,10 @@ export const buildFiltersFromCriteria = (
 export const getGroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
     criteria: CountCriteria;
-    count: Pick<AlertParams['count'], 'comparator'>;
+    count: {
+      comparator: AlertParams['count']['comparator'];
+      value?: AlertParams['count']['value'];
+    };
   },
   timestampField: string,
   index: string,
@@ -480,9 +483,21 @@ export const getGroupedESQuery = (
     timestampField
   );
 
-  const isOptimizableComparator = (selectedComparator: AlertParams['count']['comparator']) => {
-    const optimizableThresholdComparators = [Comparator.GT];
-    return optimizableThresholdComparators.includes(selectedComparator);
+  const isOptimizableComparator = (
+    selectedComparator: AlertParams['count']['comparator'],
+    selectedValue?: AlertParams['count']['value']
+  ) => {
+    if (selectedComparator === Comparator.GT) {
+      return true;
+    } else if (
+      typeof selectedValue === 'number' &&
+      selectedComparator === Comparator.GT_OR_EQ &&
+      selectedValue > 0
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   if (isOptimizableComparator(comparator)) {

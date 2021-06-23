@@ -70,6 +70,7 @@ export const CriterionPreview: React.FC<Props> = ({
       criteria,
       count: {
         comparator: alertParams.count.comparator,
+        value: alertParams.count.value,
       },
       timeSize: alertParams.timeSize,
       timeUnit: alertParams.timeUnit,
@@ -86,6 +87,7 @@ export const CriterionPreview: React.FC<Props> = ({
     alertParams.timeUnit,
     alertParams.groupBy,
     alertParams.count.comparator,
+    alertParams.count.value,
     chartCriterion,
   ]);
 
