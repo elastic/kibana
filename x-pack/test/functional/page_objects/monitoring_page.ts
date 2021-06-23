@@ -17,7 +17,7 @@ export class MonitoringPageObject extends FtrService {
   }
 
   async closeAlertsModal() {
-    return testSubjects.click('alerts-modal-button');
+    return this.testSubjects.click('alerts-modal-button');
   }
 
   async clickBreadcrumb(subj: string) {

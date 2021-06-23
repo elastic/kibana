@@ -71,25 +71,23 @@ uiRoutes.when('/overview', {
           }
 
           this.renderReact(
-            <>
-              <SetupModeRenderer
-                scope={$scope}
-                injector={$injector}
-                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                  <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-                    {flyoutComponent}
-                    <Overview
-                      cluster={data}
-                      alerts={this.alerts}
-                      setupMode={setupMode}
-                      showLicenseExpiration={showLicenseExpiration}
-                    />
-                    <EnableAlertsModal />
-                    {bottomBarComponent}
-                  </SetupModeContext.Provider>
-                )}
-              />
-            </>
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Overview
+                    cluster={data}
+                    alerts={this.alerts}
+                    setupMode={setupMode}
+                    showLicenseExpiration={showLicenseExpiration}
+                  />
+                  <EnableAlertsModal />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
           );
         }
       );
