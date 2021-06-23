@@ -1,6 +1,6 @@
 # expressionRevealImage
 
-Expression Reveal Image plugin is an extracted Canvas chart. It is registrating the `revealImage` chart, expression elements, functions and views to canvas and expression plugins.   
+Expression Reveal Image plugin adds a `revealImage` function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
 
 ---
 
