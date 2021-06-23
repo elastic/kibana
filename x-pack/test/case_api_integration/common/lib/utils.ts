@@ -46,6 +46,7 @@ import {
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
   AlertResponse,
+  ConnectorMappings,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -575,6 +576,32 @@ export const ensureSavedObjectIsAuthorized = (
 ) => {
   expect(entities.length).to.eql(numberOfExpectedCases);
   entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
+};
+
+interface ConnectorMappingsSavedObject {
+  'cases-connector-mappings': ConnectorMappings;
+}
+
+/**
+ * Returns connector mappings saved objects from Elasticsearch directly.
+ */
+export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
+  const mappings: ApiResponse<
+    estypes.SearchResponse<ConnectorMappingsSavedObject>
+  > = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases-connector-mappings',
+          },
+        },
+      },
+    },
+  });
+
+  return mappings;
 };
 
 export const createCaseWithConnector = async ({
