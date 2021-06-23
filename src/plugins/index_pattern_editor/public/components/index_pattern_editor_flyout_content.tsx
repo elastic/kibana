@@ -384,7 +384,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   return (
     <>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-        <FlyoutPanels.Item border="right">
+        <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           {/*
           possibly break out into own component
         */}
