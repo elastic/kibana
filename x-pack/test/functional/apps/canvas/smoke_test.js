@@ -17,7 +17,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
-    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
+    const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
