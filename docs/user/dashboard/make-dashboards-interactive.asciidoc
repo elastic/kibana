@@ -2,7 +2,29 @@
 [[drilldowns]]
 == Make dashboards interactive
 
+:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, drilldowns
+:description: Add interactive capabilities to your dashboard, such as controls that allow \
+you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other \
+dashboards and external websites.
+
 Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other dashboards and external websites. 
+
+*Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
+
+{kib} supports two types of *Controls*:
+
+* *Options list* — Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
+For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
+
+* *Range slider* — Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a 
+min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
++
+[role="screenshot"]
+image::images/dashboard-controls.png[]
+
+Panels have built-in interactive capabilties that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. For example, when can create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name. You can also create drilldowns that navigate you to an external website with the specific host name as a parameter. Each dashboards panel can support multiple drilldowns. The drilldowns you create apply only to the panel that you created the drilldown on, and are not shared across panels.
+
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 ++++
 <script type="text/javascript" async 
@@ -20,20 +42,9 @@ data-type="inline"
 
 [float]
 [[add-controls]]
-== Add control panels
+=== Add Controls panels
 
-*Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
-
-{kib} supports two types of *Controls*:
-
-* *Options list* — Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
-For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
-
-* *Range slider* — Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a 
-min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
-+
-[role="screenshot"]
-image::images/dashboard-controls.png[]
+Add interactive dashboard-level filter panels to your dashboard.
 
 . On the dashboard, click *All types*, then select *Controls*.
 
@@ -47,15 +58,6 @@ image::images/dashboard-controls.png[]
 * *Pin filters for all applications* &mdash; When selected, all filters created by interacting with the inputs are automatically pinned.
 
 . Click *Update*
-
-[float]
-[[create-drilldowns]]
-== Create drilldowns
-
-Each panel type in {kib} has a built-in interaction which applies a filter to the dashboard, for example by dragging a time range or clicking a pie slice. Drilldowns let you customize this behavior while keeping the context of the interaction. For example, if you add a drilldown to a Lens panel you navigate from a summary dashboard to a dashboard with a filter for the specific host name you filtered. You could also navigate to an external website with the specific host name as a parameter. You can create multiple drilldowns for a single panel.
-Drilldowns apply only to the panel that you created the drilldown on, and are not shared across panels.
-
-Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 [float]
 [[dashboard-drilldowns]]
