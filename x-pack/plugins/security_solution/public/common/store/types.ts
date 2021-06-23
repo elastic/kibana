@@ -37,18 +37,6 @@ export type StoreState = HostsPluginState &
  */
 export type State = CombinedState<StoreState>;
 
-export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
-
-export interface KueryFilterQuery {
-  kind: KueryFilterQueryKind;
-  expression: string;
-}
-
-export interface SerializedFilterQuery {
-  kuery: KueryFilterQuery | null;
-  serializedQuery: string;
-}
-
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
  * state and `dispatch` accepts `Immutable` versions of actions.
