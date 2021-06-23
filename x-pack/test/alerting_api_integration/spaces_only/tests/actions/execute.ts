@@ -406,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(startExecuteEvent?.message).to.eql(startMessage);
     }
 
-    expect(event?.kibana?.task).to.eql(undefined);
+    expect(executeEvent?.kibana?.task).to.eql(undefined);
 
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
