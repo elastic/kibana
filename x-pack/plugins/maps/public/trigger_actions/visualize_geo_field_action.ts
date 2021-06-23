@@ -33,18 +33,18 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     }),
   isCompatible: async () => !!getVisualizeCapabilities().show,
   getHref: async (context) => {
-    const { app, route } = await getMapsLink(context);
+    const { app, path } = await getMapsLink(context);
 
     return getCore().application.getUrlForApp(app, {
-      path: route,
+      path,
       absolute: false,
     });
   },
   execute: async (context) => {
-    const { app, route, state } = await getMapsLink(context);
+    const { app, path, state } = await getMapsLink(context);
 
     getCore().application.navigateToApp(app, {
-      path: route,
+      path,
       state,
     });
   },

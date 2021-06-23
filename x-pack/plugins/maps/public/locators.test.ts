@@ -24,7 +24,7 @@ describe('visualize url generator', () => {
 
     expect(location).toMatchObject({
       app: 'maps',
-      route: '/map#/?_g=()&_a=()',
+      path: '/map#/?_g=()&_a=()',
       state: {},
     });
   });
@@ -39,7 +39,7 @@ describe('visualize url generator', () => {
 
     expect(location).toMatchObject({
       app: 'maps',
-      route: '/map#/?_g=(time:(from:now-15m,mode:relative,to:now))&_a=()',
+      path: '/map#/?_g=(time:(from:now-15m,mode:relative,to:now))&_a=()',
       state: {},
     });
   });
@@ -70,7 +70,7 @@ describe('visualize url generator', () => {
 
     expect(location).toMatchObject({
       app: 'maps',
-      route: `/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AVECTOR%2Cvisible%3A!t)`,
+      path: `/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AVECTOR%2Cvisible%3A!t)`,
       state: {},
     });
   });
@@ -109,7 +109,7 @@ describe('visualize url generator', () => {
 
     expect(location).toMatchObject({
       app: 'maps',
-      route: `/map#/${MAP_ID}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),query:(language:kuery,query:q2))`,
+      path: `/map#/${MAP_ID}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),query:(language:kuery,query:q2))`,
       state: {},
     });
   });

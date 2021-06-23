@@ -109,7 +109,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
 
     return {
       app: 'maps',
-      route: path,
+      path,
       state: {},
     };
   };
