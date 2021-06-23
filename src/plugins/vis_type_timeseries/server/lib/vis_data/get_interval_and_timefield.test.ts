@@ -11,12 +11,17 @@ import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
 describe('getIntervalAndTimefield(panel, series)', () => {
   const index: FetchedIndexPattern = {} as FetchedIndexPattern;
+  const params = {
+    min: '2017-01-01T00:00:00Z',
+    max: '2017-01-01T01:00:00Z',
+    maxBuckets: 1000,
+  };
 
   test('returns the panel interval and timefield', () => {
     const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
     const series = {} as Series;
 
-    expect(getIntervalAndTimefield(panel, index, series)).toEqual({
+    expect(getIntervalAndTimefield(panel, index, params, series)).toEqual({
       timeField: '@timestamp',
       interval: 'auto',
     });
@@ -30,7 +35,7 @@ describe('getIntervalAndTimefield(panel, series)', () => {
       series_time_field: 'time',
     } as unknown) as Series;
 
-    expect(getIntervalAndTimefield(panel, index, series)).toEqual({
+    expect(getIntervalAndTimefield(panel, index, params, series)).toEqual({
       timeField: 'time',
       interval: '1m',
     });
