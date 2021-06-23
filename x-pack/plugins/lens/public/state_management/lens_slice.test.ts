@@ -6,22 +6,15 @@
  */
 
 import { Query } from 'src/plugins/data/public';
-import { makeLensStore, defaultState } from '../mocks';
-import { lensSlice } from './lens_slice';
-
-const {
+import {
+  switchDatasource,
+  switchVisualization,
   setState,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
-  // updateLayer,
-  // switchVisualization,
-  // selectSuggestion,
-  // rollbackSuggestion,
-  // submitSuggestion,
-  // switchDatasource,
-  // setToggleFullscreen,
-} = lensSlice.actions;
+} from '.';
+import { makeLensStore, defaultState } from '../mocks';
 
 describe('lensSlice', () => {
   const store = makeLensStore({});
@@ -69,6 +62,87 @@ describe('lensSlice', () => {
         changed: true,
       });
       expect(datasourceUpdater).toHaveBeenCalledTimes(1);
+    });
+    it('should update the layer state with passed in reducer', () => {
+      const newDatasourceState = {};
+      store.dispatch(
+        updateDatasourceState({
+          datasourceId: 'testDatasource',
+          updater: newDatasourceState,
+        })
+      );
+      expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual(
+        newDatasourceState
+      );
+    });
+    it('should should switch active visualization', () => {
+      const newVisState = {};
+      store.dispatch(
+        switchVisualization({
+          newVisualizationId: 'testVis2',
+          initialState: newVisState,
+        })
+      );
+
+      expect(store.getState().lens.visualization.state).toBe(newVisState);
+    });
+
+    it('should should switch active visualization and update datasource state', () => {
+      const newVisState = {};
+      const newDatasourceState = {};
+
+      store.dispatch(
+        switchVisualization({
+          newVisualizationId: 'testVis2',
+          initialState: newVisState,
+          datasourceState: newDatasourceState,
+          datasourceId: 'testDatasource',
+        })
+      );
+
+      expect(store.getState().lens.visualization.state).toBe(newVisState);
+      expect(store.getState().lens.datasourceStates.testDatasource.state).toBe(newDatasourceState);
+    });
+
+    it('should switch active datasource and initialize new state', () => {
+      store.dispatch(
+        switchDatasource({
+          newDatasourceId: 'testDatasource2',
+        })
+      );
+
+      expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+      expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(true);
+    });
+
+    it('not initialize already initialized datasource on switch', () => {
+      const datasource2State = {};
+      const customStore = makeLensStore({
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+            testDatasource2: {
+              state: datasource2State,
+              isLoading: false,
+            },
+          },
+        },
+      });
+
+      customStore.dispatch(
+        switchDatasource({
+          newDatasourceId: 'testDatasource2',
+        })
+      );
+
+      expect(customStore.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+      expect(customStore.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
+      expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toBe(
+        datasource2State
+      );
     });
   });
 });
