@@ -36,6 +36,7 @@ function ErrorComponent({ handlers, parentNode, error }: ErrorComponentProps) {
 
   useEffect(() => {
     handlers.event({ name: 'onResize', data: updateErrorView });
+    handlers.done();
     return () => {
       handlers.event({ name: 'destroy' });
     };
