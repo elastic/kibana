@@ -48,17 +48,15 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: 
 
 export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journey/screenshot/block/{hash}',
+  path: '/api/uptime/journey/screenshot/block',
   validate: {
-    params: schema.object({
-      hash: schema.string(),
-    }),
     query: schema.object({
+      hash: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
       _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ request, response, uptimeEsClient }) => {
-    const { hash } = request.params;
+    const { hash } = request.query;
 
     const decoded = t.union([t.string, t.array(t.string)]).decode(hash);
     if (!isRight(decoded)) {
@@ -75,6 +73,8 @@ export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: U
     return response.ok({
       body: result[0],
       headers: {
+        // we can cache these blocks with extreme prejudice as they are inherently unchanging
+        // when queried by ID, since the ID is the hash of the data
         'Cache-Control': 'max-age=604800',
       },
     });

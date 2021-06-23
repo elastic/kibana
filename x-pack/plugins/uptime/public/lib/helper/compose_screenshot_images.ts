@@ -34,20 +34,23 @@ export const composeScreenshotRef = async (
 
   for (const block of screenshotRef.screenshot_ref.blocks) {
     drawOperations.push(
-      new Promise<void>((r) => {
+      new Promise<void>((resolve, reject) => {
         const img = new Image();
         const { top, left, width, height, hash } = block;
         const blob = blocks[hash];
-        if (!blob)
-          throw Error(`Error processing image. Expected image data with hash ${hash} is missing`);
-        img.onload = () => {
-          ctx?.drawImage(img, left, top, width, height);
-          r();
-        };
-        img.src = `data:image/jpg;base64,${blob.synthetics.blob}`;
+        if (!blob) {
+          reject(Error(`Error processing image. Expected image data with hash ${hash} is missing`));
+        } else {
+          img.onload = () => {
+            ctx?.drawImage(img, left, top, width, height);
+            resolve();
+          };
+          img.src = `data:image/jpg;base64,${blob.synthetics.blob}`;
+        }
       })
     );
   }
 
+  // once all `draw` operations finish, caller can extract img string
   return Promise.all(drawOperations);
 };

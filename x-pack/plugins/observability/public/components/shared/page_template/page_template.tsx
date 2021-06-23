@@ -28,6 +28,7 @@ export type WrappedPageTemplateProps = Pick<
   | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
+  | 'isEmptyState'
 > &
   // recreate the exclusivity of bottomBar-related props
   ExclusiveUnion<

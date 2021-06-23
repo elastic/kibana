@@ -9,14 +9,14 @@ import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeBlockAccordion } from './code_block_accordion';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { StepScreenshots } from './check_steps/step_expanded_row/step_screenshots';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
 interface ExecutedStepProps {
-  step: Ping;
+  step: JourneyStep;
   index: number;
   loading: boolean;
   browserConsole?: string;

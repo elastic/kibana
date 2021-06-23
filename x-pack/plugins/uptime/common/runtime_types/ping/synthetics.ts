@@ -8,19 +8,52 @@
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-export const JourneyStepType = t.type({
-  '@timestamp': t.string,
-  monitor: t.type({
-    check_group: t.string,
-  }),
-  synthetics: t.type({
-    step: t.type({
-      index: t.number,
+/**
+ * This type has some overlap with the Ping type, but it helps avoid runtime type
+ * check failures and removes a lot of unnecessary fields that our Synthetics UI code
+ * does not care about.
+ */
+export const JourneyStepType = t.intersection([
+  t.partial({
+    monitor: t.partial({
+      duration: t.type({
+        us: t.number,
+      }),
       name: t.string,
+      status: t.string,
+      type: t.string,
     }),
-    type: t.string,
+    synthetics: t.partial({
+      error: t.partial({
+        message: t.string,
+        stack: t.string,
+      }),
+      payload: t.partial({
+        message: t.string,
+        source: t.string,
+        status: t.string,
+        text: t.string,
+      }),
+      step: t.type({
+        index: t.number,
+        name: t.string,
+      }),
+      isScreenshotRef: t.boolean,
+      screenshotExists: t.boolean,
+    }),
   }),
-});
+  t.type({
+    _id: t.string,
+    '@timestamp': t.string,
+    monitor: t.type({
+      id: t.string,
+      check_group: t.string,
+    }),
+    synthetics: t.type({
+      type: t.string,
+    }),
+  }),
+]);
 
 export type JourneyStep = t.TypeOf<typeof JourneyStepType>;
 
@@ -31,6 +64,9 @@ export const FailedStepsApiResponseType = t.type({
 
 export type FailedStepsApiResponse = t.TypeOf<typeof FailedStepsApiResponseType>;
 
+/**
+ * The individual screenshot blocks Synthetics uses to reduce disk footprint.
+ */
 export const ScreenshotBlockType = t.type({
   hash: t.string,
   top: t.number,
@@ -39,27 +75,52 @@ export const ScreenshotBlockType = t.type({
   width: t.number,
 });
 
-export type ScreenshotBlock = t.TypeOf<typeof ScreenshotBlockType>;
-
-export const KeyRefFields = t.type({
-  width: t.number,
-  height: t.number,
-  blocks: t.array(ScreenshotBlockType),
+/**
+ * The old style of screenshot document that contains a full screenshot blob.
+ */
+export const ScreenshotType = t.type({
+  synthetics: t.intersection([
+    t.partial({
+      blob: t.string,
+    }),
+    t.type({
+      blob: t.string,
+      blob_mime: t.string,
+      step: t.type({
+        name: t.string,
+      }),
+      type: t.literal('step/screenshot'),
+    }),
+  ]),
 });
 
+export type Screenshot = t.TypeOf<typeof ScreenshotType>;
+
+export function isScreenshot(data: unknown): data is Screenshot {
+  return isRight(ScreenshotType.decode(data));
+}
+
+/**
+ * The ref used by synthetics to organize the blocks needed to recompose a
+ * fragmented image.
+ */
 export const RefResultType = t.type({
   '@timestamp': t.string,
   monitor: t.type({
     check_group: t.string,
   }),
-  screenshot_ref: KeyRefFields,
+  screenshot_ref: t.type({
+    width: t.number,
+    height: t.number,
+    blocks: t.array(ScreenshotBlockType),
+  }),
   synthetics: t.type({
     package_version: t.string,
     step: t.type({
       name: t.string,
       index: t.number,
     }),
-    type: t.string,
+    type: t.literal('step/screenshot_ref'),
   }),
 });
 
@@ -68,6 +129,10 @@ export const RawRefResultType = t.type({
 });
 
 export type RefResult = t.TypeOf<typeof RefResultType>;
+
+export function isRefResult(data: unknown): data is RefResult {
+  return isRight(RefResultType.decode(data));
+}
 
 export const ScreenshotRefType = t.type({
   blob_mime: t.string,
@@ -79,6 +144,20 @@ export const ScreenshotRefType = t.type({
   // blocks: t.array(ScreenshotBlockType),
 });
 
+/**
+ * Represents the result of querying for the legacy-style full screenshot blob.
+ */
+export const ScreenshotImageBlobType = t.type({
+  stepName: t.union([t.null, t.string]),
+  maxSteps: t.number,
+  src: t.string,
+});
+
+export type ScreenshotImageBlob = t.TypeOf<typeof ScreenshotImageBlobType>;
+
+export function isScreenshotImageBlob(data: unknown): data is ScreenshotImageBlob {
+  return isRight(ScreenshotImageBlobType.decode(data));
+}
 export type ScreenshotRef = Omit<t.TypeOf<typeof RefResultType>, '@timestamp'> & {
   timestamp: string;
 };
@@ -95,6 +174,22 @@ const ScreenshotBlockBlob = t.type({
 
 export type ScreenshotBlockBlob = t.TypeOf<typeof ScreenshotBlockBlob>;
 
+/**
+ * Represents the block blobs stored by hash. These documents are used to recompose synthetics images.
+ */
+export const ScreenshotBlockDocType = t.type({
+  id: t.string,
+  synthetics: t.type({
+    blob: t.string,
+    blob_mime: t.string,
+  }),
+});
+
+export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
+
+/**
+ * Contains the fields requried by the Synthetics UI when utilizing screenshot refs.
+ */
 export const ScreenshotRefImageDataType = t.type({
   stepName: t.union([t.null, t.string]),
   maxSteps: t.number,
@@ -109,3 +204,33 @@ export type ScreenshotRefImageData = t.TypeOf<typeof ScreenshotRefImageDataType>
 export function isScreenshotRef(data: unknown): data is ScreenshotRefImageData {
   return isRight(ScreenshotRefImageDataType.decode(data));
 }
+
+export const SyntheticsJourneyApiResponseType = t.intersection([
+  t.type({
+    checkGroup: t.string,
+    steps: t.array(JourneyStepType),
+  }),
+  t.partial({
+    details: t.union([
+      t.intersection([
+        t.type({
+          timestamp: t.string,
+          journey: JourneyStepType,
+        }),
+        t.partial({
+          next: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+          previous: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+        }),
+      ]),
+      t.null,
+    ]),
+  }),
+]);
+
+export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;

@@ -12,6 +12,7 @@ export {
   Frequency,
   NotAuthorizedSection,
   SectionError,
+  PageError,
   sendRequest,
   SendRequestConfig,
   SendRequestResponse,

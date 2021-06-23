@@ -5,61 +5,53 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { ScreenshotBlockDoc } from '../../../common/runtime_types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-
-const ScreenshotBlockDoc = t.type({
-  synthetics: t.type({
-    blob: t.string,
-    blob_mime: t.string,
-  }),
-});
 
 const ScreenshotBlockResultType = t.array(
   t.type({
     _id: t.string,
-    _source: ScreenshotBlockDoc,
+    _source: t.type({
+      synthetics: t.type({
+        blob: t.string,
+        blob_mime: t.string,
+      }),
+    }),
   })
 );
 
-export type ScreenshotBlock = Omit<t.TypeOf<typeof ScreenshotBlockDoc>, '@timestamp'> & {
-  id: string;
-};
-
 export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
   { blockIds: string[] },
-  ScreenshotBlock[]
+  ScreenshotBlockDoc[]
 > = async ({ blockIds, uptimeEsClient }) => {
-  return withSpan('fetch-journey-blocks', async () => {
-    const body = {
-      query: {
-        bool: {
-          filter: [
-            {
-              ids: {
-                values: blockIds,
-              },
+  const body = {
+    query: {
+      bool: {
+        filter: [
+          {
+            ids: {
+              values: blockIds,
             },
-          ],
-        },
+          },
+        ],
       },
-      size: 10000,
-      _source: ['synthetics.blob', 'synthetics.blob_mime'],
-    };
+    },
+    size: 10000,
+    _source: ['synthetics.blob', 'synthetics.blob_mime'],
+  };
 
-    const fetchScreenshotBlocksResult = await uptimeEsClient.search({ body });
+  const fetchScreenshotBlocksResult = await uptimeEsClient.search({ body });
 
-    const decoded = ScreenshotBlockResultType.decode(fetchScreenshotBlocksResult.body.hits.hits);
+  const decoded = ScreenshotBlockResultType.decode(fetchScreenshotBlocksResult.body.hits.hits);
 
-    if (!isRight(decoded)) {
-      throw Error('Error parsing Journey screenshot blocks. Malformed data.');
-    }
+  if (!isRight(decoded)) {
+    throw Error('Error parsing journey screenshot blocks. Malformed data.');
+  }
 
-    return decoded.right.map(({ _id, _source }) => ({
-      id: _id,
-      ..._source,
-    }));
-  });
+  return decoded.right.map(({ _id, _source }) => ({
+    id: _id,
+    ..._source,
+  }));
 };

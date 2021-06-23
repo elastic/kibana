@@ -25,14 +25,19 @@ function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes
   return true;
 }
 
+/**
+ * Assembles the data for a composite image and returns the composite to a callback.
+ * @param imgRef the data and dimensions for the composite image.
+ * @param callback sends the composited image to this callback.
+ * @param url this is the composited image value, if it is truthy the function will skip the compositing process
+ */
 export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
   callback: React.Dispatch<string | undefined>,
   url?: string
-) => {
+): void => {
   const dispatch = useDispatch();
   const blocks = useSelector(journeyScreenshotBlockSelector);
-  console.log('blocks', blocks);
   React.useEffect(() => {
     dispatch(
       fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
@@ -42,11 +47,14 @@ export const useCompositeImage = (
     const canvas = document.createElement('canvas');
 
     async function compose() {
+      // @ts-expect-error TODO fix typing here
       await composeScreenshotRef(imgRef, canvas, blocks);
       const imgData = canvas.toDataURL('image/jpg', 1.0);
       callback(imgData);
     }
 
+    // if the URL is truthy it means it's already been composed, so there
+    // is no need to call the function
     if (
       typeof url === 'undefined' &&
       allBlocksLoaded(

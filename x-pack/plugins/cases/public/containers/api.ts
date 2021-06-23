@@ -8,9 +8,14 @@
 import { assign, omit } from 'lodash';
 
 import {
+  ACTION_TYPES_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -18,30 +23,19 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  getCaseCommentsUrl,
+  getCaseDetailsUrl,
+  getCasePushUrl,
+  getCaseUserActionUrl,
+  getSubCaseDetailsUrl,
+  getSubCaseUserActionUrl,
   StatusAll,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-} from '../../common';
-
-import {
-  ACTION_TYPES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../common';
-
-import {
-  getCaseCommentsUrl,
-  getCasePushUrl,
-  getCaseDetailsUrl,
-  getCaseUserActionUrl,
-  getSubCaseDetailsUrl,
-  getSubCaseUserActionUrl,
 } from '../../common';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -189,7 +183,7 @@ export const getCases = async ({
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
-    tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
+    tags: filterOptions.tags,
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),

@@ -17,10 +17,10 @@ export interface GetJourneyStepsParams {
 }
 
 const defaultEventTypes = [
-  'step/end',
   'cmd/status',
-  'step/screenshot',
   'journey/browserconsole',
+  'step/end',
+  'step/screenshot',
   'step/screenshot_ref',
 ];
 
@@ -32,16 +32,13 @@ export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   }
 };
 
-const ResultHit = t.type({
-  _id: t.string,
-  _source: t.intersection([JourneyStepType, t.type({ '@timestamp': t.string })]),
-});
+const ResultHit = t.intersection([JourneyStepType, t.type({ '@timestamp': t.string })]);
 
 const parseResult = (hits: unknown, checkGroup: string) => {
   const decoded = t.array(ResultHit).decode(hits);
   if (!isRight(decoded)) {
     throw Error(
-      `Error processing synthetic journey steps for check group ${checkGroup}. Malformed data.`
+      `Could not process synthetic journey steps for check group ${checkGroup}. Malformed data.`
     );
   }
   return decoded.right;
@@ -79,37 +76,38 @@ export const getJourneySteps: UMElasticsearchQueryFn<
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const steps = parseResult(result.hits.hits, checkGroup);
+  const steps = parseResult(
+    result.hits.hits.map(({ _id, _source }) => Object.assign({ _id }, _source)),
+    checkGroup
+  );
 
   const screenshotIndexList: number[] = [];
   const refIndexList: number[] = [];
   const stepsWithoutImages: Array<t.TypeOf<typeof ResultHit>> = [];
 
   /**
-   * Store screenshot indexes for later tagging.
+   * Store screenshot indexes, we use these to determine if a step has a screenshot below.
    * Store steps that are not screenshots, we return these to the client.
    */
   for (const step of steps) {
-    const {
-      _source: { synthetics },
-    } = step;
-    if (synthetics.type === 'step/screenshot') {
+    const { synthetics } = step;
+    if (synthetics.type === 'step/screenshot' && synthetics?.step?.index) {
       screenshotIndexList.push(synthetics.step.index);
-    } else if (synthetics.type === 'step/screenshot_ref') {
+    } else if (synthetics.type === 'step/screenshot_ref' && synthetics?.step?.index) {
       refIndexList.push(synthetics.step.index);
     } else {
       stepsWithoutImages.push(step);
     }
   }
 
-  return stepsWithoutImages.map(({ _id, _source }) => ({
-    ..._source,
-    timestamp: _source['@timestamp'],
-    docId: _id,
+  return stepsWithoutImages.map(({ _id, ...rest }) => ({
+    _id,
+    ...rest,
+    timestamp: rest['@timestamp'],
     synthetics: {
-      ..._source.synthetics,
-      screenshotExists: screenshotIndexList.some((i) => i === _source.synthetics.step.index),
-      isScreenshotRef: refIndexList.some((i) => i === _source.synthetics.step.index),
+      ...rest.synthetics,
+      screenshotExists: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
+      isScreenshotRef: refIndexList.some((i) => i === rest?.synthetics?.step?.index),
     },
   }));
 };

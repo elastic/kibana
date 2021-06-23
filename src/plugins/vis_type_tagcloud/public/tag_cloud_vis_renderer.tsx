@@ -8,6 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
@@ -18,7 +19,7 @@ const TagCloudChart = lazy(() => import('./components/tag_cloud_chart'));
 
 export const getTagCloudVisRenderer: (
   deps: TagCloudVisDependencies
-) => ExpressionRenderDefinition<TagCloudVisRenderValue> = ({ colors }) => ({
+) => ExpressionRenderDefinition<TagCloudVisRenderValue> = ({ palettes }) => ({
   name: 'tagloud_vis',
   displayName: 'Tag Cloud visualization',
   reuseDomNode: true,
@@ -26,16 +27,20 @@ export const getTagCloudVisRenderer: (
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+    const palettesRegistry = await palettes.getPalettes();
 
     render(
-      <VisualizationContainer handlers={handlers}>
-        <TagCloudChart
-          {...config}
-          colors={colors}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-        />
-      </VisualizationContainer>,
+      <I18nProvider>
+        <VisualizationContainer handlers={handlers}>
+          <TagCloudChart
+            {...config}
+            palettesRegistry={palettesRegistry}
+            renderComplete={handlers.done}
+            fireEvent={handlers.event}
+            syncColors={config.syncColors}
+          />
+        </VisualizationContainer>
+      </I18nProvider>,
       domNode
     );
   },

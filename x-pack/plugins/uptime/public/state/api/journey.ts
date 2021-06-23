@@ -11,28 +11,29 @@ import {
   FailedStepsApiResponse,
   FailedStepsApiResponseType,
   Ping,
+  ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types';
-import { ScreenshotBlock } from '../../../common/runtime_types';
+import { ScreenshotBlockDoc } from '../../../common/runtime_types/ping/synthetics';
 
-export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlock[]> {
+export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
   return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
 }
 
-export async function fetchScreenshotBlock(params: string): Promise<ScreenshotBlock[]> {
+export async function fetchScreenshotBlock(params: string): Promise<ScreenshotBlockDoc[]> {
   return apiService.get(`/api/uptime/journey/screenshot/block/${params}`);
 }
 
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
+  return apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+  );
 }
 
 export async function fetchJourneysFailedSteps({
@@ -40,7 +41,7 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return await apiService.get(
+  return apiService.get(
     `/api/uptime/journeys/failed_steps`,
     { checkGroups },
     FailedStepsApiResponseType
@@ -61,12 +62,6 @@ export async function fetchLastSuccessfulStep({
     timestamp,
     stepIndex,
   })) as Ping;
-}
-
-export interface ScreenshotImageBlob {
-  stepName: string | null;
-  maxSteps: number;
-  src: string;
 }
 
 export async function getJourneyScreenshot(
@@ -91,11 +86,10 @@ export async function getJourneyScreenshot(
         ref: await response.json(),
       };
     } else {
-      const imgBlob = await response.blob();
       return {
         stepName,
         maxSteps,
-        src: URL.createObjectURL(imgBlob),
+        src: URL.createObjectURL(await response.blob()),
       };
     }
   } catch (e) {

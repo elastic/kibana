@@ -6,11 +6,17 @@
  */
 
 import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { caseFn } from './case';
 
 describe('case', () => {
   const fn = functionWrapper(caseFn);
+  let testScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
 
   describe('spec', () => {
     it('is a function', () => {
@@ -19,29 +25,22 @@ describe('case', () => {
   });
 
   describe('function', () => {
-    describe('no args', () => {
-      it('should return a case object that matches with the result as the context', () => {
-        const context = null;
-        const args = {};
-        expect(fn(context, args)).resolves.toEqual({
-          type: 'case',
-          matches: true,
-          result: context,
-        });
-      });
-    });
-
     describe('no if or value', () => {
       it('should return the result if provided', () => {
         const context = null;
         const args = {
           then: () => of('foo'),
         };
-        expect(fn(context, args)).resolves.toEqual({
-          type: 'case',
-          matches: true,
-          result: 'foo',
-        });
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', [
+            {
+              type: 'case',
+              matches: true,
+              result: 'foo',
+            },
+          ])
+        );
       });
     });
 
@@ -49,11 +48,16 @@ describe('case', () => {
       it('should return as the matches prop', () => {
         const context = null;
         const args = { if: false };
-        expect(fn(context, args)).resolves.toEqual({
-          type: 'case',
-          matches: args.if,
-          result: context,
-        });
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', [
+            {
+              type: 'case',
+              matches: args.if,
+              result: context,
+            },
+          ])
+        );
       });
     });
 
@@ -63,15 +67,23 @@ describe('case', () => {
           when: () => of('foo'),
           then: () => of('bar'),
         };
-        expect(fn('foo', args)).resolves.toEqual({
-          type: 'case',
-          matches: true,
-          result: 'bar',
-        });
-        expect(fn('bar', args)).resolves.toEqual({
-          type: 'case',
-          matches: false,
-          result: null,
+
+        testScheduler.run(({ expectObservable }) => {
+          expectObservable(fn('foo', args)).toBe('(0|)', [
+            {
+              type: 'case',
+              matches: true,
+              result: 'bar',
+            },
+          ]);
+
+          expectObservable(fn('bar', args)).toBe('(0|)', [
+            {
+              type: 'case',
+              matches: false,
+              result: null,
+            },
+          ]);
         });
       });
     });
@@ -81,13 +93,18 @@ describe('case', () => {
         const context = null;
         const args = {
           when: () => 'foo',
-          if: true,
+          if: false,
         };
-        expect(fn(context, args)).resolves.toEqual({
-          type: 'case',
-          matches: args.if,
-          result: context,
-        });
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', [
+            {
+              type: 'case',
+              matches: args.if,
+              result: context,
+            },
+          ])
+        );
       });
     });
   });

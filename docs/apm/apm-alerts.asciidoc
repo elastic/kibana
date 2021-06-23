@@ -15,7 +15,7 @@ and enables central management of all alerts from <<management,Kibana Management
 image::apm/images/apm-alert.png[Create an alert in the APM app]
 
 For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
-see Kibana's <<defining-alerts,defining alerts>>.
+see Kibana's <<create-edit-rules,defining alerts>>.
 
 The APM app supports four different types of alerts:
 

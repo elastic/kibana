@@ -49,9 +49,13 @@ const DefaultImage: React.FC<ScreenshotImageProps & { url?: string }> = ({
       className="syntheticsStepImage"
     />
   ) : (
-    <EuiLoadingSpinner />
+    <EuiLoadingSpinner size="l" />
   );
 
+/**
+ * This component provides an intermediate step for composite images. It causes a loading spinner to appear
+ * while the image is being re-assembled, then calls the default image component and provides a data URL for the image.
+ */
 const RecomposedScreenshotImage: React.FC<
   ScreenshotImageProps & {
     imgRef: ScreenshotRefImageData;
@@ -61,7 +65,8 @@ const RecomposedScreenshotImage: React.FC<
 > = (props) => {
   const { imgRef, setUrl, url } = props;
 
-  console.log('hi');
+  // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
+  // `useCompositeImage` will call `setUrl` when the image is composited, and the updated `url` will display.
   useCompositeImage(imgRef, setUrl, url);
 
   return <DefaultImage {...props} url={props.url} />;
@@ -81,7 +86,6 @@ const StepImageComponent: React.FC<
     url: string | undefined;
   }
 > = (props) => {
-  console.log('ref', props.imgRef);
   if (props.imgSrc) {
     props.setUrl(props.imgSrc);
     return <DefaultImage {...props} url={props.url} />;
@@ -122,7 +126,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
           style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (
-        <EuiLoadingSpinner />
+        <EuiLoadingSpinner size="l" />
       )}
     </EuiPopover>
   );

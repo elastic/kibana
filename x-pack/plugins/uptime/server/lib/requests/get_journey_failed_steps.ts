@@ -53,8 +53,8 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<
 
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  return result.hits.hits.map((h) => {
-    const decoded = JourneyStepType.decode(h._source);
+  return result.hits.hits.map(({ _id, _source }) => {
+    const decoded = JourneyStepType.decode(Object.assign({ _id }, _source));
     if (!isRight(decoded)) {
       throw Error(
         'Unable to parse data for failed journey steps. Invalid format or missing fields.'
@@ -62,8 +62,8 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<
     }
     const { right: step } = decoded;
     return {
-      timestamp: step['@timestamp'],
       ...step,
+      timestamp: step['@timestamp'],
     };
   });
 };

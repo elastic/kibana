@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { JourneyStep } from '../../../common/runtime_types';
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
 import { getUptimeESMockClient } from './helper';
 
@@ -13,10 +14,11 @@ describe('getJourneySteps request module', () => {
     it('returns default steps if none are provided', () => {
       expect(formatSyntheticEvents()).toMatchInlineSnapshot(`
         Array [
-          "step/end",
           "cmd/status",
-          "step/screenshot",
           "journey/browserconsole",
+          "step/end",
+          "step/screenshot",
+          "step/screenshot_ref",
         ]
       `);
     });
@@ -120,10 +122,11 @@ describe('getJourneySteps request module', () => {
         Object {
           "terms": Object {
             "synthetics.type": Array [
-              "step/end",
               "cmd/status",
-              "step/screenshot",
               "journey/browserconsole",
+              "step/end",
+              "step/screenshot",
+              "step/screenshot_ref",
             ],
           },
         }
@@ -156,9 +159,11 @@ describe('getJourneySteps request module', () => {
 
       expect(result).toHaveLength(2);
       // `getJourneySteps` is responsible for formatting these fields, so we need to check them
-      result.forEach((step: any) => {
-        expect(['2021-02-01T17:45:19.001Z', '2021-02-01T17:45:49.944Z']).toContain(step.timestamp);
-        expect(['o6myXncBFt2V8m6r6z-r', 'IjqzXncBn2sjqrYxYoCG']).toContain(step.docId);
+      result.forEach((step: JourneyStep) => {
+        expect(['2021-02-01T17:45:19.001Z', '2021-02-01T17:45:49.944Z']).toContain(
+          step['@timestamp']
+        );
+        expect(['o6myXncBFt2V8m6r6z-r', 'IjqzXncBn2sjqrYxYoCG']).toContain(step._id);
         expect(step.synthetics.screenshotExists).toBeDefined();
       });
     });
