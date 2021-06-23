@@ -69,7 +69,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const setErrorToast = useErrorToast();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 

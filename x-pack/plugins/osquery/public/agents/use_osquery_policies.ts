@@ -15,11 +15,8 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useOsqueryPolicies = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
     ['osqueryPolicies'],

@@ -26,11 +26,8 @@ interface UseAgentGroups {
 }
 
 export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);

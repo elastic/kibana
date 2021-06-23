@@ -17,11 +17,8 @@ import {
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery<GetAgentPoliciesResponse, unknown, GetAgentPoliciesResponseItem[]>(
     ['agentPolicies'],

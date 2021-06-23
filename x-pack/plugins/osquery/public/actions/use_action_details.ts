@@ -34,11 +34,8 @@ interface UseActionDetails {
 }
 
 export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],

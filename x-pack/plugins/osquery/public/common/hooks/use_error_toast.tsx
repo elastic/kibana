@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ErrorToastOptions, IToasts, Toast } from 'kibana/public';
+import { ErrorToastOptions, Toast } from 'kibana/public';
 import { useState } from 'react';
+import { useKibana } from '../../common/lib/kibana';
 
-export const useErrorToast = (toasts: IToasts) => {
+export const useErrorToast = () => {
   const [errorToast, setErrorToast] = useState<Toast>();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
   return (error?: unknown, opts?: ErrorToastOptions) => {
     if (errorToast) {
       toasts.remove(errorToast);

@@ -18,11 +18,8 @@ interface UseAgentPolicy {
 }
 
 export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['agentPolicy', { policyId }],

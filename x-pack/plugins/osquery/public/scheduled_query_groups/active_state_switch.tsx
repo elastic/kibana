@@ -37,7 +37,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const setErrorToast = useErrorToast();
   const [confirmationModal, setConfirmationModal] = useState(false);
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);

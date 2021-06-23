@@ -18,11 +18,8 @@ interface UseAgentStatus {
 }
 
 export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
     ['agentStatus', policyId],

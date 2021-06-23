@@ -57,11 +57,8 @@ export const useActionResults = ({
   skip = false,
   isLive = false,
 }: UseActionResults) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionResults', { actionId }],

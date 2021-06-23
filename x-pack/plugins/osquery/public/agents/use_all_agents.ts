@@ -29,11 +29,8 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {

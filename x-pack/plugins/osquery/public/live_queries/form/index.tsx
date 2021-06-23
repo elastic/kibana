@@ -36,12 +36,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   // onSubmit,
   onSuccess,
 }) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const setErrorToast = useErrorToast(toasts);
+  const setErrorToast = useErrorToast();
 
   const {
     data,

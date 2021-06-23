@@ -13,11 +13,8 @@ import { agentPolicyRouteService, GetOneAgentPolicyResponse } from '../../../fle
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = (policyIds: string[] = []) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   const agentResponse = useQueries(
     policyIds.map((policyId) => ({

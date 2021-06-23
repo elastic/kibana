@@ -49,11 +49,8 @@ export const useAllActions = ({
   filterQuery,
   skip = false,
 }: UseAllActions) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],

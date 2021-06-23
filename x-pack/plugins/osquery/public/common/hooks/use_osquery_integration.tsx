@@ -15,11 +15,8 @@ import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
 
 export const useOsqueryIntegration = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const setErrorToast = useErrorToast(toasts);
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     'integrations',

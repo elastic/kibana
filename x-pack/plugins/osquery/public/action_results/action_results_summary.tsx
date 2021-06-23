@@ -58,6 +58,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
+  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -68,10 +69,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     limit: pageSize,
     direction: Direction.asc,
     sortField: '@timestamp',
-    isLive,
+    isLive: !expired && isLive,
   });
-
-  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
 
   const { data: logsResults } = useAllResults({
     actionId,
@@ -83,7 +82,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         direction: Direction.asc,
       },
     ],
-    isLive,
+    isLive: !expired && isLive,
   });
 
   const notRespondedCount = useMemo(() => {
