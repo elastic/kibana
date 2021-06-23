@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Disabling of SELinux",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:setenforce and process.args:0",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:setenforce and process.args:0\n",
   "risk_score": 47,
   "rule_id": "eb9eb8ba-a983-41d9-9c93-a1c05112ca5e",
   "severity": "medium",
