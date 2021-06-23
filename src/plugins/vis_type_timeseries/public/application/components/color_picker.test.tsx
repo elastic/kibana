@@ -36,7 +36,7 @@ describe('ColorPicker', () => {
     const props = { ...defaultProps, value: '#68BC00' };
     component = mount(<ColorPicker {...props} />);
     component.find('.tvbColorPicker button').simulate('click');
-    const input = findTestSubject(component, 'topColorPickerInput');
+    const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('#68BC00');
   });
 
@@ -44,7 +44,7 @@ describe('ColorPicker', () => {
     const props = { ...defaultProps, value: 'rgba(85,66,177,1)' };
     component = mount(<ColorPicker {...props} />);
     component.find('.tvbColorPicker button').simulate('click');
-    const input = findTestSubject(component, 'topColorPickerInput');
+    const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('85,66,177,1');
   });
 
