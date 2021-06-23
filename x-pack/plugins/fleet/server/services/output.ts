@@ -9,10 +9,9 @@ import type { SavedObjectsClientContract } from 'src/core/server';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { decodeCloudId } from '../../common';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common';
 
 import { appContextService } from './app_context';
-import { normalizeHostsForAgents } from './hosts_utils';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
