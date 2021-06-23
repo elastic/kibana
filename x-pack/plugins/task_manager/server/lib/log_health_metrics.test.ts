@@ -195,6 +195,11 @@ describe('logHealthMetrics', () => {
       stats: {
         runtime: {
           value: {
+            drift_by_type: {
+              'taskType:test': {
+                p99: 60000,
+              },
+            },
             drift: {
               p99: 60000,
             },
@@ -206,7 +211,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config);
 
     expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
-      `Detected delay task start of 60s (which exceeds configured value of 60s)`
+      `Detected delay task start of 60s for task \"taskType:test\" (which exceeds configured value of 60s)`
     );
 
     const secondMessage = JSON.parse(
@@ -326,7 +331,14 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
             p95: 2500,
             p99: 3000,
           },
-          drift_by_type: {},
+          drift_by_type: {
+            'taskType:test': {
+              p50: 1000,
+              p90: 2000,
+              p95: 2500,
+              p99: 3000,
+            },
+          },
           load: {
             p50: 1000,
             p90: 2000,
