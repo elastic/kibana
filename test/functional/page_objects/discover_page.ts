@@ -441,7 +441,7 @@ export class DiscoverPageObject extends FtrService {
   public async closeSidebarFieldFilter() {
     await this.testSubjects.click('toggleFieldFilterButton');
 
-    await this.retry.waitFor('Sidebar filter closed', async () => {
+    await this.retry.waitFor('sidebar filter closed', async () => {
       return !(await this.testSubjects.exists('filterSelectionPanel'));
     });
   }
