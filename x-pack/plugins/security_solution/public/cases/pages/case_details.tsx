@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -16,7 +16,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { CASES_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -29,11 +29,13 @@ export const CaseDetailsPage = React.memo(() => {
   }>();
   const search = useGetUrlSearch(navTabs.case);
 
-  useEffect(() => {
-    if (userPermissions != null && !userPermissions.read) {
-      navigateToApp(CASES_APP_ID, { path: getCaseUrl(search) });
-    }
-  }, [navigateToApp, userPermissions, search]);
+  if (userPermissions != null && !userPermissions.read) {
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.case,
+      path: getCaseUrl(search),
+    });
+    return null;
+  }
 
   return caseId != null ? (
     <>
