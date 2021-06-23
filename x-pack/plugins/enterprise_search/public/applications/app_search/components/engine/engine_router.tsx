@@ -114,6 +114,16 @@ export const EngineRouter: React.FC = () => {
           <SchemaRouter />
         </Route>
       )}
+      {canViewMetaEngineSourceEngines && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
+        </Route>
+      )}
       {canManageEngineRelevanceTuning && (
         <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
           <RelevanceTuning />
@@ -144,16 +154,6 @@ export const EngineRouter: React.FC = () => {
         {canManageEngineSynonyms && (
           <Route path={ENGINE_SYNONYMS_PATH}>
             <Synonyms />
-          </Route>
-        )}
-        {canViewMetaEngineSourceEngines && (
-          <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
-            <SourceEngines />
-          </Route>
-        )}
-        {canViewEngineCrawler && (
-          <Route path={ENGINE_CRAWLER_PATH}>
-            <CrawlerRouter />
           </Route>
         )}
       </Layout>
