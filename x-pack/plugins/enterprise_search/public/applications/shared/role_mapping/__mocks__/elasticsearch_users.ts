@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './actions';
-export * from './labels';
-export { DEFAULT_META } from './default_meta';
+export const elasticsearchUsers = [
+  {
+    email: 'user1@user.com',
+    username: 'user1',
+  },
+];
