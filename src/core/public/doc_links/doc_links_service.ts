@@ -205,6 +205,7 @@ export class DocLinksService {
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
+          sessionLimits: `${KIBANA_DOCS}search-sessions.html#_limitations`,
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
@@ -525,6 +526,7 @@ export interface DocLinksStart {
     };
     readonly search: {
       readonly sessions: string;
+      readonly sessionLimits: string;
     };
     readonly indexPatterns: {
       readonly introduction: string;
