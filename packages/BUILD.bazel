@@ -49,6 +49,7 @@ filegroup(
       "//packages/kbn-std:build",
       "//packages/kbn-storybook:build",
       "//packages/kbn-telemetry-tools:build",
+      "//packages/kbn-test:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-ui-framework:build",
       "//packages/kbn-ui-shared-deps:build",
