@@ -147,6 +147,7 @@ const processFile = async ({
       from: ctx.resourcePath,
     }
   );
+  ctx.addDependency(Path.normalize(require.resolve('../../postcss.config.js')));
 
   return {
     css: postCssResult.css,

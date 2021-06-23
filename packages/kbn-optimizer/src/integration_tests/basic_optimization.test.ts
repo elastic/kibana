@@ -146,15 +146,13 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
-    // code + styles + style/css-loader runtimes + public path updater
-    16
+    // code + styles + public path updater
+    7
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
-      <absolute path>/node_modules/css-loader/package.json,
-      <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/postcss.config.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
@@ -165,6 +163,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-optimizer/src/worker/runtime/inject_style.ts,
     ]
   `);
 

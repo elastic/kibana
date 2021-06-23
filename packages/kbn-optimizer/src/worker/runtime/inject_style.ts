@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ThemeTag } from '../../common';
+import type { ThemeTag } from '../../common';
 
 interface Ref {
   ref: string;
