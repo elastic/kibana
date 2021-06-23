@@ -249,7 +249,10 @@ export class SessionService {
    */
   public continue(sessionId: string) {
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
-      this.state.set(this.lastSessionSnapshot);
+      this.state.set({
+        ...this.lastSessionSnapshot,
+        appName: this.currentApp,
+      });
       this.lastSessionSnapshot = undefined;
     } else {
       // eslint-disable-next-line no-console
@@ -263,6 +266,18 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
+    // make sure apps can't clear other apps' sessions
+    const currentSessionApp = this.state.get().appName;
+    if (currentSessionApp && currentSessionApp !== this.currentApp) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
+          this.currentApp
+        }", owner: "${currentSessionApp}"`
+      );
+      return;
+    }
+
     if (this.getSessionId()) {
       this.lastSessionSnapshot = this.state.get();
     }

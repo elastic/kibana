@@ -153,6 +153,39 @@ describe('Session service', () => {
     });
   });
 
+  it("Can't clear other apps' session", async () => {
+    sessionService.start();
+    expect(sessionService.getSessionId()).not.toBeUndefined();
+    currentAppId$.next('change');
+    sessionService.clear();
+    expect(sessionService.getSessionId()).not.toBeUndefined();
+  });
+
+  it('Can continue previous session from another app', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+    expect(sessionId).not.toBeUndefined();
+
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    expect(sessionService.isSessionStorageReady()).toBe(true);
+
+    sessionService.clear();
+    sessionService.clear(); // even allow to call clear multiple times
+
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+    expect(sessionService.getSessionId()).toBe(sessionId);
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
   test('getSearchOptions infers isRestore & isStored from state', async () => {
     const sessionId = sessionService.start();
     const someOtherId = 'some-other-id';
