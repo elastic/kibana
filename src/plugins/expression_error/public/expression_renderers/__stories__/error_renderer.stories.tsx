@@ -8,19 +8,13 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { revealImageRenderer } from '../';
-import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
+import { errorRenderer } from '../';
 import { Render } from '../../../../presentation_util/public/__stories__';
 
-import { Origin } from '../../../common/types/expression_functions';
-
-storiesOf('renderers/revealImage', module).add('default', () => {
+storiesOf('renderers/error', module).add('default', () => {
+  const thrownError = new Error('There was an error');
   const config = {
-    image: elasticLogo,
-    emptyImage: elasticOutline,
-    origin: Origin.LEFT,
-    percent: 0.45,
+    error: thrownError,
   };
-
-  return <Render renderer={revealImageRenderer} config={config} />;
+  return <Render renderer={errorRenderer} config={config} />;
 });

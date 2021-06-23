@@ -8,24 +8,33 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { withSuspense } from '../../../presentation_util/public';
-import { getRendererStrings } from '../../common/i18n';
-import { RevealImageRendererConfig } from '../../common/types';
+import { ErrorRendererConfig } from '../../common/types';
 
-const { revealImage: revealImageStrings } = getRendererStrings();
+const errorStrings = {
+  getDisplayName: () =>
+    i18n.translate('expressionError.renderer.error.displayName', {
+      defaultMessage: 'Error information',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionError.renderer.error.helpDescription', {
+      defaultMessage: 'Render error data in a way that is helpful to users',
+    }),
+};
 
-const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
-const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
+const LazyErrorComponent = lazy(() => import('../components/error_component'));
+const ErrorComponent = withSuspense(LazyErrorComponent, null);
 
-export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
-  name: 'revealImage',
-  displayName: revealImageStrings.getDisplayName(),
-  help: revealImageStrings.getHelpDescription(),
+export const errorRenderer = (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
+  name: 'error',
+  displayName: errorStrings.getDisplayName(),
+  help: errorStrings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode: HTMLElement,
-    config: RevealImageRendererConfig,
+    config: ErrorRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
     handlers.onDestroy(() => {
@@ -34,7 +43,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
 
     render(
       <I18nProvider>
-        <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
+        <ErrorComponent handlers={handlers} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );

@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type OriginString = 'bottom' | 'left' | 'top' | 'right';
-
-export interface ErrorRendererConfig {
-  error: Error;
-}
-
-export interface NodeDimensions {
-  width: number;
-  height: number;
-}
+// eslint-disable-next-line import/no-default-export
+export { Debug as default } from './debug';

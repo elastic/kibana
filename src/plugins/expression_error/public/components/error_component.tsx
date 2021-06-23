@@ -6,127 +6,54 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, MouseEventHandler } from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { NodeDimensions, ErrorRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
+import { ErrorRendererConfig } from '../../common/types';
+import {
+  withSuspense,
+  LazyErrorComponent,
+  LazyPopoverComponent,
+} from '../../../presentation_util/public';
 import './reveal_image.scss';
+
+const Error = withSuspense(LazyErrorComponent);
+const Popover = withSuspense(LazyPopoverComponent);
 
 interface ErrorComponentProps extends ErrorRendererConfig {
   handlers: IInterpreterRenderHandlers;
   parentNode: HTMLElement;
 }
 
-interface ImageStyles {
-  width?: string;
-  height?: string;
-  clipPath?: string;
-}
+function ErrorComponent({ handlers, parentNode, error }: ErrorComponentProps) {
+  const [buttonSize, setButtonSize] = useState<number>(0);
 
-interface AlignerStyles {
-  backgroundImage?: string;
-}
-
-function ErrorComponent({
-  handlers,
-  parentNode,
-  percent,
-  origin,
-  image,
-  emptyImage,
-}: ErrorComponentProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [dimensions, setDimensions] = useState<NodeDimensions>({
-    width: 1,
-    height: 1,
-  });
-
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // modify the top-level container class
-  parentNode.className = 'revealImage';
-
-  // set up the overlay image
-  const updateImageView = useCallback(() => {
-    if (imgRef.current) {
-      setDimensions({
-        height: imgRef.current.naturalHeight,
-        width: imgRef.current.naturalWidth,
-      });
-
-      setLoaded(true);
-      return handlers.done();
-    }
-  }, [imgRef, handlers]);
+  const updateErrorView = useCallback(() => {
+    setButtonSize(Math.min(parentNode.clientHeight, parentNode.clientWidth));
+  }, [parentNode]);
 
   useEffect(() => {
-    handlers.event({ name: 'onResize', data: updateImageView });
+    handlers.event({ name: 'onResize', data: updateErrorView });
     return () => {
       handlers.event({ name: 'destroy' });
     };
-  }, [handlers, updateImageView]);
+  }, [handlers, updateErrorView]);
 
-  function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
-    const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
-    const values: Array<number | string> = [0, 0, 0, 0];
-    values[directions[originParam]] = `${100 - percentParam * 100}%`;
-    return `inset(${values.join(' ')})`;
-  }
-
-  function getImageSizeStyle() {
-    const imgStyles: ImageStyles = {};
-
-    const imgDimensions = {
-      height: dimensions.height,
-      width: dimensions.width,
-      ratio: dimensions.height / dimensions.width,
-    };
-
-    const domNodeDimensions = {
-      width: parentNode.clientWidth,
-      height: parentNode.clientHeight,
-      ratio: parentNode.clientHeight / parentNode.clientWidth,
-    };
-
-    if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = `${domNodeDimensions.height}px`;
-      imgStyles.width = 'initial';
-    } else {
-      imgStyles.width = `${domNodeDimensions.width}px`;
-      imgStyles.height = 'initial';
-    }
-
-    return imgStyles;
-  }
-
-  const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
-
-  const alignerStyles: AlignerStyles = {};
-
-  if (isValidUrl(emptyImage ?? '')) {
-    // only use empty image if one is provided
-    alignerStyles.backgroundImage = `url(${emptyImage})`;
-  }
-
-  let imgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
-
-  imgStyles.clipPath = getClipPath(percent, origin);
-  if (imgRef.current && loaded) {
-    imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
-  }
+  const button = (handleClick: MouseEventHandler<any>) => (
+    <EuiIcon
+      className="canvasRenderError__icon"
+      onClick={handleClick}
+      style={{
+        height: buttonSize,
+        width: buttonSize,
+      }}
+      type="alert"
+    />
+  );
 
   return (
-    <div className="revealImageAligner" style={alignerStyles}>
-      <img
-        ref={imgRef}
-        onLoad={updateImageView}
-        className="revealImage__image"
-        src={imgSrc ?? ''}
-        alt=""
-        role="presentation"
-        style={imgStyles}
-      />
+    <div className="canvasRenderError">
+      <Popover button={button}>{() => <Error payload={{ error }} />}</Popover>
     </div>
   );
 }
