@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { JsonObject } from '@kbn/common-utils';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
@@ -19,7 +20,6 @@ import {
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',

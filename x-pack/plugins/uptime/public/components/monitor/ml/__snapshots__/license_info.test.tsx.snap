@@ -12,6 +12,7 @@ Array [
       <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
+        color="inherit"
         data-euiicon-type="help"
       />
       <span

@@ -9,9 +9,9 @@ import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AdministrationSubTab } from '../types';
 import {
@@ -25,7 +25,6 @@ import {
   getEventFiltersListPath,
   getTrustedAppsListPath,
 } from '../common/routing';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 /** Ensure that all flyouts z-index in Administation area show the flyout header */
 const EuiPanelStyled = styled(EuiPanel)`
@@ -44,11 +43,10 @@ interface AdministrationListPageProps {
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
+      <SecuritySolutionPageWrapper noTimeline {...otherProps}>
         <HeaderPage
           hideSourcerer={true}
           title={title}
@@ -59,7 +57,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           {actions}
         </HeaderPage>
 
-        <SiemNavigation
+        <SecuritySolutionTabNavigation
           navTabs={{
             [AdministrationSubTab.endpoints]: {
               name: ENDPOINTS_TAB,
@@ -77,27 +75,23 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
               pageId: SecurityPageName.administration,
               disabled: false,
             },
-            ...(isEventFilteringEnabled
-              ? {
-                  [AdministrationSubTab.eventFilters]: {
-                    name: EVENT_FILTERS_TAB,
-                    id: AdministrationSubTab.eventFilters,
-                    href: getEventFiltersListPath(),
-                    urlKey: 'administration',
-                    pageId: SecurityPageName.administration,
-                    disabled: false,
-                  },
-                }
-              : {}),
+            [AdministrationSubTab.eventFilters]: {
+              name: EVENT_FILTERS_TAB,
+              id: AdministrationSubTab.eventFilters,
+              href: getEventFiltersListPath(),
+              urlKey: 'administration',
+              pageId: SecurityPageName.administration,
+              disabled: false,
+            },
           }}
         />
 
         <EuiSpacer />
 
-        <EuiPanelStyled>{children}</EuiPanelStyled>
+        <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 );

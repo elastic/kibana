@@ -46,8 +46,10 @@ export declare class AggConfig
 |  [getRequestAggs()](./kibana-plugin-plugins-data-public.aggconfig.getrequestaggs.md) |  |  |
 |  [getResponseAggs()](./kibana-plugin-plugins-data-public.aggconfig.getresponseaggs.md) |  |  |
 |  [getTimeRange()](./kibana-plugin-plugins-data-public.aggconfig.gettimerange.md) |  |  |
+|  [getTimeShift()](./kibana-plugin-plugins-data-public.aggconfig.gettimeshift.md) |  |  |
 |  [getValue(bucket)](./kibana-plugin-plugins-data-public.aggconfig.getvalue.md) |  |  |
 |  [getValueBucketPath()](./kibana-plugin-plugins-data-public.aggconfig.getvaluebucketpath.md) |  | Returns the bucket path containing the main value the agg will produce (e.g. for sum of bytes it will point to the sum, for median it will point to the 50 percentile in the percentile multi value bucket) |
+|  [hasTimeShift()](./kibana-plugin-plugins-data-public.aggconfig.hastimeshift.md) |  |  |
 |  [isFilterable()](./kibana-plugin-plugins-data-public.aggconfig.isfilterable.md) |  |  |
 |  [makeLabel(percentageMode)](./kibana-plugin-plugins-data-public.aggconfig.makelabel.md) |  |  |
 |  [nextId(list)](./kibana-plugin-plugins-data-public.aggconfig.nextid.md) | <code>static</code> | Calculate the next id based on the ids in this list {<!-- -->array<!-- -->} list - a list of objects with id properties |

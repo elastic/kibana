@@ -78,7 +78,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 45
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -96,7 +96,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 49
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -144,7 +144,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 55
+          "lineNumber": 54
         },
         "deprecated": false,
         "children": [
@@ -160,7 +160,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 65
+              "lineNumber": 64
             },
             "deprecated": false,
             "children": [
@@ -183,7 +183,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 65
+                  "lineNumber": 64
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -237,7 +237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 69
+              "lineNumber": 68
             },
             "deprecated": false,
             "children": [
@@ -262,7 +262,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 70
+                  "lineNumber": 69
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -281,7 +281,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 71
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -309,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 270
+              "lineNumber": 260
             },
             "deprecated": false,
             "children": [
@@ -331,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 270
+                  "lineNumber": 260
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -351,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 289
+              "lineNumber": 279
             },
             "deprecated": false,
             "children": [],
@@ -653,7 +653,13 @@
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "DeleteResponse",
               ">; } | undefined>; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
-              "RuleDataPluginService",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleRegistryPluginSetupContract",
+                "text": "RuleRegistryPluginSetupContract"
+              },
               "; start: () => Promise<void>; }; security?: { setup: ",
               {
                 "pluginId": "security",

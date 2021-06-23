@@ -51,9 +51,9 @@ export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
   indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
   options: {
-    fetchKibabaIndexForStringIndexes: boolean;
+    fetchKibanaIndexForStringIndexes: boolean;
   } = {
-    fetchKibabaIndexForStringIndexes: false,
+    fetchKibanaIndexForStringIndexes: false,
   }
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
@@ -63,7 +63,7 @@ export const fetchIndexPattern = async (
     indexPattern = await indexPatternsService.getDefault();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
-      if (options.fetchKibabaIndexForStringIndexes) {
+      if (options.fetchKibanaIndexForStringIndexes) {
         indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
           (index) => index.title === indexPatternValue
         );

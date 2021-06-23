@@ -53,23 +53,21 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 export function __kbnBootstrap__(): Promise<void>;
 
 // @public (undocumented)
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
     appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    deepLinks?: AppDeepLink[];
     defaultPath?: string;
-    euiIconType?: string;
     exactRoute?: boolean;
-    icon?: string;
     id: string;
-    meta?: AppMeta;
+    keywords?: string[];
     mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
-    order?: number;
+    searchable?: boolean;
     status?: AppStatus;
     title: string;
-    tooltip?: string;
     updater$?: Observable<AppUpdater>;
 }
 
@@ -84,6 +82,21 @@ export interface AppCategory {
     label: string;
     order?: number;
 }
+
+// @public
+export type AppDeepLink = {
+    id: string;
+    title: string;
+    keywords?: string[];
+    navLinkStatus?: AppNavLinkStatus;
+    searchable?: boolean;
+} & AppNavOptions & ({
+    path: string;
+    deepLinks?: AppDeepLink[];
+} | {
+    path?: string;
+    deepLinks: AppDeepLink[];
+});
 
 // @public
 export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
@@ -137,15 +150,10 @@ export interface ApplicationStart {
     getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
+        deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
-}
-
-// @public
-export interface AppMeta {
-    keywords?: string[];
-    searchDeepLinks?: AppSearchDeepLink[];
 }
 
 // @public
@@ -171,18 +179,12 @@ export enum AppNavLinkStatus {
 }
 
 // @public
-export type AppSearchDeepLink = {
-    id: string;
-    title: string;
-} & ({
-    path: string;
-    searchDeepLinks?: AppSearchDeepLink[];
-    keywords?: string[];
-} | {
-    path?: string;
-    searchDeepLinks: AppSearchDeepLink[];
-    keywords?: string[];
-});
+export interface AppNavOptions {
+    euiIconType?: string;
+    icon?: string;
+    order?: number;
+    tooltip?: string;
+}
 
 // @public
 export enum AppStatus {
@@ -194,7 +196,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -319,8 +321,7 @@ export interface ChromeNavLink {
     readonly order?: number;
     readonly title: string;
     readonly tooltip?: string;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-    readonly url?: string;
+    readonly url: string;
 }
 
 // @public
@@ -584,15 +585,18 @@ export interface DocLinksStart {
         };
         readonly search: {
             readonly sessions: string;
+            readonly sessionLimits: string;
         };
         readonly indexPatterns: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
             readonly fieldFormattersString: string;
+            readonly runtimeFields: string;
         };
         readonly addData: string;
         readonly kibana: string;
         readonly upgradeAssistant: string;
+        readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
@@ -662,6 +666,19 @@ export interface DocLinksStart {
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
+        readonly fleet: Readonly<{
+            guide: string;
+            fleetServer: string;
+            fleetServerAddFleetServer: string;
+            settings: string;
+            settingsFleetServerHostSettings: string;
+            troubleshooting: string;
+            elasticAgent: string;
+            datastreams: string;
+            datastreamsNamingScheme: string;
+            upgradeElasticAgent: string;
+            upgradeElasticAgent712lower: string;
+        }>;
     };
 }
 
@@ -920,10 +937,9 @@ export interface IUiSettingsClient {
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
-// Warning: (ae-missing-release-tag) "NavigateToAppOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface NavigateToAppOptions {
+    deepLinkId?: string;
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
@@ -1071,23 +1087,21 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
+    deepLinks: PublicAppDeepLinkInfo[];
+    keywords: string[];
+    navLinkStatus: AppNavLinkStatus;
+    searchable: boolean;
+};
+
+// @public
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-    meta: PublicAppMetaInfo;
-};
-
-// @public
-export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
     keywords: string[];
-    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-};
-
-// @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
-    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-    keywords: string[];
+    deepLinks: PublicAppDeepLinkInfo[];
+    searchable: boolean;
 };
 
 // @public
@@ -1257,7 +1271,7 @@ export interface SavedObjectsCreateOptions {
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
     // @alpha
-    aggs?: Record<string, estypes.AggregationContainer>;
+    aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -1283,7 +1297,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SortOrder;
+    sortOrder?: estypes.SearchSortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1618,6 +1632,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

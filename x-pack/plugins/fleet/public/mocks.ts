@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStartMock } from './applications/fleet/mock';
+import { createStartMock } from './mock';
 
 export const fleetMock = {
   createStartMock,

@@ -4,10 +4,10 @@
 
 ## ChromeNavLink.url property
 
-The route used to open the  of an application. If unset, `baseUrl` will be used instead.
+The route used to open the default path and the deep links of an application.
 
 <b>Signature:</b>
 
 ```typescript
-readonly url?: string;
+readonly url: string;
 ```

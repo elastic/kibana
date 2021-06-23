@@ -59,8 +59,9 @@ export async function getServiceErrorGroups({
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
-    const response = await withApmSpan('get_top_service_error_groups', () =>
-      apmEventClient.search({
+    const response = await apmEventClient.search(
+      'get_top_service_error_groups',
+      {
         apm: {
           events: [ProcessorEvent.error],
         },
@@ -104,7 +105,7 @@ export async function getServiceErrorGroups({
             },
           },
         },
-      })
+      }
     );
 
     const errorGroups =
@@ -139,50 +140,49 @@ export async function getServiceErrorGroups({
       (group) => group.group_id
     );
 
-    const timeseriesResponse = await withApmSpan(
+    const timeseriesResponse = await apmEventClient.search(
       'get_service_error_groups_timeseries',
-      async () =>
-        apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.error],
-          },
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
-                  { term: { [SERVICE_NAME]: serviceName } },
-                  { term: { [TRANSACTION_TYPE]: transactionType } },
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                  ...kqlQuery(kuery),
-                ],
-              },
+      {
+        apm: {
+          events: [ProcessorEvent.error],
+        },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
+                { term: { [SERVICE_NAME]: serviceName } },
+                { term: { [TRANSACTION_TYPE]: transactionType } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
             },
-            aggs: {
-              error_groups: {
-                terms: {
-                  field: ERROR_GROUP_ID,
-                  size,
-                },
-                aggs: {
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: start,
-                        max: end,
-                      },
+          },
+          aggs: {
+            error_groups: {
+              terms: {
+                field: ERROR_GROUP_ID,
+                size,
+              },
+              aggs: {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: start,
+                      max: end,
                     },
                   },
                 },
               },
             },
           },
-        })
+        },
+      }
     );
 
     return {

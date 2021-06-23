@@ -11,7 +11,7 @@ import {
   settingsObjectType,
 } from '../../../../plugins/uptime/server/lib/saved_objects';
 
-const ARCHIVE = 'uptime/full_heartbeat';
+const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
 export const deleteUptimeSettingsObject = async (server: any) => {
   // delete the saved object
@@ -50,10 +50,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
-        await esArchiver.load('uptime/blank');
+        await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       });
       afterEach('unload', async () => {
-        await esArchiver.unload('uptime/blank');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
       loadTestFile(require.resolve('./locations'));

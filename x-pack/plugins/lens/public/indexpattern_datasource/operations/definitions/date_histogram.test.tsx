@@ -87,6 +87,7 @@ const indexPattern2: IndexPattern = {
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultOptions = {
+  layerId: '1',
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -98,6 +99,9 @@ const defaultOptions = {
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('date_histogram', () => {
@@ -205,7 +209,8 @@ describe('date_histogram', () => {
         'col1',
         indexPattern1,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -258,7 +263,8 @@ describe('date_histogram', () => {
           ]),
         },
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

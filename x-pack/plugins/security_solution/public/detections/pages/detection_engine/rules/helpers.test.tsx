@@ -18,7 +18,7 @@ import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   determineDetailsValue,
-  userHasNoPermissions,
+  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
@@ -403,26 +403,26 @@ describe('rule helpers', () => {
     });
   });
 
-  describe('userHasNoPermissions', () => {
-    test("returns false when user's CRUD operations are null", () => {
-      const result: boolean = userHasNoPermissions(null);
-      const userHasNoPermissionsExpectedResult = false;
+  describe('userHasPermissions', () => {
+    test("returns true when user's CRUD operations are null", () => {
+      const result: boolean = userHasPermissions(null);
+      const userHasPermissionsExpectedResult = true;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
 
-    test('returns true when user cannot CRUD', () => {
-      const result: boolean = userHasNoPermissions(false);
-      const userHasNoPermissionsExpectedResult = true;
+    test('returns false when user cannot CRUD', () => {
+      const result: boolean = userHasPermissions(false);
+      const userHasPermissionsExpectedResult = false;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
 
-    test('returns false when user can CRUD', () => {
-      const result: boolean = userHasNoPermissions(true);
-      const userHasNoPermissionsExpectedResult = false;
+    test('returns true when user can CRUD', () => {
+      const result: boolean = userHasPermissions(true);
+      const userHasPermissionsExpectedResult = true;
 
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
   });
 

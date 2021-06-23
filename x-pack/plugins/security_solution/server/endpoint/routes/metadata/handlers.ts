@@ -17,7 +17,7 @@ import {
 import {
   HostInfo,
   HostMetadata,
-  HostMetaDataInfo,
+  HostMetadataInfo,
   HostResultList,
   HostStatus,
   MetadataQueryStrategyVersions,
@@ -182,7 +182,7 @@ export async function getHostMetaData(
   metadataRequestContext: MetadataRequestContext,
   id: string,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): Promise<HostMetaDataInfo | undefined> {
+): Promise<HostMetadataInfo | undefined> {
   if (
     !metadataRequestContext.esClient &&
     !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client

@@ -8,9 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError, License } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense, mockError } from '../test_lib';
 import { registerPauseRoute } from './register_pause_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -23,12 +22,9 @@ describe('[CCR API] Pause follower index/indices', () => {
 
     registerPauseRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -37,7 +33,9 @@ describe('[CCR API] Pause follower index/indices', () => {
 
   it('pauses a single item', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      ccr: {
+        pauseFollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -51,11 +49,13 @@ describe('[CCR API] Pause follower index/indices', () => {
 
   it('pauses multiple items', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockResolvedValueOnce({ acknowledge: true }),
+      ccr: {
+        pauseFollow: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true })
+          .mockResolvedValueOnce({ acknowledge: true })
+          .mockResolvedValueOnce({ acknowledge: true }),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -69,10 +69,12 @@ describe('[CCR API] Pause follower index/indices', () => {
 
   it('returns partial errors', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
-        .mockResolvedValueOnce({ acknowledge: true })
-        .mockRejectedValueOnce({ response: { error: {} } }),
+      ccr: {
+        pauseFollow: jest
+          .fn()
+          .mockResolvedValueOnce({ acknowledge: true })
+          .mockRejectedValueOnce(mockError),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({

@@ -17,7 +17,7 @@ import {
   CombinedState,
 } from 'redux';
 
-import { AppMountParameters, AppSearchDeepLink } from '../../../../../src/core/public';
+import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
 import { StartServices } from '../types';
 
 /**
@@ -58,8 +58,8 @@ export type SecuritySubPluginKeyStore =
 export type SecuritySubPluginNames = keyof typeof SecurityPageName;
 
 interface SecurityDeepLink {
-  base: AppSearchDeepLink[];
-  premium?: AppSearchDeepLink[];
+  base: AppDeepLink[];
+  premium?: AppDeepLink[];
 }
 
 export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };

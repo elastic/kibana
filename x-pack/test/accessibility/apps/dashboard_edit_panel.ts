@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Edit Panel', () => {
     before(async () => {
-      await esArchiver.load('dashboard/drilldowns');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
+      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
     });
 
     it('can open menu', async () => {

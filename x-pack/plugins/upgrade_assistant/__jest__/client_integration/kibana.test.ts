@@ -79,7 +79,7 @@ describe('Kibana deprecations', () => {
         let modal = document.body.querySelector('[data-test-subj="stepsModal"]');
 
         expect(modal).not.toBe(null);
-        expect(modal!.textContent).toContain(`Fix '${deprecation.domainId}'`);
+        expect(modal!.textContent).toContain(`Resolve deprecation in '${deprecation.domainId}'`);
 
         const steps: NodeListOf<Element> | null = modal!.querySelectorAll(
           '[data-test-subj="fixDeprecationSteps"] .euiStep'
@@ -127,7 +127,7 @@ describe('Kibana deprecations', () => {
         let modal = document.body.querySelector('[data-test-subj="resolveModal"]');
 
         expect(modal).not.toBe(null);
-        expect(modal!.textContent).toContain(`Resolve '${deprecation.domainId}'`);
+        expect(modal!.textContent).toContain(`Resolve deprecation in '${deprecation.domainId}'`);
 
         const confirmButton: HTMLButtonElement | null = modal!.querySelector(
           '[data-test-subj="confirmModalConfirmButton"]'
@@ -182,9 +182,7 @@ describe('Kibana deprecations', () => {
       component.update();
 
       expect(exists('kibanaRequestError')).toBe(true);
-      expect(find('kibanaRequestError').text()).toContain(
-        'Could not retrieve Kibana deprecations.'
-      );
+      expect(find('kibanaRequestError').text()).toContain('Could not retrieve Kibana deprecations');
     });
 
     test('handles deprecation service error', async () => {
@@ -217,7 +215,7 @@ describe('Kibana deprecations', () => {
       // Verify top-level callout renders
       expect(exists('kibanaPluginError')).toBe(true);
       expect(find('kibanaPluginError').text()).toContain(
-        'Not all Kibana deprecations were retrieved successfully.'
+        'Not all Kibana deprecations were retrieved successfully'
       );
 
       // Open all deprecations

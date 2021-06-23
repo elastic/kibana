@@ -11,6 +11,7 @@ import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
 
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
@@ -22,12 +23,14 @@ export function getCustomAgents(
   logger: Logger,
   url: string
 ): GetCustomAgentsResponse {
+  const generalTLSSettings = configurationUtilities.getTLSSettings();
+  const agentTLSOptions = getNodeTLSOptions(logger, generalTLSSettings.verificationMode);
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting
   const defaultAgents = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({
-      rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
+      ...agentTLSOptions,
     }),
   };
 
@@ -50,10 +53,18 @@ export function getCustomAgents(
       agentOptions.ca = tlsSettings.certificateAuthoritiesData;
     }
 
+    const tlsSettingsFromConfig = getTLSSettingsFromConfig(
+      tlsSettings.verificationMode,
+      tlsSettings.rejectUnauthorized
+    );
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
-    if (tlsSettings.rejectUnauthorized !== undefined) {
-      agentOptions.rejectUnauthorized = tlsSettings.rejectUnauthorized;
+    const customHostNodeTLSOptions = getNodeTLSOptions(
+      logger,
+      tlsSettingsFromConfig.verificationMode
+    );
+    if (customHostNodeTLSOptions.rejectUnauthorized !== undefined) {
+      agentOptions.rejectUnauthorized = customHostNodeTLSOptions.rejectUnauthorized;
     }
   }
 
@@ -96,6 +107,10 @@ export function getCustomAgents(
     return defaultAgents;
   }
 
+  const proxyNodeTLSOptions = getNodeTLSOptions(
+    logger,
+    proxySettings.proxyTLSSettings.verificationMode
+  );
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated tls options from above, into
   // the https agent.
@@ -106,7 +121,7 @@ export function getCustomAgents(
     protocol: proxyUrl.protocol,
     headers: proxySettings.proxyHeaders,
     // do not fail on invalid certs if value is false
-    rejectUnauthorized: proxySettings.proxyRejectUnauthorizedCertificates,
+    ...proxyNodeTLSOptions,
   }) as unknown) as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 

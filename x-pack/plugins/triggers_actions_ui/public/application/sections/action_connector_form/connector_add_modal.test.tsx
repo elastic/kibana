@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { ConnectorAddModal } from './connector_add_modal';
+import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -39,12 +39,12 @@ describe('connector_add_modal', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-        return {};
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
       },
-      validateParams: (): GenericValidationResult<unknown> => {
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
     });

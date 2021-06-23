@@ -45,7 +45,9 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromESFieldType(field.type as estypes.RuntimeField['type']);
+    const schema = getDataGridSchemaFromESFieldType(
+      field.type as estypes.MappingRuntimeField['type']
+    );
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
@@ -194,7 +196,7 @@ export const useIndexData = (
         setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
         setRowCountRelation(
           typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.TotalHitsRelation)
+            ? ('eq' as estypes.SearchTotalHitsRelation)
             : resp.hits.total.relation
         );
         setTableItems(docs);

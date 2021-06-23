@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Feature, FeatureCollection } from 'geojson';
-import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
+import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {

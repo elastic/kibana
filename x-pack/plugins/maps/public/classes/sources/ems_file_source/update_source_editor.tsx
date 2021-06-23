@@ -12,7 +12,7 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEmsFileLayers } from '../../../util';
 import { IEmsFileSource } from './ems_file_source';
 import { IField } from '../../fields/field';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   layerId: string;

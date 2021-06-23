@@ -161,7 +161,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- [{ type, id, attributes, references, migrationVersion }]"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -451,7 +453,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- an array ids, or an array of objects containing id and optionally type"
+                ],
                 "signature": [
                   "{ id: string; type: string; }[]"
                 ],
@@ -4755,7 +4759,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 36
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -5071,7 +5075,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -5095,7 +5099,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -5108,7 +5112,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 39
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -5124,7 +5128,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -5140,7 +5144,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -5153,7 +5157,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 47
+                  "lineNumber": 46
                 },
                 "deprecated": false,
                 "children": [
@@ -5469,7 +5473,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 48
+                      "lineNumber": 47
                     },
                     "deprecated": false
                   },
@@ -5517,7 +5521,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 49
+                      "lineNumber": 48
                     },
                     "deprecated": false
                   },
@@ -5530,7 +5534,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 50
+                      "lineNumber": 49
                     },
                     "deprecated": false
                   },
@@ -5546,7 +5550,7 @@
                     ],
                     "source": {
                       "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                      "lineNumber": 51
+                      "lineNumber": 50
                     },
                     "deprecated": false
                   }
@@ -5581,7 +5585,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 74
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -5603,7 +5607,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 74
+                  "lineNumber": 73
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5637,7 +5641,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-              "lineNumber": 93
+              "lineNumber": 92
             },
             "deprecated": false,
             "children": [
@@ -5659,7 +5663,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-                  "lineNumber": 93
+                  "lineNumber": 92
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7571,7 +7575,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 697
+              "lineNumber": 696
             },
             "deprecated": false,
             "children": [
@@ -7587,7 +7591,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 698
+                  "lineNumber": 697
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7610,7 +7614,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 699
+                  "lineNumber": 698
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7663,7 +7667,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 759
+              "lineNumber": 758
             },
             "deprecated": false,
             "children": [
@@ -7685,7 +7689,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 760
+                  "lineNumber": 759
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7735,7 +7739,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 926
+              "lineNumber": 925
             },
             "deprecated": false,
             "children": [
@@ -7760,7 +7764,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 927
+                  "lineNumber": 926
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7783,7 +7787,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 928
+                  "lineNumber": 927
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7819,7 +7823,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1013
+              "lineNumber": 1012
             },
             "deprecated": false,
             "children": [
@@ -7835,7 +7839,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1014
+                  "lineNumber": 1013
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7852,7 +7856,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1015
+                  "lineNumber": 1014
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7875,7 +7879,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1016
+                  "lineNumber": 1015
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7917,7 +7921,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1055
+              "lineNumber": 1054
             },
             "deprecated": false,
             "children": [
@@ -7933,7 +7937,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1056
+                  "lineNumber": 1055
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7950,7 +7954,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1057
+                  "lineNumber": 1056
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7973,7 +7977,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1058
+                  "lineNumber": 1057
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8017,7 +8021,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1185
+              "lineNumber": 1184
             },
             "deprecated": false,
             "children": [
@@ -8033,7 +8037,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1186
+                  "lineNumber": 1185
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8050,7 +8054,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1187
+                  "lineNumber": 1186
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8067,7 +8071,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1188
+                  "lineNumber": 1187
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8091,7 +8095,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1189
+                  "lineNumber": 1188
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8137,7 +8141,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1283
+              "lineNumber": 1282
             },
             "deprecated": false,
             "children": [
@@ -8162,7 +8166,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1284
+                  "lineNumber": 1283
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8186,7 +8190,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1285
+                  "lineNumber": 1284
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8232,7 +8236,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1307
+              "lineNumber": 1306
             },
             "deprecated": false,
             "children": [
@@ -8255,7 +8259,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1308
+                  "lineNumber": 1307
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8272,7 +8276,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1309
+                  "lineNumber": 1308
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8289,7 +8293,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1310
+                  "lineNumber": 1309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8313,7 +8317,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1311
+                  "lineNumber": 1310
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8362,7 +8366,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1334
+              "lineNumber": 1333
             },
             "deprecated": false,
             "children": [
@@ -8387,7 +8391,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1335
+                  "lineNumber": 1334
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8410,7 +8414,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1336
+                  "lineNumber": 1335
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8450,7 +8454,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1551
+              "lineNumber": 1550
             },
             "deprecated": false,
             "children": [
@@ -8466,7 +8470,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1552
+                  "lineNumber": 1551
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8483,7 +8487,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1553
+                  "lineNumber": 1552
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8506,7 +8510,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1554
+                  "lineNumber": 1553
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8546,7 +8550,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1662
+              "lineNumber": 1661
             },
             "deprecated": false,
             "children": [
@@ -8564,7 +8568,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1663
+                  "lineNumber": 1662
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8583,7 +8587,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1664
+                  "lineNumber": 1663
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8610,7 +8614,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1665
+                  "lineNumber": 1664
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8636,7 +8640,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1666
+                  "lineNumber": 1665
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8679,7 +8683,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1822
+              "lineNumber": 1821
             },
             "deprecated": false,
             "children": [
@@ -8695,7 +8699,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1823
+                  "lineNumber": 1822
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8718,7 +8722,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1824
+                  "lineNumber": 1823
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8758,7 +8762,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1895
+              "lineNumber": 1890
             },
             "deprecated": false,
             "children": [
@@ -8774,7 +8778,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1896
+                  "lineNumber": 1891
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8800,7 +8804,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1897
+                  "lineNumber": 1892
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8848,7 +8852,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1951
+              "lineNumber": 1946
             },
             "deprecated": false,
             "children": [
@@ -8872,7 +8876,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1952
+                  "lineNumber": 1947
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8896,7 +8900,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1953
+                  "lineNumber": 1948
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9362,7 +9366,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": [],
+                "description": [
+                  "The namespace ID, which must be either a non-empty string or `undefined`."
+                ],
                 "signature": [
                   "string | undefined"
                 ],
@@ -9400,7 +9406,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": [],
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -11718,207 +11726,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.SavedObjectsComplexFieldMapping",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsComplexFieldMapping",
-        "description": [
-          "\nSee {@link SavedObjectsFieldMapping} for documentation.\n"
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/mappings/types.ts",
-          "lineNumber": 141
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsComplexFieldMapping.dynamic",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dynamic",
-            "description": [
-              "\nThe dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings.\n\nNote: To limit the number of mapping fields Saved Object types should\n*never* use `dynamic: true`."
-            ],
-            "signature": [
-              "false | \"strict\" | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 150
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsComplexFieldMapping.enabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 151
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsComplexFieldMapping.doc_values",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "doc_values",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 152
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsComplexFieldMapping.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 153
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsComplexFieldMapping.properties",
-            "type": "Object",
-            "tags": [],
-            "label": "properties",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsMappingProperties",
-                "text": "SavedObjectsMappingProperties"
-              }
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 154
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.SavedObjectsCoreFieldMapping",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsCoreFieldMapping",
-        "description": [
-          "\nSee {@link SavedObjectsFieldMapping} for documentation.\n"
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/mappings/types.ts",
-          "lineNumber": 123
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsCoreFieldMapping.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 124
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsCoreFieldMapping.null_value",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "null_value",
-            "description": [],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 125
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsCoreFieldMapping.index",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 126
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsCoreFieldMapping.doc_values",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "doc_values",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 127
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsCoreFieldMapping.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "{ [subfield: string]: { type: string; ignore_above?: number | undefined; }; } | undefined"
-            ],
-            "source": {
-              "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 128
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.SavedObjectsCreateOptions",
         "type": "Interface",
         "tags": [],
@@ -12859,7 +12666,7 @@
             ],
             "signature": [
               "Record<string, ",
-              "AggregationContainer",
+              "AggregationsAggregationContainer",
               "> | undefined"
             ],
             "source": {
@@ -14364,7 +14171,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/mappings/types.ts",
-          "lineNumber": 87
+          "lineNumber": 88
         },
         "deprecated": false,
         "children": [
@@ -14380,7 +14187,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "deprecated": false
           }
@@ -14499,15 +14306,15 @@
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 245
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 167
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
-                  "path": "x-pack/plugins/lens/server/migrations.ts",
-                  "lineNumber": 312
+                  "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts",
+                  "lineNumber": 234
                 }
               }
             ],
@@ -16936,7 +16743,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/mappings/types.ts",
-          "lineNumber": 36
+          "lineNumber": 37
         },
         "deprecated": false,
         "children": [
@@ -16954,7 +16761,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -16978,7 +16785,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/mappings/types.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "deprecated": false
           }
@@ -17418,7 +17225,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
-          "lineNumber": 31
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -18396,7 +18203,7 @@
         "description": [],
         "signature": [
           "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
-          "AggregationContainer",
+          "AggregationsAggregationContainer",
           "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | \"_doc\" | undefined; search?: string | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "core",
@@ -18465,25 +18272,81 @@
           "\nDescribe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.\n\nPlease refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}\nFor the mapping documentation\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsComplexFieldMapping",
-            "text": "SavedObjectsComplexFieldMapping"
-          },
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsCoreFieldMapping",
-            "text": "SavedObjectsCoreFieldMapping"
-          }
+          "(",
+          "MappingFlattenedProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingJoinProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingPercolatorProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingRankFeatureProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingRankFeaturesProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingConstantKeywordProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingFieldAliasProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingHistogramProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingObjectProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingNestedProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingSearchAsYouTypeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingTextProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingBinaryProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingBooleanProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDateProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDateNanosProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingKeywordProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingLongRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingIpRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingIntegerRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingFloatRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDoubleRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDateRangeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingGeoPointProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingGeoShapeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingCompletionProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingGenericProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingIpProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingMurmur3HashProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingShapeProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingTokenCountProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingVersionProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingWildcardProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingPointProperty",
+          " & { dynamic?: false | \"strict\" | undefined; })"
         ],
         "source": {
           "path": "src/core/server/saved_objects/mappings/types.ts",
-          "lineNumber": 99
+          "lineNumber": 100
         },
         "deprecated": false,
         "initialIsOpen": false

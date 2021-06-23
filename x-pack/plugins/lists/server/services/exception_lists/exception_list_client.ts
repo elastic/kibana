@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -31,11 +32,13 @@ import {
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
+  GetExceptionListSummaryOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
+import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
@@ -51,7 +54,6 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { createEndpointEventFiltersList } from './create_endoint_event_filters_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -70,6 +72,15 @@ export class ExceptionListClient {
   }: GetExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient } = this;
     return getExceptionList({ id, listId, namespaceType, savedObjectsClient });
+  };
+
+  public getExceptionListSummary = async ({
+    listId,
+    id,
+    namespaceType,
+  }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
+    const { savedObjectsClient } = this;
+    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };
 
   public getExceptionListItem = async ({
@@ -102,18 +113,6 @@ export class ExceptionListClient {
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointTrustedAppsList({
-      savedObjectsClient,
-      user,
-      version: 1,
-    });
-  };
-
-  /**
-   * Create the Endpoint Event Filters Agnostic list if it does not yet exist (`null` is returned if it does exist)
-   */
-  public createEndpointEventFiltersList = async (): Promise<ExceptionListSchema | null> => {
-    const { savedObjectsClient, user } = this;
-    return createEndpointEventFiltersList({
       savedObjectsClient,
       user,
       version: 1,

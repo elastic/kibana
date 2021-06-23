@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
 
 export const detectionsTimelineIds = [
@@ -12,7 +13,14 @@ export const detectionsTimelineIds = [
   TimelineId.detectionsRulesDetailsPage,
 ];
 
-export const skipQueryForDetectionsPage = (id: string, defaultIndex: string[]) =>
+// TODO: Once we are past experimental phase `useRuleRegistry` should be removed
+export const skipQueryForDetectionsPage = (
+  id: string,
+  defaultIndex: string[],
+  useRuleRegistry = false
+) =>
   id != null &&
   detectionsTimelineIds.some((timelineId) => timelineId === id) &&
-  !defaultIndex.some((di) => di.toLowerCase().startsWith('.siem-signals'));
+  !defaultIndex.some((di) =>
+    di.toLowerCase().startsWith(useRuleRegistry ? DEFAULT_ALERTS_INDEX : '.siem-signals')
+  );

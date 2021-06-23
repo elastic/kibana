@@ -15,11 +15,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('POST /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
-      await esArchiver.load('functional_base');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('functional_base');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
     });
 
     it('should update the tag when validation succeed', async () => {

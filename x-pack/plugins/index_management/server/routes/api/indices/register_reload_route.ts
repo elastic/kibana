@@ -17,15 +17,10 @@ const bodySchema = schema.maybe(
   })
 );
 
-export function registerReloadRoute({
-  router,
-  license,
-  indexDataEnricher,
-  lib,
-}: RouteDependencies) {
+export function registerReloadRoute({ router, indexDataEnricher, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexNames = [] } = (req.body as typeof bodySchema.type) ?? {};
 
       try {
@@ -45,6 +40,6 @@ export function registerReloadRoute({
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

@@ -1,0 +1,45 @@
+- name: install dependencies
+  become: yes
+  yum:
+    name:
+      - nss
+      - fontconfig
+      - freetype
+    state: latest
+
+- name: find rpm package
+  find:
+    paths: /packages/
+    patterns: kibana-*-x86_64.rpm
+  register: kibana_rpm
+
+- name: install
+  become: yes
+  yum:
+    name: "{{ kibana_rpm.files[0].path }}"
+    state: present
+    disable_gpg_check: yes
+
+- name: copy configuration
+  become: yes
+  template:
+    src: templates/kibana.yml
+    dest: /etc/kibana/kibana.yml
+  register: config
+
+- name: open port 5601/tcp
+  become: yes
+  command:
+    cmd: firewall-cmd --zone=public --permanent --add-port=5601/tcp
+
+- name: reload firewall
+  become: yes
+  command:
+    cmd: firewall-cmd --reload
+
+- name: start kibana
+  become: yes
+  systemd:
+    state: started
+    name: kibana
+    daemon_reload: yes

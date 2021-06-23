@@ -22,6 +22,9 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   coreStart = core;
   pluginsStart = plugins;
 }
+
+export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
+export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
@@ -55,7 +58,6 @@ let mapAppConfig: MapsConfigType;
 export const setMapAppConfig = (config: MapsConfigType) => (mapAppConfig = config);
 export const getMapAppConfig = () => mapAppConfig;
 
-export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
@@ -110,7 +112,7 @@ export async function getChartsPaletteServiceGetColor(): Promise<
   const chartConfiguration = { syncColors: true };
   return (value: string) => {
     const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getColor(series, chartConfiguration);
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
     return color ? color : '#3d3d3d';
   };
 }

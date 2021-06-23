@@ -8,15 +8,16 @@
 import { act } from 'react-dom/test-utils';
 
 import '../test_utils/setup_environment';
-import { registerTestBed, TestBed, noop, docLinks, getCommonActions } from '../test_utils';
+import { registerTestBed, TestBed, noop, getCommonActions } from '../test_utils';
 
 import { FieldEditor } from './field_editor';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
+import { docLinksServiceMock } from '../../../../core/public/mocks';
 
 const defaultProps: Props = {
   onSave: noop,
   onCancel: noop,
-  docLinks,
+  docLinks: docLinksServiceMock.createStartContract() as any,
   FieldEditor,
   indexPattern: { fields: [] } as any,
   uiSettings: {} as any,

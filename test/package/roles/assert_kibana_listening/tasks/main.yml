@@ -1,0 +1,2 @@
+- name: localhost:5601
+  wait_for: host=localhost port=5601 timeout=60

@@ -32,7 +32,7 @@ export interface FullIndexInfo {
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
 // the upgraded index.
-export const excludeUnusedTypesQuery: estypes.QueryContainer = {
+export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
   bool: {
     must_not: [
       // https://github.com/elastic/kibana/issues/91869
@@ -401,7 +401,6 @@ async function reindex(
       task_id: String(task),
     });
 
-    // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property
     const e = body.error;
     if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);

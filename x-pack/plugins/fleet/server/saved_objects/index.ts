@@ -229,11 +229,13 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
           enabled: false,
           properties: {
             type: { type: 'keyword' },
+            policy_template: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },

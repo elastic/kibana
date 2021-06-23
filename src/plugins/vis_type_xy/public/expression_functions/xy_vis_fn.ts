@@ -161,6 +161,12 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         defaultMessage: 'Defines the chart palette name',
       }),
     },
+    fillOpacity: {
+      types: ['number'],
+      help: i18n.translate('visTypeXy.function.args.fillOpacity.help', {
+        defaultMessage: 'Defines the area chart fill opacity',
+      }),
+    },
     xDimension: {
       types: ['xy_dimension', 'null'],
       help: i18n.translate('visTypeXy.function.args.xDimension.help', {
@@ -242,6 +248,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         type: 'palette',
         name: args.palette,
       },
+      fillOpacity: args.fillOpacity,
       fittingFunction: args.fittingFunction,
       dimensions: {
         x: args.xDimension,

@@ -20,6 +20,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />

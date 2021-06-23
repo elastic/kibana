@@ -25,7 +25,7 @@ export function checkGetManagementMlJobsResolver() {
         if (isManageML === true && isPlatinumOrTrialLicense === true) {
           return resolve({ mlFeatureEnabledInSpace });
         } else {
-          return reject();
+          return reject({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace });
         }
       })
       .catch((e) => {

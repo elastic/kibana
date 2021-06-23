@@ -7,6 +7,7 @@
  */
 
 import { schema as s, ObjectType } from '@kbn/config-schema';
+import { sortOrderSchema } from './common_schemas';
 
 /**
  * Schemas for the Bucket aggregations.
@@ -85,6 +86,12 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
     min_doc_count: s.maybe(s.number({ min: 1 })),
     size: s.maybe(s.number()),
     show_term_doc_count_error: s.maybe(s.boolean()),
-    order: s.maybe(s.oneOf([s.literal('asc'), s.literal('desc')])),
+    order: s.maybe(
+      s.oneOf([
+        sortOrderSchema,
+        s.recordOf(s.string(), sortOrderSchema),
+        s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+      ])
+    ),
   }),
 };

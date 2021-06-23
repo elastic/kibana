@@ -66,7 +66,7 @@ export const getEndpointListPath = (
 
 export const getEndpointDetailsPath = (
   props: {
-    name: 'endpointDetails' | 'endpointPolicyResponse' | 'endpointIsolate';
+    name: 'endpointDetails' | 'endpointPolicyResponse' | 'endpointIsolate' | 'endpointUnIsolate';
   } & EndpointIndexUIQueryParams &
     EndpointDetailsUrlProps,
   search?: string
@@ -78,6 +78,9 @@ export const getEndpointDetailsPath = (
   switch (props.name) {
     case 'endpointIsolate':
       queryParams.show = 'isolate';
+      break;
+    case 'endpointUnIsolate':
+      queryParams.show = 'unisolate';
       break;
     case 'endpointPolicyResponse':
       queryParams.show = 'policy_response';

@@ -78,6 +78,7 @@ export interface SeriesParam {
   mode: ChartMode;
   show: boolean;
   showCircles: boolean;
+  circlesRadius: number;
   type: ChartType;
   valueAxis: string;
 }
@@ -155,6 +156,7 @@ export interface VisParams {
    */
   detailedTooltip?: boolean;
   palette: PaletteOutput;
+  fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
 }
 
@@ -186,6 +188,7 @@ export interface XYVisConfig {
    */
   detailedTooltip?: boolean;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  fillOpacity?: number;
   xDimension: ExpressionValueXYDimension | null;
   yDimension: ExpressionValueXYDimension[];
   zDimension?: ExpressionValueXYDimension[];

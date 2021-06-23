@@ -149,6 +149,7 @@ export const buildExpression = (
           ],
           fittingFunction: [state.fittingFunction || 'None'],
           curveType: [state.curveType || 'LINEAR'],
+          fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [
             {
               type: 'expression',
@@ -243,6 +244,7 @@ export const buildExpression = (
           ],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
+          valuesInLegend: [state?.valuesInLegend || false],
           layers: validLayers.map((layer) => {
             const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 

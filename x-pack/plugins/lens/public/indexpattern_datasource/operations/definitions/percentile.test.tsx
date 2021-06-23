@@ -32,6 +32,10 @@ const defaultProps = {
     hasRestrictions: false,
   } as IndexPattern,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {
@@ -123,7 +127,8 @@ describe('percentile', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
