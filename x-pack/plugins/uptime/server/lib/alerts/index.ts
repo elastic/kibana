@@ -8,6 +8,7 @@
 import { UptimeAlertTypeFactory } from './types';
 import { statusCheckAlertFactory, ActionGroupIds as statusCheckActionGroup } from './status_check';
 import { tlsAlertFactory, ActionGroupIds as tlsActionGroup } from './tls';
+import { tlsLegacyAlertFactory, ActionGroupIds as tlsLegacyActionGroup } from './tls_legacy';
 import {
   durationAnomalyAlertFactory,
   ActionGroupIds as durationAnomalyActionGroup,
@@ -16,5 +17,6 @@ import {
 export const uptimeAlertTypeFactories: [
   UptimeAlertTypeFactory<statusCheckActionGroup>,
   UptimeAlertTypeFactory<tlsActionGroup>,
+  UptimeAlertTypeFactory<tlsLegacyActionGroup>,
   UptimeAlertTypeFactory<durationAnomalyActionGroup>
-] = [statusCheckAlertFactory, tlsAlertFactory, durationAnomalyAlertFactory];
+] = [statusCheckAlertFactory, tlsAlertFactory, tlsLegacyAlertFactory, durationAnomalyAlertFactory];
