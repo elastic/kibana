@@ -19,7 +19,7 @@ import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
-import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
+import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
 import {
   FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
   FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
@@ -168,7 +168,7 @@ export async function installTemplateForDataStream({
 }
 
 interface TemplateMapEntry {
-  _meta: { package: { name: string } };
+  _meta: { package?: { name: string } };
   template:
     | {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;

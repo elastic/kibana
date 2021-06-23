@@ -10,6 +10,7 @@ export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
 
 export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
+  _meta: {},
   template: {
     settings: {
       index: {
