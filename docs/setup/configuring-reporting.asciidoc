@@ -99,7 +99,7 @@ image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 
 [float]
 [[reporting-roles-user-api]]
-==== Grant access with the user API
+==== Grant access with the role API
 You can also use the {ref}/security-api-put-role.html[role API] to grant access to the reporting features. Grant the reporting role to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
 
 [source, sh]
