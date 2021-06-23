@@ -12,7 +12,8 @@
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
-    "server/**/*"
+    "server/**/*",
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

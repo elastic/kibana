@@ -42,9 +42,13 @@ describe('EndpointList store concerns', () => {
         loading: false,
         error: undefined,
         endpointDetails: {
+          flyoutView: undefined,
           activityLog: {
-            page: 1,
-            pageSize: 50,
+            paging: {
+              disabled: false,
+              page: 1,
+              pageSize: 50,
+            },
             logData: { type: 'UninitialisedResourceState' },
           },
           hostDetails: {
@@ -76,6 +80,10 @@ describe('EndpointList store concerns', () => {
         policyVersionInfo: undefined,
         isolationRequestState: {
           type: 'UninitialisedResourceState',
+        },
+        endpointPendingActions: {
+          data: new Map(),
+          type: 'LoadedResourceState',
         },
       });
     });

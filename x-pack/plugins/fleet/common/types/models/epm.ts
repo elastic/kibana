@@ -13,9 +13,7 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
-  defaultPackages,
   installationStatuses,
-  requiredPackages,
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
@@ -45,7 +43,7 @@ export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
+export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice';
@@ -407,10 +405,6 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 };
-
-export type RequiredPackage = typeof requiredPackages;
-
-export type DefaultPackages = typeof defaultPackages;
 
 export interface IndexTemplateMappings {
   properties: any;

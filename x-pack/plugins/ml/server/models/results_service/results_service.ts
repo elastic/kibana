@@ -27,6 +27,7 @@ import {
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
+import { annotationServiceProvider } from '../annotation_service';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -620,13 +621,19 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const finalResults: GetDatafeedResultsChartDataResult = {
       bucketResults: [],
       datafeedResults: [],
+      annotationResultsRect: [],
+      annotationResultsLine: [],
+      modelSnapshotResultsLine: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
-    const datafeedConfig = await getDatafeedByJobId(jobId);
 
-    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
-    if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
+    const [datafeedConfig, { body: jobsResponse }] = await Promise.all([
+      getDatafeedByJobId(jobId),
+      mlClient.getJobs({ job_id: jobId }),
+    ]);
+
+    if (jobsResponse && (jobsResponse.count === 0 || jobsResponse.jobs === undefined)) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
 
@@ -696,16 +703,61 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         ]) || [];
     }
 
-    const bucketResp = await mlClient.getBuckets({
-      job_id: jobId,
-      body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
-    });
+    const { getAnnotations } = annotationServiceProvider(client!);
+
+    const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
+      mlClient.getBuckets({
+        job_id: jobId,
+        body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
+      }),
+      getAnnotations({
+        jobIds: [jobId],
+        earliestMs: start,
+        latestMs: end,
+        maxAnnotations: 1000,
+      }),
+      mlClient.getModelSnapshots({
+        job_id: jobId,
+        start: String(start),
+        end: String(end),
+      }),
+    ]);
 
     const bucketResults = bucketResp?.body?.buckets ?? [];
     bucketResults.forEach((dataForTime) => {
       const timestamp = Number(dataForTime?.timestamp);
       const eventCount = dataForTime?.event_count;
       finalResults.bucketResults.push([timestamp, eventCount]);
+    });
+
+    const annotationResults = annotationResp.annotations[jobId] || [];
+    annotationResults.forEach((annotation) => {
+      const timestamp = Number(annotation?.timestamp);
+      const endTimestamp = Number(annotation?.end_timestamp);
+      if (timestamp === endTimestamp) {
+        finalResults.annotationResultsLine.push({
+          dataValue: timestamp,
+          details: annotation.annotation,
+        });
+      } else {
+        finalResults.annotationResultsRect.push({
+          coordinates: {
+            x0: timestamp,
+            x1: endTimestamp,
+          },
+          details: annotation.annotation,
+        });
+      }
+    });
+
+    const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
+    modelSnapshots.forEach((modelSnapshot) => {
+      const timestamp = Number(modelSnapshot?.timestamp);
+
+      finalResults.modelSnapshotResultsLine.push({
+        dataValue: timestamp,
+        details: modelSnapshot.description,
+      });
     });
 
     return finalResults;

@@ -55,7 +55,7 @@ import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
-import { getTimeShiftWarningMessages } from './dimension_panel/time_shift';
+import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -462,7 +462,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: getTimeShiftWarningMessages,
+    getWarningMessages: getStateTimeShiftWarningMessages,
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

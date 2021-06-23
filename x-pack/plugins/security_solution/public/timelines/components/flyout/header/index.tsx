@@ -35,7 +35,7 @@ import { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
@@ -52,6 +52,7 @@ import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
 import { TimelineKPIs } from './kpis';
+import { LineClamp } from '../../../../common/components/line_clamp';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -206,13 +207,13 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
 
-  const content = useMemo(() => (description.length ? description : commonI18n.DESCRIPTION), [
-    description,
-  ]);
-
   return (
     <EuiText size="s" data-test-subj="timeline-description">
-      {content}
+      {description.length ? (
+        <LineClamp key={description.length} content={description} lineClampHeight={4.5} />
+      ) : (
+        commonI18n.DESCRIPTION
+      )}
     </EuiText>
   );
 };
@@ -318,6 +319,8 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
+  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
@@ -349,9 +352,11 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
           <EuiFlexItem grow={false}>
             <AddToFavoritesButton timelineId={timelineId} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddToCaseButton timelineId={timelineId} />
-          </EuiFlexItem>
+          {hasWritePermissions && (
+            <EuiFlexItem grow={false}>
+              <AddToCaseButton timelineId={timelineId} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </StyledTimelineHeader>
