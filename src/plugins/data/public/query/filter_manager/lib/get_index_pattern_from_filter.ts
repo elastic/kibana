@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { buildEsQuery, EsQueryConfig } from './build_es_query';
-export { buildQueryFromFilters } from './from_filters';
-export { luceneStringToDsl } from './lucene_string_to_dsl';
-export { decorateQuery } from './decorate_query';
-export { getEsQueryConfig } from './get_es_query_config';
-export { IndexPatternBase } from './types';
+import { Filter, IIndexPattern } from '../../../../common';
+
+export function getIndexPatternFromFilter(
+  filter: Filter,
+  indexPatterns: IIndexPattern[]
+): IIndexPattern | undefined {
+  return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
+}

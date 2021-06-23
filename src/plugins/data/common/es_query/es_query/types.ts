@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../filters';
-import { IIndexPattern } from '../..';
+import { IFieldType } from '../../index_patterns';
 
-export function getIndexPatternFromFilter(
-  filter: Filter,
-  indexPatterns: IIndexPattern[]
-): IIndexPattern | undefined {
-  return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
+export interface IndexPatternBase {
+  fields: IFieldType[];
+  id?: string;
 }
