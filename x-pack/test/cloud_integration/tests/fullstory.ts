@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import { CLOUD_USER_ID } from '../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const browser = getService('browser');
   const find = getService('find');
   const PageObjects = getPageObjects(['common']);
