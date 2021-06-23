@@ -17,6 +17,7 @@ import {
   AlertMessageLinkToken,
   ThreadPoolRejectionsAlertParams,
   CommonAlertFilter,
+  AlertState,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
@@ -178,10 +179,10 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       ],
     };
   }
-
   protected executeActions(
     instance: AlertInstance,
-    alertStates: AlertThreadPoolRejectionsState[],
+    { alertStates }: { alertStates: AlertState[] },
+    item: AlertData | null,
     cluster: AlertCluster
   ) {
     const type = this.threadPoolType;
