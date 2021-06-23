@@ -148,7 +148,7 @@ export const applicationUsageSchema = {
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
-  observability: commonSchema,
+  'observability-overview': commonSchema,
   osquery: commonSchema,
   security_account: commonSchema,
   security_access_agreement: commonSchema,

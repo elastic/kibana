@@ -24,7 +24,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { casesFeatureId, observabilityAppId } from '../common/const';
+import { casesFeatureId, observabilityFeatureId } from '../common/const';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -47,14 +47,14 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [casesFeatureId, 'kibana'],
-      catalogue: [observabilityAppId],
-      cases: [observabilityAppId],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
       privileges: {
         all: {
           app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityAppId],
+          catalogue: [observabilityFeatureId],
           cases: {
-            all: [observabilityAppId],
+            all: [observabilityFeatureId],
           },
           api: [],
           savedObject: {
@@ -65,9 +65,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         read: {
           app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityAppId],
+          catalogue: [observabilityFeatureId],
           cases: {
-            read: [observabilityAppId],
+            read: [observabilityFeatureId],
           },
           api: [],
           savedObject: {

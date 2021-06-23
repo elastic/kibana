@@ -3970,7 +3970,7 @@
             }
           }
         },
-        "observability": {
+        "observability-overview": {
           "properties": {
             "appId": {
               "type": "keyword",

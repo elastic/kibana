@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const CASES_OWNER = 'observability';
+import { observabilityFeatureId } from '../../../../common/const';
+
+export const CASES_OWNER = observabilityFeatureId;

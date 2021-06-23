@@ -34,7 +34,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { observabilityAppId } from '../common/const';
+import { observabilityAppId, observabilityFeatureId } from '../common/const';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -147,7 +147,7 @@ export class Plugin
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
-        id: observabilityAppId,
+        id: observabilityFeatureId,
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
         }),
