@@ -19,4 +19,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
 
-export { TimelinesPluginSetup, TimelinesPluginStart } from './types';
+export { TimelinesPluginUI, TimelinesPluginStart } from './types';

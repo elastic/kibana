@@ -44,7 +44,8 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
-export const GLOBAL_HEADER_HEIGHT = 98; // px
+export const GLOBAL_HEADER_HEIGHT = 96; // px
+export const GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER = 128; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -70,6 +71,9 @@ export enum SecurityPageName {
   administration = 'administration',
 }
 
+/**
+ * The ID of the cases plugin
+ */
 export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
@@ -237,6 +241,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
   '.servicenow',
   '.jira',
