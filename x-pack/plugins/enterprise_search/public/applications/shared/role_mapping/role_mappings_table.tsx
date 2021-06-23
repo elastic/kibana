@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
@@ -126,9 +126,9 @@ export const RoleMappingsTable: React.FC<Props> = ({
       return (
         <span data-test-subj="ProviderSpecificList">
           {authProvider.join(', ')}{' '}
-          <a href={AUTH_PROVIDER_DOCUMENTATION_URL} target="_blank">
+          <EuiLink href={AUTH_PROVIDER_DOCUMENTATION_URL} target="_blank">
             <EuiIconTip type="alert" color="warning" content={AUTH_PROVIDER_TOOLTIP} />
-          </a>
+          </EuiLink>
         </span>
       );
     },
