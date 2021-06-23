@@ -1048,6 +1048,9 @@ export default ({ getService }: FtrProviderContext) => {
           for (const dashboard of testData.expected.dashboards) {
             await ml.testResources.deleteDashboardById(dashboard);
           }
+          for (const job of testData.expected.jobs) {
+            await ml.api.deleteAnomalyDetectionJobES(job.jobId);
+          }
           await ml.api.cleanMlIndices();
         });
 
