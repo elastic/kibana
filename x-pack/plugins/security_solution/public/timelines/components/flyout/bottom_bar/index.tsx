@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
-import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
