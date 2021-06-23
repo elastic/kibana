@@ -95,6 +95,7 @@ export const UserSelector: React.FC<Props> = ({
       <EuiFormRow label={USERNAME_LABEL} helpText={!elasticsearchUser.username && REQUIRED_LABEL}>
         <EuiFieldText
           name={USERNAME_LABEL}
+          disabled={!isNewUser}
           data-test-subj="UsernameInput"
           value={elasticsearchUser.username}
           onChange={(e) => setElasticsearchUsernameValue(e.target.value)}
