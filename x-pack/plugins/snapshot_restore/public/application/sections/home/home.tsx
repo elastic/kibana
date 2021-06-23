@@ -13,6 +13,7 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
 import { useConfig, useCore } from '../../app_context';
+import { APP_WRAPPER_CLASS } from '../../../shared_imports';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -130,24 +131,26 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
 
       <EuiSpacer size="l" />
 
-      <Switch>
-        <Route
-          exact
-          path={`${BASE_PATH}/repositories/:repositoryName*`}
-          component={RepositoryList}
-        />
-        {/* We have two separate SnapshotList routes because repository names could have slashes in
-         *  them. This would break a route with a path like snapshots/:repositoryName?/:snapshotId*
-         */}
-        <Route exact path={`${BASE_PATH}/snapshots`} component={SnapshotList} />
-        <Route
-          exact
-          path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
-          component={SnapshotList}
-        />
-        <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
-        <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
-      </Switch>
+      <div className={APP_WRAPPER_CLASS}>
+        <Switch>
+          <Route
+            exact
+            path={`${BASE_PATH}/repositories/:repositoryName*`}
+            component={RepositoryList}
+          />
+          {/* We have two separate SnapshotList routes because repository names could have slashes in
+           *  them. This would break a route with a path like snapshots/:repositoryName?/:snapshotId*
+           */}
+          <Route exact path={`${BASE_PATH}/snapshots`} component={SnapshotList} />
+          <Route
+            exact
+            path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
+            component={SnapshotList}
+          />
+          <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
+          <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
+        </Switch>
+      </div>
     </>
   );
 };

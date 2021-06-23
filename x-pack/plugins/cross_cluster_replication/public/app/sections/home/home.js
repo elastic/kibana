@@ -15,6 +15,7 @@ import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
 import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';
+import { APP_WRAPPER_CLASS } from '../../../shared_imports';
 
 export class CrossClusterReplicationHome extends PureComponent {
   state = {
@@ -88,10 +89,13 @@ export class CrossClusterReplicationHome extends PureComponent {
 
         <EuiSpacer size="l" />
 
-        <Switch>
-          <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
-          <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
-        </Switch>
+
+        <div className={APP_WRAPPER_CLASS}>
+          <Switch>
+            <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
+          </Switch>
+        </div>
       </>
     );
   }
