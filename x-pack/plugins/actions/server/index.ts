@@ -47,7 +47,6 @@ export type {
   TeamsActionTypeId,
   TeamsActionParams,
 } from './builtin_action_types';
-
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
