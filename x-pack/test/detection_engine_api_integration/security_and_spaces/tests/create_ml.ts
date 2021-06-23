@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         probability: 0.007820139656036713,
         record_score: 33.36147565024334,
         result_type: 'record',
-        timestamp: '2020-11-16T22:58:08.000Z',
+        timestamp: 1605567488000,
         typical: [0.007820139656036711],
         user: { name: ['root'] },
         process: { name: ['store'] },
