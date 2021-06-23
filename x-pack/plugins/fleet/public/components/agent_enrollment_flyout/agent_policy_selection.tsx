@@ -49,9 +49,8 @@ const resolveAgentId = (
 };
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
-  const { withKeySelection, agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
-  const onKeyChange = props.withKeySelection && props.onKeyChange;
-  const selectedApiKeyId = props.withKeySelection && props.selectedApiKeyId;
+  const { agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
+
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
     () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
   );
@@ -105,12 +104,12 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           excludeFleetServer={excludeFleetServer}
         />
       )}
-      {withKeySelection && onKeyChange && (
+      {props.withKeySelection && props.onKeyChange && (
         <>
           <EuiSpacer />
           <AdvancedAgentAuthenticationSettings
-            selectedApiKeyId={selectedApiKeyId}
-            onKeyChange={onKeyChange}
+            selectedApiKeyId={props.selectedApiKeyId}
+            onKeyChange={props.onKeyChange}
             agentPolicyId={selectedAgentPolicyId}
           />
         </>
