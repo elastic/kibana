@@ -63,7 +63,7 @@ export interface UseGetCase extends CaseState {
    * @param [silent] When set to `true`, the `isLoading` property will not be set to `true`
    * while doing the API call
    */
-  fetchCase: (silent?: boolean) => void;
+  fetchCase: (silent?: boolean) => Promise<void>;
   updateCase: (newCase: Case) => void;
 }
 
