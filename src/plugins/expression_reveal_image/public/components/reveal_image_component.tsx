@@ -55,12 +55,13 @@ function RevealImageComponent({
       });
 
       setLoaded(true);
-      return handlers.done();
+      handlers.done();
     }
   }, [imgRef, handlers]);
 
   useEffect(() => {
     handlers.event({ name: 'onResize', data: updateImageView });
+    handlers.done();
     return () => {
       handlers.event({ name: 'destroy' });
     };
