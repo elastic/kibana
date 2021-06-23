@@ -39,7 +39,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
      * to load the workpad. Resolves once the workpad is in the DOM
      */
     async loadFirstWorkpad(workpadName: string) {
-      const elem = await testSubjects.find('canvasWorkpadLoaderWorkpad');
+      const elem = await testSubjects.find('canvasWorkpadTableWorkpad');
       const text = await elem.getVisibleText();
       expect(text).to.be(workpadName);
       await elem.click();

@@ -34,7 +34,7 @@ export type CanvasServiceFactory<Service> = (
   appUpdater: BehaviorSubject<AppUpdater>
 ) => Service | Promise<Service>;
 
-class CanvasServiceProvider<Service> {
+export class CanvasServiceProvider<Service> {
   private factory: CanvasServiceFactory<Service>;
   private service: Service | undefined;
 

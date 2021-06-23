@@ -37,6 +37,7 @@ jest.mock('./steps', () => {
     ...module,
     AgentPolicySelectionStep: jest.fn(),
     AgentEnrollmentKeySelectionStep: jest.fn(),
+    ViewDataStep: jest.fn(),
   };
 });
 

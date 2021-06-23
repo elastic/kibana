@@ -11,11 +11,9 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
-
-import { Loading } from '../../../shared/loading';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } from './components';
 
@@ -61,20 +59,10 @@ describe('SourceEngines', () => {
     expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(1);
   });
 
-  it('renders a loading component before data has loaded', () => {
-    setMockValues({ ...MOCK_VALUES, dataLoading: true });
-    const wrapper = shallow(<SourceEngines />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
   describe('page actions', () => {
-    const getPageHeader = (wrapper: ShallowWrapper) =>
-      wrapper.find(EuiPageHeader).dive().children().dive();
-
     it('contains a button to add source engines', () => {
       const wrapper = shallow(<SourceEngines />);
-      expect(getPageHeader(wrapper).find(AddSourceEnginesButton)).toHaveLength(1);
+      expect(getPageHeaderActions(wrapper).find(AddSourceEnginesButton)).toHaveLength(1);
     });
 
     it('hides the add source engines button if the user does not have permissions', () => {
@@ -86,7 +74,7 @@ describe('SourceEngines', () => {
       });
       const wrapper = shallow(<SourceEngines />);
 
-      expect(getPageHeader(wrapper).find(AddSourceEnginesButton)).toHaveLength(0);
+      expect(getPageHeaderActions(wrapper).find(AddSourceEnginesButton)).toHaveLength(0);
     });
   });
 });
