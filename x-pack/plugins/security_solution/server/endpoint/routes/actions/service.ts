@@ -10,6 +10,42 @@ import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 
+const getShouldClauses = ({
+  indices,
+  elasticAgentId,
+}: {
+  indices: string[];
+  elasticAgentId: string;
+}) => {
+  return indices.map((_index) => {
+    const clause = {
+      bool: {
+        filter: [
+          {
+            term: {
+              _index,
+            },
+          },
+          {
+            term: {
+              [_index === AGENT_ACTIONS_INDEX ? 'agents' : 'agent_id']: elasticAgentId,
+            },
+          },
+        ],
+      },
+    };
+    // only `endpoint` actions in the result
+    if (_index === AGENT_ACTIONS_INDEX) {
+      clause.bool.filter.push({
+        term: {
+          input_type: 'endpoint',
+        },
+      });
+    }
+    return clause;
+  });
+};
+
 export const getAuditLogESQuery = ({
   elasticAgentId,
   from,
@@ -19,17 +55,19 @@ export const getAuditLogESQuery = ({
   from: number;
   size: number;
 }): estypes.SearchRequest => {
+  const indices = [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX];
+
   return {
-    index: [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX],
+    index: indices,
     size,
     from,
     body: {
       query: {
         bool: {
-          should: [
-            { terms: { agents: [elasticAgentId] } },
-            { terms: { agent_id: [elasticAgentId] } },
-          ],
+          should: getShouldClauses({
+            indices,
+            elasticAgentId,
+          }),
         },
       },
       sort: [
