@@ -16,7 +16,6 @@ import {
   EuiRange,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
