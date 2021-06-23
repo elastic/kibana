@@ -69,7 +69,6 @@ kibana_vars=(
     logging.appenders
     logging.appenders.console
     logging.appenders.file
-    logging.appenders.rolling-file
     logging.dest
     logging.json
     logging.loggers
