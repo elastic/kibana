@@ -182,8 +182,6 @@ describe('licensing plugin', () => {
 
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
 
-        // console.log('***', first);
-
         expect(first.error).toBe(error1.message);
         expect(second.error).toBe(error2.message);
         expect(third.type).toBe('basic');
