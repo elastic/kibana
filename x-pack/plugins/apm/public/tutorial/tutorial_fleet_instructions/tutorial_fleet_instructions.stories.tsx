@@ -17,7 +17,6 @@ interface Args {
 }
 
 function Wrapper({ hasFleetPolicyWithApmIntegration }: Args) {
-  // TODO mock http
   const http = ({
     get: () => ({ hasData: hasFleetPolicyWithApmIntegration }),
   } as unknown) as HttpStart;
@@ -40,10 +39,10 @@ export default {
   },
 };
 
-export const WithApmIntegration: Story<Args> = (_args) => {
+export const Instructions: Story<Args> = (_args) => {
   return <Wrapper {..._args} />;
 };
 
-WithApmIntegration.args = {
+Instructions.args = {
   hasFleetPolicyWithApmIntegration: true,
 };
