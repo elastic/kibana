@@ -10,6 +10,7 @@ import { RequestHandler } from 'src/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
 import { CommentType } from '../../../../../cases/common';
+import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
@@ -103,12 +104,17 @@ export const isolationRequestHandler = function (
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {
       const newIDs: string[][] = await Promise.all(
-        req.body.alert_ids.map(async (a: string) =>
-          (await endpointContext.service.getCasesClient(req)).cases.getCaseIDsByAlertID({
+        req.body.alert_ids.map(async (a: string) => {
+          const cases: CasesByAlertId = await (
+            await endpointContext.service.getCasesClient(req)
+          ).cases.getCasesByAlertID({
             alertID: a,
             options: { owner: APP_ID },
-          })
-        )
+          });
+          return cases.map((caseInfo): string => {
+            return caseInfo.id;
+          });
+        })
       );
       caseIDs = caseIDs.concat(...newIDs);
     }
