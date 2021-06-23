@@ -47,5 +47,6 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     isSessionStorageReady: jest.fn(() => true),
     getSearchSessionIndicatorUiConfig: jest.fn(() => ({ isDisabled: () => ({ disabled: false }) })),
     hasAccess: jest.fn(() => true),
+    continue: jest.fn(),
   };
 }
