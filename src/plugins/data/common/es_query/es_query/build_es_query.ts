@@ -12,7 +12,7 @@ import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter } from '../filters';
 import { Query } from '../../query/types';
-import { MinimalIndexPattern } from './types';
+import { IndexPatternBase } from './types';
 
 export interface EsQueryConfig {
   allowLeadingWildcards: boolean;
@@ -36,7 +36,7 @@ function removeMatchAll<T>(filters: T[]) {
  * config contains dateformat:tz
  */
 export function buildEsQuery(
-  indexPattern: MinimalIndexPattern | undefined,
+  indexPattern: IndexPatternBase | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {

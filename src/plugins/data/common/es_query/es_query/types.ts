@@ -8,7 +8,7 @@
 
 import { IFieldType } from '../../index_patterns';
 
-export interface MinimalIndexPattern {
+export interface IndexPatternBase {
   fields: IFieldType[];
   id?: string;
 }

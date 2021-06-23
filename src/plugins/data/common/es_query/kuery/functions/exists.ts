@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import * as literal from '../node_types/literal';
-import { KueryNode, IFieldType, MinimalIndexPattern } from '../../..';
+import { KueryNode, IFieldType, IndexPatternBase } from '../../..';
 
 export function buildNodeParams(fieldName: string) {
   return {
@@ -18,7 +18,7 @@ export function buildNodeParams(fieldName: string) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: MinimalIndexPattern,
+  indexPattern?: IndexPatternBase,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

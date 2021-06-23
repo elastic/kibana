@@ -7,11 +7,11 @@
  */
 
 import { getFields } from './get_fields';
-import { MinimalIndexPattern, IFieldType, KueryNode } from '../../../..';
+import { IndexPatternBase, IFieldType, KueryNode } from '../../../..';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
-  indexPattern?: MinimalIndexPattern,
+  indexPattern?: IndexPatternBase,
   nestedPath?: string
 ): KueryNode {
   const fullFieldNameNode = {

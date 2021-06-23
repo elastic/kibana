@@ -9,11 +9,11 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { MinimalIndexPattern } from './types';
+import { IndexPatternBase } from './types';
 import { IFieldType } from '../../index_patterns';
 
 describe('handleNestedFilter', function () {
-  const indexPattern: MinimalIndexPattern = {
+  const indexPattern: IndexPatternBase = {
     id: 'logstash-*',
     fields,
   };

@@ -13,7 +13,7 @@ import { KueryNode, DslQuery, KueryParseOptions } from '../types';
 
 // @ts-ignore
 import { parse as parseKuery } from './_generated_/kuery';
-import { MinimalIndexPattern } from '../..';
+import { IndexPatternBase } from '../..';
 
 const fromExpression = (
   expression: string | DslQuery,
@@ -65,7 +65,7 @@ export const fromKueryExpression = (
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
-  indexPattern?: MinimalIndexPattern,
+  indexPattern?: IndexPatternBase,
   config?: Record<string, any>,
   context?: Record<string, any>
 ): JsonObject => {
