@@ -45,6 +45,7 @@ import {
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
+import { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -81,6 +82,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     line: LineAnnotationDatum[];
   }>({ rect: [], line: [] });
   const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
+  const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
@@ -141,7 +143,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     setIsLoadingChartData(false);
   }, [endDate, data.bucketSpan]);
 
-  const getJobData = async () => {
+  const getJobData = useCallback(async () => {
     try {
       const job: CombinedJobWithStats = await loadFullJob(jobId);
       setData({
@@ -152,7 +154,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     } catch (error) {
       displayErrorToast(error);
     }
-  };
+  }, [jobId]);
 
   useEffect(function loadJobWithDatafeed() {
     getJobData();
@@ -389,6 +391,30 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           />
                         </>
                       ) : null}
+                      {messageData.length > 0 ? (
+                        <>
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedChart.messageLineAnnotationId',
+                              {
+                                defaultMessage: 'Job messages line result',
+                              }
+                            )}
+                            key="messages-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={messageData}
+                            marker={<EuiIcon type="tableDensityNormal" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.euiColorAccent,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
+                        </>
+                      ) : null}
                       <LineSeries
                         key={'source-results'}
                         color={euiTheme.euiColorPrimary}
@@ -446,7 +472,18 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
               </EuiFlexItem>
               {range !== undefined ? (
                 <EuiFlexItem grow={false}>
-                  <JobMessagesPane jobId={jobId} {...range} />
+                  <JobMessagesPane
+                    jobId={jobId}
+                    {...range}
+                    actionHandler={(message: JobMessage) => {
+                      const datum = setLineAnnotationHeader({
+                        dataValue: message.timestamp,
+                        details: message.message,
+                      });
+
+                      setMessageData([datum]);
+                    }}
+                  />
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
