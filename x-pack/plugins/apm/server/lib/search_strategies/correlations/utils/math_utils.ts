@@ -5,15 +5,9 @@
  * 2.0.
  */
 
+import { range } from 'lodash';
 import { HistogramItem } from '../query_ranges';
 import { asPreciseDecimal } from '../../../../../common/utils/formatters';
-
-export function* range(start: number, end: number, step: number) {
-  while (start < end) {
-    yield start;
-    start += step;
-  }
-}
 
 // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 export function getRandomInt(min: number, max: number) {

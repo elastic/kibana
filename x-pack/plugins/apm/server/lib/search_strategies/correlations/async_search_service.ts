@@ -6,23 +6,21 @@
  */
 
 import { shuffle } from 'lodash';
-
+import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
-
-import type {
-  AsyncSearchProviderProgress,
-  SearchServiceParams,
-  SearchServiceValue,
-} from '../../../../common/search_strategies/correlations/types';
-
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
 import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
-import { hashHistogram, isHistogramRoughlyEqual, range } from './utils';
+import { hashHistogram, isHistogramRoughlyEqual } from './utils';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import type {
+  AsyncSearchProviderProgress,
+  SearchServiceParams,
+  SearchServiceValue,
+} from '../../../../common/search_strategies/correlations/types';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
