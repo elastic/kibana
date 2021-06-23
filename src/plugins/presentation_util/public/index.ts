@@ -38,6 +38,7 @@ export {
   LazyDebugComponent,
   LazyErrorComponent,
   LazyPopoverComponent,
+  ClosePopoverFn,
   withSuspense,
 } from './components';
 
