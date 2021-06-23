@@ -35,7 +35,7 @@ import { KibanaServices } from './common/lib/kibana/services';
 import {
   APP_ID,
   APP_ICON_SOLUTION,
-  APP_DETECTIONS_PATH,
+  OVERVIEW_PATH,
   APP_OVERVIEW_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
@@ -49,7 +49,7 @@ import {
 import { SecurityPageName } from './app/types';
 import { getDeepLinks, getDeepLinksAndKeywords } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
-import { HOSTS, NETWORK, TIMELINES, DETECTION_ENGINE, CASE } from './app/translations';
+import { TIMELINES, CASE } from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -71,7 +71,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  private detectionsUpdater$ = new Subject<AppUpdater>();
   private caseUpdater$ = new Subject<AppUpdater>();
   // TODO: [1101] remove all previous updaters and use only appUpdater$
   private appUpdater$ = new Subject<AppUpdater>();
@@ -146,28 +145,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: DETECTION_ENGINE,
-      order: 9001,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_DETECTIONS_PATH,
-      updater$: this.detectionsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { detections: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
       title: TIMELINES,
       order: 9002,
@@ -215,14 +192,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
-      defaultPath: APP_OVERVIEW_PATH,
+      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
-
         return renderApp({
           ...params,
           services: await startServices,
@@ -340,7 +316,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
-        detections: new subPluginClasses.Detections(),
+        alerts: new subPluginClasses.Detections(),
+        rules: new subPluginClasses.Rules(),
+        exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
@@ -363,7 +341,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const subPlugins = await this.subPlugins();
     return {
       overview: subPlugins.overview.start(),
-      detections: subPlugins.detections.start(storage),
+      alerts: subPlugins.alerts.start(storage),
+      rules: subPlugins.rules.start(storage),
+      exceptions: subPlugins.exceptions.start(storage),
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
@@ -389,7 +369,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         { createStore, createInitialState },
         kibanaIndexPatterns,
         {
-          detections: detectionsSubPlugin,
+          alerts: alertsSubPlugin,
+          rules: rulesSubPlugin,
+          exceptions: exceptionsSubPlugin,
           hosts: hostsSubPlugin,
           network: networkSubPlugin,
           timelines: timelinesSubPlugin,
@@ -428,9 +410,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
-      const detectionsStart = subPlugins
-        ? subPlugins.detections
-        : detectionsSubPlugin.start(this.storage);
+      const alertsStart = subPlugins ? subPlugins.alerts : alertsSubPlugin.start(this.storage);
+      const rulesStart = subPlugins ? subPlugins.rules : rulesSubPlugin.start(this.storage);
+      const exceptionsStart = subPlugins
+        ? subPlugins.exceptions
+        : exceptionsSubPlugin.start(this.storage);
+
       const hostsStart = subPlugins ? subPlugins.hosts : hostsSubPlugin.start(this.storage);
       const networkStart = subPlugins ? subPlugins.network : networkSubPlugin.start(this.storage);
       const timelinesStart = subPlugins ? subPlugins.timelines : timelinesSubPlugin.start();
@@ -443,7 +428,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.store.initialState.timeline!,
           timelineById: {
             ...timelinesStart.store.initialState.timeline!.timelineById,
-            ...detectionsStart.storageTimelines!.timelineById,
+            ...alertsStart.storageTimelines!.timelineById,
+            ...rulesStart.storageTimelines!.timelineById,
+            ...exceptionsStart.storageTimelines!.timelineById,
             ...hostsStart.storageTimelines!.timelineById,
             ...networkStart.storageTimelines!.timelineById,
           },

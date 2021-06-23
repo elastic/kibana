@@ -50,6 +50,9 @@ export const useFormatUrl = (page: SiemNavTabKey) => {
       }`;
       // TODO: [1101] remove conditional and use always deepLinkId
       return page === 'overview' ||
+        page === 'alerts' ||
+        page === 'rules' ||
+        page === 'exceptions' ||
         page === 'hosts' ||
         page === 'network' ||
         page === 'administration' ||

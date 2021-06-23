@@ -69,8 +69,8 @@ export type SecuritySubPluginKeyStore =
   | 'management';
 
 export type SecurityDeepLinkName =
-  | SecurityPageName.detections
   | SecurityPageName.overview
+  | SecurityPageName.detections
   | SecurityPageName.hosts
   | SecurityPageName.network
   | SecurityPageName.timelines

@@ -47,7 +47,7 @@ export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'searc
 
 export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
   const { application } = coreStart;
-  const { pageName, path, search } = parseRoute(window.location);
+  const { pageName, path } = parseRoute(window.location);
 
   switch (pageName) {
     case SecurityPageName.overview:
@@ -97,8 +97,23 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
         path,
       });
       break;
-    case 'detections':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+    case SecurityPageName.alerts:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.alerts,
+        replace: true,
+        path,
+      });
+      break;
+    case SecurityPageName.rules:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        replace: true,
+        path,
+      });
+      break;
+    case SecurityPageName.exceptions:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.exceptions,
         replace: true,
         path,
       });
@@ -107,7 +122,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       application.navigateToApp(APP_ID, {
         deepLinkId: SecurityPageName.overview,
         replace: true,
-        path: `${search}`,
+        path,
       });
       break;
   }

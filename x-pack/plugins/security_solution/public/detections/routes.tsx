@@ -6,18 +6,23 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { ALERTS_PATH, SecurityPageName } from '../../common/constants';
 
-import { DetectionEngineContainer } from './pages/detection_engine';
-import { NotFoundPage } from '../app/404';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 
-export const AlertsRoutes: React.FC = () => (
-  <Switch>
-    <Route path="/">
-      <DetectionEngineContainer />
-    </Route>
-    <Route>
-      <NotFoundPage />
-    </Route>
-  </Switch>
+import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
+
+export const AlertsRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.alerts}>
+    <DetectionEnginePage />
+    <SpyRoute pageName={SecurityPageName.alerts} />
+  </TrackApplicationView>
 );
+
+export const routes = [
+  {
+    path: ALERTS_PATH,
+    render: AlertsRoutes,
+  },
+];

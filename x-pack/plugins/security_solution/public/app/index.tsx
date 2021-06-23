@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { OVERVIEW_PATH } from '../../common/constants';
 
 import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
@@ -57,18 +58,22 @@ export const renderApp = ({
     >
       <Switch>
         {/* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */}
-        {subPlugins.overview.routes!.map((route) => (
-          <Route {...route} key="overview" />
+        {[
+          ...subPlugins.overview.routes!,
+          ...subPlugins.alerts.routes!,
+          ...subPlugins.rules.routes!,
+          ...subPlugins.exceptions.routes!,
+          ...subPlugins.hosts.routes!,
+          ...subPlugins.network.routes!,
+          ...subPlugins.management.routes!,
+        ].map((route, index) => (
+          <Route key={`route-${index}`} {...route} />
         ))}
-        {subPlugins.hosts.routes!.map((route) => (
-          <Route {...route} key="hosts" />
-        ))}
-        {subPlugins.network.routes!.map((route) => (
-          <Route {...route} key="network" />
-        ))}
-        {subPlugins.management.routes!.map((route) => (
-          <Route {...route} key="management" />
-        ))}
+
+        <Route path="" exact>
+          <Redirect to={OVERVIEW_PATH} />
+        </Route>
+
         <Route>
           <NotFoundPage />
         </Route>

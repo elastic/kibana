@@ -25,10 +25,10 @@ describe('URL compatibility', () => {
     cleanKibana();
   });
 
-  it('Redirects to Detection alerts from old Detections URL', () => {
+  it.skip('Redirects to Detection alerts from old Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
 
-    cy.url().should('include', '/security/detections');
+    cy.url().should('include', '/security/alerts');
   });
 
   it('sets the global start and end dates from the url with timestamps', () => {

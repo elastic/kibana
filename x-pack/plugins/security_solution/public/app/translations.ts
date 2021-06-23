@@ -26,6 +26,14 @@ export const DETECTION_ENGINE = i18n.translate(
   }
 );
 
+export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
+  defaultMessage: 'Rules',
+});
+
+export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
+  defaultMessage: 'Exceptions',
+});
+
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });
@@ -40,4 +48,17 @@ export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
 
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
   defaultMessage: 'Administration',
+});
+
+export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
+  defaultMessage: 'Detect',
+});
+export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
+  defaultMessage: 'Explore',
+});
+export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.investigate', {
+  defaultMessage: 'Investigate',
+});
+export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
+  defaultMessage: 'Manage',
 });

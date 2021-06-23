@@ -33,6 +33,9 @@ export const usePrimaryNavigationItems = ({
         // TODO: [1101] remove conditional and use always deepLinkId
         if (
           id === 'overview' ||
+          id === 'alerts' ||
+          id === 'rules' ||
+          id === 'exceptions' ||
           id === 'hosts' ||
           id === 'network' ||
           id === 'endpoints' ||
@@ -49,6 +52,9 @@ export const usePrimaryNavigationItems = ({
       // TODO: [1101] remove conditional and use always deepLinkId
       const appHref =
         id === 'overview' ||
+        id === 'alerts' ||
+        id === 'rules' ||
+        id === 'exceptions' ||
         id === 'hosts' ||
         id === 'network' ||
         id === 'endpoints' ||
@@ -79,7 +85,6 @@ export const usePrimaryNavigationItems = ({
         items: [
           getSideNav(navTabs.overview),
           // TODO: [1101] Move the following nav items to its group
-          getSideNav(navTabs.detections),
           getSideNav(navTabs.timelines),
           getSideNav(navTabs.case),
         ],
@@ -87,9 +92,9 @@ export const usePrimaryNavigationItems = ({
       {
         ...navTabGroups.detect,
         items: [
-          //     getSideNav(navTabs.alert),
-          //     getSideNav(navTabs.rule),
-          //     getSideNav(navTabs.exception),
+          getSideNav(navTabs.alerts),
+          getSideNav(navTabs.rules),
+          getSideNav(navTabs.exceptions),
         ],
       },
       {

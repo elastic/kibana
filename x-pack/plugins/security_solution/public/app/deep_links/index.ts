@@ -10,13 +10,25 @@ import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
 import { App, AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
-import { ADMINISTRATION, OVERVIEW, HOSTS, NETWORK } from '../translations';
+import {
+  ADMINISTRATION,
+  OVERVIEW,
+  DETECTION_ENGINE,
+  ALERTS,
+  RULES,
+  EXCEPTIONS,
+  HOSTS,
+  NETWORK,
+} from '../translations';
 import {
   APP_ICON_SOLUTION,
+  OVERVIEW_PATH,
+  ALERTS_PATH,
+  RULES_PATH,
+  EXCEPTIONS_PATH,
   HOSTS_PATH,
   NETWORK_PATH,
   ENDPOINTS_PATH,
-  OVERVIEW_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
 } from '../../../common/constants';
@@ -27,7 +39,25 @@ export const topDeepLinks: AppDeepLink[] = [
     title: OVERVIEW,
     path: OVERVIEW_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.overview', {
+        defaultMessage: 'Overview',
+      }),
+    ],
     order: 9000,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.detections,
+    title: DETECTION_ENGINE,
+    path: ALERTS_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.detections', {
+        defaultMessage: 'Detections',
+      }),
+    ],
+    order: 9001,
     euiIconType: APP_ICON_SOLUTION,
   },
   {
@@ -35,6 +65,11 @@ export const topDeepLinks: AppDeepLink[] = [
     title: HOSTS,
     path: HOSTS_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.hosts', {
+        defaultMessage: 'Hosts',
+      }),
+    ],
     order: 9002,
     euiIconType: APP_ICON_SOLUTION,
   },
@@ -43,7 +78,12 @@ export const topDeepLinks: AppDeepLink[] = [
     title: NETWORK,
     path: NETWORK_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
-    order: 9002,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.network', {
+        defaultMessage: 'Network',
+      }),
+    ],
+    order: 9003,
     euiIconType: APP_ICON_SOLUTION,
   },
   {
@@ -51,7 +91,12 @@ export const topDeepLinks: AppDeepLink[] = [
     title: ADMINISTRATION,
     path: ENDPOINTS_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
-    order: 9002,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.administration', {
+        defaultMessage: 'Administration',
+      }),
+    ],
+    order: 9004,
     euiIconType: APP_ICON_SOLUTION,
   },
 ];
@@ -60,19 +105,52 @@ const nestedDeepLinks: SecurityDeepLinks = {
   [SecurityPageName.overview]: {
     base: [],
   },
-  detections: {
+  [SecurityPageName.detections]: {
     base: [
       {
-        id: 'siemDetectionRules',
-        title: i18n.translate('xpack.securitySolution.search.detections.manage', {
-          defaultMessage: 'Manage Rules',
-        }),
-        keywords: ['rules'],
-        path: '/rules',
+        id: SecurityPageName.alerts,
+        title: ALERTS,
+        path: ALERTS_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.alerts', {
+            defaultMessage: 'Alerts',
+          }),
+        ],
+        searchable: true,
+        order: 9001,
+        euiIconType: APP_ICON_SOLUTION,
+      },
+      {
+        id: SecurityPageName.rules,
+        title: RULES,
+        path: RULES_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.rules', {
+            defaultMessage: 'Rules',
+          }),
+        ],
+        searchable: true,
+        order: 9001,
+        euiIconType: APP_ICON_SOLUTION,
+      },
+      {
+        id: SecurityPageName.exceptions,
+        title: EXCEPTIONS,
+        path: EXCEPTIONS_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.exceptions', {
+            defaultMessage: 'Exceptions',
+          }),
+        ],
+        searchable: true,
+        order: 9001,
       },
     ],
   },
-  hosts: {
+  [SecurityPageName.hosts]: {
     base: [
       {
         id: 'authentications',
@@ -113,7 +191,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  network: {
+  [SecurityPageName.network]: {
     base: [
       {
         id: 'dns',
@@ -185,7 +263,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  administration: {
+  [SecurityPageName.administration]: {
     base: [
       {
         id: SecurityPageName.endpoints,
@@ -212,44 +290,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
   },
 };
 
-const deepLinkKeywords: { [key in SecurityDeepLinkName]: string[] } = {
-  [SecurityPageName.overview]: [
-    i18n.translate('xpack.securitySolution.search.overview', {
-      defaultMessage: 'Overview',
-    }),
-  ],
-  detections: [
-    i18n.translate('xpack.securitySolution.search.detections', {
-      defaultMessage: 'Detections',
-    }),
-  ],
-  hosts: [
-    i18n.translate('xpack.securitySolution.search.hosts', {
-      defaultMessage: 'Hosts',
-    }),
-  ],
-  network: [
-    i18n.translate('xpack.securitySolution.search.network', {
-      defaultMessage: 'Network',
-    }),
-  ],
-  timelines: [
-    i18n.translate('xpack.securitySolution.search.timelines', {
-      defaultMessage: 'Timelines',
-    }),
-  ],
-  case: [
-    i18n.translate('xpack.securitySolution.search.cases', {
-      defaultMessage: 'Cases',
-    }),
-  ],
-  [SecurityPageName.administration]: [
-    i18n.translate('xpack.securitySolution.search.administration', {
-      defaultMessage: 'Administration',
-    }),
-  ],
-};
-
 /**
  * TODO: [1101] remove function
  * A function that generates a subPlugin's meta tag
@@ -270,13 +310,11 @@ export function getDeepLinksAndKeywords(
     const premiumRoutes = nestedDeepLinks[subPluginName] && nestedDeepLinks[subPluginName].premium;
     if (premiumRoutes !== undefined) {
       return {
-        keywords: deepLinkKeywords[subPluginName],
         deepLinks: [...baseRoutes, ...premiumRoutes],
       };
     }
   }
   return {
-    keywords: deepLinkKeywords[subPluginName],
     deepLinks: baseRoutes,
   };
 }
@@ -295,14 +333,12 @@ export function getDeepLinks(licenseType?: LicenseType): AppDeepLink[] {
       if (premiumDeepLinks !== undefined) {
         return {
           ...deepLink,
-          keywords: deepLinkKeywords[deepLinkId],
           deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
         };
       }
     }
     return {
       ...deepLink,
-      keywords: deepLinkKeywords[deepLinkId],
       deepLinks: baseDeepLinks,
     };
   });

@@ -90,7 +90,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 
   const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
   const backUrl = formatUrl(backOptions?.href ?? '');
-
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();

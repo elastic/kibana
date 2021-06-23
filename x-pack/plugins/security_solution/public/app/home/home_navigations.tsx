@@ -10,7 +10,9 @@ import { SecurityPageName, SecurityPageGroupName } from '../types';
 import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
-  APP_DETECTIONS_PATH,
+  APP_RULES_PATH,
+  APP_ALERTS_PATH,
+  APP_EXCEPTIONS_PATH,
   APP_HOSTS_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
@@ -29,12 +31,26 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'overview',
   },
-  [SecurityPageName.detections]: {
-    id: SecurityPageName.detections,
-    name: i18n.DETECTION_ENGINE,
-    href: APP_DETECTIONS_PATH,
+  [SecurityPageName.alerts]: {
+    id: SecurityPageName.alerts,
+    name: i18n.ALERTS,
+    href: APP_ALERTS_PATH,
     disabled: false,
-    urlKey: 'detections',
+    urlKey: SecurityPageName.alerts,
+  },
+  [SecurityPageName.rules]: {
+    id: SecurityPageName.rules,
+    name: i18n.RULES,
+    href: APP_RULES_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.rules,
+  },
+  [SecurityPageName.exceptions]: {
+    id: SecurityPageName.exceptions,
+    name: i18n.EXCEPTIONS,
+    href: APP_EXCEPTIONS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.exceptions,
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,
@@ -95,22 +111,21 @@ export const navTabs: SiemNavTab = {
   },
 };
 
-// TODO: [1101] i18n names
 export const navTabGroups: NavTabGroups = {
   [SecurityPageGroupName.detect]: {
     id: SecurityPageGroupName.detect,
-    name: 'Detect',
+    name: i18n.DETECT,
   },
   [SecurityPageGroupName.explore]: {
     id: SecurityPageGroupName.explore,
-    name: 'Explore',
+    name: i18n.EXPLORE,
   },
   [SecurityPageGroupName.investigate]: {
     id: SecurityPageGroupName.investigate,
-    name: 'Investigate',
+    name: i18n.INVESTIGATE,
   },
   [SecurityPageGroupName.manage]: {
     id: SecurityPageGroupName.manage,
-    name: 'Manage',
+    name: i18n.MANAGE,
   },
 };

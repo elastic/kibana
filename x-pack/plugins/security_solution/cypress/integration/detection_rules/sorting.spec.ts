@@ -89,7 +89,7 @@ describe('Alerts detection rules', () => {
       });
   });
 
-  it('Pagination updates page number and results', () => {
+  it.skip('Pagination updates page number and results', () => {
     createCustomRule({ ...newRule, name: 'Test a rule' }, '5');
     createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
 
@@ -128,7 +128,7 @@ describe('Alerts detection rules', () => {
       .should('have.class', 'euiPaginationButton-isActive');
   });
 
-  it('Auto refreshes rules', () => {
+  it.skip('Auto refreshes rules', () => {
     cy.clock(Date.now());
 
     goToManageAlertsDetectionRules();
