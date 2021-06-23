@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.body.index_templates.length).to.be(1);
-      expect(res.body.index_templates[0]?.index_template?.composed_of[0]).to.be(
+      expect(res.body.index_templates[0]?.index_template?.composed_of).to.contain(
         '.fleet_component_template-1'
       );
     });
