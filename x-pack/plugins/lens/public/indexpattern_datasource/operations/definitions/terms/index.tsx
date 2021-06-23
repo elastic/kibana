@@ -424,25 +424,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           />
         </EuiFormRow>
         <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-                defaultMessage: 'Rank direction',
-              })}{' '}
-              <EuiIconTip
-                color="subdued"
-                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
-                  defaultMessage: `Specifies the ranking order of the top values.`,
-                })}
-                iconProps={{
-                  className: 'eui-alignTop',
-                }}
-                position="top"
-                size="s"
-                type="questionInCircle"
-              />
-            </>
-          }
+          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+            defaultMessage: 'Rank direction',
+          })}
           display="columnCompressed"
           fullWidth
         >

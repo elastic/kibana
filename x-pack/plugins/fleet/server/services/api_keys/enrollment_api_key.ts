@@ -12,7 +12,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { IngestManagerError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -47,7 +47,7 @@ export async function listEnrollmentApiKeys(
     body: query ? { query } : undefined,
   });
 
-  // @ts-expect-error @elastic/elasticsearch
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {

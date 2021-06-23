@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getDurationForPercentile } from './get_duration_for_percentile';

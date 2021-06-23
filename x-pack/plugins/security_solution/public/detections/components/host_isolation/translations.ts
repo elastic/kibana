@@ -17,7 +17,7 @@ export const ISOLATE_HOST = i18n.translate(
 export const UNISOLATE_HOST = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.unisolateHost',
   {
-    defaultMessage: 'Unisolate host',
+    defaultMessage: 'Release host',
   }
 );
 
