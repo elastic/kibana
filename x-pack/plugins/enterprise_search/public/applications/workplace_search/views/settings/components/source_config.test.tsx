@@ -40,6 +40,13 @@ describe('SourceConfig', () => {
     expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
   });
 
+  it('renders a breadcrumb fallback while data is loading', () => {
+    setMockValues({ dataLoading: true, sourceConfigData: {} });
+    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+
+    expect(wrapper.prop('pageChrome')).toEqual(['Settings', 'Content source connectors', '...']);
+  });
+
   it('handles delete click', () => {
     const wrapper = shallow(<SourceConfig sourceIndex={1} />);
     const saveConfig = wrapper.find(SaveConfig);
