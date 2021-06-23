@@ -227,7 +227,6 @@ describe('EngineLogic', () => {
 
       it('handles 5xx errors', async () => {
         mount();
-        jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
         http.get.mockReturnValue(Promise.reject('An error occured'));
 
         EngineLogic.actions.initializeEngine();
@@ -243,6 +242,7 @@ describe('EngineLogic', () => {
     describe('pollEmptyEngine', () => {
       beforeEach(() => jest.useFakeTimers());
       afterEach(() => jest.clearAllTimers());
+      afterAll(() => jest.useRealTimers());
 
       it('starts a poll', () => {
         mount();
