@@ -165,7 +165,7 @@ export function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   const result: TimeSeriesResult = {
     results: [],

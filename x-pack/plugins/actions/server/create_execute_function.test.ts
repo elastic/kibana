@@ -83,6 +83,62 @@ describe('execute()', () => {
     });
   });
 
+  test('schedules the action with all given parameters and relatedSavedObjects', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asHttpRequestExecutionSource(request),
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          namespace: 'some-namespace',
+          type: 'some-type',
+          typeId: 'some-typeId',
+        },
+      ],
+    });
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+      {}
+    );
+  });
+
   test('schedules the action with all given parameters with a preconfigured action', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,

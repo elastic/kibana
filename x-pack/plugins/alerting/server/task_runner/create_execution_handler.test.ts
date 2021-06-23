@@ -135,6 +135,14 @@ test('enqueues execution per selected action', async () => {
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -247,6 +255,14 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       id: '1',
       type: 'alert',
     }),
+    relatedSavedObjects: [
+      {
+        id: '1',
+        namespace: 'test1',
+        type: 'alert',
+        typeId: 'test',
+      },
+    ],
     spaceId: 'test1',
     apiKey: createExecutionHandlerParams.apiKey,
   });
@@ -327,6 +343,14 @@ test('context attribute gets parameterized', async () => {
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -360,6 +384,14 @@ test('state attribute gets parameterized', async () => {
           "foo": true,
           "stateVal": "My state-val goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
