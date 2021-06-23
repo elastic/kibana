@@ -11,6 +11,7 @@ import { notificationServiceMock } from '../../../../../../../../src/core/public
 import { createTGridMocks } from '../../../../../../timelines/public/mock';
 
 import { createGetAppUrl, createNavigateTo } from '../hooks';
+// import { createGetAppUrl, createNavigateTo } from '../hooks';
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
