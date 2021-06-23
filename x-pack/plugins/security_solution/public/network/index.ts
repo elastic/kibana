@@ -17,7 +17,6 @@ export class Network {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
       routes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),

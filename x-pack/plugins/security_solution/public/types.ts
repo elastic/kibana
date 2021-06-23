@@ -92,7 +92,7 @@ export interface SubPlugins {
   management: Management;
 }
 
-// TODO: [1101] find a better way to get those types
+// TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   alerts: ReturnType<Detections['start']>;
   rules: ReturnType<Rules['start']>;

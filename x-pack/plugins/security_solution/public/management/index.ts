@@ -39,7 +39,6 @@ export class Management {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove
       routes,
       store: {
         initialState: {

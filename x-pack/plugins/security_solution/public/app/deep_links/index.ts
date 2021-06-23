@@ -11,7 +11,6 @@ import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
 import { App, AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
-  ADMINISTRATION,
   OVERVIEW,
   DETECTION_ENGINE,
   ALERTS,
@@ -19,6 +18,9 @@ import {
   EXCEPTIONS,
   HOSTS,
   NETWORK,
+  TIMELINES,
+  CASE,
+  ADMINISTRATION,
 } from '../translations';
 import {
   APP_ICON_SOLUTION,
@@ -28,6 +30,8 @@ import {
   EXCEPTIONS_PATH,
   HOSTS_PATH,
   NETWORK_PATH,
+  TIMELINES_PATH,
+  CASES_PATH,
   ENDPOINTS_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
@@ -84,6 +88,32 @@ export const topDeepLinks: AppDeepLink[] = [
       }),
     ],
     order: 9003,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.timelines,
+    title: TIMELINES,
+    path: TIMELINES_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.timelines', {
+        defaultMessage: 'Timelines',
+      }),
+    ],
+    order: 9002,
+    euiIconType: APP_ICON_SOLUTION,
+  },
+  {
+    id: SecurityPageName.case,
+    title: CASE,
+    path: CASES_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.cases', {
+        defaultMessage: 'Cases',
+      }),
+    ],
+    order: 9002,
     euiIconType: APP_ICON_SOLUTION,
   },
   {
@@ -289,35 +319,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
     ],
   },
 };
-
-/**
- * TODO: [1101] remove function
- * A function that generates a subPlugin's meta tag
- * @param subPluginName SubPluginName of the app to retrieve meta information for.
- * @param licenseType optional string for license level, if not provided basic is assumed.
- */
-export function getDeepLinksAndKeywords(
-  subPluginName: SecurityDeepLinkName,
-  licenseType?: LicenseType
-): Pick<App, 'deepLinks' | 'keywords'> {
-  const baseRoutes = [...nestedDeepLinks[subPluginName].base];
-  if (
-    licenseType === 'gold' ||
-    licenseType === 'platinum' ||
-    licenseType === 'enterprise' ||
-    licenseType === 'trial'
-  ) {
-    const premiumRoutes = nestedDeepLinks[subPluginName] && nestedDeepLinks[subPluginName].premium;
-    if (premiumRoutes !== undefined) {
-      return {
-        deepLinks: [...baseRoutes, ...premiumRoutes],
-      };
-    }
-  }
-  return {
-    deepLinks: baseRoutes,
-  };
-}
 
 /**
  * A function that generates the plugin deepLinks

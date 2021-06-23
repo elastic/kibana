@@ -17,7 +17,7 @@ export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detectio
 export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
-export { getTimelinesUrl, getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
+export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
 export {
   getCaseDetailsUrl,
   getCaseUrl,
@@ -48,21 +48,10 @@ export const useFormatUrl = (page: SiemNavTabKey) => {
           ? ''
           : `?${pathArr[1]}`
       }`;
-      // TODO: [1101] remove conditional and use always deepLinkId
-      return page === 'overview' ||
-        page === 'alerts' ||
-        page === 'rules' ||
-        page === 'exceptions' ||
-        page === 'hosts' ||
-        page === 'network' ||
-        page === 'administration' ||
-        page === 'endpoints' ||
-        page === 'trusted_apps' ||
-        page === 'event_filters'
-        ? getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute })
-        : getUrlForApp(`${APP_ID}:${page}`, { path: formattedPath, absolute });
+      return getUrlForApp(APP_ID, { deepLinkId: page, path: formattedPath, absolute });
     },
     [getUrlForApp, page, search]
   );
+
   return { formatUrl, search };
 };

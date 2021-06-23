@@ -87,24 +87,23 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: SecurityPageName.administration,
   },
-  // TODO: [1101] i18n names
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
-    name: 'Endpoints',
+    name: i18n.ENDPOINTS,
     href: APP_ENDPOINTS_PATH,
     disabled: false,
     urlKey: SecurityPageName.administration,
   },
   [SecurityPageName.trustedApps]: {
     id: SecurityPageName.trustedApps,
-    name: 'Trusted Applications',
+    name: i18n.TRUSTED_APPLICATIONS,
     href: APP_TRUSTED_APPS_PATH,
     disabled: false,
     urlKey: SecurityPageName.administration,
   },
   [SecurityPageName.eventFilters]: {
     id: SecurityPageName.eventFilters,
-    name: 'Event Filters',
+    name: i18n.EVENT_FILTERS,
     href: APP_EVENT_FILTERS_PATH,
     disabled: false,
     urlKey: SecurityPageName.administration,

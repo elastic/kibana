@@ -30,38 +30,11 @@ export const usePrimaryNavigationItems = ({
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
-        // TODO: [1101] remove conditional and use always deepLinkId
-        if (
-          id === 'overview' ||
-          id === 'alerts' ||
-          id === 'rules' ||
-          id === 'exceptions' ||
-          id === 'hosts' ||
-          id === 'network' ||
-          id === 'endpoints' ||
-          id === 'trusted_apps' ||
-          id === 'event_filters'
-        ) {
-          navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
-        } else {
-          navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
-        }
+        navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
         track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
       };
 
-      // TODO: [1101] remove conditional and use always deepLinkId
-      const appHref =
-        id === 'overview' ||
-        id === 'alerts' ||
-        id === 'rules' ||
-        id === 'exceptions' ||
-        id === 'hosts' ||
-        id === 'network' ||
-        id === 'endpoints' ||
-        id === 'trusted_apps' ||
-        id === 'event_filters'
-          ? getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch })
-          : getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
+      const appHref = getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch });
 
       return {
         'data-href': appHref,
@@ -82,12 +55,7 @@ export const usePrimaryNavigationItems = ({
       {
         id: APP_ID,
         name: '',
-        items: [
-          getSideNav(navTabs.overview),
-          // TODO: [1101] Move the following nav items to its group
-          getSideNav(navTabs.timelines),
-          getSideNav(navTabs.case),
-        ],
+        items: [getSideNav(navTabs.overview)],
       },
       {
         ...navTabGroups.detect,
@@ -103,7 +71,7 @@ export const usePrimaryNavigationItems = ({
       },
       {
         ...navTabGroups.investigate,
-        items: [],
+        items: [getSideNav(navTabs.timelines), getSideNav(navTabs.case)],
       },
       {
         ...navTabGroups.manage,

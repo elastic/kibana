@@ -49,6 +49,21 @@ export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
   defaultMessage: 'Administration',
 });
+export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administration.endpoints', {
+  defaultMessage: 'Endpoints',
+});
+export const TRUSTED_APPLICATIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.trustedApps',
+  {
+    defaultMessage: 'Trusted Applications',
+  }
+);
+export const EVENT_FILTERS = i18n.translate(
+  'xpack.securitySolution.search.administration.eventFilters',
+  {
+    defaultMessage: 'Event Filters',
+  }
+);
 
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',

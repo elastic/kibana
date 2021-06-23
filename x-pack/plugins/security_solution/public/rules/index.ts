@@ -16,7 +16,6 @@ export class Rules {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
       },

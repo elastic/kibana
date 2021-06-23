@@ -14,31 +14,6 @@ import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
 import { RenderAppProps, RenderAppPropsOld } from './types';
 
-// TODO: [1101] remove renderAppOld when all sections migrated
-export const renderAppOld = ({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-  services,
-  store,
-  SubPluginRoutes,
-}: RenderAppPropsOld): (() => void) => {
-  render(
-    <SecurityApp
-      history={history}
-      onAppLeave={onAppLeave}
-      services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
-    >
-      <SubPluginRoutes />
-    </SecurityApp>,
-    element
-  );
-  return () => unmountComponentAtNode(element);
-};
-
 export const renderApp = ({
   element,
   history,
@@ -57,15 +32,16 @@ export const renderApp = ({
       store={store}
     >
       <Switch>
-        {/* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */}
         {[
-          ...subPlugins.overview.routes!,
-          ...subPlugins.alerts.routes!,
-          ...subPlugins.rules.routes!,
-          ...subPlugins.exceptions.routes!,
-          ...subPlugins.hosts.routes!,
-          ...subPlugins.network.routes!,
-          ...subPlugins.management.routes!,
+          ...subPlugins.overview.routes,
+          ...subPlugins.alerts.routes,
+          ...subPlugins.rules.routes,
+          ...subPlugins.exceptions.routes,
+          ...subPlugins.hosts.routes,
+          ...subPlugins.network.routes,
+          ...subPlugins.timelines.routes,
+          ...subPlugins.cases.routes,
+          ...subPlugins.management.routes,
         ].map((route, index) => (
           <Route key={`route-${index}`} {...route} />
         ))}

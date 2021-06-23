@@ -85,6 +85,8 @@ export enum SecurityPageGroupName {
   manage = 'manage',
 }
 
+export const TIMELINES_PATH = '/timelines';
+export const CASES_PATH = '/cases';
 export const OVERVIEW_PATH = '/overview';
 export const ALERTS_PATH = '/alerts';
 export const RULES_PATH = '/rules';

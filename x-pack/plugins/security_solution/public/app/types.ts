@@ -23,15 +23,6 @@ import { StartedSubPlugins, StartServices } from '../types';
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-// TODO: [1101] remove RenderAppPropsOld when all sections migrated
-export interface RenderAppPropsOld extends AppMountParameters {
-  services: StartServices;
-  store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
-}
-/**
- * The React properties used to render `SecurityApp` as well as the `element` to render it into.
- */
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
@@ -53,10 +44,8 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
 
 export type SecuritySubPluginRoutes = RouteProps[];
 
-// TODO: [1101] remove SubPluginRoutes and make routes required
 export interface SecuritySubPlugin {
-  SubPluginRoutes: React.FC;
-  routes?: SecuritySubPluginRoutes;
+  routes: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
