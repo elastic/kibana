@@ -26,6 +26,17 @@ function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes
 }
 
 /**
+ * Checks if two refs are the same. If the ref is unchanged, there's no need
+ * to run the expensive draw procedure.
+ */
+function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boolean {
+  if (typeof a === 'undefined' || typeof b === 'undefined') return false;
+  const stepA = a.ref.screenshotRef.synthetics.step;
+  const stepB = b.ref.screenshotRef.synthetics.step;
+  return stepA.index !== stepB.index || stepA.name !== stepB.name;
+}
+
+/**
  * Assembles the data for a composite image and returns the composite to a callback.
  * @param imgRef the data and dimensions for the composite image.
  * @param callback sends the composited image to this callback.
@@ -43,11 +54,16 @@ export const useCompositeImage = (
       fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
     );
   }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
+
+  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData | undefined>(undefined);
+
+  if (curRef === null) {
+    setCurRef(imgRef);
+  }
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
 
     async function compose() {
-      // @ts-expect-error TODO fix typing here
       await composeScreenshotRef(imgRef, canvas, blocks);
       const imgData = canvas.toDataURL('image/jpg', 1.0);
       callback(imgData);
@@ -56,16 +72,17 @@ export const useCompositeImage = (
     // if the URL is truthy it means it's already been composed, so there
     // is no need to call the function
     if (
-      typeof url === 'undefined' &&
+      (typeof url === 'undefined' || isNewRef(imgRef, curRef)) &&
       allBlocksLoaded(
         blocks,
         imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash)
       )
     ) {
       compose();
+      setCurRef(imgRef);
     }
     return () => {
       canvas.parentElement?.removeChild(canvas);
     };
-  }, [imgRef, callback, url, blocks]);
+  }, [imgRef, callback, curRef, url, blocks]);
 };
