@@ -5,15 +5,27 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+import { mockDetailItemData } from '../mock';
 import { endpointAlertCheck } from './endpoint_alert_check';
 
 describe('utils', () => {
-  describe('endpoinAlertCheck', () => {
-    it('should return true if detections data comes from an endpoint rule', () => {
-      expect(endpointAlertCheck(mockData)).toBeTruthy();
-    });
+  describe('endpointAlertCheck', () => {
     it('should return false if detections data does not come from endpoint rule', () => {
-      expect(endpointAlertCheck(mockDataWithout)).toBeFalsy();
+      expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    });
+    it('should return true if detections data comes from an endpoint rule', () => {
+      _.remove(mockDetailItemData, function (o) {
+        return o.field === 'agent.type';
+      });
+      const mockEndpointDetailItemData = _.concat(mockDetailItemData, {
+        field: 'agent.type',
+        originalValue: 'endpoint',
+        values: ['endpoint'],
+        isObjectArray: false,
+      });
+
+      expect(endpointAlertCheck({ data: mockEndpointDetailItemData })).toBeTruthy();
     });
   });
 });

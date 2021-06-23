@@ -9,6 +9,6 @@ import { find } from 'lodash/fp';
 import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 
 export const endpointAlertCheck = ({ data }: { data: TimelineEventsDetailsItem[] | null }) => {
-  const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, data)?.values;
+  const findEndpointAlert = find({ field: 'agent.type' }, data)?.values;
   return findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
 };
