@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { toExpression } from './ast';
+import { toExpression } from '@kbn/interpreter/common';
 
 describe('ast toExpression', () => {
   describe('single expression', () => {
