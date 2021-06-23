@@ -15,8 +15,13 @@ import { getRouteMetric } from '../routes/usage';
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { METRICS_INDICES } from './constants';
 import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
+import {
+  getAgentQueryMetrics,
+  getBeatMetrics,
+  getLiveQueryMetrics,
+  runQuery,
+} from './fetcher_helpers';
 
 interface PolicyLevelUsage {
   scheduled_queries?: ScheduledQueryUsageMetrics;
@@ -41,21 +46,7 @@ export async function getPolicyLevelUsage(
     // TODO: figure out how to support dynamic keys in metrics
     // packageVersions: getPackageVersions(packagePolicies),
   };
-  const agentResponse = await esClient.search({
-    body: {
-      size: 0,
-      aggs: {
-        policied: {
-          filter: {
-            terms: {
-              policy_id: packagePolicies.items.map((p) => p.policy_id),
-            },
-          },
-        },
-      },
-    },
-    index: '.fleet-agents',
-  });
+  const agentResponse = await runQuery(() => getAgentQueryMetrics(esClient, packagePolicies));
   const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
@@ -98,26 +89,11 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
     } as ScheduledQueryUsageMetrics
   );
 }
-
 export async function getLiveQueryUsage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { body: metricResponse } = await esClient.search({
-    body: {
-      size: 0,
-      aggs: {
-        queries: {
-          filter: {
-            term: {
-              input_type: 'osquery',
-            },
-          },
-        },
-      },
-    },
-    index: '.fleet-actions',
-  });
+  const { body: metricResponse } = await runQuery(() => getLiveQueryMetrics(esClient));
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
   };
@@ -134,58 +110,7 @@ export async function getLiveQueryUsage(
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  const { body: metricResponse } = await esClient.search({
-    body: {
-      size: 0,
-      aggs: {
-        lastDay: {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-24h',
-                lte: 'now',
-              },
-            },
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                sort: [
-                  {
-                    '@timestamp': {
-                      order: 'desc',
-                    },
-                  },
-                ],
-                size: 1,
-              },
-            },
-            max_rss: {
-              max: {
-                field: 'monitoring.metrics.beat.memstats.rss',
-              },
-            },
-            avg_rss: {
-              avg: {
-                field: 'monitoring.metrics.beat.memstats.rss',
-              },
-            },
-            max_cpu: {
-              max: {
-                field: 'monitoring.metrics.beat.cpu.total.time.ms',
-              },
-            },
-            avg_cpu: {
-              avg: {
-                field: 'monitoring.metrics.beat.cpu.total.time.ms',
-              },
-            },
-          },
-        },
-      },
-    },
-    index: METRICS_INDICES,
-  });
+  const { body: metricResponse } = await runQuery(() => getBeatMetrics(esClient));
   const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
   const result: BeatMetricsUsage = {
     memory: {
