@@ -15,8 +15,6 @@ import { EuiInMemoryTable, EuiTableHeaderCell } from '@elastic/eui';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 
-import { ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
-
 import { RoleMappingsTable } from './role_mappings_table';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
