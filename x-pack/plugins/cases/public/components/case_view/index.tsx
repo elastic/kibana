@@ -31,17 +31,14 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import {
-  getConnectorById,
-  normalizeActionConnector,
-  getNoneConnector,
-} from '../configure_cases/utils';
+import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
@@ -230,7 +227,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors({
+      toastPermissionsErrors: false,
+    });
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -363,7 +362,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
               allCasesNavigation={allCasesNavigation}
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
-              disabled={!userCanCrud}
+              userCanCrud={userCanCrud}
               disableAlerting={ruleDetailsNavigation == null}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
@@ -406,7 +405,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
                       <>
                         <MyEuiHorizontalRule
                           margin="s"
@@ -418,7 +417,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                               <StatusActionButton
                                 status={caseData.status}
                                 onStatusChanged={changeStatus}
-                                disabled={!userCanCrud}
                                 isLoading={isLoading && updateKey === 'status'}
                               />
                             </EuiFlexItem>
@@ -450,16 +448,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
                 <TagList
                   data-test-subj="case-view-tag-list"
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
-                  owner={[caseData.owner]}
                 />
                 <EditConnector
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }
@@ -467,6 +464,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
                   userActions={caseUserActions}
+                  permissionsError={permissionsError}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -15,7 +15,7 @@ describe('Series Builder ReportFilters', function () {
   const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
   });
