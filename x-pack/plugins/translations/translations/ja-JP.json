@@ -9795,8 +9795,6 @@
     "xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink": "詳細情報",
     "xpack.idxMgmt.home.componentTemplates.emptyPromptTitle": "コンポーネントテンプレートを作成して開始",
     "xpack.idxMgmt.home.componentTemplates.list.componentTemplatesDescription": "コンポーネントテンプレートを使用して、複数のインデックステンプレートで設定、マッピング、エイリアス構成を再利用します。{learnMoreLink}",
-    "xpack.idxMgmt.home.componentTemplates.list.loadErrorReloadLinkLabel": "再試行してください。",
-    "xpack.idxMgmt.home.componentTemplates.list.loadErrorTitle": "コンポーネントテンプレートを読み込めません。{reloadLink}",
     "xpack.idxMgmt.home.componentTemplates.list.loadingMessage": "コンポーネントテンプレートを読み込んでいます…",
     "xpack.idxMgmt.home.componentTemplatesTabTitle": "コンポーネントテンプレート",
     "xpack.idxMgmt.home.dataStreamsTabTitle": "データストリーム",
