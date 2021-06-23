@@ -51,6 +51,30 @@ that ship with {kib}.
 | `csp.style_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
 
+| `csp.connect_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src[Content Security Policy `connect-src` directive].
+
+| `csp.default_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src[Content Security Policy `default-src` directive].
+
+| `csp.font_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src[Content Security Policy `font-src` directive].
+
+| `csp.frame_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src[Content Security Policy `frame-src` directive].
+
+| `csp.img_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src[Content Security Policy `img-src` directive].
+
+| `csp.frame_ancestors:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors[Content Security Policy `frame-ancestors` directive].
+
+| `csp.report_uri:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
+
+| `csp.report_to:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to[Content Security Policy `report-to` directive].
+
 |[[csp-strict]] `csp.strict:`
  | Blocks {kib} access to any browser that
 does not enforce even rudimentary CSP rules. In practice, this disables
