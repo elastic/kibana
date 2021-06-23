@@ -10,8 +10,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { initializeFullStoryMock } from './plugin.test.mocks';
-import { CloudPlugin, loadFullStoryUserId } from './plugin';
-import { CloudConfigType } from '../common/config';
+import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {

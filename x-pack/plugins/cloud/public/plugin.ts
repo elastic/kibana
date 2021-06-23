@@ -60,11 +60,11 @@ export interface CloudSetup {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  private config!: CloudConfigTypePublic;
+  private config!: CloudConfigType;
   private isCloudEnabled: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<CloudConfigTypePublic>();
+    this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = false;
   }
 
