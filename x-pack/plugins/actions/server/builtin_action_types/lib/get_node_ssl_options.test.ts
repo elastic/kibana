@@ -4,35 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-describe('getNodeTLSOptions', () => {
-  test('get node.js TLS options: rejectUnauthorized eql true for the verification mode "full"', () => {
-    const nodeOption = getNodeTLSOptions(logger, 'full');
+describe('getNodeSSLOptions', () => {
+  test('get node.js SSL options: rejectUnauthorized eql true for the verification mode "full"', () => {
+    const nodeOption = getNodeSSLOptions(logger, 'full');
     expect(nodeOption).toMatchObject({
       rejectUnauthorized: true,
     });
   });
 
-  test('get node.js TLS options: rejectUnauthorized eql true for the verification mode "certificate"', () => {
-    const nodeOption = getNodeTLSOptions(logger, 'certificate');
+  test('get node.js SSL options: rejectUnauthorized eql true for the verification mode "certificate"', () => {
+    const nodeOption = getNodeSSLOptions(logger, 'certificate');
     expect(nodeOption.checkServerIdentity).not.toBeNull();
     expect(nodeOption.rejectUnauthorized).toBeTruthy();
   });
 
-  test('get node.js TLS options: rejectUnauthorized eql false for the verification mode "none"', () => {
-    const nodeOption = getNodeTLSOptions(logger, 'none');
+  test('get node.js SSL options: rejectUnauthorized eql false for the verification mode "none"', () => {
+    const nodeOption = getNodeSSLOptions(logger, 'none');
     expect(nodeOption).toMatchObject({
       rejectUnauthorized: false,
     });
   });
 
-  test('get node.js TLS options: rejectUnauthorized eql true for the verification mode value which does not exist, the logger called with the proper warning message', () => {
-    const nodeOption = getNodeTLSOptions(logger, 'notexist');
+  test('get node.js SSL options: rejectUnauthorized eql true for the verification mode value which does not exist, the logger called with the proper warning message', () => {
+    const nodeOption = getNodeSSLOptions(logger, 'notexist');
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -46,23 +46,23 @@ describe('getNodeTLSOptions', () => {
   });
 });
 
-describe('getTLSSettingsFromConfig', () => {
+describe('getSSLSettingsFromConfig', () => {
   test('get verificationMode eql "none" if legacy rejectUnauthorized eql false', () => {
-    const nodeOption = getTLSSettingsFromConfig(undefined, false);
+    const nodeOption = getSSLSettingsFromConfig(undefined, false);
     expect(nodeOption).toMatchObject({
       verificationMode: 'none',
     });
   });
 
   test('get verificationMode eql "none" if legacy rejectUnauthorized eql true', () => {
-    const nodeOption = getTLSSettingsFromConfig(undefined, true);
+    const nodeOption = getSSLSettingsFromConfig(undefined, true);
     expect(nodeOption).toMatchObject({
       verificationMode: 'full',
     });
   });
 
   test('get verificationMode eql "certificate", ignore rejectUnauthorized', () => {
-    const nodeOption = getTLSSettingsFromConfig('certificate', false);
+    const nodeOption = getSSLSettingsFromConfig('certificate', false);
     expect(nodeOption).toMatchObject({
       verificationMode: 'certificate',
     });
