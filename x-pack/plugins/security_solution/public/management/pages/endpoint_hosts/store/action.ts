@@ -16,7 +16,7 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../fleet/common';
-import { EndpointState } from '../types';
+import { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -163,12 +163,29 @@ export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsS
   payload: EndpointState['endpointPendingActions'];
 };
 
+export interface EndpointDetailsActivityLogUpdatePaging {
+  type: 'endpointDetailsActivityLogUpdatePaging';
+  payload: {
+    // disable paging when no more data after paging
+    disabled: boolean;
+    page: number;
+    pageSize: number;
+  };
+}
+
+export interface EndpointDetailsFlyoutTabChanged {
+  type: 'endpointDetailsFlyoutTabChanged';
+  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
   | AppRequestedEndpointActivityLog
+  | EndpointDetailsActivityLogUpdatePaging
+  | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse

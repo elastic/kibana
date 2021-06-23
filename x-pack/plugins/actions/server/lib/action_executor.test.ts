@@ -23,6 +23,7 @@ const services = actionsMock.createServices();
 const actionsClient = actionsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const executeParams = {
   actionId: '1',
@@ -42,7 +43,7 @@ actionExecutor.initialize({
   getActionsClientWithRequest,
   actionTypeRegistry,
   encryptedSavedObjectsClient,
-  eventLogger: eventLoggerMock.create(),
+  eventLogger,
   preconfiguredActions: [],
 });
 
@@ -377,6 +378,50 @@ test('logs a warning when alert executor returns invalid status', async () => {
   expect(loggerMock.warn).toBeCalledWith(
     'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
   );
+});
+
+test('writes to event log for execute and execute start', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+    event: {
+      action: 'execute-start',
+    },
+    kibana: {
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+    },
+    message: 'action started: test:1: action-1',
+  });
+  expect(eventLogger.logEvent.mock.calls[1][0]).toMatchObject({
+    event: {
+      action: 'execute',
+    },
+    kibana: {
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+    },
+    message: 'action executed: test:1: action-1',
+  });
 });
 
 function setupActionExecutorMock() {
