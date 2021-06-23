@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
-import { ComponentStrings } from '../../../../../i18n';
+import PropTypes from 'prop-types';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-const { DropdownFilter: strings } = ComponentStrings;
+const strings = {
+  getMatchAllOptionLabel: () =>
+    i18n.translate('xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel', {
+      defaultMessage: 'ANY',
+      description: 'The dropdown filter option to match any value in the field.',
+    }),
+};
 
 export interface Props {
   /**
