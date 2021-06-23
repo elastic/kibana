@@ -110,7 +110,7 @@ function TutorialConfigAgent({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.2.0/overview`,
+        href: `${basePath}/app/integrations#/detail/apm-0.3.0/overview`,
       };
 
   return (
