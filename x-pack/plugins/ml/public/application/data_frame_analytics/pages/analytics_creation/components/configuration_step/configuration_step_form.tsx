@@ -11,10 +11,12 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiRange,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
@@ -94,6 +96,24 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   });
   return runtimeOptions;
 }
+
+interface OptionLabelWithIconTipProps {
+  label: string;
+  tooltip: string;
+}
+
+const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
+  <>
+    {label}
+    <EuiIconTip
+      content={tooltip}
+      iconProps={{
+        className: 'eui-alignTop',
+      }}
+      size="s"
+    />
+  </>
+);
 
 export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   actions,
@@ -554,9 +574,22 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         <Fragment>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-              defaultMessage: 'Dependent variable',
-            })}
+            label={
+              <OptionLabelWithIconTip
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
+                  {
+                    defaultMessage: 'Dependent variable',
+                  }
+                )}
+                tooltip={i18n.translate(
+                  'xpack.ml.dataframe.analytics.dependentVariableInfoTooltip',
+                  {
+                    defaultMessage: 'The field that you want to predict the value of.',
+                  }
+                )}
+              />
+            }
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
@@ -609,7 +642,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               placeholder={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
                 {
-                  defaultMessage: 'dependent variable',
+                  defaultMessage: 'Select the field to be used as the dependent variable.',
                 }
               )}
               isDisabled={isJobCreated}
