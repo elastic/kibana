@@ -1,5 +1,5 @@
 [role="xpack"]
-[[secure-reporting]]
+[[configuring-reporting]]
 == Configure reporting in {kib}
 
 ++++
@@ -39,7 +39,7 @@ that {kib} could not connect to the Chromium process.
 To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. For more information, refer to <<reporting-troubleshooting-puppeteer-debug-logs>>.
 
 [float]
-[[reporting-roles-management-ui]]
+[[secure-reporting]]
 === Grant users access to reporting
 
 When security is enabled, access to the {report-features} is controlled by roles and privileges. 
