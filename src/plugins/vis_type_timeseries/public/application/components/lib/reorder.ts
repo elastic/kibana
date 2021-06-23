@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const reorder = (list, startIndex, endIndex) => {
+export const reorder = (list: unknown[], startIndex: number, endIndex: number) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
