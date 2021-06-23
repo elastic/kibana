@@ -83,7 +83,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Detection rules, threshold', () => {
+describe('Detection rules, threshold', () => {
   const expectedUrls = newThresholdRule.referenceUrls.join('');
   const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
   const expectedTags = newThresholdRule.tags.join('');

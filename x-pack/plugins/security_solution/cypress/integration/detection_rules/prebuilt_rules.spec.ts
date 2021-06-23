@@ -142,7 +142,7 @@ describe('Actions with prebuilt rules', () => {
     );
   });
 
-  it.skip('Deletes and recovers more than one rule', () => {
+  it('Deletes and recovers more than one rule', () => {
     changeRowsPerPageTo100();
 
     const numberOfRulesToBeSelected = 2;
