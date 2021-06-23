@@ -8,5 +8,6 @@
 export const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
+  executeStart: 'execute-start',
   executeViaHttp: 'execute-via-http',
 };
