@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-export const DETECTIONS_URL = 'app/security/alerts';
+export const ALERTS_URL = 'app/security/alerts';
 export const DETECTIONS_RULE_MANAGEMENT_URL = 'app/security/rules';
 export const detectionsRuleDetailsUrl = (ruleId: string) => `app/security/rules/id/${ruleId}`;
 
 export const CASES_URL = '/app/security/cases';
-export const DETECTIONS = '/app/security/alerts';
+export const DETECTIONS = '/app/siem#/detections';
+export const SECURITY_DETECTIONS_URL = '/app/security/detections';
+export const SECURITY_DETECTIONS_RULES_URL = '/app/security/detections/rules';
+export const SECURITY_DETECTIONS_RULES_CREATION_URL = '/app/security/detections/rules/create';
+
 export const EXCEPTIONS_URL = 'app/security/exceptions';
 
 export const HOSTS_URL = '/app/security/hosts/allHosts';

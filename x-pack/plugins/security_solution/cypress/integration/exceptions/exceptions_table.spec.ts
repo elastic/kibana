@@ -25,7 +25,7 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL, EXCEPTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL, EXCEPTIONS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
@@ -44,7 +44,7 @@ import { createExceptionList } from '../../tasks/api_calls/exceptions';
 describe('Exceptions Table', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule);
     goToManageAlertsDetectionRules();
