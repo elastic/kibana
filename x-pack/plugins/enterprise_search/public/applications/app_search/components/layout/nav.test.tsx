@@ -10,6 +10,9 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 jest.mock('../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to }) => ({ href: to })),
 }));
+jest.mock('../engine/engine_nav', () => ({
+  useEngineNav: () => [],
+}));
 
 import { useAppSearchNav } from './nav';
 
