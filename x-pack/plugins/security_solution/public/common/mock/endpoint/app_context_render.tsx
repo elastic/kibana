@@ -9,6 +9,7 @@ import React from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
+import { AppDeepLink } from 'kibana/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -21,10 +22,10 @@ import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
-import { APP_ID, APP_PATH, SecurityPageName } from '../../../../common/constants';
+import { APP_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
-import { MANAGEMENT_APP_ID } from '../../../../../../../src/plugins/management/common/contants';
+import { getDeepLinks } from '../../../app/deep_links';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -171,23 +172,29 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
+  const deepLinkPaths = getDeepLinkPaths(getDeepLinks());
+
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
-  coreStart.application.getUrlForApp.mockImplementation((appId, options) => {
+  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
     switch (appId) {
       case PLUGIN_ID:
         return '/app/fleet';
       case APP_ID:
-        return options?.deepLinkId
-          ? options?.deepLinkId === SecurityPageName.administration
-            ? '/endpoints'
-            : `/${options?.deepLinkId}`
-          : '/app/security';
-
-      case MANAGEMENT_APP_ID:
-        return '/app/security/administration';
+        return `${APP_PATH}${
+          deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''
+        }${path ?? ''}`;
       default:
         return `${appId} not mocked!`;
     }
+  });
+
+  coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
+    if (appId === APP_ID) {
+      history.push(
+        `${deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''}${path ?? ''}`
+      );
+    }
+    return Promise.resolve();
   });
 
   coreStart.application.navigateToUrl.mockImplementation((url) => {
@@ -196,6 +203,18 @@ const createCoreStartMock = (
   });
 
   return coreStart;
+};
+
+const getDeepLinkPaths = (deepLinks: AppDeepLink[]): Record<string, string> => {
+  return deepLinks.reduce((result: Record<string, string>, deepLink) => {
+    if (deepLink.path) {
+      result[deepLink.id] = deepLink.path;
+    }
+    if (deepLink.deepLinks) {
+      return { ...result, ...getDeepLinkPaths(deepLink.deepLinks) };
+    }
+    return result;
+  }, {});
 };
 
 const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http']) => {

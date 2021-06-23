@@ -7,36 +7,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { OVERVIEW_PATH } from '../../common/constants';
 
 import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
 import { RenderAppProps, RenderAppPropsOld } from './types';
-
-// TODO: [1101] remove renderAppOld when all sections migrated
-export const renderAppOld = ({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-  services,
-  store,
-  SubPluginRoutes,
-}: RenderAppPropsOld): (() => void) => {
-  render(
-    <SecurityApp
-      history={history}
-      onAppLeave={onAppLeave}
-      services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
-    >
-      <SubPluginRoutes />
-    </SecurityApp>,
-    element
-  );
-  return () => unmountComponentAtNode(element);
-};
 
 export const renderApp = ({
   element,
@@ -57,18 +33,23 @@ export const renderApp = ({
     >
       <Switch>
         {[
-          ...(subPlugins.overview.routes ?? []),
-          ...(subPlugins.hosts.routes ?? []),
-          ...(subPlugins.network.routes ?? []),
-          ...(subPlugins.alerts.routes ?? []),
-          ...(subPlugins.rules.routes ?? []),
-          ...(subPlugins.exceptions.routes ?? []),
-          ...(subPlugins.timelines.routes ?? []),
-          ...(subPlugins.cases.routes ?? []),
-          /* TODO: [1101] add subPlugins routes here when migrating sections, once all migrated we will be able to inject all subPlugins routes at once */
+          ...subPlugins.overview.routes,
+          ...subPlugins.alerts.routes,
+          ...subPlugins.rules.routes,
+          ...subPlugins.exceptions.routes,
+          ...subPlugins.hosts.routes,
+          ...subPlugins.network.routes,
+          ...subPlugins.timelines.routes,
+          ...subPlugins.cases.routes,
+          ...subPlugins.management.routes,
         ].map((route, index) => (
-          <Route key={`subpligin-route-${index}`} {...route} />
+          <Route key={`route-${index}`} {...route} />
         ))}
+
+        <Route path="" exact>
+          <Redirect to={OVERVIEW_PATH} />
+        </Route>
+
         <Route>
           <NotFoundPage />
         </Route>

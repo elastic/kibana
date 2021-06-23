@@ -13,7 +13,6 @@ export class Overview {
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
       routes,
     };
   }

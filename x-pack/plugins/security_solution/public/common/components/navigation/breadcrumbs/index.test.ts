@@ -114,12 +114,8 @@ const getMockObject = (
 // The string returned is different from what getUrlForApp returns, but does not matter for the purposes of this test.
 const getUrlForAppMock = (
   appId: string,
-  options?: { path?: string; deepLinkId?: string; absolute?: boolean }
-) => {
-  const { path, deepLinkId } = options ?? {};
-
-  return `${appId}${deepLinkId ? `/${deepLinkId}` : ''}${path ?? ''}`;
-};
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
+) => `${appId}${options?.deepLinkId ? `/${options.deepLinkId}` : ''}${options?.path ?? ''}`;
 
 describe('Navigation Breadcrumbs', () => {
   const hostName = 'siem-kibana';
@@ -136,7 +132,7 @@ describe('Navigation Breadcrumbs', () => {
       );
       expect(breadcrumbs).toEqual([
         {
-          href: 'securitySolutionoverview',
+          href: 'securitySolution/overview',
           text: 'Security',
         },
         {
@@ -157,7 +153,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Network',
           href:
@@ -176,7 +172,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Timelines',
           href:
@@ -191,7 +187,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Hosts',
           href:
@@ -212,7 +208,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Network',
           href:
@@ -232,7 +228,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Network',
           href:
@@ -252,7 +248,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Alerts',
         },
@@ -264,7 +260,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Cases',
           href:
@@ -285,7 +281,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Cases',
           href:
@@ -303,10 +299,10 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionoverview' },
+        { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Administration',
-          href: 'securitySolution:administration',
+          href: 'securitySolution/endpoints',
         },
       ]);
     });
@@ -337,20 +333,35 @@ describe('Navigation Breadcrumbs', () => {
 
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock);
+      const navigateToUrlMock = jest.fn();
+      setBreadcrumbs(
+        getMockObject('hosts', '/', hostName),
+        chromeMock,
+        getUrlForAppMock,
+        navigateToUrlMock
+      );
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'Security', href: 'securitySolutionoverview' },
-        {
+        expect.objectContaining({
+          text: 'Security',
+          href: 'securitySolution/overview',
+          onClick: expect.any(Function),
+        }),
+        expect.objectContaining({
           text: 'Hosts',
           href:
             "securitySolution/hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-        },
-        {
+          onClick: expect.any(Function),
+        }),
+        expect.objectContaining({
           text: 'siem-kibana',
           href:
             "securitySolution/hosts/siem-kibana?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          onClick: expect.any(Function),
+        }),
+        {
+          text: 'Authentications',
+          href: '',
         },
-        { text: 'Authentications', href: '' },
       ]);
     });
   });

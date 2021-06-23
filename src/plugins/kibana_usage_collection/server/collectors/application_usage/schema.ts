@@ -158,8 +158,7 @@ export const applicationUsageSchema = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
-  securitySolution: commonSchema, // It's a forward app so we'll likely never report it
-  'securitySolution:administration': commonSchema,
+  securitySolution: commonSchema,
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

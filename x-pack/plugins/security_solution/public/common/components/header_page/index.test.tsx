@@ -16,7 +16,6 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../lib/kibana');
-
 jest.mock('../link_to');
 
 describe('HeaderPage', () => {

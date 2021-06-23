@@ -39,7 +39,7 @@ export const TabNavigationComponent: React.FC<
   }) => {
     const {
       chrome,
-      application: { getUrlForApp },
+      application: { getUrlForApp, navigateToUrl },
     } = useKibana().services;
 
     useEffect(() => {
@@ -62,7 +62,8 @@ export const TabNavigationComponent: React.FC<
             timerange: urlState.timerange,
           },
           chrome,
-          getUrlForApp
+          getUrlForApp,
+          navigateToUrl
         );
       }
     }, [

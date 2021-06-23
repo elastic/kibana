@@ -125,20 +125,6 @@ export interface PluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
-
-const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
-
-/**
- * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
- */
-const securitySubPluginsNoCases = [
-  // TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
-  APP_ID,
-  `${APP_ID}:${SecurityPageName.administration}`,
-];
-
-const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -304,7 +290,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
+<<<<<<< HEAD
       app: [...allSecuritySubPlugins, 'kibana'],
+=======
+      app: [APP_ID, 'kibana'],
+>>>>>>> 7087ad2ea22 ([Security Solutions] Management navigation (#102685))
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -359,7 +349,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
+<<<<<<< HEAD
           app: [...securitySubPluginsNoCases, 'kibana'],
+=======
+          app: [APP_ID, 'kibana'],
+>>>>>>> 7087ad2ea22 ([Security Solutions] Management navigation (#102685))
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
@@ -380,7 +374,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
+<<<<<<< HEAD
           app: [...securitySubPluginsNoCases, 'kibana'],
+=======
+          app: [APP_ID, 'kibana'],
+>>>>>>> 7087ad2ea22 ([Security Solutions] Management navigation (#102685))
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {

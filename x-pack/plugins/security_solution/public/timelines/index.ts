@@ -15,7 +15,6 @@ export class Timelines {
 
   public start(): SecuritySubPluginWithStore<'timeline', TimelineState> {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
       routes,
       store: {
         initialState: { timeline: initialTimelineState },
