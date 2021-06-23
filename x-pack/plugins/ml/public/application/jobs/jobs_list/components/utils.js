@@ -347,12 +347,18 @@ export function filterJobs(jobs, clauses) {
         // if it's an array of job ids
         if (c.field === 'id') {
           js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
-        } else {
+        } else if (c.field === 'groups') {
           // the groups value is an array of group ids
           js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        } else if (c.field === 'job_tags') {
+          js = jobTagFilter(jobs, c.value);
         }
       } else {
-        js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        if (c.field === 'job_tags') {
+          js = js = jobTagFilter(jobs, [c.value]);
+        } else {
+          js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        }
       }
     }
 
@@ -369,6 +375,25 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
+function jobProperty(job, prop) {
+  const propMap = {
+    job_state: 'jobState',
+    datafeed_state: 'datafeedState',
+    groups: 'groups',
+    id: 'id',
+    job_tags: 'jobTags',
+  };
+  return job[propMap[prop]];
+}
+
+function jobTagFilter(jobs, value) {
+  return jobs.filter((job) => {
+    const tags = jobProperty(job, 'job_tags');
+    return Object.entries(tags)
+      .map((t) => t.join(':'))
+      .find((t) => value.some((t1) => t1 === t));
+  });
+}
 // check to see if a job has been stored in mlJobService.tempJobCloningObjects
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
@@ -389,14 +414,4 @@ export function checkForAutoStartDatafeed() {
       datafeedId,
     };
   }
-}
-
-function jobProperty(job, prop) {
-  const propMap = {
-    job_state: 'jobState',
-    datafeed_state: 'datafeedState',
-    groups: 'groups',
-    id: 'id',
-  };
-  return job[propMap[prop]];
 }

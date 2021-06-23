@@ -16,6 +16,7 @@ import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/date_picker';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -39,6 +40,14 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
+        defaultMessage: 'Overview',
+      }),
+    },
+  ]);
+
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
@@ -48,13 +57,13 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasData, hasAnyData } = useHasData();
+  const { hasDataMap, hasAnyData } = useHasData();
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
 
-  const alerts = (hasData.alert?.hasData as Alert[]) || [];
+  const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
