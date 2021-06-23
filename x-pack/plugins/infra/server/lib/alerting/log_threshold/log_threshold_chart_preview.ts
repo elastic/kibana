@@ -98,8 +98,10 @@ const addHistogramAggregationToQuery = (
   };
 
   if (isGrouped) {
-    // Optimized
-    if (!query.body.aggregations.groups.aggregations?.filtered_results) {
+    const isOptimizedQuery = (groupedQuery: any) =>
+      !groupedQuery.body.aggregations.groups.aggregations?.filtered_results ? true : false;
+
+    if (isOptimizedQuery(query)) {
       query.body.aggregations.groups.aggregations = {
         ...query.body.aggregations.groups.aggregations,
         ...histogramAggregation,
