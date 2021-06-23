@@ -34,19 +34,16 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       );
     }, [details.columns, field, indexPattern, multiFields]);
 
+    if (!visualizeInfo) {
+      return null;
+    }
+
     const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      if (!visualizeInfo) {
-        return;
-      }
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
       trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
       triggerVisualizeActions(visualizeInfo.field, indexPattern.id, details.columns);
     };
-
-    if (!visualizeInfo) {
-      return null;
-    }
 
     return (
       <EuiPopoverFooter>
