@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Role as ASRole } from '../../app_search/types';
+import { RoleTypes as ASRole } from '../../app_search/types';
 import { ElasticsearchUser } from '../../shared/types';
 import { Role as WSRole } from '../../workplace_search/types';
 
