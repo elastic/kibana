@@ -28,8 +28,12 @@ export const useAppSearchNav = () => {
     {
       id: 'engines',
       name: ENGINES_TITLE,
-      ...generateNavLink({ to: ENGINES_PATH, isRoot: true }),
-      items: useEngineNav(),
+      ...generateNavLink({
+        to: ENGINES_PATH,
+        isRoot: true,
+        shouldShowActiveForSubroutes: true,
+        items: useEngineNav(),
+      }),
     },
   ];
 
