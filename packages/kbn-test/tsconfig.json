@@ -4,6 +4,7 @@
     "incremental": true,
     "outDir": "./target/types",
     "stripInternal": true,
+    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
     "rootDir": "src",
