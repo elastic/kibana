@@ -205,7 +205,7 @@ export class RuleDataClient implements IRuleDataClient {
         });
       } catch (err) {
         // something might have created the index already, that sounds OK
-        if (err?.meta?.body?.type !== 'resource_already_exists_exception') {
+        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
           throw err;
         }
       }
