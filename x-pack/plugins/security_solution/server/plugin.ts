@@ -136,7 +136,6 @@ const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
 // TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
 const securitySubPlugins = [
   APP_ID,
-  `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.administration}`,
 ];

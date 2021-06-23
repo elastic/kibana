@@ -13,7 +13,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -24,6 +23,7 @@ import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
 import { Sourcerer } from '../sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useKibana } from '../../lib/kibana';
 
 interface HeaderProps {
   border?: boolean;
@@ -91,27 +91,29 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   titleNode,
   ...rest
 }) => {
-  const history = useHistory();
+  const { navigateToUrl } = useKibana().services.application;
+
   const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
+  const backUrl = formatUrl(backOptions?.href ?? '');
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();
       if (backOptions) {
-        history.push(backOptions.href ?? '');
+        navigateToUrl(backUrl);
       }
     },
-    [backOptions, history]
+    [backOptions, navigateToUrl, backUrl]
   );
   return (
     <>
-      <EuiPageHeader alignItems="center" bottomBorder={border}>
+      <EuiPageHeader alignItems="center" bottomBorder={border} paddingSize="l">
         <EuiPageHeaderSection>
           {backOptions && (
             <LinkBack>
               <LinkIcon
                 dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
                 onClick={goTo}
-                href={formatUrl(backOptions.href ?? '')}
+                href={backUrl}
                 iconType="arrowLeft"
               >
                 {backOptions.text}
@@ -120,7 +122,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           )}
 
           {!backOptions && backComponent && <>{backComponent}</>}
-
           {titleNode || (
             <Title
               draggableArguments={draggableArguments}
@@ -146,5 +147,3 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     </>
   );
 };
-
-export const HeaderPage = React.memo(HeaderPageComponent);

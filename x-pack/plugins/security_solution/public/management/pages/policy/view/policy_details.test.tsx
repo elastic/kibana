@@ -16,7 +16,6 @@ import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routin
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../common/hooks/use_license');
 
 describe('Policy Details', () => {

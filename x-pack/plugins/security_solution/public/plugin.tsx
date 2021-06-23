@@ -37,7 +37,6 @@ import { KibanaServices } from './common/lib/kibana/services';
 import {
   APP_ID,
   APP_ICON_SOLUTION,
-  APP_DETECTIONS_PATH,
   APP_OVERVIEW_PATH,
   NETWORK_PATH,
   APP_TIMELINES_PATH,
@@ -49,6 +48,9 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
   OVERVIEW_PATH,
+  EXCEPTIONS_PATH,
+  RULES_PATH,
+  ALERTS_PATH,
   HOSTS_PATH,
 } from '../common/constants';
 
@@ -60,9 +62,11 @@ import {
   HOSTS,
   NETWORK,
   TIMELINES,
-  DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
+  RULES,
+  ALERTS,
+  EXCEPTIONS,
 } from './app/translations';
 import {
   IndexFieldsStrategyRequest,
@@ -86,7 +90,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  private detectionsUpdater$ = new Subject<AppUpdater>();
+  private alertsUpdater$ = new Subject<AppUpdater>();
   private hostsUpdater$ = new Subject<AppUpdater>();
   private networkUpdater$ = new Subject<AppUpdater>();
   private caseUpdater$ = new Subject<AppUpdater>();
@@ -159,28 +163,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
       return services;
     })();
-
-    core.application.register({
-      id: `${APP_ID}:${SecurityPageName.detections}`,
-      title: DETECTION_ENGINE,
-      order: 9001,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_DETECTIONS_PATH,
-      updater$: this.detectionsUpdater$,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { detections: subPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
-        });
-      },
-    });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
@@ -262,6 +244,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           euiIconType: APP_ICON_SOLUTION,
         },
         {
+          id: SecurityPageName.alerts,
+          title: ALERTS,
+          path: ALERTS_PATH,
+          navLinkStatus: AppNavLinkStatus.visible,
+          order: 9001,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.rules,
+          title: RULES,
+          path: RULES_PATH,
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+          order: 9001,
+          euiIconType: APP_ICON_SOLUTION,
+        },
+        {
+          id: SecurityPageName.exceptions,
+          title: EXCEPTIONS,
+          path: EXCEPTIONS_PATH,
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+          order: 9001,
+        },
+        {
           id: SecurityPageName.hosts,
           title: HOSTS,
           path: HOSTS_PATH,
@@ -282,7 +289,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
-
         return renderApp({
           ...params,
           services: await startServices,
@@ -350,11 +356,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
           registerDeepLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
-          registerDeepLinks(
-            SecurityPageName.detections,
-            this.detectionsUpdater$,
-            currentLicense.type
-          );
+          registerDeepLinks(SecurityPageName.alerts, this.alertsUpdater$, currentLicense.type);
           registerDeepLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
           registerDeepLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
         }
@@ -407,7 +409,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
-        detections: new subPluginClasses.Detections(),
+        alerts: new subPluginClasses.Detections(),
+        rules: new subPluginClasses.Rules(),
+        exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
@@ -430,7 +434,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const subPlugins = await this.subPlugins();
     return {
       overview: subPlugins.overview.start(),
-      detections: subPlugins.detections.start(storage),
+      alerts: subPlugins.alerts.start(storage),
+      rules: subPlugins.rules.start(storage),
+      exceptions: subPlugins.exceptions.start(storage),
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
@@ -456,7 +462,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         { createStore, createInitialState },
         kibanaIndexPatterns,
         {
-          detections: detectionsSubPlugin,
+          alerts: alertsSubPlugin,
+          rules: rulesSubPlugin,
+          exceptions: exceptionsSubPlugin,
           hosts: hostsSubPlugin,
           network: networkSubPlugin,
           timelines: timelinesSubPlugin,
@@ -495,9 +503,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
-      const detectionsStart = subPlugins
-        ? subPlugins.detections
-        : detectionsSubPlugin.start(this.storage);
+      const alertsStart = subPlugins ? subPlugins.alerts : alertsSubPlugin.start(this.storage);
+      const rulesStart = subPlugins ? subPlugins.rules : rulesSubPlugin.start(this.storage);
+      const exceptionsStart = subPlugins
+        ? subPlugins.exceptions
+        : exceptionsSubPlugin.start(this.storage);
+
       const hostsStart = subPlugins ? subPlugins.hosts : hostsSubPlugin.start(this.storage);
       const networkStart = subPlugins ? subPlugins.network : networkSubPlugin.start(this.storage);
       const timelinesStart = subPlugins ? subPlugins.timelines : timelinesSubPlugin.start();
@@ -510,7 +521,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.store.initialState.timeline!,
           timelineById: {
             ...timelinesStart.store.initialState.timeline!.timelineById,
-            ...detectionsStart.storageTimelines!.timelineById,
+            ...alertsStart.storageTimelines!.timelineById,
+            ...rulesStart.storageTimelines!.timelineById,
+            ...exceptionsStart.storageTimelines!.timelineById,
             ...hostsStart.storageTimelines!.timelineById,
             ...networkStart.storageTimelines!.timelineById,
           },

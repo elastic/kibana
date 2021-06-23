@@ -54,7 +54,7 @@ const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.case;
 
 const isAlertsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.detections;
+  spyState != null && spyState.pageName === SecurityPageName.alerts;
 
 const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.administration;
@@ -112,7 +112,7 @@ export const getBreadcrumbsForRoute = (
     ];
   }
   if (isAlertsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+    const tempNav: SearchNavTab = { urlKey: SecurityPageName.alerts, isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];

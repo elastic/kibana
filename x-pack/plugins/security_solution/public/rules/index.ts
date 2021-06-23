@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
-import { routes } from './routes';
+
 import { SecuritySubPlugin } from '../app/types';
+import { DETECTIONS_TIMELINE_IDS } from '../detections';
+import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { routes } from './routes';
 
-export const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
-  TimelineId.detectionsRulesDetailsPage,
-  TimelineId.detectionsPage,
-];
-
-export class Detections {
+export class Rules {
   public setup() {}
 
   public start(storage: Storage): SecuritySubPlugin {
