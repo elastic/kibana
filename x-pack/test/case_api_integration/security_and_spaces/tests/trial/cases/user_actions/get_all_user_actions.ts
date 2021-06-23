@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
         .set('kbn-xsrf', 'true')
-        .send({})
+        .send({ case_url: `${CASES_URL}/${postedCase.id}` })
         .expect(200);
 
       const { body } = await supertest
