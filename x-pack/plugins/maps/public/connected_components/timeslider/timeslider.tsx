@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
 import { TimeRange } from '../../../../../../src/plugins/data/common';
@@ -49,7 +49,7 @@ export function Timeslider(props: Props) {
 class KeyedTimeslider extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _timeoutId: number | undefined;
-  private _unsubscribe: () => void | undefined;
+  private _subscription: Subscription | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -75,6 +75,7 @@ class KeyedTimeslider extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    this._onPause();
     this._isMounted = false;
   }
 
@@ -132,9 +133,9 @@ class KeyedTimeslider extends Component<Props, State> {
 
   _onPause = () => {
     this.setState({ isPaused: true });
-    if (this._unsubscribe) {
-      this._unsubscribe();
-      this._unsubscribe = undefined;
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+      this._subscription = undefined;
     }
     if (this._timeoutId) {
       clearTimeout(this._timeoutId);
@@ -148,7 +149,7 @@ class KeyedTimeslider extends Component<Props, State> {
 
     // use waitForTimesliceToLoad$ observable to wait until next frame loaded
     // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-    this._unsubscribe = this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
+    this._subscription = this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
       if (this.state.isPaused) {
         return;
       }
