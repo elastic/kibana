@@ -103,7 +103,7 @@ const processFile = async ({
         includePaths: [Path.resolve(options.repoRoot, 'node_modules')],
         ...(!options.dist
           ? {
-              sourceMap: !!options.dist,
+              sourceMap: true,
               sourceMapRoot: options.sourceMapRoot,
               outFile: Path.join(ctx.rootContext, 'style.css.map'),
               sourceMapContents: true,
@@ -205,10 +205,9 @@ const asyncLoader = async (ctx: webpack.loader.LoaderContext, css: string) => {
     if (!result.map) {
       resultMap[result.tag] = result.css;
     } else {
-      const base64Map = Buffer.from(
-        unescape(encodeURIComponent(JSON.stringify(result.map))),
-        'utf8'
-      ).toString('base64');
+      const base64Map = Buffer.from(unescape(encodeURIComponent(result.map)), 'utf8').toString(
+        'base64'
+      );
       const cssWithMap = `${result.css}\n/*# sourceMappingURL=data:application/json;base64,${base64Map} */`;
       resultMap[result.tag] = cssWithMap;
     }
