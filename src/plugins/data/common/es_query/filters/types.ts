@@ -40,5 +40,3 @@ export enum FILTERS {
   GEO_POLYGON = 'geo_polygon',
   SPATIAL_FILTER = 'spatial_filter',
 }
-
-export type ConvertFn = (value: any) => string;
