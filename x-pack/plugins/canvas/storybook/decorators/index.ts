@@ -11,6 +11,7 @@ import { kibanaContextDecorator } from './kibana_decorator';
 import { servicesContextDecorator } from './services_decorator';
 
 export { reduxDecorator } from './redux_decorator';
+export { servicesContextDecorator } from './services_decorator';
 
 export const addDecorators = () => {
   if (process.env.NODE_ENV === 'test') {
@@ -20,5 +21,5 @@ export const addDecorators = () => {
 
   addDecorator(kibanaContextDecorator);
   addDecorator(routerContextDecorator);
-  addDecorator(servicesContextDecorator);
+  addDecorator(servicesContextDecorator());
 };
