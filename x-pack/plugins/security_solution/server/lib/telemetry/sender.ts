@@ -140,6 +140,31 @@ export class TelemetryEventsSender {
     return callCluster('search', query);
   }
 
+  public async fetchEndpointMetrics() {
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
+    }
+
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: `.*`,
+      ignore_unavailable: false,
+      size: 0,
+      body: {
+        query: {
+          match: {
+            'Endpoint.policy.applied.status': 'failure',
+          },
+        },
+      },
+    };
+
+    const {
+      body: failedPolicyResponses,
+    } = await this.esClient.search<EndpointMetricsPolicyResponse>(query);
+    return failedPolicyResponses;
+  }
+
   public async fetchFleetAgents() {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
@@ -156,11 +181,50 @@ export class TelemetryEventsSender {
   }
 
   public async fetchEndpointPolicyConfigs(id: string) {
-    if (this.savedObjectClient === undefined) {
-      throw Error('could not fetch endpoint policy configs. saved object client is not available');
+    if (this.esClient === undefined) {
+      throw Error('could not fetch policy responses. es client is not available');
     }
 
-    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: `.ds-metrics-endpoint.metrics*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          endpoint_agents: {
+            terms: {
+              size: this.max_records,
+              field: 'agent.id',
+              aggs: {
+                latest_metrics: {
+                  top_hits: {
+                    size: 1,
+                    sort: [
+                      {
+                        '@timestamp': {
+                          order: 'desc',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              gte: 'now-1d/d',
+              lt: 'now/d',
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient.search(query);
   }
 
   public async fetchFailedEndpointPolicyResponses() {

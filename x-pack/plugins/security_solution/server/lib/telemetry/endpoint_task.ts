@@ -102,6 +102,9 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
+    const endpointMetrics = await this.sender.fetchEndpointMetrics();
+    this.logger.debug(`ep metrics: ${endpointMetrics}`);
+
     const failedPolicyResponses = await this.sender.fetchFailedEndpointPolicyResponses();
     this.logger.debug(`ep policy responses: ${failedPolicyResponses}`);
 

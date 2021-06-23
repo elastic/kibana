@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+// Sec Sol Kbn telemetry instrumentation specific
+
+export interface FleetAgentCacheItem {
+  policy_id: string | undefined;
+  policy_version: string | undefined;
+}
+
+// EP Policy Response
+
 export interface EndpointMetricsPolicyResponse {
   agent: EndpointAgent; // endpoint agent
   elastic: EndpointPolicyAgent; // fleet agent
@@ -68,7 +77,26 @@ interface EndpointPolicyEvent {
   action: string;
 }
 
-export interface FleetAgentCacheItem {
-  policy_id: string | undefined;
-  policy_version: string | undefined;
+// EP Metrics
+
+export interface EndpointMetrics {
+  endpoint_id: string;
+  fleet_agent_id: string;
+  os_name: string;
+  os_platform: string;
+  os_version: string;
+  uptime_endpoint: string;
+  uptime_system: string;
+  memory: EndpointMetricMemory;
+  cpu: EndpointMetricCPU;
+}
+
+interface EndpointMetricMemory {
+  mean: string;
+  latest: string;
+}
+
+interface EndpointMetricCPU {
+  mean: string;
+  histogram: Array<{ key: string; value: number }>;
 }
