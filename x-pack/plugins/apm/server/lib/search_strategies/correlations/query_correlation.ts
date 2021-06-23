@@ -41,7 +41,7 @@ interface BucketCorrelation {
 
 export const getTransactionDurationCorrelationRequest = (
   params: SearchServiceParams,
-  percentiles: Record<string, number>,
+  percentiles: number[],
   totalHits: number,
   fieldName?: string,
   fieldValue?: string
@@ -58,9 +58,7 @@ export const getTransactionDurationCorrelationRequest = (
     });
   }
 
-  const percentileValues = Object.values(percentiles);
-
-  const ranges = percentileValues.reduce(
+  const ranges = percentiles.reduce(
     (p, to) => {
       const from = p[p.length - 1].to;
       p.push({ from, to });
@@ -71,12 +69,12 @@ export const getTransactionDurationCorrelationRequest = (
   ranges.push({ from: ranges[ranges.length - 1].to });
 
   const step = PERCENTILES_STEP;
-  const tempPercentiles = [percentileValues[0]];
+  const tempPercentiles = [percentiles[0]];
   const tempFractions = [step / 100];
   // Collapse duplicates
-  for (let i = 1; i < percentileValues.length; i++) {
-    if (percentileValues[i] !== percentileValues[i - 1]) {
-      tempPercentiles.push(percentileValues[i]);
+  for (let i = 1; i < percentiles.length; i++) {
+    if (percentiles[i] !== percentiles[i - 1]) {
+      tempPercentiles.push(percentiles[i]);
       tempFractions.push(2 / 100);
     } else {
       tempFractions[tempFractions.length - 1] =
@@ -85,7 +83,7 @@ export const getTransactionDurationCorrelationRequest = (
   }
   tempFractions.push(2 / 100);
 
-  const tempRanges = percentileValues.reduce((p, to) => {
+  const tempRanges = percentiles.reduce((p, to) => {
     const from = p[p.length - 1]?.to;
     if (from) {
       p.push({ from, to });
@@ -106,12 +104,12 @@ export const getTransactionDurationCorrelationRequest = (
   }
   tempExpectations.push(tempPercentiles[tempPercentiles.length - 1]);
 
-  const expectations = percentileValues.map((d, index) => {
-    const previous = percentileValues[index - 1] || 0;
+  const expectations = percentiles.map((d, index) => {
+    const previous = percentiles[index - 1] || 0;
     return (previous + d) / 2;
   });
   expectations.unshift(0);
-  expectations.push(percentileValues[percentileValues.length - 1]);
+  expectations.push(percentiles[percentiles.length - 1]);
 
   const bucketCorrelation: BucketCorrelation = {
     buckets_path: 'latency_ranges>_count',
@@ -157,7 +155,7 @@ export const getTransactionDurationCorrelationRequest = (
 export const fetchTransactionDurationCorrelation = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  percentiles: Record<string, number>,
+  percentiles: number[],
   totalHits: number,
   fieldName?: string,
   fieldValue?: string

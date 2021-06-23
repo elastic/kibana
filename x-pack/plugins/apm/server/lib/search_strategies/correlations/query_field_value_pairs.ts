@@ -59,7 +59,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
   params: SearchServiceParams,
   fieldCandidates: Field[],
   progress: AsyncSearchProviderProgress,
-  percentiles: Record<string, number>
+  percentiles: number[]
 ): Promise<FieldValuePairs> => {
   const fieldValuePairs: FieldValuePairs = [];
 
@@ -69,10 +69,8 @@ export const fetchTransactionDurationFieldValuePairs = async (
     return Math.floor((v - PERCENTILES_STEP) / PERCENTILES_STEP + 0.5);
   });
 
-  const percentilesArr = Object.values(percentiles);
   const ranges = indices.map((index) => ({
-    from:
-      percentilesArr[Math.min(index, Object.keys(percentilesArr).length - 1)],
+    from: percentiles[Math.min(index, Object.keys(percentiles).length - 1)],
   }));
 
   for (let i = 0; i < fieldCandidates.length; i++) {

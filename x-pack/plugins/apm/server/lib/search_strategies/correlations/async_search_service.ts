@@ -110,11 +110,12 @@ export const asyncSearchServiceProvider = (
 
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
-      const percentiles = await fetchTransactionDurationPecentiles(
+      const percentilesRecords = await fetchTransactionDurationPecentiles(
         esClient,
         params,
         percents
       );
+      const percentiles = Object.values(percentilesRecords);
 
       if (isCancelled) {
         isRunning = false;
@@ -141,8 +142,8 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          // If one of the fields run into an error
-          // we don't want to stop the whole process
+          // If one of the fields have an error
+          // We don't want to stop the whole process
           try {
             const {
               correlation,
