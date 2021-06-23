@@ -14,6 +14,28 @@ import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
+const BucketsAggs = rt.array(
+  rt.type({
+    key: rt.string,
+  })
+);
+
+export const GetCaseIdsByAlertIdAggsRt = rt.type({
+  references: rt.type({
+    doc_count: rt.number,
+    caseIds: rt.type({
+      buckets: BucketsAggs,
+    }),
+  }),
+});
+
+export const CasesByAlertIdRt = rt.array(
+  rt.type({
+    id: rt.string,
+    title: rt.string,
+  })
+);
+
 export enum CaseType {
   collection = 'collection',
   individual = 'individual',
@@ -311,3 +333,6 @@ export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
+
+export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
