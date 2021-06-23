@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { useDebouncedValue } from '../../shared_components';
 
 export interface FillOpacityOptionProps {
@@ -33,6 +33,7 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   return isFillOpacityEnabled ? (
     <>
+      <EuiSpacer />
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.fillOpacityLabel', {

@@ -63,6 +63,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
 
   return (
     <>
+      {isValueLabelsEnabled || (isFittingEnabled && <EuiSpacer />)}
       {isValueLabelsEnabled && (
         <EuiFormRow
           display="columnCompressed"
@@ -140,7 +141,6 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
           />
         </EuiFormRow>
       )}
-      <EuiSpacer />
     </>
   );
 };
