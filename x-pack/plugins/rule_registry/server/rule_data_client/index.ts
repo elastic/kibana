@@ -107,6 +107,10 @@ export class RuleDataClient implements IRuleDataClient {
     const clusterClient = await this.getClusterClient();
     let simulatedRollover: IndicesRolloverResponse;
     try {
+      // By simulating the rollover here first, we can easily retrieve the current write index name
+      // and the prospective new write index name. These index names will be used to check if the new
+      // write index would have any mapping differences from the current write index, and if so, we
+      // trigger an actual rollover.
       ({ body: simulatedRollover } = await clusterClient.indices.rollover({
         alias,
         dry_run: true,
@@ -143,6 +147,10 @@ export class RuleDataClient implements IRuleDataClient {
     const needRollover = this.indexNeedsRollover(currentVersions, targetVersions);
     if (needRollover) {
       try {
+        // We specify the new_index name explicitly here to avoid races that would cause us to roll
+        // the index multiple times. If another function rolls the index in between the simulated rollover
+        // above and this rollover, then this rollover will fail with a resource_already_exists_exception - so
+        // we catch and suppress that exception. Any other exceptions are rethrown.
         await clusterClient.indices.rollover({
           alias,
           new_index: simulatedRollover.new_index,
