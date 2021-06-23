@@ -62,6 +62,7 @@ export function PolicySelector({
         options={options}
         selectedOptions={selectedOption ? [selectedOption] : []}
         onChange={(selectedOptions) => {
+          console.log('### caue ~ selectedOptions', selectedOptions);
           onChange(selectedOptions[0]);
         }}
       />

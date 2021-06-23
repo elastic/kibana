@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { CopyCommands } from '../copy_commands';
+import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { CopyCommands } from './copy_commands';
 import { PolicySelectorOption, PolicySelector } from './policy_selector';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions } from './get_policy_options';
@@ -58,6 +58,7 @@ function TutorialConfigAgent({
   });
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<PolicySelectorOption>();
+  console.log('### caue ~ selectedOption', selectedOption);
 
   useEffect(() => {
     async function fetchData() {

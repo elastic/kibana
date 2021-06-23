@@ -177,12 +177,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
-      () => import('./components/shared/tutorial/config_agent')
+      () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
-      () => import('./components/shared/tutorial/config_agent/rum_script')
+      () => import('./tutorial/config_agent/rum_script')
     );
 
     plugins.observability.dashboard.register({

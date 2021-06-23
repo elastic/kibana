@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO: ${'http://localhost:8200'}' fallback server_url
 export const rails = `# config/elastic_apm.yml:
 
 # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space

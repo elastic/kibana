@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// TODO: doesn't have token
 export const rum = `import { init as initApm } from '@elastic/apm-rum'
 var apm = initApm({
 
@@ -48,13 +47,12 @@ var apm = initApm({
   environment: 'production'
 })`;
 
-// TODO: doesn't have token/url
 export const rumScript = `\
 <script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
 <script>
   elasticApm.init({
     serviceName: 'your-app-name',
-    serverUrl: 'http://localhost:8200',
+    serverUrl: '{{{apmServerUrl}}}',
   })
 </script>
 `;
