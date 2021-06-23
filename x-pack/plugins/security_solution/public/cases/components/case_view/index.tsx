@@ -38,6 +38,7 @@ import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
+import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 
 interface Props {
   caseId: string;
@@ -180,7 +181,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
 
   return (
-    <>
+    <CaseDetailsRefreshContext.Provider value={refreshRef}>
       {casesUi.getCaseView({
         refreshRef,
         allCasesNavigation: {
@@ -251,7 +252,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         userCanCrud,
       })}
       <SpyRoute state={spyState} pageName={SecurityPageName.case} />
-    </>
+    </CaseDetailsRefreshContext.Provider>
   );
 });
 
