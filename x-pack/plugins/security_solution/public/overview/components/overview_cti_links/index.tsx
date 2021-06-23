@@ -22,9 +22,9 @@ const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (prop
 
   switch (isThreatIntelModuleEnabled) {
     case true:
-      return <CtiEnabledModule {...props} />;
+      return <CtiEnabledModule {...props} data-test-subj="cti-enabled-module" />;
     case false:
-      return <CtiDisabledModule />;
+      return <CtiDisabledModule data-test-subj="cti-disabled-module" />;
     case undefined:
     default:
       return null;

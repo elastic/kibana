@@ -13,7 +13,7 @@ import { emptyEventCountsByDataset } from './helpers';
 export const ID = 'ctiEventCountQuery';
 const PREFIX = 'threatintel.';
 
-export const useCTIEventCounts = ({
+export const useCtiEventCounts = ({
   deleteQuery,
   from,
   setQuery,

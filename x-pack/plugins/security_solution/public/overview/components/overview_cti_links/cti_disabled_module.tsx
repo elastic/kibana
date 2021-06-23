@@ -31,6 +31,7 @@ export const CtiDisabledModuleComponent = () => {
             </EuiButton>
           </EuiFlexItem>
         }
+        data-test-subj="cti-inner-panel-danger"
       />
     ),
     [threatIntelDocLink]

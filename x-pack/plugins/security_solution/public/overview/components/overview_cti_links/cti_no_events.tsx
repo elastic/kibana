@@ -13,7 +13,12 @@ import * as i18n from './translations';
 import { emptyEventCountsByDataset } from '../../containers/overview_cti_links/helpers';
 
 const warning = (
-  <CtiInnerPanel color={'warning'} title={i18n.WARNING_TITLE} body={i18n.WARNING_BODY} />
+  <CtiInnerPanel
+    color={'warning'}
+    title={i18n.WARNING_TITLE}
+    body={i18n.WARNING_BODY}
+    data-test-subj="cti-inner-panel-warning"
+  />
 );
 
 export const CtiNoEventsComponent = ({ to, from }: { to: string; from: string }) => {

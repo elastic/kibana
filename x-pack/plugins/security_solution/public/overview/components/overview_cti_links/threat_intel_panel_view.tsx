@@ -85,6 +85,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
   const subtitle = useMemo(
     () => (
       <FormattedMessage
+        data-test-subj="cti-total-event-count"
         defaultMessage="Showing: {totalEventCount} {totalEventCount, plural, one {event} other {events}}"
         id="xpack.securitySolution.overview.ctiDashboardSubtitle"
         values={{ totalEventCount }}
@@ -112,6 +113,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
     () =>
       isDashboardPluginDisabled ? (
         <CtiInnerPanel
+          data-test-subj="cti-inner-panel-info"
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
@@ -166,9 +168,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
                           </DashboardRightSideElement>
                           <DashboardRightSideElement key={`${title}-source`} grow={3}>
                             {path ? (
-                              <RightSideLink href={path} data-test-subj="cti-dashboard-link">
-                                {linkCopy}
-                              </RightSideLink>
+                              <RightSideLink href={path}>{linkCopy}</RightSideLink>
                             ) : (
                               <EuiText color={'subdued'} size={'s'}>
                                 {linkCopy}
