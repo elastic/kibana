@@ -26,7 +26,7 @@ export interface RuleExecutorData {
 }
 
 export function getRuleExecutorData(
-  type: AlertTypeWithExecutor<any, any, any, any, any, any, any>,
+  type: AlertTypeWithExecutor<any, any, any, any, any, any>,
   options: AlertExecutorOptions<any, any, any, any, any>
 ) {
   return {
