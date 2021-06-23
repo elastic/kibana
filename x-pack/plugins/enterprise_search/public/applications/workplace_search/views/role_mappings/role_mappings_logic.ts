@@ -74,6 +74,7 @@ interface RoleMappingsActions {
   setElasticsearchUser(
     elasticsearchUser?: ElasticsearchUser
   ): { elasticsearchUser: ElasticsearchUser };
+  setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   openRoleMappingFlyout(): void;
   openSingleUserRoleMappingFlyout(): void;
   closeUsersAndRolesFlyout(): void;
@@ -143,6 +144,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     handleDeleteMapping: (roleMappingId: string) => ({ roleMappingId }),
     handleSaveMapping: true,
     handleSaveUser: true,
+    setDefaultGroup: (availableGroups: RoleGroup[]) => ({ availableGroups }),
     openRoleMappingFlyout: true,
     closeUsersAndRolesFlyout: false,
     setElasticsearchUsernameValue: (username: string) => ({ username }),
@@ -261,6 +263,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       new Set(),
       {
         setRoleMappingsData: (_, { availableGroups }) =>
+          new Set(
+            availableGroups
+              .filter((group) => group.name === DEFAULT_GROUP_NAME)
+              .map((group) => group.id)
+          ),
+        setDefaultGroup: (_, { availableGroups }) =>
           new Set(
             availableGroups
               .filter((group) => group.name === DEFAULT_GROUP_NAME)
@@ -503,6 +511,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       clearFlashMessages();
       const firstUser = values.elasticsearchUsers[0];
       actions.setElasticsearchUser(firstUser);
+      actions.setDefaultGroup(values.availableGroups);
     },
     openRoleMappingFlyout: () => {
       clearFlashMessages();
