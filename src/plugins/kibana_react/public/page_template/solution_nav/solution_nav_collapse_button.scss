@@ -1,0 +1,33 @@
+.kbnPageTemplateSolutionNavCollapseButton {
+  // transition: left $euiAnimSpeedFast $euiAnimSlightResistance,
+  //             opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+  position: fixed;
+  opacity: 0;
+  left: 240px - $euiSize;
+  z-index: 2;
+
+  &:hover,
+  &:focus {
+    transition-delay: 0 !important;
+  }
+
+  .kbnPageTemplateSolutionNav:hover ~ &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+    left: 240px - $euiSizeL;
+  }
+}
+
+.kbnPageTemplateSolutionNavCollapseButton-isCollapsed {
+  left: $euiSizeS !important;
+  opacity: 1 !important;
+  transition-delay: 0 !important;
+}
+
+@include euiBreakpoint('xs','s') {
+  // The collapsibility of the side nav is controlled by the EuiSideNav component at this breakpoint
+  .kbnPageTemplateSolutionNavCollapseButton {
+    display: none;
+  }
+}
