@@ -125,7 +125,7 @@ export const JobsListPage: FC<{
 }> = ({ coreStart, share, history, spacesApi }) => {
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
-  const [accessDenied, setAccessDenied] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
