@@ -59,6 +59,24 @@
   }
 }
 
+.kbnOverviewSolution {
+  &.enterpriseSearch {
+    .euiCard__image {
+      background-color: $euiColorSecondary;
+    }
+  }
+  &.observability {
+    .euiCard__image {
+      background-color: $euiColorAccent;
+    }
+  }
+  &.securitySolution {
+    .euiCard__image {
+      background-color: $euiColorDarkestShade;
+    }
+  }
+}
+
 .kbnOverviewSolution__icon {
   background-color: $euiColorEmptyShade !important;
   box-shadow: none !important;

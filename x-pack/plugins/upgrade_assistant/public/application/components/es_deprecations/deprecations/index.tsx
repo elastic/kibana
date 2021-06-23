@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { GroupedDeprecations } from './grouped';
+export { EsDeprecationAccordion } from './deprecation_group_item';

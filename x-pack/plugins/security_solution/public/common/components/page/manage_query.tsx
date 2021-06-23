@@ -12,7 +12,7 @@ import React from 'react';
 import { inputsModel } from '../../store';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 
-interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
+export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
   id: string;
   legendPosition?: Position;
@@ -21,7 +21,9 @@ interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   inspect?: inputsModel.InspectQuery;
 }
 
-export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
+export function manageQuery<T>(
+  WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
+): React.ComponentClass<OwnProps & T> {
   class ManageQuery extends React.PureComponent<OwnProps & T> {
     static displayName: string;
     public componentDidUpdate(prevProps: OwnProps) {

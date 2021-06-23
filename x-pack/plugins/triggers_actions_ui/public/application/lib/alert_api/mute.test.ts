@@ -13,12 +13,12 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('muteAlert', () => {
   test('should call mute alert API', async () => {
-    const result = await muteAlert({ http, id: '1' });
+    const result = await muteAlert({ http, id: '1/' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerting/rule/1/_mute_all",
+          "/api/alerting/rule/1%2F/_mute_all",
         ],
       ]
     `);
@@ -27,7 +27,7 @@ describe('muteAlert', () => {
 
 describe('muteAlerts', () => {
   test('should call mute alert API per alert', async () => {
-    const ids = ['1', '2', '3'];
+    const ids = ['1', '2', '/'];
     const result = await muteAlerts({ http, ids });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
@@ -39,7 +39,7 @@ describe('muteAlerts', () => {
           "/api/alerting/rule/2/_mute_all",
         ],
         Array [
-          "/api/alerting/rule/3/_mute_all",
+          "/api/alerting/rule/%2F/_mute_all",
         ],
       ]
     `);

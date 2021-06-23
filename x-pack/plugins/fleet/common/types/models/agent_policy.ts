@@ -21,7 +21,7 @@ export interface NewAgentPolicy {
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
-  preconfiguration_id?: string; // Uniqifies preconfigured policies by something other than `name`
+  is_preconfigured?: boolean;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
@@ -61,9 +61,9 @@ export interface FullAgentPolicyInput {
 }
 
 export interface FullAgentPolicyOutputPermissions {
-  [role: string]: {
-    cluster: string[];
-    indices: Array<{
+  [packagePolicyName: string]: {
+    cluster?: string[];
+    indices?: Array<{
       names: string[];
       privileges: string[];
     }>;
@@ -91,6 +91,7 @@ export interface FullAgentPolicy {
   revision?: number;
   agent?: {
     monitoring: {
+      namespace?: string;
       use_output?: string;
       enabled: boolean;
       metrics: boolean;

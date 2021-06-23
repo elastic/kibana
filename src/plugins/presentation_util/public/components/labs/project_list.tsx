@@ -29,6 +29,10 @@ export const ProjectList = (props: Props) => {
 
   const items = Object.values(projects)
     .map((project) => {
+      if (!project.isDisplayed) {
+        return null;
+      }
+
       // Filter out any panels that don't match the solutions filter, (if provided).
       if (solutions && !solutions.some((solution) => project.solutions.includes(solution))) {
         return null;

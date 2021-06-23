@@ -23,6 +23,39 @@ const preconfiguredActionSchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
+const customHostSettingsSchema = schema.object({
+  url: schema.string({ minLength: 1 }),
+  smtp: schema.maybe(
+    schema.object({
+      ignoreTLS: schema.maybe(schema.boolean()),
+      requireTLS: schema.maybe(schema.boolean()),
+    })
+  ),
+  tls: schema.maybe(
+    schema.object({
+      /**
+       * @deprecated in favor of `verificationMode`
+       **/
+      rejectUnauthorized: schema.maybe(schema.boolean()),
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
+      certificateAuthoritiesFiles: schema.maybe(
+        schema.oneOf([
+          schema.string({ minLength: 1 }),
+          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        ])
+      ),
+      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
+    })
+  ),
+});
+
+export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
@@ -44,12 +77,41 @@ export const configSchema = schema.object({
   }),
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  /**
+   * @deprecated in favor of `tls.proxyVerificationMode`
+   **/
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
+  /**
+   * @deprecated in favor of `tls.verificationMode`
+   **/
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  tls: schema.maybe(
+    schema.object({
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
+      proxyVerificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
+    })
+  ),
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
+  customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  cleanupFailedExecutionsTask: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    cleanupInterval: schema.duration({ defaultValue: '5m' }),
+    idleInterval: schema.duration({ defaultValue: '1h' }),
+    pageSize: schema.number({ defaultValue: 100 }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

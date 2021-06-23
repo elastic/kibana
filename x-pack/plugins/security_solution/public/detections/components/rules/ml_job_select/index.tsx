@@ -6,15 +6,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
+  EuiToolTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -23,63 +21,36 @@ import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  ML_JOB_SELECT_PLACEHOLDER_TEXT,
-  ENABLE_ML_JOB_WARNING,
-} from '../step_define_rule/translations';
+import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../step_define_rule/translations';
+import { HelpText } from './help_text';
 
 interface MlJobValue {
   id: string;
   description: string;
 }
 
-type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;
-
-const HelpTextWarningContainer = styled.div`
-  margin-top: 10px;
+const JobDisplayContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
+
+type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;
 
 const MlJobSelectEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 5px;
 `;
 
-const HelpText: React.FC<{ href: string; showEnableWarning: boolean }> = ({
-  href,
-  showEnableWarning = false,
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
-      defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “security” to those jobs in the {machineLearning} application to make them appear here."
-      values={{
-        machineLearning: (
-          <EuiLink href={href} target="_blank">
-            <FormattedMessage
-              id="xpack.securitySolution.components.mlJobSelect.machineLearningLink"
-              defaultMessage="Machine Learning"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-    {showEnableWarning && (
-      <HelpTextWarningContainer>
-        <EuiText size="xs" color="warning">
-          <EuiIcon type="alert" />
-          <span>{ENABLE_ML_JOB_WARNING}</span>
-        </EuiText>
-      </HelpTextWarningContainer>
-    )}
-  </>
-);
-
 const JobDisplay: React.FC<MlJobValue> = ({ id, description }) => (
-  <>
+  <JobDisplayContainer>
     <strong>{id}</strong>
-    <EuiText size="xs" color="subdued">
-      <p>{description}</p>
-    </EuiText>
-  </>
+    <EuiToolTip content={description}>
+      <EuiText size="xs" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+    </EuiToolTip>
+  </JobDisplayContainer>
 );
 
 interface MlJobSelectProps {
@@ -114,9 +85,14 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
 
   const selectedJobOptions = jobOptions.filter((option) => jobIds.includes(option.value.id));
 
-  const allJobsRunning = useMemo(() => {
+  const notRunningJobIds = useMemo<string[]>(() => {
     const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));
-    return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+    return selectedJobs.reduce((acc, job) => {
+      if (!isJobStarted(job.jobState, job.datafeedState)) {
+        acc.push(job.id);
+      }
+      return acc;
+    }, [] as string[]);
   }, [jobs, jobIds]);
 
   return (
@@ -124,7 +100,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
       <EuiFlexItem>
         <EuiFormRow
           label={field.label}
-          helpText={<HelpText href={mlUrl} showEnableWarning={!allJobsRunning} />}
+          helpText={<HelpText href={mlUrl} notRunningJobIds={notRunningJobIds} />}
           isInvalid={isInvalid}
           error={errorMessage}
           data-test-subj="mlJobSelect"

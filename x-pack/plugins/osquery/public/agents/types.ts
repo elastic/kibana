@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { TermsAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { Agent } from '../../common/shared_imports';
 
 interface BaseDataPoint {
   key: string;
@@ -14,7 +15,7 @@ interface BaseDataPoint {
 }
 
 export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: TermsAggregate<AggregationDataPoint>;
+  [key: string]: estypes.AggregationsTermsAggregate<AggregationDataPoint>;
 };
 
 export interface Group {
@@ -29,6 +30,8 @@ export interface Overlap {
 export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
+
+export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'status'>;
 
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
@@ -46,7 +49,7 @@ interface BaseGroupOption {
 
 export type AgentOptionValue = BaseGroupOption & {
   groups: { [groupType: string]: string };
-  online: boolean;
+  status: string;
 };
 
 export type GroupOptionValue = BaseGroupOption & {
@@ -57,5 +60,6 @@ export enum AGENT_GROUP_KEY {
   All,
   Platform,
   Policy,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Agent,
 }

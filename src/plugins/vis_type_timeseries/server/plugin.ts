@@ -24,7 +24,7 @@ import { PluginStart } from '../../data/server';
 import { IndexPatternsService } from '../../data/common';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
-import { uiSettings } from './ui_settings';
+import { getUiSettings } from './ui_settings';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -35,7 +35,7 @@ import {
   DefaultSearchStrategy,
   RollupSearchStrategy,
 } from './lib/search_strategies';
-import { TimeseriesVisData, VisPayload } from '../common/types';
+import type { TimeseriesVisData, VisPayload } from '../common/types';
 
 import { registerTimeseriesUsageCollector } from './usage_collector';
 
@@ -83,7 +83,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     plugins: VisTypeTimeseriesPluginSetupDependencies
   ) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
-    core.uiSettings.register(uiSettings);
+    core.uiSettings.register(getUiSettings());
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;

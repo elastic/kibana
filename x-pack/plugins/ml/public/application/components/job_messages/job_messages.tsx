@@ -93,6 +93,7 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
         compressed={true}
         loading={loading}
         error={error}
+        data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
       />
     </>
   );

@@ -26,11 +26,15 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
         message:
-          'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format instead.',
+          `Defining "xpack.security.authc.providers" as an array of provider types is deprecated. ` +
+          `Use extended "object" format instead.`,
+        correctiveActions: {
+          manualSteps: [
+            `Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.`,
+          ],
+        },
       });
     }
-
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     const hasProviderType = (providerType: string) => {
@@ -48,9 +52,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         message:
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.',
+        correctiveActions: {
+          manualSteps: [
+            'Remove either the `basic` or `token` auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
+          ],
+        },
       });
     }
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
@@ -61,10 +69,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         message:
           '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used',
+        correctiveActions: {
+          manualSteps: [
+            `Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.`,
+          ],
+        },
       });
     }
-
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.enabled === false) {
@@ -72,8 +83,13 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         message:
           'Disabling the security plugin (`xpack.security.enabled`) will not be supported in the next major version (8.0). ' +
           'To turn off security features, disable them in Elasticsearch instead.',
+        correctiveActions: {
+          manualSteps: [
+            `Remove "xpack.security.enabled" from your Kibana configuration.`,
+            `To turn off security features, disable them in Elasticsearch instead.`,
+          ],
+        },
       });
     }
-    return settings;
   },
 ];

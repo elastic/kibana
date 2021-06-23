@@ -9,76 +9,69 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../shared/loading';
+import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
-import { DOCS_PREFIX } from '../../routes';
+import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
+import { EmptyState } from './components';
+import { RELEVANCE_TUNING_TITLE } from './constants';
+import { RelevanceTuningCallouts } from './relevance_tuning_callouts';
 import { RelevanceTuningForm } from './relevance_tuning_form';
-import { RelevanceTuningLayout } from './relevance_tuning_layout';
-
 import { RelevanceTuningPreview } from './relevance_tuning_preview';
 
 import { RelevanceTuningLogic } from '.';
 
-const EmptyCallout: React.FC = () => {
-  return (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
-            {
-              defaultMessage: 'Tuning requires schema fields',
-            }
-          )}
-        </h2>
-      }
-      body={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
-        {
-          defaultMessage: 'Index documents to tune relevance.',
-        }
-      )}
-      actions={
-        <EuiButton
-          size="s"
-          color="primary"
-          href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
-          fill
-        >
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyButtonLabel',
-            {
-              defaultMessage: 'Read the relevance tuning guide',
-            }
-          )}
-        </EuiButton>
-      }
-    />
-  );
-};
-
 export const RelevanceTuning: React.FC = () => {
   const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
-  const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
+  const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } = useActions(
+    RelevanceTuningLogic
+  );
 
   useEffect(() => {
     initializeRelevanceTuning();
   }, []);
 
-  const body = () => {
-    if (dataLoading) {
-      return <Loading />;
-    }
+  return (
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([RELEVANCE_TUNING_TITLE])}
+      pageHeader={{
+        pageTitle: RELEVANCE_TUNING_TITLE,
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
+          { defaultMessage: 'Set field weights and boosts.' }
+        ),
+        rightSideItems: engineHasSchemaFields
+          ? [
+              <EuiButton
+                data-test-subj="SaveRelevanceTuning"
+                color="primary"
+                fill
+                onClick={updateSearchSettings}
+              >
+                {SAVE_BUTTON_LABEL}
+              </EuiButton>,
+              <EuiButton
+                data-test-subj="ResetRelevanceTuning"
+                color="danger"
+                onClick={resetSearchSettings}
+              >
+                {RESTORE_DEFAULTS_BUTTON_LABEL}
+              </EuiButton>,
+            ]
+          : [],
+      }}
+      isLoading={dataLoading}
+      isEmptyState={!engineHasSchemaFields}
+      emptyState={<EmptyState />}
+    >
+      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
+      <RelevanceTuningCallouts />
 
-    if (!engineHasSchemaFields) {
-      return <EmptyCallout />;
-    }
-
-    return (
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
           <RelevanceTuningForm />
@@ -87,13 +80,6 @@ export const RelevanceTuning: React.FC = () => {
           <RelevanceTuningPreview />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  };
-
-  return (
-    <RelevanceTuningLayout>
-      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
-      {body()}
-    </RelevanceTuningLayout>
+    </AppSearchPageTemplate>
   );
 };

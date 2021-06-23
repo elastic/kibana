@@ -17,7 +17,6 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
 
-import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
@@ -39,7 +38,6 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
-  private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
   private config!: ConfigSchema;
   private readonly storage = new Storage(window.localStorage);
   private usageCollector?: SearchUsageCollector;
@@ -50,22 +48,6 @@ export class DataEnhancedPlugin
     core: CoreSetup<DataEnhancedStartDependencies>,
     { bfetch, data, management }: DataEnhancedSetupDependencies
   ) {
-    this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
-      bfetch,
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-      session: data.search.session,
-    });
-
-    data.__enhance({
-      search: {
-        searchInterceptor: this.enhancedSearchInterceptor,
-      },
-    });
-
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {
       const sessionsConfig = this.config.search.sessions;
@@ -96,7 +78,5 @@ export class DataEnhancedPlugin
     }
   }
 
-  public stop() {
-    this.enhancedSearchInterceptor.stop();
-  }
+  public stop() {}
 }

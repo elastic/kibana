@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-import { ActionsConnectorsList } from './actions_connectors_list';
+import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -118,6 +118,7 @@ describe('actions_connectors_list component with items', () => {
           id: '3',
           actionTypeId: 'test2',
           description: 'My preconfigured test 2',
+          isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
           config: {},
@@ -153,7 +154,7 @@ describe('actions_connectors_list component with items', () => {
 
     const mockedActionParamsFields = React.lazy(async () => ({
       default() {
-        return <React.Fragment />;
+        return <></>;
       },
     }));
 
@@ -161,12 +162,12 @@ describe('actions_connectors_list component with items', () => {
       id: 'test',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-        return {};
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
       },
-      validateParams: (): GenericValidationResult<unknown> => {
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
@@ -215,6 +216,16 @@ describe('actions_connectors_list component with items', () => {
     ).toBeDisabled();
   });
 
+  it('renders fix button when connector secrets is missing', async () => {
+    await setup();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="fixConnectorButton"]').last().getDOMNode()
+    ).not.toBeDisabled();
+  });
+
   it('supports pagination', async () => {
     await setup(
       times(15, (index) => ({
@@ -249,7 +260,8 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
-    expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
+    const edit = await wrapper.find('ConnectorEditFlyout');
+    expect(edit).toHaveLength(1);
   });
 });
 

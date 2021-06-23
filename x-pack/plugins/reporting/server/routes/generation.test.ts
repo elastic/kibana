@@ -14,7 +14,10 @@ import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockLevelLogger, createMockReportingCore } from '../test_helpers';
-import { createMockPluginSetup } from '../test_helpers/create_mock_reportingplugin';
+import {
+  createMockConfigSchema,
+  createMockPluginSetup,
+} from '../test_helpers/create_mock_reportingplugin';
 import { registerJobGenerationRoutes } from './generation';
 import type { ReportingRequestHandlerContext } from '../types';
 
@@ -28,24 +31,15 @@ describe('POST /api/reporting/generate', () => {
   let core: ReportingCore;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
-  const config = {
-    get: jest.fn().mockImplementation((...args) => {
-      const key = args.join('.');
-      switch (key) {
-        case 'queue.indexInterval':
-          return 'year';
-        case 'queue.timeout':
-          return 10000;
-        case 'index':
-          return '.reporting';
-        case 'queue.pollEnabled':
-          return true;
-        default:
-          return;
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({
+    queue: {
+      indexInterval: 'year',
+      timeout: 10000,
+      pollEnabled: true,
+    },
+    index: '.reporting',
+  });
+
   const mockLogger = createMockLevelLogger();
 
   beforeEach(async () => {
@@ -53,7 +47,7 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: jest.fn() })
     );
 
     const mockSetupDeps = createMockPluginSetup({

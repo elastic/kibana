@@ -71,7 +71,7 @@ export function generateFilters(
   operation: string,
   index: string
 ): Filter[] {
-  values = Array.isArray(values) ? values : [values];
+  values = Array.isArray(values) ? _.uniq(values) : [values];
   const fieldObj = (_.isObject(field)
     ? field
     : {

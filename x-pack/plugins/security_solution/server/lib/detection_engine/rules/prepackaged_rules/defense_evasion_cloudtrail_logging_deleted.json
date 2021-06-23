@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS CloudTrail Log Deleted",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeleteTrail and event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:DeleteTrail and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_DeleteTrail.html",
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/cloudtrail/delete-trail.html"
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

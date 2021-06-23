@@ -109,6 +109,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   const sampleSize = ALERT_PREVIEW_SAMPLE_SIZE;
 
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
+  const [lastQueryInterval, setLastQueryInterval] = useState<string>();
   const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
   const [previewError, setPreviewError] = useState<Error | undefined>();
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
@@ -135,6 +136,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         sampleSize,
       });
       setPreviewResponse(response);
+      setLastQueryInterval(lookBehindInterval);
       setPreviewError(undefined);
     } catch (e) {
       setPreviewResponse(undefined);
@@ -165,7 +167,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.previewAlert.intervalLabel"
-                defaultMessage="Check the alert condition with an interval"
+                defaultMessage="Check the rule condition with an interval"
               />
             }
             isInvalid={isInvalid}
@@ -173,7 +175,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
           >
             <EuiFieldText
               placeholder="15d, 6m"
-              value={lookBehindInterval}
+              value={lookBehindInterval ?? ''}
               onChange={(e) => {
                 setLookBehindInterval(e.target.value);
               }}
@@ -220,10 +222,10 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 <strong>
                   <FormattedMessage
                     id="xpack.ml.previewAlert.previewMessage"
-                    defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
+                    defaultMessage="Found {alertsCount, plural, one {# anomaly} other {# anomalies}} in the last {interval}."
                     values={{
                       alertsCount: previewResponse.count,
-                      interval: lookBehindInterval,
+                      interval: lastQueryInterval,
                     }}
                   />
                 </strong>

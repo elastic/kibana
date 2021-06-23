@@ -16,13 +16,15 @@ import {
   Logger,
 } from 'src/core/server';
 
+import { ConfigType } from '../';
+
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
   JSON_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
-import { ConfigType } from '../index';
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
   config: ConfigType;
@@ -77,14 +79,15 @@ export class EnterpriseSearchRequestHandler {
         const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
-        const { method } = request.route;
-        const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
-        const body = !this.isEmptyObj(request.body as object)
-          ? JSON.stringify(request.body)
-          : undefined;
+        const options = {
+          method: request.route.method as string,
+          headers: { Authorization: request.headers.authorization as string, ...JSON_HEADER },
+          body: this.getBodyAsString(request.body as object | Buffer),
+          agent: entSearchHttpAgent.getHttpAgent(),
+        };
 
         // Call the Enterprise Search API
-        const apiResponse = await fetch(url, { method, headers, body });
+        const apiResponse = await fetch(url, options);
 
         // Handle response headers
         this.setResponseHeaders(apiResponse);
@@ -145,6 +148,18 @@ export class EnterpriseSearchRequestHandler {
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * There are a number of different expected incoming bodies that we handle & pass on to Enterprise Search for ingestion:
+   * - Standard object data (should be JSON stringified)
+   * - Empty (should be passed as undefined and not as an empty obj)
+   * - Raw buffers (passed on as a string, occurs when using the `skipBodyValidation` lib helper)
+   */
+  getBodyAsString(body: object | Buffer): string | undefined {
+    if (Buffer.isBuffer(body)) return body.toString();
+    if (this.isEmptyObj(body)) return undefined;
+    return JSON.stringify(body);
   }
 
   /**

@@ -83,13 +83,15 @@ export const getTimelinesTableColumns = ({
     }),
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
-    ...getActionsColumns({
-      actionTimelineToShow,
-      deleteTimelines,
-      enableExportTimelineDownloader,
-      onOpenDeleteTimelineModal,
-      onOpenTimeline,
-    }),
+    ...(actionTimelineToShow.length
+      ? getActionsColumns({
+          actionTimelineToShow,
+          deleteTimelines,
+          enableExportTimelineDownloader,
+          onOpenDeleteTimelineModal,
+          onOpenTimeline,
+        })
+      : []),
   ];
 };
 

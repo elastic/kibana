@@ -12,6 +12,8 @@ export type {
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
   ConfigDeprecation,
+  ConfigDeprecationCommand,
+  ChangedDeprecatedPaths,
 } from './deprecation';
 
 export { applyDeprecations, configDeprecationFactory } from './deprecation';

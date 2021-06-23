@@ -9,3 +9,8 @@ export interface CheckPermissionsResponse {
   error?: 'MISSING_SECURITY' | 'MISSING_SUPERUSER_ROLE';
   success: boolean;
 }
+
+export interface GenerateServiceTokenResponse {
+  name: string;
+  value: string;
+}

@@ -22,8 +22,8 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
-  aggregations?: Record<string, estypes.AggregationContainer>;
-  searchAfterSortId: string | undefined;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+  searchAfterSortIds: estypes.SearchSortResults | undefined;
   index: string[];
   from: string;
   to: string;
@@ -31,16 +31,15 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;
-  filter?: estypes.QueryContainer;
+  filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   aggregations,
-  searchAfterSortId,
+  searchAfterSortIds,
   index,
   from,
   to,
@@ -51,7 +50,6 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -66,15 +64,16 @@ export const singleSearchAfter = async ({
       filter,
       size: pageSize,
       sortOrder,
-      searchAfterSortId,
+      searchAfterSortIds,
       timestampOverride,
-      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();
     const {
       body: nextSearchAfterResult,
-    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(searchAfterQuery);
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+      searchAfterQuery as estypes.SearchRequest
+    );
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

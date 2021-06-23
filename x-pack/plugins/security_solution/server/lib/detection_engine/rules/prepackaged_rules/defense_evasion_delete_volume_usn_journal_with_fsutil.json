@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Delete Volume USN Journal with Fsutil",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:fsutil.exe and process.args:(deletejournal and usn)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"fsutil.exe\" or process.pe.original_file_name == \"fsutil.exe\") and \n  process.args : \"deletejournal\" and process.args : \"usn\"\n",
   "risk_score": 21,
   "rule_id": "f675872f-6d85-40a3-b502-c0d2ef101e92",
   "severity": "low",
@@ -48,6 +48,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }

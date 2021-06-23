@@ -76,6 +76,7 @@ export const SETTINGS_API_ROUTES = {
 // App API routes
 export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
+  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service-tokens`,
 };
 
 // Agent API routes
@@ -84,7 +85,6 @@ export const AGENT_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
-  EVENTS_PATTERN: `${API_ROOT}/agents/{agentId}/events`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,

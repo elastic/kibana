@@ -8,6 +8,7 @@
 
 import { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
+import moment from 'moment';
 import supertest from 'supertest';
 import {
   getServerOptions,
@@ -35,6 +36,7 @@ describe('BasePathProxyServer', () => {
     config = {
       host: '127.0.0.1',
       port: 10012,
+      shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 1000,
       socketTimeout: 1000,
       cors: {
@@ -181,6 +183,45 @@ describe('BasePathProxyServer', () => {
       .then((res) => {
         expect(res.get('foo')).toEqual('bar');
       });
+  });
+
+  test('forwards request cancellation', async () => {
+    let propagated = false;
+
+    let notifyRequestReceived: () => void;
+    const requestReceived = new Promise<void>((resolve) => {
+      notifyRequestReceived = resolve;
+    });
+
+    let notifyRequestAborted: () => void;
+    const requestAborted = new Promise<void>((resolve) => {
+      notifyRequestAborted = resolve;
+    });
+
+    server.route({
+      method: 'GET',
+      path: `${basePath}/foo/{test}`,
+      handler: async (request, h) => {
+        notifyRequestReceived();
+
+        request.raw.req.once('aborted', () => {
+          notifyRequestAborted();
+          propagated = true;
+        });
+        return await new Promise((resolve) => undefined);
+      },
+    });
+    await server.start();
+
+    const request = proxySupertest.get(`${basePath}/foo/some-string`).end();
+
+    await requestReceived;
+
+    request.abort();
+
+    await requestAborted;
+
+    expect(propagated).toEqual(true);
   });
 
   test('handles putting', async () => {

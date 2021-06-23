@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const isClusterOptedIn = (clusterUsage: any): boolean => {
+import type { TelemetryAggregatedStats } from './get_stats_with_xpack';
+
+export const isClusterOptedIn = (clusterUsage?: TelemetryAggregatedStats): boolean => {
   return (
     clusterUsage?.stack_stats?.kibana?.plugins?.telemetry?.opt_in_status === true ||
     // If stack_stats.kibana.plugins.telemetry does not exist, assume opted-in for BWC

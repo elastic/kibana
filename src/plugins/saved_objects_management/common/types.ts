@@ -19,6 +19,7 @@ export interface SavedObjectMetadata {
   editUrl?: string;
   inAppUrl?: { path: string; uiCapabilitiesPath: string };
   namespaceType?: SavedObjectsNamespaceType;
+  hiddenType?: boolean;
 }
 
 /**

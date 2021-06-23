@@ -18,8 +18,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dls', function () {
     before('initialize tests', async () => {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('security/dlstest');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('settings');
@@ -75,9 +75,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        'name:ABC Company name.keyword:ABC Company region:EAST region.keyword:EAST _id:doc1 _index:dlstest _score:0 _type: -'
-      );
+      expect(rowData).to.contain('EAST');
     });
     after('logout', async () => {
       await PageObjects.security.forceLogout();

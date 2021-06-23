@@ -25,7 +25,7 @@ import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { getNestedProperty } from '../../../../../util/object_utils';
 
-import { getIndexPatternAndSavedSearch } from '../../../../../util/index_utils';
+import { getIndexPatternAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 8;
 
@@ -61,7 +61,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
       indexPatternTitle = indexPatternAndSavedSearch.indexPattern?.title ?? '';
     }
 
-    if (indexPatternTitle.includes(':')) {
+    if (isCcsIndexPattern(indexPatternTitle)) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(

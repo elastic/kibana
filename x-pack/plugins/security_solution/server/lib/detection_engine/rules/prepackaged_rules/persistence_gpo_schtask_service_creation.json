@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Creation or Modification of a new GPO Scheduled Task or Service",
-  "query": "event.category:file and not event.type:deletion and file.path:(C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\ScheduledTasks\\\\ScheduledTasks.xml or C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\Preferences\\\\Services\\\\Services.xml) and not process.name:dfsrs.exe",
+  "query": "file where event.type != \"deletion\" and\n  file.path : (\"?:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\ScheduledTasks\\\\ScheduledTasks.xml\",\n               \"?:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\Preferences\\\\Services\\\\Services.xml\") and\n  not process.name : \"dfsrs.exe\"\n",
   "risk_score": 21,
   "rule_id": "c0429aa8-9974-42da-bfb6-53a0a515a145",
   "severity": "low",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

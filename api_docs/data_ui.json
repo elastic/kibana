@@ -4,30 +4,12 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "data",
         "id": "def-public.QueryStringInput",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-public.QueryStringInput.$1",
-            "type": "Object",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.QueryStringInputProps",
-                "text": "QueryStringInputProps"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
-              "lineNumber": 24
-            }
-          }
-        ],
+        "tags": [],
+        "label": "QueryStringInput",
+        "description": [],
         "signature": [
           "(props: ",
           {
@@ -39,35 +21,61 @@
           },
           ") => JSX.Element"
         ],
-        "description": [],
-        "label": "QueryStringInput",
         "source": {
           "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
           "lineNumber": 24
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataUiPluginApi",
+                "section": "def-public.QueryStringInputProps",
+                "text": "QueryStringInputProps"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "data",
         "id": "def-public.QueryStringInputProps",
         "type": "Interface",
+        "tags": [],
         "label": "QueryStringInputProps",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+          "lineNumber": 42
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.indexPatterns",
             "type": "Array",
+            "tags": [],
             "label": "indexPatterns",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 43
-            },
             "signature": [
               "(string | ",
               {
@@ -78,201 +86,221 @@
                 "text": "IIndexPattern"
               },
               ")[]"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 43
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.query",
             "type": "Object",
+            "tags": [],
             "label": "query",
             "description": [],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 44
             },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              }
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.disableAutoFocus",
             "type": "CompoundType",
+            "tags": [],
             "label": "disableAutoFocus",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 45
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.screenTitle",
             "type": "string",
+            "tags": [],
             "label": "screenTitle",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 46
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.prepend",
             "type": "Any",
+            "tags": [],
             "label": "prepend",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 47
             },
-            "signature": [
-              "any"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.persistedLog",
             "type": "Object",
+            "tags": [],
             "label": "persistedLog",
             "description": [],
+            "signature": [
+              "PersistedLog",
+              "<any> | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 48
             },
-            "signature": [
-              "PersistedLog",
-              "<any> | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.bubbleSubmitEvent",
             "type": "CompoundType",
+            "tags": [],
             "label": "bubbleSubmitEvent",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 49
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.placeholder",
             "type": "string",
+            "tags": [],
             "label": "placeholder",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 50
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.disableLanguageSwitcher",
             "type": "CompoundType",
+            "tags": [],
             "label": "disableLanguageSwitcher",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 51
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.languageSwitcherPopoverAnchorPosition",
             "type": "CompoundType",
+            "tags": [],
             "label": "languageSwitcherPopoverAnchorPosition",
             "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 52
             },
-            "signature": [
-              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.onBlur",
             "type": "Function",
+            "tags": [],
             "label": "onBlur",
             "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 53
             },
-            "signature": [
-              "(() => void) | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.onChange",
             "type": "Function",
+            "tags": [],
             "label": "onChange",
             "description": [],
+            "signature": [
+              "((query: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              ") => void) | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 54
             },
-            "signature": [
-              "((query: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              ") => void) | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus",
             "type": "Function",
+            "tags": [],
             "label": "onChangeQueryInputFocus",
             "description": [],
+            "signature": [
+              "((isFocused: boolean) => void) | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 55
             },
-            "signature": [
-              "((isFocused: boolean) => void) | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.onSubmit",
             "type": "Function",
+            "tags": [],
             "label": "onSubmit",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 56
-            },
             "signature": [
               "((query: ",
               {
@@ -283,197 +311,223 @@
                 "text": "Query"
               },
               ") => void) | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 56
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.submitOnBlur",
             "type": "CompoundType",
+            "tags": [],
             "label": "submitOnBlur",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 57
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.dataTestSubj",
             "type": "string",
+            "tags": [],
             "label": "dataTestSubj",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 58
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.size",
             "type": "CompoundType",
+            "tags": [],
             "label": "size",
             "description": [],
+            "signature": [
+              "\"s\" | \"l\" | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 59
             },
-            "signature": [
-              "\"s\" | \"l\" | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.className",
             "type": "string",
+            "tags": [],
             "label": "className",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 60
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.isInvalid",
             "type": "CompoundType",
+            "tags": [],
             "label": "isInvalid",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 61
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.isClearable",
             "type": "CompoundType",
+            "tags": [],
             "label": "isClearable",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 62
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.iconType",
             "type": "CompoundType",
+            "tags": [],
             "label": "iconType",
             "description": [],
+            "signature": [
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 63
             },
-            "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.nonKqlMode",
             "type": "CompoundType",
+            "tags": [],
             "label": "nonKqlMode",
             "description": [],
+            "signature": [
+              "\"text\" | \"lucene\" | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 69
             },
-            "signature": [
-              "\"text\" | \"lucene\" | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.nonKqlModeHelpText",
             "type": "string",
+            "tags": [],
             "label": "nonKqlModeHelpText",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 70
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.autoSubmit",
             "type": "CompoundType",
+            "tags": [],
             "label": "autoSubmit",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 74
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.storageKey",
             "type": "string",
+            "tags": [],
             "label": "storageKey",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
               "lineNumber": 78
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-          "lineNumber": 42
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "data",
         "id": "def-public.IndexPatternSelectProps",
         "type": "Type",
-        "label": "IndexPatternSelectProps",
         "tags": [],
+        "label": "IndexPatternSelectProps",
         "description": [],
+        "signature": [
+          "Pick<Pick<",
+          "EuiComboBoxProps",
+          "<any>, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"autoFocus\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"autoFocus\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\"> & Required<Pick<Pick<",
+          "EuiComboBoxProps",
+          "<any>, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"autoFocus\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+        ],
         "source": {
           "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",
           "lineNumber": 17
         },
-        "signature": [
-          "Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\"> & globalThis.Required<Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; fieldTypes?: string[] | undefined; onNoIndexPatterns?: (() => void) | undefined; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "data",
         "id": "def-public.SearchBar",
         "type": "CompoundType",
+        "tags": [],
         "label": "SearchBar",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/ui/search_bar/index.tsx",
-          "lineNumber": 23
-        },
         "signature": [
           "React.ComponentClass<Pick<Pick<",
           {
@@ -483,7 +537,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, \"filters\" | \"query\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, any> & { WrappedComponent: React.ComponentType<Pick<",
+          ", \"filters\" | \"query\" | \"placeholder\" | \"iconType\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"isClearable\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, \"filters\" | \"query\" | \"placeholder\" | \"iconType\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"isClearable\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, any> & { WrappedComponent: React.ComponentType<Pick<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -491,38 +545,49 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & ReactIntl.InjectedIntlProps>; }"
+          ", \"filters\" | \"query\" | \"placeholder\" | \"iconType\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"isClearable\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & ReactIntl.InjectedIntlProps>; }"
         ],
+        "source": {
+          "path": "src/plugins/data/public/ui/search_bar/index.tsx",
+          "lineNumber": 23
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "data",
         "id": "def-public.SearchBarProps",
         "type": "Type",
-        "label": "SearchBarProps",
         "tags": [],
+        "label": "SearchBarProps",
         "description": [],
+        "signature": [
+          "SearchBarOwnProps",
+          " & SearchBarInjectedDeps"
+        ],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
-          "lineNumber": 80
+          "lineNumber": 79
         },
-        "signature": [
-          "SearchBarOwnProps & SearchBarInjectedDeps"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "data",
         "id": "def-public.StatefulSearchBarProps",
         "type": "Type",
-        "label": "StatefulSearchBarProps",
         "tags": [],
+        "label": "StatefulSearchBarProps",
         "description": [],
+        "signature": [
+          "SearchBarOwnProps",
+          " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; }"
+        ],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
           "lineNumber": 31
         },
-        "signature": [
-          "SearchBarOwnProps & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

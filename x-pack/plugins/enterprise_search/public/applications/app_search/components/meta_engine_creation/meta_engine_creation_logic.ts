@@ -25,6 +25,7 @@ interface MetaEngineCreationValues {
   name: string;
   rawName: string;
   selectedIndexedEngineNames: string[];
+  isLoading: boolean;
 }
 
 interface MetaEngineCreationActions {
@@ -38,6 +39,7 @@ interface MetaEngineCreationActions {
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
   ): { selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames'] };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -50,9 +52,17 @@ export const MetaEngineCreationLogic = kea<
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
-    submitEngine: () => null,
+    submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     indexedEngineNames: [
       [],
       {
@@ -121,6 +131,7 @@ export const MetaEngineCreationLogic = kea<
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
   }),

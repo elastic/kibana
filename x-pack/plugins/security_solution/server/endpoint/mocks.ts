@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
+import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
-import { xpackMocks } from '../../../../mocks';
+import { xpackMocks } from '../fixtures';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
@@ -28,8 +28,7 @@ import { ManifestManager } from './services/artifacts/manifest_manager/manifest_
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
-// import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 
@@ -78,7 +77,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
-    security: securityMock.createSetup(),
+    security: securityMock.createStart(),
     alerting: alertsMock.createStart(),
     config,
     licenseService: new LicenseService(),
@@ -87,6 +86,10 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    cases: {
+      getCasesClientWithRequest: jest.fn(),
+    },
   };
 };
 
@@ -131,11 +134,11 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
+  dataClient: jest.Mocked<IScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
-  const context = xpackMocks.createRequestHandlerContext();
-  context.core.elasticsearch.legacy.client = dataClient;
+  const context = (xpackMocks.createRequestHandlerContext() as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
 }

@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
-  EuiCodeEditor,
 } from '@elastic/eui';
 // @ts-expect-error
 import less from 'less/lib/less-browser';
@@ -43,6 +42,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { CodeEditor, CssLang } from '../../../../../kibana_react/public';
 
 const lessC = less(window, { env: 'production' });
 
@@ -172,18 +172,20 @@ export class MarkdownPanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -218,35 +220,34 @@ export class MarkdownPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.showScrollbarsLabel"
-                    defaultMessage="Show scrollbars?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.markdown.optionsTab.showScrollbarsLabel',
+                    {
+                      defaultMessage: 'Show scrollbars?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.markdown_scrollbars}
+                    name="markdown_scrollbars"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo
-                  value={model.markdown_scrollbars}
-                  name="markdown_scrollbars"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.openLinksInNewTab"
-                    defaultMessage="Open links in new tab?"
+                <EuiFormRow
+                  label={i18n.translate('visTypeTimeseries.markdown.optionsTab.openLinksInNewTab', {
+                    defaultMessage: 'Open links in new tab?',
+                  })}
+                >
+                  <YesNo
+                    value={model.markdown_openLinksInNewTab}
+                    name="markdown_openLinksInNewTab"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo
-                  value={model.markdown_openLinksInNewTab}
-                  name="markdown_openLinksInNewTab"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel htmlFor={htmlId('valign')}>
@@ -280,12 +281,10 @@ export class MarkdownPanelConfig extends Component<
               </span>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCodeEditor
-              mode="less"
-              theme="github"
-              width="100%"
-              name={`ace-css-${model.id}`}
-              setOptions={{ fontSize: '14px' }}
+            <CodeEditor
+              height="500px"
+              languageId={CssLang.ID}
+              options={{ fontSize: 14 }}
               value={model.markdown_less ?? ''}
               onChange={this.handleCSSChange}
             />

@@ -2,18 +2,9 @@
 
 exports[`Header should render normally 1`] = `
 <Fragment>
-  <EuiTitle
+  <EuiText
     size="s"
   >
-    <h3>
-      <FormattedMessage
-        defaultMessage="Field filters"
-        id="indexPatternManagement.editIndexPattern.sourceHeader"
-        values={Object {}}
-      />
-    </h3>
-  </EuiTitle>
-  <EuiText>
     <p>
       <FormattedMessage
         defaultMessage="Field filters can be used to exclude one or more fields when fetching a document. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. If you have documents with large or unimportant fields you may benefit from filtering those out at this lower level."

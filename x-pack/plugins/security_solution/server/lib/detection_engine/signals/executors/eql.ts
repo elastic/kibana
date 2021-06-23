@@ -7,8 +7,9 @@
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
-import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -16,47 +17,51 @@ import {
 } from '../../../../../../alerting/server';
 import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
 import { EqlRuleParams } from '../../schemas/rule_schemas';
-import { RefreshTypes } from '../../types';
-import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleStatusService } from '../rule_status_service';
-import { bulkInsertSignals, filterDuplicateSignals } from '../single_bulk_create';
+
 import {
   AlertAttributes,
+  BulkCreate,
+  WrapHits,
+  WrapSequences,
   EqlSignalSearchResponse,
+  RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  WrappedSignalHit,
+  SimpleHit,
 } from '../types';
-import { createSearchAfterReturnType, makeFloatString, wrapSignal } from '../utils';
+import { createSearchAfterReturnType, makeFloatString } from '../utils';
 
 export const eqlExecutor = async ({
   rule,
+  tuple,
   exceptionItems,
-  ruleStatusService,
   services,
   version,
-  searchAfterSize,
   logger,
-  refresh,
+  searchAfterSize,
+  bulkCreate,
+  wrapHits,
+  wrapSequences,
 }: {
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
+  tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
-  ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
-  searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
   if (hasLargeValueItem(exceptionItems)) {
-    await ruleStatusService.partialFailure(
+    result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
     );
     result.warning = true;
@@ -84,14 +89,19 @@ export const eqlExecutor = async ({
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,
-    ruleParams.from,
-    ruleParams.to,
+    tuple.from.toISOString(),
+    tuple.to.toISOString(),
     searchAfterSize,
     ruleParams.timestampOverride,
     exceptionItems,
     ruleParams.eventCategoryOverride
   );
   const eqlSignalSearchStart = performance.now();
+  logger.debug(
+    `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
+      request.body
+    )}`
+  );
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request
@@ -99,28 +109,19 @@ export const eqlExecutor = async ({
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
   result.searchAfterTimes = [eqlSearchDuration];
-  let newSignals: WrappedSignalHit[] | undefined;
+  let newSignals: SimpleHit[] | undefined;
   if (response.hits.sequences !== undefined) {
-    newSignals = response.hits.sequences.reduce(
-      (acc: WrappedSignalHit[], sequence) =>
-        acc.concat(buildSignalGroupFromSequence(sequence, rule, ruleParams.outputIndex)),
-      []
-    );
+    newSignals = wrapSequences(response.hits.sequences);
   } else if (response.hits.events !== undefined) {
-    newSignals = filterDuplicateSignals(
-      rule.id,
-      response.hits.events.map((event) =>
-        wrapSignal(buildSignalFromEvent(event, rule, true), ruleParams.outputIndex)
-      )
-    );
+    newSignals = wrapHits(response.hits.events);
   } else {
     throw new Error(
       'eql query response should have either `sequences` or `events` but had neither'
     );
   }
 
-  if (newSignals.length > 0) {
-    const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
+  if (newSignals?.length) {
+    const insertResult = await bulkCreate(newSignals);
     result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
     result.createdSignalsCount += insertResult.createdItemsCount;
     result.createdSignals = insertResult.createdItems;

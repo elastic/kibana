@@ -6,7 +6,7 @@
  */
 
 import { flow } from 'fp-ts/lib/function';
-import { addIdToItem, removeIdFromItem } from '../../../../../common/add_remove_id_to_item';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import {
   CreateRulesSchema,
   UpdateRulesSchema,

@@ -62,6 +62,7 @@ export const CleanExtraFilesFromModules: Task = {
       // tests
       '**/test',
       '**/tests',
+      '**/jest.config.js',
       '**/__tests__',
       '**/*.test.js',
       '**/*.snap',

@@ -19,9 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard saved search embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('dashboard/current/data');
-      await esArchiver.loadIfNeeded('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -45,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const marks = $('mark')
         .toArray()
         .map((mark) => $(mark).text());
-      expect(marks.length).to.be(50);
+      expect(marks.length).to.above(10);
     });
 
     it('removing a filter removes highlights', async function () {

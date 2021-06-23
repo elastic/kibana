@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FiltersExpressionSelectContainer, StatusExpressionSelect } from '../monitor_expressions';
@@ -13,6 +13,7 @@ import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
 import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
 import { AlertQueryBar } from '../alert_query_bar/query_bar';
+import { useGetUrlParams } from '../../../../hooks';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
@@ -44,6 +45,22 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     Object.keys(alertFilters).filter((f) => alertFilters[f].length)
   );
 
+  const { search = '' } = useGetUrlParams();
+
+  useEffect(() => {
+    if (search) {
+      setAlertParams('search', search);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSearchChange = useCallback(
+    (value: string) => {
+      setAlertParams('search', value);
+    },
+    [setAlertParams]
+  );
+
   return (
     <>
       <OldAlertCallOut isOldAlert={isOldAlert} />
@@ -65,10 +82,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="s" />
 
-      <AlertQueryBar
-        query={alertParams.search || ''}
-        onChange={(value: string) => setAlertParams('search', value)}
-      />
+      <AlertQueryBar query={alertParams.search || ''} onChange={onSearchChange} />
 
       <EuiSpacer size="s" />
 

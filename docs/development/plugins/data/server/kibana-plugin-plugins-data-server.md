@@ -13,6 +13,7 @@
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |
+|  [NoSearchIdInSessionError](./kibana-plugin-plugins-data-server.nosearchidinsessionerror.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
@@ -45,6 +46,8 @@
 |  --- | --- |
 |  [AggFunctionsMapping](./kibana-plugin-plugins-data-server.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
+|  [AsyncSearchResponse](./kibana-plugin-plugins-data-server.asyncsearchresponse.md) |  |
+|  [AsyncSearchStatusResponse](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |

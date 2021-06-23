@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../plugins/data_enhanced/common/search';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -33,7 +33,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
           const viewCell = await row.findByTestSubject('sessionManagementNameCol');
           const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
           return {
-            name: $.findTestSubject('sessionManagementNameCol').text(),
+            name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),

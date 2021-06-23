@@ -12,12 +12,14 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
   <EuiIcon
     aria-hidden="true"
     className="euiButtonIcon__icon"
+    color="inherit"
     size="m"
     type="iInCircle"
   >
     <span
       aria-hidden="true"
       className="euiButtonIcon__icon"
+      color="inherit"
       data-euiicon-type="iInCircle"
       size="m"
     />
@@ -86,12 +88,14 @@ Array [
                 <EuiIcon
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   size="m"
                   type="cross"
                 >
                   <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="cross"
                     size="m"
                   />
@@ -172,12 +176,14 @@ Array [
           <EuiIcon
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             size="m"
             type="cross"
           >
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="cross"
               size="m"
             />
@@ -289,12 +295,14 @@ Array [
                 <EuiIcon
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   size="m"
                   type="cross"
                 >
                   <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="cross"
                     size="m"
                   />
@@ -373,12 +381,14 @@ Array [
           <EuiIcon
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             size="m"
             type="cross"
           >
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="cross"
               size="m"
             />

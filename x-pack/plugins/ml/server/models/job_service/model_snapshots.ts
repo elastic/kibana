@@ -30,7 +30,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     replay: boolean,
     end?: number,
     deleteInterveningResults: boolean = true,
-    calendarEvents?: [{ start: number; end: number; description: string }]
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
   ) {
     let datafeedId = `datafeed-${jobId}`;
     // ensure job exists

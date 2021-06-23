@@ -9,7 +9,7 @@ import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { Query, TimeRange, esQuery, Filter } from '../../../../../../src/plugins/data/public';
+import { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -69,8 +69,6 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
       return;
     }
 
-    const parsedQuery = esQuery.buildEsQuery(undefined, this.input.query, this.input.filters);
-
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
     const endTimestamp = datemathToEpochMillis(this.input.timeRange.to, 'up');
 
@@ -86,7 +84,8 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}
               height="100%"
-              query={parsedQuery}
+              query={this.input.query}
+              filters={this.input.filters}
             />
           </div>
         </EuiThemeProvider>

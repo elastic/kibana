@@ -10,6 +10,7 @@ import React, { Fragment } from 'react';
 import { useValues, useActions } from 'kea';
 
 import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
@@ -25,7 +26,14 @@ export const Callouts: React.FC = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
-    <div aria-live="polite" role="region" data-test-subj="FlashMessages">
+    <div
+      aria-live="polite"
+      role="region"
+      aria-label={i18n.translate('xpack.enterpriseSearch.flashMessages.regionAriaLabel', {
+        defaultMessage: 'Flash messages',
+      })}
+      data-test-subj="FlashMessages"
+    >
       {messages.map(({ type, message, description }, index) => (
         <Fragment key={index}>
           <EuiCallOut

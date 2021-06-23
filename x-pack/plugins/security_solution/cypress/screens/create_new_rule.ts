@@ -111,8 +111,6 @@ export const LOOK_BACK_TIME_TYPE =
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
-export const MACHINE_LEARNING_DROPDOWN_ITEM = '.euiFilterSelectItem';
-
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
@@ -128,6 +126,8 @@ export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTa
 export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
+
+export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
 
 export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 

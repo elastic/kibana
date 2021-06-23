@@ -125,7 +125,7 @@ function useIndexPatternsTitles(
         fatalErrors.add(err);
         throw err;
       })
-      .then(setIndexPatternsTitles);
+      .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, indexPatterns, notifications]);
 
   return indexPatternsTitles;

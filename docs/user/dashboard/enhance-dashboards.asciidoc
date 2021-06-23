@@ -1,7 +1,7 @@
 [[enhance-dashboards]]
 == Enhance dashboards
 
-Now that you have added panels to your dashboard, you can add filter panels to interact with the data, and Markdown panels to add context to the data. 
+You can add filter panels to interact with the data in your visualization panels, and Markdown panels to add context to the data. 
 To make your dashboard look the way you want, use the editing options.
 
 [float]
@@ -21,11 +21,9 @@ min and max aggregation. For example, use the range slider when you want to filt
 [role="screenshot"]
 image::images/dashboard-controls.png[]
 
-. From the dashboard, click *Create panel*.
+. On the dashboard, click *All types*, then select *Controls*.
 
-. On the *New Visualization* window, click *Controls*.
-
-. Click *Options*, then configure the following, then click *Update*:
+. Click *Options*, then configure the following options:
 
 * *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
  {kib} filters are created only when you click *Apply changes*.
@@ -33,6 +31,8 @@ image::images/dashboard-controls.png[]
 * *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
 
 * *Pin filters for all applications* &mdash; When selected, all filters created by interacting with the inputs are automatically pinned.
+
+. Click *Update*
 
 [float]
 [[add-text]]
@@ -42,9 +42,7 @@ Add text panels with *Markdown* when you want to provide context to the other pa
 
 *Markdown* is a text entry field that accepts GitHub-flavored Markdown text. For information about GitHub-flavored Markdown text, click *Help*.
 
-. From the dashboard, click *Create panel*.
-
-. On the *New Visualization* window, click *Text*.
+. From the dashboard, click *All types*, then select *Text*.
 
 . In the *Markdown* field, enter the text, then click *Update*.
 

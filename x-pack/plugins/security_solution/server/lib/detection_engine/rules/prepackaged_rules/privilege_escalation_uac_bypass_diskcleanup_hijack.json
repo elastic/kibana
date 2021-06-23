@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "UAC Bypass via DiskCleanup Scheduled Task Hijack",
-  "query": "process where event.type in (\"start\", \"process_started\") and\nprocess.args:\"/autoclean\" and process.args:\"/d\" and\nnot process.executable : (\"C:\\\\Windows\\\\System32\\\\cleanmgr.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\cleanmgr.exe\")\n",
+  "query": "process where event.type == \"start\" and\n process.args : \"/autoclean\" and process.args : \"/d\" and\n not process.executable : (\"C:\\\\Windows\\\\System32\\\\cleanmgr.exe\",\n                           \"C:\\\\Windows\\\\SysWOW64\\\\cleanmgr.exe\",\n                           \"C:\\\\Windows\\\\System32\\\\taskhostw.exe\")\n",
   "risk_score": 47,
   "rule_id": "1dcc51f6-ba26-49e7-9ef4-2655abb2361e",
   "severity": "medium",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

@@ -4,8 +4,10 @@
 
 ## Execution.result property
 
+Future that tracks result or error of this execution.
+
 <b>Signature:</b>
 
 ```typescript
-get result(): Promise<Output | ExpressionValueError>;
+readonly result: Observable<Output | ExpressionValueError>;
 ```

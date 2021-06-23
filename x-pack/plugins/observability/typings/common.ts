@@ -14,7 +14,8 @@ export type ObservabilityApp =
   | 'synthetics'
   | 'observability-overview'
   | 'stack_monitoring'
-  | 'ux';
+  | 'ux'
+  | 'fleet';
 
 export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
   ? Value

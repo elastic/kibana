@@ -120,7 +120,7 @@ describe('es', () => {
     });
 
     describe('metric aggs', () => {
-      const emptyScriptedFields = [];
+      const emptyScriptFields = {};
 
       test('adds a metric agg for each metric', () => {
         config.metric = [
@@ -133,7 +133,7 @@ describe('es', () => {
           'percentiles:\\:bytes\\:123:20.0,50.0,100.0',
           'percentiles:a:2',
         ];
-        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        agg = createDateAgg(config, tlConfig, emptyScriptFields);
         expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).toEqual({ avg: { field: 'bytes' } });
         expect(agg.time_buckets.aggs['percentiles(bytes)']).toEqual({
@@ -156,14 +156,15 @@ describe('es', () => {
 
       test('adds a scripted metric agg for each scripted metric', () => {
         config.metric = ['avg:scriptedBytes'];
-        const scriptedFields = [
-          {
-            name: 'scriptedBytes',
-            script: 'doc["bytes"].value',
-            lang: 'painless',
+        const scriptFields = {
+          scriptedBytes: {
+            script: {
+              source: 'doc["bytes"].value',
+              lang: 'painless',
+            },
           },
-        ];
-        agg = createDateAgg(config, tlConfig, scriptedFields);
+        };
+        agg = createDateAgg(config, tlConfig, scriptFields);
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).toEqual({
           avg: {
             script: {
@@ -176,14 +177,14 @@ describe('es', () => {
 
       test('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
-        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        agg = createDateAgg(config, tlConfig, emptyScriptFields);
         expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
 
       test('has a special `count` metric with redundant field which use a script', () => {
         config.metric = ['count:beer'];
-        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        agg = createDateAgg(config, tlConfig, emptyScriptFields);
         expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
@@ -192,7 +193,7 @@ describe('es', () => {
 
   describe('buildRequest', () => {
     const fn = buildRequest;
-    const emptyScriptedFields = [];
+    const emptyScriptFields = {};
     let tlConfig;
     let config;
     beforeEach(() => {
@@ -206,20 +207,20 @@ describe('es', () => {
 
     test('sets the index on the request', () => {
       config.index = 'beer';
-      const request = fn(config, tlConfig, emptyScriptedFields);
+      const request = fn(config, tlConfig, emptyScriptFields);
 
       expect(request.params.index).toEqual('beer');
     });
 
     test('always sets body.size to 0', () => {
-      const request = fn(config, tlConfig, emptyScriptedFields);
+      const request = fn(config, tlConfig, emptyScriptFields);
 
       expect(request.params.body.size).toEqual(0);
     });
 
     test('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
-      const request = fn(config, tlConfig, emptyScriptedFields);
+      const request = fn(config, tlConfig, emptyScriptFields);
 
       expect(request.params.body.aggs.q.meta.type).toEqual('split');
 
@@ -231,14 +232,14 @@ describe('es', () => {
     describe('timeouts', () => {
       test('sets the timeout on the request', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
+        const request = fn(config, tlConfig, emptyScriptFields, {}, 30000);
 
         expect(request.params.timeout).toEqual('30000ms');
       });
 
       test('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields, 0);
+        const request = fn(config, tlConfig, emptyScriptFields, {}, 0);
 
         expect(request.params).not.toHaveProperty('timeout');
       });
@@ -258,7 +259,7 @@ describe('es', () => {
       test('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptFields);
 
         expect(request.params.ignore_throttled).toEqual(true);
       });
@@ -266,7 +267,7 @@ describe('es', () => {
       test('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptFields);
 
         expect(request.params.ignore_throttled).toEqual(false);
       });
@@ -301,7 +302,7 @@ describe('es', () => {
 
       test('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptFields);
         const filter = request.params.body.query.bool.filter.bool;
         expect(filter.must.length).toEqual(1);
         expect(filter.must_not.length).toEqual(2);
@@ -309,12 +310,12 @@ describe('es', () => {
 
       test('does not include filters if config.kibana = false', () => {
         config.kibana = false;
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptFields);
         expect(request.params.body.query.bool.filter).toEqual(undefined);
       });
 
       test('adds a time filter to the bool querys must clause', () => {
-        let request = fn(config, tlConfig, emptyScriptedFields);
+        let request = fn(config, tlConfig, emptyScriptFields);
         expect(request.params.body.query.bool.must.length).toEqual(1);
         expect(request.params.body.query.bool.must[0]).toEqual({
           range: {
@@ -327,7 +328,7 @@ describe('es', () => {
         });
 
         config.kibana = true;
-        request = fn(config, tlConfig, emptyScriptedFields);
+        request = fn(config, tlConfig, emptyScriptFields);
         expect(request.params.body.query.bool.must.length).toEqual(1);
       });
     });
@@ -335,7 +336,7 @@ describe('es', () => {
     describe('config.split', () => {
       test('adds terms aggs, in order, under the filters agg', () => {
         config.split = ['beer:5', 'wine:10', ':lemo:nade::15', ':jui:ce:723::45'];
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, {});
 
         let aggs = request.params.body.aggs.q.aggs;
 
@@ -362,19 +363,21 @@ describe('es', () => {
 
       test('adds scripted terms aggs, in order, under the filters agg', () => {
         config.split = ['scriptedBeer:5', 'scriptedWine:10'];
-        const scriptedFields = [
-          {
-            name: 'scriptedBeer',
-            script: 'doc["beer"].value',
-            lang: 'painless',
+        const scriptFields = {
+          scriptedBeer: {
+            script: {
+              source: 'doc["beer"].value',
+              lang: 'painless',
+            },
           },
-          {
-            name: 'scriptedWine',
-            script: 'doc["wine"].value',
-            lang: 'painless',
+          scriptedWine: {
+            script: {
+              source: 'doc["wine"].value',
+              lang: 'painless',
+            },
           },
-        ];
-        const request = fn(config, tlConfig, scriptedFields);
+        };
+        const request = fn(config, tlConfig, scriptFields);
 
         const aggs = request.params.body.aggs.q.aggs;
 

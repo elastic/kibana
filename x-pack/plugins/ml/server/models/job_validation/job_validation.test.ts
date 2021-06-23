@@ -161,7 +161,7 @@ describe('ML - validateJob', () => {
       function: '',
     });
     payload.job.analysis_config.detectors.push({
-      // @ts-expect-error
+      // @ts-expect-error incorrect type on purpose for test
       function: undefined,
     });
 

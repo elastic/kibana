@@ -13,6 +13,7 @@ import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
 import {
+  ColumnHeaderOptions,
   DataProviderType,
   TimelineId,
   TimelineStatus,
@@ -37,7 +38,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -113,7 +114,8 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
     {
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
-      width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+      initialWidth:
+        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
     }
   );
 

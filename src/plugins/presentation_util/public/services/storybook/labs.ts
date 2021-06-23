@@ -8,7 +8,7 @@
 
 import { EnvironmentName, projectIDs, Project } from '../../../common';
 import { PluginServiceFactory } from '../create';
-import { projects, ProjectID, getProjectIDs } from '../../../common';
+import { projects, ProjectID, getProjectIDs, SolutionName } from '../../../common';
 import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from '../labs';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
@@ -16,9 +16,15 @@ export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 export const labsServiceFactory: LabsServiceFactory = () => {
   const storage = window.sessionStorage;
 
-  const getProjects = () =>
+  const getProjects = (solutions: SolutionName[] = []) =>
     projectIDs.reduce((acc, id) => {
-      acc[id] = getProject(id);
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
       return acc;
     }, {} as { [id in ProjectID]: Project });
 
@@ -40,13 +46,17 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   };
 
   const reset = () => {
+    // This is normally not ok, but it's our isolated Storybook instance.
     storage.clear();
   };
+
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {
     getProjectIDs,
     getProjects,
     getProject,
+    isProjectEnabled,
     reset,
     setProjectStatus,
   };

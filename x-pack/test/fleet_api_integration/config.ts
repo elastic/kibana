@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.
@@ -15,7 +15,8 @@ import { defineDockerServersConfig } from '@kbn/test';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:c5925eb82898dfc3e879a521871c7383513804c7';
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/package-registry/distribution:fc104ac437370d80518e24da6d0b84370edf0c0c';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -50,22 +51,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
-    esArchiver: xPackAPITestsConfig.get('esArchiver'),
-    services: {
-      ...xPackAPITestsConfig.get('services'),
-    },
+    services: xPackAPITestsConfig.get('services'),
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
     },
-
-    esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
-    },
-
+    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        // always install Endpoint package by default when Fleet sets up
+        `--xpack.fleet.packages.0.name=endpoint`,
+        `--xpack.fleet.packages.0.version=latest`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
       ],
     },

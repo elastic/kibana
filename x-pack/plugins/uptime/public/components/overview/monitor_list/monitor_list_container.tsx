@@ -12,6 +12,7 @@ import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 
 export interface MonitorListProps {
   filters?: string;
@@ -64,6 +65,14 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     statusFilter,
     query,
   ]);
+
+  useEffect(() => {
+    dispatch(getMonitorAlertsAction.get());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getConnectorsAction.get());
+  }, [dispatch]);
 
   return (
     <MonitorListComponent

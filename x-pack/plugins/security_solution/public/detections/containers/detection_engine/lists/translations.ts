@@ -20,10 +20,3 @@ export const LISTS_INDEX_CREATE_FAILURE = i18n.translate(
     defaultMessage: 'Failed to create the lists index',
   }
 );
-
-export const LISTS_PRIVILEGES_READ_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.alerts.readListsPrivileges.errorDescription',
-  {
-    defaultMessage: 'Failed to retrieve lists privileges',
-  }
-);

@@ -29,7 +29,12 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-const ConditionEntryTypeSchema = schema.literal('match');
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  ConditionEntryField.PATH,
+  schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
+  schema.literal('match')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 /*
@@ -82,29 +87,7 @@ const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-/*
- * Entry Schema depending on Os type using schema.conditional.
- * If OS === WINDOWS then use Windows schema,
- * else if OS === LINUX then use Linux schema,
- * else use Mac schema
- */
-const EntrySchemaDependingOnOS = schema.conditional(
-  schema.siblingRef('os'),
-  OperatingSystem.WINDOWS,
-  WindowsEntrySchema,
-  schema.conditional(
-    schema.siblingRef('os'),
-    OperatingSystem.LINUX,
-    LinuxEntrySchema,
-    MacEntrySchema
-  )
-);
-
-/*
- * Entities array schema.
- * The validate function checks there is no duplicated entry inside the array
- */
-const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
+const entriesSchemaOptions = {
   minSize: 1,
   validate(entries: ConditionEntry[]) {
     return (
@@ -113,7 +96,27 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
         .join(', ') || undefined
     );
   },
-});
+};
+
+/*
+ * Entities array schema depending on Os type using schema.conditional.
+ * If OS === WINDOWS then use Windows schema,
+ * else if OS === LINUX then use Linux schema,
+ * else use Mac schema
+ *
+ * The validate function checks there is no duplicated entry inside the array
+ */
+const EntriesSchema = schema.conditional(
+  schema.siblingRef('os'),
+  OperatingSystem.WINDOWS,
+  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.conditional(
+    schema.siblingRef('os'),
+    OperatingSystem.LINUX,
+    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
+    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+  )
+);
 
 const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
   schema.object({

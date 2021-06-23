@@ -6,9 +6,7 @@
  */
 
 import { patchRulesBulkSchema, PatchRulesBulkSchema } from './patch_rules_bulk_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight } from '../../../test_utils';
-import { formatErrors } from '../../../format_errors';
+import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { PatchRulesSchema } from './patch_rules_schema';
 
 // only the basics of testing are here.

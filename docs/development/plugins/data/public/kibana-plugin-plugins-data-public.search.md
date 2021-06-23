@@ -21,7 +21,7 @@ search: {
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;

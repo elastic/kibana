@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Network Connection via RunDLL32",
-  "query": "sequence by host.id, process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\", \"info\") and process.name : \"rundll32.exe\" and process.args_count == 1]\n  [network where process.name : \"rundll32.exe\" and network.protocol != \"dns\" and network.direction == \"outgoing\" and\n   not cidrmatch(destination.ip, \"10.0.0.0/8\",  \"172.16.0.0/12\", \"192.168.0.0/16\", \"127.0.0.0/8\")]\n",
+  "query": "sequence by host.id, process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"rundll32.exe\" and process.args_count == 1]\n  [network where process.name : \"rundll32.exe\" and\n   not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\", \"127.0.0.0/8\", \"FE80::/10\", \"::1/128\")]\n",
   "risk_score": 47,
   "rule_id": "52aaab7b-b51c-441a-89ce-4387b3aea886",
   "severity": "medium",
@@ -48,5 +48,5 @@
     }
   ],
   "type": "eql",
-  "version": 8
+  "version": 9
 }

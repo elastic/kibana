@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import {
   CoreSetup,
   RequestHandlerContext,
@@ -174,10 +175,10 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
 
   router.put(
     {
-      path: '/api/alerts_fixture/{id}/reschedule_task',
+      path: '/api/alerts_fixture/{taskId}/reschedule_task',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          taskId: schema.string(),
         }),
         body: schema.object({
           runAt: schema.string(),
@@ -189,23 +190,20 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
-      const { id } = req.params;
+      const { taskId } = req.params;
       const { runAt } = req.body;
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['task', 'alert'],
       });
-      const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
       const result = await retryIfConflicts(
         logger,
-        `/api/alerts_fixture/${id}/reschedule_task`,
+        `/api/alerts_fixture/${taskId}/reschedule_task`,
         async () => {
-          return await savedObjectsWithTasksAndAlerts.update<TaskInstance>(
-            'task',
-            alert.attributes.scheduledTaskId!,
-            { runAt }
-          );
+          return await savedObjectsWithTasksAndAlerts.update<TaskInstance>('task', taskId, {
+            runAt,
+          });
         }
       );
       return res.ok({ body: result });
@@ -273,6 +271,55 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
         return res.ok({
           body: { apiKeysToInvalidate: findResult.saved_objects },
         });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/enqueue_action',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [, { actions, security, spaces }] = await core.getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(req);
+
+        const createAPIKeyResult =
+          security &&
+          (await security.authc.apiKeys.grantAsInternalUser(req, {
+            name: `alerts_fixture:enqueue_action:${uuid.v4()}`,
+            role_descriptors: {},
+          }));
+
+        await actionsClient.enqueueExecution({
+          id: req.params.id,
+          spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+          apiKey: createAPIKeyResult
+            ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                'base64'
+              )
+            : null,
+          params: req.body.params,
+          source: {
+            type: 'HTTP_REQUEST' as any,
+            source: req,
+          },
+        });
+        return res.noContent();
       } catch (err) {
         return res.badRequest({ body: err });
       }

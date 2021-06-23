@@ -16,9 +16,20 @@
     "../../../typings/**/*"
   ],
   "references": [
-    { "path": "../alerting/tsconfig.json" },
-    { "path": "../ml/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" },
-    { "path": "../observability/tsconfig.json" }
+    {
+      "path": "../alerting/tsconfig.json"
+    },
+    {
+      "path": "../ml/tsconfig.json"
+    },
+    {
+      "path": "../triggers_actions_ui/tsconfig.json"
+    },
+    {
+      "path": "../observability/tsconfig.json"
+    },
+    {
+      "path": "../fleet/tsconfig.json"
+    }
   ]
 }

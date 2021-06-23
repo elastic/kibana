@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LoginForm } from './login_form';
+export { LoginForm, MessageType as LoginFormMessageType } from './login_form';

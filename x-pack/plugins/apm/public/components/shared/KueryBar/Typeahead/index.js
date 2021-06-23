@@ -172,6 +172,7 @@ export class Typeahead extends Component {
       >
         <div style={{ position: 'relative' }}>
           <EuiFieldSearch
+            data-test-subj="headerFilterKuerybar"
             fullWidth
             style={{
               backgroundImage: 'none',

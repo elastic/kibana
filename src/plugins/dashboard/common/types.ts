@@ -32,6 +32,14 @@ export interface DashboardPanelState<
   panelRefName?: string;
 }
 
+export interface DashboardCapabilities {
+  showWriteControls: boolean;
+  saveQuery: boolean;
+  createNew: boolean;
+  show: boolean;
+  [key: string]: boolean;
+}
+
 /**
  * This should always represent the latest dashboard panel shape, after all possible migrations.
  */

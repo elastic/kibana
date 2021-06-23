@@ -21,20 +21,24 @@ import {
   IKibanaSearchRequest,
   ISearchOptions,
   nodeBuilder,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
-import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
+import {
+  esKuery,
+  ISearchSessionService,
+  NoSearchIdInSessionError,
+} from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import {
-  ENHANCED_ES_SEARCH_STRATEGY,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-  SEARCH_SESSION_TYPE,
-} from '../../../common';
+} from '../../../../../../src/plugins/data/common';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import {
@@ -436,7 +440,7 @@ export class SearchSessionService
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
-      throw new Error('No search ID in this session matching the given search request');
+      throw new NoSearchIdInSessionError();
     }
     this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 
@@ -461,6 +465,7 @@ export class SearchSessionService
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
+        getConfig: () => this.config.search.sessions,
       };
     };
   };

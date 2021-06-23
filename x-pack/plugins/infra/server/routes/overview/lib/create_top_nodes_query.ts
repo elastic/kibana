@@ -60,7 +60,7 @@ export const createTopNodesQuery = (
           },
           cpu: {
             avg: {
-              field: 'system.cpu.total.pct',
+              field: 'system.cpu.total.norm.pct',
             },
           },
           iowait: {

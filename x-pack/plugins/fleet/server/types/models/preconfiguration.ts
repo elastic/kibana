@@ -8,7 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+import {
+  PRECONFIGURATION_LATEST_KEYWORD,
+  DEFAULT_AGENT_POLICY,
+  DEFAULT_FLEET_SERVER_AGENT_POLICY,
+  DEFAULT_PACKAGES,
+} from '../../constants';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -36,14 +41,17 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
-  })
+  }),
+  {
+    defaultValue: DEFAULT_PACKAGES,
+  }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,
     namespace: schema.maybe(NamespaceSchema),
-    id: schema.oneOf([schema.string(), schema.number()]),
+    id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),
     is_default_fleet_server: schema.maybe(schema.boolean()),
     package_policies: schema.arrayOf(
@@ -59,6 +67,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
             schema.object({
               type: schema.string(),
               enabled: schema.maybe(schema.boolean()),
+              keep_enabled: schema.maybe(schema.boolean()),
               vars: varsSchema,
               streams: schema.maybe(
                 schema.arrayOf(
@@ -68,6 +77,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
                       dataset: schema.string(),
                     }),
                     enabled: schema.maybe(schema.boolean()),
+                    keep_enabled: schema.maybe(schema.boolean()),
                     vars: varsSchema,
                   })
                 )
@@ -77,5 +87,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
         ),
       })
     ),
-  })
+  }),
+  {
+    defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
+  }
 );

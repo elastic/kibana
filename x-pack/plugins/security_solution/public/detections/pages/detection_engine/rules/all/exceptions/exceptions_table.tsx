@@ -15,17 +15,17 @@ import {
 } from '@elastic/eui';
 import { History } from 'history';
 
+import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
-import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { ExceptionListFilter, useApi, useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
-import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
@@ -37,7 +37,7 @@ export type Func = () => Promise<void>;
 
 interface ExceptionListsTableProps {
   history: History;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loading: boolean;
   formatUrl: FormatUrl;
 }
@@ -59,9 +59,9 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
-  ({ formatUrl, history, hasNoPermissions, loading }) => {
+  ({ formatUrl, history, hasPermissions, loading }) => {
     const {
-      services: { http, notifications },
+      services: { http, notifications, timelines },
     } = useKibana();
     const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -77,6 +77,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       namespaceTypes: ['single', 'agnostic'],
       notifications,
       showTrustedApps: false,
+      showEventFilters: false,
     });
     const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists(
       {
@@ -88,6 +89,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+    const { addError } = useAppToasts();
 
     const handleDeleteSuccess = useCallback(
       (listId?: string) => () => {
@@ -100,12 +102,11 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleDeleteError = useCallback(
       (err: Error & { body?: { message: string } }): void => {
-        notifications.toasts.addError(err, {
+        addError(err, {
           title: i18n.EXCEPTION_DELETE_ERROR,
-          toastMessage: err.body != null ? err.body.message : err.message,
         });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleDelete = useCallback(
@@ -170,9 +171,9 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleExportError = useCallback(
       (err: Error) => {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
+        addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleExport = useCallback(
@@ -343,7 +344,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
             <HeaderSection
               split
               title={i18n.ALL_EXCEPTIONS}
-              subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
+              subtitle={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
             >
               {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
             </HeaderSection>
@@ -358,7 +359,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               <>
                 <AllRulesUtilityBar
                   showBulkActions={false}
-                  userHasNoPermissions={hasNoPermissions}
+                  canBulkEdit={hasPermissions}
                   paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
@@ -366,7 +367,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 <EuiBasicTable
                   data-test-subj="exceptions-table"
                   columns={exceptionsColumns}
-                  isSelectable={!hasNoPermissions ?? false}
+                  isSelectable={hasPermissions}
                   itemId="id"
                   items={tableItems}
                   noItemsMessage={emptyPrompt}

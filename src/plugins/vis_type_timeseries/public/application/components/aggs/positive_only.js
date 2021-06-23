@@ -13,7 +13,7 @@ import { MetricSelect } from './metric_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

@@ -6,21 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
-
 /**
  * Type of charts able to render
  */
-export const ChartType = Object.freeze({
-  Line: 'line' as const,
-  Area: 'area' as const,
-  Histogram: 'histogram' as const,
-});
-export type ChartType = $Values<typeof ChartType>;
+export enum ChartType {
+  Line = 'line',
+  Area = 'area',
+  Histogram = 'histogram',
+}
 
 /**
  * Type of xy visualizations
  */
 export type XyVisType = ChartType | 'horizontal_bar';
-
-export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';

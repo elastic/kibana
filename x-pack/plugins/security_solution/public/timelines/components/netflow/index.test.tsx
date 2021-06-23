@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -61,6 +61,8 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../network/components/source_destination/field_names';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

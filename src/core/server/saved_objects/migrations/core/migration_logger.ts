@@ -24,7 +24,7 @@ export interface SavedObjectsMigrationLogger {
    */
   warning: (msg: string) => void;
   warn: (msg: string) => void;
-  error: (msg: string, meta: LogMeta) => void;
+  error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
 }
 
 export class MigrationLogger implements SavedObjectsMigrationLogger {

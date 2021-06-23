@@ -11,7 +11,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
-import { useMatrixHistogram } from '../../containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { TestProviders } from '../../mock';
 
@@ -30,7 +30,7 @@ jest.mock('../charts/barchart', () => ({
 }));
 
 jest.mock('../../containers/matrix_histogram', () => ({
-  useMatrixHistogram: jest.fn(),
+  useMatrixHistogramCombined: jest.fn(),
 }));
 
 jest.mock('../../components/matrix_histogram/utils', () => ({
@@ -63,7 +63,7 @@ describe('Matrix Histogram Component', () => {
   };
 
   beforeAll(() => {
-    (useMatrixHistogram as jest.Mock).mockReturnValue([
+    (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
       false,
       {
         data: null,
@@ -75,6 +75,7 @@ describe('Matrix Histogram Component', () => {
       wrappingComponent: TestProviders,
     });
   });
+
   describe('on initial load', () => {
     test('it renders MatrixLoader', () => {
       expect(wrapper.find('MatrixLoader').exists()).toBe(true);
@@ -99,7 +100,7 @@ describe('Matrix Histogram Component', () => {
 
   describe('not initial load', () => {
     beforeAll(() => {
-      (useMatrixHistogram as jest.Mock).mockReturnValue([
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
         false,
         {
           data: [

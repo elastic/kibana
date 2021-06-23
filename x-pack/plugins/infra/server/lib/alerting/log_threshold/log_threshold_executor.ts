@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import {
   AlertExecutorOptions,
   AlertServices,
@@ -73,15 +74,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     const { sources } = libs;
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
-    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+    const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
       sourceConfiguration.configuration,
       await libs.framework.getIndexPatternsService(
         savedObjectsClient,
         scopedClusterClient.asCurrentUser
       )
     );
-    const indexPattern = resolvedLogSourceConfiguration.indices;
-    const timestampField = resolvedLogSourceConfiguration.timestampField;
 
     try {
       const validatedParams = decodeOrThrow(alertParamsRT)(params);
@@ -90,7 +89,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         await executeAlert(
           validatedParams,
           timestampField,
-          indexPattern,
+          indices,
+          runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
@@ -98,7 +98,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         await executeRatioAlert(
           validatedParams,
           timestampField,
-          indexPattern,
+          indices,
+          runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
@@ -112,10 +113,11 @@ async function executeAlert(
   alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
-  const query = getESQuery(alertParams, timestampField, indexPattern);
+  const query = getESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
@@ -142,6 +144,7 @@ async function executeRatioAlert(
   alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
@@ -156,8 +159,13 @@ async function executeRatioAlert(
     criteria: getDenominator(alertParams.criteria),
   };
 
-  const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern);
-  const denominatorQuery = getESQuery(denominatorParams, timestampField, indexPattern);
+  const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern, runtimeMappings);
+  const denominatorQuery = getESQuery(
+    denominatorParams,
+    timestampField,
+    indexPattern,
+    runtimeMappings
+  );
 
   if (!numeratorQuery || !denominatorQuery) {
     throw new Error('ES query could not be built from the provided ratio alert params');
@@ -189,11 +197,12 @@ async function executeRatioAlert(
 const getESQuery = (
   alertParams: Omit<AlertParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
-  indexPattern: string
+  indexPattern: string,
+  runtimeMappings: estypes.MappingRuntimeFields
 ) => {
   return hasGroupBy(alertParams)
-    ? getGroupedESQuery(alertParams, timestampField, indexPattern)
-    : getUngroupedESQuery(alertParams, timestampField, indexPattern);
+    ? getGroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings)
+    : getUngroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
 };
 
 export const processUngroupedResults = (
@@ -423,8 +432,9 @@ export const buildFiltersFromCriteria = (
 export const getGroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria },
   timestampField: string,
-  index: string
-): object | undefined => {
+  index: string,
+  runtimeMappings: estypes.MappingRuntimeFields
+): estypes.SearchRequest | undefined => {
   const { groupBy } = params;
 
   if (!groupBy || !groupBy.length) {
@@ -460,20 +470,21 @@ export const getGroupedESQuery = (
     },
   };
 
-  const body = {
+  const body: estypes.SearchRequest['body'] = {
     query: {
       bool: {
         filter: [groupedRangeFilter],
       },
     },
     aggregations,
+    runtime_mappings: runtimeMappings,
     size: 0,
   };
 
   return {
     index,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     body,
   };
 };
@@ -481,14 +492,15 @@ export const getGroupedESQuery = (
 export const getUngroupedESQuery = (
   params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  index: string
+  index: string,
+  runtimeMappings: estypes.MappingRuntimeFields
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField
   );
 
-  const body = {
+  const body: estypes.SearchRequest['body'] = {
     // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
     track_total_hits: true,
     query: {
@@ -497,13 +509,14 @@ export const getUngroupedESQuery = (
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   };
 
   return {
     index,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     body,
   };
 };

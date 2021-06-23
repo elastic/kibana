@@ -7,6 +7,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { Duration } from 'moment';
 
 export interface IHttpConfig {
   host: string;
@@ -16,6 +17,7 @@ export interface IHttpConfig {
   socketTimeout: number;
   cors: ICorsConfig;
   ssl: ISslConfig;
+  shutdownTimeout: Duration;
 }
 
 export interface ICorsConfig {

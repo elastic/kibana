@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MODEL_TYPES } from '../../../../common/model_options';
+import { MODEL_TYPES } from '../../../../common/enums';
 
 export const MODEL_SCRIPTS = {
   [MODEL_TYPES.UNWEIGHTED]: () => 'MovingFunctions.unweightedAvg(values)',

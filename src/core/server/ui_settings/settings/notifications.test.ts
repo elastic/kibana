@@ -36,15 +36,15 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: Value must be equal to or greater than [0].
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: Value must be equal to or greater than [0].
+        - [1]: expected value to equal [Infinity]"
+      `);
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [number] but got [string]
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: expected value of type [number] but got [string]
+        - [1]: expected value to equal [Infinity]"
+      `);
     });
   });
 
@@ -55,15 +55,15 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: Value must be equal to or greater than [0].
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: Value must be equal to or greater than [0].
+        - [1]: expected value to equal [Infinity]"
+      `);
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [number] but got [string]
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: expected value of type [number] but got [string]
+        - [1]: expected value to equal [Infinity]"
+      `);
     });
   });
 
@@ -74,15 +74,15 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: Value must be equal to or greater than [0].
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: Value must be equal to or greater than [0].
+        - [1]: expected value to equal [Infinity]"
+      `);
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [number] but got [string]
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: expected value of type [number] but got [string]
+        - [1]: expected value to equal [Infinity]"
+      `);
     });
   });
 
@@ -93,15 +93,15 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: Value must be equal to or greater than [0].
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: Value must be equal to or greater than [0].
+        - [1]: expected value to equal [Infinity]"
+      `);
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [number] but got [string]
-- [1]: expected value to equal [Infinity]"
-`);
+        "types that failed validation:
+        - [0]: expected value of type [number] but got [string]
+        - [1]: expected value to equal [Infinity]"
+      `);
     });
   });
 });

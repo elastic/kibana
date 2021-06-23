@@ -61,7 +61,7 @@ describe('checkActionTypeEnabled', () => {
           >
             <FormattedMessage
               defaultMessage="View license options"
-              id="xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseLinkTitle"
+              id="xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
               values={Object {}}
             />
           </EuiLink>

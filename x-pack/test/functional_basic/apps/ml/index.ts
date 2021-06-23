@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning basic license', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['ciGroup2', 'skipFirefox', 'mlqa']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -28,8 +28,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
 
-      await esArchiver.unload('ml/farequote');
-      await esArchiver.unload('ml/module_sample_ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
 
       await ml.testResources.resetKibanaTimeZone();
     });

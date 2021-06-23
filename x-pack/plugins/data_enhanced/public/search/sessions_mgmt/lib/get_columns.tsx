@@ -22,7 +22,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { TableText } from '../components';
 import { OnActionComplete, PopoverActionsMenu } from '../components';
 import { StatusIndicator } from '../components/status';
@@ -118,6 +118,20 @@ export const getColumns = (
           </RedirectAppLinks>
         );
       },
+    },
+
+    // # Searches
+    {
+      field: 'numSearches',
+      name: i18n.translate('xpack.data.mgmt.searchSessions.table.numSearches', {
+        defaultMessage: '# Searches',
+      }),
+      sortable: true,
+      render: (numSearches: UISession['numSearches'], session) => (
+        <TableText color="subdued" data-test-subj="sessionManagementNumSearchesCol">
+          {numSearches}
+        </TableText>
+      ),
     },
 
     // Session status

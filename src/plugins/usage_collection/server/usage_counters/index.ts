@@ -8,8 +8,8 @@
 
 export type { UsageCountersServiceSetup } from './usage_counters_service';
 export type { UsageCountersSavedObjectAttributes, UsageCountersSavedObject } from './saved_objects';
-export type { IncrementCounterParams } from './usage_counter';
+export type { IUsageCounter as UsageCounter, IncrementCounterParams } from './usage_counter';
 
 export { UsageCountersService } from './usage_counters_service';
-export { UsageCounter } from './usage_counter';
+export type { SerializeCounterParams } from './saved_objects';
 export { USAGE_COUNTERS_SAVED_OBJECT_TYPE, serializeCounterKey } from './saved_objects';

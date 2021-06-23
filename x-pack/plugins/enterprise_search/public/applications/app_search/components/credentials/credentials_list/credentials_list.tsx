@@ -116,7 +116,7 @@ export const CredentialsList: React.FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
-                defaultMessage: 'No API Keys have been created yet.',
+                defaultMessage: 'Create your first API key',
               })}
             </h2>
           }

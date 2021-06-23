@@ -10,6 +10,8 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -49,11 +51,13 @@ export const useHostsKpiUniqueIps = ({
   skip = false,
   startDate,
 }: UseHostsKpiUniqueIps): [boolean, HostsKpiUniqueIpsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+
   const [
     hostsKpiUniqueIpsRequest,
     setHostsKpiUniqueIpsRequest,
@@ -74,6 +78,7 @@ export const useHostsKpiUniqueIps = ({
       refetch: refetch.current,
     }
   );
+  const { addError, addWarning } = useAppToasts();
 
   const hostsKpiUniqueIpsSearch = useCallback(
     (request: HostsKpiUniqueIpsRequestOptions | null) => {
@@ -105,16 +110,14 @@ export const useHostsKpiUniqueIps = ({
                 searchSubscription$.current.unsubscribe();
               } else if (response.isPartial && !response.isRunning) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
+                addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_HOSTS_KPI_UNIQUE_IPS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -125,28 +128,34 @@ export const useHostsKpiUniqueIps = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
+    const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+      indices: indexNames,
+      filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+    });
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);

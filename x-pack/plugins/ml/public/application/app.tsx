@@ -82,22 +82,27 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     embeddable: deps.embeddable,
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
-    fileUpload: deps.fileUpload,
+    dataVisualizer: deps.dataVisualizer,
     ...coreStart,
   };
 
   const I18nContext = coreStart.i18n.Context;
+  const ApplicationUsageTrackingProvider =
+    deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
     <RedirectAppLinks application={coreStart.application}>
-      <I18nContext>
-        <KibanaContextProvider
-          services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
-        >
-          <MlRouter pageDeps={pageDeps} />
-        </KibanaContextProvider>
-      </I18nContext>
+      <ApplicationUsageTrackingProvider>
+        <I18nContext>
+          <KibanaContextProvider
+            services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+          >
+            <MlRouter pageDeps={pageDeps} />
+          </KibanaContextProvider>
+        </I18nContext>
+      </ApplicationUsageTrackingProvider>
     </RedirectAppLinks>
   );
 };
@@ -125,7 +130,7 @@ export const renderApp = (
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
-    fileUpload: deps.fileUpload,
+    dataVisualizer: deps.dataVisualizer,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

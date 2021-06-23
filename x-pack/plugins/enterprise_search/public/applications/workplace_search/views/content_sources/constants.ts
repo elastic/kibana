@@ -257,6 +257,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -295,7 +302,7 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 
@@ -361,35 +368,6 @@ export const PRIVATE_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.private.link',
   {
     defaultMessage: 'Add a private content source',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
-  {
-    defaultMessage: 'Manage private content sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
-  {
-    defaultMessage: 'Review Group Sources',
-  }
-);
-
-export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
-  {
-    defaultMessage: 'Review the status of all sources shared with your Group.',
-  }
-);
-
-export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
-  {
-    defaultMessage:
-      'Review the status of all connected private sources, and manage private sources for your account.',
   }
 );
 

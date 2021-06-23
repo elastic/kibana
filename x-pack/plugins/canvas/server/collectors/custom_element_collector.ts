@@ -34,13 +34,41 @@ export interface CustomElementTelemetry {
 
 export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
   custom_elements: {
-    count: { type: 'long' },
-    elements: {
-      min: { type: 'long' },
-      max: { type: 'long' },
-      avg: { type: 'float' },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of custom Canvas elements',
+      },
     },
-    functions_in_use: { type: 'array', items: { type: 'keyword' } },
+    elements: {
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of elements used in Canvas Custom Element',
+        },
+      },
+    },
+    functions_in_use: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The functions in use by Canvas Custom Elements',
+        },
+      },
+    },
   },
 };
 

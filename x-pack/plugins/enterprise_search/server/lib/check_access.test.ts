@@ -62,7 +62,7 @@ describe('checkAccess', () => {
     });
   });
 
-  describe('when the spaces plugin is unavailable', () => {
+  describe('when the Spaces plugin is unavailable', () => {
     describe('when security is disabled', () => {
       it('should allow all access', async () => {
         const spaces = undefined;

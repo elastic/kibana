@@ -62,12 +62,11 @@ export class ApiService {
     return result;
   }
 
-  public async getDeprecationLogging() {
-    const result = await this.sendRequest<{ isEnabled: boolean }>({
+  public useLoadDeprecationLogging() {
+    return this.useRequest<{ isEnabled: boolean }>({
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'get',
     });
-    return result;
   }
 
   public async updateDeprecationLogging(loggingData: { isEnabled: boolean }) {

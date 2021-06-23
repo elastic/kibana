@@ -13,12 +13,14 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       this.tags('ciGroup11');
 
+      loadTestFile(require.resolve('./aliases'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
       loadTestFile(require.resolve('./create_rules'));
       loadTestFile(require.resolve('./create_rules_bulk'));
       loadTestFile(require.resolve('./create_index'));
+      loadTestFile(require.resolve('./create_ml'));
       loadTestFile(require.resolve('./create_threat_matching'));
       loadTestFile(require.resolve('./create_exceptions'));
       loadTestFile(require.resolve('./delete_rules'));
@@ -33,6 +35,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./update_rules'));
       loadTestFile(require.resolve('./update_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules_bulk'));
+      loadTestFile(require.resolve('./perform_bulk_action'));
       loadTestFile(require.resolve('./patch_rules'));
       loadTestFile(require.resolve('./read_privileges'));
       loadTestFile(require.resolve('./query_signals'));
@@ -41,12 +44,20 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./create_signals_migrations'));
       loadTestFile(require.resolve('./finalize_signals_migrations'));
       loadTestFile(require.resolve('./delete_signals_migrations'));
+      loadTestFile(require.resolve('./timestamps'));
+      loadTestFile(require.resolve('./runtime'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests
     // listed on ./exception_operators_data_types/index
     describe('', function () {
       loadTestFile(require.resolve('./exception_operators_data_types/index'));
+    });
+
+    // That split here enable us on using a different ciGroup to run the tests
+    // listed on ./keyword_family/index
+    describe('', function () {
+      loadTestFile(require.resolve('./keyword_family/index'));
     });
   });
 };

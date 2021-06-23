@@ -9,13 +9,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageContentBody } from '@elastic/eui';
+import { LogRetentionPanel } from './log_retention';
 
 import { Settings } from './settings';
 
 describe('Settings', () => {
   it('renders', () => {
     const wrapper = shallow(<Settings />);
-    expect(wrapper.find(EuiPageContentBody)).toHaveLength(1);
+    expect(wrapper.find(LogRetentionPanel)).toHaveLength(1);
   });
 });

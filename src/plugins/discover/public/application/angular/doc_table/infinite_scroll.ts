@@ -9,6 +9,7 @@
 import $ from 'jquery';
 
 interface LazyScope extends ng.IScope {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -19,6 +20,7 @@ export function createInfiniteScrollDirective() {
       more: '=',
     },
     link: ($scope: LazyScope, $element: JQuery) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let checkTimer: any;
       /**
        * depending on which version of Discover is displayed, different elements are scrolling
@@ -32,11 +34,12 @@ export function createInfiniteScrollDirective() {
         const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
         const usedScrollDiv = isMobileView ? scrollDivMobile : scrollDiv;
         const scrollTop = usedScrollDiv.scrollTop();
+        const scrollOffset = usedScrollDiv.prop('offsetTop') || 0;
 
         const winHeight = Number(usedScrollDiv.height());
         const winBottom = Number(winHeight) + Number(scrollTop);
         const elTop = $element.get(0).offsetTop || 0;
-        const remaining = elTop - winBottom;
+        const remaining = elTop - scrollOffset - winBottom;
 
         if (remaining <= winHeight) {
           $scope[$scope.$$phase ? '$eval' : '$apply'](function () {

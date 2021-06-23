@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentStatusResponse, agentRouteService } from '../../../fleet/common';
@@ -16,7 +17,10 @@ interface UseAgentStatus {
 }
 
 export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
     ['agentStatus', policyId],
@@ -34,6 +38,12 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
     {
       enabled: !skip,
       select: (response) => response.results,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_status.fetchError', {
+            defaultMessage: 'Error while fetching agent status',
+          }),
+        }),
     }
   );
 };

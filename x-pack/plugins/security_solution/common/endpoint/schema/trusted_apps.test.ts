@@ -247,6 +247,30 @@ describe('When invoking Trusted Apps Schema', () => {
         expect(() => body.validate(bodyMsg)).not.toThrow();
       });
 
+      it('should validate `entry.type` does not accept `wildcard` when field is NOT PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.HASH,
+              type: 'wildcard',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.type` accepts `wildcard` when field is PATH', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.PATH,
+              type: 'wildcard',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
       it('should validate `entry.value` required', () => {
         const { value, ...entry } = createConditionEntry();
         expect(() => body.validate(createNewTrustedApp({ entries: [entry] }))).toThrow();

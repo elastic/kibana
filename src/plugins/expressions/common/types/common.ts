@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of
@@ -23,9 +23,9 @@ export type TypeToString<T> = KnownTypeToString<T> | UnmappedTypeStrings;
  * the `type` key as a string literal type for it.
  */
 // prettier-ignore
-export type KnownTypeToString<T> = 
-  T extends string ? 'string' : 
-  T extends boolean ? 'boolean' : 
+export type KnownTypeToString<T> =
+  T extends string ? 'string' :
+  T extends boolean ? 'boolean' :
   T extends number ? 'number' :
   T extends null ? 'null' :
   T extends { type: string } ? T['type'] :
@@ -36,7 +36,9 @@ export type KnownTypeToString<T> =
  *
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<
+  T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+>;
 
 /**
  * Types used in Expressions that don't map to a primitive cleanly:

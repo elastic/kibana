@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS IAM Group Deletion",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeleteGroup and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:DeleteGroup and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iam/delete-group.html",
     "https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteGroup.html"
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

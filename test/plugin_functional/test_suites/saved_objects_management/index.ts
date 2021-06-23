@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./export_transform'));
     loadTestFile(require.resolve('./import_warnings'));
+    loadTestFile(require.resolve('./hidden_types'));
   });
 }

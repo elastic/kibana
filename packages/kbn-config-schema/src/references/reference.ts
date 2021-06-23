@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { internals, Reference as InternalReference } from '../internals';
+import type { Reference as InternalReference } from 'joi';
+import { internals } from '../internals';
 
 export class Reference<T> {
   public static isReference<V>(value: V | Reference<V> | undefined): value is Reference<V> {

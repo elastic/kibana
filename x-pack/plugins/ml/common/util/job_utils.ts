@@ -8,7 +8,7 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -78,7 +78,7 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
  * if composite is defined.
  * @param buckets
  */
-export function hasValidComposite(buckets: estypes.AggregationContainer) {
+export function hasValidComposite(buckets: estypes.AggregationsAggregationContainer) {
   if (
     isPopulatedObject(buckets, ['composite']) &&
     isPopulatedObject(buckets.composite, ['sources']) &&
@@ -99,6 +99,15 @@ export function hasValidComposite(buckets: estypes.AggregationContainer) {
     });
   }
   return true;
+}
+
+/**
+ * Validates if aggregation type is currently not supported
+ * e.g. any other type other than 'date_histogram' or 'aggregations'
+ * @param buckets
+ */
+export function isUnsupportedAggType(aggType: string) {
+  return aggType !== 'date_histogram' && aggType !== 'aggs' && aggType !== 'aggregations';
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
@@ -143,9 +152,12 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       if (isPopulatedObject(aggs)) {
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
+          if (Object.keys(aggs[aggBucketsName]).some(isUnsupportedAggType)) {
+            return false;
+          }
           // if fieldName is an aggregated field under nested terms using bucket_script
           const aggregations =
-            getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
+            getAggregations<estypes.AggregationsAggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
           if (foundField?.bucket_script !== undefined) {
             return false;
@@ -207,7 +219,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
         return i18n.translate(
           'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
           {
-            defaultMessage: 'Disabled because the datafeed contains unsupported composite sources.',
+            defaultMessage: 'the datafeed contains unsupported composite sources',
           }
         );
       }
@@ -223,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'Disabled because not a viewable time series job.',
+      defaultMessage: 'it is not a viewable time series job',
     });
   }
 }
@@ -819,7 +831,7 @@ export function getLatestDataOrBucketTimestamp(
  * in the job wizards and so would be lost in a clone.
  */
 export function processCreatedBy(customSettings: CustomSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by!)) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by as CREATED_BY_LABEL)) {
     delete customSettings.created_by;
   }
 }

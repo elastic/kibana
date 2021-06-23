@@ -171,10 +171,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
       byField,
       overField,
       partitionField,
-      // @ts-expect-error
-      excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
+      excludeFrequent:
+        excludeFrequentOption.label !== ''
+          ? (excludeFrequentOption.label as estypes.MlExcludeFrequent)
+          : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
+      useNull: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);
@@ -346,7 +349,7 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
 }
 
 function createExcludeFrequentOption(
-  excludeFrequent: estypes.ExcludeFrequent | null
+  excludeFrequent: estypes.MlExcludeFrequent | null
 ): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;

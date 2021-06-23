@@ -1,7 +1,10 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana",
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
     "mappings": {
       "dynamic": "strict",
       "properties": {
@@ -178,8 +181,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "tree": "quadtree",
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"

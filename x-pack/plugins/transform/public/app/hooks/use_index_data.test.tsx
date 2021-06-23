@@ -6,9 +6,10 @@
  */
 
 import React, { FC } from 'react';
+import { IntlProvider } from 'react-intl';
 
 import '@testing-library/jest-dom/extend-expect';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from 'src/core/public';
@@ -48,7 +49,9 @@ describe('Transform: useIndexData()', () => {
   test('indexPattern set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
-      <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(
@@ -101,17 +104,21 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       return <DataGrid {...props} />;
     };
 
-    const { queryByText } = render(
-      <MlSharedContext.Provider value={mlSharedImports}>
-        <Wrapper />
-      </MlSharedContext.Provider>
+    render(
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlSharedImports}>
+          <Wrapper />
+        </MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     // Act
     // Assert
     await waitFor(() => {
-      expect(queryByText('the-index-preview-title')).toBeInTheDocument();
-      expect(queryByText('Cross-cluster search returned no fields data.')).not.toBeInTheDocument();
+      expect(screen.queryByText('the-index-preview-title')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Cross-cluster search returned no fields data.')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -140,17 +147,21 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       return <DataGrid {...props} />;
     };
 
-    const { queryByText } = render(
-      <MlSharedContext.Provider value={mlSharedImports}>
-        <Wrapper />
-      </MlSharedContext.Provider>
+    render(
+      <IntlProvider locale="en">
+        <MlSharedContext.Provider value={mlSharedImports}>
+          <Wrapper />
+        </MlSharedContext.Provider>
+      </IntlProvider>
     );
 
     // Act
     // Assert
     await waitFor(() => {
-      expect(queryByText('the-index-preview-title')).toBeInTheDocument();
-      expect(queryByText('Cross-cluster search returned no fields data.')).toBeInTheDocument();
+      expect(screen.queryByText('the-index-preview-title')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Cross-cluster search returned no fields data.')
+      ).toBeInTheDocument();
     });
   });
 });

@@ -56,13 +56,14 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const exploratoryViewLink = createExploratoryViewUrl(
     {
       [`monitor-duration`]: {
-        reportType: 'upd',
+        reportType: 'kpi',
         time: { from: dateRangeStart, to: dateRangeEnd },
         reportDefinitions: {
-          'monitor.id': monitorId as string,
+          'monitor.id': [monitorId] as string[],
         },
         breakdown: 'observer.geo.name',
         operationType: 'average',
+        dataType: 'synthetics',
       },
     },
     basePath

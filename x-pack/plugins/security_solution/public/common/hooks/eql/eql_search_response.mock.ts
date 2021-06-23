@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
+import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { Connection } from '@elastic/elasticsearch';

@@ -6,11 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
-
-export interface HasImportPermission {
-  hasImportPermission: boolean;
-}
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -73,6 +69,28 @@ export interface FindFileStructureResponse {
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
   should_trim_fields?: boolean;
+}
+
+export interface FindFileStructureErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes?: ErrorAttribute;
+  };
+  name: string;
+}
+
+interface ErrorAttribute {
+  body: {
+    error: {
+      suppressed: Array<{ reason: string }>;
+    };
+  };
+}
+
+export interface HasImportPermission {
+  hasImportPermission: boolean;
 }
 
 export type InputData = any[];

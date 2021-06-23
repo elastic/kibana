@@ -106,6 +106,8 @@ function findFieldsInQuery(obj: object) {
     if (isPopulatedObject(val)) {
       fields.push(key);
       fields.push(...findFieldsInQuery(val));
+    } else if (typeof val === 'string') {
+      fields.push(val);
     } else {
       fields.push(key);
     }

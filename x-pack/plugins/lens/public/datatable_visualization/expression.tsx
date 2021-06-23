@@ -17,6 +17,9 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
+import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
@@ -25,11 +28,18 @@ import { ColumnState } from './visualization';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
+import { computeSummaryRowForColumn } from './summary';
+
+export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
+  type: 'lens_datatable_column';
+  palette?: PaletteOutput<CustomPaletteState>;
+  summaryRowValue?: unknown;
+};
 
 export interface Args {
   title: string;
   description?: string;
-  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
+  columns: ColumnConfigArg[];
   sortingColumnId: string | undefined;
   sortingDirection: 'asc' | 'desc' | 'none';
 }
@@ -108,6 +118,16 @@ export const getDatatable = ({
       return memo;
     }, {});
 
+    const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
+    for (const column of columnsWithSummary) {
+      column.summaryRowValue = computeSummaryRowForColumn(
+        column,
+        firstTable,
+        formatters,
+        formatFactory({ id: 'number' })
+      );
+    }
+
     if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
@@ -160,6 +180,13 @@ export const datatableColumn: ExpressionFunctionDefinition<
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },
+    colorMode: { types: ['string'], help: '' },
+    palette: {
+      types: ['palette'],
+      help: '',
+    },
+    summaryRow: { types: ['string'], help: '' },
+    summaryLabel: { types: ['string'], help: '' },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {
@@ -172,6 +199,8 @@ export const datatableColumn: ExpressionFunctionDefinition<
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType>;
+  paletteService: PaletteRegistry;
+  uiSettings: IUiSettingsClient;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -222,8 +251,10 @@ export const getDatatableRenderer = (dependencies: {
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          uiSettings={dependencies.uiSettings}
         />
       </I18nProvider>,
       domNode,

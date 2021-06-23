@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { Inspect, Maybe, PageInfoPaginated } from '../../common';
+import { Inspect, Maybe, PageInfoPaginated, SortField } from '../../common';
 import { RequestOptionsPaginated } from '../..';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
@@ -20,7 +20,8 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface ResultsRequestOptions extends RequestOptionsPaginated {
+export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
   actionId: string;
   agentId?: string;
+  sort: SortField[];
 }

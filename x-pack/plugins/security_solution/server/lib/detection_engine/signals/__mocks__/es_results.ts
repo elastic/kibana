@@ -115,6 +115,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
+  sortIds: string[] = ['1234567891111', '2233447556677'],
   ip?: string | string[],
   destIp?: string | string[]
 ): SignalSourceHit => ({
@@ -139,13 +140,13 @@ export const sampleDocWithSortId = (
     'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
     'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
   },
-  sort: ['1234567891111'],
+  sort: sortIds,
 });
 
 export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit => ({
+): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -224,12 +225,12 @@ export const sampleWrappedSignalHit = (): WrappedSignalHit => {
   };
 };
 
-export const sampleDocWithAncestors = (): SignalSearchResponse => {
+export const sampleDocWithAncestors = (): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => {
   const sampleDoc = sampleDocNoSortId();
   delete sampleDoc.sort;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete sampleDoc._source.source;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   sampleDoc._source.signal = {
     parent: {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -561,7 +562,9 @@ export const sampleBulkCreateErrorResult = {
 
 export const sampleDocSearchResultsNoSortId = (
   someUuid: string = sampleIdGuid
-): SignalSearchResponse => ({
+): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -630,7 +633,8 @@ export const repeatedSearchResultsWithSortId = (
   pageSize: number,
   guids: string[],
   ips?: Array<string | string[]>,
-  destIps?: Array<string | string[]>
+  destIps?: Array<string | string[]>,
+  sortIds?: string[]
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -646,6 +650,7 @@ export const repeatedSearchResultsWithSortId = (
     hits: Array.from({ length: pageSize }).map((x, index) => ({
       ...sampleDocWithSortId(
         guids[index],
+        sortIds,
         ips ? ips[index] : '127.0.0.1',
         destIps ? destIps[index] : '127.0.0.1'
       ),

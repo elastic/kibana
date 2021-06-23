@@ -12,6 +12,16 @@ export type Name = t.TypeOf<typeof name>;
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
+export const agentSelection = t.type({
+  agents: t.array(t.string),
+  allAgentsSelected: t.boolean,
+  platformsSelected: t.array(t.string),
+  policiesSelected: t.array(t.string),
+});
+export type AgentSelection = t.TypeOf<typeof agentSelection>;
+export const agentSelectionOrUndefined = t.union([agentSelection, t.undefined]);
+export type AgentSelectionOrUndefined = t.TypeOf<typeof agentSelectionOrUndefined>;
+
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
 export const descriptionOrUndefined = t.union([description, t.undefined]);

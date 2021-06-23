@@ -10,6 +10,8 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,7 +50,7 @@ export const useHostsKpiHosts = ({
   skip = false,
   startDate,
 }: UseHostsKpiHosts): [boolean, HostsKpiHostsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -57,6 +59,7 @@ export const useHostsKpiHosts = ({
     hostsKpiHostsRequest,
     setHostsKpiHostsRequest,
   ] = useState<HostsKpiHostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -69,6 +72,7 @@ export const useHostsKpiHosts = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const hostsKpiHostsSearch = useCallback(
     (request: HostsKpiHostsRequestOptions | null) => {
@@ -98,16 +102,14 @@ export const useHostsKpiHosts = ({
                 searchSubscription$.current.unsubscribe();
               } else if (response.isPartial && !response.isRunning) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_HOSTS);
+                addWarning(i18n.ERROR_HOSTS_KPI_HOSTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_HOSTS_KPI_HOSTS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -118,28 +120,34 @@ export const useHostsKpiHosts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsKpiQueries.kpiHosts,
-        filterQuery: createFilter(filterQuery),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);

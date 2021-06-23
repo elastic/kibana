@@ -56,6 +56,9 @@ const fields = [
 fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
+fields.getAll = () => {
+  return fields;
+};
 
 const indexPattern = ({
   id: 'index-pattern-with-timefield-id',
@@ -72,5 +75,8 @@ const indexPattern = ({
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
+  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+};
 
 export const indexPatternWithTimefieldMock = indexPattern;

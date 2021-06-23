@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import semver from 'semver';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
@@ -26,17 +26,17 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     afterEach(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     describe('one agent', () => {
@@ -593,7 +593,11 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.eql({
-          agent1: { success: false, error: 'Cannot upgrade agent in hosted agent policy policy1' },
+          agent1: {
+            success: false,
+            error:
+              'Cannot upgrade agent in hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
           agent2: { success: true },
         });
 

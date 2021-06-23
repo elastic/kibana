@@ -10,7 +10,6 @@ import { RunContext } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ReportingConfigType } from '../../config';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -24,8 +23,7 @@ describe('Execute Report Task', () => {
   let configType: ReportingConfigType;
   beforeAll(async () => {
     configType = createMockConfigSchema();
-    const mockConfig = createMockConfig(configType);
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting = await createMockReportingCore(configType);
   });
 
   it('Instance setup', () => {

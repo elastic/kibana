@@ -15,6 +15,7 @@ export const useIndexPattern = () => {
   const indexPattern = useSelector(selectIndexPattern);
 
   useEffect(() => {
+    // we only use index pattern for kql queries
     if (!indexPattern.index_pattern) {
       dispatch(getIndexPattern());
     }

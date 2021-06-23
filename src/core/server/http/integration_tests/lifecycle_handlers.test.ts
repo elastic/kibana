@@ -7,6 +7,7 @@
  */
 
 import supertest from 'supertest';
+import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 
@@ -44,6 +45,7 @@ describe('core lifecycle handlers', () => {
         return new BehaviorSubject({
           hosts: ['localhost'],
           maxPayload: new ByteSizeValue(1024),
+          shutdownTimeout: moment.duration(30, 'seconds'),
           autoListen: true,
           ssl: {
             enabled: false,

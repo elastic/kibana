@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { OperationType } from '../../../../../../../lens/public';
 
 export function OperationTypeSelect({
@@ -19,7 +19,9 @@ export function OperationTypeSelect({
   seriesId: string;
   defaultOperationType?: OperationType;
 }) {
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const operationType = series?.operationType;
 
@@ -44,6 +46,12 @@ export function OperationTypeSelect({
       value: 'median' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.median', {
         defaultMessage: 'Median',
+      }),
+    },
+    {
+      value: 'sum' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.sum', {
+        defaultMessage: 'Sum',
       }),
     },
     {
@@ -74,7 +82,10 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
-      prepend="Calculation"
+      fullWidth
+      prepend={i18n.translate('xpack.observability.expView.operationType.label', {
+        defaultMessage: 'Calculation',
+      })}
       data-test-subj="operationTypeSelect"
       compressed
       valueOfSelected={operationType || defaultOperationType}

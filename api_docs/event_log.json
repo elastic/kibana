@@ -11,6 +11,7 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.ClusterClientAdapter",
         "type": "Class",
         "tags": [],
@@ -26,348 +27,412 @@
           },
           "<TDoc>"
         ],
+        "source": {
+          "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.Unnamed.$1",
-                "type": "Object",
-                "label": "opts",
-                "isRequired": true,
-                "signature": [
-                  "ConstructorOpts"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 54
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 54
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ConstructorOpts"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.shutdown",
             "type": "Function",
+            "tags": [],
             "label": "shutdown",
+            "description": [],
             "signature": [
               "() => Promise<void>"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 78
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.indexDocument",
             "type": "Function",
+            "tags": [],
             "label": "indexDocument",
+            "description": [],
             "signature": [
               "(doc: TDoc) => void"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.indexDocument.$1",
-                "type": "Uncategorized",
-                "label": "doc",
-                "isRequired": true,
-                "signature": [
-                  "TDoc"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 83
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 83
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.indexDocument.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  "TDoc"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 83
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.indexDocuments",
             "type": "Function",
+            "tags": [],
             "label": "indexDocuments",
+            "description": [],
             "signature": [
               "(docs: TDoc[]) => Promise<void>"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.indexDocuments.$1",
-                "type": "Array",
-                "label": "docs",
-                "isRequired": true,
-                "signature": [
-                  "TDoc[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 87
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 87
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.indexDocuments.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "docs",
+                "description": [],
+                "signature": [
+                  "TDoc[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 87
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.doesIlmPolicyExist",
             "type": "Function",
+            "tags": [],
             "label": "doesIlmPolicyExist",
+            "description": [],
             "signature": [
               "(policyName: string) => Promise<boolean>"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.doesIlmPolicyExist.$1",
-                "type": "string",
-                "label": "policyName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 123
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 123
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesIlmPolicyExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "policyName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 123
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.createIlmPolicy",
             "type": "Function",
+            "tags": [],
             "label": "createIlmPolicy",
+            "description": [],
             "signature": [
               "(policyName: string, policy: Record<string, unknown>) => Promise<void>"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$1",
-                "type": "string",
-                "label": "policyName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 138
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$2",
-                "type": "Object",
-                "label": "policy",
-                "isRequired": true,
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 138
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 138
-            }
-          },
-          {
-            "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist",
-            "type": "Function",
-            "label": "doesIndexTemplateExist",
-            "signature": [
-              "(name: string) => Promise<boolean>"
-            ],
-            "description": [],
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist.$1",
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$1",
                 "type": "string",
-                "label": "name",
-                "isRequired": true,
+                "tags": [],
+                "label": "policyName",
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 152
-                }
+                  "lineNumber": 138
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "policy",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 138
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
+            "label": "doesIndexTemplateExist",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 152
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 152
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.createIndexTemplate",
             "type": "Function",
+            "tags": [],
             "label": "createIndexTemplate",
+            "description": [],
             "signature": [
               "(name: string, template: Record<string, unknown>) => Promise<void>"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$1",
-                "type": "string",
-                "label": "name",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 162
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$2",
-                "type": "Object",
-                "label": "template",
-                "isRequired": true,
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 162
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 162
-            }
-          },
-          {
-            "id": "def-server.ClusterClientAdapter.doesAliasExist",
-            "type": "Function",
-            "label": "doesAliasExist",
-            "signature": [
-              "(name: string) => Promise<boolean>"
-            ],
-            "description": [],
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-server.ClusterClientAdapter.doesAliasExist.$1",
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$1",
                 "type": "string",
+                "tags": [],
                 "label": "name",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 180
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-              "lineNumber": 180
-            }
-          },
-          {
-            "id": "def-server.ClusterClientAdapter.createIndex",
-            "type": "Function",
-            "label": "createIndex",
-            "signature": [
-              "(name: string, body?: Record<string, unknown>) => Promise<void>"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.createIndex.$1",
-                "type": "string",
-                "label": "name",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 190
-                }
+                  "lineNumber": 162
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
-                "id": "def-server.ClusterClientAdapter.createIndex.$2",
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$2",
                 "type": "Object",
-                "label": "body",
-                "isRequired": true,
+                "tags": [],
+                "label": "template",
+                "description": [],
                 "signature": [
                   "Record<string, unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 190
-                }
+                  "lineNumber": 162
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.doesAliasExist",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
+            "label": "doesAliasExist",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+              "lineNumber": 180
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesAliasExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 180
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.createIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndex",
+            "description": [],
+            "signature": [
+              "(name: string, body?: Record<string, unknown>) => Promise<void>"
+            ],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 190
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 190
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndex.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "body",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 190
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects",
             "type": "Function",
+            "tags": [],
             "label": "queryEventsBySavedObjects",
+            "description": [],
             "signature": [
               "(index: string, namespace: string | undefined, type: string, ids: string[], { page, per_page: perPage, start, end, sort_field, sort_order, filter }: ",
               "FindOptionsType",
@@ -381,127 +446,148 @@
               },
               ">"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
-                "type": "string",
-                "label": "index",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 205
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$2",
-                "type": "string",
-                "label": "namespace",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 206
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$3",
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 207
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$4",
-                "type": "Array",
-                "label": "ids",
-                "isRequired": true,
-                "signature": [
-                  "string[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 208
-                }
-              },
-              {
-                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$5",
-                "type": "CompoundType",
-                "label": "{ page, per_page: perPage, start, end, sort_field, sort_order, filter }",
-                "isRequired": true,
-                "signature": [
-                  "FindOptionsType"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-                  "lineNumber": 210
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 204
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 205
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 206
+                },
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$3",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 207
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 208
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "{ page, per_page: perPage, start, end, sort_field, sort_order, filter }",
+                "description": [],
+                "signature": [
+                  "FindOptionsType"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                  "lineNumber": 210
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-          "lineNumber": 47
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.createReadySignal",
         "type": "Function",
+        "tags": [],
         "label": "createReadySignal",
+        "description": [],
         "signature": [
           "() => ",
           "ReadySignal",
           "<T>"
         ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/event_log/server/lib/ready_signal.ts",
           "lineNumber": 13
         },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.IEventLogClient",
         "type": "Interface",
+        "tags": [],
         "label": "IEventLogClient",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "lineNumber": 44
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "eventLog",
             "id": "def-server.IEventLogClient.findEventsBySavedObjectIds",
             "type": "Function",
+            "tags": [],
             "label": "findEventsBySavedObjectIds",
+            "description": [],
             "signature": [
               "(type: string, ids: string[], options?: Partial<",
               "FindOptionsType",
@@ -515,499 +601,577 @@
               },
               ">"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "eventLog",
                 "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$1",
                 "type": "string",
+                "tags": [],
                 "label": "type",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 46
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "eventLog",
                 "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$2",
                 "type": "Array",
+                "tags": [],
                 "label": "ids",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string[]"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 47
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "eventLog",
                 "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$3",
                 "type": "Object",
+                "tags": [],
                 "label": "options",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   "Partial<",
                   "FindOptionsType",
                   "> | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 48
-                }
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/event_log/server/types.ts",
-              "lineNumber": 45
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/event_log/server/types.ts",
-          "lineNumber": 44
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.IEventLogger",
         "type": "Interface",
+        "tags": [],
         "label": "IEventLogger",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-server.IEventLogger.logEvent",
-            "type": "Function",
-            "label": "logEvent",
-            "signature": [
-              "(properties: DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.IEventLogger.logEvent.$1",
-                "type": "Object",
-                "label": "properties",
-                "isRequired": false,
-                "signature": [
-                  "DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/types.ts",
-                  "lineNumber": 53
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/event_log/server/types.ts",
-              "lineNumber": 53
-            }
-          },
-          {
-            "id": "def-server.IEventLogger.startTiming",
-            "type": "Function",
-            "label": "startTiming",
-            "signature": [
-              "(event: DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.IEventLogger.startTiming.$1",
-                "type": "Object",
-                "label": "event",
-                "isRequired": false,
-                "signature": [
-                  "DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/types.ts",
-                  "lineNumber": 54
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/event_log/server/types.ts",
-              "lineNumber": 54
-            }
-          },
-          {
-            "id": "def-server.IEventLogger.stopTiming",
-            "type": "Function",
-            "label": "stopTiming",
-            "signature": [
-              "(event: DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.IEventLogger.stopTiming.$1",
-                "type": "Object",
-                "label": "event",
-                "isRequired": false,
-                "signature": [
-                  "DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/event_log/server/types.ts",
-                  "lineNumber": 55
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/event_log/server/types.ts",
-              "lineNumber": 55
-            }
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/event_log/server/types.ts",
           "lineNumber": 52
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.logEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "logEvent",
+            "description": [],
+            "signature": [
+              "(properties: DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.logEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "properties",
+                "description": [],
+                "signature": [
+                  "DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/types.ts",
+                  "lineNumber": 53
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.startTiming",
+            "type": "Function",
+            "tags": [],
+            "label": "startTiming",
+            "description": [],
+            "signature": [
+              "(event: DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.startTiming.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/types.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.stopTiming",
+            "type": "Function",
+            "tags": [],
+            "label": "stopTiming",
+            "description": [],
+            "signature": [
+              "(event: DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "lineNumber": 55
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.stopTiming.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/event_log/server/types.ts",
+                  "lineNumber": 55
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.QueryEventsBySavedObjectResult",
         "type": "Interface",
+        "tags": [],
         "label": "QueryEventsBySavedObjectResult",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+          "lineNumber": 37
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "eventLog",
             "id": "def-server.QueryEventsBySavedObjectResult.page",
             "type": "number",
+            "tags": [],
             "label": "page",
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 38
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "eventLog",
             "id": "def-server.QueryEventsBySavedObjectResult.per_page",
             "type": "number",
+            "tags": [],
             "label": "per_page",
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 39
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "eventLog",
             "id": "def-server.QueryEventsBySavedObjectResult.total",
             "type": "number",
+            "tags": [],
             "label": "total",
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 40
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "eventLog",
             "id": "def-server.QueryEventsBySavedObjectResult.data",
             "type": "Array",
+            "tags": [],
             "label": "data",
             "description": [],
+            "signature": [
+              "(Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
+            ],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 41
             },
-            "signature": [
-              "(Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-          "lineNumber": 37
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.IEvent",
         "type": "Type",
-        "label": "IEvent",
         "tags": [],
+        "label": "IEvent",
         "description": [],
+        "signature": [
+          "DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+        ],
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
           "lineNumber": 26
         },
-        "signature": [
-          "undefined | DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>>"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "eventLog",
         "id": "def-server.IValidatedEvent",
         "type": "Type",
-        "label": "IValidatedEvent",
         "tags": [],
+        "label": "IValidatedEvent",
         "description": [],
+        "signature": [
+          "Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> | undefined"
+        ],
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
           "lineNumber": 25
         },
-        "signature": [
-          "undefined | Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "eventLog",
         "id": "def-server.SAVED_OBJECT_REL_PRIMARY",
         "type": "string",
+        "tags": [],
         "label": "SAVED_OBJECT_REL_PRIMARY",
         "description": [],
+        "signature": [
+          "\"primary\""
+        ],
         "source": {
           "path": "x-pack/plugins/event_log/server/types.ts",
           "lineNumber": 18
         },
-        "signature": [
-          "\"primary\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "eventLog",
       "id": "def-server.IEventLogService",
       "type": "Interface",
+      "tags": [],
       "label": "IEventLogService",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "x-pack/plugins/event_log/server/types.ts",
+        "lineNumber": 29
+      },
+      "deprecated": false,
       "children": [
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.isEnabled",
           "type": "Function",
+          "tags": [],
           "label": "isEnabled",
+          "description": [],
           "signature": [
             "() => boolean"
           ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 30
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.isLoggingEntries",
           "type": "Function",
+          "tags": [],
           "label": "isLoggingEntries",
+          "description": [],
           "signature": [
             "() => boolean"
           ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 31
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.isIndexingEntries",
           "type": "Function",
+          "tags": [],
           "label": "isIndexingEntries",
+          "description": [],
           "signature": [
             "() => boolean"
           ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 32
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.registerProviderActions",
           "type": "Function",
+          "tags": [],
           "label": "registerProviderActions",
+          "description": [],
           "signature": [
             "(provider: string, actions: string[]) => void"
           ],
-          "description": [],
-          "children": [
-            {
-              "id": "def-server.IEventLogService.registerProviderActions.$1",
-              "type": "string",
-              "label": "provider",
-              "isRequired": true,
-              "signature": [
-                "string"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 33
-              }
-            },
-            {
-              "id": "def-server.IEventLogService.registerProviderActions.$2",
-              "type": "Array",
-              "label": "actions",
-              "isRequired": true,
-              "signature": [
-                "string[]"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 33
-              }
-            }
-          ],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 33
-          }
+          },
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerProviderActions.$1",
+              "type": "string",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 33
+              },
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerProviderActions.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "actions",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 33
+              },
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.isProviderActionRegistered",
           "type": "Function",
+          "tags": [],
           "label": "isProviderActionRegistered",
+          "description": [],
           "signature": [
             "(provider: string, action: string) => boolean"
           ],
-          "description": [],
-          "children": [
-            {
-              "id": "def-server.IEventLogService.isProviderActionRegistered.$1",
-              "type": "string",
-              "label": "provider",
-              "isRequired": true,
-              "signature": [
-                "string"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 34
-              }
-            },
-            {
-              "id": "def-server.IEventLogService.isProviderActionRegistered.$2",
-              "type": "string",
-              "label": "action",
-              "isRequired": true,
-              "signature": [
-                "string"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 34
-              }
-            }
-          ],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 34
-          }
+          },
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.isProviderActionRegistered.$1",
+              "type": "string",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 34
+              },
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.isProviderActionRegistered.$2",
+              "type": "string",
+              "tags": [],
+              "label": "action",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 34
+              },
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.getProviderActions",
           "type": "Function",
+          "tags": [],
           "label": "getProviderActions",
+          "description": [],
           "signature": [
             "() => Map<string, Set<string>>"
           ],
-          "description": [],
-          "children": [],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 35
-          }
+          },
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.registerSavedObjectProvider",
           "type": "Function",
+          "tags": [],
           "label": "registerSavedObjectProvider",
+          "description": [],
           "signature": [
             "(type: string, provider: ",
             "SavedObjectProvider",
             ") => void"
           ],
-          "description": [],
-          "children": [
-            {
-              "id": "def-server.IEventLogService.registerSavedObjectProvider.$1",
-              "type": "string",
-              "label": "type",
-              "isRequired": true,
-              "signature": [
-                "string"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 36
-              }
-            },
-            {
-              "id": "def-server.IEventLogService.registerSavedObjectProvider.$2",
-              "type": "Function",
-              "label": "provider",
-              "isRequired": true,
-              "signature": [
-                "SavedObjectProvider"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 36
-              }
-            }
-          ],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 36
-          }
+          },
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerSavedObjectProvider.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 36
+              },
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerSavedObjectProvider.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "SavedObjectProvider"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 36
+              },
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogService.getLogger",
           "type": "Function",
+          "tags": [],
           "label": "getLogger",
+          "description": [],
           "signature": [
-            "(properties: DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => ",
+            "(properties: DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined) => ",
             {
               "pluginId": "eventLog",
               "scope": "server",
@@ -1016,49 +1180,56 @@
               "text": "IEventLogger"
             }
           ],
-          "description": [],
-          "children": [
-            {
-              "id": "def-server.IEventLogService.getLogger.$1",
-              "type": "Object",
-              "label": "properties",
-              "isRequired": false,
-              "signature": [
-                "DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; url?: string | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; hash?: string | undefined; provider?: string | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; uuid?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
-              ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/event_log/server/types.ts",
-                "lineNumber": 37
-              }
-            }
-          ],
-          "tags": [],
-          "returnComment": [],
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 37
-          }
+          },
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.getLogger.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "properties",
+              "description": [],
+              "signature": [
+                "DeepPartial<DeepWriteable<Readonly<{ kibana?: Readonly<{ saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; url?: string | undefined; end?: string | undefined; category?: string[] | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; original?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; duration?: number | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; outcome?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; rule?: Readonly<{ description?: string | undefined; id?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+              ],
+              "source": {
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "lineNumber": 37
+              },
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/event_log/server/types.ts",
-        "lineNumber": 29
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "eventLog",
       "id": "def-server.IEventLogClientService",
       "type": "Interface",
+      "tags": [],
       "label": "IEventLogClientService",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "x-pack/plugins/event_log/server/types.ts",
+        "lineNumber": 40
+      },
+      "deprecated": false,
       "children": [
         {
+          "parentPluginId": "eventLog",
           "id": "def-server.IEventLogClientService.getClient",
           "type": "Function",
+          "tags": [],
           "label": "getClient",
+          "description": [],
           "signature": [
             "(request: ",
             {
@@ -1077,13 +1248,19 @@
               "text": "IEventLogClient"
             }
           ],
-          "description": [],
+          "source": {
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "lineNumber": 41
+          },
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "eventLog",
               "id": "def-server.IEventLogClientService.getClient.$1",
               "type": "Object",
+              "tags": [],
               "label": "request",
-              "isRequired": true,
+              "description": [],
               "signature": [
                 {
                   "pluginId": "core",
@@ -1094,25 +1271,17 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "description": [],
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 41
-              }
+              },
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "x-pack/plugins/event_log/server/types.ts",
-            "lineNumber": 41
-          }
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/event_log/server/types.ts",
-        "lineNumber": 40
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1124,18 +1293,20 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "eventLog",
         "id": "def-common.BASE_EVENT_LOG_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "BASE_EVENT_LOG_API_PATH",
         "description": [],
+        "signature": [
+          "\"/api/event_log\""
+        ],
         "source": {
           "path": "x-pack/plugins/event_log/common/index.ts",
           "lineNumber": 8
         },
-        "signature": [
-          "\"/api/event_log\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

@@ -6,11 +6,10 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-
 import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
-} from '../../common/types';
+} from '@kbn/securitysolution-list-utils';
 
 import { migrations } from './migrations';
 

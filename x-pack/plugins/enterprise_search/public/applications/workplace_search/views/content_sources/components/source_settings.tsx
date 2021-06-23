@@ -26,6 +26,8 @@ import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
+
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -36,6 +38,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -50,6 +53,8 @@ import {
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
+
+import { SourceLayout } from './source_layout';
 
 export const SourceSettings: React.FC = () => {
   const { updateContentSource, removeContentSource } = useActions(SourceLogic);
@@ -127,8 +132,8 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title="Source settings" />
+    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>
@@ -196,6 +201,6 @@ export const SourceSettings: React.FC = () => {
         </EuiButton>
         {confirmModalVisible && confirmModal}
       </ContentSection>
-    </>
+    </SourceLayout>
   );
 };

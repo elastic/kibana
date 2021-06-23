@@ -8,6 +8,8 @@
 export default function ({ loadTestFile }) {
   describe('SecuritySolution Endpoints', () => {
     loadTestFile(require.resolve('./authentications'));
+    loadTestFile(require.resolve('./cases_privileges'));
+    loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./host_details'));
     loadTestFile(require.resolve('./kpi_network'));

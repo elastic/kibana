@@ -6,105 +6,36 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import {
-  getMlJobsUsage,
-  getMlJobMetrics,
-  getRulesUsage,
-  initialRulesUsage,
-  initialMlJobsUsage,
-} from './detections_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
+import { getDetectionRuleMetrics, initialDetectionRulesUsage } from './detection_rule_helpers';
+import { getMlJobMetrics, initialMlJobsUsage } from './detection_ml_helpers';
+import { DetectionMetrics } from './types';
 
-interface FeatureUsage {
-  enabled: number;
-  disabled: number;
-}
+import { INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 
-export interface DetectionRulesUsage {
-  custom: FeatureUsage;
-  elastic: FeatureUsage;
-}
+export const isElasticRule = (tags: string[] = []) =>
+  tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
-export interface MlJobsUsage {
-  custom: FeatureUsage;
-  elastic: FeatureUsage;
-}
-
-export interface DetectionsUsage {
-  detection_rules: DetectionRulesUsage;
-  ml_jobs: MlJobsUsage;
-}
-
-export interface DetectionMetrics {
-  ml_jobs: MlJobMetric[];
-}
-
-export interface MlJobDataCount {
-  bucket_count: number;
-  empty_bucket_count: number;
-  input_bytes: number;
-  input_record_count: number;
-  last_data_time: number;
-  processed_record_count: number;
-}
-
-export interface MlJobModelSize {
-  bucket_allocation_failures_count: number;
-  memory_status: string;
-  model_bytes: number;
-  model_bytes_exceeded: number;
-  model_bytes_memory_limit: number;
-  peak_model_bytes: number;
-}
-
-export interface MlTimingStats {
-  average_bucket_processing_time_ms: number;
-  bucket_count: number;
-  exponential_average_bucket_processing_time_ms: number;
-  exponential_average_bucket_processing_time_per_hour_ms: number;
-  maximum_bucket_processing_time_ms: number;
-  minimum_bucket_processing_time_ms: number;
-  total_bucket_processing_time_ms: number;
-}
-
-export interface MlJobMetric {
-  job_id: string;
-  open_time: string;
-  state: string;
-  data_counts: MlJobDataCount;
-  model_size_stats: MlJobModelSize;
-  timing_stats: MlTimingStats;
-}
-
-export const defaultDetectionsUsage = {
-  detection_rules: initialRulesUsage,
-  ml_jobs: initialMlJobsUsage,
-};
-
-export const fetchDetectionsUsage = async (
+export const fetchDetectionsMetrics = async (
   kibanaIndex: string,
+  signalsIndex: string,
   esClient: ElasticsearchClient,
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
-): Promise<DetectionsUsage> => {
-  const [rulesUsage, mlJobsUsage] = await Promise.allSettled([
-    getRulesUsage(kibanaIndex, esClient),
-    getMlJobsUsage(ml, savedObjectClient),
+): Promise<DetectionMetrics> => {
+  const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
+    getMlJobMetrics(ml, savedObjectClient),
+    getDetectionRuleMetrics(kibanaIndex, signalsIndex, esClient, savedObjectClient),
   ]);
 
   return {
-    detection_rules: rulesUsage.status === 'fulfilled' ? rulesUsage.value : initialRulesUsage,
-    ml_jobs: mlJobsUsage.status === 'fulfilled' ? mlJobsUsage.value : initialMlJobsUsage,
-  };
-};
-
-export const fetchDetectionsMetrics = async (
-  ml: MlPluginSetup | undefined,
-  savedObjectClient: SavedObjectsClientContract
-): Promise<DetectionMetrics> => {
-  const [mlJobMetrics] = await Promise.allSettled([getMlJobMetrics(ml, savedObjectClient)]);
-
-  return {
-    ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : [],
+    ml_jobs:
+      mlJobMetrics.status === 'fulfilled'
+        ? mlJobMetrics.value
+        : { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
+    detection_rules:
+      detectionRuleMetrics.status === 'fulfilled'
+        ? detectionRuleMetrics.value
+        : { detection_rule_detail: [], detection_rule_usage: initialDetectionRulesUsage },
   };
 };

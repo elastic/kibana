@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
   categorizationFieldExamplesSchema,
-  chartSchema,
+  basicChartSchema,
+  populationChartSchema,
   datafeedIdsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
+  optionaljobIdsSchema,
   jobsWithTimerangeSchema,
   lookBackProgressSchema,
   topCategoriesSchema,
@@ -212,7 +215,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
    *  job stats, datafeed stats, and calendars.
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) optionaljobIdsSchema
    *
    * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
    *    which includes the full configuration and stats for the job.
@@ -221,15 +224,19 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/jobs_summary',
       validate: {
-        body: jobIdsSchema,
+        body: optionaljobIdsSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { jobsSummary } = jobServiceProvider(client, mlClient);
+        const { jobsSummary } = jobServiceProvider(
+          client,
+          mlClient,
+          context.alerting?.getAlertsClient()
+        );
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -255,7 +262,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/jobs_with_time_range',
       validate: {
-        body: schema.object(jobsWithTimerangeSchema),
+        body: jobsWithTimerangeSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -316,21 +323,25 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) optionaljobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs',
       validate: {
-        body: jobIdsSchema,
+        body: optionaljobIdsSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { createFullJobsList } = jobServiceProvider(client, mlClient);
+        const { createFullJobsList } = jobServiceProvider(
+          client,
+          mlClient,
+          context.alerting?.getAlertsClient()
+        );
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);
 
@@ -385,7 +396,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/update_groups',
       validate: {
-        body: schema.object(updateGroupsSchema),
+        body: updateGroupsSchema,
       },
       options: {
         tags: ['access:ml:canUpdateJob'],
@@ -491,7 +502,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { indexPattern } = request.params;
-        const isRollup = request.query.rollup === 'true';
+        const isRollup = request.query?.rollup === 'true';
         const savedObjectsClient = context.core.savedObjects.client;
         const { newJobCaps } = jobServiceProvider(client, mlClient);
         const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
@@ -518,7 +529,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/new_job_line_chart',
       validate: {
-        body: schema.object(chartSchema),
+        body: schema.object(basicChartSchema),
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -577,7 +588,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/new_job_population_chart',
       validate: {
-        body: schema.object(chartSchema),
+        body: schema.object(populationChartSchema),
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -798,20 +809,19 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const { datafeedId, job, datafeed } = request.body;
 
-        if (datafeedId !== undefined) {
-          const { body } = await mlClient.previewDatafeed(
-            {
-              datafeed_id: datafeedId,
-            },
-            getAuthorizationHeader(request)
-          );
-          return response.ok({
-            body,
-          });
-        }
+        const payload =
+          datafeedId !== undefined
+            ? {
+                datafeed_id: datafeedId,
+              }
+            : ({
+                body: {
+                  job_config: job,
+                  datafeed_config: datafeed,
+                },
+              } as estypes.MlPreviewDatafeedRequest);
 
-        const { datafeedPreview } = jobServiceProvider(client, mlClient);
-        const body = await datafeedPreview(job, datafeed);
+        const { body } = await mlClient.previewDatafeed(payload, getAuthorizationHeader(request));
         return response.ok({
           body,
         });

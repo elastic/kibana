@@ -15,22 +15,13 @@ export interface FleetConfigType {
   registryProxyUrl?: string;
   agents: {
     enabled: boolean;
-    tlsCheckDisabled: boolean;
-    pollingRequestTimeout: number;
-    maxConcurrentConnections: number;
-    kibana: {
-      host?: string[] | string;
-      ca_sha256?: string;
-    };
     elasticsearch: {
-      host?: string;
+      hosts?: string[];
       ca_sha256?: string;
     };
     fleet_server?: {
       hosts?: string[];
     };
-    agentPolicyRolloutRateLimitIntervalMs: number;
-    agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];

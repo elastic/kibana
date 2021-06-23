@@ -9,7 +9,7 @@ import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
 
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { useOsqueryPolicies } from './use_osquery_policies';
@@ -134,7 +134,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.online ? 'success' : 'danger'}>
+      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
         <span className={contentClassName}>
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>

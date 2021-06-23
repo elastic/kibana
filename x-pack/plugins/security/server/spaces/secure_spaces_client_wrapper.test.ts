@@ -6,15 +6,19 @@
  */
 
 import { deepFreeze } from '@kbn/std';
+import type { EcsEventOutcome } from 'src/core/server';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import type { GetAllSpacesPurpose, Space } from '../../../spaces/server';
 import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
-import { EventOutcome, SpaceAuditAction } from '../audit';
+import { SpaceAuditAction } from '../audit';
 import { auditServiceMock } from '../audit/index.mock';
-import type { AuthorizationServiceSetup } from '../authorization';
+import type {
+  AuthorizationServiceSetup,
+  AuthorizationServiceSetupInternal,
+} from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
@@ -84,7 +88,9 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   };
 };
 
-const expectNoAuthorizationCheck = (authorization: jest.Mocked<AuthorizationServiceSetup>) => {
+const expectNoAuthorizationCheck = (
+  authorization: jest.Mocked<AuthorizationServiceSetupInternal>
+) => {
   expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkSavedObjectsPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -135,8 +141,8 @@ const expectSuccessAuditLogging = (
 
 const expectAuditEvent = (
   auditLogger: AuditLogger,
-  action: AuditEvent['event']['action'],
-  outcome: AuditEvent['event']['outcome'],
+  action: string,
+  outcome: EcsEventOutcome,
   savedObject?: Required<AuditEvent>['kibana']['saved_object']
 ) => {
   expect(auditLogger.log).toHaveBeenCalledWith(
@@ -194,15 +200,15 @@ describe('SecureSpacesClientWrapper', () => {
       expect(response).toEqual(spaces);
       expectNoAuthorizationCheck(authorization);
       expectNoAuditLogging(legacyAuditLogger);
-      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, EventOutcome.SUCCESS, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
         type: 'space',
         id: spaces[0].id,
       });
-      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, EventOutcome.SUCCESS, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
         type: 'space',
         id: spaces[1].id,
       });
-      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, EventOutcome.SUCCESS, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
         type: 'space',
         id: spaces[2].id,
       });
@@ -285,7 +291,7 @@ describe('SecureSpacesClientWrapper', () => {
           );
 
           expectForbiddenAuditLogging(legacyAuditLogger, username, 'getAll');
-          expectAuditEvent(auditLogger, SpaceAuditAction.FIND, EventOutcome.FAILURE);
+          expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'failure');
         });
 
         test(`returns spaces that the user is authorized for`, async () => {
@@ -330,7 +336,7 @@ describe('SecureSpacesClientWrapper', () => {
           );
 
           expectSuccessAuditLogging(legacyAuditLogger, username, 'getAll', [spaces[0].id]);
-          expectAuditEvent(auditLogger, SpaceAuditAction.FIND, EventOutcome.SUCCESS, {
+          expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
             type: 'space',
             id: spaces[0].id,
           });
@@ -351,7 +357,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(response).toEqual(spaces[0]);
       expectNoAuthorizationCheck(authorization);
       expectNoAuditLogging(legacyAuditLogger);
-      expectAuditEvent(auditLogger, SpaceAuditAction.GET, EventOutcome.SUCCESS, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
         id: spaces[0].id,
       });
@@ -392,7 +398,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectForbiddenAuditLogging(legacyAuditLogger, username, 'get', spaceId);
-      expectAuditEvent(auditLogger, SpaceAuditAction.GET, EventOutcome.FAILURE, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'failure', {
         type: 'space',
         id: spaces[0].id,
       });
@@ -432,7 +438,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectSuccessAuditLogging(legacyAuditLogger, username, 'get', [spaceId]);
-      expectAuditEvent(auditLogger, SpaceAuditAction.GET, EventOutcome.SUCCESS, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
         id: spaceId,
       });
@@ -457,7 +463,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(response).toEqual(space);
       expectNoAuthorizationCheck(authorization);
       expectNoAuditLogging(legacyAuditLogger);
-      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'unknown', {
         type: 'space',
         id: space.id,
       });
@@ -495,7 +501,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectForbiddenAuditLogging(legacyAuditLogger, username, 'create');
-      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, EventOutcome.FAILURE, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'failure', {
         type: 'space',
         id: space.id,
       });
@@ -534,7 +540,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectSuccessAuditLogging(legacyAuditLogger, username, 'create');
-      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'unknown', {
         type: 'space',
         id: space.id,
       });
@@ -559,7 +565,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(response).toEqual(space.id);
       expectNoAuthorizationCheck(authorization);
       expectNoAuditLogging(legacyAuditLogger);
-      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
         type: 'space',
         id: space.id,
       });
@@ -597,7 +603,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectForbiddenAuditLogging(legacyAuditLogger, username, 'update');
-      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, EventOutcome.FAILURE, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'failure', {
         type: 'space',
         id: space.id,
       });
@@ -636,7 +642,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectSuccessAuditLogging(legacyAuditLogger, username, 'update');
-      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
         type: 'space',
         id: space.id,
       });
@@ -660,7 +666,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.delete).toHaveBeenCalledWith(space.id);
       expectNoAuthorizationCheck(authorization);
       expectNoAuditLogging(legacyAuditLogger);
-      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
       });
@@ -698,7 +704,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectForbiddenAuditLogging(legacyAuditLogger, username, 'delete');
-      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, EventOutcome.FAILURE, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'failure', {
         type: 'space',
         id: space.id,
       });
@@ -735,7 +741,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
 
       expectSuccessAuditLogging(legacyAuditLogger, username, 'delete');
-      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, EventOutcome.UNKNOWN, {
+      expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
       });

@@ -6,14 +6,22 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { Cloud } from './fields/cloud';
 import { Container } from './fields/container';
+import { Host } from './fields/host';
 import { Kubernetes } from './fields/kubernetes';
+import { Service } from './fields/service';
 
 type BaseMetric = APMBaseDoc & {
   processor: {
     name: 'metric';
     event: 'metric';
   };
+  cloud?: Cloud;
+  container?: Container;
+  kubernetes?: Kubernetes;
+  service?: Service;
+  host?: Host;
 };
 
 type BaseBreakdownMetric = BaseMetric & {
@@ -86,8 +94,6 @@ type TransactionDurationMetric = BaseMetric & {
     environment?: string;
     version?: string;
   };
-  container?: Container;
-  kubernetes?: Kubernetes;
 };
 
 export type SpanDestinationMetric = BaseMetric & {

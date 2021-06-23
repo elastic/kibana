@@ -11,13 +11,13 @@ import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
 import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../common/constants';
-import { getFileUpload } from '../../../kibana_services';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps, FileUploadGeoResults } from '../../../../../file_upload/public';
+import { FileUploadGeoResults } from '../../../../../file_upload/public';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { getFileUploadComponent } from '../../../kibana_services';
 
 export enum UPLOAD_STEPS {
   CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',
@@ -26,15 +26,14 @@ export enum UPLOAD_STEPS {
 }
 
 enum INDEXING_STAGE {
-  READY = 'READY',
+  CONFIGURE = 'CONFIGURE',
   TRIGGERED = 'TRIGGERED',
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR',
 }
 
 interface State {
-  indexingStage: INDEXING_STAGE | null;
-  fileUploadComponent: React.ComponentType<FileUploadComponentProps> | null;
+  indexingStage: INDEXING_STAGE;
   results?: FileUploadGeoResults;
 }
 
@@ -42,13 +41,11 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   private _isMounted: boolean = false;
 
   state: State = {
-    indexingStage: null,
-    fileUploadComponent: null,
+    indexingStage: INDEXING_STAGE.CONFIGURE,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadFileUploadComponent();
   }
 
   componentWillUnmount() {
@@ -58,7 +55,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   componentDidUpdate() {
     if (
       this.props.currentStepId === UPLOAD_STEPS.UPLOAD &&
-      this.state.indexingStage === INDEXING_STAGE.READY
+      this.state.indexingStage === INDEXING_STAGE.CONFIGURE
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
       this.props.startStepLoading();
@@ -90,13 +87,6 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     ]);
     this.props.advanceToNextStep();
   });
-
-  async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
-    if (this._isMounted) {
-      this.setState({ fileUploadComponent });
-    }
-  }
 
   _onFileSelect = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
@@ -156,32 +146,17 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };
 
-  // Called on file upload screen when UI state changes
-  _onIndexReady = (indexReady: boolean) => {
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ indexingStage: indexReady ? INDEXING_STAGE.READY : null });
-    if (indexReady) {
-      this.props.enableNextBtn();
-    } else {
-      this.props.disableNextBtn();
-    }
-  };
-
   render() {
-    if (!this.state.fileUploadComponent) {
-      return null;
-    }
+    const FileUpload = getFileUploadComponent();
 
-    const FileUpload = this.state.fileUploadComponent;
     return (
       <EuiPanel>
         <FileUpload
           isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
           onFileSelect={this._onFileSelect}
           onFileClear={this._onFileClear}
-          onIndexReady={this._onIndexReady}
+          enableImportBtn={this.props.enableNextBtn}
+          disableImportBtn={this.props.disableNextBtn}
           onUploadComplete={this._onUploadComplete}
           onUploadError={this._onUploadError}
         />

@@ -77,7 +77,7 @@ export const WaterfallFlyout = ({
     return null;
   }
 
-  const { url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
+  const { x, url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
 
   trackMetric({ metric: 'waterfall_flyout', metricType: METRIC_TYPE.CLICK });
 
@@ -93,7 +93,13 @@ export const WaterfallFlyout = ({
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
               <EuiFlexItem>
-                <MiddleTruncatedText text={url} url={url} ariaLabel={url} />
+                <MiddleTruncatedText
+                  index={x + 1}
+                  text={url}
+                  url={url}
+                  ariaLabel={url}
+                  highestIndex={x + 1}
+                />
               </EuiFlexItem>
             </h2>
           </EuiTitle>

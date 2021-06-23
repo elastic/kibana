@@ -14,7 +14,7 @@ import {
   clearFlashMessages,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/schema/types';
 
 import { EngineLogic } from '../engine';
 import { Result } from '../result/types';

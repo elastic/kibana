@@ -13,7 +13,7 @@ import {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import type { Logger } from 'src/core/server';
+import type { Logger, LogMeta } from 'src/core/server';
 
 import moment from 'moment';
 import { CounterMetric, UsageCounter } from './usage_counter';
@@ -22,6 +22,10 @@ import {
   storeCounter,
   serializeCounterKey,
 } from './saved_objects';
+
+interface UsageCountersLogMeta extends LogMeta {
+  kibana: { usageCounters: { results: unknown[] } };
+}
 
 export interface UsageCountersServiceDeps {
   logger: Logger;
@@ -116,7 +120,11 @@ export class UsageCountersService {
         rxOp.concatMap((counters) => this.storeDate$(counters, internalRepository))
       )
       .subscribe((results) => {
-        this.logger.debug('Store counters into savedObjects', results);
+        this.logger.debug<UsageCountersLogMeta>('Store counters into savedObjects', {
+          kibana: {
+            usageCounters: { results },
+          },
+        });
       });
 
     this.flushCache$.next();

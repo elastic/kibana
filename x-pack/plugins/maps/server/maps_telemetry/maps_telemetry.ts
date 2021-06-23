@@ -25,6 +25,18 @@ import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
+import {
+  getBaseMapsPerCluster,
+  getGridResolutionsPerCluster,
+  getScalingOptionsPerCluster,
+  getTelemetryLayerTypesPerCluster,
+  getTermJoinsPerCluster,
+  TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER,
+  TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER,
+  TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
+  TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
+  TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
+} from './util';
 
 interface Settings {
   showMapVisualizationTypes: boolean;
@@ -52,6 +64,11 @@ export interface GeoIndexPatternsUsage {
 export interface LayersStatsUsage {
   mapsTotalCount: number;
   timeCaptured: string;
+  layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
+  scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
+  joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
+  basemaps: TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER;
+  resolutions: TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -246,11 +263,22 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
+  const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
+  const scalingOptions = getScalingOptionsPerCluster(layerLists);
+  const joins = getTermJoinsPerCluster(layerLists);
+  const basemaps = getBaseMapsPerCluster(layerLists);
+  const resolutions = getGridResolutionsPerCluster(layerLists);
+
   return {
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
     timeCaptured: new Date().toISOString(),
+    layerTypes: telemetryLayerTypeCounts,
+    scalingOptions,
+    joins,
+    basemaps,
+    resolutions,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

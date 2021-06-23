@@ -29,6 +29,8 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkTopCountriesQuery';
 
@@ -68,12 +70,13 @@ export const useNetworkTopCountries = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopCountriesSelector(state, type, flowTarget)
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [
     networkTopCountriesRequest,
@@ -95,6 +98,7 @@ export const useNetworkTopCountries = ({
     },
     [limit]
   );
+  const { addError, addWarning } = useAppToasts();
 
   const [
     networkTopCountriesResponse,
@@ -147,16 +151,14 @@ export const useNetworkTopCountries = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
+                addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_TOP_COUNTRIES,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -167,32 +169,50 @@ export const useNetworkTopCountries = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addWarning, addError, skip]
   );
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkQueries.topCountries,
-        filterQuery: createFilter(filterQuery),
-        flowTarget,
-        ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort,
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
+        pagination: generateTablePaginationOptions(activePage, limit),
+        sort,
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    ip,
+    limit,
+    startDate,
+    sort,
+    flowTarget,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

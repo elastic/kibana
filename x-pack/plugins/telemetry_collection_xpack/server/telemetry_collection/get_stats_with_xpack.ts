@@ -45,7 +45,9 @@ export const getStatsWithXpack: StatsGetter<TelemetryAggregatedStats> = async fu
     })
     .reduce((acc, stats) => {
       // Concatenate the telemetry reported via monitoring as additional payloads instead of reporting it inside of stack_stats.kibana.plugins.monitoringTelemetry
-      const monitoringTelemetry = stats.stack_stats.kibana?.plugins?.monitoringTelemetry?.stats;
+      const monitoringTelemetry = stats.stack_stats.kibana?.plugins?.monitoringTelemetry?.stats as
+        | TelemetryAggregatedStats[]
+        | undefined;
       if (monitoringTelemetry) {
         delete stats.stack_stats.kibana!.plugins.monitoringTelemetry;
       }

@@ -10,12 +10,12 @@ import { Readable } from 'stream';
 import uuid from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   ImportTimelineResultSchema,
   importTimelineResultSchema,
   TimelineStatus,
 } from '../../../../../../common/types/timeline';
-import { validate } from '../../../../../../common/validate';
 
 import { createBulkErrorObject, BulkError } from '../../../../detection_engine/routes/utils';
 

@@ -6,17 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isEqual, uniqWith } from 'lodash';
+import { ExpressionRenderError } from '../../../../../src/plugins/expressions/public';
+import { isEsError } from '../../../../../src/plugins/data/public';
+import type { IEsError, Reason } from '../../../../../src/plugins/data/public';
 
-import { ExpressionRenderError } from 'src/plugins/expressions/public';
-
-interface ElasticsearchErrorClause {
-  type: string;
-  reason: string;
-  caused_by?: ElasticsearchErrorClause;
-}
+type ErrorCause = Required<IEsError>['attributes'];
 
 interface RequestError extends Error {
-  body?: { attributes?: { error: ElasticsearchErrorClause } };
+  body?: { attributes?: { error: { caused_by: ErrorCause } } };
+}
+
+interface ReasonDescription {
+  type: string;
+  reason: string;
+  context?: ReasonDescription;
+}
+
+interface EsAggError {
+  message: string;
+  stack: string;
 }
 
 const isRequestError = (e: Error | RequestError): e is RequestError => {
@@ -26,54 +35,104 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
-interface ESError extends Error {
-  attributes?: { caused_by?: ElasticsearchErrorClause };
-}
-
-const isEsError = (e: Error | ESError): e is ESError => {
-  if ('attributes' in e) {
-    return e.attributes?.caused_by?.caused_by !== undefined;
-  }
-  return false;
+// what happens for runtime field used on indexpatterns not accessible to the user?
+// they will throw on the kibana side as data will be undefined
+const isEsAggError = (e: Error | EsAggError): e is EsAggError => {
+  return 'message' in e && 'stack' in e && !isRequestError(e as Error) && !isEsError(e);
 };
 
-function getNestedErrorClause({
+function getNestedErrorClauseWithContext({
   type,
   reason,
   caused_by: causedBy,
-}: ElasticsearchErrorClause): { type: string; reason: string } {
+  lang,
+  script,
+}: Reason): ReasonDescription[] {
+  if (!causedBy) {
+    // scripted fields error has changed with no particular hint about painless in it,
+    // so it tries to lookup in the message for the script word
+    if (/script/.test(reason)) {
+      return [{ type, reason, context: { type: 'Painless script', reason: '' } }];
+    }
+    return [{ type, reason }];
+  }
+  const [payload] = getNestedErrorClause(causedBy);
+  if (lang === 'painless') {
+    return [
+      {
+        ...payload,
+        context: { type: 'Painless script', reason: `"${script}"` || reason },
+      },
+    ];
+  }
+  return [{ ...payload, context: { type, reason } }];
+}
+
+function getNestedErrorClause(e: ErrorCause | Reason): ReasonDescription[] {
+  const { type, reason, caused_by: causedBy } = e;
+  // Painless scripts errors are nested within the failed_shards property
+  if ('failed_shards' in e) {
+    if (e.failed_shards) {
+      return e.failed_shards.flatMap((shardCause) =>
+        getNestedErrorClauseWithContext(shardCause.reason)
+      );
+    }
+  }
   if (causedBy) {
     return getNestedErrorClause(causedBy);
   }
-  return { type, reason };
+  return [{ type, reason }];
 }
 
-function getErrorSource(e: Error | RequestError | ESError) {
+function getErrorSources(e: Error) {
   if (isRequestError(e)) {
-    return e.body!.attributes!.error;
+    return getNestedErrorClause(e.body!.attributes!.error as ErrorCause);
   }
   if (isEsError(e)) {
-    return e.attributes!.caused_by;
+    if (e.attributes?.reason) {
+      return getNestedErrorClause(e.attributes);
+    }
+    return getNestedErrorClause(e.attributes?.caused_by as ErrorCause);
   }
+  return [];
 }
 
-export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | null) {
+export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | null): string[] {
+  const errorMessages = [];
   if (error && 'original' in error && error.original) {
-    const errorSource = getErrorSource(error.original);
-    if (errorSource == null) {
-      return;
-    }
-    const rootError = getNestedErrorClause(errorSource);
-    if (rootError.reason && rootError.type) {
-      return i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
-        defaultMessage: 'Request error: {type}, {reason}',
-        values: {
-          reason: rootError.reason,
-          type: rootError.type,
-        },
-      });
+    if (isEsAggError(error.original)) {
+      errorMessages.push(error.message);
+    } else {
+      const rootErrors = uniqWith(getErrorSources(error.original), isEqual);
+      for (const rootError of rootErrors) {
+        if (rootError.context) {
+          errorMessages.push(
+            i18n.translate('xpack.lens.editorFrame.expressionFailureMessageWithContext', {
+              defaultMessage: 'Request error: {type}, {reason} in {context}',
+              values: {
+                reason: rootError.reason,
+                type: rootError.type,
+                context: rootError.context.reason
+                  ? `${rootError.context.reason} (${rootError.context.type})`
+                  : rootError.context.type,
+              },
+            })
+          );
+        } else {
+          errorMessages.push(
+            i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
+              defaultMessage: 'Request error: {type}, {reason}',
+              values: {
+                reason: rootError.reason,
+                type: rootError.type,
+              },
+            })
+          );
+        }
+      }
     }
   }
+  return errorMessages;
 }
 
 export function getMissingVisualizationTypeError() {

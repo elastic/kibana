@@ -8,10 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import { FeatureCollection } from 'geojson';
-// @ts-expect-error
 import * as topojson from 'topojson-client';
+import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
-
 import fetch from 'node-fetch';
 import {
   GIS_API_PATH,
@@ -145,7 +144,7 @@ export async function fetchGeoJson(
   }
 
   if (format === FORMAT_TYPE.TOPOJSON) {
-    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
+    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`) as GeometryCollection;
     return topojson.feature(fetchedJson, features);
   }
 

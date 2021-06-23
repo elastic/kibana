@@ -16,7 +16,7 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
   const _config = {
     [CONFIG_PATH]: settings,
   };
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     _config,
     deprecations.map((deprecation) => ({
       deprecation,

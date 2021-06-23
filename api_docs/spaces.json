@@ -4,9 +4,14 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "spaces",
         "id": "def-public.getSpaceColor",
         "type": "Function",
+        "tags": [],
         "label": "getSpaceColor",
+        "description": [
+          "\nDetermines the color for the provided space.\nIf a color is present on the Space itself, then that is used.\nOtherwise, a color is provided from EUI's Visualization Colors based on the space name.\n"
+        ],
         "signature": [
           "(space: Partial<",
           {
@@ -18,65 +23,21 @@
           },
           ">) => string"
         ],
-        "description": [
-          "\nDetermines the color for the provided space.\nIf a color is present on the Space itself, then that is used.\nOtherwise, a color is provided from EUI's Visualization Colors based on the space name.\n"
-        ],
-        "children": [
-          {
-            "id": "def-public.getSpaceColor.$1",
-            "type": "Object",
-            "label": "space",
-            "isRequired": true,
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "spacesOss",
-                "scope": "common",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-common.Space",
-                "text": "Space"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 24
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
           "lineNumber": 24
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.getSpaceImageUrl",
-        "type": "Function",
-        "label": "getSpaceImageUrl",
-        "signature": [
-          "(space: Partial<",
-          {
-            "pluginId": "spacesOss",
-            "scope": "common",
-            "docId": "kibSpacesOssPluginApi",
-            "section": "def-common.Space",
-            "text": "Space"
-          },
-          ">) => string"
-        ],
-        "description": [
-          "\nDetermines the avatar image for the provided space.\n"
-        ],
+        "deprecated": false,
         "children": [
           {
-            "id": "def-public.getSpaceImageUrl.$1",
+            "parentPluginId": "spaces",
+            "id": "def-public.getSpaceColor.$1",
             "type": "Object",
+            "tags": [],
             "label": "space",
-            "isRequired": true,
+            "description": [
+              "the space."
+            ],
             "signature": [
               "Partial<",
               {
@@ -88,45 +49,52 @@
               },
               ">"
             ],
-            "description": [],
             "source": {
               "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 64
-            }
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
-        "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-public.getSpaceImageUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpaceImageUrl",
+        "description": [
+          "\nDetermines the avatar image for the provided space.\n"
+        ],
+        "signature": [
+          "(space: Partial<",
+          {
+            "pluginId": "spacesOss",
+            "scope": "common",
+            "docId": "kibSpacesOssPluginApi",
+            "section": "def-common.Space",
+            "text": "Space"
+          },
+          ">) => string"
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
           "lineNumber": 64
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.getSpaceInitials",
-        "type": "Function",
-        "label": "getSpaceInitials",
-        "signature": [
-          "(space: Partial<",
-          {
-            "pluginId": "spacesOss",
-            "scope": "common",
-            "docId": "kibSpacesOssPluginApi",
-            "section": "def-common.Space",
-            "text": "Space"
-          },
-          ">) => string"
-        ],
-        "description": [
-          "\nDetermines the initials for the provided space.\nIf initials are present on the Space itself, then that is used.\nOtherwise, the initials are calculated based off the words in the space name, with a max length of 2 characters.\n"
-        ],
+        "deprecated": false,
         "children": [
           {
-            "id": "def-public.getSpaceInitials.$1",
+            "parentPluginId": "spaces",
+            "id": "def-public.getSpaceImageUrl.$1",
             "type": "Object",
+            "tags": [],
             "label": "space",
-            "isRequired": true,
+            "description": [
+              "the space."
+            ],
             "signature": [
               "Partial<",
               {
@@ -138,27 +106,85 @@
               },
               ">"
             ],
-            "description": [],
             "source": {
               "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 43
-            }
+              "lineNumber": 64
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
-        "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-public.getSpaceInitials",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpaceInitials",
+        "description": [
+          "\nDetermines the initials for the provided space.\nIf initials are present on the Space itself, then that is used.\nOtherwise, the initials are calculated based off the words in the space name, with a max length of 2 characters.\n"
+        ],
+        "signature": [
+          "(space: Partial<",
+          {
+            "pluginId": "spacesOss",
+            "scope": "common",
+            "docId": "kibSpacesOssPluginApi",
+            "section": "def-common.Space",
+            "text": "Space"
+          },
+          ">) => string"
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
           "lineNumber": 43
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.getSpaceInitials.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "space",
+            "description": [
+              "the space."
+            ],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "spaces",
         "id": "def-public.GetSpaceResult",
         "type": "Interface",
+        "tags": [],
         "label": "GetSpaceResult",
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -176,19 +202,21 @@
             "text": "Space"
           }
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spaces",
             "id": "def-public.GetSpaceResult.authorizedPurposes",
             "type": "Object",
+            "tags": [],
             "label": "authorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
-            },
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "signature": [
               "Record<",
               {
@@ -199,184 +227,241 @@
                 "text": "GetAllSpacesPurpose"
               },
               ", boolean> | undefined"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-public.Space",
         "type": "Interface",
-        "label": "Space",
-        "description": [],
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Space.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.color",
-            "type": "string",
-            "label": "color",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.initials",
-            "type": "string",
-            "label": "initials",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.disabledFeatures",
-            "type": "Array",
-            "label": "disabledFeatures",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space._reserved",
-            "type": "CompoundType",
-            "label": "_reserved",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
+        "label": "Space",
+        "description": [
+          "\nA Space."
         ],
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9
+          "lineNumber": 12
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nDisplay name for this space."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.initials",
+            "type": "string",
+            "tags": [],
+            "label": "initials",
+            "description": [
+              "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.imageUrl",
+            "type": "string",
+            "tags": [],
+            "label": "imageUrl",
+            "description": [
+              "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.disabledFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledFeatures",
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space._reserved",
+            "type": "CompoundType",
+            "tags": [
+              "private"
+            ],
+            "label": "_reserved",
+            "description": [
+              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "spaces",
         "id": "def-public.GetAllSpacesPurpose",
         "type": "Type",
-        "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
-        },
+        "label": "GetAllSpacesPurpose",
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "spaces",
       "id": "def-public.SpacesPluginSetup",
       "type": "Type",
-      "label": "SpacesPluginSetup",
       "tags": [],
-      "description": [],
-      "source": {
-        "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 39
-      },
+      "label": "SpacesPluginSetup",
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
       "signature": [
         "{}"
       ],
+      "source": {
+        "path": "x-pack/plugins/spaces/public/plugin.tsx",
+        "lineNumber": 42
+      },
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "spaces",
       "id": "def-public.SpacesPluginStart",
       "type": "Type",
-      "label": "SpacesPluginStart",
       "tags": [],
-      "description": [],
+      "label": "SpacesPluginStart",
+      "description": [
+        "\nStart contract for the Spaces plugin."
+      ],
+      "signature": [
+        {
+          "pluginId": "spacesOss",
+          "scope": "public",
+          "docId": "kibSpacesOssPluginApi",
+          "section": "def-public.SpacesApi",
+          "text": "SpacesApi"
+        }
+      ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 40
+        "lineNumber": 47
       },
-      "signature": [
-        "SpacesApi"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -385,113 +470,155 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "spaces",
         "id": "def-server.addSpaceIdToPath",
         "type": "Function",
+        "tags": [],
         "label": "addSpaceIdToPath",
+        "description": [
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
+        ],
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.addSpaceIdToPath.$1",
-            "type": "string",
-            "label": "basePath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44
-            }
-          },
-          {
-            "id": "def-server.addSpaceIdToPath.$2",
-            "type": "string",
-            "label": "spaceId",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45
-            }
-          },
-          {
-            "id": "def-server.addSpaceIdToPath.$3",
-            "type": "string",
-            "label": "requestedPath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43
+          "lineNumber": 61
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.addSpaceIdToPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the server's base path."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.addSpaceIdToPath.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "the space id."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 63
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.addSpaceIdToPath.$3",
+            "type": "string",
+            "tags": [],
+            "label": "requestedPath",
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 64
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "the space-aware version of the requested path, inclusive of the server's base path."
+        ],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "spaces",
         "id": "def-server.GetAllSpacesOptions",
         "type": "Interface",
-        "label": "GetAllSpacesOptions",
-        "description": [],
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.GetAllSpacesOptions.purpose",
-            "type": "CompoundType",
-            "label": "purpose",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11
-            },
-            "signature": [
-              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
-            "type": "CompoundType",
-            "label": "includeAuthorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
+        "label": "GetAllSpacesOptions",
+        "description": [
+          "\nControls how spaces are retrieved."
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 13
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.GetAllSpacesOptions.purpose",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "purpose",
+            "description": [
+              "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
+            ],
+            "signature": [
+              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "includeAuthorizedPurposes",
+            "description": [
+              "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-server.GetSpaceResult",
         "type": "Interface",
+        "tags": [],
         "label": "GetSpaceResult",
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -509,19 +636,21 @@
             "text": "Space"
           }
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spaces",
             "id": "def-server.GetSpaceResult.authorizedPurposes",
             "type": "Object",
+            "tags": [],
             "label": "authorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
-            },
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "signature": [
               "Record<",
               {
@@ -532,146 +661,512 @@
                 "text": "GetAllSpacesPurpose"
               },
               ", boolean> | undefined"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
-        },
         "initialIsOpen": false
       },
       {
-        "id": "def-server.Space",
+        "parentPluginId": "spaces",
+        "id": "def-server.ISpacesClient",
         "type": "Interface",
-        "label": "Space",
-        "description": [],
         "tags": [],
+        "label": "ISpacesClient",
+        "description": [
+          "\nClient interface for interacting with spaces."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.getAll",
+            "type": "Function",
             "tags": [],
-            "id": "def-server.Space.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12
-            },
+            "label": "getAll",
+            "description": [
+              "\nRetrieve all available spaces."
+            ],
             "signature": [
-              "string | undefined"
-            ]
+              "(options?: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesOptions",
+                "text": "GetAllSpacesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetSpaceResult",
+                "text": "GetSpaceResult"
+              },
+              "[]>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.getAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "controls which spaces are retrieved."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.GetAllSpacesOptions",
+                    "text": "GetAllSpacesOptions"
+                  },
+                  " | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.get",
+            "type": "Function",
             "tags": [],
-            "id": "def-server.Space.color",
-            "type": "string",
-            "label": "color",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13
-            },
+            "label": "get",
+            "description": [
+              "\nRetrieve a space by its id."
+            ],
             "signature": [
-              "string | undefined"
-            ]
+              "(id: string) => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 40
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the space id."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 40
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.create",
+            "type": "Function",
             "tags": [],
-            "id": "def-server.Space.initials",
-            "type": "string",
-            "label": "initials",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14
-            },
+            "label": "create",
+            "description": [
+              "\nCreates a space."
+            ],
             "signature": [
-              "string | undefined"
-            ]
+              "(space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "space",
+                "description": [
+                  "the space to create."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 46
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.update",
+            "type": "Function",
             "tags": [],
-            "id": "def-server.Space.disabledFeatures",
-            "type": "Array",
-            "label": "disabledFeatures",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15
-            },
+            "label": "update",
+            "description": [
+              "\nUpdates a space."
+            ],
             "signature": [
-              "string[]"
-            ]
+              "(id: string, space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the id of the space to update."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "space",
+                "description": [
+                  "the updated space."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.delete",
+            "type": "Function",
             "tags": [],
-            "id": "def-server.Space._reserved",
-            "type": "CompoundType",
-            "label": "_reserved",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16
-            },
+            "label": "delete",
+            "description": [
+              "\nDeletes a space, and all saved objects belonging to that space."
+            ],
             "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
+              "(id: string) => Promise<void>"
+            ],
             "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 59
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the id of the space to delete."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-server.Space",
+        "type": "Interface",
+        "tags": [],
+        "label": "Space",
+        "description": [
+          "\nA Space."
         ],
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9
+          "lineNumber": 12
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nDisplay name for this space."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.initials",
+            "type": "string",
+            "tags": [],
+            "label": "initials",
+            "description": [
+              "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.imageUrl",
+            "type": "string",
+            "tags": [],
+            "label": "imageUrl",
+            "description": [
+              "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.disabledFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledFeatures",
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space._reserved",
+            "type": "CompoundType",
+            "tags": [
+              "private"
+            ],
+            "label": "_reserved",
+            "description": [
+              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-server.SpacesServiceSetup",
         "type": "Interface",
-        "label": "SpacesServiceSetup",
-        "description": [],
         "tags": [],
+        "label": "SpacesServiceSetup",
+        "description": [
+          "\nThe Spaces service setup contract."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+          "lineNumber": 19
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceSetup.getSpaceId",
             "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
             "label": "getSpaceId",
+            "description": [
+              "\nRetrieves the space id associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -683,15 +1178,94 @@
               },
               "<unknown, unknown, unknown, any>) => string"
             ],
-            "description": [
-              "\nRetrieves the space id associated with the provided request."
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 27
+            },
+            "deprecated": true,
+            "removeBy": "7.16",
+            "references": [
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 56
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.ts",
+                  "lineNumber": 34
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/plugin.ts",
+                  "lineNumber": 267
+                }
+              },
+              {
+                "plugin": "reporting",
+                "link": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 269
+                }
+              },
+              {
+                "plugin": "apm",
+                "link": {
+                  "path": "x-pack/plugins/apm/server/routes/index_pattern.ts",
+                  "lineNumber": 33
+                }
+              },
+              {
+                "plugin": "infra",
+                "link": {
+                  "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts",
+                  "lineNumber": 239
+                }
+              },
+              {
+                "plugin": "infra",
+                "link": {
+                  "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts",
+                  "lineNumber": 241
+                }
+              },
+              {
+                "plugin": "infra",
+                "link": {
+                  "path": "x-pack/plugins/infra/server/plugin.ts",
+                  "lineNumber": 153
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 206
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.test.ts",
+                  "lineNumber": 24
+                }
+              }
             ],
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceSetup.getSpaceId.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -702,118 +1276,265 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 23
-                }
+                  "lineNumber": 27
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.SpacesServiceSetup.spaceIdToNamespace",
+            "type": "Function",
             "tags": [
               "deprecated"
             ],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "id": "def-server.SpacesServiceSetup.spaceIdToNamespace",
-            "type": "Function",
             "label": "spaceIdToNamespace",
-            "signature": [
-              "(spaceId: string) => string | undefined"
-            ],
             "description": [
               "\nConverts the provided space id into the corresponding Saved Objects `namespace` id."
             ],
+            "signature": [
+              "(spaceId: string) => string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 36
+            },
+            "deprecated": true,
+            "removeBy": "7.16",
+            "references": [],
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceSetup.spaceIdToNamespace.$1",
                 "type": "string",
+                "tags": [],
                 "label": "spaceId",
-                "isRequired": true,
+                "description": [
+                  "the space id to convert."
+                ],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 31
-                }
+                  "lineNumber": 36
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.SpacesServiceSetup.namespaceToSpaceId",
+            "type": "Function",
             "tags": [
               "deprecated"
             ],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "id": "def-server.SpacesServiceSetup.namespaceToSpaceId",
-            "type": "Function",
             "label": "namespaceToSpaceId",
-            "signature": [
-              "(namespace: string | undefined) => string"
-            ],
             "description": [
               "\nConverts the provided namespace into the corresponding space id."
             ],
-            "children": [
+            "signature": [
+              "(namespace: string | undefined) => string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 45
+            },
+            "deprecated": true,
+            "removeBy": "7.16",
+            "references": [
               {
-                "id": "def-server.SpacesServiceSetup.namespaceToSpaceId.$1",
-                "type": "string",
-                "label": "namespace",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 39
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.ts",
+                  "lineNumber": 56
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
+                  "lineNumber": 1000
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
+                  "lineNumber": 1027
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.test.ts",
+                  "lineNumber": 25
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 66
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 67
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 68
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 72
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 85
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 86
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 87
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 88
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 89
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 94
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 95
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 142
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 143
+                }
+              },
+              {
+                "plugin": "security",
+                "link": {
+                  "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts",
+                  "lineNumber": 147
                 }
               }
             ],
-            "tags": [
-              "deprecated"
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.SpacesServiceSetup.namespaceToSpaceId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "the namespace to convert."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+                  "lineNumber": 45
+                },
+                "deprecated": false,
+                "isRequired": false
+              }
             ],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 39
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 16
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-server.SpacesServiceStart",
         "type": "Interface",
-        "label": "SpacesServiceStart",
-        "description": [],
         "tags": [],
+        "label": "SpacesServiceStart",
+        "description": [
+          "\nThe Spaces service start contract."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+          "lineNumber": 51
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.createSpacesClient",
             "type": "Function",
+            "tags": [],
             "label": "createSpacesClient",
             "description": [
               "\nCreates a scoped instance of the SpacesClient."
             ],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 46
-            },
             "signature": [
               "(request: ",
               {
@@ -823,15 +1544,58 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Pick<",
-              "SpacesClient",
-              ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">"
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.ISpacesClient",
+                "text": "ISpacesClient"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 56
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "the request."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false
+              }
             ]
           },
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.getSpaceId",
             "type": "Function",
+            "tags": [],
             "label": "getSpaceId",
+            "description": [
+              "\nRetrieves the space id associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -843,15 +1607,21 @@
               },
               "<unknown, unknown, unknown, any>) => string"
             ],
-            "description": [
-              "\nRetrieves the space id associated with the provided request."
-            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceStart.getSpaceId.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -862,24 +1632,25 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 52
-                }
+                  "lineNumber": 62
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 52
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.isInDefaultSpace",
             "type": "Function",
+            "tags": [],
             "label": "isInDefaultSpace",
+            "description": [
+              "\nIndicates if the provided request is executing within the context of the `default` space."
+            ],
             "signature": [
               "(request: ",
               {
@@ -891,15 +1662,21 @@
               },
               "<unknown, unknown, unknown, any>) => boolean"
             ],
-            "description": [
-              "\nIndicates if the provided request is executing within the context of the `default` space."
-            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 68
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceStart.isInDefaultSpace.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -910,24 +1687,25 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 58
-                }
+                  "lineNumber": 68
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 58
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.getActiveSpace",
             "type": "Function",
+            "tags": [],
             "label": "getActiveSpace",
+            "description": [
+              "\nRetrieves the Space associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -947,15 +1725,21 @@
               },
               ">"
             ],
-            "description": [
-              "\nRetrieves the Space associated with the provided request."
-            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 74
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceStart.getActiveSpace.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "request",
-                "isRequired": true,
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -966,145 +1750,238 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 64
-                }
+                  "lineNumber": 74
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 64
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.spaceIdToNamespace",
             "type": "Function",
+            "tags": [],
             "label": "spaceIdToNamespace",
-            "signature": [
-              "(spaceId: string) => string | undefined"
-            ],
             "description": [
               "\nConverts the provided space id into the corresponding Saved Objects `namespace` id."
             ],
+            "signature": [
+              "(spaceId: string) => string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 80
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceStart.spaceIdToNamespace.$1",
                 "type": "string",
+                "tags": [],
                 "label": "spaceId",
-                "isRequired": true,
+                "description": [
+                  "the space id to convert."
+                ],
                 "signature": [
                   "string"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 70
-                }
+                  "lineNumber": 80
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 70
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceStart.namespaceToSpaceId",
             "type": "Function",
+            "tags": [],
             "label": "namespaceToSpaceId",
-            "signature": [
-              "(namespace: string | undefined) => string"
-            ],
             "description": [
               "\nConverts the provided namespace into the corresponding space id."
             ],
+            "signature": [
+              "(namespace: string | undefined) => string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
+              "lineNumber": 86
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "spaces",
                 "id": "def-server.SpacesServiceStart.namespaceToSpaceId.$1",
                 "type": "string",
+                "tags": [],
                 "label": "namespace",
-                "isRequired": false,
+                "description": [
+                  "the namespace to convert."
+                ],
                 "signature": [
                   "string | undefined"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 76
-                }
+                  "lineNumber": 86
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 76
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 42
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "spaces",
         "id": "def-server.GetAllSpacesPurpose",
         "type": "Type",
-        "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
-        },
+        "label": "GetAllSpacesPurpose",
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ISpacesClient",
+        "parentPluginId": "spaces",
+        "id": "def-server.SpacesClientRepositoryFactory",
         "type": "Type",
-        "label": "ISpacesClient",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-          "lineNumber": 27
-        },
-        "signature": [
-          "{ get: (id: string) => Promise<Space>; delete: (id: string) => Promise<void>; create: (space: Space) => Promise<Space>; update: (id: string, space: Space) => Promise<Space>; getAll: (options?: GetAllSpacesOptions) => Promise<GetSpaceResult[]>; }"
+        "tags": [
+          "private"
         ],
+        "label": "SpacesClientRepositoryFactory",
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
+        "signature": [
+          "(request: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, savedObjectsStart: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          },
+          ") => Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsRepository",
+            "text": "SavedObjectsRepository"
+          },
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-server.SpacesClientWrapper",
+        "type": "Type",
+        "tags": [
+          "private"
+        ],
+        "label": "SpacesClientWrapper",
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
+        "signature": [
+          "(request: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, baseClient: ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          },
+          ") => ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "spaces",
       "id": "def-server.SpacesPluginSetup",
       "type": "Interface",
-      "label": "SpacesPluginSetup",
-      "description": [],
       "tags": [],
+      "label": "SpacesPluginSetup",
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
+      "source": {
+        "path": "x-pack/plugins/spaces/server/plugin.ts",
+        "lineNumber": 57
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "spaces",
           "id": "def-server.SpacesPluginSetup.spacesService",
           "type": "Object",
+          "tags": [
+            "deprecated"
+          ],
           "label": "spacesService",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 55
-          },
+          "description": [
+            "\nService for interacting with spaces.\n"
+          ],
           "signature": [
             {
               "pluginId": "spaces",
@@ -1113,51 +1990,171 @@
               "section": "def-server.SpacesServiceSetup",
               "text": "SpacesServiceSetup"
             }
+          ],
+          "source": {
+            "path": "x-pack/plugins/spaces/server/plugin.ts",
+            "lineNumber": 64
+          },
+          "deprecated": true,
+          "removeBy": "7.16",
+          "references": [
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/server/plugin.ts",
+                "lineNumber": 60
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/server/plugin.ts",
+                "lineNumber": 267
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/server/plugin.ts",
+                "lineNumber": 285
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/server/plugin.ts",
+                "lineNumber": 301
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "lineNumber": 267
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "lineNumber": 289
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "lineNumber": 301
+              }
+            },
+            {
+              "plugin": "apm",
+              "link": {
+                "path": "x-pack/plugins/apm/server/routes/index_pattern.ts",
+                "lineNumber": 33
+              }
+            },
+            {
+              "plugin": "infra",
+              "link": {
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts",
+                "lineNumber": 238
+              }
+            },
+            {
+              "plugin": "infra",
+              "link": {
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts",
+                "lineNumber": 239
+              }
+            },
+            {
+              "plugin": "infra",
+              "link": {
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts",
+                "lineNumber": 241
+              }
+            },
+            {
+              "plugin": "infra",
+              "link": {
+                "path": "x-pack/plugins/infra/server/plugin.ts",
+                "lineNumber": 153
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 206
+              }
+            }
           ]
         },
         {
-          "tags": [],
+          "parentPluginId": "spaces",
           "id": "def-server.SpacesPluginSetup.spacesClient",
           "type": "Object",
+          "tags": [
+            "private"
+          ],
           "label": "spacesClient",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 56
-          },
+          "description": [
+            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
+          ],
           "signature": [
             "{ setClientRepositoryFactory: (factory: ",
-            "SpacesClientRepositoryFactory",
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesClientRepositoryFactory",
+              "text": "SpacesClientRepositoryFactory"
+            },
             ") => void; registerClientWrapper: (wrapper: ",
-            "SpacesClientWrapper",
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesClientWrapper",
+              "text": "SpacesClientWrapper"
+            },
             ") => void; }"
-          ]
+          ],
+          "source": {
+            "path": "x-pack/plugins/spaces/server/plugin.ts",
+            "lineNumber": 70
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 54
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "spaces",
       "id": "def-server.SpacesPluginStart",
       "type": "Interface",
-      "label": "SpacesPluginStart",
-      "description": [],
       "tags": [],
+      "label": "SpacesPluginStart",
+      "description": [
+        "\nStart contract for the Spaces plugin."
+      ],
+      "source": {
+        "path": "x-pack/plugins/spaces/server/plugin.ts",
+        "lineNumber": 87
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "spaces",
           "id": "def-server.SpacesPluginStart.spacesService",
           "type": "Object",
+          "tags": [],
           "label": "spacesService",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 63
-          },
+          "description": [
+            "Service for interacting with spaces."
+          ],
           "signature": [
             {
               "pluginId": "spaces",
@@ -1166,13 +2163,14 @@
               "section": "def-server.SpacesServiceStart",
               "text": "SpacesServiceStart"
             }
-          ]
+          ],
+          "source": {
+            "path": "x-pack/plugins/spaces/server/plugin.ts",
+            "lineNumber": 89
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 62
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1181,115 +2179,159 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "spaces",
         "id": "def-common.addSpaceIdToPath",
         "type": "Function",
+        "tags": [],
         "label": "addSpaceIdToPath",
+        "description": [
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
+        ],
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-common.addSpaceIdToPath.$1",
-            "type": "string",
-            "label": "basePath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44
-            }
-          },
-          {
-            "id": "def-common.addSpaceIdToPath.$2",
-            "type": "string",
-            "label": "spaceId",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45
-            }
-          },
-          {
-            "id": "def-common.addSpaceIdToPath.$3",
-            "type": "string",
-            "label": "requestedPath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43
+          "lineNumber": 61
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.addSpaceIdToPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the server's base path."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.addSpaceIdToPath.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "the space id."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 63
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.addSpaceIdToPath.$3",
+            "type": "string",
+            "tags": [],
+            "label": "requestedPath",
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 64
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "the space-aware version of the requested path, inclusive of the server's base path."
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-common.getSpaceIdFromPath",
         "type": "Function",
+        "tags": [
+          "private"
+        ],
         "label": "getSpaceIdFromPath",
+        "description": [
+          "\nExtracts the space id from the given path.\n"
+        ],
         "signature": [
           "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
         ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-common.getSpaceIdFromPath.$1",
-            "type": "CompoundType",
-            "label": "requestBasePath",
-            "isRequired": false,
-            "signature": [
-              "string | null | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "id": "def-common.getSpaceIdFromPath.$2",
-            "type": "CompoundType",
-            "label": "serverBasePath",
-            "isRequired": false,
-            "signature": [
-              "string | null | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 14
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 12
+          "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.getSpaceIdFromPath.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requestBasePath",
+            "description": [
+              "The base path of the current request."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.getSpaceIdFromPath.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverBasePath",
+            "description": [
+              "The server's base path."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the space id."
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-common.isReservedSpace",
         "type": "Function",
+        "tags": [],
         "label": "isReservedSpace",
+        "description": [
+          "\nReturns whether the given Space is reserved or not.\n"
+        ],
         "signature": [
           "(space: Partial<",
           {
@@ -1301,15 +2343,21 @@
           },
           "> | null | undefined) => boolean"
         ],
-        "description": [
-          "\nReturns whether the given Space is reserved or not.\n"
-        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "spaces",
             "id": "def-common.isReservedSpace.$1",
             "type": "CompoundType",
+            "tags": [],
             "label": "space",
-            "isRequired": false,
+            "description": [
+              "the space"
+            ],
             "signature": [
               "Partial<",
               {
@@ -1321,73 +2369,88 @@
               },
               "> | null | undefined"
             ],
-            "description": [
-              "the space"
-            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false,
+            "isRequired": false
           }
         ],
-        "tags": [],
         "returnComment": [
           "boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
-          "lineNumber": 18
-        },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "spaces",
         "id": "def-common.GetAllSpacesOptions",
         "type": "Interface",
-        "label": "GetAllSpacesOptions",
-        "description": [],
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.GetAllSpacesOptions.purpose",
-            "type": "CompoundType",
-            "label": "purpose",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11
-            },
-            "signature": [
-              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.GetAllSpacesOptions.includeAuthorizedPurposes",
-            "type": "CompoundType",
-            "label": "includeAuthorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
+        "label": "GetAllSpacesOptions",
+        "description": [
+          "\nControls how spaces are retrieved."
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 13
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.GetAllSpacesOptions.purpose",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "purpose",
+            "description": [
+              "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
+            ],
+            "signature": [
+              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.GetAllSpacesOptions.includeAuthorizedPurposes",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "includeAuthorizedPurposes",
+            "description": [
+              "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-common.GetSpaceResult",
         "type": "Interface",
+        "tags": [],
         "label": "GetSpaceResult",
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -1405,19 +2468,21 @@
             "text": "Space"
           }
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spaces",
             "id": "def-common.GetSpaceResult.authorizedPurposes",
             "type": "Object",
+            "tags": [],
             "label": "authorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
-            },
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "signature": [
               "Record<",
               {
@@ -1428,82 +2493,93 @@
                 "text": "GetAllSpacesPurpose"
               },
               ", boolean> | undefined"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/spaces/common/types.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "spaces",
         "id": "def-common.ENTER_SPACE_PATH",
         "type": "string",
+        "tags": [],
         "label": "ENTER_SPACE_PATH",
         "description": [
           "\nThe path to enter a space."
+        ],
+        "signature": [
+          "\"/spaces/enter\""
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/constants.ts",
           "lineNumber": 33
         },
-        "signature": [
-          "\"/spaces/enter\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spaces",
         "id": "def-common.GetAllSpacesPurpose",
         "type": "Type",
-        "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
-        },
+        "label": "GetAllSpacesPurpose",
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
+        "source": {
+          "path": "x-pack/plugins/spaces/common/types.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "spaces",
         "id": "def-common.MAX_SPACE_INITIALS",
         "type": "number",
+        "tags": [],
         "label": "MAX_SPACE_INITIALS",
         "description": [
           "\nThe maximum number of characters allowed in the Space Avatar's initials"
+        ],
+        "signature": [
+          "2"
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/constants.ts",
           "lineNumber": 28
         },
-        "signature": [
-          "2"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "spaces",
         "id": "def-common.SPACE_SEARCH_COUNT_THRESHOLD",
         "type": "number",
+        "tags": [],
         "label": "SPACE_SEARCH_COUNT_THRESHOLD",
         "description": [
           "\nThe minimum number of spaces required to show a search control."
+        ],
+        "signature": [
+          "8"
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/constants.ts",
           "lineNumber": 23
         },
-        "signature": [
-          "8"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

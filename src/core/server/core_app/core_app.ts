@@ -65,7 +65,7 @@ export class CoreApp {
       async (context, req, res) => {
         const { query, params } = req;
         const { path } = params;
-        if (!path || !path.endsWith('/')) {
+        if (!path || !path.endsWith('/') || path.startsWith('/')) {
           return res.notFound();
         }
 

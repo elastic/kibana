@@ -17,7 +17,7 @@ import {
 import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { ConfigSchema } from '../../../config';
-import { SEARCH_SESSION_TYPE } from '../../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../../src/plugins/data/common';
 import { DataEnhancedStartDependencies } from '../../type';
 
 export const SEARCH_SESSIONS_TASK_TYPE = 'search_sessions_monitor';

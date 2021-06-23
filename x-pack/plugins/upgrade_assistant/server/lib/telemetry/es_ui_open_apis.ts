@@ -36,6 +36,7 @@ export async function upsertUIOpenOption({
   cluster,
   indices,
   savedObjects,
+  kibana,
 }: UpsertUIOpenOptionDependencies): Promise<UIOpen> {
   if (overview) {
     await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'overview' });
@@ -49,9 +50,14 @@ export async function upsertUIOpenOption({
     await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'indices' });
   }
 
+  if (kibana) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'kibana' });
+  }
+
   return {
     overview,
     cluster,
     indices,
+    kibana,
   };
 }

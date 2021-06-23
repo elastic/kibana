@@ -38,6 +38,13 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
+  // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
+  // public method to return this array
+  // const registry = reporting.getExportTypesRegistry();
+  // const kibanaAccessControlTags = registry.getAllAccessControlTags();
+  const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if deprecated config is turned off
+  const kibanaAccessControlTags = useKibanaAccessControl ? ['access:downloadCsv'] : [];
+
   // This API calls run the SearchSourceImmediate export type's runTaskFn directly
   router.post(
     {
@@ -49,6 +56,9 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           browserTimezone: schema.string({ defaultValue: 'UTC' }),
           title: schema.string(),
         }),
+      },
+      options: {
+        tags: kibanaAccessControlTags,
       },
     },
     userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {

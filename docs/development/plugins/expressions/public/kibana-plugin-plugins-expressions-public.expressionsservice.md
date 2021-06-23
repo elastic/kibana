@@ -70,7 +70,7 @@ The actual function is defined in the <code>fn</code> key. The function can be \
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [setup()](./kibana-plugin-plugins-expressions-public.expressionsservice.setup.md) |  | Returns Kibana Platform \*setup\* life-cycle contract. Useful to return the same contract on server-side and browser-side. |
-|  [start()](./kibana-plugin-plugins-expressions-public.expressionsservice.start.md) |  | Returns Kibana Platform \*start\* life-cycle contract. Useful to return the same contract on server-side and browser-side. |
+|  [setup(args)](./kibana-plugin-plugins-expressions-public.expressionsservice.setup.md) |  | Returns Kibana Platform \*setup\* life-cycle contract. Useful to return the same contract on server-side and browser-side. |
+|  [start(args)](./kibana-plugin-plugins-expressions-public.expressionsservice.start.md) |  | Returns Kibana Platform \*start\* life-cycle contract. Useful to return the same contract on server-side and browser-side. |
 |  [stop()](./kibana-plugin-plugins-expressions-public.expressionsservice.stop.md) |  |  |
 

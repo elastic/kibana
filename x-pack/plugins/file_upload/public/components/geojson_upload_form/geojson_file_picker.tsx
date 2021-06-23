@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../../common';
-import { getMaxBytesFormatted } from '../../get_max_bytes';
+import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
 import { validateFile } from '../../importer';
 import {
   GeoJsonImporter,

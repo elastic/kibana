@@ -46,6 +46,7 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    version: 'version',
   } as any,
 };
 
@@ -91,12 +92,12 @@ describe('constructor', () => {
     });
   });
 
-  it('passes browserSupportsCsp to ChromeService', () => {
+  it('passes browserSupportsCsp and coreContext to ChromeService', () => {
     createCoreSystem();
-
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
+      browserSupportsCsp: true,
+      kibanaVersion: 'version',
     });
   });
 
@@ -199,7 +200,7 @@ describe('#start()', () => {
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
     expect(root.innerHTML).toMatchInlineSnapshot(
-      `"<div id=\\"kibana-body\\"></div><div></div><div></div>"`
+      `"<div id=\\"kibana-body\\" data-test-subj=\\"kibanaChrome\\"></div><div></div><div></div>"`
     );
   });
 

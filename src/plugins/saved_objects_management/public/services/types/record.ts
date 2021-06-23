@@ -15,6 +15,7 @@ export interface SavedObjectsManagementRecord {
     icon: string;
     title: string;
     namespaceType: SavedObjectsNamespaceType;
+    hiddenType: boolean;
   };
   references: SavedObjectReference[];
   namespaces?: string[];

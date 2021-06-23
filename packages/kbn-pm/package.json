@@ -11,11 +11,5 @@
     "build": "../../node_modules/.bin/webpack",
     "kbn:watch": "../../node_modules/.bin/webpack --watch",
     "prettier": "../../node_modules/.bin/prettier --write './src/**/*.ts'"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  },
-  "dependencies": {
-    "@kbn/utils": "link:../kbn-utils"
   }
 }

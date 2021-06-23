@@ -5,7 +5,7 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
-import type { AllSeries, AllShortSeries } from '../hooks/use_url_storage';
+import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
 import type { SeriesUrl } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -19,6 +19,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     breakdown,
     filters,
     reportDefinitions,
+    dataType,
     ...restSeries
   } = series;
 
@@ -29,6 +30,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.BREAK_DOWN]: breakdown,
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
+    [URL_KEYS.DATA_TYPE]: dataType,
     ...restSeries,
   };
 }
@@ -48,10 +50,26 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
   );
 }
 
-export function buildPhraseFilter(field: string, value: any, indexPattern: IIndexPattern) {
+export function buildPhraseFilter(field: string, value: string, indexPattern: IIndexPattern) {
   const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildPhrasesFilter(field: string, value: string[], indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildExistsFilter(field: string, indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
   }
   return [];
 }

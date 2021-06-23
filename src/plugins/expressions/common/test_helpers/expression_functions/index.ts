@@ -12,7 +12,20 @@ import { error } from './error';
 import { introspectContext } from './introspect_context';
 import { mult } from './mult';
 import { sleep } from './sleep';
-import { AnyExpressionFunctionDefinition } from '../../expression_functions';
+import { sum } from './sum';
+import {
+  AnyExpressionFunctionDefinition,
+  clog,
+  font,
+  variableSet,
+  variable,
+  theme,
+  cumulativeSum,
+  derivative,
+  movingAverage,
+  mapColumn,
+  math,
+} from '../../expression_functions';
 
 export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
   access,
@@ -21,4 +34,15 @@ export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
   introspectContext,
   mult,
   sleep,
+  sum,
+  clog,
+  font,
+  variableSet,
+  variable,
+  theme,
+  cumulativeSum,
+  derivative,
+  movingAverage,
+  mapColumn,
+  math,
 ];

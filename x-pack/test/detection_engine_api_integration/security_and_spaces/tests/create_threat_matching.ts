@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
@@ -27,6 +27,7 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -68,13 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating threat match rule', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -107,13 +108,13 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
@@ -150,6 +151,97 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
+        const fullSource = signalsOpen.hits.hits.find(
+          (signal) => signal._source.signal.parents[0].id === 'UBXOBmkBR346wHgnLP8T'
+        );
+        const fullSignal = fullSource!._source; // If this doesn't exist the test is going to fail anyway so using a bang operator here to get rid of ts error
+        expect(fullSignal).eql({
+          '@timestamp': fullSignal['@timestamp'],
+          agent: {
+            ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+            hostname: 'zeek-sensor-amsterdam',
+            id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+            type: 'auditbeat',
+            version: '8.0.0',
+          },
+          cloud: {
+            instance: {
+              id: '133551048',
+            },
+            provider: 'digitalocean',
+            region: 'ams3',
+          },
+          ecs: {
+            version: '1.0.0-beta2',
+          },
+          event: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'signal',
+            module: 'system',
+            origin: '/var/log/wtmp',
+          },
+          host: {
+            architecture: 'x86_64',
+            containerized: false,
+            hostname: 'zeek-sensor-amsterdam',
+            id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+            name: 'zeek-sensor-amsterdam',
+            os: {
+              codename: 'bionic',
+              family: 'debian',
+              kernel: '4.15.0-45-generic',
+              name: 'Ubuntu',
+              platform: 'ubuntu',
+              version: '18.04.2 LTS (Bionic Beaver)',
+            },
+          },
+          message: 'System boot',
+          service: {
+            type: 'system',
+          },
+          signal: {
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
+            ancestors: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            depth: 1,
+            original_event: {
+              action: 'boot',
+              dataset: 'login',
+              kind: 'event',
+              module: 'system',
+              origin: '/var/log/wtmp',
+            },
+            original_time: fullSignal.signal.original_time,
+            parent: {
+              depth: 0,
+              id: 'UBXOBmkBR346wHgnLP8T',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              type: 'event',
+            },
+            parents: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            rule: fullSignal.signal.rule,
+            status: 'open',
+          },
+          threat: {
+            indicator: get(fullSignal, 'threat.indicator'),
+          },
+        });
       });
 
       it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
@@ -267,11 +359,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('indicator enrichment', () => {
         beforeEach(async () => {
-          await esArchiver.load('filebeat/threat_intel');
+          await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('filebeat/threat_intel');
+          await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
         it('enriches signals with the single indicator that matched', async () => {

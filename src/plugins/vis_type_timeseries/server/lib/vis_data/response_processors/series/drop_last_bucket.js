@@ -14,8 +14,9 @@ export function dropLastBucket(resp, panel, series) {
     const shouldDropLastBucket = isLastValueTimerangeMode(panel, series);
 
     if (shouldDropLastBucket) {
-      const seriesDropLastBucket = get(series, 'override_drop_last_bucket', 1);
-      const dropLastBucket = get(panel, 'drop_last_bucket', seriesDropLastBucket);
+      const dropLastBucket = series.override_index_pattern
+        ? get(series, 'series_drop_last_bucket', 0)
+        : get(panel, 'drop_last_bucket', 0);
 
       if (dropLastBucket) {
         results.forEach((item) => {

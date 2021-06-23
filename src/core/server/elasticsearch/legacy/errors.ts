@@ -17,6 +17,7 @@ enum ErrorCode {
 
 /**
  * @deprecated. The new elasticsearch client doesn't wrap errors anymore.
+ * @removeBy 7.16
  * @public
  * */
 export interface LegacyElasticsearchError extends Boom.Boom {

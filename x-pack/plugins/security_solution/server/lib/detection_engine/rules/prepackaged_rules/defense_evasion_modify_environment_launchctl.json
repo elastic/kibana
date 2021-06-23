@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Modification of Environment Variable via Launchctl",
-  "query": "event.category:process and event.type:start and process.name:launchctl and process.args:(setenv and not (JAVA*_HOME or RUNTIME_JAVA_HOME or DBUS_LAUNCHD_SESSION_BUS_SOCKET or ANT_HOME))",
+  "query": "event.category:process and event.type:start and process.name:launchctl and process.args:(setenv and not (JAVA*_HOME or RUNTIME_JAVA_HOME or DBUS_LAUNCHD_SESSION_BUS_SOCKET or ANT_HOME or LG_WEBOS_TV_SDK_HOME or WEBOS_CLI_TV or EDEN_ENV) ) and not process.parent.executable:(\"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or \"/usr/local/bin/kr\" or \"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or \"/Applications/IntelliJ IDEA CE.app/Contents/jbr/Contents/Home/lib/jspawnhelper\")",
   "references": [
     "https://github.com/rapid7/metasploit-framework/blob/master//modules/post/osx/escalate/tccbypass.rb"
   ],
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

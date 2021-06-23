@@ -27,6 +27,8 @@ import { networkModel } from '../../store';
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -128,12 +130,8 @@ describe('NetworkTopCountries Table Component', () => {
         direction: 'asc',
         field: 'bytes_out',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'Bytes inClick to sort in ascending order'
-      );
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-        'Bytes outClick to sort in descending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
+      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
       expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
     });
   });

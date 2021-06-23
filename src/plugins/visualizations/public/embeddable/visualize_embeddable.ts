@@ -337,6 +337,14 @@ export class VisualizeEmbeddable
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
           }
+          // do not trigger the filter click event if the filter bar is not visible
+          if (
+            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
+            !this.input.id &&
+            !this.vis.type.options.showFilterBar
+          ) {
+            return;
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -412,7 +420,7 @@ export class VisualizeEmbeddable
   };
 
   public supportedTriggers(): string[] {
-    return this.vis.type.getSupportedTriggers?.() ?? [];
+    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

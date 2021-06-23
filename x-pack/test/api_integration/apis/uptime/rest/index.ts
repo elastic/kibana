@@ -38,24 +38,41 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('with generated data', () => {
-      beforeEach('load heartbeat data', async () => await esArchiver.loadIfNeeded('uptime/blank'));
-      after('unload', async () => await esArchiver.unload('uptime/blank'));
+      beforeEach('load heartbeat data', async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+        );
+      });
+      after('unload', async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank_data_stream');
+      });
 
       loadTestFile(require.resolve('./certs'));
       loadTestFile(require.resolve('./dynamic_settings'));
       loadTestFile(require.resolve('./snapshot'));
       loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
+      loadTestFile(require.resolve('./telemetry_collectors_fleet'));
     });
 
     describe('with real-world data', () => {
-      beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
-      afterEach('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
+      beforeEach(
+        'load heartbeat data',
+        async () =>
+          await esArchiver.load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      );
+      afterEach(
+        'unload',
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      );
       loadTestFile(require.resolve('./monitor_latest_status'));
       loadTestFile(require.resolve('./ping_histogram'));
       loadTestFile(require.resolve('./ping_list'));
       loadTestFile(require.resolve('./monitor_duration'));
-      loadTestFile(require.resolve('./doc_count'));
+      loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
     });
   });

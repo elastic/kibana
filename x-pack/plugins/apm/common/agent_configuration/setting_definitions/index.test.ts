@@ -157,9 +157,17 @@ describe('filterByAgent', () => {
       ]);
     });
 
+    it('php', () => {
+      expect(getSettingKeysForAgent('php')).toEqual([
+        'log_level',
+        'recording',
+        'transaction_max_spans',
+        'transaction_sample_rate',
+      ]);
+    });
+
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
-        'capture_body',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);

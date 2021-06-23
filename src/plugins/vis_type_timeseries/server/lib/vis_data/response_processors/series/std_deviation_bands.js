@@ -7,7 +7,7 @@
  */
 
 import { getAggValue, getLastMetric, getSplits } from '../../helpers';
-import { METRIC_TYPES } from '../../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../../common/enums';
 
 export function stdDeviationBands(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

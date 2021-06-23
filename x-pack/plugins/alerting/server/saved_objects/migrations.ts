@@ -6,6 +6,7 @@
  */
 
 import {
+  LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
@@ -19,6 +20,10 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
+
+interface AlertLogMeta extends LogMeta {
+  migrations: { alertDocument: SavedObjectUnsanitizedDoc<RawAlert> };
+}
 
 type AlertMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAlert>
@@ -84,9 +89,13 @@ function executeMigrationWithErrorHandling(
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
-      context.log.error(
+      context.log.error<AlertLogMeta>(
         `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
-        { alertDocument: doc }
+        {
+          migrations: {
+            alertDocument: doc,
+          },
+        }
       );
     }
     return doc;

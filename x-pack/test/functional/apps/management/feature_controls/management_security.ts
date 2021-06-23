@@ -18,12 +18,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('no management privileges', () => {
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions'],
+          sectionLinks: ['triggersActions', 'reporting'],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',

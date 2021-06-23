@@ -1,10 +1,11 @@
 {
   "author": [
-    "Elastic"
+    "Elastic",
+    "Austin Songer"
   ],
-  "description": "Identifies attempts to delete an AWS Config Service rule. An adversary may tamper with Config rules in order to reduce visibiltiy into the security posture of an account and / or its workload instances.",
+  "description": "Identifies attempts to delete an AWS Config Service resource. An adversary may tamper with Config services in order to reduce visibility into the security posture of an account and / or its workload instances.",
   "false_positives": [
-    "Privileged IAM users with security responsibilities may be expected to make changes to the Config rules in order to align with local security policies and requirements. Automation, orchestration, and security tools may also make changes to the Config service, where they are used to automate setup or configuration of AWS accounts. Other kinds of user or service contexts do not commonly make changes to this service."
+    "Privileged IAM users with security responsibilities may be expected to make changes to the Config service in order to align with local security policies and requirements. Automation, orchestration, and security tools may also make changes to the Config service, where they are used to automate setup or configuration of AWS accounts. Other kinds of user or service contexts do not commonly make changes to this service."
   ],
   "from": "now-60m",
   "index": [
@@ -15,8 +16,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS Config Service Tampering",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset: aws.cloudtrail and event.action: DeleteConfigRule and event.provider: config.amazonaws.com",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:(DeleteConfigRule or DeleteOrganizationConfigRule or DeleteConfigurationAggregator or DeleteConfigurationRecorder or DeleteConformancePack or DeleteOrganizationConformancePack or DeleteDeliveryChannel or DeleteRemediationConfiguration or DeleteRetentionConfiguration)",
   "references": [
     "https://docs.aws.amazon.com/config/latest/developerguide/how-does-config-work.html",
     "https://docs.aws.amazon.com/config/latest/APIReference/API_Operations.html"
@@ -58,5 +59,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

@@ -18,6 +18,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_diction
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
+import apm from 'elastic-apm-node';
 
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
@@ -32,8 +33,70 @@ afterAll(() => fakeTimer.restore());
 describe('TaskManagerRunner', () => {
   const pendingStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.PENDING, opts);
   const readyToRunStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.READY_TO_RUN, opts);
+  const mockApmTrans = {
+    end: jest.fn(),
+  };
 
   describe('Pending Stage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest
+        .spyOn(apm, 'startTransaction')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockImplementation(() => mockApmTrans as any);
+    });
+    test('makes calls to APM as expected when task markedAsRunning is success', async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+      await runner.markTaskAsRunning();
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'taskManager',
+        'taskManager markTaskAsRunning'
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+    });
+    test('makes calls to APM as expected when task markedAsRunning fails', async () => {
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+      store.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+      );
+      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+        `[Error: Saved object [type/id] not found]`
+      );
+      // await runner.markTaskAsRunning();
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'taskManager',
+        'taskManager markTaskAsRunning'
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
     test('provides details about the task that is running', async () => {
       const { runner } = await pendingStageSetup({
         instance: {
@@ -572,6 +635,55 @@ describe('TaskManagerRunner', () => {
   });
 
   describe('Ready To Run Stage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('makes calls to APM as expected when task runs successfully', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', 'taskManager run', {
+        childOf: 'apmTraceparent',
+      });
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+    });
+    test('makes calls to APM as expected when task fails', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error('rar');
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', 'taskManager run', {
+        childOf: 'apmTraceparent',
+      });
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -1275,6 +1387,7 @@ describe('TaskManagerRunner', () => {
         status: 'idle',
         user: 'example',
         ownerId: null,
+        traceparent: 'apmTraceparent',
       },
       instance
     );

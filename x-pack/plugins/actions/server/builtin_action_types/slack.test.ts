@@ -194,7 +194,9 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
@@ -219,7 +221,9 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: new Set(['example.com']),
       proxyOnlyHosts: undefined,
     });
@@ -244,7 +248,9 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: new Set(['not-example.com']),
       proxyOnlyHosts: undefined,
     });
@@ -269,7 +275,9 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['example.com']),
     });
@@ -294,7 +302,9 @@ describe('execute()', () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {
+        verificationMode: 'none',
+      },
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['not-example.com']),
     });

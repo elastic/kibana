@@ -13,17 +13,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
-import { IndexPatternField } from '../../../../../data/common/index_patterns';
-import { SkipBottomButton } from '../../components/skip_bottom_button';
+import { IndexPatternField } from '../../../../../data/common';
+import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 
 export interface DocTableLegacyProps {
   columns: string[];
   searchDescription?: string;
   searchTitle?: string;
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  rows: estypes.Hit[];
+  rows: estypes.SearchHit[];
   indexPattern: IIndexPattern;
-  minimumVisibleRows: number;
+  minimumVisibleRows?: number;
   onAddColumn?: (column: string) => void;
   onBackToTop: () => void;
   onSort?: (sort: string[][]) => void;
@@ -45,6 +45,7 @@ export type AngularScope = IScope & { renderProps?: DocTableLegacyProps };
 export async function injectAngularElement(
   domNode: Element,
   template: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   renderProps: any,
   injector: auto.IInjectorService
 ) {
@@ -64,6 +65,7 @@ export async function injectAngularElement(
   return newScope;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getRenderFn(domNode: Element, props: any) {
   const directive = {
     template: `<doc-table
@@ -117,11 +119,9 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   }, [setMinimumVisibleRows, renderProps.rows]);
 
   useEffect(() => {
-    if (minimumVisibleRows > 50) {
-      setMinimumVisibleRows(50);
-    }
+    setMinimumVisibleRows(50);
     setRows(renderProps.rows);
-  }, [renderProps.rows, minimumVisibleRows, setMinimumVisibleRows]);
+  }, [renderProps.rows, setMinimumVisibleRows]);
 
   useEffect(() => {
     if (ref && ref.current && !scope.current) {
@@ -131,7 +131,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
       });
     } else if (scope && scope.current) {
       scope.current.renderProps = { ...renderProps, rows, minimumVisibleRows };
-      scope.current.$apply();
+      scope.current.$applyAsync();
     }
   }, [renderProps, minimumVisibleRows, rows]);
 

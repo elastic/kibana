@@ -77,10 +77,9 @@ export interface SavedObjectsBulkUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsUpdateOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
   version?: string;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
+  upsert?: Attributes;
   references?: SavedObjectReference[];
 }
 
@@ -437,7 +436,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: T,
-    { version, migrationVersion, references }: SavedObjectsUpdateOptions = {}
+    { version, references, upsert }: SavedObjectsUpdateOptions = {}
   ): Promise<SimpleSavedObject<T>> {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
@@ -446,9 +445,9 @@ export class SavedObjectsClient {
     const path = this.getPath([type, id]);
     const body = {
       attributes,
-      migrationVersion,
       references,
       version,
+      upsert,
     };
 
     return this.savedObjectsFetch(path, {

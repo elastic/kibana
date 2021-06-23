@@ -7,16 +7,15 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
+import { LogMeta } from '@kbn/logging';
 import { OpsMetrics } from '..';
 
-const ECS_VERSION = '1.7.0';
 /**
  * Converts ops metrics into ECS-compliant `LogMeta` for logging
  *
  * @internal
  */
-export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
+export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   const { process, os } = metrics;
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
@@ -51,13 +50,11 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
         })}] `
       : '';
 
-  return {
-    ecs: { version: ECS_VERSION },
-    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+  const meta: LogMeta = {
     event: {
-      kind: EcsEventKind.METRIC,
-      category: [EcsEventCategory.PROCESS, EcsEventCategory.HOST],
-      type: EcsEventType.INFO,
+      kind: 'metric',
+      category: ['process', 'host'],
+      type: ['info'],
     },
     process: {
       uptime: uptimeVal,
@@ -71,8 +68,14 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
     },
     host: {
       os: {
+        // @ts-expect-error custom fields not yet part of ECS
         load: loadEntries,
       },
     },
+  };
+
+  return {
+    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+    meta,
   };
 }

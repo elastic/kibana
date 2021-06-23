@@ -101,10 +101,10 @@ export async function fetchDiskUsageNodeStats(
 
   const { body: response } = await esClient.search(params);
   const stats: AlertDiskUsageNodeStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations!.clusters;
+  // @ts-expect-error declare type for aggregations explicitly
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 

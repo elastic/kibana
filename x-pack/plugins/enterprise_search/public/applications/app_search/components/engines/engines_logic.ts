@@ -16,6 +16,7 @@ import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { DELETE_ENGINE_MESSAGE } from './constants';
+import { EnginesAPIResponse } from './types';
 
 interface EnginesValues {
   dataLoading: boolean;
@@ -27,10 +28,6 @@ interface EnginesValues {
   metaEnginesLoading: boolean;
 }
 
-interface EnginesAPIResponse {
-  results: EngineDetails[];
-  meta: Meta;
-}
 interface EnginesActions {
   deleteEngine(engine: EngineDetails): { engine: EngineDetails };
   onDeleteEngineSuccess(engine: EngineDetails): { engine: EngineDetails };

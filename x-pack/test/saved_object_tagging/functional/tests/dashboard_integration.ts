@@ -38,12 +38,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard integration', () => {
     before(async () => {
-      await esArchiver.load('dashboard');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      );
+      await esArchiver.loadIfNeeded(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
     after(async () => {
-      await esArchiver.unload('dashboard');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      );
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('listing', () => {

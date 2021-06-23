@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { NewAlertParams } from './alerts';
 import { AlertAction } from '../../../../triggers_actions_ui/public';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
@@ -19,6 +20,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server';
 import { ActionTypeId } from '../../components/settings/types';
+import { Ping } from '../../../common/runtime_types/ping';
 
 export const SLACK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
@@ -31,7 +33,17 @@ export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
-export function populateAlertActions({ defaultActions, monitorId, monitorName }: NewAlertParams) {
+const getRecoveryMessage = (selectedMonitor: Ping) => {
+  return i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
+    defaultMessage: 'Monitor {monitor} with url {url} has recovered with status Up',
+    values: {
+      monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
+      url: selectedMonitor?.url?.full,
+    },
+  });
+};
+
+export function populateAlertActions({ defaultActions, selectedMonitor }: NewAlertParams) {
   const actions: AlertAction[] = [];
   defaultActions.forEach((aId) => {
     const action: AlertAction = {
@@ -40,27 +52,52 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
       group: MONITOR_STATUS.id,
       params: {},
     };
+
+    const recoveredAction: AlertAction = {
+      id: aId.id,
+      actionTypeId: aId.actionTypeId,
+      group: 'recovered',
+      params: {
+        message: getRecoveryMessage(selectedMonitor),
+      },
+    };
+
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
-        action.params = getPagerDutyActionParams(monitorId);
+        action.params = getPagerDutyActionParams(selectedMonitor);
+        recoveredAction.params = getPagerDutyActionParams(selectedMonitor, true);
+        actions.push(recoveredAction);
         break;
       case SERVER_LOG_ACTION_ID:
-        action.params = getServerLogActionParams();
+        action.params = getServerLogActionParams(selectedMonitor);
+        recoveredAction.params = getServerLogActionParams(selectedMonitor, true);
+        actions.push(recoveredAction);
         break;
       case INDEX_ACTION_ID:
-        action.params = getIndexActionParams();
+        action.params = getIndexActionParams(selectedMonitor);
+        recoveredAction.params = getIndexActionParams(selectedMonitor, true);
+        actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
         action.params = getServiceNowActionParams();
+        // Recovery action for service now is not implemented yet
         break;
       case JIRA_ACTION_ID:
         action.params = getJiraActionParams();
+        // Recovery action for Jira is not implemented yet
         break;
       case WEBHOOK_ACTION_ID:
-        action.params = getWebhookActionParams();
+        action.params = getWebhookActionParams(selectedMonitor);
+        recoveredAction.params = getWebhookActionParams(selectedMonitor, true);
+        actions.push(recoveredAction);
         break;
       case SLACK_ACTION_ID:
       case TEAMS_ACTION_ID:
+        action.params = {
+          message: MonitorStatusTranslations.defaultActionMessage,
+        };
+        actions.push(recoveredAction);
+        break;
       default:
         action.params = {
           message: MonitorStatusTranslations.defaultActionMessage,
@@ -73,7 +110,21 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
   return actions;
 }
 
-function getIndexActionParams(): IndexActionParams {
+function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexActionParams {
+  if (recovery) {
+    return {
+      documents: [
+        {
+          monitorName: '{{state.monitorName}}',
+          monitorUrl: '{{{state.monitorUrl}}}',
+          statusMessage: getRecoveryMessage(selectedMonitor),
+          latestErrorMessage: '',
+          observerLocation: '{{state.observerLocation}}',
+        },
+      ],
+      indexOverride: null,
+    };
+  }
   return {
     documents: [
       {
@@ -88,22 +139,37 @@ function getIndexActionParams(): IndexActionParams {
   };
 }
 
-function getServerLogActionParams(): ServerLogActionParams {
+function getServerLogActionParams(selectedMonitor: Ping, recovery = false): ServerLogActionParams {
+  if (recovery) {
+    return {
+      level: 'info',
+      message: getRecoveryMessage(selectedMonitor),
+    };
+  }
   return {
     level: 'warn',
     message: MonitorStatusTranslations.defaultActionMessage,
   };
 }
 
-function getWebhookActionParams(): WebhookActionParams {
+function getWebhookActionParams(selectedMonitor: Ping, recovery = false): WebhookActionParams {
   return {
-    body: MonitorStatusTranslations.defaultActionMessage,
+    body: recovery
+      ? getRecoveryMessage(selectedMonitor)
+      : MonitorStatusTranslations.defaultActionMessage,
   };
 }
 
-function getPagerDutyActionParams(monitorId: string): PagerDutyActionParams {
+function getPagerDutyActionParams(selectedMonitor: Ping, recovery = false): PagerDutyActionParams {
+  if (recovery) {
+    return {
+      dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
+      eventAction: 'resolve',
+      summary: getRecoveryMessage(selectedMonitor),
+    };
+  }
   return {
-    dedupKey: monitorId + MONITOR_STATUS.id,
+    dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
     eventAction: 'trigger',
     severity: 'error',
     summary: MonitorStatusTranslations.defaultActionMessage,

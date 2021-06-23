@@ -46,5 +46,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 |  --- | --- | --- |
 |  [deprecations](./kibana-plugin-core-server.pluginconfigdescriptor.deprecations.md) | <code>ConfigDeprecationProvider</code> | Provider for the  to apply to the plugin configuration. |
 |  [exposeToBrowser](./kibana-plugin-core-server.pluginconfigdescriptor.exposetobrowser.md) | <code>{</code><br/><code>        [P in keyof T]?: boolean;</code><br/><code>    }</code> | List of configuration properties that will be available on the client-side plugin. |
+|  [exposeToUsage](./kibana-plugin-core-server.pluginconfigdescriptor.exposetousage.md) | <code>MakeUsageFromSchema&lt;T&gt;</code> | Expose non-default configs to usage collection to be sent via telemetry. set a config to <code>true</code> to report the actual changed config value. set a config to <code>false</code> to report the changed config value as \[redacted\].<!-- -->All changed configs except booleans and numbers will be reported as \[redacted\] unless otherwise specified.[MakeUsageFromSchema](./kibana-plugin-core-server.makeusagefromschema.md) |
 |  [schema](./kibana-plugin-core-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-core-server.pluginconfigschema.md) |
 

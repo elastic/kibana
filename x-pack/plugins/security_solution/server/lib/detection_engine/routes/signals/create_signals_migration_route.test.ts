@@ -13,13 +13,19 @@ import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/detec
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { createMigration } from '../../migrations/create_migration';
-import { getIndexAliases } from '../../index/get_index_aliases';
+import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
 jest.mock('../index/check_template_version');
-jest.mock('../../index/get_index_aliases');
+jest.mock('@kbn/securitysolution-es-utils', () => {
+  const original = jest.requireActual('@kbn/securitysolution-es-utils');
+  return {
+    ...original,
+    getIndexAliases: jest.fn(),
+  };
+});
 jest.mock('../../migrations/create_migration');
 jest.mock('../../migrations/get_index_versions_by_index');
 jest.mock('../../migrations/get_signal_versions_by_index');

@@ -7,7 +7,7 @@
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('"Create Index Pattern" wizard', function () {

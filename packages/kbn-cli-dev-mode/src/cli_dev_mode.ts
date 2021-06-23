@@ -44,7 +44,7 @@ Rx.merge(
   .subscribe(exitSignal$);
 
 // timeout where the server is allowed to exit gracefully
-const GRACEFUL_TIMEOUT = 5000;
+const GRACEFUL_TIMEOUT = 30000;
 
 export type SomeCliArgs = Pick<
   CliArgs,

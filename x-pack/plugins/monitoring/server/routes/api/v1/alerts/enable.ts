@@ -8,7 +8,7 @@
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
 import { AlertsFactory } from '../../../../alerts';
-import { RouteDependencies } from '../../../../types';
+import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
 import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
@@ -17,7 +17,7 @@ import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/comm
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
-export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) {
+export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
@@ -25,6 +25,17 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
     },
     async (context, request, response) => {
       try {
+        // Check to ensure the space is listed in monitoring.cluster_alerts.allowedSpaces
+        const config = server.config();
+        const allowedSpaces =
+          config.get('monitoring.cluster_alerts.allowedSpaces') || ([] as string[]);
+        if (!allowedSpaces.includes(context.infra.spaceId)) {
+          server.log.info(
+            `Skipping alert creation for "${context.infra.spaceId}" space; add space ID to 'monitoring.cluster_alerts.allowedSpaces' in your kibana.yml`
+          );
+          return response.ok({ body: undefined });
+        }
+
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const {
@@ -33,6 +44,9 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           } = await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
+            server.log.info(
+              `Skipping alert creation for "${context.infra.spaceId}" space; Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch, and an encryption key in your kibana.yml file.`
+            );
             return response.ok({
               body: {
                 isSufficientlySecure,
@@ -88,6 +102,10 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
             alerts.map((alert) => alert.createIfDoesNotExist(alertsClient, actionsClient, actions))
           );
         }
+
+        server.log.info(
+          `Created ${createdAlerts.length} alerts for "${context.infra.spaceId}" space`
+        );
 
         return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });
       } catch (err) {

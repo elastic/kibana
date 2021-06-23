@@ -366,8 +366,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('aggregated or scripted job', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();

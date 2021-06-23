@@ -112,6 +112,7 @@ export async function getNodes(
     },
     filterPath: [
       'hits.hits._source.source_node',
+      'hits.hits._source.service.address',
       'hits.hits._source.elasticsearch.node',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,

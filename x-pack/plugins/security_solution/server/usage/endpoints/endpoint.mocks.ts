@@ -6,10 +6,9 @@
  */
 
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../../fleet/common/constants/agent';
-import { Agent } from '../../../../fleet/common';
-import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
+
+import { Agent, FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
 const testAgentPolicyId = 'testAgentPolicyId';
@@ -45,7 +44,6 @@ export const mockFleetObjectsResponse = (
       type: 'PERMANENT',
       user_provided_metadata: {},
       enrolled_at: lastCheckIn,
-      current_error_events: [],
       local_metadata: {
         elastic: {
           agent: {
@@ -64,7 +62,7 @@ export const mockFleetObjectsResponse = (
           full: MockOSFullName,
         },
       },
-      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      packages: [FLEET_ENDPOINT_PACKAGE, 'system'],
       last_checkin: lastCheckIn,
     },
     {
@@ -74,7 +72,6 @@ export const mockFleetObjectsResponse = (
       type: 'PERMANENT',
       user_provided_metadata: {},
       enrolled_at: lastCheckIn,
-      current_error_events: [],
       local_metadata: {
         elastic: {
           agent: {
@@ -93,7 +90,7 @@ export const mockFleetObjectsResponse = (
           full: MockOSFullName,
         },
       },
-      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      packages: [FLEET_ENDPOINT_PACKAGE, 'system'],
       last_checkin: lastCheckIn,
     },
   ],
@@ -215,7 +212,7 @@ export const mockFleetEventsObjectsResponse = (
   updatedDate = new Date().toISOString(),
   policyStatus: 'success' | 'failure' = running ? 'success' : 'failure',
   policyMode: 'prevent' | 'detect' | 'off' = 'prevent'
-): SavedObjectsFindResponse<AgentEventSOAttributes> => {
+): SavedObjectsFindResponse => {
   return {
     page: 1,
     per_page: 20,

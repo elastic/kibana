@@ -6,6 +6,7 @@
  */
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
+import moment from 'moment';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
@@ -39,6 +40,8 @@ export interface WorkpadTelemetry {
   functions?: {
     total: number;
     in_use: string[];
+    in_use_30d: string[];
+    in_use_90d: string[];
     per_element: {
       avg: number;
       min: number;
@@ -56,38 +59,156 @@ export interface WorkpadTelemetry {
 }
 
 export const workpadSchema: MakeSchemaFrom<WorkpadTelemetry> = {
-  workpads: { total: { type: 'long' } },
+  workpads: {
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of Canvas Workpads in the cluster',
+      },
+    },
+  },
   pages: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of pages across all Canvas Workpads',
+      },
+    },
     per_workpad: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of pages across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of pages found in a Canvas Workpad',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of pages found in a Canvas Workpad',
+        },
+      },
     },
   },
   elements: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of elements across all Canvas Workpads',
+      },
+    },
     per_page: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of elements per page across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of elements on a page across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of elements on a page across all Canvas Workpads',
+        },
+      },
     },
   },
   functions: {
-    total: { type: 'long' },
-    in_use: { type: 'array', items: { type: 'keyword' } },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of functions in use across all Canvas Workpads',
+      },
+    },
+    in_use: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'A function in use in any Canvas Workpad',
+        },
+      },
+    },
+    in_use_30d: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'A function in use in a Canvas Workpad that has been modified in the last 30 days',
+        },
+      },
+    },
+    in_use_90d: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'A function in use in a Canvas Workpad that has been modified in the last 90 days',
+        },
+      },
+    },
     per_element: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'Average number of functions used per element across all Canvas Workpads',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description:
+            'The minimum number of functions used in an element across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description:
+            'The maximum number of functions used in an element across all Canvas Workpads',
+        },
+      },
     },
   },
   variables: {
-    total: { type: 'long' },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of variables defined across all Canvas Workpads',
+      },
+    },
+
     per_workpad: {
-      avg: { type: 'float' },
-      min: { type: 'long' },
-      max: { type: 'long' },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of variables set per Canvas Workpad',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number variables set across all Canvas Workpads',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of variables set across all Canvas Workpads',
+        },
+      },
     },
   },
 };
@@ -98,6 +219,11 @@ export const workpadSchema: MakeSchemaFrom<WorkpadTelemetry> = {
   @returns Workpad Telemetry Data
 */
 export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetry {
+  const functionCollection = {
+    all: new Set<string>(),
+    '30d': new Set<string>(),
+    '90d': new Set<string>(),
+  };
   const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
@@ -106,6 +232,21 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
 
   // make a summary of info about each workpad
   const workpadsInfo = workpadDocs.map((workpad) => {
+    let this30Days = false;
+    let this90Days = false;
+
+    if (workpad['@timestamp'] !== undefined) {
+      const lastReadDaysAgo = moment().diff(moment(workpad['@timestamp']), 'days');
+
+      if (lastReadDaysAgo < 30) {
+        this30Days = true;
+      }
+
+      if (lastReadDaysAgo < 90) {
+        this90Days = true;
+      }
+    }
+
     let pages = { count: 0 };
     try {
       pages = { count: workpad.pages.length };
@@ -121,6 +262,16 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       return page.elements.map((element) => {
         const ast = parseExpression(element.expression);
         collectFns(ast, (cFunction) => {
+          functionCollection.all.add(cFunction);
+
+          if (this30Days) {
+            functionCollection['30d'].add(cFunction);
+          }
+
+          if (this90Days) {
+            functionCollection['90d'].add(cFunction);
+          }
+
           functionSet.add(cFunction);
         });
         return ast.chain.length; // get the number of parts in the expression
@@ -203,7 +354,9 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     elementsTotal > 0
       ? {
           total: functionsTotal,
-          in_use: Array.from(functionSet),
+          in_use: Array.from(functionCollection.all),
+          in_use_30d: Array.from(functionCollection['30d']),
+          in_use_90d: Array.from(functionCollection['90d']),
           per_element: {
             avg: functionsTotal / functionCounts.length,
             min: arrayMin(functionCounts) || 0,

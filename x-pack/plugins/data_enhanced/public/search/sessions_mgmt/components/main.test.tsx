@@ -60,7 +60,7 @@ describe('Background Search Session Management Main', () => {
       ELASTIC_WEBSITE_URL: `boo/`,
       DOC_LINK_VERSION: `#foo`,
       links: {
-        elasticsearch: { asyncSearch: `mock-url` } as any,
+        search: { sessions: `mock-url` } as any,
       } as any,
     };
 

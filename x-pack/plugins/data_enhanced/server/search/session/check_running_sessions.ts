@@ -15,14 +15,14 @@ import {
 import moment from 'moment';
 import { EMPTY, from, Observable } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
+  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-} from '../../../common';
+} from '../../../../../../src/plugins/data/common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
 import { SearchSessionsConfig, SearchStatus } from './types';

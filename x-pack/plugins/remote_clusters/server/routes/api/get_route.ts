@@ -11,14 +11,18 @@ import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {
+  const {
+    router,
+    lib: { handleEsError },
+  } = deps;
+
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
-      const callAsCurrentUser = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
-      const clusterSettings = await callAsCurrentUser('cluster.getSettings');
+      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { body: clusterSettings } = await clusterClient.asCurrentUser.cluster.getSettings();
 
       const transientClusterNames = Object.keys(
         get(clusterSettings, 'transient.cluster.remote') || {}
@@ -27,7 +31,7 @@ export const register = (deps: RouteDependencies): void => {
         get(clusterSettings, 'persistent.cluster.remote') || {}
       );
 
-      const clustersByName = await callAsCurrentUser('cluster.remoteInfo');
+      const { body: clustersByName } = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
       const body = clusterNames.map((clusterName: string): any => {
@@ -60,14 +64,11 @@ export const register = (deps: RouteDependencies): void => {
 
       return response.ok({ body });
     } catch (error) {
-      if (isEsError(error)) {
-        return response.customError({ statusCode: error.statusCode, body: error });
-      }
-      throw error;
+      return handleEsError({ error, response });
     }
   };
 
-  deps.router.get(
+  router.get(
     {
       path: API_BASE_PATH,
       validate: false,

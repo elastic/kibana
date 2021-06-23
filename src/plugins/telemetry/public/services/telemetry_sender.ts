@@ -33,8 +33,7 @@ export class TelemetrySender {
   };
 
   private shouldSendReport = (): boolean => {
-    // check if opt-in for telemetry is enabled
-    if (this.telemetryService.getIsOptedIn()) {
+    if (this.telemetryService.canSendTelemetry()) {
       if (!this.lastReported) {
         return true;
       }
@@ -58,8 +57,8 @@ export class TelemetrySender {
     this.isSending = true;
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryData: any | any[] = await this.telemetryService.fetchTelemetry();
-      const clusters: string[] = [].concat(telemetryData);
+      const telemetryData: string | string[] = await this.telemetryService.fetchTelemetry();
+      const clusters: string[] = ([] as string[]).concat(telemetryData);
       await Promise.all(
         clusters.map(
           async (cluster) =>

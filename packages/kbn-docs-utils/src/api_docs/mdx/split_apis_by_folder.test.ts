@@ -34,11 +34,11 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 
-  doc = getPluginApi(project, plugins[0], plugins, log);
+  doc = getPluginApi(project, plugins[0], plugins, log, false);
 });
 
 test('foo service has all exports', () => {
-  expect(doc?.client.length).toBe(33);
+  expect(doc?.client.length).toBe(35);
   const split = splitApisByFolder(doc);
   expect(split.length).toBe(2);
 
@@ -47,5 +47,5 @@ test('foo service has all exports', () => {
 
   expect(fooDoc?.common.length).toBe(1);
   expect(fooDoc?.client.length).toBe(2);
-  expect(mainDoc?.client.length).toBe(31);
+  expect(mainDoc?.client.length).toBe(33);
 });

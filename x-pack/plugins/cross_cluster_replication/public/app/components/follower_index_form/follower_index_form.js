@@ -34,14 +34,15 @@ import { indexNameValidator, leaderIndexValidator } from '../../services/input_v
 import { routing } from '../../services/routing';
 import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
+import { documentationLinks } from '../../services/documentation_links';
 import { API_STATUS } from '../../constants';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
 import {
-  advancedSettingsFields,
-  emptyAdvancedSettings,
+  getAdvancedSettingsFields,
+  getEmptyAdvancedSettings,
   areAdvancedSettingsEdited,
 } from './advanced_settings_fields';
 
@@ -49,23 +50,24 @@ import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 
 const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-const fieldToValidatorMap = advancedSettingsFields.reduce(
-  (map, advancedSetting) => {
-    const { field, validator } = advancedSetting;
-    map[field] = validator;
-    return map;
-  },
-  {
-    name: indexNameValidator,
-    leaderIndex: leaderIndexValidator,
-  }
-);
+const getFieldToValidatorMap = (advancedSettingsFields) =>
+  advancedSettingsFields.reduce(
+    (map, advancedSetting) => {
+      const { field, validator } = advancedSetting;
+      map[field] = validator;
+      return map;
+    },
+    {
+      name: indexNameValidator,
+      leaderIndex: leaderIndexValidator,
+    }
+  );
 
 const getEmptyFollowerIndex = (remoteClusterName = '') => ({
   name: '',
   remoteCluster: remoteClusterName,
   leaderIndex: '',
-  ...emptyAdvancedSettings,
+  ...getEmptyAdvancedSettings(documentationLinks),
 });
 
 /**
@@ -121,7 +123,7 @@ export class FollowerIndexForm extends PureComponent {
     // eslint-disable-next-line no-nested-ternary
     const areAdvancedSettingsVisible = isNew
       ? false
-      : areAdvancedSettingsEdited(followerIndex)
+      : areAdvancedSettingsEdited(followerIndex, documentationLinks)
       ? true
       : false;
 
@@ -164,7 +166,8 @@ export class FollowerIndexForm extends PureComponent {
 
   getFieldsErrors = (newFields) => {
     return Object.keys(newFields).reduce((errors, field) => {
-      const validator = fieldToValidatorMap[field];
+      const advancedSettings = getAdvancedSettingsFields(documentationLinks);
+      const validator = getFieldToValidatorMap(advancedSettings)[field];
       const value = newFields[field];
 
       if (validator) {
@@ -278,17 +281,20 @@ export class FollowerIndexForm extends PureComponent {
     }
 
     // Clear the advanced settings form.
-    this.onFieldsChange(emptyAdvancedSettings);
+    this.onFieldsChange(getEmptyAdvancedSettings(documentationLinks));
 
     // Save a cache of the advanced settings.
     const fields = this.getFields();
-    this.cachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
-      const value = fields[field];
-      if (value !== '') {
-        cache[field] = value;
-      }
-      return cache;
-    }, {});
+    this.cachedAdvancedSettings = getAdvancedSettingsFields(documentationLinks).reduce(
+      (cache, { field }) => {
+        const value = fields[field];
+        if (value !== '') {
+          cache[field] = value;
+        }
+        return cache;
+      },
+      {}
+    );
 
     // Hide the advanced settings.
     this.setState({
@@ -614,7 +620,7 @@ export class FollowerIndexForm extends PureComponent {
           {areAdvancedSettingsVisible && (
             <Fragment>
               <EuiSpacer size="s" />
-              {advancedSettingsFields.map((advancedSetting) => {
+              {getAdvancedSettingsFields(documentationLinks).map((advancedSetting) => {
                 const {
                   field,
                   testSubject,

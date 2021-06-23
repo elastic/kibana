@@ -22,7 +22,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(mockAlertsQuery, indexName));
+      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
       await waitForNextUpdate();
       expect(result.current).toEqual({
         loading: false,
@@ -40,7 +40,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(mockAlertsQuery, indexName));
+      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -60,7 +60,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(mockAlertsQuery, indexName));
+      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
       await waitForNextUpdate();
       await waitForNextUpdate();
       if (result.current.refetch) {
@@ -77,7 +77,7 @@ describe('useQueryAlerts', () => {
       const { rerender, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts(args[0], args[1]), {
+      >((args) => useQueryAlerts({ query: args[0], indexName: args[1] }), {
         initialProps: [mockAlertsQuery, indexName],
       });
       await waitForNextUpdate();
@@ -94,7 +94,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts(args[0], args[1]), {
+      >((args) => useQueryAlerts({ query: args[0], indexName: args[1] }), {
         initialProps: [mockAlertsQuery, indexName],
       });
       await waitForNextUpdate();
@@ -114,7 +114,8 @@ describe('useQueryAlerts', () => {
     });
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnQueryAlerts<unknown, unknown>>(
-        () => useQueryAlerts<unknown, unknown>(mockAlertsQuery, 'mock-index-name')
+        () =>
+          useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName: 'mock-index-name' })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

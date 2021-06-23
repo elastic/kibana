@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -24,6 +24,8 @@ import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type Buckets = Array<{
   key: string;
@@ -51,38 +53,57 @@ export const useMatrixHistogram = ({
   histogramType,
   indexNames,
   isPtrIncluded,
+  onError,
   stackByField,
   startDate,
   threshold,
   skip = false,
+  includeMissingData = true,
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
   (to: string, from: string) => void
 ] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    matrixHistogramRequest,
-    setMatrixHistogramRequest,
-  ] = useState<MatrixHistogramRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: MatrixHistogramQuery,
-    filterQuery: createFilter(filterQuery),
+  const { getTransformChangesIfTheyExist } = useTransforms();
+
+  const {
+    indices: initialIndexName,
+    factoryQueryType: initialFactoryQueryType,
+    histogramType: initialHistogramType,
+    timerange: initialTimerange,
+  } = getTransformChangesIfTheyExist({
     histogramType,
+    factoryQueryType: MatrixHistogramQuery,
+    indices: indexNames,
+    filterQuery,
     timerange: {
       interval: '12h',
       from: startDate,
       to: endDate,
     },
+  });
+
+  const [
+    matrixHistogramRequest,
+    setMatrixHistogramRequest,
+  ] = useState<MatrixHistogramRequestOptions>({
+    defaultIndex: initialIndexName,
+    factoryQueryType: initialFactoryQueryType,
+    filterQuery: createFilter(filterQuery),
+    histogramType: initialHistogramType ?? histogramType,
+    timerange: initialTimerange,
     stackByField,
     threshold,
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
+    ...(includeMissingData != null ? { includeMissingData } : {}),
   });
+  const { addError, addWarning } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -126,14 +147,13 @@ export const useMatrixHistogram = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addError(msg, {
+              addError(msg, {
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
               searchSubscription$.current.unsubscribe();
@@ -145,21 +165,35 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, notifications.toasts]
+    [data.search, errorMessage, addError, addWarning]
   );
 
   useEffect(() => {
+    const {
+      indices,
+      factoryQueryType,
+      histogramType: newHistogramType,
+      timerange,
+    } = getTransformChangesIfTheyExist({
+      histogramType,
+      factoryQueryType: MatrixHistogramQuery,
+      indices: indexNames,
+      filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+    });
+
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexNames,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        histogramType,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        histogramType: newHistogramType ?? histogramType,
+        timerange,
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
@@ -180,9 +214,11 @@ export const useMatrixHistogram = ({
     threshold,
     isPtrIncluded,
     docValueFields,
+    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {
+    // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
       hostsSearch(matrixHistogramRequest);
     }
@@ -207,4 +243,73 @@ export const useMatrixHistogram = ({
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
+};
+
+/* function needed to split ip histogram data requests due to elasticsearch bug https://github.com/elastic/kibana/issues/89205
+ * using includeMissingData parameter to do the "missing data" query separately
+ **/
+export const useMatrixHistogramCombined = (
+  matrixHistogramQueryProps: MatrixHistogramQueryProps
+): [boolean, UseMatrixHistogramArgs] => {
+  const [mainLoading, mainResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: true,
+  });
+
+  const skipMissingData = useMemo(() => !matrixHistogramQueryProps.stackByField.endsWith('.ip'), [
+    matrixHistogramQueryProps.stackByField,
+  ]);
+  const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: false,
+    skip: skipMissingData,
+  });
+
+  const combinedLoading = useMemo<boolean>(() => mainLoading || missingDataLoading, [
+    mainLoading,
+    missingDataLoading,
+  ]);
+
+  const combinedResponse = useMemo<UseMatrixHistogramArgs>(() => {
+    if (skipMissingData) return mainResponse;
+
+    const { data, inspect, totalCount, refetch, buckets } = mainResponse;
+    const {
+      data: extraData,
+      inspect: extraInspect,
+      totalCount: extraTotalCount,
+      refetch: extraRefetch,
+    } = missingDataResponse;
+
+    const combinedRefetch = () => {
+      refetch();
+      extraRefetch();
+    };
+
+    if (combinedLoading) {
+      return {
+        data: [],
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: combinedRefetch,
+        totalCount: -1,
+        buckets: [],
+      };
+    }
+
+    return {
+      data: [...data, ...extraData],
+      inspect: {
+        dsl: [...inspect.dsl, ...extraInspect.dsl],
+        response: [...inspect.response, ...extraInspect.response],
+      },
+      totalCount: totalCount + extraTotalCount,
+      refetch: combinedRefetch,
+      buckets,
+    };
+  }, [combinedLoading, mainResponse, missingDataResponse, skipMissingData]);
+
+  return [combinedLoading, combinedResponse];
 };

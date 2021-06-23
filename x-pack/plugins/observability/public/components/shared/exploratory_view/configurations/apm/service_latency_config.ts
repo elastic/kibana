@@ -10,20 +10,21 @@ import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
-export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
+export function getServiceLatencyLensConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    id: seriesId,
-    reportType: 'service-latency',
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average',
-      sourceField: 'transaction.duration.us',
-      label: 'Latency',
-    },
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'transaction.duration.us',
+        label: 'Latency',
+      },
+    ],
     hasOperationType: true,
     defaultFilters: [
       'user_agent.name',

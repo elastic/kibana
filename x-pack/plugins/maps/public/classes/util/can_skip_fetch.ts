@@ -89,10 +89,12 @@ export async function canSkipSourceUpdate({
 
   let updateDueToApplyGlobalTime = false;
   let updateDueToTime = false;
+  let updateDueToTimeslice = false;
   if (timeAware) {
     updateDueToApplyGlobalTime = prevMeta.applyGlobalTime !== nextMeta.applyGlobalTime;
     if (nextMeta.applyGlobalTime) {
       updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
+      updateDueToTimeslice = !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
     }
   }
 
@@ -148,6 +150,7 @@ export async function canSkipSourceUpdate({
   return (
     !updateDueToApplyGlobalTime &&
     !updateDueToTime &&
+    !updateDueToTimeslice &&
     !updateDueToRefreshTimer &&
     !updateDueToExtentChange &&
     !updateDueToFields &&

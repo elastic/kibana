@@ -12,13 +12,13 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
   async function setup(options: { initialSettings?: Record<string, any> } = {}) {
     const { initialSettings } = options;
 
-    const { uiSettings, callCluster, supertest } = getServices();
+    const { uiSettings, esClient, supertest } = getServices();
 
     // delete the kibana index to ensure we start fresh
-    await callCluster('deleteByQuery', {
+    await esClient.deleteByQuery({
       index: savedObjectsIndex,
+      conflicts: 'proceed',
       body: {
-        conflicts: 'proceed',
         query: { match_all: {} },
       },
       refresh: true,

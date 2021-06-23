@@ -30,8 +30,13 @@ it(
   'produces a valid junit report for failures',
   async () => {
     const result = await execa(
-      './node_modules/.bin/jest',
-      ['--config', 'packages/kbn-test/src/jest/integration_tests/__fixtures__/jest.config.js'],
+      'node',
+      [
+        '--preserve-symlinks',
+        './node_modules/.bin/jest',
+        '--config',
+        'packages/kbn-test/src/jest/integration_tests/__fixtures__/jest.config.js',
+      ],
       {
         cwd: REPO_ROOT,
         env: {

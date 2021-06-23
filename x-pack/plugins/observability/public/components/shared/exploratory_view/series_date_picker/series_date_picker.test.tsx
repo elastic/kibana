@@ -6,58 +6,67 @@
  */
 
 import React from 'react';
-import { mockUrlStorage, mockUseHasData, render } from '../rtl_helpers';
+import { mockUseHasData, render } from '../rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { SeriesDatePicker } from './index';
 import { DEFAULT_TIME } from '../configurations/constants';
 
 describe('SeriesDatePicker', function () {
   it('should render properly', function () {
-    mockUrlStorage({
+    const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'dist' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
         },
       },
-    });
-    const { getByText } = render(<SeriesDatePicker seriesId={'series-id'} />);
+    };
+    const { getByText } = render(<SeriesDatePicker seriesId={'series-id'} />, { initSeries });
 
     getByText('Last 30 minutes');
   });
 
   it('should set defaults', async function () {
-    const { setSeries: setSeries1 } = mockUrlStorage({
+    const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          reportType: 'upp',
+          reportType: 'kpi' as const,
+          dataType: 'synthetics' as const,
           breakdown: 'monitor.status',
         },
       },
-    } as any);
-    render(<SeriesDatePicker seriesId={'uptime-pings-histogram'} />);
+    };
+    const { setSeries: setSeries1 } = render(
+      <SeriesDatePicker seriesId={'uptime-pings-histogram'} />,
+      { initSeries: initSeries as any }
+    );
     expect(setSeries1).toHaveBeenCalledTimes(1);
     expect(setSeries1).toHaveBeenCalledWith('uptime-pings-histogram', {
       breakdown: 'monitor.status',
-      reportType: 'upp',
+      dataType: 'synthetics' as const,
+      reportType: 'kpi' as const,
       time: DEFAULT_TIME,
     });
   });
 
   it('should set series data', async function () {
-    const { setSeries } = mockUrlStorage({
+    const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'kpi' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-30m', to: 'now' },
         },
       },
-    });
+    };
 
     const { onRefreshTimeRange } = mockUseHasData();
-    const { getByTestId } = render(<SeriesDatePicker seriesId={'series-id'} />);
+    const { getByTestId, setSeries } = render(<SeriesDatePicker seriesId={'series-id'} />, {
+      initSeries,
+    });
 
     await waitFor(function () {
       fireEvent.click(getByTestId('superDatePickerToggleQuickMenuButton'));
@@ -69,7 +78,8 @@ describe('SeriesDatePicker', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'monitor.status',
-      reportType: 'upp',
+      dataType: 'synthetics',
+      reportType: 'kpi',
       time: { from: 'now/d', to: 'now/d' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);

@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should request source clusters for destination locations', async () => {
-      const response = await PageObjects.maps.getResponse();
+      const { rawResponse: response } = await PageObjects.maps.getResponse();
       expect(response.aggregations.destSplit.buckets.length).to.equal(2);
     });
 

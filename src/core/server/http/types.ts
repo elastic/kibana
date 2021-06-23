@@ -278,6 +278,11 @@ export interface HttpServiceSetup {
 }
 
 /** @internal */
+export interface InternalNotReadyHttpServiceSetup {
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+}
+
+/** @internal */
 export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
@@ -287,6 +292,7 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <
@@ -297,6 +303,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
+  notReadyServer?: InternalNotReadyHttpServiceSetup;
 }
 
 /** @public */

@@ -24,7 +24,9 @@ jest.mock('../../services/package_policy', (): {
 } => {
   return {
     packagePolicyService: {
-      compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
+      compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
+        Promise.resolve(dataInputs)
+      ),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
       create: jest.fn((soClient, esClient, newData) =>

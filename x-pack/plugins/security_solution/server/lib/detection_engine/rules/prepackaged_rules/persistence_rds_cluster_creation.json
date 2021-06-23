@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS RDS Cluster Creation",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:(CreateDBCluster or CreateGlobalCluster) and event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:(CreateDBCluster or CreateGlobalCluster) and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/create-db-cluster.html",
     "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBCluster.html",
@@ -62,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

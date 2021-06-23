@@ -6,16 +6,8 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { usageProvider } from '../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
-import {
-  SearchSessionService,
-  enhancedEsSearchStrategyProvider,
-  eqlSearchStrategyProvider,
-} from './search';
-import { getUiSettings } from './ui_settings';
 import type {
   DataEnhancedRequestHandlerContext,
   DataEnhancedSetupDependencies as SetupDependencies,
@@ -23,6 +15,7 @@ import type {
 } from './type';
 import { ConfigSchema } from '../config';
 import { registerUsageCollector } from './collectors';
+import { SearchSessionService } from './search';
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
@@ -36,31 +29,12 @@ export class EnhancedDataServerPlugin
   }
 
   public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
-    const usage = deps.usageCollection ? usageProvider(core) : undefined;
-
-    core.uiSettings.register(getUiSettings());
     core.savedObjects.registerType(searchSessionSavedObjectType);
-
-    deps.data.search.registerSearchStrategy(
-      ENHANCED_ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.config,
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage
-      )
-    );
-
-    deps.data.search.registerSearchStrategy(
-      EQL_SEARCH_STRATEGY,
-      eqlSearchStrategyProvider(this.logger)
-    );
 
     this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
 
     deps.data.__enhance({
       search: {
-        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
         sessionService: this.sessionService,
       },
     });

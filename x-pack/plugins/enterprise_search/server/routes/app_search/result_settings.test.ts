@@ -71,22 +71,6 @@ describe('result settings routes', () => {
         path: '/as/engines/:engineName/result_settings',
       });
     });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = {
-          body: {
-            result_fields: resultFields,
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-    });
   });
 
   describe('POST /api/app_search/engines/{name}/sample_response_search', () => {
@@ -113,22 +97,6 @@ describe('result settings routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/sample_response_search',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = {
-          body: {
-            query: 'test',
-            result_fields: resultFields,
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
       });
     });
   });

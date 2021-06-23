@@ -394,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
         )!;
 
         // And now try to login with `saml2`.
-        await supertest
+        const unauthenticatedResponse = await supertest
           .post('/api/security/saml/callback')
           .ca(CA_CERT)
           .set('Cookie', saml1HandshakeCookie.cookieString())
@@ -402,6 +402,30 @@ export default function ({ getService }: FtrProviderContext) {
             SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml2` }),
           })
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.headers.refresh).to.be(
+          `0;url=/logout?msg=UNAUTHENTICATED&next=%2F`
+        );
+      });
+
+      it('should fail if SAML response is not valid', async () => {
+        const unauthenticatedResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .send({
+            SAMLResponse: await createSAMLResponse({ inResponseTo: 'some-invalid-request-id' }),
+          })
+          .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.headers.refresh).to.be(
+          `0;url=/login?msg=UNAUTHENTICATED&next=%2F`
+        );
       });
 
       it('should be able to log in via SP initiated login with any configured realm', async () => {
@@ -651,6 +675,41 @@ export default function ({ getService }: FtrProviderContext) {
           { type: 'oidc', name: 'oidc1' },
           { name: 'oidc1', type: 'oidc' },
           'token'
+        );
+      });
+
+      it('should fail IdP initiated login if state is not matching', async () => {
+        const handshakeResponse = await supertest
+          .get('/api/security/oidc/initiate_login?iss=https://test-op.elastic.co')
+          .ca(CA_CERT)
+          .expect(302);
+        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+
+        const unauthenticatedResponse = await supertest
+          .get('/api/security/oidc/callback?code=code2&state=someothervalue')
+          .ca(CA_CERT)
+          .set('Cookie', handshakeCookie.cookieString())
+          .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.headers.refresh).to.be(
+          `0;url=/logout?msg=UNAUTHENTICATED&next=%2F`
+        );
+      });
+
+      it('should fail IdP initiated login if issuer is not known', async () => {
+        const unauthenticatedResponse = await supertest
+          .get('/api/security/oidc/initiate_login?iss=https://dummy.hacker.co')
+          .ca(CA_CERT)
+          .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.headers.refresh).to.be(
+          `0;url=/login?msg=UNAUTHENTICATED&next=%2F`
         );
       });
 

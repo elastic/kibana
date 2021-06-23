@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A scheduled task can be used by an adversary to establish persistence, move laterally, and/or escalate privileges.",
+  "false_positives": [
+    "Legitimate scheduled tasks may be created during installation of new software."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Local Scheduled Task Creation",
+  "query": "sequence with maxspan=1m\n  [process where event.type != \"end\" and\n    ((process.name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                      \"powershell.exe\", \"pwsh.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\", \"winrshost.exe\") or\n    process.pe.original_file_name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                                     \"powershell.exe\", \"pwsh.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\",\n                                     \"winrshost.exe\")) or\n    process.code_signature.trusted == false)] by process.entity_id\n  [process where event.type == \"start\" and\n    (process.name : \"schtasks.exe\" or process.pe.original_file_name == \"schtasks.exe\") and\n    process.args : (\"/create\", \"-create\") and process.args : (\"/RU\", \"/SC\", \"/TN\", \"/TR\", \"/F\", \"/XML\") and\n    /* exclude SYSTEM SIDs - look for task creations by non-SYSTEM user */\n    not user.id : (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\")] by process.parent.entity_id\n",
+  "risk_score": 21,
+  "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.005",
+              "name": "Scheduled Task",
+              "reference": "https://attack.mitre.org/techniques/T1053/005/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
+}

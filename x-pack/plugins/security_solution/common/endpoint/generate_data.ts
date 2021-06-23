@@ -254,6 +254,12 @@ interface HostInfo {
         version: number;
       };
     };
+    configuration?: {
+      isolation: boolean;
+    };
+    state?: {
+      isolation: boolean;
+    };
   };
 }
 
@@ -417,6 +423,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Update the common host metadata - essentially creating an entire new endpoint metadata record
+   * when the `.generateHostMetadata()` is subsequently called
+   */
+  public updateCommonInfo() {
+    this.commonInfo = this.createHostData();
+  }
+
+  /**
    * Parses an index and returns the data stream fields extracted from the index.
    *
    * @param index the index name to parse into the data stream parts
@@ -433,6 +447,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
+    const isIsolated = this.randomBoolean(0.3);
+
     return {
       agent: {
         version: this.randomVersion(),
@@ -457,6 +473,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
+        },
+        configuration: {
+          isolation: isIsolated,
+        },
+        state: {
+          isolation: isIsolated,
         },
       },
     };
@@ -1290,6 +1312,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateEpmPackage(): GetPackagesResponse['response'][0] {
     return {
+      id: this.seededUUIDv4(),
       name: 'endpoint',
       title: 'Elastic Endpoint',
       version: '0.5.0',

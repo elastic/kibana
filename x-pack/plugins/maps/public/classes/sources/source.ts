@@ -8,17 +8,20 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
-
 import { IField } from '../fields/field';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { AbstractSourceDescriptor, Attribution } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { PreIndexedShape } from '../../../common/elasticsearch_util';
+
+export type OnSourceChangeArgs = {
+  propName: string;
+  value: unknown;
+  newLayerType?: LAYER_TYPE;
+};
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -29,11 +32,6 @@ export type ImmutableSourceProperty = {
   label: string;
   value: string;
   link?: string;
-};
-
-export type Attribution = {
-  url: string;
-  label: string;
 };
 
 export interface ISource {
@@ -47,7 +45,7 @@ export interface ISource {
   isRefreshTimerAware(): boolean;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
-  getAttributions(): Promise<Attribution[]>;
+  getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
@@ -103,8 +101,8 @@ export class AbstractSource implements ISource {
     return '';
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    return [];
+  getAttributionProvider(): (() => Promise<Attribution[]>) | null {
+    return null;
   }
 
   isFieldAware(): boolean {

@@ -17,6 +17,7 @@ describe('InputRow', () => {
   const props = {
     value: 'some value',
     placeholder: 'Enter a value',
+    autoFocus: false,
     onChange: jest.fn(),
     onDelete: jest.fn(),
     disableDelete: false,
@@ -33,6 +34,7 @@ describe('InputRow', () => {
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
     expect(wrapper.find(EuiFieldText).prop('value')).toEqual('some value');
     expect(wrapper.find(EuiFieldText).prop('placeholder')).toEqual('Enter a value');
+    expect(wrapper.find(EuiFieldText).prop('autoFocus')).toEqual(false);
     expect(wrapper.find('[data-test-subj="deleteInputRowButton"]').prop('title')).toEqual(
       'Delete value'
     );

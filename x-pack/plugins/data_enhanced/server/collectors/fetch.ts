@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { SEARCH_SESSION_TYPE } from '../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
 import { ReportedUsage } from './register';
 
 interface SessionPersistedTermsBucket {
@@ -36,8 +36,12 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>, logger: L
         },
       });
 
-      // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregations
-      const buckets: SessionPersistedTermsBucket[] = esResponse.aggregations!.persisted.buckets;
+      const aggs = esResponse.aggregations as Record<
+        string,
+        estypes.AggregationsMultiBucketAggregate<SessionPersistedTermsBucket>
+      >;
+
+      const buckets = aggs.persisted.buckets;
       if (!buckets.length) {
         return { transientCount: 0, persistedCount: 0, totalCount: 0 };
       }

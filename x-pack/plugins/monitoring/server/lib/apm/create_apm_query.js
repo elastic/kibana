@@ -18,7 +18,7 @@ export function createApmQuery(options = {}) {
   options = defaults(options, {
     filters: [],
     metric: ApmMetric.getMetricFields(),
-    type: 'beats_stats',
+    types: ['stats', 'beats_stats'],
   });
 
   options.filters.push({

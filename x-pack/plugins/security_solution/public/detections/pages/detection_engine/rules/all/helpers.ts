@@ -68,3 +68,19 @@ export const getSearchFilters = ({
 
   return { [defaultSearchTerm]: searchValue };
 };
+
+/**
+ * This function helps to parse NDJSON with exported rules
+ * and retrieve the number of successfully exported rules.
+ *
+ * @param blob a Blob received from an _export endpoint
+ * @returns Number of exported rules
+ */
+export const getExportedRulesCount = async (blob: Blob): Promise<number> => {
+  const blobContent = await blob.text();
+  // The Blob content is an NDJSON file, the last line of which contains export details.
+  const exportDetailsJson = blobContent.split('\n').filter(Boolean).slice(-1)[0];
+  const exportDetails = JSON.parse(exportDetailsJson);
+
+  return exportDetails.exported_count;
+};

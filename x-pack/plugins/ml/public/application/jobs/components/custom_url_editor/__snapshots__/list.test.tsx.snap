@@ -12,6 +12,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
+        data-test-subj="mlJobEditCustomUrlItemLabel"
         describedByIds={Array []}
         display="row"
         error={Array []}
@@ -114,6 +115,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
+            data-test-subj="mlJobEditTestCustomUrlButton"
             iconType="popout"
             onClick={[Function]}
             size="s"
@@ -146,6 +148,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
+            data-test-subj="mlJobEditDeleteCustomUrlButton_0"
             iconType="trash"
             onClick={[Function]}
             size="s"
@@ -162,6 +165,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
+        data-test-subj="mlJobEditCustomUrlItemLabel"
         describedByIds={Array []}
         display="row"
         error={Array []}
@@ -264,6 +268,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
+            data-test-subj="mlJobEditTestCustomUrlButton"
             iconType="popout"
             onClick={[Function]}
             size="s"
@@ -296,6 +301,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
+            data-test-subj="mlJobEditDeleteCustomUrlButton_1"
             iconType="trash"
             onClick={[Function]}
             size="s"
@@ -312,6 +318,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
+        data-test-subj="mlJobEditCustomUrlItemLabel"
         describedByIds={Array []}
         display="row"
         error={Array []}
@@ -414,6 +421,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
+            data-test-subj="mlJobEditTestCustomUrlButton"
             iconType="popout"
             onClick={[Function]}
             size="s"
@@ -446,6 +454,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
+            data-test-subj="mlJobEditDeleteCustomUrlButton_2"
             iconType="trash"
             onClick={[Function]}
             size="s"

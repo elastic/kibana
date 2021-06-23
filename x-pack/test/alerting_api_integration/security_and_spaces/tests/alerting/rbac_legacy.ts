@@ -35,7 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esTestIndexTool.destroy();
-      await esArchiver.load('alerts_legacy');
+      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       await setupSpacesAndUsers(getService);
@@ -44,7 +44,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await esArchiver.unload('alerts_legacy');
+      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy');
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -112,7 +112,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'Unauthorized to updateApiKey a "test.always-firing" alert for "alertsFixture"',
+                  'Unauthorized to updateApiKey a "test.always-firing" rule for "alertsFixture"',
                 statusCode: 403,
               });
               break;
@@ -177,12 +177,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
               'pre-7.10.0'
             );
 
+            // Get scheduled task id
+            const getResponse = await supertestWithoutAuth
+              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
+              .auth(user.username, user.password)
+              .expect(200);
+
             // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 2 seconds,
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
             await supertest
-              .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reschedule_task`)
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/${
+                  getResponse.body.scheduled_task_id
+                }/reschedule_task`
+              )
               .set('kbn-xsrf', 'foo')
               .send({
                 runAt: getRunAt(2000),

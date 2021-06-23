@@ -249,6 +249,9 @@ export const Controls: FC<Props> = React.memo(
               icon="branch"
               onClick={() => {
                 getNodeData({ id: nodeLabel, type: nodeType });
+                if (cy) {
+                  cy.elements().unselect();
+                }
                 setShowFlyout(false);
                 setPopover(false);
               }}
@@ -264,12 +267,7 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout
-          ownFocus
-          size="m"
-          onClose={() => setShowFlyout(false)}
-          data-test-subj="mlAnalyticsJobMapFlyout"
-        >
+        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>

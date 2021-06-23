@@ -1,9 +1,0 @@
-title: AgentEvent
-allOf:
-  - type: object
-    properties:
-      id:
-        type: string
-    required:
-      - id
-  - $ref: ./new_agent_event.yaml

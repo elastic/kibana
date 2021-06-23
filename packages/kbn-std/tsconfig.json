@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "declarationDir": "./target",
+    "incremental": true,
     "outDir": "./target",
     "stripInternal": true,
     "declaration": true,
     "declarationMap": true,
+    "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-std/src",
     "types": [
@@ -16,8 +16,5 @@
   },
   "include": [
     "./src/**/*.ts"
-  ],
-  "exclude": [
-    "**/__fixture__/**/*"
   ]
 }

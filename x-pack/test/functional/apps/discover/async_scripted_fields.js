@@ -23,8 +23,10 @@ export default function ({ getService, getPageObjects }) {
     this.tags(['skipFirefox']);
 
     before(async function () {
-      await esArchiver.load('kibana_scripted_fields_on_logstash');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/kibana_scripted_fields_on_logstash'
+      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await security.testUser.setRoles(['test_logstash_reader', 'global_discover_read']);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
@@ -36,8 +38,8 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
     });
 

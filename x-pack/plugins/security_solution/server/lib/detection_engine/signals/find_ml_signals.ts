@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ExceptionListItemSchema } from '../../../../../lists/common';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';

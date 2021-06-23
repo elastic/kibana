@@ -32,5 +32,5 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [bulkUpdate(objects)](./kibana-plugin-core-public.savedobjectsclient.bulkupdate.md) |  | Update multiple documents at once |
-|  [update(type, id, attributes, { version, migrationVersion, references })](./kibana-plugin-core-public.savedobjectsclient.update.md) |  | Updates an object |
+|  [update(type, id, attributes, { version, references, upsert })](./kibana-plugin-core-public.savedobjectsclient.update.md) |  | Updates an object |
 

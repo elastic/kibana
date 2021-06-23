@@ -21,6 +21,7 @@ export function getRootBreadcrumbs() {
   ];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSavedSearchBreadcrumbs($route: any) {
   return [
     ...getRootBreadcrumbs(),

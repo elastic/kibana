@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../../shared/types';
+import { SchemaType } from '../../../../../shared/schema/types';
 
 import { Boosts } from '../../boosts';
 import { Boost, SearchField } from '../../types';
@@ -19,7 +19,7 @@ import { WeightSlider } from './weight_slider';
 
 interface Props {
   name: string;
-  type: SchemaTypes;
+  type: SchemaType;
   boosts?: Boost[];
   field?: SearchField;
 }

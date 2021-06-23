@@ -1,6 +1,7 @@
 {
   "author": [
-    "Elastic"
+    "Elastic",
+    "Austin Songer"
   ],
   "description": "Identifies the deactivation of a specified multi-factor authentication (MFA) device and removes it from association with the user name for which it was originally enabled. In AWS Identity and Access Management (IAM), a device must be deactivated before it can be deleted.",
   "false_positives": [
@@ -15,8 +16,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS IAM Deactivation of MFA Device",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeactivateMFADevice and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:(DeactivateMFADevice or DeleteVirtualMFADevice) and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iam/deactivate-mfa-device.html",
     "https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeactivateMFADevice.html"
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

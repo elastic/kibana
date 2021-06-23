@@ -16,7 +16,7 @@ import {
   ConnectorSchema,
   CommentSchema,
 } from './schema';
-import { CaseResponse, CasesResponse } from '../../../common/api';
+import { CaseResponse, CasesResponse } from '../../../common';
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type Connector = TypeOf<typeof ConnectorSchema>;

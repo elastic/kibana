@@ -8,6 +8,7 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
+import { Duration } from 'moment';
 
 export const httpConfigSchema = schema.object(
   {
@@ -22,6 +23,7 @@ export const httpConfigSchema = schema.object(
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',
     }),
+    shutdownTimeout: schema.duration({ defaultValue: '30s' }),
     keepaliveTimeout: schema.number({
       defaultValue: 120000,
     }),
@@ -47,6 +49,7 @@ export class HttpConfig implements IHttpConfig {
   host: string;
   port: number;
   maxPayload: ByteSizeValue;
+  shutdownTimeout: Duration;
   keepaliveTimeout: number;
   socketTimeout: number;
   cors: ICorsConfig;
@@ -57,6 +60,7 @@ export class HttpConfig implements IHttpConfig {
     this.host = rawConfig.host;
     this.port = rawConfig.port;
     this.maxPayload = rawConfig.maxPayload;
+    this.shutdownTimeout = rawConfig.shutdownTimeout;
     this.keepaliveTimeout = rawConfig.keepaliveTimeout;
     this.socketTimeout = rawConfig.socketTimeout;
     this.cors = rawConfig.cors;

@@ -8,12 +8,11 @@
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
-
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService } from '../../../kibana_services';
+import { getHttp, getMapAppConfig, getSearchService } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -23,7 +22,6 @@ import {
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
-
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -31,17 +29,16 @@ import {
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   MVT_SOURCE_LAYER_NAME,
+  MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
-import { loadIndexSettings } from './load_index_settings';
-
+import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
 import { registerSource } from '../source_registry';
 import {
   ESSearchSourceDescriptor,
@@ -51,17 +48,16 @@ import {
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import {
-  GeoJsonWithMeta,
-  ITiledSingleLayerVectorSource,
-  SourceTooltipConfig,
-} from '../vector_source';
+import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import { addFeatureToIndex, getMatchingIndexes } from './util/feature_edit';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -393,6 +389,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
+  async supportsFeatureEditing(): Promise<boolean> {
+    if (!getMapAppConfig().enableDrawingFeature) {
+      return false;
+    }
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+    if (!matchingIndexes) {
+      return false;
+    }
+    // For now we only support 1:1 index-pattern:index matches
+    return matchingIndexes.length === 1;
+  }
+
   _hasSort(): boolean {
     const { sortField, sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
@@ -465,7 +477,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return this._tooltipFields.length > 0;
   }
 
@@ -672,14 +684,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
+  async addFeature(geometry: Geometry | Position[]) {
+    const indexPattern = await this.getIndexPattern();
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+  }
+
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }> {
+  ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -722,6 +734,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 &geoFieldType=${geoField.type}`;
 
     return {
+      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),

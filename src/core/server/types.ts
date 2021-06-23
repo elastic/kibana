@@ -37,6 +37,10 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsNamespaceType,
 } from './saved_objects/types';
+export type {
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from './saved_objects/service';
 export type { DomainDeprecationDetails, DeprecationsGetResponse } from './deprecations/types';
 export * from './ui_settings/types';
 export type { EnvironmentMode, PackageInfo } from '@kbn/config';

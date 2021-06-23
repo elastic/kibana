@@ -19,11 +19,14 @@ import { networkTls } from './tls';
 import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
 import { networkUsers } from './users';
-import { networkKpiDns } from './kpi/dns';
-import { networkKpiNetworkEvents } from './kpi/network_events';
-import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
+import { networkKpiDns, networkKpiDnsEntities } from './kpi/dns';
+import { networkKpiNetworkEvents, networkKpiNetworkEventsEntities } from './kpi/network_events';
+import { networkKpiTlsHandshakes, networkKpiTlsHandshakesEntities } from './kpi/tls_handshakes';
 import { networkKpiUniqueFlows } from './kpi/unique_flows';
-import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
+import {
+  networkKpiUniquePrivateIps,
+  networkKpiUniquePrivateIpsEntities,
+} from './kpi/unique_private_ips';
 
 jest.mock('./details');
 jest.mock('./dns');
@@ -51,10 +54,14 @@ describe('networkFactory', () => {
       [NetworkQueries.topNFlow]: networkTopNFlow,
       [NetworkQueries.users]: networkUsers,
       [NetworkKpiQueries.dns]: networkKpiDns,
+      [NetworkKpiQueries.dnsEntities]: networkKpiDnsEntities,
       [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
+      [NetworkKpiQueries.networkEventsEntities]: networkKpiNetworkEventsEntities,
+      [NetworkKpiQueries.tlsHandshakesEntities]: networkKpiTlsHandshakesEntities,
       [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
       [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
       [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
+      [NetworkKpiQueries.uniquePrivateIpsEntities]: networkKpiUniquePrivateIpsEntities,
     };
     expect(networkFactory).toEqual(expectedNetworkFactory);
   });

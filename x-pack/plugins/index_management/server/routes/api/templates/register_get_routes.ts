@@ -17,11 +17,11 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router, license }: RouteDependencies) {
-  router.get(
-    { path: addBasePath('/index_templates'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
+export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
+  router.get({ path: addBasePath('/index_templates'), validate: false }, async (ctx, req, res) => {
+    const { callAsCurrentUser } = ctx.dataManagement!.client;
+
+    try {
       const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
       const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
@@ -41,8 +41,17 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       };
 
       return res.ok({ body });
-    })
-  );
+    } catch (error) {
+      if (isEsError(error)) {
+        return res.customError({
+          statusCode: error.statusCode,
+          body: error,
+        });
+      }
+      // Case: default
+      throw error;
+    }
+  });
 }
 
 const paramsSchema = schema.object({
@@ -54,13 +63,13 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
+export function registerGetOneRoute({ router, lib }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
@@ -106,6 +115,6 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

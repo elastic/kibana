@@ -38,6 +38,7 @@ export const emptyMlCapabilities: MlCapabilitiesResponse = {
     canCreateDataFrameAnalytics: false,
     canStartStopDataFrameAnalytics: false,
     canCreateMlAlerts: false,
+    canUseMlAlerts: false,
   },
   isPlatinumOrTrialLicense: false,
   mlFeatureEnabledInSpace: false,

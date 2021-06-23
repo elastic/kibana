@@ -30,6 +30,8 @@ describe('telemetry_ui_metric', () => {
   const registerType = jest.fn();
   const mockedFetchContext = createCollectorFetchContextMock();
 
+  const commonSavedObjectsAttributes = { score: 0, references: [], type: 'ui-metric' };
+
   beforeAll(() =>
     registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
   );
@@ -44,13 +46,12 @@ describe('telemetry_ui_metric', () => {
 
   test('when savedObjectClient is initialised, return something', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
-    savedObjectClient.find.mockImplementation(
-      async () =>
-        ({
-          saved_objects: [],
-          total: 0,
-        } as any)
-    );
+    savedObjectClient.find.mockImplementation(async () => ({
+      saved_objects: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
+    }));
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
     expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
@@ -59,20 +60,33 @@ describe('telemetry_ui_metric', () => {
 
   test('results grouped by appName', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
-    savedObjectClient.find.mockImplementation(async () => {
-      return {
-        saved_objects: [
-          { id: 'testAppName:testKeyName1', attributes: { count: 3 } },
-          { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
-          { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
-          {
-            id:
-              'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
-            attributes: { count: 1 },
-          },
-        ],
-        total: 3,
-      } as any;
+    savedObjectClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName:testKeyName1',
+          attributes: { count: 3 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName:testKeyName2',
+          attributes: { count: 5 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id: 'testAppName2:testKeyName3',
+          attributes: { count: 1 },
+        },
+        {
+          ...commonSavedObjectsAttributes,
+          id:
+            'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          attributes: { count: 1 },
+        },
+      ],
+      total: 3,
+      per_page: 3,
+      page: 1,
     });
 
     getUsageCollector.mockImplementation(() => savedObjectClient);

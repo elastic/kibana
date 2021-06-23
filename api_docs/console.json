@@ -16,38 +16,38 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "console",
       "id": "def-server.ConsoleSetup",
       "type": "Type",
+      "tags": [],
       "label": "ConsoleSetup",
-      "tags": [
-        "public"
-      ],
       "description": [],
+      "signature": [
+        "{ addExtensionSpecFilePath: (path: string) => void; }"
+      ],
       "source": {
         "path": "src/plugins/console/server/types.ts",
         "lineNumber": 13
       },
-      "signature": [
-        "{ addExtensionSpecFilePath: (path: string) => void; }"
-      ],
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "console",
       "id": "def-server.ConsoleStart",
       "type": "Type",
+      "tags": [],
       "label": "ConsoleStart",
-      "tags": [
-        "public"
-      ],
       "description": [],
+      "signature": [
+        "{ addProcessorDefinition: (processor: unknown) => void; }"
+      ],
       "source": {
         "path": "src/plugins/console/server/types.ts",
         "lineNumber": 18
       },
-      "signature": [
-        "{ addProcessorDefinition: (processor: unknown) => void; }"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

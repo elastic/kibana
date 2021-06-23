@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('input control options', () => {
     before(async () => {
+      await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default

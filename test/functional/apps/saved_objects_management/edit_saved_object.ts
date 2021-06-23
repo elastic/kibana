@@ -55,14 +55,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await button.click();
   };
 
-  // Flaky: https://github.com/elastic/kibana/issues/68400
-  describe.skip('saved objects edition page', () => {
+  describe('saved objects edition page', () => {
     beforeEach(async () => {
-      await esArchiver.load('saved_objects_management/edit_saved_object');
+      await esArchiver.load(
+        'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('saved_objects_management/edit_saved_object');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
+      );
     });
 
     it('allows to update the saved object when submitting', async () => {

@@ -87,12 +87,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
+    const defaultDescription = processorDescriptor?.getDefaultDescription(processor.options);
+
+    const hasNoDescription = !defaultDescription && !processor.options.description;
+
     const inlineTextInputContainerClasses = classNames(
       'pipelineProcessorsEditor__item__descriptionContainer',
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'pipelineProcessorsEditor__item__descriptionContainer--displayNone':
-          isInMoveMode && !processor.options.description,
+          isInMoveMode && hasNoDescription,
       }
     );
 
@@ -208,16 +212,17 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
+              <EuiFlexItem
+                data-test-subj="pipelineProcessorItemDescriptionContainer"
+                className={inlineTextInputContainerClasses}
+                grow={false}
+              >
                 <InlineTextInput
                   disabled={isEditorNotInIdleMode}
                   onChange={onDescriptionChange}
                   ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
                   text={description}
-                  placeholder={
-                    processorDescriptor?.getDefaultDescription(processor.options) ??
-                    i18nTexts.descriptionPlaceholder
-                  }
+                  placeholder={defaultDescription ?? i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -3,7 +3,7 @@
 /target
 /test/functional/failure_debug
 /test/functional/screenshots
-/test/functional/apps/reporting/reports/session
+/test/functional/apps/**/reports/session
 /test/reporting/configs/failure_debug/
 /plugins/reporting/.chromium/
 /plugins/reporting/chromium/

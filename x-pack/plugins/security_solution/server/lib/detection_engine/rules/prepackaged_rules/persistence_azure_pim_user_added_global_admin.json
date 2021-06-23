@@ -13,7 +13,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Global Administrator Role Addition to PIM User",
-  "note": "The Azure Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.properties.category:RoleManagement and azure.auditlogs.operation_name:(\"Add eligible member to role in PIM completed (permanent)\" or \"Add member to role in PIM completed (timebound)\") and azure.auditlogs.properties.target_resources.*.display_name:\"Global Administrator\" and event.outcome:(Success or success)",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/users-groups-roles/directory-assign-admin-roles"
@@ -48,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -11,7 +11,7 @@ import {
   PluginStart,
   shimHitsTotal,
 } from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
 import {
   FactoryQueryTypes,
   StrategyResponseType,

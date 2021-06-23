@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 // @ts-expect-error
@@ -25,9 +25,10 @@ import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 
 import {
   LABEL_BORDER_SIZES,
-  VECTOR_STYLES,
+  LAYER_TYPE,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style_fields_helper';
 import {
@@ -257,7 +258,18 @@ export class VectorStyleEditor extends Component<Props, State> {
     );
   }
 
-  _renderLabelProperties() {
+  _renderLabelProperties(isPoints: boolean) {
+    if (
+      !isPoints &&
+      this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR &&
+      !this.props.layer.getSource().isESSource()
+    ) {
+      // This handles and edge-case
+      // 3rd party lines and polygons from mvt sources cannot be labeled, because they do not have label-centroid geometries inside the tile.
+      // These label-centroids are only added for ES-sources
+      return;
+    }
+
     const hasLabel = this._hasLabel();
     const hasLabelBorder = this._hasLabelBorder();
     return (
@@ -456,7 +468,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(true)}
       </Fragment>
     );
   }
@@ -470,7 +482,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }
@@ -487,7 +499,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }

@@ -7,64 +7,71 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockAppIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
+import { mockAppIndexPattern, render } from '../../rtl_helpers';
 import { ReportTypesCol, SELECTED_DATA_TYPE_FOR_REPORT } from './report_types_col';
 import { ReportTypes } from '../series_builder';
 import { DEFAULT_TIME } from '../../configurations/constants';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
+import { NEW_SERIES_KEY } from '../../hooks/use_series_storage';
 
 describe('ReportTypesCol', function () {
+  const seriesId = 'test-series-id';
+
   mockAppIndexPattern();
 
   it('should render properly', function () {
-    render(<ReportTypesCol reportTypes={ReportTypes.ux} />);
+    render(<ReportTypesCol reportTypes={ReportTypes.ux} seriesId={seriesId} />);
     screen.getByText('Performance distribution');
     screen.getByText('KPI over time');
   });
 
   it('should display empty message', function () {
-    render(<ReportTypesCol reportTypes={[]} />);
+    render(<ReportTypesCol reportTypes={[]} seriesId={seriesId} />);
     screen.getByText(SELECTED_DATA_TYPE_FOR_REPORT);
   });
 
   it('should set series on change', function () {
-    const { setSeries } = mockUrlStorage({});
-    render(<ReportTypesCol reportTypes={ReportTypes.synthetics} />);
+    const { setSeries } = render(
+      <ReportTypesCol reportTypes={ReportTypes.synthetics} seriesId={seriesId} />
+    );
 
-    fireEvent.click(screen.getByText(/monitor duration/i));
+    fireEvent.click(screen.getByText(/KPI over time/i));
 
-    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: 'user_agent.name',
+      dataType: 'ux',
       reportDefinitions: {},
-      reportType: 'upd',
+      reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);
   });
 
   it('should set selected as filled', function () {
-    const { setSeries } = mockUrlStorage({
+    const initSeries = {
       data: {
         [NEW_SERIES_KEY]: {
-          dataType: 'synthetics',
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'kpi' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
       },
-    });
+    };
 
-    render(<ReportTypesCol reportTypes={ReportTypes.synthetics} />);
+    const { setSeries } = render(
+      <ReportTypesCol reportTypes={ReportTypes.synthetics} seriesId={seriesId} />,
+      { initSeries }
+    );
 
     const button = screen.getByRole('button', {
-      name: /pings histogram/i,
+      name: /KPI over time/i,
     });
 
     expect(button.classList).toContain('euiButton--fill');
     fireEvent.click(button);
 
     // undefined on click selected
-    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
       dataType: 'synthetics',
       time: DEFAULT_TIME,
     });

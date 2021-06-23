@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FoundListSchema } from './found_list_schema';
+import type { FoundListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getListResponseMock } from './list_schema.mock';
 
 export const getFoundListSchemaMock = (): FoundListSchema => ({

@@ -17,5 +17,7 @@ post:
         schema:
           type: object
           properties:
+            revoke:
+              type: boolean
             force:
               type: boolean

@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PDF Reader Child Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(AcroRd32.exe or Acrobat.exe or FoxitPhantomPDF.exe or FoxitReader.exe) and process.name:(arp.exe or dsquery.exe or dsget.exe or gpresult.exe or hostname.exe or ipconfig.exe or nbtstat.exe or net.exe or net1.exe or netsh.exe or netstat.exe or nltest.exe or ping.exe or qprocess.exe or quser.exe or qwinsta.exe or reg.exe or sc.exe or systeminfo.exe or tasklist.exe or tracert.exe or whoami.exe or bginfo.exe or cdb.exe or cmstp.exe or csi.exe or dnx.exe or fsi.exe or ieexec.exe or iexpress.exe or installutil.exe or Microsoft.Workflow.Compiler.exe or msbuild.exe or mshta.exe or msxsl.exe or odbcconf.exe or rcsi.exe or regsvr32.exe or xwizard.exe or atbroker.exe or forfiles.exe or schtasks.exe or regasm.exe or regsvcs.exe or cmd.exe or cscript.exe or powershell.exe or pwsh.exe or wmic.exe or wscript.exe or bitsadmin.exe or certutil.exe or ftp.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"AcroRd32.exe\",\n                         \"Acrobat.exe\",\n                         \"FoxitPhantomPDF.exe\",\n                         \"FoxitReader.exe\") and\n  process.name : (\"arp.exe\", \"dsquery.exe\", \"dsget.exe\", \"gpresult.exe\", \"hostname.exe\", \"ipconfig.exe\", \"nbtstat.exe\",\n                  \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"ping.exe\", \"qprocess.exe\",\n                  \"quser.exe\", \"qwinsta.exe\", \"reg.exe\", \"sc.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\",\n                  \"whoami.exe\", \"bginfo.exe\", \"cdb.exe\", \"cmstp.exe\", \"csi.exe\", \"dnx.exe\", \"fsi.exe\", \"ieexec.exe\",\n                  \"iexpress.exe\", \"installutil.exe\", \"Microsoft.Workflow.Compiler.exe\", \"msbuild.exe\", \"mshta.exe\",\n                  \"msxsl.exe\", \"odbcconf.exe\", \"rcsi.exe\", \"regsvr32.exe\", \"xwizard.exe\", \"atbroker.exe\",\n                  \"forfiles.exe\", \"schtasks.exe\", \"regasm.exe\", \"regsvcs.exe\", \"cmd.exe\", \"cscript.exe\",\n                  \"powershell.exe\", \"pwsh.exe\", \"wmic.exe\", \"wscript.exe\", \"bitsadmin.exe\", \"certutil.exe\", \"ftp.exe\")\n",
   "risk_score": 21,
   "rule_id": "53a26770-9cbd-40c5-8b57-61d01a325e14",
   "severity": "low",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 6
+  "type": "eql",
+  "version": 7
 }

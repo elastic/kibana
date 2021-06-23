@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 export const LabsStrings = {
   Components: {
@@ -18,7 +19,8 @@ export const LabsStrings = {
           defaultMessage: 'Kibana',
         }),
         help: i18n.translate('presentationUtil.labs.components.kibanaSwitchHelp', {
-          defaultMessage: 'Sets the corresponding Advanced Setting for this lab project in Kibana',
+          defaultMessage:
+            'Sets the corresponding Advanced Setting for this lab project; affects all Kibana users',
         }),
       }),
       getBrowserSwitchText: () => ({
@@ -51,24 +53,28 @@ export const LabsStrings = {
         i18n.translate('presentationUtil.labs.components.overrideFlagsLabel', {
           defaultMessage: 'Override flags',
         }),
+      getOverriddenIconTipLabel: () =>
+        i18n.translate('presentationUtil.labs.components.overridenIconTipLabel', {
+          defaultMessage: 'Default overridden',
+        }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          id="presentationUtil.labs.components.enabledStatusMessage"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Enabled</strong>,
+            status: <EuiCode>Enabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the enabled status of a lab project"
         />
       ),
       getDisabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          id="presentationUtil.labs.components.disabledStatusMessage"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Disabled</strong>,
+            status: <EuiCode>Disabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the disabled status of a lab project"
         />
       ),
     },
@@ -76,6 +82,11 @@ export const LabsStrings = {
       getTitleLabel: () =>
         i18n.translate('presentationUtil.labs.components.titleLabel', {
           defaultMessage: 'Lab projects',
+        }),
+      getDescriptionMessage: () =>
+        i18n.translate('presentationUtil.labs.components.descriptionMessage', {
+          defaultMessage:
+            'Lab projects are features and functionality that are in-progress or experimental in nature.  They can be enabled and disabled locally for your browser or tab, or in Kibana.',
         }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {
@@ -88,6 +99,10 @@ export const LabsStrings = {
       getRefreshLabel: () =>
         i18n.translate('presentationUtil.labs.components.calloutHelp', {
           defaultMessage: 'Refresh to apply changes',
+        }),
+      getCloseButtonLabel: () =>
+        i18n.translate('presentationUtil.labs.components.closeButtonLabel', {
+          defaultMessage: 'Close',
         }),
     },
   },

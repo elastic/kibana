@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiToken } from '@elastic/eui';
 
+import { SchemaType, InternalSchemaType } from '../../../shared/schema/types';
+
 import { FieldType } from './types';
 
 interface Props {
@@ -16,13 +18,14 @@ interface Props {
 }
 
 const fieldTypeToTokenMap = {
-  text: 'tokenString',
-  string: 'tokenString',
-  number: 'tokenNumber',
-  float: 'tokenNumber',
-  location: 'tokenGeo',
-  geolocation: 'tokenGeo',
-  date: 'tokenDate',
+  [SchemaType.Text]: 'tokenString',
+  [InternalSchemaType.String]: 'tokenString',
+  [SchemaType.Number]: 'tokenNumber',
+  [InternalSchemaType.Float]: 'tokenNumber',
+  [SchemaType.Geolocation]: 'tokenGeo',
+  [InternalSchemaType.Location]: 'tokenGeo',
+  [SchemaType.Date]: 'tokenDate',
+  [InternalSchemaType.Date]: 'tokenDate',
 };
 
 export const ResultToken: React.FC<Props> = ({ fieldType }) => {

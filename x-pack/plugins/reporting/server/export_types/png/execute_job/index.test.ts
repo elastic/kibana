@@ -9,7 +9,11 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import { createMockReportingCore } from '../../../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../../test_helpers';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
@@ -40,27 +44,17 @@ const encryptHeaders = async (headers: Record<string, string>) => {
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPNG;
 
 beforeEach(async () => {
-  const kbnConfig = {
-    'server.basePath': '/sbp',
-  };
-  const reportingConfig = {
+  const mockReportingConfig = createMockConfigSchema({
     index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
-    'kibanaServer.hostname': 'localhost',
-    'kibanaServer.port': 5601,
-    'kibanaServer.protocol': 'http',
-    'queue.indexInterval': 'daily',
-    'queue.timeout': Infinity,
-  };
-  const mockReportingConfig = {
-    get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],
-    kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-  };
+    queue: {
+      indexInterval: 'daily',
+      timeout: Infinity,
+    },
+  });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-
-  // @ts-ignore over-riding config method
-  mockReporting.config = mockReportingConfig;
+  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 
   (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
@@ -98,14 +92,14 @@ test(`passes browserTimezone to generatePng`, async () => {
           ],
           "warning": [Function],
         },
-        "http://localhost:5601/sbp/app/kibana#/something",
+        "localhost:80undefined/app/kibana#/something",
         "UTC",
         Object {
           "conditions": Object {
-            "basePath": "/sbp",
+            "basePath": undefined,
             "hostname": "localhost",
-            "port": 5601,
-            "protocol": "http",
+            "port": 80,
+            "protocol": undefined,
           },
           "headers": Object {},
         },

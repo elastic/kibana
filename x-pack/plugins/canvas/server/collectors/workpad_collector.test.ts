@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { summarizeWorkpads } from './workpad_collector';
 import { workpads } from '../../__fixtures__/workpads';
+import moment from 'moment';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {
@@ -49,6 +50,8 @@ describe('usage collector handle es response data', () => {
           'image',
           'shape',
         ],
+        in_use_30d: [],
+        in_use_90d: [],
       },
       variables: {
         total: 7,
@@ -71,7 +74,13 @@ describe('usage collector handle es response data', () => {
       workpads: { total: 1 },
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
-      functions: { total: 1, in_use: ['toast'], per_element: { avg: 1, min: 1, max: 1 } },
+      functions: {
+        total: 1,
+        in_use: ['toast'],
+        in_use_30d: [],
+        in_use_90d: [],
+        per_element: { avg: 1, min: 1, max: 1 },
+      },
       variables: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
     });
   });
@@ -116,6 +125,8 @@ describe('usage collector handle es response data', () => {
           'plot',
           'seriesStyle',
         ],
+        in_use_30d: [],
+        in_use_90d: [],
         per_element: { avg: 7, min: 7, max: 7 },
       },
       variables: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } }, // Variables still possible even with no pages
@@ -125,5 +136,43 @@ describe('usage collector handle es response data', () => {
   it('should fail gracefully in general', () => {
     const usage = summarizeWorkpads([]);
     expect(usage).toEqual({});
+  });
+
+  describe('functions', () => {
+    it('collects funtions used in the most recent 30d and 90d', () => {
+      const thirtyDayFunction = '30d';
+      const ninetyDayFunction = '90d';
+      const otherFunction = '180d';
+
+      const workpad30d = cloneDeep(workpads[0]);
+      const workpad90d = cloneDeep(workpads[0]);
+      const workpad180d = cloneDeep(workpads[0]);
+
+      const now = moment();
+
+      workpad30d['@timestamp'] = now.subtract(1, 'day').toDate().toISOString();
+      workpad90d['@timestamp'] = now.subtract(80, 'day').toDate().toISOString();
+      workpad180d['@timestamp'] = now.subtract(180, 'day').toDate().toISOString();
+
+      workpad30d.pages[0].elements[0].expression = `${thirtyDayFunction}`;
+      workpad90d.pages[0].elements[0].expression = `${ninetyDayFunction}`;
+      workpad180d.pages[0].elements[0].expression = `${otherFunction}`;
+
+      const mockWorkpads = [workpad30d, workpad90d, workpad180d];
+      const usage = summarizeWorkpads(mockWorkpads);
+
+      expect(usage.functions?.in_use_30d).toHaveLength(1);
+      expect(usage.functions?.in_use_30d).toEqual(expect.arrayContaining([thirtyDayFunction]));
+
+      expect(usage.functions?.in_use_90d).toHaveLength(2);
+      expect(usage.functions?.in_use_90d).toEqual(
+        expect.arrayContaining([thirtyDayFunction, ninetyDayFunction])
+      );
+
+      expect(usage.functions?.in_use).toHaveLength(3);
+      expect(usage.functions?.in_use).toEqual(
+        expect.arrayContaining([thirtyDayFunction, ninetyDayFunction, otherFunction])
+      );
+    });
   });
 });

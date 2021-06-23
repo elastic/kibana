@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
-  const docTable = getService('docTable');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -34,11 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/94545
-  describe.skip('discover data grid context tests', () => {
+  describe('discover data grid context tests', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
@@ -67,16 +66,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
-        // entering the context view (contains the legacy type)
-        const contextFields = await docTable.getFields();
+
+        const contextFields = await dataGrid.getFields();
         const anchorTimestamp = contextFields[0][0];
+
         return anchorTimestamp === firstTimestamp;
       });
     });
 
     it('should open the context view with the same columns', async () => {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['Time (@timestamp)', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -110,7 +110,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await docTable.getBodyRows()).to.have.length(6);
+      await retry.waitFor('document table has a length of 6', async () => {
+        const nrOfDocs = (await dataGrid.getBodyRows()).length;
+        return nrOfDocs === 6;
+      });
     });
   });
 }

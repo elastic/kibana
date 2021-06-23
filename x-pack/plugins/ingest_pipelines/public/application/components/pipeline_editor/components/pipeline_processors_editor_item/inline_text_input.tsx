@@ -92,7 +92,10 @@ function _InlineTextInput({
     >
       <EuiToolTip content={text ?? placeholder}>
         <EuiText size="s" color="subdued">
-          <div className="pipelineProcessorsEditor__item__description">
+          <div
+            className="pipelineProcessorsEditor__item__description"
+            data-test-subj="inlineTextInputNonEditableText"
+          >
             {text || <em>{placeholder}</em>}
           </div>
         </EuiText>

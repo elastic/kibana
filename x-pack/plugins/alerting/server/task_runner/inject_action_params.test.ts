@@ -14,7 +14,8 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      alertId: '1',
+      ruleId: '1',
+      spaceId: 'the-space',
       actionTypeId: '.server-log',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -32,7 +33,8 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      alertId: '1',
+      ruleId: '1',
+      spaceId: 'default',
       actionTypeId: '.email',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -41,8 +43,58 @@ describe('injectActionParams', () => {
           "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
         },
         "kibanaFooterLink": Object {
-          "path": "/app/management/insightsAndAlerting/triggersActions/alert/1",
-          "text": "View alert in Kibana",
+          "path": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "text": "View rule in Kibana",
+        },
+      }
+    `);
+  });
+
+  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email and spaceId is undefined', () => {
+    const actionParams = {
+      body: {
+        message: 'State: "{{state.value}}", Context: "{{context.value}}"',
+      },
+    };
+    const result = injectActionParams({
+      actionParams,
+      ruleId: '1',
+      spaceId: undefined,
+      actionTypeId: '.email',
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
+        },
+        "kibanaFooterLink": Object {
+          "path": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "text": "View rule in Kibana",
+        },
+      }
+    `);
+  });
+
+  test('injects viewInKibanaPath with space ID and viewInKibanaText when actionTypeId is .email', () => {
+    const actionParams = {
+      body: {
+        message: 'State: "{{state.value}}", Context: "{{context.value}}"',
+      },
+    };
+    const result = injectActionParams({
+      actionParams,
+      ruleId: '1',
+      spaceId: 'not-the-default',
+      actionTypeId: '.email',
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
+        },
+        "kibanaFooterLink": Object {
+          "path": "/s/not-the-default/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "text": "View rule in Kibana",
         },
       }
     `);

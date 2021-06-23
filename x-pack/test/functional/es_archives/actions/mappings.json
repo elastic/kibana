@@ -87,6 +87,9 @@
             "actionTypeId": {
               "type": "keyword"
             },
+            "isMissingSecrets": {
+              "type": "boolean"
+            },
             "config": {
               "enabled": false,
               "type": "object"

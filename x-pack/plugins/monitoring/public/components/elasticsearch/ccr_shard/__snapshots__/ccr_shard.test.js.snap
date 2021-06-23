@@ -47,13 +47,7 @@ exports[`CcrShard that is renders an exception properly 1`] = `
 `;
 
 exports[`CcrShard that it renders normally 1`] = `
-<EuiPage
-  style={
-    Object {
-      "backgroundColor": "white",
-    }
-  }
->
+<EuiPage>
   <EuiPageBody>
     <EuiPanel>
       <Status

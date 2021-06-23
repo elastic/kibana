@@ -7,8 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { IndexPattern } from '..';
+import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
 import type { RequestAdapter } from '../../../inspector/common';
 
 export type ISearchGeneric = <
@@ -65,6 +64,11 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    * Indicates whether the results returned are complete or partial
    */
   isPartial?: boolean;
+
+  /**
+   * Indicates whether the results returned are from the async-search index
+   */
+  isRestored?: boolean;
 
   /**
    * The raw response returned by the internal search method (usually the raw ES response)

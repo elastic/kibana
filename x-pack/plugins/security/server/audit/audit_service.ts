@@ -37,15 +37,6 @@ export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 }
 
-interface AuditLogMeta extends AuditEvent {
-  ecs: {
-    version: string;
-  };
-  trace: {
-    id: string;
-  };
-}
-
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
   getLogger: (id?: string) => LegacyAuditLogger;
@@ -146,7 +137,7 @@ export class AuditService {
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
        *     action: 'saved_object_update',
-       *     outcome: EventOutcome.UNKNOWN
+       *     outcome: 'unknown'
        *   },
        *   kibana: {
        *     saved_object: { type: 'dashboard', id: '123' }
@@ -161,13 +152,12 @@ export class AuditService {
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
-        const meta: AuditLogMeta = {
-          ecs: { version: ECS_VERSION },
+        const meta: AuditEvent = {
           ...event,
           user:
             (user && {
               name: user.username,
-              roles: user.roles,
+              roles: user.roles as string[],
             }) ||
             event.user,
           kibana: {
@@ -178,7 +168,8 @@ export class AuditService {
           trace: { id: request.id },
         };
         if (filterEvent(meta, config.ignore_filters)) {
-          this.ecsLogger.info(event.message!, meta);
+          const { message, ...eventMeta } = meta;
+          this.ecsLogger.info(message, eventMeta);
         }
       };
       return { log };
@@ -243,6 +234,13 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     ],
   }));
 
+/**
+ * Evaluates the list of provided ignore rules, and filters out events only
+ * if *all* rules match the event.
+ *
+ * For event fields that can contain an array of multiple values, every value
+ * must be matched by an ignore rule for the event to be excluded.
+ */
 export function filterEvent(
   event: AuditEvent,
   ignoreFilters: ConfigType['audit']['ignore_filters']
@@ -250,10 +248,10 @@ export function filterEvent(
   if (ignoreFilters) {
     return !ignoreFilters.some(
       (rule) =>
-        (!rule.actions || rule.actions.includes(event.event.action)) &&
-        (!rule.categories || rule.categories.includes(event.event.category!)) &&
-        (!rule.types || rule.types.includes(event.event.type!)) &&
-        (!rule.outcomes || rule.outcomes.includes(event.event.outcome!)) &&
+        (!rule.actions || rule.actions.includes(event.event?.action!)) &&
+        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
+        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );
   }

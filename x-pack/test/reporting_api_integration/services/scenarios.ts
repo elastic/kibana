@@ -22,8 +22,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -31,12 +33,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
   const initEcommerce = async () => {
-    await esArchiver.load('reporting/ecommerce');
-    await esArchiver.load('reporting/ecommerce_kibana');
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
-    await esArchiver.unload('reporting/ecommerce');
-    await esArchiver.unload('reporting/ecommerce_kibana');
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
   };
 
@@ -58,6 +60,35 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const createTestReportingUserRole = async () => {
+    await security.role.create('test_reporting_user', {
+      metadata: {},
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          {
+            names: ['ecommerce'],
+            privileges: ['read', 'view_index_metadata'],
+            allow_restricted_indices: false,
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            dashboard: ['minimal_read', 'download_csv_report', 'generate_report'],
+            discover: ['minimal_read', 'generate_report'],
+            canvas: ['minimal_read', 'generate_report'],
+            visualize: ['minimal_read', 'generate_report'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+  };
+
   const createDataAnalyst = async () => {
     await security.user.create('data_analyst', {
       password: 'data_analyst-password',
@@ -69,7 +100,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const createTestReportingUser = async () => {
     await security.user.create('reporting_user', {
       password: 'reporting_user-password',
-      roles: ['data_analyst', 'reporting_user'],
+      roles: ['test_reporting_user'],
       full_name: 'Reporting User',
     });
   };
@@ -142,6 +173,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_PASSWORD,
     createDataAnalystRole,
     createDataAnalyst,
+    createTestReportingUserRole,
     createTestReportingUser,
     downloadCsv,
     generatePdf,

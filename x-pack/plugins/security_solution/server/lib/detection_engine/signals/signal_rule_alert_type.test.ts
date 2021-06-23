@@ -18,7 +18,7 @@ import {
   checkPrivileges,
   createSearchAfterReturnType,
 } from './utils';
-import * as parseScheduleDates from '../../../../common/detection_engine/parse_schedule_dates';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
@@ -48,6 +48,13 @@ jest.mock('./utils', () => {
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./executors/query');
 jest.mock('./executors/ml');
+jest.mock('@kbn/securitysolution-io-ts-utils', () => {
+  const original = jest.requireActual('@kbn/securitysolution-io-ts-utils');
+  return {
+    ...original,
+    parseScheduleDates: jest.fn(),
+  };
+});
 
 const getPayload = (
   ruleAlert: RuleAlertType,
@@ -66,6 +73,25 @@ const getPayload = (
   previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  rule: {
+    name: ruleAlert.name,
+    tags: ruleAlert.tags,
+    consumer: 'foo',
+    producer: 'foo',
+    ruleTypeId: 'ruleType',
+    ruleTypeName: 'Name of rule',
+    enabled: true,
+    schedule: {
+      interval: '1h',
+    },
+    actions: [],
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: new Date('2019-12-13T16:50:33.400Z'),
+    updatedAt: new Date('2019-12-13T16:50:33.400Z'),
+    throttle: null,
+    notifyWhen: null,
+  },
 });
 
 describe('signal_rule_alert_type', () => {
@@ -130,7 +156,8 @@ describe('signal_rule_alert_type', () => {
     (queryExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
     (mlExecutor as jest.Mock).mockClear();
     (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
-    const value: Partial<ApiResponse<estypes.FieldCapabilitiesResponse>> = {
+    (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+    const value: Partial<ApiResponse<estypes.FieldCapsResponse>> = {
       statusCode: 200,
       body: {
         indices: ['index1', 'index2', 'index3', 'index4'],
@@ -147,7 +174,7 @@ describe('signal_rule_alert_type', () => {
       },
     };
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
-      value as ApiResponse<estypes.FieldCapabilitiesResponse>
+      value as ApiResponse<estypes.FieldCapsResponse>
     );
     const ruleAlert = getAlertMock(getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({
@@ -247,35 +274,6 @@ describe('signal_rule_alert_type', () => {
       expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
     });
 
-    it("should set refresh to 'wait_for' when actions are present", async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      ruleAlert.actions = [
-        {
-          actionTypeId: '.slack',
-          params: {
-            message:
-              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-          },
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        },
-      ];
-
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual('wait_for');
-    });
-
-    it('should set refresh to false when actions are not present', async () => {
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual(false);
-    });
-
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
       const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.actions = [
@@ -329,11 +327,7 @@ describe('signal_rule_alert_type', () => {
       });
       payload.params.meta = {};
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -366,11 +360,7 @@ describe('signal_rule_alert_type', () => {
       });
       delete payload.params.meta;
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -403,11 +393,7 @@ describe('signal_rule_alert_type', () => {
       });
       payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -447,6 +433,7 @@ describe('signal_rule_alert_type', () => {
         lastLookBackDate: null,
         createdSignalsCount: 0,
         createdSignals: [],
+        warningMessages: [],
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);

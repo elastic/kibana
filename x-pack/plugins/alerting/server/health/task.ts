@@ -14,7 +14,7 @@ import {
 import { AlertsConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
-import { getHealth } from './get_health';
+import { getAlertingHealthStatus } from './get_health';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
@@ -71,15 +71,10 @@ export function healthCheckTaskRunner(
     return {
       async run() {
         try {
-          const alertingHealthStatus = await getHealth(
-            (await coreStartServices)[0].savedObjects.createInternalRepository(['alert'])
+          return await getAlertingHealthStatus(
+            (await coreStartServices)[0].savedObjects,
+            state.runs
           );
-          return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: alertingHealthStatus.decryptionHealth.status,
-            },
-          };
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
           return {

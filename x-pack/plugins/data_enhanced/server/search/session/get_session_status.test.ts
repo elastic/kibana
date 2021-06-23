@@ -7,7 +7,7 @@
 
 import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
-import { SearchSessionStatus } from '../../../common';
+import { SearchSessionStatus } from '../../../../../../src/plugins/data/common';
 
 describe('getSessionStatus', () => {
   test("returns an in_progress status if there's nothing inside the session", () => {

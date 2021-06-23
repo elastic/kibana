@@ -29,3 +29,12 @@ export const DATES = {
     },
   },
 };
+
+export const ML_JOB_IDS = [
+  'kibana-metrics-ui-default-default-hosts_memory_usage',
+  'kibana-metrics-ui-default-default-hosts_network_out',
+  'kibana-metrics-ui-default-default-hosts_network_in',
+  'kibana-metrics-ui-default-default-k8s_network_out',
+  'kibana-metrics-ui-default-default-k8s_network_in',
+  'kibana-metrics-ui-default-default-k8s_memory_usage',
+];

@@ -7,9 +7,8 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
-// @ts-expect-error
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
@@ -17,16 +16,16 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DrawFilterControl } from './draw_control';
+import { mapboxgl } from '@kbn/mapbox-gl';
+import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
-// @ts-expect-error
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto } from '../../../common/descriptor_types';
+import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
@@ -35,20 +34,17 @@ import {
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
-// @ts-expect-error
-import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
+import {
+  addSpriteSheetToMapFromImageData,
+  loadSpriteSheetImageData,
+  removeOrphanedSourcesAndLayers,
+  // @ts-expect-error
+} from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
-// @ts-expect-error
-import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
-// @ts-expect-error
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
-
-mapboxgl.workerUrl = mbWorkerUrl;
-mapboxgl.setRTLTextPlugin(mbRtlPlugin);
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
 
 export interface Props {
   isMapReady: boolean;
@@ -70,9 +66,10 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
-  geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  featureModeActive: boolean;
+  filterModeActive: boolean;
 }
 
 interface State {
@@ -172,8 +169,7 @@ export class MBMap extends Component<Props, State> {
     };
   }
 
-  async _createMbMapInstance(): Promise<MapboxMap> {
-    const initialView = await getInitialView(this.props.goto, this.props.settings);
+  async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const mbStyle = {
         version: 8,
@@ -237,9 +233,14 @@ export class MBMap extends Component<Props, State> {
   }
 
   async _initializeMap() {
+    const initialView = await getInitialView(this.props.goto, this.props.settings);
+    if (!this._isMounted) {
+      return;
+    }
+
     let mbMap: MapboxMap;
     try {
-      mbMap = await this._createMbMapInstance();
+      mbMap = await this._createMbMapInstance(initialView);
     } catch (error) {
       this.props.setMapInitError(error.message);
       return;
@@ -293,10 +294,13 @@ export class MBMap extends Component<Props, State> {
     });
   }
 
-  _loadMakiSprites(mbMap: MapboxMap) {
-    const sprites = isRetina() ? sprites2 : sprites1;
+  async _loadMakiSprites(mbMap: MapboxMap) {
+    const spritesUrl = isRetina() ? sprites2 : sprites1;
     const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    addSpritesheetToMap(json, sprites, mbMap);
+    const spritesData = await loadSpriteSheetImageData(spritesUrl);
+    if (this._isMounted) {
+      addSpriteSheetToMapFromImageData(json, spritesData, mbMap);
+    }
   }
 
   _syncMbMapWithMapState = () => {
@@ -413,12 +417,17 @@ export class MBMap extends Component<Props, State> {
   };
 
   render() {
-    let drawControl;
+    let drawFilterControl;
+    let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = this.props.addFilters ? (
-        <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+      drawFilterControl =
+        this.props.addFilters && this.props.filterModeActive ? (
+          <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+        ) : null;
+      drawFeatureControl = this.props.featureModeActive ? (
+        <DrawFeatureControl mbMap={this.state.mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
@@ -427,7 +436,6 @@ export class MBMap extends Component<Props, State> {
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
           onSingleValueTrigger={this.props.onSingleValueTrigger}
-          geoFields={this.props.geoFields}
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
@@ -442,7 +450,8 @@ export class MBMap extends Component<Props, State> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawControl}
+        {drawFilterControl}
+        {drawFeatureControl}
         {scaleControl}
         {tooltipControl}
       </div>

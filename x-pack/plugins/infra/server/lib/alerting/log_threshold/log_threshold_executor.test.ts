@@ -24,6 +24,7 @@ import {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { alertsMock } from '../../../../../alerting/server/mocks';
+import type { estypes } from '@elastic/elasticsearch';
 
 // Mocks //
 const numericField = {
@@ -68,6 +69,16 @@ const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
+
+const runtimeMappings: estypes.MappingRuntimeFields = {
+  runtime_field: {
+    type: 'keyword',
+    script: {
+      lang: 'painless',
+      source: 'emit("a runtime value")',
+    },
+  },
+};
 
 describe('Log threshold executor', () => {
   describe('Comparators', () => {
@@ -188,11 +199,16 @@ describe('Log threshold executor', () => {
           ...baseAlertParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
-        const query = getUngroupedESQuery(alertParams, TIMESTAMP_FIELD, FILEBEAT_INDEX);
+        const query = getUngroupedESQuery(
+          alertParams,
+          TIMESTAMP_FIELD,
+          FILEBEAT_INDEX,
+          runtimeMappings
+        );
         expect(query).toEqual({
           index: 'filebeat-*',
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           body: {
             track_total_hits: true,
             query: {
@@ -274,6 +290,15 @@ describe('Log threshold executor', () => {
                 ],
               },
             },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("a runtime value")',
+                },
+              },
+            },
             size: 0,
           },
         });
@@ -285,11 +310,16 @@ describe('Log threshold executor', () => {
           groupBy: ['host.name'],
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
-        const query = getGroupedESQuery(alertParams, TIMESTAMP_FIELD, FILEBEAT_INDEX);
+        const query = getGroupedESQuery(
+          alertParams,
+          TIMESTAMP_FIELD,
+          FILEBEAT_INDEX,
+          runtimeMappings
+        );
         expect(query).toEqual({
           index: 'filebeat-*',
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           body: {
             query: {
               bool: {
@@ -402,6 +432,15 @@ describe('Log threshold executor', () => {
                       },
                     },
                   },
+                },
+              },
+            },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("a runtime value")',
                 },
               },
             },

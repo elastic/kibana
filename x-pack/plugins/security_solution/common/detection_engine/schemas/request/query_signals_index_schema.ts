@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
+import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
 export const querySignalsSchema = t.exact(
   t.partial({

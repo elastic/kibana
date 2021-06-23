@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useKibana } from '../../lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface UseMessagesStorage {
   getMessages: (plugin: string) => string[];

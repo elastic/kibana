@@ -24,5 +24,5 @@ export const createMlStartDepsMock = () => ({
   maps: jest.fn(),
   lens: lensPluginMock.createStartContract(),
   triggersActionsUi: triggersActionsUiMock.createStart(),
-  fileUpload: jest.fn(),
+  dataVisualizer: jest.fn(),
 });

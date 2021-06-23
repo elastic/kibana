@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
@@ -17,6 +17,8 @@ import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+
+jest.mock('../../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

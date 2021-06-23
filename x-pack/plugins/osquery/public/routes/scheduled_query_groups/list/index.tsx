@@ -9,13 +9,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { ScheduledQueryGroupsTable } from '../../../scheduled_query_groups/scheduled_query_groups_table';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const ScheduledQueryGroupsPageComponent = () => {
-  const hasSaveUICapabilities = useKibana().services.application.capabilities.osquery.save;
   const newQueryLinkProps = useRouterNavigate('scheduled_query_groups/add');
 
   const LeftColumn = useMemo(
@@ -50,11 +49,7 @@ const ScheduledQueryGroupsPageComponent = () => {
   );
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      rightColumn={hasSaveUICapabilities ? RightColumn : undefined}
-      rightColumnGrow={false}
-    >
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       <ScheduledQueryGroupsTable />
     </WithHeaderLayout>
   );

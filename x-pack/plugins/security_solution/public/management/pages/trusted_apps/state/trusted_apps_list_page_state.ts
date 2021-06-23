@@ -6,7 +6,7 @@
  */
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { AsyncResourceState } from '.';
+import { AsyncResourceState } from '../../../state/async_resource_state';
 import { GetPolicyListResponse } from '../../policy/types';
 
 export interface Pagination {

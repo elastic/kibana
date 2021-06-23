@@ -18,6 +18,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('visual builder', function describeIndexTests() {
+    before(async () => {
+      await visualize.initTests();
+    });
     describe('table', () => {
       beforeEach(async () => {
         await visualBuilder.resetPage('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');
@@ -26,6 +29,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.checkTableTabIsPresent();
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
         await visualBuilder.clickDataTab('table');
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');

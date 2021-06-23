@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './shared_exports';
+export * from './types';
+export * from './search_strategy';
+export * from './utility_types';

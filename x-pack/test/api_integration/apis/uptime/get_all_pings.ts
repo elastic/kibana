@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('get_all_pings', () => {
-    const archive = 'uptime/pings';
+    const archive = 'x-pack/test/functional/es_archives/uptime/pings';
 
     before('load heartbeat data', async () => await esArchiver.load(archive));
     after('unload heartbeat data', async () => await esArchiver.unload(archive));

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import { defaultRequestParameters } from './common';
 
 export const createLogEntryCategoryExamplesQuery = (
   indices: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
   endTime: number,
   categoryQuery: string,
   exampleCount: number
-) => ({
+): estypes.SearchRequest => ({
   ...defaultRequestParameters,
   body: {
     query: {
@@ -43,6 +44,7 @@ export const createLogEntryCategoryExamplesQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
     _source: false,
     fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],

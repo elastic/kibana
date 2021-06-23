@@ -23,7 +23,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
   const htmlId = htmlIdGenerator();
   const yesNoOption = (
     <YesNo
-      disabled={Boolean(panel.ignore_global_filter)}
+      disabled={panel.ignore_global_filter}
       value={model.ignore_global_filter}
       name="ignore_global_filter"
       onChange={onChange}

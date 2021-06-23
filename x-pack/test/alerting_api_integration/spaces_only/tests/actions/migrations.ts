@@ -16,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('actions');
+      await esArchiver.load('x-pack/test/functional/es_archives/actions');
     });
 
     after(async () => {
-      await esArchiver.unload('actions');
+      await esArchiver.unload('x-pack/test/functional/es_archives/actions');
     });
 
     it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {
@@ -54,6 +54,15 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseNoAuth.status).to.eql(200);
       expect(responseNoAuth.body.config).key('hasAuth');
       expect(responseNoAuth.body.config.hasAuth).to.eql(false);
+    });
+
+    it('7.14.0 migrates connectors to have `isMissingSecrets` property', async () => {
+      const responseWithisMissingSecrets = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+      );
+
+      expect(responseWithisMissingSecrets.status).to.eql(200);
+      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
     });
   });
 }

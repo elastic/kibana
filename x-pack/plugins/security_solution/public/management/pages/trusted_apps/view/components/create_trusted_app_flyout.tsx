@@ -44,6 +44,7 @@ import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
 import { useToasts } from '../../../../../common/lib/kibana';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -81,14 +82,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       };
     }, [isLoadingPolicies, policyList]);
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const handleCancelClick = useCallback(() => {
       if (creationInProgress) {

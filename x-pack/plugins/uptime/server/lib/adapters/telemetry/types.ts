@@ -40,4 +40,8 @@ export interface UptimeTelemetry {
   dateRangeEnd: string[];
   autorefreshInterval: number[];
   autoRefreshEnabled: boolean;
+
+  fleet_no_of_unique_monitors: number;
+  fleet_monitor_frequency: number[];
+  fleet_monitor_name_stats: Stats;
 }

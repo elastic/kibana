@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { ACTION_URL } from '../../../../../../cases/common/constants';
+import { ACTION_URL } from '../../../../../../cases/common';
 import { KibanaServices } from '../../../../common/lib/kibana';
 
 interface CaseAction {

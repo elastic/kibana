@@ -216,46 +216,47 @@ export function getAlertType(
 
     const { body: searchResult } = await esClient.search(query);
 
-    if (searchResult.hits.hits.length > 0) {
-      const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
-      logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
+    logger.debug(
+      `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
+    );
 
-      // apply the alert condition
-      const conditionMet = compareFn(numMatches, params.threshold);
+    const numMatches = (searchResult.hits.total as estypes.SearchTotalHits).value;
 
-      if (conditionMet) {
-        const humanFn = i18n.translate(
-          'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
-          {
-            defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
-            values: {
-              thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
-              threshold: params.threshold.join(' and '),
-            },
-          }
-        );
+    // apply the alert condition
+    const conditionMet = compareFn(numMatches, params.threshold);
 
-        const baseContext: EsQueryAlertActionContext = {
-          date: new Date().toISOString(),
-          value: numMatches,
-          conditions: humanFn,
-          hits: searchResult.hits.hits,
-        };
-
-        const actionContext = addMessages(options, baseContext, params);
-        const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
-        alertInstance
-          // store the params we would need to recreate the query that led to this alert instance
-          .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
-          .scheduleActions(ActionGroupId, actionContext);
-
-        // update the timestamp based on the current search results
-        const firstValidTimefieldSort = getValidTimefieldSort(
-          searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
-        );
-        if (firstValidTimefieldSort) {
-          timestamp = firstValidTimefieldSort;
+    if (conditionMet) {
+      const humanFn = i18n.translate(
+        'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
+        {
+          defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
+          values: {
+            thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
+            threshold: params.threshold.join(' and '),
+          },
         }
+      );
+
+      const baseContext: EsQueryAlertActionContext = {
+        date: new Date().toISOString(),
+        value: numMatches,
+        conditions: humanFn,
+        hits: searchResult.hits.hits,
+      };
+
+      const actionContext = addMessages(options, baseContext, params);
+      const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
+      alertInstance
+        // store the params we would need to recreate the query that led to this alert instance
+        .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
+        .scheduleActions(ActionGroupId, actionContext);
+
+      // update the timestamp based on the current search results
+      const firstValidTimefieldSort = getValidTimefieldSort(
+        searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+      );
+      if (firstValidTimefieldSort) {
+        timestamp = firstValidTimefieldSort;
       }
     }
 

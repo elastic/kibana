@@ -81,8 +81,7 @@ export function plotFunctionFactory(
       fn: (input, args) => {
         const seriesStyles: { [key: string]: SeriesStyle } =
           keyBy(args.seriesStyle || [], 'label') || {};
-
-        const sortedRows = sortBy(input.rows, ['x', 'y', 'color', 'size', 'text']);
+        const sortedRows = input.rows;
         const ticks = getTickHash(input.columns, sortedRows);
         const font = args.font ? getFontSpec(args.font) : {};
 
@@ -145,7 +144,7 @@ export function plotFunctionFactory(
               canvas: false,
               colors: paletteService
                 .get(args.palette.name || 'custom')
-                .getColors(data.length, args.palette.params),
+                .getCategoricalColors(data.length, args.palette.params),
               legend: getLegendConfig(args.legend, data.length),
               grid: gridConfig,
               xaxis: getFlotAxisConfig('x', args.xaxis, {

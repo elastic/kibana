@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObject } from '../../../../../../src/core/server';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';
 
 describe('the InfraSources lib', () => {
@@ -18,9 +20,10 @@ describe('the InfraSources lib', () => {
         id: 'TEST_ID',
         version: 'foo',
         updated_at: '2000-01-01T00:00:00.000Z',
+        type: infraSourceConfigurationSavedObjectName,
         attributes: {
           metricAlias: 'METRIC_ALIAS',
-          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
+          logIndices: { type: 'index_pattern', indexPatternId: 'log_index_pattern_0' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
@@ -29,6 +32,13 @@ describe('the InfraSources lib', () => {
             timestamp: 'TIMESTAMP',
           },
         },
+        references: [
+          {
+            id: 'LOG_INDEX_PATTERN',
+            name: 'log_index_pattern_0',
+            type: 'index-pattern',
+          },
+        ],
       });
 
       expect(
@@ -39,7 +49,7 @@ describe('the InfraSources lib', () => {
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
-          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
+          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_INDEX_PATTERN' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
@@ -70,12 +80,14 @@ describe('the InfraSources lib', () => {
       const request: any = createRequestContext({
         id: 'TEST_ID',
         version: 'foo',
+        type: infraSourceConfigurationSavedObjectName,
         updated_at: '2000-01-01T00:00:00.000Z',
         attributes: {
           fields: {
             container: 'CONTAINER',
           },
         },
+        references: [],
       });
 
       expect(
@@ -106,8 +118,10 @@ describe('the InfraSources lib', () => {
       const request: any = createRequestContext({
         id: 'TEST_ID',
         version: 'foo',
+        type: infraSourceConfigurationSavedObjectName,
         updated_at: '2000-01-01T00:00:00.000Z',
         attributes: {},
+        references: [],
       });
 
       expect(
@@ -140,7 +154,7 @@ const createMockStaticConfiguration = (sources: any) => ({
   sources,
 });
 
-const createRequestContext = (savedObject?: any) => {
+const createRequestContext = (savedObject?: SavedObject<unknown>) => {
   return {
     core: {
       savedObjects: {

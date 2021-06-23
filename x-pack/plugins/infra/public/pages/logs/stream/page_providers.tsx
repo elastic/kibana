@@ -50,20 +50,12 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
     LogPositionState.Context
   );
-  const { filterQueryAsKuery } = useContext(LogFilterState.Context);
+  const { filterQuery } = useContext(LogFilterState.Context);
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
     return null;
   }
-
-  const logStreamProps = {
-    sourceId,
-    startTimestamp,
-    endTimestamp,
-    query: filterQueryAsKuery?.expression ?? undefined,
-    center: targetPosition ?? undefined,
-  };
 
   // Don't initialize the entries until the position has been fully intialized.
   // See `<WithLogPositionUrlState />`
@@ -71,7 +63,17 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     return null;
   }
 
-  return <LogStreamProvider {...logStreamProps}>{children}</LogStreamProvider>;
+  return (
+    <LogStreamProvider
+      sourceId={sourceId}
+      startTimestamp={startTimestamp}
+      endTimestamp={endTimestamp}
+      query={filterQuery?.parsedQuery}
+      center={targetPosition ?? undefined}
+    >
+      {children}
+    </LogStreamProvider>
+  );
 };
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
@@ -86,7 +88,7 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
     entriesEnd: bottomCursor,
     centerCursor: entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null,
     size: entries.length,
-    filterQuery,
+    filterQuery: filterQuery?.serializedQuery ?? null,
   };
   return <LogHighlightsState.Provider {...highlightsProps}>{children}</LogHighlightsState.Provider>;
 };

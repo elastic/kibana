@@ -8,13 +8,13 @@
 import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginStart } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { ManifestManager } from '../endpoint/services';
 import { AppClientFactory } from '../client';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
@@ -34,7 +34,7 @@ export const getPackagePolicyCreateCallback = (
   manifestManager: ManifestManager,
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
-  securitySetup: SecurityPluginSetup,
+  securityStart: SecurityPluginStart,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
@@ -58,7 +58,7 @@ export const getPackagePolicyCreateCallback = (
           appClientFactory,
           context,
           request,
-          securitySetup,
+          securityStart,
           alerts,
           maxTimelineImportExportSize,
           exceptionsClient,

@@ -8,6 +8,7 @@
 import { Moment } from 'moment';
 
 import { CombinedJob, CombinedJobWithStats } from './combined_job';
+import { MlAnomalyDetectionAlertRule } from '../alerts';
 export { Datafeed } from './datafeed';
 export { DatafeedStats } from './datafeed_stats';
 
@@ -34,6 +35,8 @@ export interface MlSummaryJob {
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;
   awaitingNodeAssignment: boolean;
+  alertingRules?: MlAnomalyDetectionAlertRule[];
+  jobTags: Record<string, string>;
 }
 
 export interface AuditMessage {

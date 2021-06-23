@@ -173,7 +173,7 @@ export class StartDatafeedModal extends Component {
                   label={
                     <FormattedMessage
                       id="xpack.ml.jobsList.startDatafeedModal.createAlertDescription"
-                      defaultMessage="Create alert after datafeed has started"
+                      defaultMessage="Create alert rule after datafeed has started"
                     />
                   }
                   checked={createAlert}

@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, memo, useCallback, useEffect } from 'react';
-import {
-  EuiTablePagination,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiIcon,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
 
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { Pagination } from '../../../state';
 
 import {
@@ -33,49 +25,26 @@ import {
   useTrustedAppsStoreActionCallback,
 } from '../../hooks';
 
-import { NO_RESULTS_MESSAGE } from '../../translations';
-
 import { TrustedAppCard, TrustedAppCardProps } from '../trusted_app_card';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
+import {
+  PaginatedContent,
+  PaginatedContentProps,
+} from '../../../../../components/paginated_content';
+import { TrustedApp } from '../../../../../../../common/endpoint/types';
 
 export interface PaginationBarProps {
   pagination: Pagination;
   onChange: (pagination: { size: number; index: number }) => void;
 }
 
-const PaginationBar = ({ pagination, onChange }: PaginationBarProps) => {
-  const pageCount = Math.ceil(pagination.totalItemCount / pagination.pageSize);
+type TrustedAppCardType = typeof TrustedAppCard;
 
-  useEffect(() => {
-    if (pageCount > 0 && pageCount < pagination.pageIndex + 1) {
-      onChange({ index: pageCount - 1, size: pagination.pageSize });
-    }
-  }, [pageCount, onChange, pagination]);
-
-  return (
-    <div>
-      <EuiTablePagination
-        activePage={pagination.pageIndex}
-        itemsPerPage={pagination.pageSize}
-        itemsPerPageOptions={pagination.pageSizeOptions}
-        pageCount={pageCount}
-        onChangeItemsPerPage={useCallback((size) => onChange({ index: 0, size }), [onChange])}
-        onChangePage={useCallback((index) => onChange({ index, size: pagination.pageSize }), [
-          pagination.pageSize,
-          onChange,
-        ])}
-      />
-    </div>
-  );
-};
-
-const GridMessage: FC = ({ children }) => (
-  <div className="euiTextAlign--center">
-    <EuiSpacer size="m" />
-    {children}
-    <EuiSpacer size="m" />
-  </div>
-);
+const RootWrapper = styled.div`
+  .trusted-app + .trusted-app {
+    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+  }
+`;
 
 export const TrustedAppsGrid = memo(() => {
   const history = useHistory();
@@ -103,55 +72,32 @@ export const TrustedAppsGrid = memo(() => {
     [history, location]
   );
 
-  const handlePaginationChange = useTrustedAppsNavigateCallback(({ index, size }) => ({
-    page_index: index,
-    page_size: size,
+  const handlePaginationChange: PaginatedContentProps<
+    TrustedApp,
+    TrustedAppCardType
+  >['onChange'] = useTrustedAppsNavigateCallback(({ pageIndex, pageSize }) => ({
+    page_index: pageIndex,
+    page_size: pageSize,
   }));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiProgress size="xs" color="primary" />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        {error && (
-          <GridMessage>
-            <EuiIcon type="minusInCircle" color="danger" /> {error}
-          </GridMessage>
-        )}
-        {!error && listItems.length === 0 && (
-          <GridMessage>
-            <EuiText size="s">{NO_RESULTS_MESSAGE}</EuiText>
-          </GridMessage>
-        )}
-        {!error && listItems.length > 0 && (
-          <>
-            <EuiSpacer size="l" />
-
-            <EuiFlexGroup direction="column">
-              {listItems.map((item) => (
-                <EuiFlexItem grow={false} key={item.id}>
-                  <TrustedAppCard
-                    trustedApp={item}
-                    onDelete={handleTrustedAppDelete}
-                    onEdit={handleTrustedAppEdit}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </>
-        )}
-      </EuiFlexItem>
-      {!error && pagination.totalItemCount > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="l" />
-
-          <PaginationBar pagination={pagination} onChange={handlePaginationChange} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <RootWrapper>
+      <PaginatedContent<TrustedApp, TrustedAppCardType>
+        items={listItems as TrustedApp[]}
+        onChange={handlePaginationChange}
+        ItemComponent={TrustedAppCard}
+        itemComponentProps={(ta) => ({
+          trustedApp: ta,
+          onDelete: handleTrustedAppDelete,
+          onEdit: handleTrustedAppEdit,
+          className: 'trusted-app',
+        })}
+        loading={isLoading}
+        itemId="id"
+        error={error}
+        pagination={pagination}
+      />
+    </RootWrapper>
   );
 });
 
