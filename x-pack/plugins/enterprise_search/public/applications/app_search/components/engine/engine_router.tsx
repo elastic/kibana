@@ -13,9 +13,7 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-import { Layout } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
-import { AppSearchNav } from '../../index';
 
 import {
   ENGINE_PATH,
@@ -129,6 +127,11 @@ export const EngineRouter: React.FC = () => {
           <RelevanceTuning />
         </Route>
       )}
+      {canManageEngineSynonyms && (
+        <Route path={ENGINE_SYNONYMS_PATH}>
+          <Synonyms />
+        </Route>
+      )}
       {canManageEngineCurations && (
         <Route path={ENGINE_CURATIONS_PATH}>
           <CurationsRouter />
@@ -149,14 +152,6 @@ export const EngineRouter: React.FC = () => {
           <ApiLogs />
         </Route>
       )}
-      {/* TODO: Remove layout once page template migration is over */}
-      <Layout navigation={<AppSearchNav />}>
-        {canManageEngineSynonyms && (
-          <Route path={ENGINE_SYNONYMS_PATH}>
-            <Synonyms />
-          </Route>
-        )}
-      </Layout>
     </Switch>
   );
 };
