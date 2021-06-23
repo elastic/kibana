@@ -48,7 +48,7 @@ export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, Star
         {
           label: 'README',
           href:
-            'https://github.com/elastic/kibana/blob/master/src/plugins/share/public/locators/README.md',
+            'https://github.com/elastic/kibana/blob/master/src/plugins/share/common/url_service/locators/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
