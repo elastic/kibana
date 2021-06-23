@@ -175,7 +175,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -288,7 +288,7 @@ Returns the value of a field from the last document, ordered by the default time
 
 This function is usefull the retrieve the latest state of an entity.
 
-Example: Get the current status of server A: 
+Example: Get the current status of server A:
 \`last_value(server.status, kql=\'server.name="A"\')\`
       `,
     }),

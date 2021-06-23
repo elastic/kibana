@@ -19,8 +19,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Feature } from 'geojson';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
-
-import { DrawFilterControl } from './draw_control';
+import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
@@ -47,6 +46,7 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
 
 export interface Props {
   isMapReady: boolean;
@@ -71,6 +71,8 @@ export interface Props {
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   updateCounts: (layerId: string, features: Feature[]) => void;
+  featureModeActive: boolean;
+  filterModeActive: boolean;
 }
 
 interface State {
@@ -452,11 +454,16 @@ export class MbMap extends Component<Props, State> {
 
   render() {
     let drawFilterControl;
+    let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawFilterControl = this.props.addFilters ? (
-        <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+      drawFilterControl =
+        this.props.addFilters && this.props.filterModeActive ? (
+          <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+        ) : null;
+      drawFeatureControl = this.props.featureModeActive ? (
+        <DrawFeatureControl mbMap={this.state.mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
@@ -480,6 +487,7 @@ export class MbMap extends Component<Props, State> {
         data-test-subj="mapContainer"
       >
         {drawFilterControl}
+        {drawFeatureControl}
         {scaleControl}
         {tooltipControl}
       </div>

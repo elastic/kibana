@@ -11,17 +11,17 @@ import { Query } from 'src/plugins/data/public';
 import { Feature } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
+  createLayerInstance,
   getLayerById,
   getLayerList,
   getLayerListRaw,
-  getSelectedLayerId,
-  getMapReady,
   getMapColors,
-  createLayerInstance,
+  getMapReady,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
-import { updateFlyout } from './ui_actions';
+import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -50,11 +50,12 @@ import {
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -255,6 +256,9 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
+    }
+    if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
     }
     dispatch({
       type: SET_SELECTED_LAYER,

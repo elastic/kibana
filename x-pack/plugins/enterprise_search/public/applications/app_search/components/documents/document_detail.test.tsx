@@ -14,9 +14,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader, EuiPageContent, EuiBasicTable } from '@elastic/eui';
+import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
+import { getPageHeaderActions } from '../../../test_helpers';
+
 import { ResultFieldValue } from '../result';
 
 import { DocumentDetail } from '.';
@@ -45,7 +46,7 @@ describe('DocumentDetail', () => {
 
   it('renders', () => {
     const wrapper = shallow(<DocumentDetail />);
-    expect(wrapper.find(EuiPageContent).length).toBe(1);
+    expect(wrapper.find(EuiPanel).length).toBe(1);
   });
 
   it('initializes data on mount', () => {
@@ -57,17 +58,6 @@ describe('DocumentDetail', () => {
     shallow(<DocumentDetail />);
     unmountHandler();
     expect(actions.setFields).toHaveBeenCalledWith([]);
-  });
-
-  it('will show a loader while data is loading', () => {
-    setMockValues({
-      ...values,
-      dataLoading: true,
-    });
-
-    const wrapper = shallow(<DocumentDetail />);
-
-    expect(wrapper.find(Loading).length).toBe(1);
   });
 
   describe('field values list', () => {
@@ -102,8 +92,7 @@ describe('DocumentDetail', () => {
 
   it('will delete the document when the delete button is pressed', () => {
     const wrapper = shallow(<DocumentDetail />);
-    const header = wrapper.find(EuiPageHeader).dive().children().dive();
-    const button = header.find('[data-test-subj="DeleteDocumentButton"]');
+    const button = getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]');
 
     button.simulate('click');
 

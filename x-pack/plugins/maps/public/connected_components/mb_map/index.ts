@@ -11,28 +11,29 @@ import { connect } from 'react-redux';
 import { Feature } from 'geojson';
 import { MbMap } from './mb_map';
 import {
-  mapExtentChanged,
-  mapReady,
-  mapDestroyed,
-  setMouseCoordinates,
-  clearMouseCoordinates,
   clearGoto,
-  setMapInitError,
+  clearMouseCoordinates,
+  mapDestroyed,
+  mapExtentChanged,
   MapExtentState,
+  mapReady,
   setAreTilesLoaded,
+  setMapInitError,
+  setMouseCoordinates,
   updateCounts,
 } from '../../actions';
 import {
+  getGoto,
   getLayerList,
   getMapReady,
-  getGoto,
+  getMapSettings,
   getScrollZoom,
   getSpatialFiltersLayer,
-  getMapSettings,
 } from '../../selectors/map_selectors';
-import { getIsFullScreen } from '../../selectors/ui_selectors';
+import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -44,6 +45,9 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
   };
 }
 

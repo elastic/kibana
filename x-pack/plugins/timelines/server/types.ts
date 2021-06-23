@@ -5,7 +5,18 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelinesPluginSetup {}
+export interface TimelinesPluginUI {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelinesPluginStart {}
+
+export interface SetupPlugins {
+  data: DataPluginSetup;
+}
+
+export interface StartPlugins {
+  data: DataPluginStart;
+}

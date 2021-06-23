@@ -12,7 +12,7 @@ import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices, SortDirection } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
-import { EsHitRecordList, fetchContextProvider } from './context';
+import { EsHitRecordList, fetchContextProvider, SurrDocType } from './context';
 import { EsHitRecord } from './context';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -73,7 +73,7 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
-          'successors',
+          SurrDocType.SUCCESSORS,
           indexPatternId,
           anchor as EsHitRecord,
           timeField,
@@ -268,7 +268,7 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
-          'successors',
+          SurrDocType.SUCCESSORS,
           indexPatternId,
           anchor as EsHitRecord,
           timeField,

@@ -38,7 +38,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     },
   };
 
-  mockUseValuesList(['elastic-co']);
+  mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
   it('should render properly', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />, {
