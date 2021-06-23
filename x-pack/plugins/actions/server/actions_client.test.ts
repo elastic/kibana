@@ -1676,6 +1676,70 @@ describe('execute()', () => {
         name: 'my name',
       },
     });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+        },
+      ],
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+            namespace: 'some-namespace',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+          namespace: 'some-namespace',
+        },
+      ],
+    });
   });
 });
 

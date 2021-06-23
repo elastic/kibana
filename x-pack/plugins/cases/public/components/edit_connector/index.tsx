@@ -30,7 +30,7 @@ import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 
-interface EditConnectorProps {
+export interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
   isLoading: boolean;
@@ -42,8 +42,9 @@ interface EditConnectorProps {
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
-  disabled?: boolean;
+  userCanCrud?: boolean;
   hideConnectorServiceNowSir?: boolean;
+  permissionsError?: string;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -104,12 +105,13 @@ export const EditConnector = React.memo(
   ({
     caseFields,
     connectors,
-    disabled = false,
+    userCanCrud = true,
     hideConnectorServiceNowSir = false,
     isLoading,
     onSubmit,
     selectedConnector,
     userActions,
+    permissionsError,
   }: EditConnectorProps) => {
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
@@ -203,6 +205,18 @@ export const EditConnector = React.memo(
       });
     }, [dispatch]);
 
+    /**
+     * if this evaluates to true it means that the connector was likely deleted because the case connector was set to something
+     * other than none but we don't find it in the list of connectors returned from the actions plugin
+     */
+    const connectorFromCaseMissing = currentConnector == null && selectedConnector !== 'none';
+
+    /**
+     * True if the chosen connector from the form was the "none" connector or no connector was in the case. The
+     * currentConnector will be null initially and after the form initializes if the case connector is "none"
+     */
+    const connectorUndefinedOrNone = currentConnector == null || currentConnector?.id === 'none';
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -210,11 +224,10 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && (
+          {!isLoading && !editConnector && userCanCrud && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
-                isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR_ARIA}
                 iconType={'pencil'}
                 onClick={onEditClick}
@@ -235,7 +248,7 @@ export const EditConnector = React.memo(
                       connectors,
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
-                      disabled,
+                      disabled: !userCanCrud,
                       hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
@@ -248,13 +261,21 @@ export const EditConnector = React.memo(
             </Form>
           </DisappearingFlexItem>
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-            {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
-              !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
-              !editConnector && (
-                <EuiText size="s">
+            {!editConnector && permissionsError ? (
+              <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
+                <span>{permissionsError}</span>
+              </EuiText>
+            ) : (
+              // if we're not editing the connectors and the connector specified in the case was found and the connector
+              // is undefined or explicitly set to none
+              !editConnector &&
+              !connectorFromCaseMissing &&
+              connectorUndefinedOrNone && (
+                <EuiText data-test-subj="edit-connector-no-connectors-msg" size="s">
                   <span>{i18n.NO_CONNECTOR}</span>
                 </EuiText>
-              )}
+              )
+            )}
             <ConnectorFieldsForm
               connector={currentConnector}
               fields={fields}
