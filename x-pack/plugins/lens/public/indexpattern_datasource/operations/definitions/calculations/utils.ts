@@ -12,7 +12,7 @@ import type { TimeScaleUnit } from '../../../time_scale';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { isColumnValidAsReference } from '../../layer_helpers';
+import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
