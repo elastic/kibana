@@ -26,7 +26,6 @@ import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-
 import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
