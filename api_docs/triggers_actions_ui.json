@@ -424,60 +424,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "JiraConfig",
-          ", ",
-          "JiraSecrets",
-          ", ",
-          "JiraActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/jira/jira.tsx",
-          "lineNumber": 62
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ResilientConfig",
-          ", ",
-          "ResilientSecrets",
-          ", ",
-          "ResilientActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/resilient/resilient.tsx",
-          "lineNumber": 67
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.getFields",
         "type": "Function",
         "tags": [],
@@ -650,60 +596,6 @@
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
           "lineNumber": 23
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getServiceNowITSMActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getServiceNowITSMActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ServiceNowConfig",
-          ", ",
-          "ServiceNowSecrets",
-          ", ",
-          "ServiceNowITSMActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 63
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getServiceNowSIRActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getServiceNowSIRActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ServiceNowConfig",
-          ", ",
-          "ServiceNowSecrets",
-          ", ",
-          "ServiceNowSIRActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 98
         },
         "deprecated": false,
         "children": [],

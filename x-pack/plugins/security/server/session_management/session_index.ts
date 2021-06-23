@@ -52,7 +52,7 @@ export function getSessionIndexTemplate(indexName: string) {
       },
     },
     mappings: {
-      dynamic: 'strict' as 'strict',
+      dynamic: 'strict',
       properties: {
         usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
@@ -61,7 +61,7 @@ export function getSessionIndexTemplate(indexName: string) {
         accessAgreementAcknowledged: { type: 'boolean' },
         content: { type: 'binary' },
       },
-    },
+    } as const,
   });
 }
 

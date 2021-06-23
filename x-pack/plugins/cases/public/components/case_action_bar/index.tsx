@@ -16,16 +16,16 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { CaseStatuses, CaseType } from '../../../common';
+import { Case, CaseStatuses, CaseType } from '../../../common';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
-import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import { OnUpdateFields } from '../case_view';
+import { CasesNavigation } from '../links';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -37,17 +37,21 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 interface CaseActionBarProps {
+  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  disabled?: boolean;
+  userCanCrud: boolean;
+  disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
+  allCasesNavigation,
   caseData,
   currentExternalIncident,
-  disabled = false,
+  disableAlerting,
+  userCanCrud,
   isLoading,
   onRefresh,
   onUpdateField,
@@ -83,6 +87,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 <EuiDescriptionListDescription>
                   <StatusContextMenu
                     currentStatus={caseData.status}
+                    disabled={!userCanCrud || isLoading}
                     onStatusChanged={onStatusChanged}
                   />
                 </EuiDescriptionListDescription>
@@ -103,37 +108,41 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
           <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <span>{i18n.SYNC_ALERTS}</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <SyncAlertsSwitch
-                  disabled={disabled || isLoading}
-                  isSynced={caseData.settings.syncAlerts}
-                  onSwitchChange={onSyncAlertsChanged}
-                />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+            {userCanCrud && !disableAlerting && (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <span>{i18n.SYNC_ALERTS}</span>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <SyncAlertsSwitch
+                    disabled={isLoading}
+                    isSynced={caseData.settings.syncAlerts}
+                    onSwitchChange={onSyncAlertsChanged}
+                  />
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
                 {i18n.CASE_REFRESH}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-              <Actions
-                caseData={caseData}
-                currentExternalIncident={currentExternalIncident}
-                disabled={disabled}
-              />
-            </EuiFlexItem>
+            {userCanCrud && (
+              <EuiFlexItem grow={false} data-test-subj="case-view-actions">
+                <Actions
+                  allCasesNavigation={allCasesNavigation}
+                  caseData={caseData}
+                  currentExternalIncident={currentExternalIncident}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiDescriptionList>
       </EuiFlexItem>

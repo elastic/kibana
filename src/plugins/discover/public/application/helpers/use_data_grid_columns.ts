@@ -13,7 +13,7 @@ import { IndexPattern, IndexPatternsContract } from '../../kibana_services';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
-} from '../angular/discover_state';
+} from '../apps/main/services/discover_state';
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,

@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import Path from 'path';
+
+const ES_ARCHIVE_DIR = '../../test/security_solution_cypress/es_archives';
+const CONFIG_PATH = '../../test/functional/config.js';
+const ES_URL = Cypress.env('ELASTICSEARCH_URL');
+const KIBANA_URL = Cypress.config().baseUrl;
+
 export const esArchiverLoad = (folder: string) => {
+  const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../scripts/es_archiver load ${folder} --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+    `node ../../../scripts/es_archiver load "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`
   );
 };
 
 export const esArchiverUnload = (folder: string) => {
+  const path = Path.join(ES_ARCHIVE_DIR, folder);
   cy.exec(
-    `node ../../../scripts/es_archiver unload ${folder} --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+    `node ../../../scripts/es_archiver unload "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`
   );
 };
 
 export const esArchiverResetKibana = () => {
   cy.exec(
-    `node ../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`,
+    `node ../../../scripts/es_archiver empty-kibana-index --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
     { failOnNonZeroExit: false }
   );
 };

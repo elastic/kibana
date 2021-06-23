@@ -116,7 +116,7 @@ export interface DeprecationsSetupDeps {
 export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
   private readonly logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
   }
 
@@ -154,7 +154,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
               level: 'critical',
               deprecationType: 'config',
               message,
-              correctiveActions: correctiveActions ?? {},
+              correctiveActions,
               documentationUrl,
             };
           });

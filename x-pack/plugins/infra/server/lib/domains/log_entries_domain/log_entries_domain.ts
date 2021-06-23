@@ -6,7 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
+
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 import {
@@ -277,7 +278,7 @@ export class InfraLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.RuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;

@@ -6,13 +6,11 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
-
-import { Loading } from '../../../shared/loading';
 
 import { EmptyEngineOverview } from './engine_overview_empty';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
@@ -46,10 +44,10 @@ describe('EngineOverview', () => {
     expect(actions.pollForOverviewMetrics).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a loading component if async data is still loading', () => {
+  it('renders a loading page template if async data is still loading', () => {
     setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<EngineOverview />);
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('isLoading')).toEqual(true);
   });
 
   describe('EmptyEngineOverview', () => {

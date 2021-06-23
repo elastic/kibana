@@ -18,10 +18,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // Failing: See https://github.com/elastic/kibana/issues/100445
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('with no anomalies present', () => {
@@ -41,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with anomalies present', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_anomalies');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_anomalies');
         // create the ml jobs saved objects
         await Promise.all(
           ML_JOB_IDS.map((id) =>
@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
       after(async () => {
-        await esArchiver.unload('infra/metrics_anomalies');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_anomalies');
       });
       it('renders the anomaly table with anomalies', async () => {
         // default threshold should already be 50 but trying to prevent unknown flakiness by setting it

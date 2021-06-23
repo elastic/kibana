@@ -20,16 +20,12 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
-import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
-import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
+import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
-import { MapRefreshConfig } from '../../../common/descriptor_types';
 import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
@@ -46,9 +42,7 @@ export interface Props {
   isFullScreen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
-  refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
-  triggerRefreshTimer: () => void;
   title?: string;
   description?: string;
   settings: MapSettings;
@@ -58,7 +52,6 @@ export interface Props {
 interface State {
   isInitialLoadRenderTimeoutComplete: boolean;
   domId: string;
-  geoFields: GeoFieldWithIndex[];
   showFitToBoundsButton: boolean;
   showTimesliderButton: boolean;
 }
@@ -66,44 +59,32 @@ interface State {
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
-  private _prevIndexPatternIds: string[] = [];
-  private _refreshTimerId: number | null = null;
-  private _prevIsPaused: boolean | null = null;
-  private _prevInterval: number | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
-    geoFields: [],
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._setRefreshTimer();
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
     registerLayerWizards();
   }
 
   componentDidUpdate() {
-    this._setRefreshTimer();
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
     if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
     }
-
-    if (!!this.props.addFilters) {
-      this._loadGeoFields(this.props.indexPatternIds);
-    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._clearRefreshTimer();
     this.props.cancelAllInFlightRequests();
   }
 
@@ -150,67 +131,6 @@ export class MapContainer extends Component<Props, State> {
       this.setState({ showTimesliderButton });
     }
   }
-
-  async _loadGeoFields(nextIndexPatternIds: string[]) {
-    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
-      // all ready loaded index pattern ids
-      return;
-    }
-
-    this._prevIndexPatternIds = nextIndexPatternIds;
-
-    const geoFields: GeoFieldWithIndex[] = [];
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-    indexPatterns.forEach((indexPattern) => {
-      indexPattern.fields.forEach((field) => {
-        if (
-          indexPattern.id &&
-          !indexPatternsUtils.isNestedField(field) &&
-          (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
-        ) {
-          geoFields.push({
-            geoFieldName: field.name,
-            geoFieldType: field.type,
-            indexPatternTitle: indexPattern.title,
-            indexPatternId: indexPattern.id,
-          });
-        }
-      });
-    });
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.setState({ geoFields });
-  }
-
-  _setRefreshTimer = () => {
-    const { isPaused, interval } = this.props.refreshConfig;
-
-    if (this._prevIsPaused === isPaused && this._prevInterval === interval) {
-      // refreshConfig is the same, nothing to do
-      return;
-    }
-
-    this._prevIsPaused = isPaused;
-    this._prevInterval = interval;
-
-    this._clearRefreshTimer();
-
-    if (!isPaused && interval > 0) {
-      this._refreshTimerId = window.setInterval(() => {
-        this.props.triggerRefreshTimer();
-      }, interval);
-    }
-  };
-
-  _clearRefreshTimer = () => {
-    if (this._refreshTimerId) {
-      window.clearInterval(this._refreshTimerId);
-      this._refreshTimerId = null;
-    }
-  };
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
@@ -289,13 +209,11 @@ export class MapContainer extends Component<Props, State> {
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
             onSingleValueTrigger={onSingleValueTrigger}
-            geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
           {!this.props.settings.hideToolbarOverlay && (
             <ToolbarOverlay
               addFilters={addFilters}
-              geoFields={this.state.geoFields}
               getFilterActions={getFilterActions}
               getActionContext={getActionContext}
               showFitToBoundsButton={this.state.showFitToBoundsButton}

@@ -8,10 +8,12 @@
 import { UptimeAlertTypeFactory } from './types';
 import { statusCheckAlertFactory } from './status_check';
 import { tlsAlertFactory } from './tls';
+import { tlsLegacyAlertFactory } from './tls_legacy';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 
 export const uptimeAlertTypeFactories: UptimeAlertTypeFactory[] = [
   statusCheckAlertFactory,
   tlsAlertFactory,
+  tlsLegacyAlertFactory,
   durationAnomalyAlertFactory,
 ];

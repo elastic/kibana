@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
 }
 
 export function RemoveSeries({ seriesId }: Props) {
-  const { removeSeries } = useUrlStorage();
+  const { removeSeries } = useSeriesStorage();
 
   const onClick = () => {
     removeSeries(seriesId);

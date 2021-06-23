@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UsageCollectionSetup } from '../../services/usage_collection';
-import { DashboardAppState, SavedDashboardPanel } from '../../types';
+import { RawDashboardState, SavedDashboardPanel } from '../../types';
 import {
   migratePanelsTo730,
   SavedDashboardPanelTo60,
@@ -28,10 +28,10 @@ import {
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: any } & DashboardAppState,
+  appState: { [key: string]: any } & RawDashboardState,
   kibanaVersion: string,
   usageCollection?: UsageCollectionSetup
-): DashboardAppState {
+): RawDashboardState {
   if (!appState.panels) {
     throw new Error(
       i18n.translate('dashboard.panel.invalidData', {

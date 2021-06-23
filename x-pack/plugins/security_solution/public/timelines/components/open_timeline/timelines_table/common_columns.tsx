@@ -10,7 +10,7 @@
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';
-
+import styled from 'styled-components';
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
@@ -19,6 +19,14 @@ import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types'
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { TimelineType } from '../../../../../common/types/timeline';
+
+const DescriptionCell = styled.span`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -85,9 +93,9 @@ export const getCommonColumns = ({
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string) => (
-      <span data-test-subj="description">
+      <DescriptionCell data-test-subj="description">
         {description != null && description.trim().length > 0 ? description : getEmptyTagValue()}
-      </span>
+      </DescriptionCell>
     ),
     sortable: false,
   },

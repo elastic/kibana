@@ -16,8 +16,8 @@ export default function statusPageFunctonalTests({
 
   describe('Status Page', function () {
     this.tags(['skipCloud', 'includeFirefox']);
-    before(async () => await esArchiver.load('empty_kibana'));
-    after(async () => await esArchiver.unload('empty_kibana'));
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    after(async () => await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
       await PageObjects.security.forceLogout();

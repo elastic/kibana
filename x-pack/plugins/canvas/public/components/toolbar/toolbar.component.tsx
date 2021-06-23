@@ -7,25 +7,17 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalFooter,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-// @ts-expect-error untyped local
-import { WorkpadManager } from '../workpad_manager';
-import { RouterContext } from '../router';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
+import { RoutingButtonIcon } from '../routing';
+
+import { WorkpadRoutingContext } from '../../routes/workpad';
 
 const { Toolbar: strings } = ComponentStrings;
 
@@ -36,7 +28,6 @@ export interface Props {
   selectedElement?: CanvasElement;
   selectedPageNumber: number;
   totalPages: number;
-  workpadId: string;
   workpadName: string;
 }
 
@@ -45,12 +36,10 @@ export const Toolbar: FC<Props> = ({
   selectedElement,
   selectedPageNumber,
   totalPages,
-  workpadId,
   workpadName,
 }) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
-  const [showWorkpadManager, setShowWorkpadManager] = useState(false);
-  const router = useContext(RouterContext);
+  const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
 
   // While the tray doesn't get activated if the workpad isn't writeable,
   // this effect will ensure that if the tray is open and the workpad
@@ -60,20 +49,6 @@ export const Toolbar: FC<Props> = ({
       setActiveTray(null);
     }
   }, [isWriteable, activeTray]);
-
-  if (!router) {
-    return <div>{strings.getErrorMessage('Router Undefined')}</div>;
-  }
-
-  const nextPage = () => {
-    const page = Math.min(selectedPageNumber + 1, totalPages);
-    router.navigateTo('loadWorkpad', { id: workpadId, page });
-  };
-
-  const previousPage = () => {
-    const page = Math.max(1, selectedPageNumber - 1);
-    router.navigateTo('loadWorkpad', { id: workpadId, page });
-  };
 
   const elementIsSelected = Boolean(selectedElement);
 
@@ -88,20 +63,6 @@ export const Toolbar: FC<Props> = ({
     }
   };
 
-  const closeWorkpadManager = () => setShowWorkpadManager(false);
-  const openWorkpadManager = () => setShowWorkpadManager(true);
-
-  const workpadManager = (
-    <EuiModal onClose={closeWorkpadManager} className="canvasModal--fixedSize" maxWidth="1000px">
-      <WorkpadManager onClose={closeWorkpadManager} />
-      <EuiModalFooter>
-        <EuiButton size="s" onClick={closeWorkpadManager}>
-          {strings.getWorkpadManagerCloseButtonLabel()}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  );
-
   const trays = {
     pageManager: <PageManager onPreviousPage={previousPage} />,
     expression: !elementIsSelected ? null : <Expression done={() => setActiveTray(null)} />,
@@ -113,17 +74,11 @@ export const Toolbar: FC<Props> = ({
       <div className="canvasToolbar__container">
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" iconType="grid" onClick={() => openWorkpadManager()}>
-              {workpadName}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} />
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
+            <RoutingButtonIcon
               color="text"
-              onClick={previousPage}
+              to={getUrl(selectedPageNumber - 1)}
               iconType="arrowLeft"
-              disabled={selectedPageNumber <= 1}
+              isDisabled={selectedPageNumber <= 1}
               aria-label={strings.getPreviousPageAriaLabel()}
             />
           </EuiFlexItem>
@@ -133,11 +88,11 @@ export const Toolbar: FC<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
+            <RoutingButtonIcon
               color="text"
-              onClick={nextPage}
+              to={getUrl(selectedPageNumber + 1)}
               iconType="arrowRight"
-              disabled={selectedPageNumber >= totalPages}
+              isDisabled={selectedPageNumber >= totalPages}
               aria-label={strings.getNextPageAriaLabel()}
             />
           </EuiFlexItem>
@@ -156,7 +111,6 @@ export const Toolbar: FC<Props> = ({
           )}
         </EuiFlexGroup>
       </div>
-      {showWorkpadManager && workpadManager}
     </div>
   );
 };
@@ -166,6 +120,5 @@ Toolbar.propTypes = {
   selectedElement: PropTypes.object,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  workpadId: PropTypes.string.isRequired,
   workpadName: PropTypes.string.isRequired,
 };

@@ -17,13 +17,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('feature controls saved objects management', () => {
     before(async () => {
-      await esArchiver.load('saved_objects_management/feature_controls/security');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      );
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
     });
 
     after(async () => {
-      await esArchiver.unload('saved_objects_management/feature_controls/security');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      );
     });
 
     describe('global all privileges', () => {

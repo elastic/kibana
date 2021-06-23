@@ -94,7 +94,6 @@ describe('Host Isolation', () => {
         },
       ])
     );
-    endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);

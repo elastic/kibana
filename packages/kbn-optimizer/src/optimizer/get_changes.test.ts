@@ -7,6 +7,7 @@
  */
 
 jest.mock('execa');
+jest.mock('fs');
 
 import { getChanges } from './get_changes';
 
@@ -14,6 +15,8 @@ const execa: jest.Mock = jest.requireMock('execa');
 
 it('parses git ls-files output', async () => {
   expect.assertions(4);
+
+  jest.requireMock('fs').existsSync.mockImplementation(() => true);
 
   execa.mockImplementation((cmd, args, options) => {
     expect(cmd).toBe('git');

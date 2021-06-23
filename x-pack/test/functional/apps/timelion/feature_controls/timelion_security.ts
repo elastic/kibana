@@ -24,8 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('feature controls security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('timelion/feature_controls');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/timelion/feature_controls');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('global timelion all privileges', () => {

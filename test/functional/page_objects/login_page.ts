@@ -7,65 +7,61 @@
  */
 
 import { delay } from 'bluebird';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function LoginPageProvider({ getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const log = getService('log');
-  const find = getService('find');
+export class LoginPageObject extends FtrService {
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
 
-  const regularLogin = async (user: string, pwd: string) => {
-    await testSubjects.setValue('loginUsername', user);
-    await testSubjects.setValue('loginPassword', pwd);
-    await testSubjects.click('loginSubmit');
-    await find.waitForDeletedByCssSelector('.kibanaWelcomeLogo');
-    await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
-  };
-
-  const samlLogin = async (user: string, pwd: string) => {
-    try {
-      await find.clickByButtonText('Login using SAML');
-      await find.setValue('input[name="email"]', user);
-      await find.setValue('input[type="password"]', pwd);
-      await find.clickByCssSelector('.auth0-label-submit');
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
-    } catch (err) {
-      log.debug(`${err} \nFailed to find Auth0 login page, trying the Auth0 last login page`);
-      await find.clickByCssSelector('.auth0-lock-social-button');
-    }
-  };
-
-  class LoginPage {
-    async login(user: string, pwd: string) {
-      const loginType = process.env.VM || '';
-      if (loginType.includes('oidc') || loginType.includes('saml')) {
-        await samlLogin(user, pwd);
-        return;
-      }
-
-      await regularLogin(user, pwd);
+  async login(user: string, pwd: string) {
+    const loginType = process.env.VM || '';
+    if (loginType.includes('oidc') || loginType.includes('saml')) {
+      await this.samlLogin(user, pwd);
+      return;
     }
 
-    async logoutLogin(user: string, pwd: string) {
-      await this.logout();
-      await this.sleep(3002);
-      await this.login(user, pwd);
-    }
-
-    async logout() {
-      await testSubjects.click('userMenuButton');
-      await this.sleep(500);
-      await testSubjects.click('logoutLink');
-      log.debug('### found and clicked log out--------------------------');
-      await this.sleep(8002);
-    }
-
-    async sleep(sleepMilliseconds: number) {
-      log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await delay(sleepMilliseconds);
-      log.debug(`... sleep(${sleepMilliseconds}) end`);
-    }
+    await this.regularLogin(user, pwd);
   }
 
-  return new LoginPage();
+  async logoutLogin(user: string, pwd: string) {
+    await this.logout();
+    await this.sleep(3002);
+    await this.login(user, pwd);
+  }
+
+  async logout() {
+    await this.testSubjects.click('userMenuButton');
+    await this.sleep(500);
+    await this.testSubjects.click('logoutLink');
+    this.log.debug('### found and clicked log out--------------------------');
+    await this.sleep(8002);
+  }
+
+  async sleep(sleepMilliseconds: number) {
+    this.log.debug(`... sleep(${sleepMilliseconds}) start`);
+    await delay(sleepMilliseconds);
+    this.log.debug(`... sleep(${sleepMilliseconds}) end`);
+  }
+
+  private async regularLogin(user: string, pwd: string) {
+    await this.testSubjects.setValue('loginUsername', user);
+    await this.testSubjects.setValue('loginPassword', pwd);
+    await this.testSubjects.click('loginSubmit');
+    await this.find.waitForDeletedByCssSelector('.kibanaWelcomeLogo');
+    await this.find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
+  }
+
+  private async samlLogin(user: string, pwd: string) {
+    try {
+      await this.find.clickByButtonText('Login using SAML');
+      await this.find.setValue('input[name="email"]', user);
+      await this.find.setValue('input[type="password"]', pwd);
+      await this.find.clickByCssSelector('.auth0-label-submit');
+      await this.find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
+    } catch (err) {
+      this.log.debug(`${err} \nFailed to find Auth0 login page, trying the Auth0 last login page`);
+      await this.find.clickByCssSelector('.auth0-lock-social-button');
+    }
+  }
 }

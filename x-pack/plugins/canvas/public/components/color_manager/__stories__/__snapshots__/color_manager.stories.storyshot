@@ -391,6 +391,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -405,6 +406,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
@@ -801,6 +803,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -815,6 +818,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
@@ -880,6 +884,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -894,6 +899,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />
@@ -959,6 +965,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
         />
@@ -973,6 +980,7 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
         />

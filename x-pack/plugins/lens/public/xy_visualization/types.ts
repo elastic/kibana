@@ -466,6 +466,7 @@ export interface XYArgs {
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
+  valuesInLegend?: boolean;
 }
 
 export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
@@ -488,6 +489,7 @@ export interface XYState {
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
+  valuesInLegend?: boolean;
 }
 
 export type State = XYState;

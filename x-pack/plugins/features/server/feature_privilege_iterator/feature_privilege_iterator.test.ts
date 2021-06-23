@@ -55,6 +55,10 @@ describe('featurePrivilegeIterator', () => {
               read: [],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -75,6 +79,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -113,6 +120,10 @@ describe('featurePrivilegeIterator', () => {
               read: [],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -136,6 +147,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -170,6 +184,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-read-type-alerts'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -190,6 +208,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -229,6 +250,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-read-type-alerts'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -261,6 +286,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -281,6 +310,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -310,6 +342,10 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-all-sub-type'],
                     },
+                  },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -349,6 +385,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -372,6 +412,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -405,6 +448,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -425,6 +472,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -454,6 +504,10 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-all-sub-type'],
                     },
+                  },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -493,6 +547,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -516,6 +574,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -549,6 +610,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -569,6 +634,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -599,6 +667,10 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-all-sub-type'],
                     },
+                  },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -641,6 +713,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type', 'cases-all-sub-type'],
+            read: ['cases-read-type', 'cases-read-sub-type'],
+          },
           ui: ['ui-action', 'ui-sub-type'],
         },
       },
@@ -667,6 +743,10 @@ describe('featurePrivilegeIterator', () => {
               all: ['alerting-all-sub-type'],
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            all: ['cases-all-sub-type'],
+            read: ['cases-read-type', 'cases-read-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -702,6 +782,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -722,6 +806,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -751,6 +838,9 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-read-type'],
                     },
+                  },
+                  cases: {
+                    read: ['cases-read-type'],
                   },
                   ui: ['ui-action'],
                 },
@@ -792,6 +882,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -817,6 +911,10 @@ describe('featurePrivilegeIterator', () => {
               all: ['alerting-read-type'],
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            all: [],
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -850,6 +948,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -870,6 +972,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -900,6 +1005,10 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-all-sub-type'],
                     },
+                  },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -942,6 +1051,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type', 'cases-all-sub-type'],
+            read: ['cases-read-type', 'cases-read-sub-type'],
+          },
           ui: ['ui-action', 'ui-sub-type'],
         },
       },
@@ -965,6 +1078,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -998,6 +1114,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -1018,6 +1138,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -1049,6 +1172,10 @@ describe('featurePrivilegeIterator', () => {
                     alert: {
                       all: ['alerting-all-sub-type'],
                     },
+                  },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -1088,6 +1215,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -1111,6 +1242,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -1168,6 +1302,10 @@ describe('featurePrivilegeIterator', () => {
                       read: ['alerting-read-sub-type'],
                     },
                   },
+                  cases: {
+                    all: ['cases-all-sub-type'],
+                    read: ['cases-read-sub-type'],
+                  },
                   ui: ['ui-sub-type'],
                 },
               ],
@@ -1209,6 +1347,10 @@ describe('featurePrivilegeIterator', () => {
               read: [],
             },
           },
+          cases: {
+            all: ['cases-all-sub-type'],
+            read: ['cases-read-sub-type'],
+          },
           ui: ['ui-sub-type'],
         },
       },
@@ -1235,6 +1377,10 @@ describe('featurePrivilegeIterator', () => {
               all: [],
               read: [],
             },
+          },
+          cases: {
+            all: ['cases-all-sub-type'],
+            read: ['cases-read-sub-type'],
           },
           ui: ['ui-sub-type'],
         },
@@ -1268,6 +1414,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
         read: {
@@ -1288,6 +1438,9 @@ describe('featurePrivilegeIterator', () => {
             alert: {
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },
@@ -1347,6 +1500,10 @@ describe('featurePrivilegeIterator', () => {
               read: ['alerting-another-read-type'],
             },
           },
+          cases: {
+            all: ['cases-all-type'],
+            read: ['cases-read-type'],
+          },
           ui: ['ui-action'],
         },
       },
@@ -1372,6 +1529,10 @@ describe('featurePrivilegeIterator', () => {
               all: [],
               read: ['alerting-read-type'],
             },
+          },
+          cases: {
+            all: [],
+            read: ['cases-read-type'],
           },
           ui: ['ui-action'],
         },

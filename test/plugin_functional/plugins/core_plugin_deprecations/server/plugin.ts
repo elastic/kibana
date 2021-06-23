@@ -29,7 +29,9 @@ async function getDeprecations({
       message: `SavedObject test-deprecations-plugin is still being used.`,
       documentationUrl: 'another-test-url',
       level: 'critical',
-      correctiveActions: {},
+      correctiveActions: {
+        manualSteps: ['Step a', 'Step b'],
+      },
     });
   }
 

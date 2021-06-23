@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
@@ -64,7 +64,7 @@ export async function getServiceAnomalies({
                   by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
                 },
               },
-            ] as estypes.QueryContainer[],
+            ] as estypes.QueryDslQueryContainer[],
           },
         },
         aggs: {
@@ -74,7 +74,9 @@ export async function getServiceAnomalies({
               sources: [
                 { serviceName: { terms: { field: 'partition_field_value' } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<Record<string, estypes.CompositeAggregationSource>>,
+              ] as Array<
+                Record<string, estypes.AggregationsCompositeAggregationSource>
+              >,
             },
             aggs: {
               metrics: {

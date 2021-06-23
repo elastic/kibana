@@ -30,20 +30,49 @@ exports[`Should show all controls 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <Connect(ToolsControl)
-      geoFields={
-        Array [
-          Object {
-            "geoFieldName": "myGeoFieldName",
-            "geoFieldType": "geo_point",
-            "indexPatternId": "1",
-            "indexPatternTitle": "myIndex",
-          },
-        ]
-      }
+      disableToolsControl={false}
     />
   </EuiFlexItem>
   <EuiFlexItem>
     <Connect(TimesliderToggleButton) />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Should show point layer edit tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FeatureEditTools)
+      pointsOnly={true}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Should show shape layer edit tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FeatureEditTools)
+      pointsOnly={false}
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

@@ -20,7 +20,7 @@ export interface TransformElasticToListItemOptions {
 }
 
 export interface TransformElasticHitToListItemOptions {
-  hits: Array<estypes.Hit<SearchEsListItemSchema>>;
+  hits: Array<estypes.SearchHit<SearchEsListItemSchema>>;
   type: Type;
 }
 

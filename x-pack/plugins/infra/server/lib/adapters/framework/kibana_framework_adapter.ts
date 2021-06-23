@@ -161,7 +161,7 @@ export class KibanaFramework {
         apiResult = elasticsearch.client.asCurrentUser.msearch({
           ...params,
           ...frozenIndicesParams,
-        } as estypes.MultiSearchRequest);
+        } as estypes.MsearchRequest);
         break;
       case 'fieldCaps':
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({

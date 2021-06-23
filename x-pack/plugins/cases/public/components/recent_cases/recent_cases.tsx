@@ -31,7 +31,9 @@ export interface RecentCasesProps {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
+  hasWritePermissions: boolean;
 }
+
 const usePrevious = (value: Partial<FilterOptions>) => {
   const ref = useRef();
   useEffect(() => {
@@ -44,9 +46,12 @@ export const RecentCasesComp = ({
   createCaseNavigation,
   filterOptions,
   maxCasesToShow,
+  hasWritePermissions,
 }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({ perPage: maxCasesToShow });
+  const { data, loading, setFilters } = useGetCases({
+    initialQueryParams: { perPage: maxCasesToShow },
+  });
 
   useEffect(() => {
     if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {
@@ -62,7 +67,7 @@ export const RecentCasesComp = ({
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />
   ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases createCaseHref={createCaseNavigation.href} />
+    <NoCases createCaseHref={createCaseNavigation.href} hasWritePermissions={hasWritePermissions} />
   ) : (
     <>
       {data.cases.map((c, i) => (

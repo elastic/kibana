@@ -19,7 +19,7 @@ import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
-  value: estypes.IndexState & {
+  value: estypes.IndicesIndexState & {
     index: string;
     type: string;
   };

@@ -53,12 +53,12 @@ describe('action_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -68,12 +68,12 @@ describe('action_form', () => {
     id: 'disabled-by-config',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -83,12 +83,12 @@ describe('action_form', () => {
     id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -98,12 +98,12 @@ describe('action_form', () => {
     id: 'disabled-by-license',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -113,12 +113,12 @@ describe('action_form', () => {
     id: 'preconfigured',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,

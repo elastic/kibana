@@ -16,8 +16,6 @@ export const SETTINGS_PATH = '/settings';
 export const CREDENTIALS_PATH = '/credentials';
 
 export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const ENGINES_PATH = '/engines';
 export const ENGINE_CREATION_PATH = '/engine_creation';
@@ -39,7 +37,7 @@ export const ENGINE_SCHEMA_PATH = `${ENGINE_PATH}/schema`;
 export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_SCHEMA_PATH}/reindex_job/:reindexJobId`;
 
 export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
-// TODO: Crawler sub-pages
+export const ENGINE_CRAWLER_DOMAIN_PATH = `${ENGINE_CRAWLER_PATH}/domains/:domainId`;
 
 export const META_ENGINE_CREATION_PATH = '/meta_engine_creation';
 export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;

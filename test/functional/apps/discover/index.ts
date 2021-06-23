@@ -20,7 +20,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));

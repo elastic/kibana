@@ -9,6 +9,7 @@ import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import styled from 'styled-components';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
@@ -23,12 +24,17 @@ import { importTimelines } from '../../containers/api';
 
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
-import { EditOneTimelineAction } from './export_timeline';
+import { EditTimelineActions } from './export_timeline';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
+
+const QueryText = styled.span`
+  white-space: normal;
+  word-break: break-word;
+`;
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -86,9 +92,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           values={{
             totalSearchResultsCount,
             with: (
-              <span data-test-subj="selectable-query-text">
+              <QueryText data-test-subj="selectable-query-text">
                 {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
-              </span>
+              </QueryText>
             ),
           }}
         />
@@ -104,9 +110,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           values={{
             totalSearchResultsCount,
             with: (
-              <span data-test-subj="selectable-query-text">
+              <QueryText data-test-subj="selectable-query-text">
                 {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
-              </span>
+              </QueryText>
             ),
           }}
         />
@@ -164,7 +170,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     return (
       <>
-        <EditOneTimelineAction
+        <EditTimelineActions
           deleteTimelines={deleteTimelines}
           ids={actionItemId}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
