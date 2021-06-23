@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from 'src/core/types';
+import { mergeMissingFieldsWithSource } from './source_fields_merging/strategies/merge_missing_fields_with_source';
 import {
   AlertAttributes,
   SignalSourceHit,
@@ -20,7 +21,6 @@ import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
-import { mergeFieldsWithSource } from './merge_fields_with_source';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -35,7 +35,7 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit
 ): SignalHit => {
-  const mergedSource = mergeFieldsWithSource({ doc });
+  const mergedSource = mergeMissingFieldsWithSource({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedSource);
   const signal: Signal = {
     ...buildSignal([doc], rule),
@@ -130,9 +130,9 @@ export const buildSignalFromEvent = (
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean
 ): SignalHit => {
+  const mergedSource = mergeMissingFieldsWithSource({ doc: event });
   const rule = applyOverrides
-    ? // @ts-expect-error @elastic/elasticsearch _source is optional
-      buildRuleWithOverrides(ruleSO, event._source)
+    ? buildRuleWithOverrides(ruleSO, mergedSource)
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
     ...buildSignal([event], rule),
@@ -141,7 +141,7 @@ export const buildSignalFromEvent = (
   const eventFields = buildEventTypeSignal(event);
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
-    ...event._source,
+    ...mergedSource,
     '@timestamp': new Date().toISOString(),
     event: eventFields,
     signal,

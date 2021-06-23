@@ -694,6 +694,9 @@ describe('buildSignalFromEvent', () => {
         rule: expectedRule(),
         depth: 2,
       },
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(signal).toEqual(expected);
   });
