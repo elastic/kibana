@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -44,21 +44,23 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   }
 
   return (
-    <div data-test-subj="transformApp">
-      <Router history={history}>
-        <Switch>
-          <Route
-            path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-            component={CloneTransformSection}
-          />
-          <Route
-            path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-            component={CreateTransformSection}
-          />
-          <Route path={`/`} component={TransformManagementSection} />
-        </Switch>
-      </Router>
-    </div>
+    <EuiFlexGroup justifyContent="spaceAround" data-test-subj="transformApp">
+      <EuiFlexItem grow={true}>
+        <Router history={history}>
+          <Switch>
+            <Route
+              path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+              component={CloneTransformSection}
+            />
+            <Route
+              path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+              component={CreateTransformSection}
+            />
+            <Route path={`/`} component={TransformManagementSection} />
+          </Switch>
+        </Router>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
