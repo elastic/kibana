@@ -164,7 +164,30 @@ describe('Session service', () => {
   it('Can continue previous session from another app', async () => {
     sessionService.start();
     const sessionId = sessionService.getSessionId();
-    expect(sessionId).not.toBeUndefined();
+
+    sessionService.clear();
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Calling clear() more then once still allows to continue previous session from another app', async () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
+
+    sessionService.clear();
+    sessionService.clear();
+
+    currentAppId$.next('change');
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.getSessionId()).toBe(sessionId);
+  });
+
+  it('Continue drops storage configuration', () => {
+    sessionService.start();
+    const sessionId = sessionService.getSessionId();
 
     sessionService.enableStorage({
       getName: async () => 'Name',
@@ -178,12 +201,30 @@ describe('Session service', () => {
     expect(sessionService.isSessionStorageReady()).toBe(true);
 
     sessionService.clear();
+
+    sessionService.continue(sessionId!);
+
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
+  // it might be that search requests finish after the session is cleared and before it was continued,
+  // to avoid "infinite loading" state after we continue the session we have to drop pending searches
+  it('Continue drops client side loading state', async () => {
+    const sessionId = sessionService.start();
+
+    sessionService.trackSearch({ abort: () => {} });
+    expect(state$.getValue()).toBe(SearchSessionState.Loading);
+
     sessionService.clear(); // even allow to call clear multiple times
 
-    currentAppId$.next('change');
+    expect(state$.getValue()).toBe(SearchSessionState.None);
+
     sessionService.continue(sessionId!);
     expect(sessionService.getSessionId()).toBe(sessionId);
-    expect(sessionService.isSessionStorageReady()).toBe(false);
+
+    // the original search was never `untracked`,
+    // but we still consider this a completed session until new search fire
+    expect(state$.getValue()).toBe(SearchSessionState.Completed);
   });
 
   test('getSearchOptions infers isRestore & isStored from state', async () => {

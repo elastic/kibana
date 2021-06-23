@@ -244,14 +244,21 @@ export class SessionService {
 
   /**
    * Continue previous search session
-   * Can be used to share a search session between different apps
+   * Can be used to share a running search session between different apps, so they can reuse search cache
+   *
+   * This is different from {@link restore} as this doesn't try to reuse saved in elasticsearch search results when restoring
    * @param sessionId
    */
   public continue(sessionId: string) {
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
       this.state.set({
         ...this.lastSessionSnapshot,
+        // have to change a name, so that current app can cancel a session that it continues
         appName: this.currentApp,
+        // also have to drop all pending searches which are used to derive client side state of search session indicator,
+        // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
+        // possible solution to this problem is to refactor session service to support multiple sessions
+        pendingSearches: [],
       });
       this.lastSessionSnapshot = undefined;
     } else {
