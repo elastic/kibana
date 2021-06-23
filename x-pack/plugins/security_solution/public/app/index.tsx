@@ -45,7 +45,11 @@ export const renderApp = ({
         ].map((route, index) => (
           <Route key={`route-${index}`} {...route} />
         ))}
-
+        <Redirect from="/detections/rules/id/:detailName/edit" to="/rules/id/:detailName/edit" />
+        <Redirect from="/detections/rules/id/:detailName" to="/rules/id/:detailName" />
+        <Redirect from="/detections/rules/create" to="/rules/create" />
+        <Redirect from="/detections/rules" to="/rules" />
+        <Redirect from="/detections" to="/alerts" />
         <Route path="" exact>
           <Redirect to={OVERVIEW_PATH} />
         </Route>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
