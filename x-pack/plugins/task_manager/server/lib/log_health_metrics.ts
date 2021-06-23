@@ -49,20 +49,20 @@ export function logHealthMetrics(
     if (
       driftInSeconds >= config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds
     ) {
-      const taskType = Object.keys(monitoredHealth.stats.runtime?.value.drift_by_type ?? {}).reduce(
-        (accum: string, typeName) => {
+      const taskTypes = Object.keys(monitoredHealth.stats.runtime?.value.drift_by_type ?? {})
+        .reduce((accum: string[], typeName) => {
           if (
             monitoredHealth.stats.runtime?.value.drift_by_type[typeName].p99 ===
             monitoredHealth.stats.runtime?.value.drift.p99
           ) {
-            accum = typeName;
+            accum.push(typeName);
           }
           return accum;
-        },
-        'unknown'
-      );
+        }, [])
+        .join(', ');
+
       logger.warn(
-        `Detected delay task start of ${driftInSeconds}s for task "${taskType}" (which exceeds configured value of ${config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds}s)`
+        `Detected delay task start of ${driftInSeconds}s for task(s) "${taskTypes}" (which exceeds configured value of ${config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds}s)`
       );
       logLevel = LogLevel.Warn;
     }

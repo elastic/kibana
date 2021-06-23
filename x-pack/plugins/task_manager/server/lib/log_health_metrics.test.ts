@@ -183,7 +183,7 @@ describe('logHealthMetrics', () => {
     expect(logMessage).toMatchObject(health);
   });
 
-  it('should log as warn if drift exceeds the threshold', () => {
+  it('should log as warn if drift exceeds the threshold for a single alert type', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -199,6 +199,9 @@ describe('logHealthMetrics', () => {
               'taskType:test': {
                 p99: 60000,
               },
+              'taskType:test2': {
+                p99: 60000 - 1,
+              },
             },
             drift: {
               p99: 60000,
@@ -211,7 +214,50 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config);
 
     expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
-      `Detected delay task start of 60s for task \"taskType:test\" (which exceeds configured value of 60s)`
+      `Detected delay task start of 60s for task(s) \"taskType:test\" (which exceeds configured value of 60s)`
+    );
+
+    const secondMessage = JSON.parse(
+      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
+        `Latest Monitored Stats: `,
+        ''
+      )
+    );
+    expect(secondMessage).toMatchObject(health);
+  });
+
+  it('should log as warn if drift exceeds the threshold for multiple alert types', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth({
+      stats: {
+        runtime: {
+          value: {
+            drift_by_type: {
+              'taskType:test': {
+                p99: 60000,
+              },
+              'taskType:test2': {
+                p99: 60000,
+              },
+            },
+            drift: {
+              p99: 60000,
+            },
+          },
+        },
+      },
+    });
+
+    logHealthMetrics(health, logger, config);
+
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
+      `Detected delay task start of 60s for task(s) \"taskType:test, taskType:test2\" (which exceeds configured value of 60s)`
     );
 
     const secondMessage = JSON.parse(
