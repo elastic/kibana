@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { upperFirst } from 'lodash';
-
 import { EuiBadge, EuiBasicTableColumn, EuiInMemoryTable, EuiTextColor } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
@@ -20,6 +18,11 @@ import {
   ALL_LABEL,
   FILTER_USERS_LABEL,
   NO_USERS_LABEL,
+  ROLE_LABEL,
+  USERNAME_LABEL,
+  EMAIL_LABEL,
+  GROUPS_LABEL,
+  ENGINES_LABEL,
 } from './constants';
 
 import { UsersAndRolesRowActions } from './';
@@ -69,12 +72,12 @@ export const UsersTable: React.FC<Props> = ({
   const columns: Array<EuiBasicTableColumn<SharedUser>> = [
     {
       field: 'username',
-      name: 'Username',
+      name: USERNAME_LABEL,
       render: (_, { username }: SharedUser) => username,
     },
     {
       field: 'email',
-      name: 'Email',
+      name: EMAIL_LABEL,
       render: (_, { email, invitation }: SharedUser) => {
         if (!email) return noItemsPlaceholder;
         return (
@@ -86,12 +89,12 @@ export const UsersTable: React.FC<Props> = ({
     },
     {
       field: 'roleType',
-      name: 'Role',
+      name: ROLE_LABEL,
       render: (_, user: SharedUser) => user.roleType,
     },
     {
       field: 'accessItems',
-      name: upperFirst(accessItemKey),
+      name: accessItemKey === 'groups' ? GROUPS_LABEL : ENGINES_LABEL,
       render: (_, { accessItems }: SharedUser) => {
         // Design calls for showing the first 2 items followed by a +x after those 2.
         // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
@@ -139,7 +142,6 @@ export const UsersTable: React.FC<Props> = ({
       search={search}
       pagination={pagination}
       message={NO_USERS_LABEL}
-      responsive={false}
     />
   );
 };

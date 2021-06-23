@@ -50,8 +50,24 @@ export const ROLE_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.rol
   defaultMessage: 'Role',
 });
 
+export const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.usernameLabel', {
+  defaultMessage: 'Username',
+});
+
+export const EMAIL_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.emailLabel', {
+  defaultMessage: 'Email',
+});
+
 export const ALL_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.allLabel', {
   defaultMessage: 'All',
+});
+
+export const GROUPS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.groupsLabel', {
+  defaultMessage: 'Groups',
+});
+
+export const ENGINES_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.enginesLabel', {
+  defaultMessage: 'Engines',
 });
 
 export const AUTH_PROVIDER_LABEL = i18n.translate(
