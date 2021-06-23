@@ -80,7 +80,7 @@ export const UserSelector: React.FC<Props> = ({
   );
 
   const emailInput = (
-    <EuiFormRow label={EMAIL_LABEL} helpText={!elasticsearchUser.email && REQUIRED_LABEL}>
+    <EuiFormRow label={EMAIL_LABEL}>
       <EuiFieldText
         name={EMAIL_LABEL}
         data-test-subj="EmailInput"
