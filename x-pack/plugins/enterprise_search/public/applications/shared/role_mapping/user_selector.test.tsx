@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchUsers } from './__mocks__/elasticsearchUsers';
+import { elasticsearchUsers } from './__mocks__/elasticsearch_users';
 
 import React from 'react';
 
