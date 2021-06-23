@@ -424,6 +424,7 @@
     "venn.js": "0.2.20",
     "vinyl": "^2.2.0",
     "vt-pbf": "^3.1.1",
+    "waait": "^1.0.5",
     "wellknown": "^0.5.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
