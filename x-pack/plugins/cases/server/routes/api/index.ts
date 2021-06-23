@@ -38,7 +38,7 @@ import { initPatchSubCasesApi } from './sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './sub_case/find_sub_cases';
 import { initDeleteSubCasesApi } from './sub_case/delete_sub_cases';
 import { ENABLE_CASE_CONNECTOR } from '../../../common';
-import { initGetCaseIdsByAlertIdApi } from './cases/alerts/get_cases';
+import { initGetCasesByAlertIdApi } from './cases/alerts/get_cases';
 import { initGetAllAlertsAttachToCaseApi } from './comments/get_alerts';
 
 /**
@@ -89,6 +89,6 @@ export function initCaseApi(deps: RouteDeps) {
   // Tags
   initGetTagsApi(deps);
   // Alerts
-  initGetCaseIdsByAlertIdApi(deps);
+  initGetCasesByAlertIdApi(deps);
   initGetAllAlertsAttachToCaseApi(deps);
 }

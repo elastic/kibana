@@ -86,10 +86,6 @@ export interface Props {
    */
   autoplayInterval: number;
   /**
-   * Enables autoplay
-   */
-  enableAutoplay: (autoplay: boolean) => void;
-  /**
    * Sets autoplay interval
    */
   setAutoplayInterval: (interval: number) => void;
@@ -110,7 +106,6 @@ export const ViewMenu: FunctionComponent<Props> = ({
   setRefreshInterval,
   autoplayEnabled,
   autoplayInterval,
-  enableAutoplay,
   setAutoplayInterval,
 }) => {
   const setRefresh = (val: number) => setRefreshInterval(val);
@@ -259,6 +254,5 @@ ViewMenu.propTypes = {
   setRefreshInterval: PropTypes.func.isRequired,
   autoplayEnabled: PropTypes.bool.isRequired,
   autoplayInterval: PropTypes.number.isRequired,
-  enableAutoplay: PropTypes.func.isRequired,
   setAutoplayInterval: PropTypes.func.isRequired,
 };
