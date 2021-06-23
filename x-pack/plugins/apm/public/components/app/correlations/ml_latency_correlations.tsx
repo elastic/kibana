@@ -44,7 +44,10 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ServiceOrTransactionsOverviewLink } from '../../shared/Links/apm/service_transactions_overview_link';
-import { getNextEnvironmentUrlParam } from '../../../../common/environment_filter_values';
+import {
+  getEnvironmentLabel,
+  getNextEnvironmentUrlParam,
+} from '../../../../common/environment_filter_values';
 import {
   IStickyProperty,
   StickyProperties,
@@ -174,7 +177,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           defaultMessage: 'Environment',
         }),
         fieldName: SERVICE_ENVIRONMENT,
-        val: urlParams.environment,
+        val: getEnvironmentLabel(urlParams.environment),
       });
     }
 

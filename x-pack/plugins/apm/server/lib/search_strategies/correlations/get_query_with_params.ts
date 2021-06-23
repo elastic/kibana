@@ -6,14 +6,14 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
-import { i18n } from '@kbn/i18n';
-
 import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import { environmentQuery as getEnvironmentQuery } from '../../../utils/queries';
 
 export enum ProcessorEvent {
   transaction = 'transaction',
@@ -22,54 +22,6 @@ export enum ProcessorEvent {
   span = 'span',
   profile = 'profile',
 }
-
-const PROCESSOR_EVENT = 'processor.event';
-const SERVICE_ENVIRONMENT = 'service.environment';
-const SERVICE_NAME = 'service.name';
-
-const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
-const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
-
-const environmentLabels: Record<string, string> = {
-  [ENVIRONMENT_ALL_VALUE]: i18n.translate(
-    'xpack.apm.filter.environment.allLabel',
-    {
-      defaultMessage: 'All',
-    }
-  ),
-  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate(
-    'xpack.apm.filter.environment.notDefinedLabel',
-    {
-      defaultMessage: 'Not defined',
-    }
-  ),
-};
-
-const ENVIRONMENT_ALL = {
-  esFieldValue: undefined,
-  value: ENVIRONMENT_ALL_VALUE,
-  text: environmentLabels[ENVIRONMENT_ALL_VALUE],
-};
-
-export const ENVIRONMENT_NOT_DEFINED = {
-  esFieldValue: undefined,
-  value: ENVIRONMENT_NOT_DEFINED_VALUE,
-  text: environmentLabels[ENVIRONMENT_NOT_DEFINED_VALUE],
-};
-
-const getEnvironmentQuery = (
-  environment?: string
-): estypes.QueryDslQueryContainer[] => {
-  if (!environment || environment === ENVIRONMENT_ALL.value) {
-    return [];
-  }
-
-  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
-  }
-
-  return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
-};
 
 const getRangeQuery = (
   start?: string,
@@ -88,33 +40,23 @@ const getRangeQuery = (
 };
 
 const getPercentileThresholdValueQuery = (
-  percentileThresholdValue: number
+  percentileThresholdValue: number | undefined
 ): estypes.QueryDslQueryContainer[] => {
-  return [
-    {
-      range: {
-        [TRANSACTION_DURATION]: {
-          gte: percentileThresholdValue,
-        },
-      },
-    },
-  ];
-};
-
-const getTransactionNameQuery = (
-  transactionName: string | undefined
-): estypes.QueryDslQueryContainer[] => {
-  return typeof transactionName === 'string'
+  return percentileThresholdValue
     ? [
         {
-          term: {
-            [TRANSACTION_NAME]: {
-              value: transactionName,
+          range: {
+            [TRANSACTION_DURATION]: {
+              gte: percentileThresholdValue,
             },
           },
         },
       ]
     : [];
+};
+
+const getTermsQuery = (fieldName: string, fieldValue: string | undefined) => {
+  return fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
 };
 
 export const getQueryWithParams = ({
@@ -128,14 +70,12 @@ export const getQueryWithParams = ({
   return {
     bool: {
       filter: [
-        { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+        ...getTermsQuery(PROCESSOR_EVENT, ProcessorEvent.transaction),
+        ...getTermsQuery(SERVICE_NAME, serviceName),
+        ...getTermsQuery(TRANSACTION_NAME, transactionName),
         ...getRangeQuery(start, end),
-        ...getTransactionNameQuery(transactionName),
         ...getEnvironmentQuery(environment),
-        ...(percentileThresholdValue
-          ? getPercentileThresholdValueQuery(percentileThresholdValue)
-          : []),
+        ...getPercentileThresholdValueQuery(percentileThresholdValue),
       ] as estypes.QueryDslQueryContainer[],
     },
   };
