@@ -4,33 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { makeDefaultServices, mockLensStore, defaultDoc, createMockVisualization } from '../mocks';
+import { makeDefaultServices, makeLensStore, defaultDoc, createMockVisualization } from '../mocks';
 import { createMockDatasource, DatasourceMock } from '../mocks';
 import { act } from 'react-dom/test-utils';
 import { loadInitialStore } from './mounter';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 const defaultSavedObjectId = '1234';
-
-const initialState = {
-  searchSessionId: 'searchSessionId',
-  filters: [],
-  query: { language: 'kuery', query: '' },
-  resolvedDateRange: { fromDate: '', toDate: '' },
-  isFullscreenDatasource: false,
-  isSaveable: false,
+const preloadedState = {
   isLoading: true,
-  isLinkedToOriginatingApp: false,
-  activeDatasourceId: 'testDatasource',
   visualization: {
     state: null,
     activeId: 'testVis',
-  },
-  datasourceStates: {
-    testDatasource: {
-      isLoading: false,
-      state: '',
-    },
   },
 };
 
@@ -76,12 +61,9 @@ describe('Mounter', () => {
     const redirectCallback = jest.fn();
     services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
-    const lensStore = await mockLensStore({
+    const lensStore = await makeLensStore({
       data: services.data,
-      preloadedState: {
-        ...initialState,
-        datasourceStates: { testDatasource: { isLoading: true, state: {} } },
-      },
+      preloadedState,
     });
     await act(async () => {
       await loadInitialStore(
@@ -103,7 +85,7 @@ describe('Mounter', () => {
     const redirectCallback = jest.fn();
     services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
-    const lensStore = await mockLensStore({ data: services.data, preloadedState: initialState });
+    const lensStore = await makeLensStore({ data: services.data, preloadedState });
     await act(async () => {
       await loadInitialStore(
         redirectCallback,
@@ -136,7 +118,7 @@ describe('Mounter', () => {
     it('does not load a document if there is no initial input', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
       await loadInitialStore(
         redirectCallback,
         undefined,
@@ -155,7 +137,7 @@ describe('Mounter', () => {
       const redirectCallback = jest.fn();
       services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
 
-      const lensStore = await mockLensStore({ data: services.data });
+      const lensStore = await makeLensStore({ data: services.data, preloadedState });
       await act(async () => {
         await loadInitialStore(
           redirectCallback,
@@ -190,7 +172,7 @@ describe('Mounter', () => {
     it('does not load documents on sequential renders unless the id changes', async () => {
       const redirectCallback = jest.fn();
       const services = makeDefaultServices();
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
 
       await act(async () => {
         await loadInitialStore(
@@ -240,7 +222,7 @@ describe('Mounter', () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
 
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
 
       services.attributeService.unwrapAttributes = jest.fn().mockRejectedValue('failed to load');
 
@@ -267,7 +249,7 @@ describe('Mounter', () => {
       const redirectCallback = jest.fn();
 
       const services = makeDefaultServices();
-      const lensStore = mockLensStore({ data: services.data });
+      const lensStore = makeLensStore({ data: services.data, preloadedState });
       await act(async () => {
         await loadInitialStore(
           redirectCallback,

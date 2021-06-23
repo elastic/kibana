@@ -366,7 +366,29 @@ export function makeDefaultServices(
   };
 }
 
-export function mockLensStore({
+export const defaultState = {
+  searchSessionId: 'sessionId-1',
+  filters: [],
+  query: { language: 'lucene', query: '' },
+  resolvedDateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
+  isFullscreenDatasource: false,
+  isSaveable: false,
+  isLoading: false,
+  isLinkedToOriginatingApp: false,
+  activeDatasourceId: 'testDatasource',
+  visualization: {
+    state: {},
+    activeId: 'testVis',
+  },
+  datasourceStates: {
+    testDatasource: {
+      isLoading: false,
+      state: '',
+    },
+  },
+};
+
+export function makeLensStore({
   data,
   preloadedState,
   dispatch,
@@ -380,18 +402,10 @@ export function mockLensStore({
   }
   const lensStore = makeConfigureStore(
     getPreloadedState({
-      activeDatasourceId: 'testDatasource',
-      visualization: { activeId: 'testVis', state: {} },
-      datasourceStates: {
-        testDatasource: {
-          isLoading: false,
-          state: '',
-        },
-      },
-
+      ...defaultState,
+      searchSessionId: data.search.session.start(),
       query: data.query.queryString.getQuery(),
       filters: data.query.filterManager.getGlobalFilters(),
-      searchSessionId: data.search.session.start(),
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     }),
@@ -419,7 +433,7 @@ export const mountWithProvider = async (
     attachTo?: HTMLElement;
   }
 ) => {
-  const lensStore = mockLensStore(store || {});
+  const lensStore = makeLensStore(store || {});
 
   let wrappingComponent: React.FC<{
     children: React.ReactNode;
