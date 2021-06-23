@@ -11,6 +11,7 @@ import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { SearchOAuth } from '../../../../../common/types';
 import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { parseQueryParams } from '../../../shared/query_params';
 
 import {
   OAuthPreAuthServerProps,
@@ -25,7 +26,7 @@ interface SearchAuthorizeValues {
 
 interface SearchAuthorizeActions {
   setServerProps(serverProps: OAuthPreAuthServerProps): OAuthPreAuthServerProps;
-  initializeSearchAuth(searchOAuth: SearchOAuth): SearchOAuth;
+  initializeSearchAuth(searchOAuth: SearchOAuth, search: string): [SearchOAuth, string];
   authorizeSearch(): void;
   setRedirectNotPending(): void;
 }
@@ -36,7 +37,7 @@ export const SearchAuthorizeLogic = kea<
   path: ['enterprise_search', 'workplace_search', 'search_authorize_logic'],
   actions: {
     setServerProps: (serverProps: OAuthPreAuthServerProps) => serverProps,
-    initializeSearchAuth: (searchOAuth: SearchOAuth) => searchOAuth,
+    initializeSearchAuth: (searchOAuth: SearchOAuth, search: string) => [searchOAuth, search],
     authorizeSearch: () => null,
     setRedirectNotPending: () => null,
   },
@@ -55,15 +56,17 @@ export const SearchAuthorizeLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    initializeSearchAuth: async (searchOAuth) => {
+    initializeSearchAuth: async ([searchOAuth, search]) => {
       clearFlashMessages();
       const { http } = HttpLogic.values;
+      const { state } = parseQueryParams(search);
 
       const query = {
         client_id: searchOAuth.clientId,
         response_type: 'code',
         redirect_uri: searchOAuth.redirectUrl,
-        scope: 'search',
+        scope: 'default_search',
+        state,
       };
 
       try {
@@ -93,6 +96,7 @@ export const SearchAuthorizeLogic = kea<
             response_type: cachedPreAuth.responseType,
             redirect_uri: cachedPreAuth.redirectUri,
             scope: cachedPreAuth.rawScopes,
+            state: cachedPreAuth.state,
           }),
           headers,
         });

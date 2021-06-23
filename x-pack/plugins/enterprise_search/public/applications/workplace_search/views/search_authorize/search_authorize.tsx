@@ -6,7 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
+import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
@@ -19,6 +21,7 @@ import { AppLogic } from '../../app_logic';
 import { SearchAuthorizeLogic } from './search_authorize_logic';
 
 export const SearchAuthorize: React.FC = () => {
+  const { search } = useLocation() as Location;
   const { initializeSearchAuth } = useActions(SearchAuthorizeLogic);
 
   const { searchOAuth } = useValues(AppLogic);
@@ -26,7 +29,7 @@ export const SearchAuthorize: React.FC = () => {
 
   useEffect(() => {
     if (searchOAuth.clientId) {
-      initializeSearchAuth(searchOAuth);
+      initializeSearchAuth(searchOAuth, search);
     }
   }, [searchOAuth]);
 
