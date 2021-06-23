@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './field_name.scss';
 import React, { Fragment } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -44,43 +43,41 @@ export function FieldName({
         <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
-      <EuiFlexGroup wrap={true} alignItems="center" responsive={false} gutterSize="s">
-        <EuiFlexItem className="eui-textBreakAll" grow={false}>
+      <EuiFlexGroup wrap={true} responsive={false} gutterSize="xs">
+        <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
           <EuiToolTip
             position="top"
             content={tooltip}
             delay="long"
-            anchorClassName="kbnDocViewer__fieldName eui-textBreakAll"
+            anchorClassName="eui-textBreakAll"
           >
             <span>{displayName}</span>
           </EuiToolTip>
         </EuiFlexItem>
 
         {isMultiField && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              delay="long"
-              content={i18n.translate(
-                'discover.fieldChooser.discoverField.multiFieldTooltipContent',
-                {
-                  defaultMessage: 'Multi-fields can have multiple values per field',
-                }
-              )}
+          <EuiToolTip
+            position="top"
+            delay="long"
+            content={i18n.translate(
+              'discover.fieldChooser.discoverField.multiFieldTooltipContent',
+              {
+                defaultMessage: 'Multi-fields can have multiple values per field',
+              }
+            )}
+          >
+            <EuiBadge
+              title=""
+              className="kbnDocViewer__multiFieldBadge"
+              color="default"
+              data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
             >
-              <EuiBadge
-                title=""
-                className="kbnDocViewer__multiFieldBadge"
-                color="default"
-                data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
-              >
-                <FormattedMessage
-                  id="discover.fieldChooser.discoverField.multiField"
-                  defaultMessage="multi-field"
-                />
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
+              <FormattedMessage
+                id="discover.fieldChooser.discoverField.multiField"
+                defaultMessage="multi-field"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         )}
       </EuiFlexGroup>
     </Fragment>

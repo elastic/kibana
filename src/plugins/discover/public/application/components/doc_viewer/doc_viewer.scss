@@ -1,15 +1,33 @@
 .kbnDocViewer {
+  table,
+  tbody {
+    height: 100%;
+  }
+
   tr:first-child th {
     border-bottom-color: transparent;
   }
 }
 
 .kbnDocViewer__tableRow {
+  height: 100%;
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
+}
 
-  &:first-child th {
-    border-top-color: transparent;
+.kbnDocViewer__tableActionsCell {
+  align-items: flex-start;
+  height: 100%;
+
+  .kbnDocViewer__buttons {
+    white-space: nowrap;
+
+    // Show all icons if one is focused,
+    &:focus-within {
+      .kbnDocViewer__actionButton {
+        opacity: 1;
+      }
+    }
   }
 
   &:hover {
@@ -29,14 +47,21 @@
   }
 }
 
-.kbnDocViewer__buttons {
-  white-space: nowrap;
+.kbnDocViewer__tableFieldNameCell {
+  align-items: flex-start;
+  height: 100%;
 
-  // Show all icons if one is focused,
-  &:focus-within {
-    .kbnDocViewer__actionButton {
-      opacity: 1;
-    }
+  .kbnDocViewer__fieldIcon {
+    padding: $euiSizeXS * 1.5;
+  }
+
+  .kbnDocViewer__fieldName {
+    padding-top: $euiSizeXS;
+    line-height: $euiLineHeight;
+  }
+
+  .kbnDocViewer__multiFieldBadge {
+    @include euiFont;
   }
 }
 
@@ -48,7 +73,7 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
-  padding-top: $euiSizeXS * .5;
+  padding-top: $euiSizeXS;
 }
 
 .kbnDocViewer__warning {

@@ -139,11 +139,13 @@ export const DocViewerTable = ({
 
   return (
     <EuiInMemoryTable
+      className="kbnDocViewer__table"
       items={items}
       columns={DOC_VIEW_COLUMNS}
       pagination={pagination}
       onTableChange={onTableChange}
       rowProps={onSetRowProps}
+      responsive={false}
     />
   );
 };
