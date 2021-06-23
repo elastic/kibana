@@ -36,37 +36,16 @@ import { KibanaServices } from './common/lib/kibana/services';
 
 import {
   APP_ID,
-  APP_ICON_SOLUTION,
+  OVERVIEW_PATH,
   APP_OVERVIEW_PATH,
-  NETWORK_PATH,
-  APP_MANAGEMENT_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
-  OVERVIEW_PATH,
-  EXCEPTIONS_PATH,
-  RULES_PATH,
-  ALERTS_PATH,
-  HOSTS_PATH,
-  CASES_PATH,
-  TIMELINES_PATH,
 } from '../common/constants';
 
-import { SecurityPageName } from './app/types';
-import { registerDeepLinks, getDeepLinksAndKeywords } from './app/search';
+import { getDeepLinks } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
-import {
-  OVERVIEW,
-  HOSTS,
-  NETWORK,
-  TIMELINES,
-  CASE,
-  ADMINISTRATION,
-  RULES,
-  ALERTS,
-  EXCEPTIONS,
-} from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -89,10 +68,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  private alertsUpdater$ = new Subject<AppUpdater>();
-  private hostsUpdater$ = new Subject<AppUpdater>();
-  private networkUpdater$ = new Subject<AppUpdater>();
-  private caseUpdater$ = new Subject<AppUpdater>();
+  private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
   private licensingSubscription: Subscription | null = null;
@@ -164,101 +140,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.administration}`,
-      title: ADMINISTRATION,
-      order: 9002,
-      euiIconType: APP_ICON_SOLUTION,
-      category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_MANAGEMENT_PATH,
-      ...getDeepLinksAndKeywords(SecurityPageName.administration),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderAppOld } = await this.lazyApplicationDependencies();
-        return renderAppOld({
-          ...params,
-          services: await startServices,
-          store: await this.store(coreStart, startPlugins),
-          SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
-        });
-      },
-    });
-
-    core.application.register({
       id: APP_ID,
       title: APP_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
-      defaultPath: APP_OVERVIEW_PATH,
-      deepLinks: [
-        {
-          id: SecurityPageName.overview,
-          title: OVERVIEW,
-          path: OVERVIEW_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9000,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.alerts,
-          title: ALERTS,
-          path: ALERTS_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9001,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.rules,
-          title: RULES,
-          path: RULES_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: true,
-          order: 9001,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.exceptions,
-          title: EXCEPTIONS,
-          path: EXCEPTIONS_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: true,
-          order: 9001,
-        },
-        {
-          id: SecurityPageName.hosts,
-          title: HOSTS,
-          path: HOSTS_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9002,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.network,
-          title: NETWORK,
-          path: NETWORK_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9002,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.timelines,
-          title: TIMELINES,
-          path: TIMELINES_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9002,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-        {
-          id: SecurityPageName.case,
-          title: CASE,
-          path: CASES_PATH,
-          navLinkStatus: AppNavLinkStatus.visible,
-          order: 9002,
-          euiIconType: APP_ICON_SOLUTION,
-        },
-      ],
-
+      defaultPath: OVERVIEW_PATH,
+      updater$: this.appUpdater$,
+      deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
@@ -329,10 +218,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          registerDeepLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
-          registerDeepLinks(SecurityPageName.alerts, this.alertsUpdater$, currentLicense.type);
-          registerDeepLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
-          registerDeepLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
+          this.appUpdater$.next(() => ({ deepLinks: getDeepLinks(currentLicense.type) }));
         }
       });
     }
@@ -425,7 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async store(
     coreStart: CoreStart,
     startPlugins: StartPlugins,
-    subPlugins?: StartedSubPlugins // TODO: [1101] make it required when all sub plugins migrated
+    subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const experimentalFeatures = parseExperimentalConfigValue(
@@ -435,20 +321,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const [
         { createStore, createInitialState },
         kibanaIndexPatterns,
-        {
-          alerts: alertsSubPlugin,
-          rules: rulesSubPlugin,
-          exceptions: exceptionsSubPlugin,
-          hosts: hostsSubPlugin,
-          network: networkSubPlugin,
-          timelines: timelinesSubPlugin,
-          management: managementSubPlugin,
-        },
         configIndexPatterns,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
-        this.subPlugins(),
         startPlugins.data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
@@ -477,29 +353,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
-      const alertsStart = subPlugins ? subPlugins.alerts : alertsSubPlugin.start(this.storage);
-      const rulesStart = subPlugins ? subPlugins.rules : rulesSubPlugin.start(this.storage);
-      const exceptionsStart = subPlugins
-        ? subPlugins.exceptions
-        : exceptionsSubPlugin.start(this.storage);
-
-      const hostsStart = subPlugins ? subPlugins.hosts : hostsSubPlugin.start(this.storage);
-      const networkStart = subPlugins ? subPlugins.network : networkSubPlugin.start(this.storage);
-      const timelinesStart = subPlugins ? subPlugins.timelines : timelinesSubPlugin.start();
-      const managementSubPluginStart = subPlugins
-        ? subPlugins.management
-        : managementSubPlugin.start(coreStart, startPlugins);
-
       const timelineInitialState = {
         timeline: {
-          ...timelinesStart.store.initialState.timeline!,
+          ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
-            ...timelinesStart.store.initialState.timeline!.timelineById,
-            ...alertsStart.storageTimelines!.timelineById,
-            ...rulesStart.storageTimelines!.timelineById,
-            ...exceptionsStart.storageTimelines!.timelineById,
-            ...hostsStart.storageTimelines!.timelineById,
-            ...networkStart.storageTimelines!.timelineById,
+            ...subPlugins.timelines.store.initialState.timeline!.timelineById,
+            ...subPlugins.alerts.storageTimelines!.timelineById,
+            ...subPlugins.rules.storageTimelines!.timelineById,
+            ...subPlugins.exceptions.storageTimelines!.timelineById,
+            ...subPlugins.hosts.storageTimelines!.timelineById,
+            ...subPlugins.network.storageTimelines!.timelineById,
           },
         },
       };
@@ -508,16 +371,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const timelineReducer = (reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
-        timelinesStart.store.reducer.timeline
+        subPlugins.timelines.store.reducer.timeline
       ) as unknown) as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
           {
-            ...hostsStart.store.initialState,
-            ...networkStart.store.initialState,
+            ...subPlugins.hosts.store.initialState,
+            ...subPlugins.network.store.initialState,
             ...timelineInitialState,
-            ...managementSubPluginStart.store.initialState,
+            ...subPlugins.management.store.initialState,
           },
           {
             kibanaIndexPatterns,
@@ -527,15 +390,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }
         ),
         {
-          ...hostsStart.store.reducer,
-          ...networkStart.store.reducer,
+          ...subPlugins.hosts.store.reducer,
+          ...subPlugins.network.store.reducer,
           timeline: timelineReducer,
-          ...managementSubPluginStart.store.reducer,
+          ...subPlugins.management.store.reducer,
           ...tGridReducer,
         },
         libs$.pipe(pluck('kibana')),
         this.storage,
-        [...(managementSubPluginStart.store.middleware ?? [])]
+        [...(subPlugins.management.store.middleware ?? [])]
       );
       if (startPlugins.timelines) {
         startPlugins.timelines.setTGridEmbeddedStore(this._store);

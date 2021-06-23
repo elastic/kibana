@@ -54,11 +54,16 @@ export type SiemNavTabKey =
   | SecurityPageName.exceptions
   | SecurityPageName.timelines
   | SecurityPageName.case
-  | SecurityPageName.administration;
+  | SecurityPageName.administration
+  | SecurityPageName.endpoints
+  | SecurityPageName.trustedApps
+  | SecurityPageName.eventFilters;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 
 export type GetUrlForApp = (
   appId: string,
-  options?: { path?: string; absolute?: boolean; deepLinkId?: string }
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
 ) => string;
+
+export type NavigateToUrl = (url: string) => void;

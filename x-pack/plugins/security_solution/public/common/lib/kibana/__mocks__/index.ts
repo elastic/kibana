@@ -10,6 +10,7 @@ import { notificationServiceMock } from '../../../../../../../../src/core/public
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createTGridMocks } from '../../../../../../timelines/public/mock';
 
+// import { createGetAppUrl, createNavigateTo } from '../hooks';
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
@@ -60,3 +61,17 @@ export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
 export const useGetUserCasesPermissions = jest.fn();
+
+// const getAppUrl = createGetAppUrl(mockStartServicesMock.application.getUrlForApp);
+// const navigateTo = createNavigateTo(
+//   mockStartServicesMock.application.navigateToApp,
+//   mockStartServicesMock.application.navigateToUrl
+// );
+// export const useAppUrl = jest.fn().mockReturnValue({ getAppUrl });
+// export const useNavigateTo = jest.fn().mockReturnValue({
+//   navigateTo,
+// });
+// export const useNavigation = jest.fn().mockReturnValue({
+//   getAppUrl,
+//   navigateTo,
+// });

@@ -8,11 +8,12 @@
 import React, { memo, MouseEventHandler } from 'react';
 import { EuiLink, EuiLinkProps, EuiButton, EuiButtonProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../../hooks/endpoint/use_navigate_to_app_event_handler';
+import { APP_ID } from '../../../../common/constants';
 
 export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
-  appId: string;
-
+  appId?: string;
+  /** optional app deep link id */
   deepLinkId?: string;
   /** Any app specific path (route) */
   appPath?: string;
@@ -29,16 +30,16 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  */
 export const LinkToApp = memo<LinkToAppProps>(
   ({
-    appId,
+    appId = APP_ID,
+    deepLinkId,
     appPath: path,
     appState: state,
-    deepLinkId,
     onClick,
     asButton,
     children,
     ...otherProps
   }) => {
-    const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick, deepLinkId });
+    const handleOnClick = useNavigateToAppEventHandler(appId, { deepLinkId, path, state, onClick });
 
     return (
       <>

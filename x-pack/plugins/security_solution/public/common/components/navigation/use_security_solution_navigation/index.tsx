@@ -26,7 +26,7 @@ export const useSecuritySolutionNavigation = () => {
   const { urlState } = useDeepEqualSelector(urlMapState);
   const {
     chrome,
-    application: { getUrlForApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
@@ -51,7 +51,8 @@ export const useSecuritySolutionNavigation = () => {
           timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp
+        getUrlForApp,
+        navigateToUrl
       );
     }
   }, [
@@ -65,6 +66,7 @@ export const useSecuritySolutionNavigation = () => {
     flowTarget,
     tabName,
     getUrlForApp,
+    navigateToUrl,
   ]);
 
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
@@ -84,6 +86,7 @@ export const useSecuritySolutionNavigation = () => {
     pageName,
     sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,
+    tabName,
     timeline: urlState.timeline,
     timerange: urlState.timerange,
   });

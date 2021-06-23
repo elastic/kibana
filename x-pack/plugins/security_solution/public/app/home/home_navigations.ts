@@ -9,15 +9,19 @@ import * as i18n from '../translations';
 import { SecurityPageName, SecurityPageGroupName } from '../types';
 import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
 import {
+  APP_ID,
   APP_OVERVIEW_PATH,
+  APP_RULES_PATH,
+  APP_ALERTS_PATH,
+  APP_EXCEPTIONS_PATH,
   APP_HOSTS_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
-  APP_RULES_PATH,
-  APP_ALERTS_PATH,
-  APP_EXCEPTIONS_PATH,
+  APP_ENDPOINTS_PATH,
+  APP_TRUSTED_APPS_PATH,
+  APP_EVENT_FILTERS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -84,24 +88,68 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: SecurityPageName.administration,
   },
+  [SecurityPageName.endpoints]: {
+    id: SecurityPageName.endpoints,
+    name: i18n.ENDPOINTS,
+    href: APP_ENDPOINTS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
+  [SecurityPageName.trustedApps]: {
+    id: SecurityPageName.trustedApps,
+    name: i18n.TRUSTED_APPLICATIONS,
+    href: APP_TRUSTED_APPS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
+  [SecurityPageName.eventFilters]: {
+    id: SecurityPageName.eventFilters,
+    name: i18n.EVENT_FILTERS,
+    href: APP_EVENT_FILTERS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.administration,
+  },
 };
 
-// TODO: [1101] i18n names
 export const navTabGroups: NavTabGroups = {
   [SecurityPageGroupName.detect]: {
     id: SecurityPageGroupName.detect,
-    name: 'Detect',
+    name: i18n.DETECT,
   },
   [SecurityPageGroupName.explore]: {
     id: SecurityPageGroupName.explore,
-    name: 'Explore',
+    name: i18n.EXPLORE,
   },
   [SecurityPageGroupName.investigate]: {
     id: SecurityPageGroupName.investigate,
-    name: 'Investigate',
+    name: i18n.INVESTIGATE,
   },
   [SecurityPageGroupName.manage]: {
     id: SecurityPageGroupName.manage,
-    name: 'Manage',
+    name: i18n.MANAGE,
   },
 };
+
+export const primaryNavigationItems = [
+  {
+    id: APP_ID,
+    name: '',
+    items: [navTabs.overview],
+  },
+  {
+    ...navTabGroups.detect,
+    items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+  },
+  {
+    ...navTabGroups.explore,
+    items: [navTabs.hosts, navTabs.network],
+  },
+  {
+    ...navTabGroups.investigate,
+    items: [navTabs.timelines, navTabs.case],
+  },
+  {
+    ...navTabGroups.manage,
+    items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+  },
+];

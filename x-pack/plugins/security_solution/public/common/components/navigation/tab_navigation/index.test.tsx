@@ -17,8 +17,8 @@ import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
 jest.mock('../../link_to');
-jest.mock('../../../lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana/kibana_react', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana/kibana_react');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -26,6 +26,7 @@ jest.mock('../../../lib/kibana', () => {
         application: {
           getUrlForApp: (appId: string, options?: { path?: string }) =>
             `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
         },
       },
     }),
@@ -43,9 +44,6 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn(() => ({
       search: SEARCH_QUERY,
     })),
-    useHistory: () => ({
-      push: jest.fn(),
-    }),
   };
 });
 

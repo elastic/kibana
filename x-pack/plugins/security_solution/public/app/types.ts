@@ -23,15 +23,6 @@ import { StartedSubPlugins, StartServices } from '../types';
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-// TODO: [1101] remove RenderAppPropsOld when all sections migrated
-export interface RenderAppPropsOld extends AppMountParameters {
-  services: StartServices;
-  store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
-}
-/**
- * The React properties used to render `SecurityApp` as well as the `element` to render it into.
- */
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
@@ -53,10 +44,8 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
 
 export type SecuritySubPluginRoutes = RouteProps[];
 
-// TODO: [1101] remove SubPluginRoutes and make routes required
 export interface SecuritySubPlugin {
-  SubPluginRoutes: React.FC;
-  routes?: SecuritySubPluginRoutes;
+  routes: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
@@ -68,14 +57,21 @@ export type SecuritySubPluginKeyStore =
   | 'alertList'
   | 'management';
 
-export type SecuritySubPluginNames = keyof typeof SecurityPageName;
+export type SecurityDeepLinkName =
+  | SecurityPageName.overview
+  | SecurityPageName.detections
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.administration;
 
 interface SecurityDeepLink {
   base: AppDeepLink[];
   premium?: AppDeepLink[];
 }
 
-export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };
+export type SecurityDeepLinks = { [key in SecurityDeepLinkName]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.
