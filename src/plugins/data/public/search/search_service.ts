@@ -24,6 +24,7 @@ import {
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
+  extendedBoundsFunction,
   kibanaTimerangeFunction,
   luceneFunction,
   kqlFunction,
@@ -115,6 +116,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);

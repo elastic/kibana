@@ -13,12 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
 import { IFieldType } from '../../../index_patterns';
 
+import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggDateHistogramFnName } from './date_histogram_fn';
-import { ExtendedBounds } from './lib/extended_bounds';
 import { TimeBuckets } from './lib/time_buckets';
 
 import { writeParams } from '../agg_params';
@@ -26,7 +26,6 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
 import { inferTimeZone } from '../utils';
-import { timerangeToAst } from '../../expressions';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
@@ -305,6 +304,7 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
         },
+        toExpressionAst: extendedBoundsToAst,
       },
     ],
   });

@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { extendedBoundsToAst } from '../../../../../../../../src/plugins/data/common';
 import {
   buildExpressionFunction,
   Range,
@@ -171,7 +172,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       interval: 'auto',
       has_extended_bounds: false,
       min_doc_count: false,
-      extended_bounds: JSON.stringify({ min: '', max: '' }),
+      extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },
   paramEditor: ({

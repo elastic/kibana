@@ -186,7 +186,16 @@ describe('ranges', () => {
               true,
             ],
             "extended_bounds": Array [
-              "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "extendedBounds",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
             ],
             "field": Array [
               "MyField",
