@@ -99,6 +99,7 @@ ts_project(
   deps = DEPS,
   declaration = True,
   declaration_map = True,
+  declaration_dir = "target/types",
   emit_declaration_only = True,
   incremental = True,
   out_dir = "target",
