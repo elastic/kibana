@@ -52,7 +52,7 @@ image::images/dashboard-controls.png[]
 [[create-drilldowns]]
 == Create drilldowns
 
-When you interact with the values and in a visualization panel, {kib} creates and applies a filter for the value to the entire dashboard. To customize the behavior of what happens when you click a value, create drilldowns. Drilldows are shortcuts that allow you to quickly navigate between your most used dashboards, or navigate to external websites from your dashboards. You can create multiple drilldowns for a single panel. 
+Each panel type in {kib} has a built-in interaction which applies a filter to the dashboard, for example by dragging a time range or clicking a pie slice. Drilldowns let you customize this behavior while keeping the context of the interaction. For example, if you add a drilldown to a Lens panel you navigate from a summary dashboard to a dashboard with a filter for the specific host name you filtered. You could also navigate to an external website with the specific host name as a parameter. You can create multiple drilldowns for a single panel.
 Drilldowns apply only to the panel that you created the drilldown on, and are not shared across panels.
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
