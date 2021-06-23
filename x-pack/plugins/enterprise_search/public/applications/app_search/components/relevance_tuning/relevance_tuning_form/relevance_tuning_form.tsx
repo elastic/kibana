@@ -42,7 +42,7 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiTitle size="m">
           <h2>
             {i18n.translate(

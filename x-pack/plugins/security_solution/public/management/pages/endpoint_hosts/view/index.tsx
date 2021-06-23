@@ -272,7 +272,7 @@ export const EndpointList = () => {
       },
       {
         field: 'host_status',
-        width: '9%',
+        width: '14%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent Status',
         }),
@@ -356,7 +356,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        width: '10%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
