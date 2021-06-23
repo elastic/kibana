@@ -122,6 +122,7 @@ describe('checkNonPersistedSessions', () => {
               status: SearchSessionStatus.COMPLETE,
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(1, 'm')),
+              expires: moment().add(moment.duration(3, 'm')),
               idMapping: {
                 'search-hash': {
                   id: 'search-id',
@@ -197,6 +198,7 @@ describe('checkNonPersistedSessions', () => {
               status: SearchSessionStatus.IN_PROGRESS,
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(2, 'm')),
+              expires: moment().add(moment.duration(3, 'm')),
               idMapping: {
                 'map-key': {
                   strategy: ENHANCED_ES_SEARCH_STRATEGY,
@@ -331,6 +333,7 @@ describe('checkNonPersistedSessions', () => {
           status: SearchSessionStatus.IN_PROGRESS,
           created: moment().subtract(moment.duration(3, 'm')),
           touched: moment().subtract(moment.duration(10, 's')),
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -412,6 +415,7 @@ describe('checkNonPersistedSessions', () => {
         namespaces: ['awesome'],
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
+          expires: moment().add(moment.duration(3, 'm')),
           touched: '123',
           idMapping: {
             'search-hash': {
@@ -455,6 +459,7 @@ describe('checkNonPersistedSessions', () => {
       const so = {
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
+          expires: moment().add(moment.duration(3, 'm')),
           touched: '123',
           idMapping: {
             'search-hash': {
