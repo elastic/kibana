@@ -13,14 +13,16 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  IS_DRAGGING_CLASS_NAME,
+} from '@kbn/securitysolution-t-grid';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
@@ -30,6 +32,7 @@ import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -158,6 +161,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
+    const { timelines } = useKibana().services;
 
     const handleClosePopOverTrigger = useCallback(() => {
       setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -243,7 +247,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       setIsPopoverOpen(true);
     }, []);
 
-    const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+    const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
       closePopover: handleClosePopOverTrigger,
       draggableId,
       fieldName: dataProvider.queryMatch.field,

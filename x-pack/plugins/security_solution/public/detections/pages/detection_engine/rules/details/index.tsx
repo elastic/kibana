@@ -27,11 +27,12 @@ import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
 import {
   ExceptionListTypeEnum,
   ExceptionListIdentifiers,
 } from '@kbn/securitysolution-io-ts-list-types';
+
+import { isTab } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -110,7 +111,6 @@ import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import * as statusI18n from '../../../../components/rules/rule_status/translations';
 import * as i18n from './translations';
-import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
