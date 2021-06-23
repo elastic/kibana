@@ -40,7 +40,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', () => {
+describe.skip('Detections > Callouts', () => {
   const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
   before(() => {

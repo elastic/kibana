@@ -16,10 +16,18 @@ import { ExceptionListsTable } from './exceptions_table';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
+import { useHistory } from 'react-router-dom';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
 jest.mock('@kbn/i18n/react', () => {
   const originalModule = jest.requireActual('@kbn/i18n/react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
@@ -29,9 +37,27 @@ jest.mock('@kbn/i18n/react', () => {
     FormattedRelative,
   };
 });
+
+jest.mock('../../../../../containers/detection_engine/lists/use_lists_config', () => ({
+  useListsConfig: jest.fn().mockReturnValue({ loading: false }),
+}));
+
+jest.mock('../../../../../components/user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([
+    {
+      loading: false,
+      canUserCRUD: false,
+    },
+  ]),
+}));
+
 describe('ExceptionListsTable', () => {
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };
+
+  beforeAll(() => {
+    (useHistory as jest.Mock).mockReturnValue(mockHistory);
+  });
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -41,6 +67,9 @@ describe('ExceptionListsTable', () => {
           toasts: {
             addError: jest.fn(),
           },
+        },
+        application: {
+          getUrlForApp: jest.fn(),
         },
       },
     });
@@ -77,15 +106,9 @@ describe('ExceptionListsTable', () => {
   it('renders delete option disabled if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
-        <ExceptionListsTable
-          history={mockHistory}
-          hasPermissions
-          loading={false}
-          formatUrl={jest.fn()}
-        />
+        <ExceptionListsTable />
       </TestProviders>
     );
-
     expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(0).text()).toEqual(
       'endpoint_list'
     );

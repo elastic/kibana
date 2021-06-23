@@ -6,7 +6,7 @@
  */
 
 export const DETECTIONS_PAGE =
-  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Detections"]';
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Alerts"]';
 
 export const CASES_PAGE = '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Cases"]';
 

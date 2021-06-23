@@ -29,9 +29,11 @@ import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
+import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
+import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
@@ -79,7 +81,9 @@ export interface AppObservableLibs {
 export type InspectResponse = Inspect & { response: string[] };
 
 export interface SubPlugins {
-  detections: Detections;
+  alerts: Detections;
+  rules: Rules;
+  exceptions: Exceptions;
   cases: Cases;
   hosts: Hosts;
   network: Network;
@@ -90,7 +94,9 @@ export interface SubPlugins {
 
 // TODO: [1101] find a better way to get those types
 export interface StartedSubPlugins {
-  detections: ReturnType<Detections['start']>;
+  alerts: ReturnType<Detections['start']>;
+  rules: ReturnType<Rules['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
   cases: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;

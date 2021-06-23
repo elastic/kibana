@@ -60,14 +60,18 @@ export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
+export const DETECTIONS = 'detections';
+
 export enum SecurityPageName {
-  detections = 'detections',
+  alerts = 'alerts',
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
   timelines = 'timelines',
   case = 'case',
   administration = 'administration',
+  rules = 'rules',
+  exceptions = 'exceptions',
 }
 
 export enum SecurityPageGroupName {
@@ -78,6 +82,9 @@ export enum SecurityPageGroupName {
 }
 
 export const OVERVIEW_PATH = '/overview';
+export const ALERTS_PATH = '/alerts';
+export const RULES_PATH = '/rules';
+export const EXCEPTIONS_PATH = '/exceptions';
 export const HOSTS_PATH = '/hosts';
 export const NETWORK_PATH = '/network';
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
@@ -87,9 +94,12 @@ export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+export const APP_RULES_PATH = `${APP_PATH}/rules`;
+export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
+export const APP_EXCEPTIONS_PATH = `${APP_PATH}/exceptions`;
 
 export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
-export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
+export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${DETECTIONS}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
