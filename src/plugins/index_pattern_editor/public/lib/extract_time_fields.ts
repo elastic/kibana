@@ -12,16 +12,16 @@ import { TimestampOption } from '../components/index_pattern_editor_flyout_conte
 
 export function extractTimeFields(fields: IFieldType[]): TimestampOption[] {
   const dateFields = fields.filter((field) => field.type === 'date');
+
+  // todo - display somewhere
+  /*
   const label = i18n.translate('indexPatternEditor.createIndexPattern.stepTime.noTimeFieldsLabel', {
     defaultMessage: "The indices which match this index pattern don't contain any time fields.",
   });
+  */
 
   if (dateFields.length === 0) {
-    return [
-      {
-        display: label,
-      },
-    ];
+    return [];
   }
 
   const noTimeFieldLabel = i18n.translate(

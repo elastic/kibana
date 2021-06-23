@@ -17,3 +17,13 @@ export {
 } from './index_pattern_flyout_content_container';
 
 export { IndexPatternEditor } from './index_pattern_editor';
+
+export { schema } from './form_schema';
+export { TimestampField, TypeField, TitleField } from './form_fields';
+export { EmptyState } from './empty_state';
+export { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+export { IndexPatternCreationConfig } from '../service';
+export { IndicesList } from './indices_list';
+export { StatusMessage } from './status_message';
+export { LoadingIndices } from './loading_indices';
+export { geti18nTexts } from './i18n_texts';

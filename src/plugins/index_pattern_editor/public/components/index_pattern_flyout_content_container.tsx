@@ -10,9 +10,6 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern, IndexPatternSpec, useKibana } from '../shared_imports';
-// import { PluginStart, InternalFieldType } from '../types';
-// import { deserializeField, getRuntimeFieldValidator } from '../lib';
-// import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
 import { IndexPatternEditorContext } from '../types';
 
@@ -74,7 +71,6 @@ export const IndexPatternFlyoutContentContainer = ({
     <IndexPatternEditorFlyoutContent
       onSave={onSaveClick}
       onCancel={onCancel}
-      isSaving={false}
       existingIndexPatterns={existingIndexPatterns}
       defaultTypeIsRollup={defaultTypeIsRollup}
     />

@@ -7,10 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
   EuiFlexGroup,
@@ -18,17 +15,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-
-import {
-  ensureMinimumTime,
-  getIndices,
-  extractTimeFields,
-  getMatchedIndices,
-  MatchedIndicesSet,
-} from '../lib';
-import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
-import { FlyoutPanels } from './flyout_panels';
 
 import {
   IndexPatternSpec,
@@ -42,20 +30,30 @@ import {
 } from '../shared_imports';
 
 import {
-  MatchedItem,
-  ResolveIndexResponseItemAlias,
-  // IndexPatternTableItem,
-  IndexPatternEditorContext,
-} from '../types';
+  ensureMinimumTime,
+  getIndices,
+  extractTimeFields,
+  getMatchedIndices,
+  MatchedIndicesSet,
+} from '../lib';
+import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
+import { FlyoutPanels } from './flyout_panels';
 
-import { schema } from './form_schema';
-import { TimestampField, TypeField, TitleField } from './form_fields';
-import { EmptyState } from './empty_state';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+import { MatchedItem, ResolveIndexResponseItemAlias, IndexPatternEditorContext } from '../types';
+
 import { IndexPatternCreationConfig } from '../service';
-import { IndicesList } from './indices_list';
-import { StatusMessage } from './status_message';
-import { LoadingIndices } from './loading_indices';
+import {
+  LoadingIndices,
+  StatusMessage,
+  IndicesList,
+  EmptyIndexPatternPrompt,
+  EmptyState,
+  TimestampField,
+  TypeField,
+  TitleField,
+  schema,
+  geti18nTexts,
+} from '.';
 
 export interface Props {
   /**
@@ -66,16 +64,13 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-
-  // uiSettings: CoreStart['uiSettings'];
-  isSaving: boolean;
   existingIndexPatterns: string[];
   defaultTypeIsRollup?: boolean;
 }
 
 export interface IndexPatternConfig {
   title: string;
-  timestampField?: string; // TimestampOption;
+  timestampField?: string;
   allowHidden: boolean;
   id?: string;
   type: string;
@@ -89,26 +84,15 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
   timestampField?: TimestampOption;
 }
 
-const geti18nTexts = () => {
-  return {
-    closeButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
-      defaultMessage: 'Close',
-    }),
-    saveButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-      defaultMessage: 'Create index pattern',
-    }),
-  };
-};
-
 const IndexPatternEditorFlyoutContentComponent = ({
   onSave,
   onCancel,
-  isSaving,
   defaultTypeIsRollup,
 }: Props) => {
   const {
     services: { http, indexPatternService, uiSettings, indexPatternCreateService },
   } = useKibana<IndexPatternEditorContext>();
+
   const i18nTexts = geti18nTexts();
 
   // return type, interal type
@@ -131,37 +115,32 @@ const IndexPatternEditorFlyoutContentComponent = ({
   });
   const [lastTitle, setLastTitle] = useState('');
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
-  const [sources, setSources] = useState<MatchedItem[]>([]);
+  const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
+  const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
+  const [allSources, setAllSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [goToForm, setGoToForm] = useState<boolean>(false);
-  const [isInitiallyLoadingIndices, setIsInitiallyLoadingIndices] = useState<boolean>(true);
+  const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [matchedIndices, setMatchedIndices] = useState<MatchedIndicesSet>({
     allIndices: [],
     exactMatchedIndices: [],
     partialMatchedIndices: [],
     visibleIndices: [],
   });
-
-  // const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [
     indexPatternCreationType,
     setIndexPatternCreationType,
   ] = useState<IndexPatternCreationConfig>(indexPatternCreateService.creation.getType('default'));
 
-  const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
-
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
+  // load all data sources
   const loadSources = useCallback(() => {
     getIndices(http, () => [], '*', allowHidden).then((dataSources) => {
-      // todo why was this being done?
-      // setSources(dataSources.filter(removeAliases))
-      setSources(dataSources);
-      // todo - why two?
+      setAllSources(dataSources);
       setIsLoadingSources(false);
-      setIsInitiallyLoadingIndices(false);
     });
     getIndices(http, () => [], '*:*', false).then((dataSources) =>
       setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
@@ -197,15 +176,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   // fetches indices and timestamp options
   useEffect(() => {
     const fetchIndices = async (query: string = '') => {
-      /*
-      if (!query) {
-        setMatchedIndices(getMatchedIndices(sources, [], [], allowHidden));
-        return;
-      }
-      */
-      // const { indexPatternCreationType } = this.props;
-
-      // this.setState({ isLoadingIndices: true, indexPatternExists: false });
+      setIsLoadingMatchedIndices(true);
       const indexRequests = [];
 
       if (query?.endsWith('*')) {
@@ -235,18 +206,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
         indexRequests.push(partialMatchQuery);
       }
 
-      if (query !== lastTitle) {
-        return;
-      }
       const [exactMatched, partialMatched] = (await ensureMinimumTime(
         indexRequests
       )) as MatchedItem[][];
 
-      // If the search changed, discard this state
-
-      // if (query !== this.lastQuery) {
-      //  return;
-      // }
+      if (query !== lastTitle) {
+        return;
+      }
 
       const isValidResult =
         !!title?.length && !existingIndexPatterns.includes(title) && exactMatched.length > 0;
@@ -257,15 +223,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
       });
 
       const matchedIndicesResult = getMatchedIndices(
-        sources,
+        allSources,
         partialMatched,
         exactMatched,
         allowHidden
       );
 
       setMatchedIndices(matchedIndicesResult);
+      setIsLoadingMatchedIndices(false);
 
       if (isValidResult) {
+        setIsLoadingTimestampFields(true);
         const fields = await ensureMinimumTime(
           indexPatternService.getFieldsForWildcard({
             pattern: query,
@@ -273,16 +241,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
           })
         );
         const timeFields = extractTimeFields(fields);
+        setIsLoadingTimestampFields(false);
         setTimestampFieldOptions(timeFields);
       } else {
         setTimestampFieldOptions([]);
       }
     };
 
-    // Whenever the field "type" changes we clear any possible painless syntax
-    // error as it is possibly stale.
     setLastTitle(title);
-
     fetchIndices(title);
   }, [
     title,
@@ -292,7 +258,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     allowHidden,
     lastTitle,
     indexPatternCreationType,
-    sources,
+    allSources,
     form,
   ]);
 
@@ -311,10 +277,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // todo
   if (isLoadingSources || isLoadingIndexPatterns) {
-    return <>loading</>;
+    return <EuiLoadingSpinner size="xl" />;
   }
 
-  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
+  const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
   if (!existingIndexPatterns.length && !goToForm) {
     if (!hasDataIndices && !remoteClustersExist) {
@@ -406,6 +372,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
     </>
   );
 
+  const noFieldsMsg =
+    title?.length &&
+    timestampFieldOptions.length === 0 &&
+    !existingIndexPatterns.includes(title || '') &&
+    !isLoadingMatchedIndices &&
+    !isLoadingTimestampFields
+      ? i18nTexts.noTimestampOptionText
+      : '';
+
   return (
     <>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
@@ -428,11 +403,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
             </EuiFlexGroup>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <TimestampField options={timestampFieldOptions} />
+                <TimestampField
+                  options={timestampFieldOptions}
+                  isLoadingOptions={isLoadingTimestampFields}
+                  helpText={noFieldsMsg}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <div>{matchedIndices.exactMatchedIndices.map((item) => item.name).join(', ')}</div>
             <AdvancedParametersSection>
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -442,12 +420,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                     data-test-subj="allowHiddenField"
                     componentProps={{
                       euiFieldProps: {
-                        'aria-label': i18n.translate(
-                          'indexPatternEditor.form.allowHiddenAriaLabel',
-                          {
-                            defaultMessage: 'Allow hidden and system indices',
-                          }
-                        ),
+                        'aria-label': i18nTexts.allowHiddenAriaLabel,
                       },
                     }}
                   />
@@ -461,12 +434,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                     data-test-subj="savedObjectIdField"
                     componentProps={{
                       euiFieldProps: {
-                        'aria-label': i18n.translate(
-                          'indexPatternEditor.form.customIndexPatternIdLabel',
-                          {
-                            defaultMessage: 'Custom index pattern ID',
-                          }
-                        ),
+                        'aria-label': i18nTexts.customIndexPatternIdLabel,
                       },
                     }}
                   />
