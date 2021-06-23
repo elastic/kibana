@@ -160,7 +160,7 @@ class KeyedTimeslider extends Component<Props, State> {
           return;
         }
         this._playNextFrame();
-      }, 2000);
+      }, 1750);
     });
   }
 
