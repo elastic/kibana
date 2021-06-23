@@ -25,6 +25,7 @@ import {
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
   ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
+  EXTERNAL_ATTRIBUTE_TOOLTIP,
 } from './constants';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
@@ -69,7 +70,19 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'attribute',
-    name: EXTERNAL_ATTRIBUTE_LABEL,
+    name: (
+      <span>
+        {EXTERNAL_ATTRIBUTE_LABEL}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          content={EXTERNAL_ATTRIBUTE_TOOLTIP}
+          iconProps={{
+            className: 'eui-alignTop',
+          }}
+        />
+      </span>
+    ),
     render: (_, { rules }: SharedRoleMapping) => getFirstAttributeName(rules),
   };
 

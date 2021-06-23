@@ -406,3 +406,11 @@ export const FILTER_USERS_LABEL = i18n.translate(
 export const NO_USERS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersLabel', {
   defaultMessage: 'No matching users found',
 });
+
+export const EXTERNAL_ATTRIBUTE_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.externalAttributeTooltip',
+  {
+    defaultMessage:
+      'External attributes are defined by the identity provider, and varies from service to service.',
+  }
+);
