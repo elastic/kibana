@@ -28,16 +28,29 @@ import { getAppOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
-import { GetUrlForApp, SearchNavTab } from '../types';
+import { GetUrlForApp, NavigateToUrl, SearchNavTab } from '../types';
 
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
   chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp
+  getUrlForApp: GetUrlForApp,
+  navigateToUrl: NavigateToUrl
 ) => {
   const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
   if (breadcrumbs) {
-    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.setBreadcrumbs(
+      breadcrumbs.map((breadcrumb) => ({
+        ...breadcrumb,
+        ...(breadcrumb.href && !breadcrumb.onClick
+          ? {
+              onClick: (ev) => {
+                ev.preventDefault();
+                navigateToUrl(breadcrumb.href!);
+              },
+            }
+          : {}),
+      }))
+    );
   }
 };
 
@@ -65,7 +78,7 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+  const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppOverviewUrl(overviewPath),

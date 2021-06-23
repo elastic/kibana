@@ -129,7 +129,7 @@ describe('Policy Details', () => {
 
       const backToListLink = policyView.find('LinkIcon[dataTestSubj="policyDetailsBackLink"]');
       expect(backToListLink.prop('iconType')).toBe('arrowLeft');
-      expect(backToListLink.prop('href')).toBe(endpointListPath);
+      expect(backToListLink.prop('href')).toBe(`/app/security${endpointListPath}`);
       expect(backToListLink.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = policyView.find('h1[data-test-subj="header-page-title"]');
@@ -171,7 +171,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution:administration',
+        'securitySolution',
         { path: endpointListPath },
       ]);
     });

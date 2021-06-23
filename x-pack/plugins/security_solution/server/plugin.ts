@@ -128,13 +128,6 @@ export interface PluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
-
-// TODO: [1101] remove securitySubPlugins and use APP_ID directly when all sections migrated
-const securitySubPlugins = [
-  APP_ID,
-  `${APP_ID}:${SecurityPageName.administration}`,
-];
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -300,7 +293,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
-      app: [...securitySubPlugins, 'kibana'],
+      app: [APP_ID, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -351,7 +344,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
@@ -372,7 +365,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [APP_ID, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {

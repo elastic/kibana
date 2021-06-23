@@ -32,7 +32,8 @@ jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 const mockGetUrlForApp = jest.fn();
-jest.mock('../../lib/kibana', () => {
+const mockNavigateToUrl = jest.fn();
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
@@ -40,6 +41,7 @@ jest.mock('../../lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
       },
     }),
@@ -104,71 +106,7 @@ describe('SIEM Navigation', () => {
       1,
       {
         detailName: undefined,
-        navTabs: {
-          alerts: {
-            disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          exceptions: {
-            disabled: false,
-            href: '/app/security/exceptions',
-            id: 'exceptions',
-            name: 'Exceptions',
-            urlKey: 'exceptions',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          rules: {
-            disabled: false,
-            href: '/app/security/rules',
-            id: 'rules',
-            name: 'Rules',
-            urlKey: 'rules',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'hosts',
         pathName: '/',
         search: '',
@@ -209,7 +147,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -225,71 +164,7 @@ describe('SIEM Navigation', () => {
         detailName: undefined,
         filters: [],
         flowTarget: undefined,
-        navTabs: {
-          alerts: {
-            disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          exceptions: {
-            disabled: false,
-            href: '/app/security/exceptions',
-            id: 'exceptions',
-            name: 'Exceptions',
-            urlKey: 'exceptions',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          rules: {
-            disabled: false,
-            href: '/app/security/rules',
-            id: 'rules',
-            name: 'Rules',
-            urlKey: 'rules',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'network',
         pathName: '/',
         query: { language: 'kuery', query: '' },
@@ -323,7 +198,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
 });

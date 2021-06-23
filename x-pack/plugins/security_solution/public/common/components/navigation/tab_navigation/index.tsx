@@ -8,11 +8,10 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-import { APP_ID } from '../../../../../common/constants';
-import { useKibana } from '../../../lib/kibana';
 
+import { useNavigation } from '../../../lib/kibana/hooks';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
 
@@ -23,20 +22,19 @@ const TabNavigationItemComponent = ({
   name,
   isSelected,
 }: TabNavigationItemProps) => {
-  const history = useHistory();
+  const { getAppUrl, navigateTo } = useNavigation();
+
   const handleClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(hrefWithSearch);
+      navigateTo({ path: hrefWithSearch });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     },
-    [history, hrefWithSearch, id]
+    [navigateTo, hrefWithSearch, id]
   );
-  const { getUrlForApp } = useKibana().services.application;
 
-  const appHref = getUrlForApp(APP_ID, {
+  const appHref = getAppUrl({
     path: hrefWithSearch,
-    deepLinkId: id,
   });
 
   return (

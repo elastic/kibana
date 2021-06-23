@@ -22,7 +22,6 @@ export class Hosts {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
-      SubPluginRoutes: () => null, // TODO: [1101] remove when typings cleaned
       routes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),

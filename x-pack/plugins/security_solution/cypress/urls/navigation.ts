@@ -22,7 +22,9 @@ export const HOSTS_PAGE_TAB_URLS = {
   uncommonProcesses: '/app/security/hosts/uncommonProcesses',
 };
 export const KIBANA_HOME = '/app/home#/';
-export const ADMINISTRATION_URL = '/app/security/administration';
+export const ENDPOINTS_URL = '/app/security/administration/endpoints';
+export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
+export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const NETWORK_URL = '/app/security/network';
 export const OVERVIEW_URL = '/app/security/overview';
 export const RULE_CREATION = 'app/security/rules/create';

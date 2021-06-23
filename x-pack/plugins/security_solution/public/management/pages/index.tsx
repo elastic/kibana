@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -20,7 +20,6 @@ import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
-import { getEndpointListPath } from '../common/routing';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
@@ -56,7 +55,6 @@ const NoPermissions = memo(() => {
 NoPermissions.displayName = 'NoPermissions';
 
 export const ManagementContainer = memo(() => {
-  const history = useHistory();
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
   if (!isIngestEnabled) {
@@ -70,14 +68,9 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
       <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
 
-      <Route
-        path={MANAGEMENT_ROUTING_ROOT_PATH}
-        exact
-        render={() => {
-          history.replace(getEndpointListPath({ name: 'endpointList' }));
-          return null;
-        }}
-      />
+      <Route path={MANAGEMENT_ROUTING_ROOT_PATH} exact>
+        <Redirect to={MANAGEMENT_ROUTING_ENDPOINTS_PATH} />
+      </Route>
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );
