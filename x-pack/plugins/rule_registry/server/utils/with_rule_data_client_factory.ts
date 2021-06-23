@@ -5,24 +5,46 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, AlertTypeParams } from '../../../alerting/common';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../alerting/common';
+import { AlertType } from '../../../alerting/server';
 import { RuleDataClient } from '../rule_data_client';
-import { AlertTypeWithExecutor } from '../types';
+import { AlertTypeWithExecutor, ExecutorTypeWithExtraServices } from '../types';
 
 export const withRuleDataClientFactory = (ruleDataClient: RuleDataClient) => <
-  TParams extends AlertTypeParams,
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends Record<string, any> = {}
+  TParams extends AlertTypeParams = never,
+  TState extends AlertTypeState = never,
+  TInstanceState extends AlertInstanceState = never,
+  TInstanceContext extends AlertInstanceContext = never,
+  TActionGroupIds extends string = never,
+  TRecoveryActionGroupId extends string = never
 >(
   type: AlertTypeWithExecutor<
     TParams,
-    TAlertInstanceContext,
-    TServices & { ruleDataClient: RuleDataClient }
+    TInstanceState,
+    TInstanceContext,
+    TActionGroupIds,
+    TRecoveryActionGroupId,
+    ExecutorTypeWithExtraServices<
+      TParams,
+      TState,
+      TInstanceState,
+      TInstanceContext,
+      TActionGroupIds,
+      { ruleDataClient: RuleDataClient }
+    >
   >
-): AlertTypeWithExecutor<
+): AlertType<
   TParams,
-  TAlertInstanceContext,
-  TServices & { ruleDataClient: RuleDataClient }
+  TState,
+  TInstanceState,
+  TInstanceContext,
+  TActionGroupIds,
+  TRecoveryActionGroupId
 > => {
   return {
     ...type,
