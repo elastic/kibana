@@ -10,6 +10,8 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
 import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
@@ -20,9 +22,11 @@ export interface Props {
   setTimeslice: (timeslice: Timeslice) => void;
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
+  waitForTimesliceToLoad$: Observable<void>;
 }
 
 interface State {
+  isPaused: boolean;
   max: number;
   min: number;
   range: number;
@@ -44,6 +48,8 @@ export function Timeslider(props: Props) {
 
 class KeyedTimeslider extends Component<Props, State> {
   private _isMounted: boolean = false;
+  private _timeoutId: number | undefined;
+  private _unsubscribe: () => void | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -59,6 +65,7 @@ class KeyedTimeslider extends Component<Props, State> {
     const timeslice: [number, number] = [min, max];
 
     this.state = {
+      isPaused: true,
       max,
       min,
       range: interval,
@@ -118,6 +125,44 @@ class KeyedTimeslider extends Component<Props, State> {
     }
   }, 300);
 
+  _onPlay = () => {
+    this.setState({ isPaused: false });
+    this._playNextFrame();
+  };
+
+  _onPause = () => {
+    this.setState({ isPaused: true });
+    if (this._unsubscribe) {
+      this._unsubscribe();
+      this._unsubscribe = undefined;
+    }
+    if (this._timeoutId) {
+      clearTimeout(this._timeoutId);
+      this._timeoutId = undefined;
+    }
+  };
+
+  _playNextFrame() {
+    // advance to next frame
+    this._onNext();
+
+    // use waitForTimesliceToLoad$ observable to wait until next frame loaded
+    // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
+    this._unsubscribe = this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
+      if (this.state.isPaused) {
+        return;
+      }
+
+      // use timeout to display frame for small time period before moving to next frame
+      this._timeoutId = window.setTimeout(() => {
+        if (this.state.isPaused) {
+          return;
+        }
+        this._playNextFrame();
+      }, 2000);
+    });
+  }
+
   render() {
     return (
       <div className="mapTimeslider">
@@ -153,6 +198,20 @@ class KeyedTimeslider extends Component<Props, State> {
                 aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
                   defaultMessage: 'Next time window',
                 })}
+              />
+              <EuiButtonIcon
+                onClick={this.state.isPaused ? this._onPlay : this._onPause}
+                iconType={this.state.isPaused ? 'play' : 'pause'}
+                color="text"
+                aria-label={
+                  this.state.isPaused
+                    ? i18n.translate('xpack.maps.timeslider.playLabel', {
+                        defaultMessage: 'Play',
+                      })
+                    : i18n.translate('xpack.maps.timeslider.pauseLabel', {
+                        defaultMessage: 'Pause',
+                      })
+                }
               />
             </div>
           </div>
