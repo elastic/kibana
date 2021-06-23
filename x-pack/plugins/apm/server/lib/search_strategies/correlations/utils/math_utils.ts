@@ -6,7 +6,7 @@
  */
 
 import { HistogramItem } from '../query_ranges';
-import { roundToDecimalPlace } from '../../../../../common/search_strategies/correlations/formatting_utils';
+import { asPreciseDecimal } from '../../../../../common/utils/formatters';
 
 export function* range(start: number, end: number, step: number) {
   while (start < end) {
@@ -36,8 +36,8 @@ export const isHistogramRoughlyEqual = (
   );
   return !sampledIndices.some((idx) => {
     return (
-      roundToDecimalPlace(a[idx].key, significantFraction) !==
-        roundToDecimalPlace(b[idx].key, significantFraction) &&
+      asPreciseDecimal(a[idx].key, significantFraction) !==
+        asPreciseDecimal(b[idx].key, significantFraction) &&
       roundToNearest(a[idx].doc_count) !== roundToNearest(b[idx].doc_count)
     );
   });
@@ -72,7 +72,7 @@ export const hashHistogram = (
   );
   return JSON.stringify(
     sampledIndices.map((idx) => {
-      return `${roundToDecimalPlace(
+      return `${asPreciseDecimal(
         histogram[idx].key,
         significantFraction
       )}-${roundToNearest(histogram[idx].doc_count)}`;

@@ -22,7 +22,7 @@ import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
 import { hashHistogram, isHistogramRoughlyEqual, range } from './utils';
-import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
@@ -210,11 +210,11 @@ export const asyncSearchServiceProvider = (
       // Row/value is considered duplicates of others
       // if they both have roughly same pearson correlation and ks test values
       // And the histograms are the same
-      const roundedCorrelation = roundToDecimalPlace(
+      const roundedCorrelation = asPreciseDecimal(
         value.correlation,
         SIGNIFICANT_FRACTION
       );
-      const roundedKS = roundToDecimalPlace(value.ksTest, SIGNIFICANT_FRACTION);
+      const roundedKS = asPreciseDecimal(value.ksTest, SIGNIFICANT_FRACTION);
       // Here we only check if they are roughly equal by comparing 10 different bins
       // and also rounding the values to account for floating points
       const key = `${roundedCorrelation}-${roundedKS}-${hashHistogram(

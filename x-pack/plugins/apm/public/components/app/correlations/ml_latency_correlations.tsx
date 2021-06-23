@@ -38,7 +38,6 @@ import {
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
-import { roundToDecimalPlace } from '../../../../common/search_strategies/correlations/formatting_utils';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -51,6 +50,7 @@ import {
   StickyProperties,
 } from '../../shared/StickyProperties';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -236,7 +236,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           { defaultMessage: 'Correlation' }
         ),
         render: (_: any, term: MlCorrelationsTerms) => {
-          return <div>{roundToDecimalPlace(term.correlation, 2)}</div>;
+          return <div>{asPreciseDecimal(term.correlation, 2)}</div>;
         },
       },
       {
