@@ -116,7 +116,7 @@ interface RoleMappingsValues {
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
-  path: ['enterprise_search', 'workplace_search', 'role_mappings'],
+  path: ['enterprise_search', 'workplace_search', 'users_and_roles'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMapping: (roleMapping: WSRoleMapping) => ({ roleMapping }),

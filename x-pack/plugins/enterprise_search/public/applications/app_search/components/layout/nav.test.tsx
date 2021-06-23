@@ -101,7 +101,7 @@ describe('useAppSearchNav', () => {
           {
             id: 'usersRoles',
             name: 'Users and roles',
-            href: '/role_mappings',
+            href: '/users_and_roles',
           },
         ],
       },
