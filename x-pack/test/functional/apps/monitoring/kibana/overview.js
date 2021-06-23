@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }) {
         to: 'Aug 29, 2017 @ 17:25:44.142',
       });
 
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> closing the modal');
       await clusterOverview.closeAlertsModal();
 
       // go to kibana overview
