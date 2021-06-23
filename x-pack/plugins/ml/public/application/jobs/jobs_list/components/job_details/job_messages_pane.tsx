@@ -14,9 +14,11 @@ import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 interface JobMessagesPaneProps {
   jobId: string;
+  start?: string;
+  end?: string;
 }
 
-export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(({ jobId }) => {
+export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(({ jobId, start, end }) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -25,7 +27,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(({ jobId }) 
   const fetchMessages = async () => {
     setIsLoading(true);
     try {
-      setMessages(await ml.jobs.jobAuditMessages(jobId));
+      setMessages(await ml.jobs.jobAuditMessages({ jobId, start, end }));
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);

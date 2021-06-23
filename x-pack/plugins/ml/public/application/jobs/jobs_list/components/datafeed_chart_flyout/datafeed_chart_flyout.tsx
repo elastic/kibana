@@ -84,6 +84,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
+  const [range, setRange] = useState<{ start: string; end: string } | undefined>();
 
   const {
     results: { getDatafeedResultChartData },
@@ -119,6 +120,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     // STARTTIME = ENDTIME - (BucketSpan * MAX_CHART_POINTS)
     const startMoment = endDate.clone().subtract(MAX_CHART_POINTS * count, unit);
     const startTimestamp = moment(startMoment).valueOf();
+    setRange({ start: String(startTimestamp), end: String(endTimestamp) });
 
     try {
       const chartData = await getDatafeedResultChartData(jobId, startTimestamp, endTimestamp);
@@ -442,9 +444,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <JobMessagesPane jobId={jobId} />
-              </EuiFlexItem>
+              {range !== undefined ? (
+                <EuiFlexItem grow={false}>
+                  <JobMessagesPane jobId={jobId} {...range} />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           ) : null}
         </EuiFlyoutBody>
