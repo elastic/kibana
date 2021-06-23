@@ -143,7 +143,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './services/rest/apm_observability_overview_fetchers'
       );
       const { hasFleetApmIntegrations } = await import(
-        './services/rest/tutorial_apm_fleet_check'
+        './tutorial/tutorial_apm_fleet_check'
       );
 
       const { createCallApmApi } = await import(
@@ -172,7 +172,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
-      () => import('./components/shared/tutorial_fleet_instructions')
+      () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(

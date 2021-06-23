@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 interface Props {
   http: HttpStart;
@@ -92,7 +92,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
-                href={`${basePath}/app/fleet#/integrations/detail/apm-0.2.0/overview`}
+                href={`${basePath}/app/integrations#/detail/apm-0.3.0/overview`}
               >
                 {i18n.translate(
                   'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
