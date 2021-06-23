@@ -9,14 +9,14 @@ import _ from 'lodash';
 import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Map as MbMap } from 'mapbox-gl';
-import { DRAW_TYPE } from '../../../../common/constants';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { DRAW_SHAPE } from '../../../../common/constants';
 
 const noop = () => {};
 
 interface Props {
   mbMap: MbMap;
-  drawType: DRAW_TYPE;
+  drawShape: DRAW_SHAPE;
 }
 
 interface State {
@@ -27,6 +27,7 @@ interface State {
 
 export class DrawTooltip extends Component<Props, State> {
   private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
+  private _isMounted = false;
 
   state: State = {
     x: undefined,
@@ -35,6 +36,7 @@ export class DrawTooltip extends Component<Props, State> {
   };
 
   componentDidMount() {
+    this._isMounted = true;
     this.props.mbMap.on('mousemove', this._updateTooltipLocation);
     this.props.mbMap.on('mouseout', this._hideTooltip);
   }
@@ -46,10 +48,28 @@ export class DrawTooltip extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     this.props.mbMap.off('mousemove', this._updateTooltipLocation);
     this.props.mbMap.off('mouseout', this._hideTooltip);
     this._updateTooltipLocation.cancel();
   }
+
+  _hideTooltip = () => {
+    this._updateTooltipLocation.cancel();
+    this.setState({ isOpen: false });
+  };
+
+  _updateTooltipLocation = _.throttle(({ lngLat }) => {
+    const mouseLocation = this.props.mbMap.project(lngLat);
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState({
+      isOpen: true,
+      x: mouseLocation.x,
+      y: mouseLocation.y,
+    });
+  }, 100);
 
   render() {
     if (this.state.x === undefined || this.state.y === undefined) {
@@ -57,18 +77,26 @@ export class DrawTooltip extends Component<Props, State> {
     }
 
     let instructions;
-    if (this.props.drawType === DRAW_TYPE.BOUNDS) {
+    if (this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
         defaultMessage:
           'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
       });
-    } else if (this.props.drawType === DRAW_TYPE.DISTANCE) {
+    } else if (this.props.drawShape === DRAW_SHAPE.DISTANCE) {
       instructions = i18n.translate('xpack.maps.drawTooltip.distanceInstructions', {
         defaultMessage: 'Click to set point. Move mouse to adjust distance. Click to finish.',
       });
-    } else if (this.props.drawType === DRAW_TYPE.POLYGON) {
+    } else if (this.props.drawShape === DRAW_SHAPE.POLYGON) {
       instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
         defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
+      });
+    } else if (this.props.drawShape === DRAW_SHAPE.LINE) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.lineInstructions', {
+        defaultMessage: 'Click to start line. Click to add vertex. Double click to finish.',
+      });
+    } else if (this.props.drawShape === DRAW_SHAPE.POINT) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.pointInstructions', {
+        defaultMessage: 'Click to create point.',
       });
     } else {
       // unknown draw type, tooltip not needed
@@ -98,18 +126,4 @@ export class DrawTooltip extends Component<Props, State> {
       </EuiPopover>
     );
   }
-
-  _hideTooltip = () => {
-    this._updateTooltipLocation.cancel();
-    this.setState({ isOpen: false });
-  };
-
-  _updateTooltipLocation = _.throttle(({ lngLat }) => {
-    const mouseLocation = this.props.mbMap.project(lngLat);
-    this.setState({
-      isOpen: true,
-      x: mouseLocation.x,
-      y: mouseLocation.y,
-    });
-  }, 100);
 }

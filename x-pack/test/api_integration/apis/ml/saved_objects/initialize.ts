@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/initialize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
 
       await ml.api.createAnomalyDetectionJobES(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId)

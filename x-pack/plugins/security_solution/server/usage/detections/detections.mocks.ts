@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
-
 export const getMockJobSummaryResponse = () => [
   {
     id: 'linux_anomalous_network_activity_ecs',
@@ -161,20 +159,6 @@ export const getMockListModulesResponse = () => [
     kibana: {},
   },
 ];
-
-export const getMockRulesResponse = () => ({
-  hits: {
-    hits: [
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:false`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:false`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-    ],
-  },
-});
 
 export const getMockMlJobDetailsResponse = () => ({
   count: 20,

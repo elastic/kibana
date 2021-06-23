@@ -23,7 +23,7 @@ const i18nTexts = {
     i18n.translate(
       'xpack.upgradeAssistant.kibanaDeprecations.resolveConfirmationModal.modalTitle',
       {
-        defaultMessage: "Resolve '{domainId}'?",
+        defaultMessage: "Resolve deprecation in '{domainId}'?",
         values: {
           domainId,
         },

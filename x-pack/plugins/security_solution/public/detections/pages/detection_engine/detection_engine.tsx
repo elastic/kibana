@@ -11,17 +11,18 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { isTab } from '../../../../../timelines/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { isTab } from '../../../common/components/accessibility/helpers';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -51,6 +52,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   buildShowBuildingBlockFilter,
+  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
@@ -81,6 +83,8 @@ const DetectionEnginePageComponent = () => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -134,19 +138,23 @@ const DetectionEnginePageComponent = () => {
   const alertsHistogramDefaultFilters = useMemo(
     () => [
       ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...(ruleRegistryEnabled
+        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
+        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...(ruleRegistryEnabled
+        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
+        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -189,22 +197,22 @@ const DetectionEnginePageComponent = () => {
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineUserUnauthenticated />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
   if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
     return (
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
           needsSignalsIndex={isSignalIndexExists === false}
           needsListsIndex={needsListsConfiguration}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
@@ -220,7 +228,7 @@ const DetectionEnginePageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 subtitle={
@@ -272,13 +280,13 @@ const DetectionEnginePageComponent = () => {
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
       <SpyRoute pageName={SecurityPageName.detections} />
     </>

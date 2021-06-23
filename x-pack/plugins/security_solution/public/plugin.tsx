@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { AnyAction, Reducer } from 'redux';
 import {
   PluginSetup,
   PluginStart,
@@ -42,8 +44,10 @@ import {
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
+  CASES_APP_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
+  DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -57,7 +61,7 @@ import {
   DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
-} from './app/home/translations';
+} from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -70,6 +74,7 @@ import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/vi
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { TimelineState } from '../../timelines/public';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -273,7 +278,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.case}`,
+      id: CASES_APP_ID,
       title: CASE,
       order: 9002,
       euiIconType: APP_ICON_SOLUTION,
@@ -446,6 +451,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        this.config.enableExperimental || []
+      );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
@@ -466,7 +474,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
             {
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .toPromise(),
@@ -474,9 +482,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       let signal: { name: string | null } = { name: null };
       try {
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        // TODO: Once we are past experimental phase this code should be removed
+        // TODO: This currently prevents TGrid from refreshing
+        if (experimentalFeatures.ruleRegistryEnabled) {
+          signal = { name: DEFAULT_ALERTS_INDEX };
+        } else {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -489,7 +503,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const networkStart = networkSubPlugin.start(this.storage);
       const timelinesStart = timelinesSubPlugin.start();
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
-
       const timelineInitialState = {
         timeline: {
           ...timelinesStart.store.initialState.timeline!,
@@ -501,6 +514,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
         },
       };
+
+      const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
+      const timelineReducer = (reduceReducers(
+        timelineInitialState.timeline,
+        tGridReducer,
+        timelinesStart.store.reducer.timeline
+      ) as unknown) as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
@@ -514,19 +534,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
-            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
+            enableExperimental: experimentalFeatures,
           }
         ),
         {
           ...hostsStart.store.reducer,
           ...networkStart.store.reducer,
-          ...timelinesStart.store.reducer,
+          timeline: timelineReducer,
           ...managementSubPluginStart.store.reducer,
+          ...tGridReducer,
         },
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]
       );
+      if (startPlugins.timelines) {
+        startPlugins.timelines.setTGridEmbeddedStore(this._store);
+      }
     }
     return this._store;
   }

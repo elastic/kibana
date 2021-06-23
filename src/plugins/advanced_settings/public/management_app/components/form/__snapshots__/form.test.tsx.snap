@@ -3,52 +3,53 @@
 exports[`Form should not render no settings message when instructed not to 1`] = `
 <Fragment>
   <div>
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 General
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": -1,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": -1,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -129,31 +130,32 @@ exports[`Form should not render no settings message when instructed not to 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 Dashboard
               </h2>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -180,57 +182,58 @@ exports[`Form should not render no settings message when instructed not to 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 X-pack
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": 9,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": 9,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -257,8 +260,8 @@ exports[`Form should not render no settings message when instructed not to 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
@@ -269,52 +272,53 @@ exports[`Form should not render no settings message when instructed not to 1`] =
 exports[`Form should render no settings message when there are no settings 1`] = `
 <Fragment>
   <div>
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 General
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": -1,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": -1,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -395,31 +399,32 @@ exports[`Form should render no settings message when there are no settings 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 Dashboard
               </h2>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -446,57 +451,58 @@ exports[`Form should render no settings message when there are no settings 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 X-pack
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": 9,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": 9,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -523,8 +529,8 @@ exports[`Form should render no settings message when there are no settings 1`] =
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
@@ -535,52 +541,53 @@ exports[`Form should render no settings message when there are no settings 1`] =
 exports[`Form should render normally 1`] = `
 <Fragment>
   <div>
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 General
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": -1,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": -1,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -661,31 +668,32 @@ exports[`Form should render normally 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 Dashboard
               </h2>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -712,57 +720,58 @@ exports[`Form should render normally 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 X-pack
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": 9,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": 9,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -789,8 +798,8 @@ exports[`Form should render normally 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
@@ -801,52 +810,53 @@ exports[`Form should render normally 1`] = `
 exports[`Form should render read-only when saving is disabled 1`] = `
 <Fragment>
   <div>
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 General
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": -1,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": -1,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -927,31 +937,32 @@ exports[`Form should render read-only when saving is disabled 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 Dashboard
               </h2>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -978,57 +989,58 @@ exports[`Form should render read-only when saving is disabled 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />
-    <EuiPanel
-      paddingSize="l"
+    <_EuiSplitPanelOuter
+      hasBorder={true}
     >
-      <EuiForm>
-        <EuiText>
-          <EuiFlexGroup
-            alignItems="baseline"
+      <_EuiSplitPanelInner
+        color="subdued"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiFlexItem
-              grow={false}
-            >
+            <EuiTitle>
               <h2>
                 X-pack
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <em>
-                <FormattedMessage
-                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                  id="advancedSettings.form.searchResultText"
-                  values={
-                    Object {
-                      "clearSearch": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <em>
-                          <FormattedMessage
-                            defaultMessage="(clear search)"
-                            id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
-                          />
-                        </em>
-                      </EuiLink>,
-                      "settingsCount": 9,
-                    }
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="advancedSettings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="advancedSettings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": 9,
                   }
-                />
-              </em>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </_EuiSplitPanelInner>
+      <_EuiSplitPanelInner>
         <Field
           clearChange={[Function]}
           dockLinks={Object {}}
@@ -1055,8 +1067,8 @@ exports[`Form should render read-only when saving is disabled 1`] = `
           }
           toasts={Object {}}
         />
-      </EuiForm>
-    </EuiPanel>
+      </_EuiSplitPanelInner>
+    </_EuiSplitPanelOuter>
     <EuiSpacer
       size="l"
     />

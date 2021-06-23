@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
+import { IndexPatternBase } from '..';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -63,7 +64,7 @@ export type RangeFilter = Filter &
     script?: {
       script: {
         params: any;
-        lang: string;
+        lang: estypes.ScriptLanguage;
         source: any;
       };
     };
@@ -93,7 +94,7 @@ const format = (field: IFieldType, value: any) =>
 export const buildRangeFilter = (
   field: IFieldType,
   params: RangeFilterParams,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };

@@ -5,35 +5,126 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiButtonGroup,
+  htmlIdGenerator,
+  EuiColorPaletteDisplay,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiComboBox,
+} from '@elastic/eui';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { DatatableVisualizationState } from '../visualization';
+import { ColumnState, DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
+import {
+  CustomizablePalette,
+  applyPaletteParams,
+  defaultPaletteParams,
+  FIXED_PROGRESSION,
+  getStopsForFixedMode,
+  useDebouncedValue,
+} from '../../shared_components/';
+import { PalettePanelContainer } from './palette_panel_container';
+import { findMinMaxByColumnId } from './shared_utils';
+import './dimension_editor.scss';
+import {
+  getDefaultSummaryLabel,
+  getFinalSummaryConfiguration,
+  getSummaryRowOptions,
+} from '../summary';
+import { isNumericField } from '../utils';
 
 const idPrefix = htmlIdGenerator()();
 
+type ColumnType = DatatableVisualizationState['columns'][number];
+type SummaryRowType = Extract<ColumnState['summaryRow'], string>;
+
+function updateColumnWith(
+  state: DatatableVisualizationState,
+  columnId: string,
+  newColumnProps: Partial<ColumnType>
+) {
+  return state.columns.map((currentColumn) => {
+    if (currentColumn.columnId === columnId) {
+      return { ...currentColumn, ...newColumnProps };
+    } else {
+      return currentColumn;
+    }
+  });
+}
+
 export function TableDimensionEditor(
-  props: VisualizationDimensionEditorProps<DatatableVisualizationState>
+  props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
 ) {
   const { state, setState, frame, accessor } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const onSummaryLabelChangeToDebounce = useCallback(
+    (newSummaryLabel: string | undefined) => {
+      setState({
+        ...state,
+        columns: updateColumnWith(state, accessor, { summaryLabel: newSummaryLabel }),
+      });
+    },
+    [accessor, setState, state]
+  );
+  const { inputValue: summaryLabel, handleInputChange: onSummaryLabelChange } = useDebouncedValue<
+    string | undefined
+  >(
+    {
+      onChange: onSummaryLabelChangeToDebounce,
+      value: column?.summaryLabel,
+    },
+    { allowEmptyString: true } // empty string is a valid label for this feature
+  );
 
   if (!column) return null;
   if (column.isTransposed) return null;
 
+  const currentData = frame.activeData?.[state.layerId];
+
   // either read config state or use same logic as chart itself
-  const currentAlignment =
-    column?.alignment ||
-    (frame.activeData &&
-    frame.activeData[state.layerId]?.columns.find(
-      (col) => col.id === accessor || getOriginalId(col.id) === accessor
-    )?.meta.type === 'number'
-      ? 'right'
-      : 'left');
+  const isNumeric = isNumericField(currentData, accessor);
+  const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
+  const currentColorMode = column?.colorMode || 'none';
+  const hasDynamicColoring = currentColorMode !== 'none';
+  // when switching from one operation to another, make sure to keep the configuration consistent
+  const { summaryRow, summaryLabel: fallbackSummaryLabel } = getFinalSummaryConfiguration(
+    accessor,
+    column,
+    currentData
+  );
+
+  const datasource = frame.datasourceLayers[state.layerId];
+  const showDynamicColoringFeature = Boolean(
+    isNumeric && !datasource?.getOperationForColumnId(accessor)?.isBucketed
+  );
 
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
+
+  const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+  const columnsToCheck = hasTransposedColumn
+    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
+      []
+    : [accessor];
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const currentMinMax = minMaxByColumnId[accessor];
+
+  const activePalette = column?.palette || {
+    type: 'palette',
+    name: defaultPaletteParams.name,
+  };
+  // need to tell the helper that the colorStops are required to display
+  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
     <>
@@ -55,7 +146,7 @@ export function TableDimensionEditor(
           options={[
             {
               id: `${idPrefix}left`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
+              label: i18n.translate('xpack.lens.table.alignment.left', {
                 defaultMessage: 'Left',
               }),
               'data-test-subj': 'lnsDatatable_alignment_groups_left',
@@ -77,18 +168,11 @@ export function TableDimensionEditor(
           ]}
           idSelected={`${idPrefix}${currentAlignment}`}
           onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'center';
-            const newColumns = state.columns.map((currentColumn) => {
-              if (currentColumn.columnId === accessor) {
-                return {
-                  ...currentColumn,
-                  alignment: newMode,
-                };
-              } else {
-                return currentColumn;
-              }
+            const newMode = id.replace(idPrefix, '') as ColumnType['alignment'];
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { alignment: newMode }),
             });
-            setState({ ...state, columns: newColumns });
           }}
         />
       </EuiFormRow>
@@ -126,6 +210,189 @@ export function TableDimensionEditor(
             }}
           />
         </EuiFormRow>
+      )}
+      {isNumeric && (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.lens.table.summaryRow.label', {
+              defaultMessage: 'Summary Row',
+            })}
+            display="columnCompressed"
+          >
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              data-test-subj="lnsDatatable_summaryrow_function"
+              placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+                defaultMessage: 'Field',
+              })}
+              options={getSummaryRowOptions()}
+              selectedOptions={[
+                {
+                  label: getDefaultSummaryLabel(summaryRow),
+                  value: summaryRow,
+                },
+              ]}
+              singleSelection={{ asPlainText: true }}
+              onChange={(choices) => {
+                const newValue = choices[0].value as SummaryRowType;
+                setState({
+                  ...state,
+                  columns: updateColumnWith(state, accessor, { summaryRow: newValue }),
+                });
+              }}
+            />
+          </EuiFormRow>
+          {summaryRow !== 'none' && (
+            <EuiFormRow
+              display="columnCompressed"
+              fullWidth
+              label={i18n.translate('xpack.lens.table.summaryRow.customlabel', {
+                defaultMessage: 'Summary label',
+              })}
+            >
+              <EuiFieldText
+                compressed
+                data-test-subj="lnsDatatable_summaryrow_label"
+                value={summaryLabel ?? fallbackSummaryLabel}
+                onChange={(e) => {
+                  onSummaryLabelChange(e.target.value);
+                }}
+              />
+            </EuiFormRow>
+          )}
+        </>
+      )}
+      {showDynamicColoringFeature && (
+        <>
+          <EuiFormRow
+            display="columnCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
+              defaultMessage: 'Color by value',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
+                defaultMessage: 'Color by value',
+              })}
+              data-test-subj="lnsDatatable_dynamicColoring_groups"
+              name="dynamicColoring"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}none`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
+                    defaultMessage: 'None',
+                  }),
+                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
+                },
+                {
+                  id: `${idPrefix}cell`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
+                    defaultMessage: 'Cell',
+                  }),
+                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
+                },
+                {
+                  id: `${idPrefix}text`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
+                    defaultMessage: 'Text',
+                  }),
+                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
+                },
+              ]}
+              idSelected={`${idPrefix}${currentColorMode}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
+                const params: Partial<ColumnType> = {
+                  colorMode: newMode,
+                };
+                if (!column?.palette && newMode !== 'none') {
+                  params.palette = {
+                    ...activePalette,
+                    params: {
+                      ...activePalette.params,
+                      // that's ok, at first open we're going to throw them away and recompute
+                      stops: displayStops,
+                    },
+                  };
+                }
+                // clear up when switching to no coloring
+                if (column?.palette && newMode === 'none') {
+                  params.palette = undefined;
+                }
+                setState({
+                  ...state,
+                  columns: updateColumnWith(state, accessor, params),
+                });
+              }}
+            />
+          </EuiFormRow>
+          {hasDynamicColoring && (
+            <EuiFormRow
+              className="lnsDynamicColoringRow"
+              display="columnCompressed"
+              fullWidth
+              label={i18n.translate('xpack.lens.paletteTableGradient.label', {
+                defaultMessage: 'Color',
+              })}
+            >
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                className="lnsDynamicColoringClickable"
+              >
+                <EuiFlexItem>
+                  <EuiColorPaletteDisplay
+                    data-test-subj="lnsDatatable_dynamicColoring_palette"
+                    palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+                    type={FIXED_PROGRESSION}
+                    onClick={() => {
+                      setIsPaletteOpen(!isPaletteOpen);
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="lnsDatatable_dynamicColoring_trigger"
+                    iconType="controlsHorizontal"
+                    onClick={() => {
+                      setIsPaletteOpen(!isPaletteOpen);
+                    }}
+                    size="xs"
+                    flush="both"
+                  >
+                    {i18n.translate('xpack.lens.paletteTableGradient.customize', {
+                      defaultMessage: 'Edit',
+                    })}
+                  </EuiButtonEmpty>
+                  <PalettePanelContainer
+                    siblingRef={props.panelRef}
+                    isOpen={isPaletteOpen}
+                    handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+                  >
+                    <CustomizablePalette
+                      palettes={props.paletteService}
+                      activePalette={activePalette}
+                      dataBounds={currentMinMax}
+                      setPalette={(newPalette) => {
+                        setState({
+                          ...state,
+                          columns: updateColumnWith(state, accessor, { palette: newPalette }),
+                        });
+                      }}
+                    />
+                  </PalettePanelContainer>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          )}
+        </>
       )}
     </>
   );

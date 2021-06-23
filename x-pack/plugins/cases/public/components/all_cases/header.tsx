@@ -20,6 +20,7 @@ interface OwnProps {
   configureCasesNavigation: CasesNavigation;
   createCaseNavigation: CasesNavigation;
   refresh: number;
+  showTitle?: boolean;
   userCanCrud: boolean;
 }
 
@@ -40,9 +41,10 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
   configureCasesNavigation,
   createCaseNavigation,
   refresh,
+  showTitle = true,
   userCanCrud,
 }) => (
-  <CaseHeaderPage title={i18n.PAGE_TITLE}>
+  <CaseHeaderPage title={showTitle ? i18n.PAGE_TITLE : ''}>
     <EuiFlexGroup
       alignItems="center"
       gutterSize="m"
@@ -50,17 +52,27 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
       wrap={true}
       data-test-subj="all-cases-header"
     >
-      <FlexItemDivider grow={false}>
-        <Count refresh={refresh} />
-      </FlexItemDivider>
-      <EuiFlexItem grow={false}>
-        <NavButtons
-          actionsErrors={actionsErrors}
-          configureCasesNavigation={configureCasesNavigation}
-          createCaseNavigation={createCaseNavigation}
-          userCanCrud={userCanCrud}
-        />
-      </EuiFlexItem>
+      {userCanCrud ? (
+        <>
+          <FlexItemDivider grow={false}>
+            <Count refresh={refresh} />
+          </FlexItemDivider>
+
+          <EuiFlexItem grow={false}>
+            <NavButtons
+              actionsErrors={actionsErrors}
+              configureCasesNavigation={configureCasesNavigation}
+              createCaseNavigation={createCaseNavigation}
+            />
+          </EuiFlexItem>
+        </>
+      ) : (
+        // doesn't include the horizontal bar that divides the buttons and other padding since we don't have any buttons
+        // to the right
+        <EuiFlexItem>
+          <Count refresh={refresh} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </CaseHeaderPage>
 );

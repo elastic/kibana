@@ -25,7 +25,8 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 
       // Persist new artifacts
       const persistErrors = await manifestManager.pushArtifacts(
-        newManifest.getAllArtifacts() as InternalArtifactCompleteSchema[]
+        newManifest.getAllArtifacts() as InternalArtifactCompleteSchema[],
+        newManifest
       );
       if (persistErrors.length) {
         reportErrors(logger, persistErrors);

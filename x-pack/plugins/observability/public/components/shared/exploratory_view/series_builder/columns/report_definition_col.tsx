@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { CustomReportField } from '../custom_report_field';
 import { DataSeries, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
@@ -36,11 +35,11 @@ export function ReportDefinitionCol({
   dataViewSeries: DataSeries;
   seriesId: string;
 }) {
-  const { indexPattern } = useAppIndexPatternContext();
+  const { getSeries, setSeries } = useSeriesStorage();
 
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const series = getSeries(seriesId);
 
-  const { reportDefinitions: selectedReportDefinitions = {} } = series;
+  const { reportDefinitions: selectedReportDefinitions = {} } = series ?? {};
 
   const { reportDefinitions, defaultSeriesType, hasOperationType, yAxisColumns } = dataViewSeries;
 
@@ -66,26 +65,21 @@ export function ReportDefinitionCol({
       <EuiFlexItem>
         <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
-      {indexPattern &&
-        reportDefinitions.map(({ field, custom, options, defaultValue }) => (
-          <EuiFlexItem key={field}>
-            {!custom ? (
-              <ReportDefinitionField
-                seriesId={seriesId}
-                dataSeries={dataViewSeries}
-                field={field}
-                onChange={onChange}
-              />
-            ) : (
-              <CustomReportField
-                field={field}
-                options={options}
-                defaultValue={defaultValue}
-                seriesId={seriesId}
-              />
-            )}
-          </EuiFlexItem>
-        ))}
+      <EuiHorizontalRule margin="xs" />
+      {reportDefinitions.map(({ field, custom, options }) => (
+        <EuiFlexItem key={field}>
+          {!custom ? (
+            <ReportDefinitionField
+              seriesId={seriesId}
+              dataSeries={dataViewSeries}
+              field={field}
+              onChange={onChange}
+            />
+          ) : (
+            <CustomReportField field={field} options={options} seriesId={seriesId} />
+          )}
+        </EuiFlexItem>
+      ))}
       {(hasOperationType || columnType === 'operation') && (
         <EuiFlexItem>
           <OperationTypeSelect
@@ -95,7 +89,11 @@ export function ReportDefinitionCol({
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} />
+        <SeriesChartTypesSelect
+          seriesId={seriesId}
+          defaultChartType={defaultSeriesType}
+          seriesTypes={dataViewSeries.seriesTypes}
+        />
       </EuiFlexItem>
     </FlexGroup>
   );

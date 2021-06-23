@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [
       require.resolve('./test_suites/usage_collection'),
+      require.resolve('./test_suites/telemetry'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
@@ -43,9 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: ['xpack.security.enabled=false'],
     },
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',

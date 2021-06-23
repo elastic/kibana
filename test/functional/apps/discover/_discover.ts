@@ -29,10 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -181,8 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/89550
-    describe.skip('query #2, which has an empty time range', () => {
+    describe('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
@@ -193,8 +192,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show "no results"', async () => {
-        const isVisible = await PageObjects.discover.hasNoResults();
-        expect(isVisible).to.be(true);
+        await retry.waitFor('no results screen is displayed', async function () {
+          const isVisible = await PageObjects.discover.hasNoResults();
+          return isVisible === true;
+        });
       });
 
       it('should suggest a new time range is picked', async () => {
@@ -327,10 +328,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
 
-        // check inspector panel request stats for timestamp
-        await inspector.open();
-
         const getRequestTimestamp = async () => {
+          // check inspector panel request stats for timestamp
+          await inspector.open();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
@@ -338,6 +338,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
+          await inspector.close();
           return requestStatsRow[0][1];
         };
 

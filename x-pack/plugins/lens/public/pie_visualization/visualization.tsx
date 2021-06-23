@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
@@ -126,7 +126,7 @@ export const getPieVisualization = ({
         triggerIcon: 'colorBy',
         palette: paletteService
           .get(state.palette?.name || 'default')
-          .getColors(10, state.palette?.params),
+          .getCategoricalColors(10, state.palette?.params),
       };
     }
 
@@ -265,10 +265,15 @@ export const getPieVisualization = ({
       }
     }
     return metricColumnsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.pie.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 

@@ -19,10 +19,11 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  rejectUnauthorized?: boolean;
+  verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
-  customizeLocalHostTls?: boolean;
+  customizeLocalHostSsl?: boolean;
+  rejectUnauthorized?: boolean; // legacy
 }
 
 // test.not-enabled is specifically not enabled
@@ -30,6 +31,7 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
   '.jira',
@@ -49,9 +51,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     license = 'trial',
     disabledPlugins = [],
     ssl = false,
-    rejectUnauthorized = true,
+    verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
-    customizeLocalHostTls = false,
+    customizeLocalHostSsl = false,
+    rejectUnauthorized = true, // legacy
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -100,25 +103,25 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const customHostSettingsValue = [
       {
         url: tlsWebhookServers.rejectUnauthorizedFalse,
-        tls: {
-          rejectUnauthorized: false,
+        ssl: {
+          verificationMode: 'none',
         },
       },
       {
         url: tlsWebhookServers.rejectUnauthorizedTrue,
-        tls: {
-          rejectUnauthorized: true,
+        ssl: {
+          verificationMode: 'full',
         },
       },
       {
         url: tlsWebhookServers.caFile,
-        tls: {
-          rejectUnauthorized: true,
+        ssl: {
+          verificationMode: 'certificate',
           certificateAuthoritiesFiles: [CA_CERT_PATH],
         },
       },
     ];
-    const customHostSettings = customizeLocalHostTls
+    const customHostSettings = customizeLocalHostSsl
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
@@ -129,7 +132,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Alerting API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -149,8 +151,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.healthCheck.interval="1s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           '--xpack.eventLog.logEntries=true',
@@ -195,28 +199,28 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
-            'custom.tls.noCustom': {
+            'custom.ssl.noCustom': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.noCustom}`,
               config: {
                 url: tlsWebhookServers.noCustom,
               },
             },
-            'custom.tls.rejectUnauthorizedFalse': {
+            'custom.ssl.rejectUnauthorizedFalse': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedFalse,
               },
             },
-            'custom.tls.rejectUnauthorizedTrue': {
+            'custom.ssl.rejectUnauthorizedTrue': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedTrue,
               },
             },
-            'custom.tls.caFile': {
+            'custom.ssl.caFile': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.caFile}`,
               config: {

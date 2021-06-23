@@ -14,9 +14,10 @@ export const syntheticsFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'microseconds',
-        outputFormat: 'asMilliseconds',
-        outputPrecision: 0,
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },

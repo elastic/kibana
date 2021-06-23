@@ -12,8 +12,14 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { ViewInApp } from './view_in_app';
+import {
+  EuiBadge,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiButtonEmpty,
+  EuiText,
+  EuiPageHeaderProps,
+} from '@elastic/eui';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -75,13 +81,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(
-        <EuiTitle size="m">
-          <h1>
-            <span>{alert.name}</span>
-          </h1>
-        </EuiTitle>
-      )
+      ).find('EuiPageHeader')
     ).toBeTruthy();
   });
 
@@ -103,7 +103,7 @@ describe('alert_details', () => {
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
+      ).find(<EuiBadge>{alertType.name}</EuiBadge>)
     ).toBeTruthy();
   });
 
@@ -290,7 +290,7 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(<ViewInApp alert={alert} />)
+        ).find('ViewInApp')
       ).toBeTruthy();
     });
 
@@ -309,16 +309,29 @@ describe('alert_details', () => {
         minimumLicenseRequired: 'basic',
         enabledInLicense: true,
       };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        )
-          .find(EuiButtonEmpty)
-          .find('[data-test-subj="openEditAlertFlyoutButton"]')
-          .first()
-          .exists()
-      ).toBeTruthy();
+      const pageHeaderProps = shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+      )
+        .find('EuiPageHeader')
+        .props() as EuiPageHeaderProps;
+      const rightSideItems = pageHeaderProps.rightSideItems;
+      expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+      <React.Fragment>
+        <EuiButtonEmpty
+          data-test-subj="openEditAlertFlyoutButton"
+          disabled={false}
+          iconType="pencil"
+          name="edit"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Edit"
+            id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </React.Fragment>
+    `);
     });
   });
 });
@@ -768,20 +781,34 @@ describe('edit button', () => {
       enabledInLicense: true,
     };
 
-    expect(
-      shallow(
-        <AlertDetails
-          alert={alert}
-          alertType={alertType}
-          actionTypes={actionTypes}
-          {...mockAlertApis}
+    const pageHeaderProps = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    )
+      .find('EuiPageHeader')
+      .props() as EuiPageHeaderProps;
+    const rightSideItems = pageHeaderProps.rightSideItems;
+    expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+    <React.Fragment>
+      <EuiButtonEmpty
+        data-test-subj="openEditAlertFlyoutButton"
+        disabled={false}
+        iconType="pencil"
+        name="edit"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Edit"
+          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+          values={Object {}}
         />
-      )
-        .find(EuiButtonEmpty)
-        .find('[name="edit"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
+      </EuiButtonEmpty>
+    </React.Fragment>
+  `);
   });
 
   it('should not render an edit button when alert editable but actions arent', () => {
@@ -851,20 +878,34 @@ describe('edit button', () => {
       enabledInLicense: true,
     };
 
-    expect(
-      shallow(
-        <AlertDetails
-          alert={alert}
-          alertType={alertType}
-          actionTypes={actionTypes}
-          {...mockAlertApis}
+    const pageHeaderProps = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    )
+      .find('EuiPageHeader')
+      .props() as EuiPageHeaderProps;
+    const rightSideItems = pageHeaderProps.rightSideItems;
+    expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+    <React.Fragment>
+      <EuiButtonEmpty
+        data-test-subj="openEditAlertFlyoutButton"
+        disabled={false}
+        iconType="pencil"
+        name="edit"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Edit"
+          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+          values={Object {}}
         />
-      )
-        .find(EuiButtonEmpty)
-        .find('[name="edit"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
+      </EuiButtonEmpty>
+    </React.Fragment>
+  `);
   });
 });
 
@@ -885,7 +926,7 @@ describe('refresh button', () => {
     };
 
     const requestRefresh = jest.fn();
-    const refreshButton = shallow(
+    const wrapper = mountWithIntl(
       <AlertDetails
         alert={alert}
         alertType={alertType}
@@ -893,10 +934,9 @@ describe('refresh button', () => {
         {...mockAlertApis}
         requestRefresh={requestRefresh}
       />
-    )
-      .find('[data-test-subj="refreshAlertsButton"]')
-      .first();
+    );
 
+    const refreshButton = wrapper.find('[data-test-subj="refreshAlertsButton"]').first();
     expect(refreshButton.exists()).toBeTruthy();
 
     refreshButton.simulate('click');

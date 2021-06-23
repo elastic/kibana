@@ -24,6 +24,8 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -31,6 +33,11 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'infra_metrics' });
   unregisterDataHandler({ appName: 'synthetics' });
 }
+
+const sampleAPMIndices = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'apm_oss.transactionIndices': 'apm-*',
+} as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',
@@ -45,7 +52,7 @@ const withCore = makeDecorator({
             appMountParameters: ({
               setHeaderActionMenu: () => {},
             } as unknown) as AppMountParameters,
-            config: { unsafe: { alertingExperience: { enabled: true } } },
+            config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
             core: options as CoreStart,
             plugins: ({
               data: {
@@ -55,6 +62,7 @@ const withCore = makeDecorator({
               },
             } as unknown) as ObservabilityPublicPluginsStart,
             observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+            ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
           <EuiThemeProvider>
@@ -175,7 +183,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -270,7 +278,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
       return (
@@ -287,7 +295,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -319,7 +327,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -353,7 +361,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -384,7 +392,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -418,7 +426,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching APM data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',

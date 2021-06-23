@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 /** @internal **/
 export interface ScriptedFieldItem {
   name: string;
-  lang: string;
+  lang: estypes.ScriptLanguage;
   script: string;
 }

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import {
+import type {
   Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
-} from 'mapbox-gl';
+} from '@kbn/mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
@@ -21,6 +21,7 @@ import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -66,7 +67,7 @@ export class TiledVectorLayer extends VectorLayer {
     dataFilters,
   }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this._style as IVectorStyle
@@ -84,6 +85,10 @@ export class TiledVectorLayer extends VectorLayer {
           source: this.getSource(),
           prevDataRequest,
           nextMeta: searchFilters,
+          getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+            // TODO use meta features to determine if tiles already contain features for timeslice.
+            return true;
+          },
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
         if (canSkip) {

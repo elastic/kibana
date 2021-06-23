@@ -44,7 +44,7 @@ export function buildBaseFilterCriteria(
 export function buildSamplerAggregation(
   aggs: any,
   samplerShardSize: number
-): Record<string, estypes.AggregationContainer> {
+): Record<string, estypes.AggregationsAggregationContainer> {
   if (samplerShardSize < 1) {
     return aggs;
   }

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -479,7 +479,7 @@ export const AlertsList: React.FunctionComponent = () => {
     : false;
 
   const table = (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="s">
         {selectedIds.length > 0 && authorizedToModifySelectedAlerts && (
           <EuiFlexItem grow={false}>
@@ -713,7 +713,7 @@ export const AlertsList: React.FunctionComponent = () => {
           onCancel={() => setManageLicenseModalOpts(null)}
         />
       )}
-    </Fragment>
+    </>
   );
 
   const loadedItems = convertAlertsToTableItems(
@@ -781,6 +781,9 @@ export const AlertsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertsList as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt

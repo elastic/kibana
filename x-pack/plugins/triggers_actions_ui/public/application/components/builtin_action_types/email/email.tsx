@@ -31,9 +31,12 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: EmailActionConnector
-    ): ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets> => {
+    ): Promise<
+      ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets>
+    > => {
+      const translations = await import('./translations');
       const configErrors = {
         from: new Array<string>(),
         port: new Array<string>(),
@@ -49,74 +52,25 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         secrets: { errors: secretsErrors },
       };
       if (!action.config.from) {
-        configErrors.from.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
-            {
-              defaultMessage: 'Sender is required.',
-            }
-          )
-        );
+        configErrors.from.push(translations.SENDER_REQUIRED);
       }
       if (action.config.from && !action.config.from.trim().match(mailformat)) {
-        configErrors.from.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
-            {
-              defaultMessage: 'Sender is not a valid email address.',
-            }
-          )
-        );
+        configErrors.from.push(translations.SENDER_NOT_VALID);
       }
       if (!action.config.port) {
-        configErrors.port.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
-            {
-              defaultMessage: 'Port is required.',
-            }
-          )
-        );
+        configErrors.port.push(translations.PORT_REQUIRED);
       }
       if (!action.config.host) {
-        configErrors.host.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
-            {
-              defaultMessage: 'Host is required.',
-            }
-          )
-        );
+        configErrors.host.push(translations.HOST_REQUIRED);
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
-            {
-              defaultMessage: 'Username is required.',
-            }
-          )
-        );
+        secretsErrors.user.push(translations.USERNAME_REQUIRED);
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
-            {
-              defaultMessage: 'Password is required.',
-            }
-          )
-        );
+        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
-            {
-              defaultMessage: 'Password is required when username is used.',
-            }
-          )
-        );
+        secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
       }
       if (!action.secrets.user && action.secrets.password) {
         secretsErrors.user.push(
@@ -130,9 +84,10 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       }
       return validationResult;
     },
-    validateParams: (
+    validateParams: async (
       actionParams: EmailActionParams
-    ): GenericValidationResult<EmailActionParams> => {
+    ): Promise<GenericValidationResult<EmailActionParams>> => {
+      const translations = await import('./translations');
       const errors = {
         to: new Array<string>(),
         cc: new Array<string>(),
@@ -146,35 +101,16 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&
         (!(actionParams.bcc instanceof Array) || actionParams.bcc.length === 0)
       ) {
-        const errorText = i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
-          {
-            defaultMessage: 'No To, Cc, or Bcc entry.  At least one entry is required.',
-          }
-        );
+        const errorText = translations.TO_CC_REQUIRED;
         errors.to.push(errorText);
         errors.cc.push(errorText);
         errors.bcc.push(errorText);
       }
       if (!actionParams.message?.length) {
-        errors.message.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
-            {
-              defaultMessage: 'Message is required.',
-            }
-          )
-        );
+        errors.message.push(translations.MESSAGE_REQUIRED);
       }
       if (!actionParams.subject?.length) {
-        errors.subject.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
-            {
-              defaultMessage: 'Subject is required.',
-            }
-          )
-        );
+        errors.subject.push(translations.SUBJECT_REQUIRED);
       }
       return validationResult;
     },

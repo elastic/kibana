@@ -175,4 +175,30 @@ describe('When on the Event Filters List Page', () => {
       });
     });
   });
+
+  describe('and the back button is present', () => {
+    beforeEach(async () => {
+      renderResult = render();
+      act(() => {
+        history.push('/event_filters', {
+          onBackButtonNavigateTo: [{ appId: 'appId' }],
+          backButtonLabel: 'back to fleet',
+          backButtonUrl: '/fleet',
+        });
+      });
+    });
+
+    it('back button is present', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+
+    it('back button is not present', () => {
+      act(() => {
+        history.push('/event_filters');
+      });
+      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+    });
+  });
 });

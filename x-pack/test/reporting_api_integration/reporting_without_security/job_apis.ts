@@ -18,13 +18,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Job Listing APIs', () => {
     before(async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     afterEach(async () => {
@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
         created_by: false,
         jobtype: 'csv',
         status: 'pending',
-        // TODO: remove the payload field from the api respones
       };
       forOwn(expectedResJob, (value: any, key: string) => {
         expect(resJob[key]).to.eql(value, key);

@@ -110,7 +110,7 @@ export class RuleDataPluginService {
     return clusterClient.indices.putIndexTemplate(template);
   }
 
-  private async _createOrUpdateLifecyclePolicy(policy: estypes.PutLifecycleRequest) {
+  private async _createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     this.assertWriteEnabled();
     const clusterClient = await this.getClusterClient();
 
@@ -130,7 +130,7 @@ export class RuleDataPluginService {
     return this._createOrUpdateIndexTemplate(template);
   }
 
-  async createOrUpdateLifecyclePolicy(policy: estypes.PutLifecycleRequest) {
+  async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     await this.wait();
     return this._createOrUpdateLifecyclePolicy(policy);
   }

@@ -681,20 +681,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 35
-            }
-          },
-          {
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
@@ -720,6 +706,20 @@
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
               "lineNumber": 88
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 35
             }
           },
           {
@@ -781,15 +781,15 @@
           {
             "plugin": "dashboard",
             "link": {
-              "path": "src/plugins/dashboard/public/application/types.ts",
-              "lineNumber": 25
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 33
             }
           },
           {
             "plugin": "dashboard",
             "link": {
-              "path": "src/plugins/dashboard/public/application/types.ts",
-              "lineNumber": 74
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 186
             }
           },
           {
@@ -803,7 +803,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 126
+              "lineNumber": 127
             }
           },
           {
@@ -1383,20 +1383,20 @@
             "plugin": "embeddable",
             "link": {
               "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-              "lineNumber": 167
+              "lineNumber": 165
             }
           },
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 11
             }
           },
           {
             "plugin": "discover",
             "link": {
-              "path": "src/plugins/discover/public/application/components/top_nav/on_save_search.tsx",
+              "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx",
               "lineNumber": 133
             }
           },
@@ -2569,20 +2569,6 @@
             }
           },
           {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 41
-            }
-          },
-          {
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
@@ -2594,6 +2580,20 @@
             "link": {
               "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
               "lineNumber": 61
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 41
             }
           },
           {
@@ -2670,7 +2670,21 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-              "lineNumber": 18
+              "lineNumber": 19
+            }
+          },
+          {
+            "plugin": "dashboard",
+            "link": {
+              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "dashboard",
+            "link": {
+              "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts",
+              "lineNumber": 15
             }
           },
           {
@@ -2692,20 +2706,6 @@
             "link": {
               "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx",
               "lineNumber": 126
-            }
-          },
-          {
-            "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/hooks/use_dashboard_state_manager.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "plugin": "dashboard",
-            "link": {
-              "path": "src/plugins/dashboard/public/application/hooks/use_dashboard_state_manager.ts",
-              "lineNumber": 35
             }
           },
           {
@@ -4337,7 +4337,7 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "lineNumber": 41
+                "lineNumber": 42
               }
             }
           ]
@@ -4364,14 +4364,14 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 87
+                "lineNumber": 92
               }
             },
             {
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 172
+                "lineNumber": 177
               }
             },
             {

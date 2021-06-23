@@ -417,8 +417,8 @@ describe('create()', () => {
       allowedHosts: ['*'],
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true,
-      rejectUnauthorized: true,
+      proxyRejectUnauthorizedCertificates: true, // legacy
+      rejectUnauthorized: true, // legacy
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
@@ -428,6 +428,10 @@ describe('create()', () => {
         cleanupInterval: schema.duration().validate('5m'),
         idleInterval: schema.duration().validate('1h'),
         pageSize: 100,
+      },
+      ssl: {
+        verificationMode: 'full',
+        proxyVerificationMode: 'full',
       },
     });
 
@@ -1671,6 +1675,70 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+        },
+      ],
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+            namespace: 'some-namespace',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+          namespace: 'some-namespace',
+        },
+      ],
     });
   });
 });

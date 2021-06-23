@@ -17,10 +17,12 @@ interface SidebarItemProps {
   item: SidebarItem;
   renderFilterScreenReaderText?: boolean;
   onClick?: OnSidebarClick;
+  highestIndex: number;
 }
 
 export const WaterfallSidebarItem = ({
   item,
+  highestIndex,
   renderFilterScreenReaderText,
   onClick,
 }: SidebarItemProps) => {
@@ -42,7 +44,8 @@ export const WaterfallSidebarItem = ({
     return is400 || is500 || isSpecific300;
   };
 
-  const text = `${offsetIndex}. ${item.url}`;
+  const text = item.url;
+
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
       ? `${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} `
@@ -58,11 +61,13 @@ export const WaterfallSidebarItem = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <MiddleTruncatedText
+              index={offsetIndex}
               text={text}
               url={url}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
               setButtonRef={setRef}
+              highestIndex={highestIndex}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -70,11 +75,13 @@ export const WaterfallSidebarItem = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <MiddleTruncatedText
+              index={offsetIndex}
               text={text}
               url={url}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
               setButtonRef={setRef}
+              highestIndex={highestIndex}
             />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>

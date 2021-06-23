@@ -28,6 +28,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   appRoute: '/app/app1',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
+  searchable: true,
   chromeless: false,
   keywords: props.keywords || [],
   deepLinks: [],
@@ -163,7 +164,7 @@ describe('applicationResultProvider', () => {
       expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
     });
 
-    it('ignores apps with non-visible navlink', async () => {
+    it('does not ignore apps with non-visible navlink', async () => {
       application.applications$ = of(
         createAppMap([
           createApp({ id: 'app1', title: 'App 1', navLinkStatus: AppNavLinkStatus.visible }),
@@ -178,7 +179,11 @@ describe('applicationResultProvider', () => {
       const provider = createApplicationResultProvider(Promise.resolve(application));
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
+        expectApp('app1'),
+        expectApp('disabled'),
+        expectApp('hidden'),
+      ]);
     });
 
     it('ignores chromeless apps', async () => {

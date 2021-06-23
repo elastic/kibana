@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import teamsSvg from './teams.svg';
 import {
   ActionTypeModel,
   GenericValidationResult,
@@ -19,7 +18,7 @@ import { isValidUrl } from '../../../lib/value_validators';
 export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: '.teams',
-    iconClass: teamsSvg,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.selectMessageText',
       {
@@ -32,61 +31,35 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
         defaultMessage: 'Send a message to a Microsoft Teams channel.',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: TeamsActionConnector
-    ): ConnectorValidationResult<unknown, TeamsSecrets> => {
+    ): Promise<ConnectorValidationResult<unknown, TeamsSecrets>> => {
+      const translations = await import('./translations');
       const secretsErrors = {
         webhookUrl: new Array<string>(),
       };
       const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
       if (!action.secrets.webhookUrl) {
-        secretsErrors.webhookUrl.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredWebhookUrlText',
-            {
-              defaultMessage: 'Webhook URL is required.',
-            }
-          )
-        );
+        secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_REQUIRED);
       } else if (action.secrets.webhookUrl) {
         if (!isValidUrl(action.secrets.webhookUrl)) {
-          secretsErrors.webhookUrl.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.invalidWebhookUrlText',
-              {
-                defaultMessage: 'Webhook URL is invalid.',
-              }
-            )
-          );
+          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_INVALID);
         } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          secretsErrors.webhookUrl.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requireHttpsWebhookUrlText',
-              {
-                defaultMessage: 'Webhook URL must start with https://.',
-              }
-            )
-          );
+          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_HTTP_INVALID);
         }
       }
       return validationResult;
     },
-    validateParams: (
+    validateParams: async (
       actionParams: TeamsActionParams
-    ): GenericValidationResult<TeamsActionParams> => {
+    ): Promise<GenericValidationResult<TeamsActionParams>> => {
+      const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),
       };
       const validationResult = { errors };
       if (!actionParams.message?.length) {
-        errors.message.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredMessageText',
-            {
-              defaultMessage: 'Message is required.',
-            }
-          )
-        );
+        errors.message.push(translations.MESSAGE_REQUIRED);
       }
       return validationResult;
     },

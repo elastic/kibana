@@ -7,21 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from './types';
 import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
 import { useDebouncedValue } from '../shared_components';
 
 export const QueryInput = ({
   value,
   onChange,
-  indexPattern,
+  indexPatternTitle,
   isInvalid,
   onSubmit,
   disableAutoFocus,
 }: {
   value: Query;
   onChange: (input: Query) => void;
-  indexPattern: IndexPattern;
+  indexPatternTitle: string;
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
@@ -35,7 +34,7 @@ export const QueryInput = ({
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
-      indexPatterns={[indexPattern]}
+      indexPatterns={[indexPatternTitle]}
       query={inputValue}
       onChange={handleInputChange}
       onSubmit={() => {

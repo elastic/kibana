@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Unique count of @message.raw [2]',
         ]);
       });
-      it('should duplicate the column when dragging to empty dimension in the same group', async () => {
+      it('should move duplicated column to non-compatible dimension group', async () => {
         await PageObjects.lens.dragDimensionToDimension(
           'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           'lnsXY_xDimensionPanel > lns-empty-dimension'

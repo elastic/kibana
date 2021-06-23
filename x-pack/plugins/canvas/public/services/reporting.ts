@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ReportingStart } from '../../../reporting/public';
 import { CanvasServiceFactory } from './';
 
 export interface ReportingService {
-  includeReporting: () => boolean;
+  start?: ReportingStart;
 }
 
 export const reportingServiceFactory: CanvasServiceFactory<ReportingService> = (
@@ -18,18 +19,24 @@ export const reportingServiceFactory: CanvasServiceFactory<ReportingService> = (
   startPlugins
 ): ReportingService => {
   const { reporting } = startPlugins;
+
+  const reportingEnabled = () => ({ start: reporting });
+  const reportingDisabled = () => ({ start: undefined });
+
   if (!reporting) {
     // Reporting is not enabled
-    return { includeReporting: () => false };
+    return reportingDisabled();
   }
 
   if (reporting.usesUiCapabilities()) {
-    // Canvas has declared Reporting as a subfeature with the `generatePdf` UI Capability
-    return {
-      includeReporting: () => coreStart.application.capabilities.canvas?.generatePdf === true,
-    };
+    if (coreStart.application.capabilities.canvas?.generatePdf === true) {
+      // Canvas has declared Reporting as a subfeature with the `generatePdf` UI Capability
+      return reportingEnabled();
+    } else {
+      return reportingDisabled();
+    }
   }
 
-  // Reporting is enabled as an Elasticsearch feature (Legacy/Deprecated)
-  return { includeReporting: () => true };
+  // Legacy/Deprecated: Reporting is enabled as an Elasticsearch feature
+  return reportingEnabled();
 };

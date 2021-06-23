@@ -23,7 +23,7 @@ import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
-import { useDebounceWithOptions } from '../helpers';
+import { useDebounceWithOptions } from '../../../../shared_components';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 
 const GranularityHelpPopover = () => {
