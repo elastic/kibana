@@ -124,25 +124,11 @@ export const RefResultType = t.type({
   }),
 });
 
-export const RawRefResultType = t.type({
-  _source: RefResultType,
-});
-
 export type RefResult = t.TypeOf<typeof RefResultType>;
 
 export function isRefResult(data: unknown): data is RefResult {
   return isRight(RefResultType.decode(data));
 }
-
-export const ScreenshotRefType = t.type({
-  blob_mime: t.string,
-  check_group: t.string,
-  step: t.type({
-    name: t.string,
-    index: t.number,
-  }),
-  // blocks: t.array(ScreenshotBlockType),
-});
 
 /**
  * Represents the result of querying for the legacy-style full screenshot blob.
@@ -158,21 +144,6 @@ export type ScreenshotImageBlob = t.TypeOf<typeof ScreenshotImageBlobType>;
 export function isScreenshotImageBlob(data: unknown): data is ScreenshotImageBlob {
   return isRight(ScreenshotImageBlobType.decode(data));
 }
-export type ScreenshotRef = Omit<t.TypeOf<typeof RefResultType>, '@timestamp'> & {
-  timestamp: string;
-};
-
-const BlockType = t.type({
-  blob: t.string,
-  blob_mime: t.string,
-});
-
-const ScreenshotBlockBlob = t.type({
-  id: t.string,
-  synthetics: BlockType,
-});
-
-export type ScreenshotBlockBlob = t.TypeOf<typeof ScreenshotBlockBlob>;
 
 /**
  * Represents the block blobs stored by hash. These documents are used to recompose synthetics images.
@@ -195,7 +166,7 @@ export const ScreenshotRefImageDataType = t.type({
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    // blocks: t.array(ScreenshotBlockBlob),
+    // blocks: t.array(ScreenshotBlockDocType),
   }),
 });
 

@@ -27,8 +27,8 @@ export const composeScreenshotRef = async (
   canvas.height = screenshotRef.screenshot_ref.height;
 
   /**
-   * We need to mark each operation as an async task, otherwise when we try
-   * to extract a data URL from the canvas it will be blank.
+   * We need to treat each operation as an async task, otherwise we will race between drawing image
+   * chunks and extracting the final data URL from the canvas; without this, the image could be blank or incomplete.
    */
   const drawOperations: Array<Promise<void>> = [];
 

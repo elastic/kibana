@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isScreenshot } from '../../../common/runtime_types';
+import { isRefResult, isScreenshot } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';

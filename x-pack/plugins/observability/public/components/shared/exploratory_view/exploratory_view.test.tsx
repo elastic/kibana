@@ -51,8 +51,9 @@ describe('ExploratoryView', () => {
     const initSeries = {
       data: {
         'ux-series': {
+          isNew: true,
           dataType: 'ux' as const,
-          reportType: 'dist' as const,
+          reportType: 'data-distribution' as const,
           breakdown: 'user_agent .name',
           reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },
