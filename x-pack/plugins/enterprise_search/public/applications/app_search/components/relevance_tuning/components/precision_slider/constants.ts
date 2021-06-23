@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-const STEP_O1_DESCRIPTION = i18n.translate(
+const STEP_01_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.step01.description',
   {
     defaultMessage: 'Lowest precision and highest recall setting.',
   }
 );
 
-const STEP_O2_DESCRIPTION = i18n.translate(
+const STEP_02_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.step02.description',
   {
     defaultMessage: 'Default. High recall, low precision.',
@@ -86,8 +86,8 @@ const STEP_11_DESCRIPTION = i18n.translate(
 );
 
 export const STEP_DESCRIPTIONS = [
-  STEP_O1_DESCRIPTION,
-  STEP_O2_DESCRIPTION,
+  STEP_01_DESCRIPTION,
+  STEP_02_DESCRIPTION,
   STEP_03_DESCRIPTION,
   STEP_04_DESCRIPTION,
   STEP_05_DESCRIPTION,
