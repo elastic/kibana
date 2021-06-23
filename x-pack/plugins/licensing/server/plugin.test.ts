@@ -55,7 +55,7 @@ describe('licensing plugin', () => {
     const client = elasticsearchServiceMock.createClusterClient();
     if (response) {
       client.asInternalUser.xpack.info.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise(response)
+        elasticsearchServiceMock.createSuccessTransportRequestPromise(response as any)
       );
     }
     return client;
@@ -115,7 +115,7 @@ describe('licensing plugin', () => {
           return elasticsearchServiceMock.createSuccessTransportRequestPromise({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
-          });
+          } as estypes.XpackInfoResponse);
         });
 
         const coreSetup = createCoreSetupWith(esClient);
@@ -173,7 +173,7 @@ describe('licensing plugin', () => {
           return elasticsearchServiceMock.createSuccessTransportRequestPromise({
             license: buildRawLicense(),
             features: {},
-          });
+          } as estypes.XpackInfoResponse);
         });
 
         const coreSetup = createCoreSetupWith(esClient);
@@ -235,7 +235,7 @@ describe('licensing plugin', () => {
           return elasticsearchServiceMock.createSuccessTransportRequestPromise({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
-          });
+          } as estypes.XpackInfoResponse);
         });
 
         const coreSetup = createCoreSetupWith(esClient);
