@@ -151,24 +151,18 @@ export const isolationRequestHandler = function (
       });
     }
 
-    const commentLines: string[] = [];
-
-    commentLines.push(`${isolate ? 'I' : 'Uni'}solate action was sent to the following Agents:`);
-    // lines of markdown links, inside a code block
-
-    // TODO: This logic probably not needed.
-    commentLines.push(`${agentIDs.map((a) => `- [${a}](/app/fleet#/agents/${a})`).join('\n')}`);
-    if (req.body.comment) {
-      commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
-    }
-
     // TODO: This sets the comment type, we'll need to use our new type.
     caseIDs.forEach(async (caseId) => {
       (await endpointContext.service.getCasesClient(req)).attachments.add({
         caseId,
         comment: {
-          comment: commentLines.join('\n'),
-          type: CommentType.actions, // TODO: Will be new comment type, actions.
+          type: CommentType.actions,
+          comment: req.body.comment || '',
+          actions: {
+            endpointId: agentIDs[0],
+            hostname: 'whatever',
+            type: isolate ? 'isolateHost' : 'releaseHost',
+          },
           owner: APP_ID,
         },
       });
