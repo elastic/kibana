@@ -104,9 +104,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       <Route exact path={ENGINES_PATH}>
         <EnginesOverview />
       </Route>
-      <Route path={ENGINE_PATH}>
-        <EngineRouter />
-      </Route>
       {canManageEngines && (
         <Route exact path={ENGINE_CREATION_PATH}>
           <EngineCreation />
@@ -117,6 +114,9 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <MetaEngineCreation />
         </Route>
       )}
+      <Route path={ENGINE_PATH}>
+        <EngineRouter />
+      </Route>
       {canViewSettings && (
         <Route exact path={SETTINGS_PATH}>
           <Settings />

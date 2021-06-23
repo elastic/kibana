@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { CustomReportField } from '../custom_report_field';
 import { DataSeries, URLReportDefinition } from '../../types';
@@ -36,8 +35,6 @@ export function ReportDefinitionCol({
   dataViewSeries: DataSeries;
   seriesId: string;
 }) {
-  const { indexPattern } = useAppIndexPatternContext();
-
   const { getSeries, setSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -69,21 +66,20 @@ export function ReportDefinitionCol({
         <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
       <EuiHorizontalRule margin="xs" />
-      {indexPattern &&
-        reportDefinitions.map(({ field, custom, options }) => (
-          <EuiFlexItem key={field}>
-            {!custom ? (
-              <ReportDefinitionField
-                seriesId={seriesId}
-                dataSeries={dataViewSeries}
-                field={field}
-                onChange={onChange}
-              />
-            ) : (
-              <CustomReportField field={field} options={options} seriesId={seriesId} />
-            )}
-          </EuiFlexItem>
-        ))}
+      {reportDefinitions.map(({ field, custom, options }) => (
+        <EuiFlexItem key={field}>
+          {!custom ? (
+            <ReportDefinitionField
+              seriesId={seriesId}
+              dataSeries={dataViewSeries}
+              field={field}
+              onChange={onChange}
+            />
+          ) : (
+            <CustomReportField field={field} options={options} seriesId={seriesId} />
+          )}
+        </EuiFlexItem>
+      ))}
       {(hasOperationType || columnType === 'operation') && (
         <EuiFlexItem>
           <OperationTypeSelect
