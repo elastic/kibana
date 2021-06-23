@@ -585,6 +585,7 @@ export interface DocLinksStart {
         };
         readonly search: {
             readonly sessions: string;
+            readonly sessionLimits: string;
         };
         readonly indexPatterns: {
             readonly introduction: string;
