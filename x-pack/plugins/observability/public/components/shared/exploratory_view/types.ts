@@ -23,6 +23,7 @@ export const ReportViewTypes = {
   dist: 'data-distribution',
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
+  mdd: 'mobile-device-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -45,8 +46,9 @@ export interface ReportDefinition {
     field?: string;
     label: string;
     description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS';
+    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
     columnFilters?: ColumnFilter[];
+    timeScale?: string;
   }>;
 }
 
@@ -94,15 +96,15 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number';
+type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
 export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
   useShortSuffix?: boolean;

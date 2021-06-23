@@ -120,6 +120,20 @@ export const getColumns = (
       },
     },
 
+    // # Searches
+    {
+      field: 'numSearches',
+      name: i18n.translate('xpack.data.mgmt.searchSessions.table.numSearches', {
+        defaultMessage: '# Searches',
+      }),
+      sortable: true,
+      render: (numSearches: UISession['numSearches'], session) => (
+        <TableText color="subdued" data-test-subj="sessionManagementNumSearchesCol">
+          {numSearches}
+        </TableText>
+      ),
+    },
+
     // Session status
     {
       field: 'status',

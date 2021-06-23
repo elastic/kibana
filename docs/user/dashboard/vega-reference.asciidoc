@@ -50,6 +50,11 @@ To learn more, read about
 https://vega.github.io/vega/docs/specification/#autosize[autosize]
 in the Vega documentation.
 
+WARNING: Autosize in Vega-Lite has https://vega.github.io/vega-lite/docs/size.html#limitations[several limitations]
+that can result in a warning like `Autosize "fit" only works for single views and layered views.`
+The recommended fix for this warning is to convert your spec to Vega using the <<vega-browser-debugging-console, browser console>>
+`VEGA_DEBUG.vega_spec` output.
+
 [float]
 [[vega-theme]]
 ====== Default theme to match {kib}
