@@ -16,7 +16,7 @@ import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
-import { SourcererScopeName } from '../../common/store/sourcerer/model
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
