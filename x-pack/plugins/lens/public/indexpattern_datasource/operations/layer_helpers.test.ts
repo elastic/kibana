@@ -1954,7 +1954,15 @@ describe('state_helpers', () => {
         expect(result.columnOrder).toEqual(layer.columnOrder);
         expect(result.columns).toEqual(layer.columns);
         expect(result.incompleteColumns).toEqual({
-          ref: { operationType: 'sum' },
+          ref: {
+            operationType: 'sum',
+            filter: {
+              language: 'kuery',
+              query: 'bytes > 4000',
+            },
+            timeScale: undefined,
+            timeShift: '3h',
+          },
         });
       });
     });
