@@ -146,6 +146,31 @@ describe('role mappings routes', () => {
       });
     });
 
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            roleMapping: {
+              groups: ['foo', 'bar'],
+              roleType: 'admin',
+              allGroups: true,
+              id: '123asf',
+            },
+            elasticsearchUser: {
+              username: 'user2@elastic.co',
+              email: 'user2',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
+      });
+    });
+
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/role_mappings/upsert_single_user_role_mapping',
