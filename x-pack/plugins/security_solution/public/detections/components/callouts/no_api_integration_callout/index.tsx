@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 
 import * as i18n from './translations';
@@ -15,12 +15,15 @@ const NoApiIntegrationKeyCallOutComponent = () => {
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
   return showCallOut ? (
-    <EuiCallOut title={i18n.NO_API_INTEGRATION_KEY_CALLOUT_TITLE} color="danger" iconType="alert">
-      <p>{i18n.NO_API_INTEGRATION_KEY_CALLOUT_MSG}</p>
-      <EuiButton color="danger" onClick={handleCallOut}>
-        {i18n.DISMISS_CALLOUT}
-      </EuiButton>
-    </EuiCallOut>
+    <>
+      <EuiCallOut title={i18n.NO_API_INTEGRATION_KEY_CALLOUT_TITLE} color="danger" iconType="alert">
+        <p>{i18n.NO_API_INTEGRATION_KEY_CALLOUT_MSG}</p>
+        <EuiButton color="danger" onClick={handleCallOut}>
+          {i18n.DISMISS_CALLOUT}
+        </EuiButton>
+      </EuiCallOut>
+      <EuiSpacer size="l" />
+    </>
   ) : null;
 };
 
